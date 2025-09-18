@@ -1,5 +1,5 @@
-"""
-"""
+""""
+
 WebSocket Authentication Race Condition Fixes Validation
 
 This test validates that the five-whys root cause analysis fixes are working properly:
@@ -10,12 +10,13 @@ This test validates that the five-whys root cause analysis fixes are working pro
 4. Environment-aware service discovery
 5. Enhanced retry mechanisms
 
-Business Impact: $500K+ ARR protection through reliable WebSocket authentication.
+Business Impact: $""500K"" plus ARR protection through reliable WebSocket authentication.
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import asyncio
 import json
 import logging
@@ -52,7 +53,8 @@ class MockWebSocket:
         
     async def send_json(self, data):
         Simulate sending JSON data."
-        Simulate sending JSON data."
+        Simulate sending JSON data.""
+
         await asyncio.sleep(self.connection_delay)
         
     async def close(self, code: int = 1000, reason: str = "):"
@@ -69,7 +71,8 @@ class MockClient:
 
 
 class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
-    """
+    """"
+
     Test suite validating WebSocket authentication race condition fixes.
     
     This test validates all the fixes implemented based on the five-whys analysis:
@@ -87,7 +90,8 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_cloud_run_race_condition_protection(self):
         """
-        "
+        ""
+
         Test that Cloud Run race condition protection is working.
         
         Validates:
@@ -107,7 +111,8 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
             # Test handshake validation timing fix
             handshake_valid = await self.authenticator._validate_websocket_handshake_timing(websocket)
             self.assertTrue(handshake_valid, Cloud Run handshake validation should work)"
-            self.assertTrue(handshake_valid, Cloud Run handshake validation should work)"
+            self.assertTrue(handshake_valid, Cloud Run handshake validation should work)""
+
             
             # Test handshake timing fix application
             start_time = time.time()
@@ -120,12 +125,14 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
                                    fShould apply Cloud Run stabilization delay of at least {base_delay}s)
             
             logger.info(f PASS:  Cloud Run handshake stabilization applied: {elapsed:.3f}s)"
-            logger.info(f PASS:  Cloud Run handshake stabilization applied: {elapsed:.3f}s)"
+            logger.info(f PASS:  Cloud Run handshake stabilization applied: {elapsed:."3f"}s)""
+
     
     @pytest.mark.asyncio
     async def test_circuit_breaker_protection(self):
         """
-    "
+    ""
+
         Test circuit breaker protection against authentication failures.
         
         Validates:
@@ -149,7 +156,8 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
         
         # Force failures to trip circuit breaker
         for _ in range(self.authenticator._circuit_breaker[failure_threshold):"
-        for _ in range(self.authenticator._circuit_breaker[failure_threshold):"
+        for _ in range(self.authenticator._circuit_breaker[failure_threshold):""
+
             await self.authenticator._record_circuit_breaker_failure()
             
         self.assertEqual(
@@ -166,7 +174,8 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
         await self.authenticator._record_circuit_breaker_success()
         self.assertEqual(
             self.authenticator._circuit_breaker[failure_count],"
-            self.authenticator._circuit_breaker[failure_count],"
+            self.authenticator._circuit_breaker[failure_count],""
+
             0,
             "Success should reset failure count"
         )
@@ -175,7 +184,8 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
     
     @pytest.mark.asyncio 
     async def test_progressive_authentication_retry(self):
-    """
+    """"
+
         Test progressive authentication retry mechanism.
         
         Validates:
@@ -192,7 +202,7 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
         mock_auth_result.error = Transient auth failure
         
         with patch.object(self.authenticator._auth_service, 'authenticate_websocket') as mock_auth:
-            # First 2 calls fail with retryable error, 3rd succeeds
+            # First 2 calls fail with retryable error, ""3rd"" succeeds
             mock_auth.side_effect = [
                 (mock_auth_result, None),  # First failure
                 (mock_auth_result, None),  # Second failure  
@@ -206,16 +216,19 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
             
             # Should have made 3 attempts (2 failures + 1 success)
             self.assertEqual(mock_auth.call_count, 3, Should attempt retry after transient failures)"
-            self.assertEqual(mock_auth.call_count, 3, Should attempt retry after transient failures)"
+            self.assertEqual(mock_auth.call_count, 3, Should attempt retry after transient failures)""
+
             
-            # Should have applied retry delays (at least 0.2s for 2 retries)
+            # Should have applied retry delays (at least 0.""2s"" for 2 retries)
             self.assertGreater(elapsed, 0.15, "Should apply progressive retry delays)"
             
-            logger.info(f PASS:  Progressive retry working: {mock_auth.call_count} attempts in {elapsed:.3f}s)
+            logger.info(f PASS:  Progressive retry working: {mock_auth.call_count} attempts in {elapsed:.""3f""}s)""
+
     
     @pytest.mark.asyncio
     async def test_environment_aware_service_discovery(self):
-    """
+    """"
+
         Test environment-aware service discovery for E2E tests.
         
         This validates Fix #2 from the five-whys analysis.
@@ -294,7 +307,8 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_websocket_auth_stats_monitoring(self):
         """
-        "
+        ""
+
         Test WebSocket authentication statistics for monitoring.
         
         Validates:
@@ -321,7 +335,8 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
         logger.info( PASS:  WebSocket authentication statistics monitoring working)
     
     def test_websocket_auth_error_codes(self):
-    """
+    """"
+
         Test WebSocket authentication error code mappings.
         
         Validates proper error codes are returned for different failure types.
@@ -350,12 +365,14 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_full_authentication_flow_race_protection(self):
         """
-    "
+    ""
+
         Integration test of full authentication flow with race protection.
         
         This tests the complete flow with all race condition fixes applied.
         "
-        "
+        ""
+
         websocket = MockWebSocket(simulate_cloud_run=True, headers={
             authorization": Bearer test-token"
         }
@@ -388,9 +405,10 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
             
             # Should apply race condition protections (timing)
             self.assertGreater(elapsed, 0.5, Should apply race condition timing protections)"
-            self.assertGreater(elapsed, 0.5, Should apply race condition timing protections)"
+            self.assertGreater(elapsed, 0.5, Should apply race condition timing protections)""
+
             
-            logger.info(f" PASS:  Full authentication flow with race protection: {elapsed:.3f}s)"
+            logger.info(f" PASS:  Full authentication flow with race protection: {elapsed:.""3f""}s)"
 
 
 def test_race_condition_fixes_integration():
@@ -421,12 +439,14 @@ def test_race_condition_fixes_integration():
         # Check that max_retries is increased and retry_delays are progressive
         circuit_breaker = authenticator._circuit_breaker
         assert circuit_breaker['failure_threshold'] == 3, "fShould have sensitive threshold (3), got {circuit_breaker['failure_threshold']}"
-        assert circuit_breaker['reset_timeout'] == 15.0, f"Should have fast reset (15s), got {circuit_breaker['reset_timeout']}"
+        assert circuit_breaker['reset_timeout'] == 15.0, f"Should have fast reset (""15s""), got {circuit_breaker['reset_timeout']}"
         assert 'cloud_run_backoff' in circuit_breaker, Should have Cloud Run specific backoff"
-        assert 'cloud_run_backoff' in circuit_breaker, Should have Cloud Run specific backoff"
+        assert 'cloud_run_backoff' in circuit_breaker, Should have Cloud Run specific backoff""
+
         
         print( PASS:  Test 2 PASSED: Enhanced retry mechanism configured)"
-        print( PASS:  Test 2 PASSED: Enhanced retry mechanism configured)"
+        print( PASS:  Test 2 PASSED: Enhanced retry mechanism configured)""
+
         
         # Test 3: Verify environment detection works
         os.environ['K_SERVICE'] = 'test-service'
@@ -445,12 +465,14 @@ def test_race_condition_fixes_integration():
             # This should import without errors after our fixes
             from test_framework.fixtures.real_services import real_services_fixture
             print( PASS:  Test 4 PASSED: E2E test configuration fixes applied)"
-            print( PASS:  Test 4 PASSED: E2E test configuration fixes applied)"
+            print( PASS:  Test 4 PASSED: E2E test configuration fixes applied)""
+
         except ImportError as e:
             print(f WARNING: [U+FE0F]  Test 4 INFO: E2E imports not available (expected in limited environment): {e}")"
         
         print( PASS:  FIVE-WHYS VALIDATION: All race condition fixes integrated successfully)"
-        print( PASS:  FIVE-WHYS VALIDATION: All race condition fixes integrated successfully)"
+        print( PASS:  FIVE-WHYS VALIDATION: All race condition fixes integrated successfully)""
+
         return True
         
     except Exception as e:

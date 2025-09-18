@@ -342,9 +342,9 @@ if __name__ == "__main__":
         for test_method in test_methods:
             try:
                 await getattr(test_instance, test_method)()
-                print(f"✅ {test_method} PASSED")
+                print(f"CHECK {test_method} PASSED")
             except Exception as e:
-                print(f"❌ {test_method} FAILED: {e}")
+                print(f"X {test_method} FAILED: {e}")
 
         await test_instance.asyncTearDown()
 

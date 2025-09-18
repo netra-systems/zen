@@ -4,7 +4,7 @@ Module: Consolidated Factory Golden Path E2E Test
 
 PURPOSE:
 This E2E test validates the complete Golden Path user flow with the consolidated factory:
-user login → chat request → agent execution → AI response delivery.
+user login -> chat request -> agent execution -> AI response delivery.
 Tests on GCP staging environment (no Docker required).
 
 BUSINESS IMPACT:
@@ -14,7 +14,7 @@ BUSINESS IMPACT:
 - End-to-end validation ensures customer-facing functionality works
 
 TEST REQUIREMENTS:
-- Tests complete Golden Path: login → chat → AI response
+- Tests complete Golden Path: login -> chat -> AI response
 - Runs on GCP staging environment (no Docker)
 - Uses real authentication and AI services
 - Validates all 5 critical WebSocket events during agent execution

@@ -98,7 +98,7 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
             self.assertTrue(self.registry.has(agent_name),
                            f"Registry should recognize core agent '{agent_name}'")
         
-        print(f"✅ All expected core agents properly registered and recognized")
+        print(f"CHECK All expected core agents properly registered and recognized")
     
     async def test_problematic_agent_names_properly_rejected(self):
         """Test 2: Verify problematic/incorrect agent names are properly rejected."""
@@ -133,9 +133,9 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
             self.assertIsNone(direct_lookup,
                              f"Direct lookup of '{problematic_name}' should return None")
             
-            print(f"   ✅ '{problematic_name}' correctly rejected")
+            print(f"   CHECK '{problematic_name}' correctly rejected")
         
-        print(f"✅ All problematic names properly rejected by registry")
+        print(f"CHECK All problematic names properly rejected by registry")
     
     async def test_correct_agent_names_work_properly(self):
         """Test 3: Verify correct agent names work in all registry operations."""
@@ -152,7 +152,7 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
             "reporting",     # Reporting agent
         ]
         
-        print(f"\n✅ Issue #347 - Testing correct name functionality:")
+        print(f"\nCHECK Issue #347 - Testing correct name functionality:")
         
         for agent_name in correct_agent_names:
             # Should be in registry
@@ -167,11 +167,11 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
             try:
                 lookup_result = self.registry.get(agent_name)
                 # Factory pattern may return None, but name should be recognized
-                print(f"   ✅ '{agent_name}' recognized by registry (factory pattern)")
+                print(f"   CHECK '{agent_name}' recognized by registry (factory pattern)")
             except Exception as e:
                 self.fail(f"Registry lookup for correct name '{agent_name}' failed: {e}")
         
-        print(f"✅ All correct agent names properly recognized by registry")
+        print(f"CHECK All correct agent names properly recognized by registry")
     
     async def test_agent_creation_workflow_with_correct_names(self):
         """Test 4: Verify agent creation workflow works with correct names."""
@@ -194,7 +194,7 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
                 )
                 
                 # Factory pattern may return None, but creation should not raise exception
-                print(f"   ✅ Agent creation for '{agent_name}' completed successfully")
+                print(f"   CHECK Agent creation for '{agent_name}' completed successfully")
                 
                 # Verify user session has the agent registered (if not None)
                 if agent is not None:
@@ -203,12 +203,12 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
                     )
                     self.assertIsNotNone(user_agent,
                                        f"User should have '{agent_name}' agent after creation")
-                    print(f"   ✅ '{agent_name}' agent properly stored in user session")
+                    print(f"   CHECK '{agent_name}' agent properly stored in user session")
                 
             except Exception as e:
                 self.fail(f"Agent creation failed for correct name '{agent_name}': {e}")
         
-        print(f"✅ Agent creation workflow works correctly with proper names")
+        print(f"CHECK Agent creation workflow works correctly with proper names")
     
     async def test_agent_creation_fails_with_incorrect_names(self):
         """Test 5: Verify agent creation properly fails with incorrect names."""
@@ -219,7 +219,7 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
         # Test agent creation with incorrect names should fail
         incorrect_names = ["apex_optimizer", "optimizer", "optimization_agent"]
         
-        print(f"\n❌ Issue #347 - Testing agent creation failure with incorrect names:")
+        print(f"\nX Issue #347 - Testing agent creation failure with incorrect names:")
         
         for incorrect_name in incorrect_names:
             print(f"   Testing creation failure for '{incorrect_name}'...")
@@ -236,9 +236,9 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
                 if agent is not None:
                     self.fail(f"Agent creation should have failed for incorrect name '{incorrect_name}'")
             
-            print(f"   ✅ '{incorrect_name}' correctly failed with: {type(context.exception).__name__}")
+            print(f"   CHECK '{incorrect_name}' correctly failed with: {type(context.exception).__name__}")
         
-        print(f"✅ Agent creation properly fails for all incorrect names")
+        print(f"CHECK Agent creation properly fails for all incorrect names")
     
     async def test_multi_user_agent_naming_consistency(self):
         """Test 6: Verify agent naming consistency across multiple users."""
@@ -262,9 +262,9 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
                 agent_type=test_agent_name,
                 user_context=self.primary_user_context
             )
-            print(f"   ✅ User 1 agent creation for '{test_agent_name}' completed")
+            print(f"   CHECK User 1 agent creation for '{test_agent_name}' completed")
         except Exception as e:
-            print(f"   ⚠️ User 1 agent creation for '{test_agent_name}' failed: {e}")
+            print(f"   WARNING️ User 1 agent creation for '{test_agent_name}' failed: {e}")
         
         # Create agent for user 2
         try:
@@ -273,9 +273,9 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
                 agent_type=test_agent_name,
                 user_context=self.secondary_user_context
             )
-            print(f"   ✅ User 2 agent creation for '{test_agent_name}' completed")
+            print(f"   CHECK User 2 agent creation for '{test_agent_name}' completed")
         except Exception as e:
-            print(f"   ⚠️ User 2 agent creation for '{test_agent_name}' failed: {e}")
+            print(f"   WARNING️ User 2 agent creation for '{test_agent_name}' failed: {e}")
         
         # Verify user sessions are isolated
         user1_metrics = user1_session.get_metrics()
@@ -286,11 +286,11 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
         self.assertEqual(user2_metrics['user_id'], self.secondary_user_context.user_id,
                         "User 2 session should have correct user ID")
         
-        print(f"   ✅ User sessions properly isolated:")
+        print(f"   CHECK User sessions properly isolated:")
         print(f"      User 1 agents: {user1_metrics['agent_count']}")
         print(f"      User 2 agents: {user2_metrics['agent_count']}")
         
-        print(f"✅ Agent naming consistency maintained across multiple users")
+        print(f"CHECK Agent naming consistency maintained across multiple users")
     
     async def test_registry_health_with_correct_naming(self):
         """Test 7: Verify registry health reporting works with correct naming."""
@@ -328,7 +328,7 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
         self.assertEqual(len(naming_related_errors), 0,
                         f"Should have no naming-related registration errors: {naming_related_errors}")
         
-        print(f"✅ Registry health is good with correct agent naming")
+        print(f"CHECK Registry health is good with correct agent naming")
     
     async def test_golden_path_agent_workflow_naming(self):
         """Test 8: Verify Golden Path workflow uses correct agent names."""
@@ -336,7 +336,7 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
         # Register default agents
         self.registry.register_default_agents()
         
-        # Test typical Golden Path workflow: triage → optimization → actions
+        # Test typical Golden Path workflow: triage -> optimization -> actions
         golden_path_agents = ["triage", "optimization", "actions"]
         
         print(f"\n🌟 Issue #347 - Golden Path workflow naming validation:")
@@ -364,7 +364,7 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
                     "agent_created": agent is not None
                 }
                 
-                print(f"      ✅ '{agent_name}' workflow step validated")
+                print(f"      CHECK '{agent_name}' workflow step validated")
                 
             except Exception as e:
                 workflow_results[agent_name] = {
@@ -372,7 +372,7 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
                     "creation_successful": False,
                     "error": str(e)
                 }
-                print(f"      ⚠️ '{agent_name}' workflow step failed: {e}")
+                print(f"      WARNING️ '{agent_name}' workflow step failed: {e}")
         
         # Verify all workflow steps have correct naming
         for agent_name in golden_path_agents:
@@ -381,7 +381,7 @@ class Issue347ComprehensiveAgentNameValidationTests(SSotAsyncTestCase):
                            f"Golden Path agent '{agent_name}' should be registered")
         
         print(f"   Golden Path workflow results: {workflow_results}")
-        print(f"✅ Golden Path workflow uses correct agent naming")
+        print(f"CHECK Golden Path workflow uses correct agent naming")
 
 
 @pytest.mark.unit
@@ -421,9 +421,9 @@ class Issue347RegressionPreventionTests(SSotBaseTestCase):
         self.assertEqual(len(correct_missing), 0,
                         f"Current correct names missing from registry: {correct_missing}")
         
-        print(f"   ✅ No legacy incorrect names found")
-        print(f"   ✅ All current correct names present")
-        print(f"✅ Regression prevention validation passed")
+        print(f"   CHECK No legacy incorrect names found")
+        print(f"   CHECK All current correct names present")
+        print(f"CHECK Regression prevention validation passed")
     
     def test_agent_type_enum_consistency(self):
         """Test 10: Verify AgentType enum aligns with registry names."""
@@ -459,8 +459,8 @@ class Issue347RegressionPreventionTests(SSotBaseTestCase):
         self.assertIn("optimizer", enum_values,
                      "AgentType enum should have 'optimizer' type")
         
-        print(f"   ✅ Registry correctly maps AgentType.OPTIMIZER → 'optimization' agent")
-        print(f"✅ Enum and registry naming handled correctly")
+        print(f"   CHECK Registry correctly maps AgentType.OPTIMIZER -> 'optimization' agent")
+        print(f"CHECK Enum and registry naming handled correctly")
 
 
 if __name__ == "__main__":

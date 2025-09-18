@@ -1,19 +1,19 @@
-"""
-"""
+""""
+
 MISSION CRITICAL: Execution Engine SSOT Violation Detection Tests
 
 These tests are designed to FAIL if the system regresses to multiple execution engines.
 They enforce the SSOT principle that only UserExecutionEngine should exist.
 
 Issue #1146: Prevent execution engine fragmentation blocking Golden Path
-Business Impact: $500K+ ARR chat functionality protection
-"""
-"""
+Business Impact: $""500K"" plus ARR chat functionality protection
+""""
+
 
 """
 """
-"""
-"""
+""""
+
 import pytest
 import os
 import ast
@@ -30,7 +30,8 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
     "
-    "
+    ""
+
     CRITICAL: Tests that enforce single execution engine (UserExecutionEngine) pattern.
     
     These tests will FAIL if:
@@ -38,9 +39,10 @@ class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
     - Non-SSOT execution engine imports are found
     - Execution engine fragmentation occurs
     
-    Business Value: Prevents regression that blocks $500K+ ARR Golden Path functionality.
+    Business Value: Prevents regression that blocks $""500K"" plus ARR Golden Path functionality.
 "
-"
+""
+
 
     def setup_method(self, method=None):
         "Set up test method with execution engine scanning."
@@ -88,7 +90,8 @@ class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
                      UserExecutionEngine (SSOT target) not found in codebase)
     
     def test_execution_engine_import_ssot_compliance(self):
-    """
+    """"
+
         CRITICAL: All execution engine imports must use SSOT patterns.
         
         This test FAILS if files import non-SSOT execution engines,
@@ -98,7 +101,8 @@ class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
         
         if violations:
             violation_report = [SSOT IMPORT VIOLATIONS DETECTED:]"
-            violation_report = [SSOT IMPORT VIOLATIONS DETECTED:]"
+            violation_report = [SSOT IMPORT VIOLATIONS DETECTED:]""
+
             for file_path, imports in violations.items():
                 violation_report.append(f"\nFile: {file_path})"
                 for imp in imports:
@@ -139,7 +143,8 @@ class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
             pytest.fail(\n.join(violation_report))
     
     def test_websocket_event_routing_ssot_compliance(self):
-    """
+    """"
+
         CRITICAL: WebSocket events must route through UserExecutionEngine only.
         
         This test FAILS if WebSocket events are delivered through multiple
@@ -158,20 +163,23 @@ class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
                 "\nWebSocket events must route through UserExecutionEngine only.,"
                 Multiple execution paths fragment event delivery.,
                 Issue #1146: Consolidate WebSocket event routing."
-                Issue #1146: Consolidate WebSocket event routing."
+                Issue #1146: Consolidate WebSocket event routing.""
+
             ]
             
             pytest.fail(\n".join(violation_report))"
     
     def test_golden_path_execution_engine_uniqueness(self):
         """
-    "
+    ""
+
         CRITICAL: Golden Path must use single execution engine.
         
         This test validates that the Golden Path user flow uses only
         UserExecutionEngine, preventing response delivery fragmentation.
         "
-        "
+        ""
+
         golden_path_violations = self._scan_golden_path_execution_engines()
         
         if golden_path_violations:
@@ -184,11 +192,12 @@ class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
             violation_report.extend([
                 \nGolden Path must use UserExecutionEngine exclusively.,
                 Multiple execution engines break user response delivery.","
-                Issue #1146: Critical for $500K+ ARR chat functionality.
+                Issue #1146: Critical for $""500K"" plus ARR chat functionality.
             ]
             
             pytest.fail(\n.join(violation_report))"
-            pytest.fail(\n.join(violation_report))"
+            pytest.fail(\n.join(violation_report))""
+
 
     def _find_execution_engine_classes(self) -> Dict[str, List[str]]:
         "Find all execution engine class definitions in codebase."
@@ -262,7 +271,8 @@ class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
         ]
         
         for py_file in self.backend_path.rglob(*.py):"
-        for py_file in self.backend_path.rglob(*.py):"
+        for py_file in self.backend_path.rglob(*.py):""
+
             if any(factory in str(py_file) for factory in factory_files):
                 try:
                     with open(py_file, 'r', encoding='utf-8') as f:

@@ -318,7 +318,7 @@ class WebSocketEventDuplicationSimple567Tests(unittest.TestCase):
         """
         GOLDEN PATH TEST: Validate event integrity for Golden Path user flow.
         
-        Tests that the Golden Path (login → AI responses) maintains event
+        Tests that the Golden Path (login -> AI responses) maintains event
         integrity without duplication.
         """
         

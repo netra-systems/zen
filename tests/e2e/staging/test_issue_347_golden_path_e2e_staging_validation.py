@@ -6,7 +6,7 @@ Golden Path user workflows in the actual GCP staging environment.
 CRITICAL REQUIREMENTS (per CLAUDE.md):
 - E2E auth mandatory - all tests use real authentication
 - Real services only - no mocks in E2E tests  
-- Golden Path focus - users login → get AI responses
+- Golden Path focus - users login -> get AI responses
 - Staging environment - test on actual GCP infrastructure
 - Business value - verify substantive AI chat functionality
 
@@ -16,9 +16,9 @@ ISSUE CONTEXT:
 - Tests verify complete user journey from login to AI response with correct agent names
 
 TEST STRATEGY:
-1. Test complete user authentication → agent interaction flow
+1. Test complete user authentication -> agent interaction flow
 2. Verify WebSocket events work correctly with proper agent names
-3. Test agent orchestration (triage → optimization → actions) in staging
+3. Test agent orchestration (triage -> optimization -> actions) in staging
 4. Validate multi-user concurrent workflows in real environment
 5. Ensure error handling works correctly with incorrect agent names
 """
@@ -130,7 +130,7 @@ class Issue347GoldenPathE2EStagingValidationTests(SSotAsyncTestCase):
             self.assertIn("staging", backend_url.lower() or websocket_url.lower(),
                          "URLs should point to staging environment")
             
-            print(f"   ✅ Staging environment configuration verified")
+            print(f"   CHECK Staging environment configuration verified")
             
         except Exception as e:
             self.skipTest(f"Staging environment not accessible: {e}")
@@ -150,7 +150,7 @@ class Issue347GoldenPathE2EStagingValidationTests(SSotAsyncTestCase):
         
         self.assertTrue(auth_result["authenticated"],
                        "User must be authenticated for Golden Path workflow")
-        print(f"   ✅ Step 1: User authentication completed")
+        print(f"   CHECK Step 1: User authentication completed")
         
         # Step 2: User sends message (triggers agent orchestration)
         user_message = {
@@ -163,9 +163,9 @@ class Issue347GoldenPathE2EStagingValidationTests(SSotAsyncTestCase):
         
         self.assertTrue(message_result["message_received"],
                        "User message should be received by system")
-        print(f"   ✅ Step 2: User message received")
+        print(f"   CHECK Step 2: User message received")
         
-        # Step 3: Agent Orchestration (triage → optimization → actions)
+        # Step 3: Agent Orchestration (triage -> optimization -> actions)
         orchestration_result = await self._simulate_agent_orchestration(user_context, user_message)
         
         # Verify correct agent names are used in orchestration
@@ -180,7 +180,7 @@ class Issue347GoldenPathE2EStagingValidationTests(SSotAsyncTestCase):
             self.assertNotIn(incorrect_name, orchestration_result["agents_involved"],
                            f"Incorrect agent name '{incorrect_name}' should NOT be used")
         
-        print(f"   ✅ Step 3: Agent orchestration with correct names: {orchestration_result['agents_involved']}")
+        print(f"   CHECK Step 3: Agent orchestration with correct names: {orchestration_result['agents_involved']}")
         
         # Step 4: WebSocket Events (5 critical events)
         websocket_result = await self._verify_websocket_events(user_context)
@@ -190,7 +190,7 @@ class Issue347GoldenPathE2EStagingValidationTests(SSotAsyncTestCase):
             self.assertIn(event, websocket_result["events_received"],
                          f"Required WebSocket event '{event}' should be received")
         
-        print(f"   ✅ Step 4: WebSocket events received: {websocket_result['events_received']}")
+        print(f"   CHECK Step 4: WebSocket events received: {websocket_result['events_received']}")
         
         # Step 5: AI Response Generation (business value validation)
         ai_response = await self._verify_ai_response_quality(user_context, user_message)
@@ -203,7 +203,7 @@ class Issue347GoldenPathE2EStagingValidationTests(SSotAsyncTestCase):
         self.assertGreater(business_relevance, 2,
                           f"AI response should contain business value indicators: {business_indicators}")
         
-        print(f"   ✅ Step 5: AI response with business value (indicators: {business_relevance}/5)")
+        print(f"   CHECK Step 5: AI response with business value (indicators: {business_relevance}/5)")
         
         # Complete Golden Path validation
         golden_path_success = all([
@@ -217,7 +217,7 @@ class Issue347GoldenPathE2EStagingValidationTests(SSotAsyncTestCase):
         self.assertTrue(golden_path_success,
                        "Complete Golden Path should succeed with correct agent naming")
         
-        print(f"✅ Complete Golden Path user journey successful with Issue #347 resolution")
+        print(f"CHECK Complete Golden Path user journey successful with Issue #347 resolution")
         
         return {
             "user_id": user_info["user_id"],
@@ -257,7 +257,7 @@ class Issue347GoldenPathE2EStagingValidationTests(SSotAsyncTestCase):
         """Simulate agent orchestration for E2E testing."""
         # Based on message type, determine expected agent flow
         if message["type"] == "optimization_request":
-            # Expected flow: triage → optimization → actions
+            # Expected flow: triage -> optimization -> actions
             expected_agents = ["triage", "optimization", "actions"]
         else:
             # Default flow
@@ -328,13 +328,13 @@ class Issue347GoldenPathE2EStagingValidationTests(SSotAsyncTestCase):
                     "success": True,
                     "result": result
                 }
-                print(f"   ✅ User {user_id} concurrent workflow completed")
+                print(f"   CHECK User {user_id} concurrent workflow completed")
             except Exception as e:
                 concurrent_results[user_id] = {
                     "success": False,
                     "error": str(e)
                 }
-                print(f"   ❌ User {user_id} concurrent workflow failed: {e}")
+                print(f"   X User {user_id} concurrent workflow failed: {e}")
         
         # Verify all users completed successfully
         successful_users = sum(1 for result in concurrent_results.values() if result["success"])
@@ -343,7 +343,7 @@ class Issue347GoldenPathE2EStagingValidationTests(SSotAsyncTestCase):
         self.assertEqual(successful_users, total_users,
                         f"All {total_users} concurrent users should complete Golden Path successfully")
         
-        print(f"✅ Multi-user concurrent Golden Path successful ({successful_users}/{total_users})")
+        print(f"CHECK Multi-user concurrent Golden Path successful ({successful_users}/{total_users})")
         
         return concurrent_results
     
@@ -382,7 +382,7 @@ class Issue347GoldenPathE2EStagingValidationTests(SSotAsyncTestCase):
         user_info = self.staging_users["primary_e2e_user"]
         user_context = user_info["context"]
         
-        print(f"\n❌ Issue #347 E2E - Error handling for incorrect agent names:")
+        print(f"\nX Issue #347 E2E - Error handling for incorrect agent names:")
         
         # Test scenarios with incorrect agent names (should fail gracefully)
         incorrect_scenarios = [
@@ -415,14 +415,14 @@ class Issue347GoldenPathE2EStagingValidationTests(SSotAsyncTestCase):
                     "system_stability_maintained": True
                 }
                 
-                print(f"      ✅ '{incorrect_name}' handled gracefully: {error_result['error_type']}")
+                print(f"      CHECK '{incorrect_name}' handled gracefully: {error_result['error_type']}")
                 
             except Exception as e:
                 error_handling_results[incorrect_name] = {
                     "graceful_failure": False,
                     "unexpected_error": str(e)
                 }
-                print(f"      ❌ '{incorrect_name}' caused unexpected error: {e}")
+                print(f"      X '{incorrect_name}' caused unexpected error: {e}")
         
         # Verify system remains stable after error handling
         system_stability = await self._verify_system_stability_after_errors(user_context)
@@ -430,7 +430,7 @@ class Issue347GoldenPathE2EStagingValidationTests(SSotAsyncTestCase):
         self.assertTrue(system_stability["stable"],
                        "System should remain stable after handling incorrect agent names")
         
-        print(f"✅ Error handling for incorrect agent names works correctly in staging")
+        print(f"CHECK Error handling for incorrect agent names works correctly in staging")
         
         return error_handling_results
     
@@ -511,7 +511,7 @@ class Issue347GoldenPathE2EStagingValidationTests(SSotAsyncTestCase):
         print(f"      Agents involved: {actual_agents}")
         print(f"      WebSocket events: {len(websocket_result['events_received'])}")
         
-        print(f"✅ Golden Path performance validated with correct agent naming")
+        print(f"CHECK Golden Path performance validated with correct agent naming")
         
         return performance_metrics
 
@@ -522,7 +522,7 @@ if __name__ == "__main__":
     print("=" * 80)
     print("🌐 Testing on GCP Staging Environment with Real Services")
     print("🔐 E2E Auth Mandatory - No Mocks Allowed")
-    print("🌟 Golden Path Focus - Users Login → Get AI Responses")
+    print("🌟 Golden Path Focus - Users Login -> Get AI Responses")
     print("=" * 80)
     
     import unittest

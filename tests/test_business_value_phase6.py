@@ -157,16 +157,16 @@ def assess_business_impact():
     
     print("IMPROVEMENTS ACHIEVED:")
     for improvement in improvements:
-        print(f"  ✓ {improvement}")
+        print(f"  CHECK {improvement}")
     
     print(f"\nOVERALL SUCCESS: {len(improvements)}/4 critical issues resolved")
     
     if len(improvements) >= 3:
-        print("RESULT: ✅ MAJOR SUCCESS - Issue #463 remediation highly effective")
+        print("RESULT: CHECK MAJOR SUCCESS - Issue #463 remediation highly effective")
     elif len(improvements) >= 2:
-        print("RESULT: ✅ SUCCESS - Issue #463 remediation effective")
+        print("RESULT: CHECK SUCCESS - Issue #463 remediation effective")
     else:
-        print("RESULT: ⚠️  PARTIAL - Additional work needed")
+        print("RESULT: WARNING️  PARTIAL - Additional work needed")
     
     return {
         "impact_level": impact_level,

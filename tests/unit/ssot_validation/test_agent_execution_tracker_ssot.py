@@ -56,7 +56,7 @@ class AgentExecutionTrackerSSOTTests(SSotBaseTestCase):
             )
             
             # Log state analysis
-            print(f"\n✅ ExecutionState Enum Consolidation:")
+            print(f"\nCHECK ExecutionState Enum Consolidation:")
             print(f"    Expected states: {len(self.expected_execution_states)}")
             print(f"    Actual states: {len(actual_states)}")
             print(f"    States: {sorted(actual_states)}")
@@ -88,7 +88,7 @@ class AgentExecutionTrackerSSOTTests(SSotBaseTestCase):
                 "get_execution_tracker should return AgentExecutionTracker instance"
             )
             
-            print(f"\n✅ AgentExecutionTracker SSOT Import:")
+            print(f"\nCHECK AgentExecutionTracker SSOT Import:")
             print(f"    Class available: {AgentExecutionTracker.__name__}")
             print(f"    Module: {AgentExecutionTracker.__module__}")
             print(f"    Factory function: get_execution_tracker")
@@ -145,13 +145,13 @@ class AgentExecutionTrackerSSOTTests(SSotBaseTestCase):
         print(f"    Properly deprecated: {len(deprecated_legacy)}")
         
         if existing_legacy:
-            print(f"\n⚠️  Legacy classes still existing:")
+            print(f"\nWARNING️  Legacy classes still existing:")
             for path in existing_legacy:
                 status = legacy_status[path]['deprecation_status']
                 print(f"      {path}: {status}")
         
         if deprecated_legacy:
-            print(f"\n✅ Properly deprecated:")
+            print(f"\nCHECK Properly deprecated:")
             for path in deprecated_legacy:
                 status = legacy_status[path]['deprecation_status']
                 print(f"      {path}: {status}")
@@ -197,15 +197,15 @@ class AgentExecutionTrackerSSOTTests(SSotBaseTestCase):
                     # but we're testing the consolidation status
                     pass
                 
-                print(f"\n✅ Execution Tracker Functionality:")
+                print(f"\nCHECK Execution Tracker Functionality:")
                 print(f"    Available methods: {len(available_methods)}/{len(core_methods)}")
                 for method in available_methods:
-                    print(f"      ✅ {method}")
+                    print(f"      CHECK {method}")
                 
                 if missing_methods:
                     print(f"    Missing methods: {len(missing_methods)}")
                     for method in missing_methods:
-                        print(f"      ❌ {method}")
+                        print(f"      X {method}")
                         
             except Exception as e:
                 print(f"    ExecutionState integration test failed: {e}")
@@ -250,7 +250,7 @@ class AgentExecutionTrackerSSOTTests(SSotBaseTestCase):
                         "Execution ID generation should produce unique IDs"
                     )
                     
-                    print(f"\n✅ Execution Tracker ID Generation:")
+                    print(f"\nCHECK Execution Tracker ID Generation:")
                     print(f"    ID generation method: create_execution_id")
                     print(f"    Sample ID: {execution_id}")
                     print(f"    Unique IDs generated: {len(id_set)}/5")
@@ -326,7 +326,7 @@ class AgentExecutionTrackerConsolidationStatusTests(SSotBaseTestCase):
         print(f"    Potentially duplicate: {len(potentially_duplicate)}")
         
         if potentially_duplicate:
-            print(f"\n⚠️  Potentially duplicate implementations:")
+            print(f"\nWARNING️  Potentially duplicate implementations:")
             for impl_name in sorted(potentially_duplicate):
                 files = [impl['file'] for impl in tracker_implementations if impl['class_name'] == impl_name]
                 print(f"      {impl_name}: {len(files)} files")
@@ -385,24 +385,24 @@ class AgentExecutionTrackerConsolidationStatusTests(SSotBaseTestCase):
             self.fail("No ExecutionState definitions found")
         
         if len(available_definitions) == 1:
-            print(f"\n✅ ExecutionState SSOT Achieved:")
+            print(f"\nCHECK ExecutionState SSOT Achieved:")
             module_path = list(available_definitions.keys())[0]
             definition = available_definitions[module_path]
             print(f"    Single definition in: {module_path}")
             print(f"    States: {sorted(definition['states'])}")
         else:
-            print(f"\n⚠️  Multiple ExecutionState Definitions:")
+            print(f"\nWARNING️  Multiple ExecutionState Definitions:")
             
             # Check if they're the same class (aliases)
             class_ids = [def_info['class_id'] for def_info in available_definitions.values()]
             unique_class_ids = set(class_ids)
             
             if len(unique_class_ids) == 1:
-                print(f"    ✅ All definitions are aliases (same class ID: {list(unique_class_ids)[0]})")
+                print(f"    CHECK All definitions are aliases (same class ID: {list(unique_class_ids)[0]})")
                 for module_path in available_definitions.keys():
                     print(f"      {module_path}")
             else:
-                print(f"    ❌ Different class definitions found ({len(unique_class_ids)} unique):")
+                print(f"    X Different class definitions found ({len(unique_class_ids)} unique):")
                 for module_path, definition in available_definitions.items():
                     print(f"      {module_path}: ID {definition['class_id']}, {len(definition['states'])} states")
                 
@@ -461,7 +461,7 @@ class AgentExecutionTrackerConsolidationStatusTests(SSotBaseTestCase):
         
         print(f"\n📊 AgentExecutionTracker Consolidation Status:")
         for indicator, status in completion_indicators.items():
-            status_symbol = "✅" if status else "❌"
+            status_symbol = "CHECK" if status else "X"
             print(f"    {indicator}: {status_symbol}")
         
         print(f"\n📈 Completion Score: {completion_score:.2f}")
@@ -471,7 +471,7 @@ class AgentExecutionTrackerConsolidationStatusTests(SSotBaseTestCase):
         if completion_score >= 0.75:
             print(f"\n🎉 CONSOLIDATION APPEARS COMPLETE")
         elif completion_score >= 0.5:
-            print(f"\n⚠️  CONSOLIDATION PARTIALLY COMPLETE")
+            print(f"\nWARNING️  CONSOLIDATION PARTIALLY COMPLETE")
         else:
             print(f"\n🚨 CONSOLIDATION INCOMPLETE - WORK NEEDED")
         

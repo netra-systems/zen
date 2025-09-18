@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 This module tests the complete Golden Path user flow integration:
 1. User authentication and session establishment
 2. Chat interface initialization and WebSocket connection
-3. User message → Agent execution → Tool usage → Business value delivery
+3. User message -> Agent execution -> Tool usage -> Business value delivery
 4. Real-time WebSocket event delivery throughout the flow
 5. Session management and graceful error handling
 

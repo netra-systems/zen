@@ -327,9 +327,9 @@ class CompleteGoldenPathE2EStagingTests(SSotAsyncTestCase):
         logger.info(f'🔍 CONCURRENCY DEBUGGING: {len(successful_journeys)}/{len(results)} journeys successful')
         for i, result in enumerate(results):
             if isinstance(result, dict) and (not result.get('success', True)):
-                logger.error(f"❌ Journey {i} failed: {result.get('error', 'Unknown error')}")
+                logger.error(f"X Journey {i} failed: {result.get('error', 'Unknown error')}")
             elif isinstance(result, dict) and result.get('success', False):
-                logger.info(f"✅ Journey {i} succeeded: {result.get('events_received', 0)} events")
+                logger.info(f"CHECK Journey {i} succeeded: {result.get('events_received', 0)} events")
         assert success_rate >= 0.5, f'Concurrent success rate too low: {success_rate:.2%}'
         assert concurrent_total_time < 60.0, f'Concurrent execution too slow: {concurrent_total_time:.2f}s'
         for result in successful_journeys:

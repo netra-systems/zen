@@ -211,9 +211,9 @@ class WebSocketEventsComprehensiveE2ETests(SSotAsyncTestCase):
         4. Event payloads contain meaningful business context
         
         Flow:
-        1. Send agent message → monitor for all critical events
-        2. Validate each event type received → check payload quality
-        3. Analyze event timing and sequencing → UX scoring
+        1. Send agent message -> monitor for all critical events
+        2. Validate each event type received -> check payload quality
+        3. Analyze event timing and sequencing -> UX scoring
         4. Validate business context and transparency
         
         Coverage: Critical event delivery, event sequencing, UX timing, business context
@@ -272,7 +272,7 @@ class WebSocketEventsComprehensiveE2ETests(SSotAsyncTestCase):
             self.logger.info(f'   UX score: {sequence.user_experience_score:.3f}')
             self.logger.info(f'   Business transparency: {sequence.business_transparency:.3f}')
         except Exception as e:
-            self.logger.error(f'❌ Critical WebSocket events delivery failed: {e}')
+            self.logger.error(f'X Critical WebSocket events delivery failed: {e}')
             raise AssertionError(f'Critical WebSocket events delivery failed: {e}. This breaks real-time user experience and system transparency.')
 
     async def test_websocket_event_timing_and_performance(self):
@@ -286,8 +286,8 @@ class WebSocketEventsComprehensiveE2ETests(SSotAsyncTestCase):
         4. Event delivery doesn't degrade under processing load
         
         Flow:
-        1. Send request → measure first event timing
-        2. Monitor all events → analyze intervals and performance
+        1. Send request -> measure first event timing
+        2. Monitor all events -> analyze intervals and performance
         3. Validate timing meets UX requirements
         4. Check for performance degradation patterns
         
@@ -378,7 +378,7 @@ class WebSocketEventsComprehensiveE2ETests(SSotAsyncTestCase):
                 self.logger.info(f'   Max interval: {max_interval:.2f}s')
             self.logger.info(f"   Performance score: {timing_metrics['performance_score']:.3f}")
         except Exception as e:
-            self.logger.error(f'❌ WebSocket event timing test failed: {e}')
+            self.logger.error(f'X WebSocket event timing test failed: {e}')
             raise AssertionError(f'WebSocket event timing and performance test failed: {e}. This indicates poor real-time user experience.')
 
     async def test_websocket_events_under_concurrent_load(self):
@@ -392,9 +392,9 @@ class WebSocketEventsComprehensiveE2ETests(SSotAsyncTestCase):
         4. User isolation maintained in event streams
         
         Flow:
-        1. Create multiple concurrent users → parallel connections
-        2. Send simultaneous messages → monitor separate event streams
-        3. Validate event isolation → no cross-user contamination
+        1. Create multiple concurrent users -> parallel connections
+        2. Send simultaneous messages -> monitor separate event streams
+        3. Validate event isolation -> no cross-user contamination
         4. Check performance degradation under load
         
         Coverage: Concurrent event delivery, user isolation, load performance
@@ -483,7 +483,7 @@ class WebSocketEventsComprehensiveE2ETests(SSotAsyncTestCase):
             for i, user_data in enumerate(connected_users):
                 self.logger.info(f"   User {i} events: {len(user_data['events'])}")
         except Exception as e:
-            self.logger.error(f'❌ Concurrent WebSocket events test failed: {e}')
+            self.logger.error(f'X Concurrent WebSocket events test failed: {e}')
             raise AssertionError(f'WebSocket events under concurrent load failed: {e}. This indicates scalability issues with real-time event delivery.')
 
     async def test_websocket_event_payload_integrity(self):
@@ -497,9 +497,9 @@ class WebSocketEventsComprehensiveE2ETests(SSotAsyncTestCase):
         4. Payload size and format are appropriate
         
         Flow:
-        1. Send business-focused message → monitor detailed event payloads
-        2. Validate payload structure → check required fields
-        3. Analyze business context → meaningful content validation
+        1. Send business-focused message -> monitor detailed event payloads
+        2. Validate payload structure -> check required fields
+        3. Analyze business context -> meaningful content validation
         4. Check data consistency across events
         
         Coverage: Event payload quality, business context, data integrity
@@ -566,7 +566,7 @@ class WebSocketEventsComprehensiveE2ETests(SSotAsyncTestCase):
             self.logger.info(f"   Payload quality score: {integrity_metrics['payload_quality_score']:.3f}")
             self.logger.info(f'   Business-relevant events: {len(business_events)}')
         except Exception as e:
-            self.logger.error(f'❌ WebSocket event payload integrity test failed: {e}')
+            self.logger.error(f'X WebSocket event payload integrity test failed: {e}')
             raise AssertionError(f'WebSocket event payload integrity test failed: {e}. This indicates poor event quality and business context delivery.')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

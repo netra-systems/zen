@@ -39,7 +39,7 @@ def assess_websocket_ssot_compliance():
                     'type': type(impl_class).__name__
                 })
                 import_successes.append(f"{module_path}.{class_name}")
-                print(f"  ✓ FOUND: {module_path}.{class_name}")
+                print(f"  CHECK FOUND: {module_path}.{class_name}")
                 findings.append(f"Implementation found: {module_path}.{class_name}")
             else:
                 import_failures.append(f"{module_path}.{class_name} - attribute not found")
@@ -70,7 +70,7 @@ def assess_websocket_ssot_compliance():
                     'factory': factory,
                     'callable': callable(factory)
                 })
-                print(f"  ✓ FOUND: {module_path}.{factory_name}")
+                print(f"  CHECK FOUND: {module_path}.{factory_name}")
                 findings.append(f"Factory found: {module_path}.{factory_name}")
         except (ImportError, AttributeError):
             print(f"  ✗ MISSING: {module_path}.{factory_name}")
@@ -96,31 +96,31 @@ def assess_websocket_ssot_compliance():
 
         # Test same instance
         if manager1 is manager2:
-            print("  ❌ VIOLATION: Same instance returned for different users")
+            print("  X VIOLATION: Same instance returned for different users")
             isolation_violations += 1
             findings.append("User isolation violation: Same instance")
         else:
-            print("  ✅ OK: Different instances for different users")
+            print("  CHECK OK: Different instances for different users")
 
         # Test shared state
         if hasattr(manager1, '_connections') and hasattr(manager2, '_connections'):
             if manager1._connections is manager2._connections:
-                print("  ❌ VIOLATION: Shared connection registry")
+                print("  X VIOLATION: Shared connection registry")
                 isolation_violations += 1
                 findings.append("User isolation violation: Shared connections")
             else:
-                print("  ✅ OK: Separate connection registries")
+                print("  CHECK OK: Separate connection registries")
 
         if hasattr(manager1, 'registry') and hasattr(manager2, 'registry'):
             if manager1.registry is manager2.registry:
-                print("  ❌ VIOLATION: Shared registry")
+                print("  X VIOLATION: Shared registry")
                 isolation_violations += 1
                 findings.append("User isolation violation: Shared registry")
             else:
-                print("  ✅ OK: Separate registries")
+                print("  CHECK OK: Separate registries")
 
     except Exception as e:
-        print(f"  ❌ ERROR: User isolation test failed - {e}")
+        print(f"  X ERROR: User isolation test failed - {e}")
         isolation_violations += 1
         findings.append(f"User isolation test error: {e}")
 
@@ -163,13 +163,13 @@ def assess_websocket_ssot_compliance():
     print(f"Overall SSOT Compliance: {overall_compliance:.1f}%")
 
     if overall_compliance >= 90:
-        assessment = "✅ EXCELLENT"
+        assessment = "CHECK EXCELLENT"
     elif overall_compliance >= 70:
-        assessment = "⚠️  GOOD"
+        assessment = "WARNING️  GOOD"
     elif overall_compliance >= 50:
-        assessment = "❌ POOR"
+        assessment = "X POOR"
     else:
-        assessment = "❌ CRITICAL"
+        assessment = "X CRITICAL"
 
     print(f"Assessment: {assessment}")
 
@@ -180,10 +180,10 @@ def assess_websocket_ssot_compliance():
     print(f"Actual Compliance: {overall_compliance:.1f}%")
 
     if overall_compliance <= 10:
-        print("✅ ISSUE #885 CLAIM VALIDATED")
+        print("CHECK ISSUE #885 CLAIM VALIDATED")
         issue_validated = True
     else:
-        print("❌ ISSUE #885 CLAIM DISPUTED")
+        print("X ISSUE #885 CLAIM DISPUTED")
         issue_validated = False
 
     print("\n7. VIOLATIONS DETECTED")

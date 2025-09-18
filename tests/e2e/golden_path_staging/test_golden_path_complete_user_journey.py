@@ -77,7 +77,7 @@ class TestGoldenPathCompleteUserJourney:
     @pytest.mark.golden_path
     @pytest.mark.timeout(180)  # 3 minute total timeout
     async def test_complete_user_login_to_ai_response_flow(self):
-        """Test complete flow: user login → send message → receive AI response.
+        """Test complete flow: user login -> send message -> receive AI response.
         
         This test WILL FAIL if the golden path is not actually operational.
         This is the ultimate test of $500K+ ARR functionality.

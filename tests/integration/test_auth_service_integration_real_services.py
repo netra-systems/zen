@@ -12,7 +12,7 @@ CRITICAL COMPLIANCE:
 - Validates JWT token flow between services
 - Tests OAuth integration for user onboarding
 - Ensures session management for user retention
-- Implements graceful degradation: real service → mock → skip
+- Implements graceful degradation: real service -> mock -> skip
 """
 
 import pytest

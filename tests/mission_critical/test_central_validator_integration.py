@@ -51,7 +51,8 @@ if original_env:
     get_env().set(ENVIRONMENT, original_env, test)
 else:
     get_env().delete(ENVIRONMENT)"
-    get_env().delete(ENVIRONMENT)"
+    get_env().delete(ENVIRONMENT)""
+
 
 
 def test_backend_service_uses_central_validator_for_jwt():
@@ -87,7 +88,8 @@ if original_env:
     get_env().set(ENVIRONMENT, original_env, test)
 else:
     get_env().delete(ENVIRONMENT)"
-    get_env().delete(ENVIRONMENT)"
+    get_env().delete(ENVIRONMENT)""
+
 
 
 def test_backend_service_uses_central_validator_for_database():
@@ -126,7 +128,8 @@ def test_backend_service_uses_central_validator_for_redis():
     "Test backend service delegates Redis credentials to central validator."
 pass
 print( PASS:  Testing backend service central validator integration for Redis...)"
-print( PASS:  Testing backend service central validator integration for Redis...)"
+print( PASS:  Testing backend service central validator integration for Redis...)""
+
 
 from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretManager
 from shared.isolated_environment import get_env
@@ -138,7 +141,8 @@ get_env().set(ENVIRONMENT, production, "test)"
     # Clear Redis configuration to force hard failure
 get_env().delete(REDIS_HOST)
 get_env().delete(REDIS_PASSWORD)"
-get_env().delete(REDIS_PASSWORD)"
+get_env().delete(REDIS_PASSWORD)""
+
 
 secret_manager = UnifiedSecretManager()
 
@@ -191,7 +195,8 @@ if original_env:
     get_env().set(ENVIRONMENT, original_env, test)
 else:
     get_env().delete(ENVIRONMENT)"
-    get_env().delete(ENVIRONMENT)"
+    get_env().delete(ENVIRONMENT)""
+
 
 
 def test_central_validator_eliminates_dangerous_defaults():
@@ -225,7 +230,8 @@ assert DATABASE_PASSWORD in error_msg"
 assert DATABASE_PASSWORD in error_msg"
 assert REDIS_PASSWORD" in error_msg"
 print(   PASS:  Central validator properly rejects missing critical secrets)"
-print(   PASS:  Central validator properly rejects missing critical secrets)"
+print(   PASS:  Central validator properly rejects missing critical secrets)""
+
 finally:
     validator.env_getter = original_getter
 
@@ -242,7 +248,8 @@ def mock_dev_env_getter(key, default=None):
         return "development"
 elif key == JWT_SECRET_KEY:
     return development-jwt-secret-32-characters-long-12345"
-    return development-jwt-secret-32-characters-long-12345"
+    return development-jwt-secret-32-characters-long-12345""
+
 else:
     return default
 
@@ -256,7 +263,8 @@ jwt_secret = validator.get_jwt_secret()
 assert jwt_secret == development-jwt-secret-32-characters-long-12345"
 assert jwt_secret == development-jwt-secret-32-characters-long-12345"
 print(   PASS:  Development environment properly allows reasonable defaults)"
-print(   PASS:  Development environment properly allows reasonable defaults)"
+print(   PASS:  Development environment properly allows reasonable defaults)""
+
 except Exception as e:
     raise AssertionError(formatted_string")"
 
@@ -309,7 +317,8 @@ print(formatted_string)
 if failed == 0:
     print(" PASS:  All central validator integration tests PASSED)"
 print( CELEBRATION:  Central configuration validator successfully integrated across all services)"
-print( CELEBRATION:  Central configuration validator successfully integrated across all services)"
+print( CELEBRATION:  Central configuration validator successfully integrated across all services)""
+
 return True
 else:
     print(" FAIL:  Some central validator integration tests FAILED)"
@@ -317,7 +326,8 @@ return False
 
 
 if __name__ == __main__:"
-if __name__ == __main__:"
+if __name__ == __main__:""
+
     success = run_all_tests()
 sys.exit(0 if success else 1)
 pass

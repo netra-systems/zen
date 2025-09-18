@@ -1,5 +1,5 @@
-"""
-"""
+""""
+
 Golden Path Phase 2 User Isolation Violation Tests
 
 CRITICAL: These tests demonstrate SSOT compliance violations and user isolation failures 
@@ -7,18 +7,19 @@ that were previously caused by deprecated singleton patterns. They validate that
 migration to proper user context factories eliminates contamination between users.
 
 Business Value Justification:
-- Segment: Platform/Enterprise
+    - Segment: Platform/Enterprise
 - Business Goal: Stability & Security 
-"""
-"""
-- Value Impact: Prevents $500K+ ARR loss from multi-user data leakage
+""""
+
+- Value Impact: Prevents $""500K"" plus ARR loss from multi-user data leakage
 - Strategic Impact: Enables regulatory compliance (HIPAA/SOC2) for enterprise customers
 
 The tests prove that:
-1. DEPRECATED: get_agent_instance_factory() creates user contamination vulnerabilities
+    1. DEPRECATED: get_agent_instance_factory() creates user contamination vulnerabilities
 2. SSOT COMPLIANT: create_agent_instance_factory(user_context) provides proper isolation
 "
-"
+""
+
 
 import asyncio
 import pytest
@@ -105,13 +106,15 @@ class MockAgent(BaseAgent):
 
 class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
     "
-    "
+    ""
+
     CRITICAL: Test user isolation violations in Golden Path Phase 2 migration.
     
     These tests demonstrate the security vulnerabilities created by deprecated
     singleton patterns and validate that proper SSOT patterns prevent contamination.
 "
-"
+""
+
 
     async def asyncSetUp(self):
         Set up test infrastructure with proper SSOT patterns.""
@@ -146,7 +149,8 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
             metadata={'test_suffix': suffix, 'created_for': user_id}
 
     async def test_deprecated_singleton_factory_raises_error(self):
-    """
+    """"
+
         TEST 1: Verify deprecated singleton factory is completely disabled.
         
         CRITICAL: The get_agent_instance_factory() function must raise an error
@@ -165,10 +169,11 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         self.assertIn(multi-user state contamination, error_message)"
         self.assertIn("create_agent_instance_factory(user_context), error_message)"
         
-        logger.info(✅ PASS: Deprecated singleton factory correctly raises security error)
+        logger.info(CHECK PASS: Deprecated singleton factory correctly raises security error)
 
     async def test_ssot_factory_provides_user_isolation(self):
-    """
+    """"
+
         TEST 2: Verify SSOT factory provides proper user isolation.
         
         CRITICAL: create_agent_instance_factory(user_context) must create
@@ -202,7 +207,8 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         self.assertNotEqual(agent1, agent2, "Agents should be different instances)"
         self.assertEqual(agent1.user_context.user_id, user1)
         self.assertEqual(agent2.user_context.user_id, user2)"
-        self.assertEqual(agent2.user_context.user_id, user2)"
+        self.assertEqual(agent2.user_context.user_id, user2)""
+
         
         # VALIDATION: Contamination markers should be different
         marker1 = agent1.get_contamination_marker()
@@ -213,11 +219,12 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         self.assertFalse(agent1.has_cross_user_contamination(user1))
         self.assertFalse(agent2.has_cross_user_contamination(user2"))"
         
-        logger.info(✅ PASS: SSOT factory provides proper user isolation)
+        logger.info(CHECK PASS: SSOT factory provides proper user isolation)
 
     async def test_concurrent_user_execution_isolation(self):
         """
-        "
+        ""
+
         TEST 3: Verify concurrent user executions remain isolated.
         
         CRITICAL: Multiple users executing agents simultaneously should have
@@ -225,7 +232,8 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
 "
 "
         logger.info(TEST 3: Testing concurrent user execution isolation)"
-        logger.info(TEST 3: Testing concurrent user execution isolation)"
+        logger.info(TEST 3: Testing concurrent user execution isolation)""
+
         
         # Create contexts for multiple concurrent users
         users = [alice", bob, charlie, diana]"
@@ -284,14 +292,16 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
             if agent.has_cross_user_contamination(user_id):
                 contamination_detected = True
                 logger.error(fCONTAMINATION: Agent for {user_id} has cross-user contamination)"
-                logger.error(fCONTAMINATION: Agent for {user_id} has cross-user contamination)"
+                logger.error(fCONTAMINATION: Agent for {user_id} has cross-user contamination)""
+
         
         self.assertFalse(contamination_detected, "No cross-user contamination should be detected)"
         
-        logger.info(✅ PASS: Concurrent user executions remain properly isolated)
+        logger.info(CHECK PASS: Concurrent user executions remain properly isolated)
 
     async def test_factory_memory_isolation(self):
-    """
+    """"
+
         TEST 4: Verify factory instances don't share memory state.'
         
         CRITICAL: Each factory instance should have completely separate
@@ -341,17 +351,19 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         self.assertEqual(metrics1['total_instances_created'], 1)
         self.assertEqual(metrics2['total_instances_created'], 1)
         
-        logger.info(✅ PASS: Factory instances have proper memory isolation)
+        logger.info(CHECK PASS: Factory instances have proper memory isolation)
 
     async def test_user_context_binding_validation(self):
-    """
+    """"
+
         TEST 5: Verify user context binding is mandatory and enforced.
         
         CRITICAL: Factories must require user context and fail gracefully
         without it to prevent context-less execution.
         
         logger.info(TEST 5: Testing user context binding validation)"
-        logger.info(TEST 5: Testing user context binding validation)"
+        logger.info(TEST 5: Testing user context binding validation)""
+
         
         # TEST: Factory creation without user context should work but be flagged
         factory_without_context = AgentInstanceFactory()  # No user context
@@ -374,17 +386,19 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         error_message = str(context.exception)
         self.assertIn("UserExecutionContext is required, error_message)"
         
-        logger.info(✅ PASS: User context binding is properly validated)
+        logger.info(CHECK PASS: User context binding is properly validated)
 
     async def test_resource_cleanup_isolation(self):
-    """
+    """"
+
         TEST 6: Verify resource cleanup doesn't affect other users.'
         
         CRITICAL: When one user's context is cleaned up, other users'
         should remain unaffected.
         
         logger.info(TEST 6: Testing resource cleanup isolation)"
-        logger.info(TEST 6: Testing resource cleanup isolation)"
+        logger.info(TEST 6: Testing resource cleanup isolation)""
+
         
         # Create contexts for multiple users
         user1_context = self.create_test_user_context("cleanup_user1, cleanup_test)"
@@ -421,12 +435,14 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         # Verify user2's contamination marker unchanged'
         self.assertFalse(agent2.has_cross_user_contamination('cleanup_user2'))
         
-        logger.info(✅ PASS: Resource cleanup maintains proper isolation)"
-        logger.info(✅ PASS: Resource cleanup maintains proper isolation)"
+        logger.info(CHECK PASS: Resource cleanup maintains proper isolation)"
+        logger.info(CHECK PASS: Resource cleanup maintains proper isolation)""
+
 
     async def test_golden_path_contamination_prevention(self):
         """
-        "
+        ""
+
         TEST 7: Golden Path end-to-end contamination prevention.
         
         CRITICAL: Full Golden Path workflow should maintain perfect user
@@ -487,12 +503,14 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         self.assertFalse(alice_result['agent_instance'].has_cross_user_contamination('golden_alice'))
         self.assertFalse(bob_result['agent_instance'].has_cross_user_contamination('golden_bob'))
         
-        logger.info(✅ PASS: Golden Path maintains perfect user isolation)"
-        logger.info(✅ PASS: Golden Path maintains perfect user isolation)"
+        logger.info(CHECK PASS: Golden Path maintains perfect user isolation)"
+        logger.info(CHECK PASS: Golden Path maintains perfect user isolation)""
+
 
     async def test_performance_isolation_under_load(self):
         """
-    "
+    ""
+
         TEST 8: Verify isolation holds under concurrent load.
         
         CRITICAL: User isolation must remain intact even under high
@@ -509,7 +527,8 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
             Stress test for individual user with multiple executions.""
             user_id = fstress_user_{user_index}
             user_context = self.create_test_user_context(user_id, stress_test)"
-            user_context = self.create_test_user_context(user_id, stress_test)"
+            user_context = self.create_test_user_context(user_id, stress_test)""
+
             
             # Create factory and agent
             factory = create_agent_instance_factory(user_context)
@@ -547,7 +566,8 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
             # Check agent contamination
             if agent.has_cross_user_contamination(user_id):
                 contamination_errors.append(fAgent for {user_id} has cross-user contamination)"
-                contamination_errors.append(fAgent for {user_id} has cross-user contamination)"
+                contamination_errors.append(fAgent for {user_id} has cross-user contamination)""
+
         
         # Report any contamination errors
         if contamination_errors:
@@ -556,7 +576,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
                 logger.error(f  - {error})
             self.fail(f"Contamination detected under load: {len(contamination_errors)} errors)"
         
-        logger.info(f✅ PASS: Isolation maintained under load ({concurrent_users} users, {executions_per_user} executions each)")"
+        logger.info(fCHECK PASS: Isolation maintained under load ({concurrent_users} users, {executions_per_user} executions each)")"
 
 
 if __name__ == '__main__':

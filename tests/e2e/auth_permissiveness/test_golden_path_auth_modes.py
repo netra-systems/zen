@@ -1,7 +1,7 @@
 """
 E2E Tests: Golden Path User Flow with Authentication Permissiveness
 
-PURPOSE: End-to-end validation of complete user journey (login → AI responses) 
+PURPOSE: End-to-end validation of complete user journey (login -> AI responses) 
 with different authentication modes to resolve 1011 WebSocket blocking issues.
 
 BUSINESS JUSTIFICATION:
@@ -56,7 +56,7 @@ class GoldenPathAuthModesTests(SSotBaseTestCase):
     """
     E2E tests for complete golden path user flow with auth permissiveness.
     
-    Tests the complete user journey: UI → WebSocket → Agent → AI Response
+    Tests the complete user journey: UI -> WebSocket -> Agent -> AI Response
     with different authentication validation levels.
     
     MUST FAIL INITIALLY to prove current system blocks golden path.
@@ -114,7 +114,7 @@ class GoldenPathAuthModesTests(SSotBaseTestCase):
             self.assertIn('cost', ai_response.lower(), 'Response should address the AI cost query')
             persisted = await self._verify_conversation_persistence(user['user_id'], test_message, ai_response)
             self.assertTrue(persisted, 'Conversation should be persisted to database')
-            self.logger.info('✅ Golden path with STRICT auth completed successfully')
+            self.logger.info('CHECK Golden path with STRICT auth completed successfully')
         except Exception as e:
             self.logger.error(f'Golden path with STRICT auth failed: {e}')
             self.fail(f'STRICT auth golden path should work but failed: {e}')
@@ -143,7 +143,7 @@ class GoldenPathAuthModesTests(SSotBaseTestCase):
         self.assertTrue(golden_path_blocked, 'Golden path should be blocked without authentication')
         agent_execution_attempted = await self._verify_no_agent_execution()
         self.assertFalse(agent_execution_attempted, 'Agent execution should not occur without auth')
-        self.logger.info(f'✅ Successfully reproduced 1011 error blocking golden path: {websocket_error}')
+        self.logger.info(f'CHECK Successfully reproduced 1011 error blocking golden path: {websocket_error}')
 
     async def test_golden_path_relaxed_auth_not_implemented(self):
         """
@@ -176,11 +176,11 @@ class GoldenPathAuthModesTests(SSotBaseTestCase):
                 else:
                     self.fail('WebSocket connected but agent execution failed with relaxed auth')
             else:
-                self.logger.info('✅ Relaxed auth correctly failed (not implemented)')
+                self.logger.info('CHECK Relaxed auth correctly failed (not implemented)')
         except Exception as e:
             error_message = str(e).lower()
             self.assertTrue(any((indicator in error_message for indicator in ['relaxed', 'not implemented', 'not found'])), f'Expected relaxed auth implementation error, got: {e}')
-            self.logger.info(f'✅ Relaxed auth golden path correctly failed: {e}')
+            self.logger.info(f'CHECK Relaxed auth golden path correctly failed: {e}')
 
     async def test_golden_path_demo_auth_not_implemented(self):
         """
@@ -214,11 +214,11 @@ class GoldenPathAuthModesTests(SSotBaseTestCase):
                 else:
                     self.fail('WebSocket connected but agent execution failed with demo auth')
             else:
-                self.logger.info('✅ Demo auth correctly failed (not implemented)')
+                self.logger.info('CHECK Demo auth correctly failed (not implemented)')
         except Exception as e:
             error_message = str(e).lower()
             self.assertTrue(any((indicator in error_message for indicator in ['demo', 'not implemented', 'not found'])), f'Expected demo auth implementation error, got: {e}')
-            self.logger.info(f'✅ Demo auth golden path correctly failed: {e}')
+            self.logger.info(f'CHECK Demo auth golden path correctly failed: {e}')
 
     async def test_golden_path_emergency_auth_not_implemented(self):
         """
@@ -251,11 +251,11 @@ class GoldenPathAuthModesTests(SSotBaseTestCase):
                 else:
                     self.fail('WebSocket connected but agent execution failed with emergency auth')
             else:
-                self.logger.info('✅ Emergency auth correctly failed (not implemented)')
+                self.logger.info('CHECK Emergency auth correctly failed (not implemented)')
         except Exception as e:
             error_message = str(e).lower()
             self.assertTrue(any((indicator in error_message for indicator in ['emergency', 'not implemented', 'not found'])), f'Expected emergency auth implementation error, got: {e}')
-            self.logger.info(f'✅ Emergency auth golden path correctly failed: {e}')
+            self.logger.info(f'CHECK Emergency auth golden path correctly failed: {e}')
 
     async def test_golden_path_all_auth_modes_comprehensive(self):
         """
@@ -287,7 +287,7 @@ class GoldenPathAuthModesTests(SSotBaseTestCase):
             self.assertFalse(results['strict']['success'], f"STRICT auth should fail without JWT: {results['strict']}")
         for mode in ['relaxed', 'demo', 'emergency']:
             self.assertFalse(results[mode]['success'], f'{mode.upper()} auth should fail (not implemented): {results[mode]}')
-        self.logger.info(f'✅ Golden path auth mode test results: {results}')
+        self.logger.info(f'CHECK Golden path auth mode test results: {results}')
         unimplemented_modes = [mode for mode, result in results.items() if not result['success'] and mode != 'strict']
         self.assertEqual(len(unimplemented_modes), 3, f'Should have 3 unimplemented auth modes: {unimplemented_modes}')
 

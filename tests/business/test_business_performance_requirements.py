@@ -487,7 +487,7 @@ class BusinessPerformanceRequirementsTests:
                           if test_category.lower().replace(' ', '_') in m.name.lower().replace(' ', '_')]
 
         for metric in category_metrics:
-            status_emoji = "✅" if metric.status == "PASS" else "❌" if metric.status == "FAIL" else "⚠️"
+            status_emoji = "CHECK" if metric.status == "PASS" else "X" if metric.status == "FAIL" else "WARNING️"
             
             # Format the value based on unit
             if metric.unit == "seconds":
@@ -516,10 +516,10 @@ class BusinessPerformanceRequirementsTests:
             print(f"\n🚨 PERFORMANCE RISK: HIGH ({len(failed_metrics)} failed metrics)")
             print("   Business Impact: Performance issues may affect customer satisfaction")
         elif warning_metrics:
-            print(f"\n⚠️ PERFORMANCE RISK: MEDIUM ({len(warning_metrics)} warning metrics)")
+            print(f"\nWARNING️ PERFORMANCE RISK: MEDIUM ({len(warning_metrics)} warning metrics)")
             print("   Business Impact: Performance monitoring required")
         else:
-            print(f"\n✅ PERFORMANCE RISK: LOW (All metrics within targets)")
+            print(f"\nCHECK PERFORMANCE RISK: LOW (All metrics within targets)")
             print("   Business Impact: Performance supports business requirements")
 
 if __name__ == "__main__":
@@ -560,15 +560,15 @@ if __name__ == "__main__":
                 print(f"   - {failure.name}: {failure.business_impact}")
             sys.exit(1)
         elif len(high_risk_failures) > 2:
-            print("\n⚠️ BUSINESS OUTCOME: HIGH PERFORMANCE RISK")
+            print("\nWARNING️ BUSINESS OUTCOME: HIGH PERFORMANCE RISK")
             print("Multiple performance issues may affect business operations")
             sys.exit(1)
         else:
-            print("\n✅ BUSINESS OUTCOME: PERFORMANCE REQUIREMENTS MET")
+            print("\nCHECK BUSINESS OUTCOME: PERFORMANCE REQUIREMENTS MET")
             print("Performance metrics support business operations and customer satisfaction")
             sys.exit(0)
 
     except Exception as e:
-        print(f"\n❌ PERFORMANCE VALIDATION FAILED: {e}")
+        print(f"\nX PERFORMANCE VALIDATION FAILED: {e}")
         print("Cannot validate performance requirements for business operations")
         sys.exit(1)

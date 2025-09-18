@@ -7,7 +7,7 @@ WebSocket bridge that enables real-time chat functionality.
 
 Business Impact: WebSocket events are critical for $500K+ ARR chat functionality.
 Any inconsistency in WebSocket bridge integration compromises the Golden Path
-user flow: Users login → AI agents process → Users receive real-time responses.
+user flow: Users login -> AI agents process -> Users receive real-time responses.
 
 Expected Behavior:
 - BEFORE CONSOLIDATION: May show inconsistencies in WebSocket integration
@@ -208,13 +208,13 @@ class WebSocketAgentBridgeSSotTests(SSotAsyncTestCase):
                     last_event = events_sent[-1]
                     self.assertEqual(last_event['type'], 'agent_started')
 
-                    print("✅ WebSocket bridge creation and event emission successful")
+                    print("CHECK WebSocket bridge creation and event emission successful")
 
                 else:
-                    print("⚠️  WebSocket bridge created but missing expected methods")
+                    print("WARNING️  WebSocket bridge created but missing expected methods")
 
             except Exception as e:
-                print(f"⚠️  WebSocket bridge setup failed: {e}")
+                print(f"WARNING️  WebSocket bridge setup failed: {e}")
 
             # Cleanup
             await registry.cleanup_user_session(test_user_id)
@@ -275,7 +275,7 @@ class WebSocketAgentBridgeSSotTests(SSotAsyncTestCase):
             self.assertLess(started_index, completed_index,
                           "agent_started should come before agent_completed")
 
-        print("✅ WebSocket event sequence validated for Golden Path")
+        print("CHECK WebSocket event sequence validated for Golden Path")
         print("💰 BUSINESS VALUE: All $500K+ ARR critical events can be sent")
 
     async def test_websocket_diagnostics_consistency(self):
@@ -334,7 +334,7 @@ class WebSocketAgentBridgeSSotTests(SSotAsyncTestCase):
                     self.assertTrue(user_info.get('has_websocket_bridge', False),
                                   "User should have WebSocket bridge in diagnostics")
 
-                print("✅ WebSocket diagnostics comprehensive and accurate")
+                print("CHECK WebSocket diagnostics comprehensive and accurate")
 
                 # Cleanup
                 await registry.cleanup_user_session(test_user_id)
@@ -364,9 +364,9 @@ class WebSocketAgentBridgeSSotTests(SSotAsyncTestCase):
             try:
                 registry.set_websocket_manager(None)
                 # Should not crash, but log warning
-                print("✅ Handled None WebSocket manager gracefully")
+                print("CHECK Handled None WebSocket manager gracefully")
             except Exception as e:
-                print(f"⚠️  Setting None WebSocket manager failed: {e}")
+                print(f"WARNING️  Setting None WebSocket manager failed: {e}")
 
             # Scenario 2: WebSocket manager without expected methods
             class IncompleteWebSocketManager:
@@ -377,9 +377,9 @@ class WebSocketAgentBridgeSSotTests(SSotAsyncTestCase):
 
             try:
                 registry.set_websocket_manager(incomplete_manager)
-                print("✅ Handled incomplete WebSocket manager gracefully")
+                print("CHECK Handled incomplete WebSocket manager gracefully")
             except Exception as e:
-                print(f"⚠️  Incomplete WebSocket manager caused error: {e}")
+                print(f"WARNING️  Incomplete WebSocket manager caused error: {e}")
 
             # Scenario 3: WebSocket bridge creation failure
             class FailingWebSocketManager:
@@ -399,17 +399,17 @@ class WebSocketAgentBridgeSSotTests(SSotAsyncTestCase):
 
                 try:
                     await user_session.set_websocket_manager(failing_manager, self.user_context)
-                    print("⚠️  Bridge creation failure was not caught")
+                    print("WARNING️  Bridge creation failure was not caught")
                 except Exception as e:
-                    print(f"✅ Bridge creation failure handled: {e}")
+                    print(f"CHECK Bridge creation failure handled: {e}")
 
                 # Cleanup
                 await registry.cleanup_user_session(test_user_id)
 
             except Exception as e:
-                print(f"✅ Failing WebSocket manager handled: {e}")
+                print(f"CHECK Failing WebSocket manager handled: {e}")
 
-            print("✅ WebSocket error handling robust and graceful")
+            print("CHECK WebSocket error handling robust and graceful")
 
         except ImportError as e:
             self.skipTest(f"Could not test WebSocket error handling: {e}")
@@ -442,7 +442,7 @@ class WebSocketAgentBridgeSSotTests(SSotAsyncTestCase):
 
                 created_sessions.append(user_session)
 
-            print(f"✅ Created {len(created_sessions)} user sessions with WebSocket bridges")
+            print(f"CHECK Created {len(created_sessions)} user sessions with WebSocket bridges")
 
             # Cleanup all sessions
             cleanup_results = []
@@ -452,7 +452,7 @@ class WebSocketAgentBridgeSSotTests(SSotAsyncTestCase):
                 self.assertEqual(result['status'], 'cleaned',
                                f"Session {user_id} should be cleaned successfully")
 
-            print(f"✅ Cleaned up {len(cleanup_results)} user sessions")
+            print(f"CHECK Cleaned up {len(cleanup_results)} user sessions")
 
             # Verify all sessions are removed from registry
             monitoring_report = await registry.monitor_all_users()
@@ -472,7 +472,7 @@ class WebSocketAgentBridgeSSotTests(SSotAsyncTestCase):
 
                 print(f"Users after emergency cleanup: {post_emergency_users}")
 
-            print("✅ WebSocket memory cleanup verified - no leaks detected")
+            print("CHECK WebSocket memory cleanup verified - no leaks detected")
 
         except ImportError as e:
             self.skipTest(f"Could not test WebSocket memory cleanup: {e}")
@@ -519,7 +519,7 @@ class WebSocketAgentBridgeSSotTests(SSotAsyncTestCase):
             self.assertEqual(len(set(user_ids)), len(user_ids),
                            "All user sessions should have unique IDs")
 
-            print(f"✅ Created {len(sessions)} concurrent user sessions")
+            print(f"CHECK Created {len(sessions)} concurrent user sessions")
 
             # Cleanup all sessions concurrently
             async def cleanup_user_session(user_id):
@@ -535,8 +535,8 @@ class WebSocketAgentBridgeSSotTests(SSotAsyncTestCase):
             self.assertEqual(successful_cleanups, len(user_contexts),
                            "All user sessions should be cleaned successfully")
 
-            print(f"✅ Cleaned up {successful_cleanups} concurrent user sessions")
-            print("✅ Concurrent users handled consistently without conflicts")
+            print(f"CHECK Cleaned up {successful_cleanups} concurrent user sessions")
+            print("CHECK Concurrent users handled consistently without conflicts")
 
         except ImportError as e:
             self.skipTest(f"Could not test concurrent users: {e}")
@@ -564,7 +564,7 @@ if __name__ == '__main__':
         print("💰 BUSINESS VALUE: WebSocket bridge SSOT consistency validated")
         print("🎯 GOLDEN PATH: Chat functionality WebSocket events protected")
     else:
-        print("⚠️  Some WebSocket tests failed - review bridge consistency")
+        print("WARNING️  Some WebSocket tests failed - review bridge consistency")
 
     if result.failures:
         print("\nFAILURES:")

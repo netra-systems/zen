@@ -122,10 +122,10 @@ class TestWebSocketAuthIntegrationSSOT(BaseIntegrationTest):
             assert auth_rejection_working, \
                 "WebSocket auth does not reject invalid tokens - security vulnerability"
 
-            print("✅ WebSocket auth flow SSOT compliance validated")
+            print("CHECK WebSocket auth flow SSOT compliance validated")
 
         except Exception as e:
-            self.fail(f"❌ WEBSOCKET AUTH SSOT FAILURE: {e}")
+            self.fail(f"X WEBSOCKET AUTH SSOT FAILURE: {e}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -238,10 +238,10 @@ class TestWebSocketAuthIntegrationSSOT(BaseIntegrationTest):
             assert auth_success_rate >= 95.0, \
                 f"Multi-user auth success rate {auth_success_rate:.1f}% below 95% threshold"
 
-            print(f"✅ Multi-user auth isolation validated: {successful_auths}/{len(users)} users authenticated")
+            print(f"CHECK Multi-user auth isolation validated: {successful_auths}/{len(users)} users authenticated")
 
         except Exception as e:
-            self.fail(f"❌ MULTI-USER AUTH ISOLATION FAILURE: {e}")
+            self.fail(f"X MULTI-USER AUTH ISOLATION FAILURE: {e}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -346,10 +346,10 @@ class TestWebSocketAuthIntegrationSSOT(BaseIntegrationTest):
             assert valid_auth_working, \
                 "Valid authentication is broken while fixing bypass issues"
 
-            print("✅ Auth bypass elimination validated - all bypass attempts properly rejected")
+            print("CHECK Auth bypass elimination validated - all bypass attempts properly rejected")
 
         except Exception as e:
-            self.fail(f"❌ AUTH BYPASS ELIMINATION FAILURE: {e}")
+            self.fail(f"X AUTH BYPASS ELIMINATION FAILURE: {e}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -400,10 +400,10 @@ class TestWebSocketAuthIntegrationSSOT(BaseIntegrationTest):
                 f"Unified auth SSOT compliance violations: {compliance_violations}. " \
                 f"Issue #1186 Phase 4 requires single authentication path."
 
-            print("✅ Unified WebSocket auth SSOT compliance validated")
+            print("CHECK Unified WebSocket auth SSOT compliance validated")
 
         except Exception as e:
-            self.fail(f"❌ UNIFIED AUTH SSOT COMPLIANCE FAILURE: {e}")
+            self.fail(f"X UNIFIED AUTH SSOT COMPLIANCE FAILURE: {e}")
 
     async def _create_test_user_in_db(self, db, user_data: Dict[str, Any]):
         """Create test user in real database"""
@@ -444,7 +444,7 @@ if __name__ == '__main__':
     print("=" * 80)
     print("🎯 Focus: WebSocket auth SSOT compliance with real PostgreSQL and Redis")
     print("🚫 Goal: Eliminate 58 auth violations through unified authentication")
-    print("✅ Validation: Single auth path, user isolation, bypass elimination")
+    print("CHECK Validation: Single auth path, user isolation, bypass elimination")
     print("=" * 80)
 
     pytest.main([__file__, "-v", "--tb=short"])

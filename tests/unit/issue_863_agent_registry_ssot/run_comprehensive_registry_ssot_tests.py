@@ -195,7 +195,7 @@ class AgentRegistrySSotTestRunner:
             if category_filter in self.test_categories:
                 categories_to_run = {category_filter: self.test_categories[category_filter]}
             else:
-                print(f"❌ Unknown category: {category_filter}")
+                print(f"X Unknown category: {category_filter}")
                 print(f"Available categories: {', '.join(self.test_categories.keys())}")
                 return results
         
@@ -232,7 +232,7 @@ class AgentRegistrySSotTestRunner:
             
             # Display results for this category
             if test_result.get("error"):
-                print(f"   ❌ ERROR: {test_result['error']}")
+                print(f"   X ERROR: {test_result['error']}")
             else:
                 tests_run = test_result.get("tests_run", 0)
                 failures = test_result.get("failures", 0)
@@ -241,14 +241,14 @@ class AgentRegistrySSotTestRunner:
                 if failures > 0:
                     print(f"   🚨 FAILURES: {failures}/{tests_run} tests failed (as expected)")
                 else:
-                    print(f"   ✅ UNEXPECTED: {tests_run} tests passed (SSOT violation not detected)")
+                    print(f"   CHECK UNEXPECTED: {tests_run} tests passed (SSOT violation not detected)")
                 
                 print(f"   ⏱️  Duration: {duration:.2f}s")
                 
                 # Show individual test results if verbose
                 if self.verbose and test_result.get("test_results"):
                     for test in test_result["test_results"]:
-                        status_icon = "🚨" if test["status"] == "FAILED" else "✅"
+                        status_icon = "🚨" if test["status"] == "FAILED" else "CHECK"
                         print(f"      {status_icon} {test['name']}: {test['status']}")
                 
                 # Show output if there are failures and verbose is on
@@ -293,14 +293,14 @@ class AgentRegistrySSotTestRunner:
             critical_marker = "🚨 CRITICAL" if info["critical"] else "📝 STANDARD"
             
             if result.get("error"):
-                status = f"❌ ERROR: {result['error']}"
+                status = f"X ERROR: {result['error']}"
             else:
                 tests = result.get("tests_run", 0)
                 failures = result.get("failures", 0)
                 if failures > 0:
                     status = f"🚨 {failures}/{tests} FAILED (expected)"
                 else:
-                    status = f"✅ {tests}/{tests} PASSED (unexpected)"
+                    status = f"CHECK {tests}/{tests} PASSED (unexpected)"
             
             print(f"  {critical_marker} {category_name.replace('_', ' ').title()}")
             print(f"    Status: {status}")
@@ -315,9 +315,9 @@ class AgentRegistrySSotTestRunner:
             print("  🚫 Users cannot receive AI responses due to registry conflicts")
             print("  🔧 IMMEDIATE SSOT CONSOLIDATION REQUIRED")
         else:
-            print("  ✅ No critical SSOT violations detected")
+            print("  CHECK No critical SSOT violations detected")
             print("  💰 $500K+ ARR Golden Path chat functionality PROTECTED")
-            print("  ✅ Registry implementations appear consistent")
+            print("  CHECK Registry implementations appear consistent")
         print()
         
         # Recommendations
@@ -326,10 +326,10 @@ class AgentRegistrySSotTestRunner:
             print("  1. 🚨 PRIORITY P0: Consolidate AgentRegistry implementations into single SSOT")
             print("  2. 🔧 Migrate all imports to use advanced registry (supervisor module)")
             print("  3. 🧪 Remove basic registry to prevent future conflicts")
-            print("  4. ✅ Verify all 5 WebSocket events work consistently")
+            print("  4. CHECK Verify all 5 WebSocket events work consistently")
             print("  5. 🔐 Test multi-user isolation thoroughly")
         else:
-            print("  1. ✅ Continue monitoring for registry consistency")
+            print("  1. CHECK Continue monitoring for registry consistency")
             print("  2. 📝 Document successful SSOT compliance patterns")
             print("  3. 🧪 Add regression tests to prevent future violations")
         
@@ -399,7 +399,7 @@ Categories:
         print("\n⏹️  Test execution interrupted by user")
         sys.exit(130)
     except Exception as e:
-        print(f"\n❌ Unexpected error running tests: {e}")
+        print(f"\nX Unexpected error running tests: {e}")
         sys.exit(2)
 
 

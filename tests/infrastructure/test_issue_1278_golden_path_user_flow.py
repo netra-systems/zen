@@ -92,10 +92,10 @@ class TestIssue1278GoldenPathUserFlow(SSotAsyncTestCase):
                     auth_found = any(indicator in content.lower() for indicator in auth_indicators)
                     assert auth_found, "Frontend missing auth integration"
             
-            logger.info("✅ Golden path step 1: Frontend loading successful")
+            logger.info("CHECK Golden path step 1: Frontend loading successful")
             
         except Exception as e:
-            logger.error(f"❌ Golden path step 1 failed: {e}")
+            logger.error(f"X Golden path step 1 failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: Frontend loading failure - {e}")
     
@@ -141,10 +141,10 @@ class TestIssue1278GoldenPathUserFlow(SSotAsyncTestCase):
                     assert response.status == 401, \
                         f"Token validation should require auth: {response.status}"
             
-            logger.info("✅ Golden path step 2: Authentication flow accessible")
+            logger.info("CHECK Golden path step 2: Authentication flow accessible")
             
         except Exception as e:
-            logger.error(f"❌ Golden path step 2 failed: {e}")
+            logger.error(f"X Golden path step 2 failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: Authentication flow failure - {e}")
     
@@ -201,10 +201,10 @@ class TestIssue1278GoldenPathUserFlow(SSotAsyncTestCase):
                 except asyncio.TimeoutError:
                     logger.warning("No auth response received (may be expected)")
             
-            logger.info("✅ Golden path step 3: WebSocket connection established")
+            logger.info("CHECK Golden path step 3: WebSocket connection established")
             
         except Exception as e:
-            logger.error(f"❌ Golden path step 3 failed: {e}")
+            logger.error(f"X Golden path step 3 failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: WebSocket connection failure - {e}")
     
@@ -263,10 +263,10 @@ class TestIssue1278GoldenPathUserFlow(SSotAsyncTestCase):
                     assert response.status < 500, \
                         f"Supervisor agent infrastructure error: {response.status}"
             
-            logger.info("✅ Golden path step 4: Agent execution infrastructure accessible")
+            logger.info("CHECK Golden path step 4: Agent execution infrastructure accessible")
             
         except Exception as e:
-            logger.error(f"❌ Golden path step 4 failed: {e}")
+            logger.error(f"X Golden path step 4 failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: Agent execution infrastructure failure - {e}")
     
@@ -331,10 +331,10 @@ class TestIssue1278GoldenPathUserFlow(SSotAsyncTestCase):
                     if 'error' not in event:  # Skip error events
                         assert 'data' in event or 'message' in event, "Event missing data/message"
             
-            logger.info("✅ Golden path step 5: Real-time event streaming functional")
+            logger.info("CHECK Golden path step 5: Real-time event streaming functional")
             
         except Exception as e:
-            logger.error(f"❌ Golden path step 5 failed: {e}")
+            logger.error(f"X Golden path step 5 failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: Event streaming infrastructure failure - {e}")
     
@@ -390,10 +390,10 @@ class TestIssue1278GoldenPathUserFlow(SSotAsyncTestCase):
                     assert response.status in [200, 201, 401, 403], \
                         f"Chat creation infrastructure error: {response.status}"
             
-            logger.info("✅ Golden path step 6: End-to-end infrastructure accessible")
+            logger.info("CHECK Golden path step 6: End-to-end infrastructure accessible")
             
         except Exception as e:
-            logger.error(f"❌ Golden path step 6 failed: {e}")
+            logger.error(f"X Golden path step 6 failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: End-to-end infrastructure failure - {e}")
     
@@ -439,10 +439,10 @@ class TestIssue1278GoldenPathUserFlow(SSotAsyncTestCase):
             assert max_response_time < 5.0, \
                 f"Max response time too slow: {max_response_time:.3f}s"
             
-            logger.info("✅ Infrastructure performance benchmarks passed")
+            logger.info("CHECK Infrastructure performance benchmarks passed")
             
         except Exception as e:
-            logger.error(f"❌ Infrastructure performance benchmarks failed: {e}")
+            logger.error(f"X Infrastructure performance benchmarks failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: Infrastructure performance failure - {e}")
 

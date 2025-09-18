@@ -8,7 +8,7 @@ EXPECTED BEHAVIOR: These tests SHOULD FAIL initially, proving the SSOT violation
 After SSOT consolidation is complete, these tests should PASS.
 
 Business Impact:
-- Blocks Golden Path user flow: Users login → get AI responses
+- Blocks Golden Path user flow: Users login -> get AI responses
 - Affects $500K+ ARR chat functionality reliability
 - Causes WebSocket event delivery failures
 
@@ -431,7 +431,7 @@ class AgentRegistryImportConflictReproductionTests(SSotAsyncTestCase):
         Test 8: Demonstrate Golden Path blocking (SHOULD FAIL)
 
         Shows how registry conflicts specifically block the critical
-        user flow: Users login → get AI responses.
+        user flow: Users login -> get AI responses.
 
         EXPECTED: FAIL - Golden Path is blocked
         AFTER FIX: PASS - Golden Path works end-to-end

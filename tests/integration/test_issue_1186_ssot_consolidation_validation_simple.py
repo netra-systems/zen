@@ -23,8 +23,8 @@ Test Strategy:
 - No complex real service dependencies
 
 Expected Outcomes After SSOT Consolidation:
-- Import count: 406 → <5 fragmented imports
-- Singleton violations: 45 → 0 violations  
+- Import count: 406 -> <5 fragmented imports
+- Singleton violations: 45 -> 0 violations  
 - Factory patterns: All use SSOT factory interfaces
 - User isolation: Factory-based isolation validated
 """
@@ -63,7 +63,7 @@ class Issue1186SSOTConsolidationValidationSimpleTests(SSotAsyncTestCase):
     maintaining basic user isolation patterns without complex service dependencies.
     
     Key Validations:
-    1. Import fragmentation eliminated (406 → <5)
+    1. Import fragmentation eliminated (406 -> <5)
     2. SSOT factory patterns validated
     3. Singleton violations eliminated
     4. Basic user isolation patterns validated
@@ -128,7 +128,7 @@ class Issue1186SSOTConsolidationValidationSimpleTests(SSotAsyncTestCase):
             f"Too many fragmented imports remain: {import_analysis['fragmented_count']}"
         )
         
-        logger.info("✅ SSOT Import Fragmentation Analysis: COMPLETED")
+        logger.info("CHECK SSOT Import Fragmentation Analysis: COMPLETED")
 
     @pytest.mark.integration
     async def test_ssot_factory_pattern_validation(self):
@@ -161,7 +161,7 @@ class Issue1186SSOTConsolidationValidationSimpleTests(SSotAsyncTestCase):
             f"Required factory methods missing: {factory_validation.get('missing_methods', 'Unknown')}"
         )
         
-        logger.info("✅ SSOT Factory Pattern Validation: PASSED")
+        logger.info("CHECK SSOT Factory Pattern Validation: PASSED")
 
     @pytest.mark.integration
     async def test_singleton_violation_detection(self):
@@ -199,7 +199,7 @@ class Issue1186SSOTConsolidationValidationSimpleTests(SSotAsyncTestCase):
             f"Critical singleton violations must be eliminated: {critical_violations}"
         )
         
-        logger.info("✅ Singleton Violation Detection: COMPLETED")
+        logger.info("CHECK Singleton Violation Detection: COMPLETED")
 
     @pytest.mark.integration
     async def test_basic_user_isolation_patterns(self):
@@ -232,7 +232,7 @@ class Issue1186SSOTConsolidationValidationSimpleTests(SSotAsyncTestCase):
             f"Factory does not support user isolation: {isolation_validation.get('isolation_error', 'Unknown')}"
         )
         
-        logger.info("✅ Basic User Isolation Patterns: VALIDATED")
+        logger.info("CHECK Basic User Isolation Patterns: VALIDATED")
 
     @pytest.mark.integration
     async def test_ssot_compliance_measurement(self):
@@ -277,7 +277,7 @@ class Issue1186SSOTConsolidationValidationSimpleTests(SSotAsyncTestCase):
             f"Factory adoption insufficient: {compliance_metrics['factory_adoption']:.1f}%"
         )
         
-        logger.info("✅ SSOT Compliance Measurement: COMPLETED")
+        logger.info("CHECK SSOT Compliance Measurement: COMPLETED")
 
     # === HELPER METHODS ===
 

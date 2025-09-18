@@ -13,7 +13,7 @@ PURPOSE:
 
 GOLDEN PATH IMPACT:
 - Chat functionality is 90% of platform value
-- Message routing failures break user → AI response flow
+- Message routing failures break user -> AI response flow
 - Multiple routers cause race conditions and silent failures
 - SSOT compliance ensures reliable message delivery
 
@@ -45,7 +45,7 @@ class TestCanonicalMessageRouterSSOTValidation(unittest.TestCase):
     """
     MISSION CRITICAL: Validates WebSocket message routing SSOT compliance.
     
-    This test ensures the Golden Path (users login → get AI responses) works reliably
+    This test ensures the Golden Path (users login -> get AI responses) works reliably
     by preventing message router fragmentation that breaks chat functionality.
     """
     
@@ -171,11 +171,11 @@ class TestCanonicalMessageRouterSSOTValidation(unittest.TestCase):
         canonical_implementations = implementations.get("CanonicalMessageRouter", [])
         
         if len(canonical_implementations) == 0:
-            return False, "❌ CRITICAL: No CanonicalMessageRouter implementation found!"
+            return False, "X CRITICAL: No CanonicalMessageRouter implementation found!"
         
         if len(canonical_implementations) > 1:
             locations = [f"{path}:{line}" for path, line in canonical_implementations]
-            return False, f"❌ CRITICAL: Multiple CanonicalMessageRouter implementations found: {locations}"
+            return False, f"X CRITICAL: Multiple CanonicalMessageRouter implementations found: {locations}"
         
         # Check if canonical implementation is in the expected location
         canonical_path, _ = canonical_implementations[0]
@@ -183,11 +183,11 @@ class TestCanonicalMessageRouterSSOTValidation(unittest.TestCase):
         
         if canonical_path != expected_path:
             return False, (
-                f"❌ CRITICAL: CanonicalMessageRouter found at {canonical_path} "
+                f"X CRITICAL: CanonicalMessageRouter found at {canonical_path} "
                 f"but should be at {expected_path}"
             )
         
-        return True, "✅ Single canonical implementation found in correct location"
+        return True, "CHECK Single canonical implementation found in correct location"
 
     def _analyze_consolidation_opportunities(self, implementations: Dict[str, List[Tuple[Path, int]]]) -> str:
         """Analyze which router classes should be consolidated."""
@@ -201,10 +201,10 @@ class TestCanonicalMessageRouterSSOTValidation(unittest.TestCase):
                     analysis.append(f"  • {class_name} at {path}:{line}")
         
         if total_implementations == 0:
-            return "✅ No duplicate router implementations found"
+            return "CHECK No duplicate router implementations found"
         
         return (
-            f"❌ CONSOLIDATION REQUIRED: {total_implementations} duplicate/alternative router implementations:\n" +
+            f"X CONSOLIDATION REQUIRED: {total_implementations} duplicate/alternative router implementations:\n" +
             "\n".join(analysis)
         )
 
@@ -215,7 +215,7 @@ class TestCanonicalMessageRouterSSOTValidation(unittest.TestCase):
         BUSINESS IMPACT:
         - Chat functionality is 90% of platform value
         - Multiple routers cause message routing failures
-        - Silent failures break user → AI response Golden Path
+        - Silent failures break user -> AI response Golden Path
         - $500K+ ARR depends on reliable WebSocket message routing
         
         EXPECTED BEHAVIOR:
@@ -247,7 +247,7 @@ class TestCanonicalMessageRouterSSOTValidation(unittest.TestCase):
         if not is_canonical_valid or "CONSOLIDATION REQUIRED" in consolidation_analysis:
             failure_report = self._generate_failure_report(router_implementations)
             print("\n" + "="*80)
-            print("❌ SSOT VALIDATION FAILED - GOLDEN PATH AT RISK")
+            print("X SSOT VALIDATION FAILED - GOLDEN PATH AT RISK")
             print("="*80)
             print(failure_report)
             print("="*80)
@@ -271,7 +271,7 @@ class TestCanonicalMessageRouterSSOTValidation(unittest.TestCase):
                 f"See test output above for detailed implementation locations."
             )
         
-        print("\n✅ SSOT VALIDATION PASSED - WebSocket routing properly consolidated")
+        print("\nCHECK SSOT VALIDATION PASSED - WebSocket routing properly consolidated")
         print("🎉 Golden Path protected: Single message router implementation confirmed")
 
     def _generate_failure_report(self, implementations: Dict[str, List[Tuple[Path, int]]]) -> str:
@@ -284,16 +284,16 @@ class TestCanonicalMessageRouterSSOTValidation(unittest.TestCase):
         canonical_impls = implementations.get("CanonicalMessageRouter", [])
         report.append(f"📍 CANONICAL IMPLEMENTATION STATUS:")
         if len(canonical_impls) == 0:
-            report.append(f"   ❌ No CanonicalMessageRouter found")
+            report.append(f"   X No CanonicalMessageRouter found")
         elif len(canonical_impls) == 1:
             path, line = canonical_impls[0]
             expected_path = Path(self.canonical_location)
             if path == expected_path:
-                report.append(f"   ✅ Found at correct location: {path}:{line}")
+                report.append(f"   CHECK Found at correct location: {path}:{line}")
             else:
-                report.append(f"   ⚠️  Found at {path}:{line} (should be {expected_path})")
+                report.append(f"   WARNING️  Found at {path}:{line} (should be {expected_path})")
         else:
-            report.append(f"   ❌ Multiple implementations found:")
+            report.append(f"   X Multiple implementations found:")
             for path, line in canonical_impls:
                 report.append(f"      • {path}:{line}")
         
@@ -315,7 +315,7 @@ class TestCanonicalMessageRouterSSOTValidation(unittest.TestCase):
             report.append(f"💥 BUSINESS IMPACT: {total_violations} router implementations threaten system stability")
             report.append("   • Message routing race conditions")
             report.append("   • Silent WebSocket failures")
-            report.append("   • Broken user → AI response flow")
+            report.append("   • Broken user -> AI response flow")
             report.append("   • Chat functionality degradation")
         
         return "\n".join(report)
@@ -358,7 +358,7 @@ class TestCanonicalMessageRouterSSOTValidation(unittest.TestCase):
                     f"This indicates incomplete SSOT consolidation."
                 )
             
-            print("✅ Architecture compliance validated")
+            print("CHECK Architecture compliance validated")
             
         except Exception as e:
             self.fail(f"Could not validate canonical implementation: {e}")

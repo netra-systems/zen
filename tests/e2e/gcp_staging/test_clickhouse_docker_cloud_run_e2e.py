@@ -83,7 +83,7 @@ class ClickHouseDockerCloudRunE2ETests:
         is_cloud_run = self.is_running_in_cloud_run()
         logger.info(f'Running in Cloud Run: {is_cloud_run}')
         if is_cloud_run:
-            logger.info('✓ Confirmed running in Cloud Run environment')
+            logger.info('CHECK Confirmed running in Cloud Run environment')
             k_service = os.environ.get('K_SERVICE', 'unknown')
             project_id = os.environ.get('GOOGLE_CLOUD_PROJECT', 'unknown')
             logger.info(f'Cloud Run Service: {k_service}')
@@ -102,7 +102,7 @@ class ClickHouseDockerCloudRunE2ETests:
         docker_status = self.get_real_docker_availability()
         logger.info(f'Docker Status: {docker_status}')
         if not docker_status['available']:
-            logger.info('✓ Confirmed Docker unavailable - testing Issue #568 scenario')
+            logger.info('CHECK Confirmed Docker unavailable - testing Issue #568 scenario')
             logger.info(f"Docker Error: {docker_status['error']}")
             mock_config = MagicMock()
             mock_config.environment = 'staging'
@@ -114,11 +114,11 @@ class ClickHouseDockerCloudRunE2ETests:
                 assert result['service'] == 'clickhouse'
                 if result['required']:
                     assert result['status'] == 'failed', f"ClickHouse required but status is {result['status']}"
-                    logger.error(f'✓ Issue #568 confirmed: Required ClickHouse failed due to Docker unavailability')
+                    logger.error(f'CHECK Issue #568 confirmed: Required ClickHouse failed due to Docker unavailability')
                 else:
                     expected_statuses = ['failed', 'skipped']
                     assert result['status'] in expected_statuses, f"Expected {expected_statuses}, got: {result['status']}"
-                    logger.info(f"✓ Issue #568 documented: Optional ClickHouse failed gracefully: {result['status']}")
+                    logger.info(f"CHECK Issue #568 documented: Optional ClickHouse failed gracefully: {result['status']}")
                 if result['status'] == 'failed':
                     assert result['error'] is not None, 'Failed status should include error message'
                     logger.info(f"ClickHouse Error: {result['error']}")
@@ -126,7 +126,7 @@ class ClickHouseDockerCloudRunE2ETests:
                     expected_error_keywords = ['connection', 'refused', 'timeout', 'unreachable', 'docker', 'daemon', 'network']
                     has_expected_error = any((keyword in error_lower for keyword in expected_error_keywords))
                     if has_expected_error:
-                        logger.info('✓ Error message indicates connectivity/Docker issue as expected')
+                        logger.info('CHECK Error message indicates connectivity/Docker issue as expected')
                     else:
                         logger.warning(f"Error message may not indicate Docker issue: {result['error']}")
         else:
@@ -165,10 +165,10 @@ class ClickHouseDockerCloudRunE2ETests:
                 essential_services = ['llm_manager']
                 for essential_service in essential_services:
                     assert essential_service in available_services, f'Essential service {essential_service} not available - chat functionality broken'
-                logger.info('✓ Core chat functionality should be available despite Docker unavailability')
+                logger.info('CHECK Core chat functionality should be available despite Docker unavailability')
                 clickhouse_available = getattr(gcp_staging_app.state, 'clickhouse_available', None)
                 if clickhouse_available is False:
-                    logger.info('✓ ClickHouse marked as unavailable - graceful degradation working')
+                    logger.info('CHECK ClickHouse marked as unavailable - graceful degradation working')
                 else:
                     logger.info(f'ClickHouse availability status: {clickhouse_available}')
             except Exception as startup_error:
@@ -177,7 +177,7 @@ class ClickHouseDockerCloudRunE2ETests:
         else:
             logger.info('Docker available - testing normal startup sequence')
             start_time, startup_logger = await run_complete_startup(gcp_staging_app)
-            logger.info('✓ Normal startup completed successfully')
+            logger.info('CHECK Normal startup completed successfully')
 
     @pytest.mark.asyncio
     async def test_simulated_cloud_run_environment_docker_unavailable(self):
@@ -211,9 +211,9 @@ class ClickHouseDockerCloudRunE2ETests:
                         assert result['service'] == 'clickhouse'
                         assert result['required'] == False, 'Should not be required in staging'
                         if result['status'] == 'failed':
-                            logger.info(f"✓ Simulated Issue #568: ClickHouse failed gracefully: {result['error']}")
+                            logger.info(f"CHECK Simulated Issue #568: ClickHouse failed gracefully: {result['error']}")
                         elif result['status'] == 'skipped':
-                            logger.info('✓ ClickHouse skipped in simulated Cloud Run environment')
+                            logger.info('CHECK ClickHouse skipped in simulated Cloud Run environment')
                         else:
                             pytest.fail(f"Unexpected status in simulated Cloud Run: {result['status']}")
 
@@ -230,7 +230,7 @@ class ClickHouseDockerCloudRunE2ETests:
         assert 'command_exists' in docker_status
         assert isinstance(docker_status['available'], bool)
         if not docker_status['available']:
-            logger.info(f"✓ Docker unavailable as expected in Cloud Run: {docker_status['error']}")
+            logger.info(f"CHECK Docker unavailable as expected in Cloud Run: {docker_status['error']}")
         else:
             logger.info('Docker is available in this environment')
 if __name__ == '__main__':

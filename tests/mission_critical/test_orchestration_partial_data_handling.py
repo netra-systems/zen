@@ -4,7 +4,7 @@ Tests the system's ability to handle partial data scenarios gracefully,'
 providing immediate value while requesting additional information.
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Maximize value delivery even with incomplete data
 - Value Impact: 40-60% value delivery possible with partial data
 - Strategic Impact: Improves user engagement and conversion rates
@@ -31,7 +31,8 @@ logger = central_logger.get_logger(__name__)
 
 class PartialDataHandlingTests:
     Test suite for partial data handling scenarios in orchestration."
-    Test suite for partial data handling scenarios in orchestration."
+    Test suite for partial data handling scenarios in orchestration.""
+
     
     # === Test Data Fixtures ===
     
@@ -39,7 +40,7 @@ class PartialDataHandlingTests:
     def partial_cost_optimization_request(self):
         "Request with partial cost data - enough to start but not complete."
         return {
-            user_request": Our LLM costs are around $8K monthly using mostly GPT-4,"
+            user_request": Our LLM costs are around $""8K"" monthly using mostly GPT-4,"
             available_data: {
                 monthly_spend_estimate: 7000-9000","
                 "primary_model: gpt-4,"
@@ -80,14 +81,16 @@ class PartialDataHandlingTests:
     @pytest.fixture
     def partial_scale_request(self):
         Request with partial scaling information."
-        Request with partial scaling information."
+        Request with partial scaling information.""
+
         return {
-            user_request": Need to handle 10x more AI requests, currently at 1000/day,"
+            user_request": Need to handle ""10x"" more AI requests, currently at 1000/day,"
             available_data: {
                 "current_volume: 1000 requests/day,"
-                target_scale: 10x,
+                target_scale: ""10x"",
                 timeline: 3 months"
-                timeline: 3 months"
+                timeline: 3 months""
+
             },
             "missing_data: ["
                 peak_concurrent_requests,
@@ -96,14 +99,16 @@ class PartialDataHandlingTests:
                 infrastructure_flexibility,"
                 infrastructure_flexibility,"
                 quality_requirements_at_scale"
-                quality_requirements_at_scale"
+                quality_requirements_at_scale""
+
             ],
             completeness: 0.50
         }
     
     @pytest.fixture
     def partial_multi_model_request(self):
-        ""Request with partial multi-model usage data."
+        ""Request with partial multi-model usage data.""
+
         return {
             user_request: Using OpenAI, Anthropic, and Cohere - costs are high","
             "available_data: {"
@@ -139,7 +144,8 @@ class PartialDataHandlingTests:
                 "compliance_requirements,"
                 current_costs,
                 error_tolerance"
-                error_tolerance"
+                error_tolerance""
+
             ],
             completeness": 0.40"
         }
@@ -206,7 +212,8 @@ class PartialDataHandlingTests:
             context = ExecutionContext(
                 run_id=test-partial-1,
                 agent_name=optimization,"
-                agent_name=optimization,"
+                agent_name=optimization,""
+
                 state=state
             )
             
@@ -231,7 +238,8 @@ class PartialDataHandlingTests:
                 data_request": {"
                     priority_tiers: {
                         critical: ["
-                        critical: ["
+                        critical: [""
+
                             {
                                 "metric: target_latency,"
                                 question: What is your acceptable response time?,
@@ -240,7 +248,8 @@ class PartialDataHandlingTests:
                             }
                         ],
                         important: ["
-                        important: ["
+                        important: [""
+
                             {
                                 metric": request_size_distribution,"
                                 question: Average request size?,
@@ -249,7 +258,8 @@ class PartialDataHandlingTests:
                             }
                         ],
                         helpful: ["
-                        helpful: ["
+                        helpful: [""
+
                             {
                                 "metric: infrastructure_details,"
                                 question: Current deployment setup?,
@@ -273,7 +283,8 @@ class PartialDataHandlingTests:
             context = ExecutionContext(
                 run_id=test-partial-2,
                 agent_name=data_helper,"
-                agent_name=data_helper,"
+                agent_name=data_helper,""
+
                 state=state
             )
             
@@ -308,7 +319,8 @@ class PartialDataHandlingTests:
                 
                 assessment = await orchestrator.assess_data_completeness({completeness: completeness)
                 confidence = assessment[confidence]"
-                confidence = assessment[confidence]"
+                confidence = assessment[confidence]""
+
                 
                 assert min_conf <= confidence <= max_conf, \
                     f"Confidence {confidence} out of range [{min_conf}, {max_conf}] for completeness {completeness}"
@@ -316,7 +328,8 @@ class PartialDataHandlingTests:
     @pytest.mark.asyncio
     async def test_phased_implementation_plan(self, partial_multi_model_request):
         Test generation of phased plans for partial data scenarios."
-        Test generation of phased plans for partial data scenarios."
+        Test generation of phased plans for partial data scenarios.""
+
         from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         
         agent = ActionsToMeetGoalsSubAgent()
@@ -350,7 +363,8 @@ class PartialDataHandlingTests:
                             {
                                 action: Analyze usage patterns per model,
                                 purpose: Identify optimization opportunities"
-                                purpose: Identify optimization opportunities"
+                                purpose: Identify optimization opportunities""
+
                             },
                             {
                                 "action: Implement intelligent model arbitrage,"
@@ -368,7 +382,8 @@ class PartialDataHandlingTests:
                             {
                                 action: Fine-tune routing algorithms,
                                 purpose: Optimize based on real data"
-                                purpose: Optimize based on real data"
+                                purpose: Optimize based on real data""
+
                             },
                             {
                                 "action: Implement advanced caching,"
@@ -432,13 +447,15 @@ class PartialDataHandlingTests:
                     }
                 ],
                 deferred_optimizations: ["
-                deferred_optimizations: ["
+                deferred_optimizations: [""
+
                     {
                         action": Model switching,"
                         reason: Requires quality metrics and testing,
                         potential_savings": 30-40%,"
                         data_needed: [quality_baselines, error_tolerance]"
-                        data_needed: [quality_baselines, error_tolerance]"
+                        data_needed: [quality_baselines, error_tolerance]""
+
                     }
                 ],
                 "testing_protocol: {"
@@ -498,10 +515,11 @@ class PartialDataHandlingTests:
                 clarification_needed: {"
                     "question: What's more important for your use case?,"
                     options: [
-                        Minimize cost (accept 2-3s latency)","
+                        Minimize cost (accept 2-""3s"" latency)","
                         Minimize latency (accept higher cost),
                         Balance both (moderate cost, moderate speed)"
-                        Balance both (moderate cost, moderate speed)"
+                        Balance both (moderate cost, moderate speed)""
+
                     ]
                 },
                 "default_recommendation: balanced_approach,"
@@ -547,7 +565,8 @@ class PartialDataHandlingTests:
                         "action: Implement rate limiting,"
                         timeline: Within 1 hour,
                         impact: Prevent further spikes"
-                        impact: Prevent further spikes"
+                        impact: Prevent further spikes""
+
                     },
                     {
                         "action: Set hard spending cap,"
@@ -575,7 +594,8 @@ class PartialDataHandlingTests:
     @pytest.mark.asyncio
     async def test_iterative_data_refinement(self):
         Test system's ability to iteratively refine recommendations as data improves."
-        Test system's ability to iteratively refine recommendations as data improves."
+        Test system's ability to iteratively refine recommendations as data improves.""
+
         initial_request = {
             user_request": Optimize AI costs,"
             completeness: 0.30,
@@ -583,14 +603,14 @@ class PartialDataHandlingTests:
         }
         
         refined_request = {
-            user_request: Optimize AI costs, spending $5K on GPT-4,
+            user_request: Optimize AI costs, spending $""5K"" on GPT-4,
             completeness: 0.60,"
             completeness: 0.60,"
             "iteration: 2"
         }
         
         complete_request = {
-            user_request: Optimize AI costs, $5K on GPT-4, 2M tokens/day, customer service,
+            user_request: Optimize AI costs, $""5K"" on GPT-4, ""2M"" tokens/day, customer service,
             completeness": 0.85,"
             iteration: 3
         }
@@ -620,7 +640,8 @@ class PartialDataHandlingTests:
     @pytest.mark.asyncio
     async def test_end_to_end_partial_data_flow(self, partial_cost_optimization_request):
         Test complete flow from partial data through value delivery."
-        Test complete flow from partial data through value delivery."
+        Test complete flow from partial data through value delivery.""
+
         from netra_backend.app.agents.supervisor.supervisor_agent import SupervisorAgent
         
         # Create supervisor with mocked dependencies
@@ -640,7 +661,8 @@ class PartialDataHandlingTests:
                         workflow: modified
                     }
             elif agent_name == optimization:"
-            elif agent_name == optimization:"
+            elif agent_name == optimization:""
+
                 return ExecutionResult(
                     success=True,
                     result={
@@ -660,7 +682,8 @@ class PartialDataHandlingTests:
                         phased_plan": {phase_1: Immediate actions}"
                     }
             elif agent_name == reporting:"
-            elif agent_name == reporting:"
+            elif agent_name == reporting:""
+
                 return ExecutionResult(
                     success=True,
                     result={
@@ -698,7 +721,8 @@ class PartialDataHandlingTests:
     
     @pytest.mark.asyncio
     async def test_websocket_events_for_partial_data(self):
-        ""Test that appropriate WebSocket events are sent for partial data scenarios."
+        ""Test that appropriate WebSocket events are sent for partial data scenarios.""
+
         from netra_backend.app.services.websocket_manager import WebSocketManager
         
         websocket_manager = WebSocketManager()
@@ -722,7 +746,8 @@ class PartialDataHandlingTests:
         await websocket_manager.send_event(partial_results", {"
             confidence: medium,
             immediate_value: Quick optimizations available"
-            immediate_value: Quick optimizations available"
+            immediate_value: Quick optimizations available""
+
         }
         
         assert len(events_sent) >= 4
@@ -742,7 +767,8 @@ class PartialDataHandlingTests:
                     "data_sufficiency assessment,"
                     confidence scoring,
                     workflow recommendation"
-                    workflow recommendation"
+                    workflow recommendation""
+
                 ]
             },
             {
@@ -772,7 +798,8 @@ class PartialDataHandlingTests:
             # For now, we verify the structure exists
             assert test[agent"] in ["triage, "optimization, data_helper]"
             assert len(test[expected_elements) >= 3"
-            assert len(test[expected_elements) >= 3"
+            assert len(test[expected_elements) >= 3""
+
     
     @pytest.mark.asyncio
     async def test_confidence_calibration(self):
@@ -782,7 +809,8 @@ class PartialDataHandlingTests:
             {completeness: 0.45, predicted_confidence": 0.55, actual_success_rate: 0.50},"
             {completeness: 0.75, predicted_confidence: 0.80, actual_success_rate": 0.78},"
             {completeness: 0.90, predicted_confidence: 0.92, actual_success_rate: 0.90},"
-            {completeness: 0.90, predicted_confidence: 0.92, actual_success_rate: 0.90},"
+            {completeness: 0.90, predicted_confidence: 0.92, actual_success_rate: 0.90},""
+
         ]
         
         for case in test_cases:

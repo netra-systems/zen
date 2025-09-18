@@ -117,10 +117,10 @@ class Issue962AuthenticationFlowValidationTests(SSotAsyncTestCase):
 
             if auth_value != backend_value:
                 jwt_inconsistencies.append(f"{key}: auth='{self._mask_secret(key, auth_value)}' != backend='{self._mask_secret(key, backend_value)}'")
-                print(f"  ❌ INCONSISTENT")
+                print(f"  X INCONSISTENT")
             else:
                 consistent_configs.append(key)
-                print(f"  ✅ CONSISTENT")
+                print(f"  CHECK CONSISTENT")
 
         # Log summary
         print(f"\nJWT Configuration Analysis:")
@@ -185,10 +185,10 @@ class Issue962AuthenticationFlowValidationTests(SSotAsyncTestCase):
             # Check for synchronization
             if auth_value != backend_value:
                 sync_failures.append(f"{key}: auth='{self._mask_secret(key, auth_value)}' != backend='{self._mask_secret(key, backend_value)}'")
-                print(f"  ❌ DESYNCHRONIZED")
+                print(f"  X DESYNCHRONIZED")
             else:
                 sync_successes.append(key)
-                print(f"  ✅ SYNCHRONIZED")
+                print(f"  CHECK SYNCHRONIZED")
 
         # Calculate synchronization percentage
         total_keys = len(self.critical_auth_keys)
@@ -271,7 +271,7 @@ class Issue962AuthenticationFlowValidationTests(SSotAsyncTestCase):
         try:
             oauth_consistent = await self._test_oauth_config_consistency()
             flow_results["OAuth Configuration"] = oauth_consistent
-            print(f"✓ OAuth Configuration: {'PASS' if oauth_consistent else 'FAIL'}")
+            print(f"CHECK OAuth Configuration: {'PASS' if oauth_consistent else 'FAIL'}")
         except Exception as e:
             flow_results["OAuth Configuration"] = False
             flow_failures.append(f"OAuth Configuration: {e}")
@@ -281,7 +281,7 @@ class Issue962AuthenticationFlowValidationTests(SSotAsyncTestCase):
         try:
             jwt_lifecycle_works = await self._test_jwt_token_lifecycle()
             flow_results["JWT Token Lifecycle"] = jwt_lifecycle_works
-            print(f"✓ JWT Token Lifecycle: {'PASS' if jwt_lifecycle_works else 'FAIL'}")
+            print(f"CHECK JWT Token Lifecycle: {'PASS' if jwt_lifecycle_works else 'FAIL'}")
         except Exception as e:
             flow_results["JWT Token Lifecycle"] = False
             flow_failures.append(f"JWT Token Lifecycle: {e}")
@@ -291,7 +291,7 @@ class Issue962AuthenticationFlowValidationTests(SSotAsyncTestCase):
         try:
             db_consistent = await self._test_database_config_consistency()
             flow_results["Database Configuration"] = db_consistent
-            print(f"✓ Database Configuration: {'PASS' if db_consistent else 'FAIL'}")
+            print(f"CHECK Database Configuration: {'PASS' if db_consistent else 'FAIL'}")
         except Exception as e:
             flow_results["Database Configuration"] = False
             flow_failures.append(f"Database Configuration: {e}")
@@ -301,7 +301,7 @@ class Issue962AuthenticationFlowValidationTests(SSotAsyncTestCase):
         try:
             config_loads = await self._test_ssot_config_loading()
             flow_results["SSOT Config Loading"] = config_loads
-            print(f"✓ SSOT Config Loading: {'PASS' if config_loads else 'FAIL'}")
+            print(f"CHECK SSOT Config Loading: {'PASS' if config_loads else 'FAIL'}")
         except Exception as e:
             flow_results["SSOT Config Loading"] = False
             flow_failures.append(f"SSOT Config Loading: {e}")

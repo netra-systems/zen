@@ -1,7 +1,7 @@
 """
 Integration Tests for Agent Registry SSOT Consolidation (Issue #929)
 
-Business Value Protection: $500K+ ARR Golden Path (login → AI responses)
+Business Value Protection: $500K+ ARR Golden Path (login -> AI responses)
 CRITICAL: These tests validate that registry consolidation maintains full system integration
 
 Test Strategy:
@@ -75,8 +75,8 @@ class AgentRegistrySSoTConsolidationIntegrationTests(SSotAsyncTestCase):
             else:
                 advanced_websocket_works = False
                 websocket_registry_conflicts.append('Advanced registry lacks WebSocket integration')
-            logger.info(f"Basic registry WebSocket integration: {('✅' if basic_websocket_works else '❌')}")
-            logger.info(f"Advanced registry WebSocket integration: {('✅' if advanced_websocket_works else '❌')}")
+            logger.info(f"Basic registry WebSocket integration: {('CHECK' if basic_websocket_works else 'X')}")
+            logger.info(f"Advanced registry WebSocket integration: {('CHECK' if advanced_websocket_works else 'X')}")
             for conflict in websocket_registry_conflicts:
                 logger.error(f'  🔥 {conflict}')
         except ImportError as e:
@@ -122,7 +122,7 @@ class AgentRegistrySSoTConsolidationIntegrationTests(SSotAsyncTestCase):
                     test_user = self.test_users[0]
                     user_session = await advanced_registry.create_user_session(test_user['user_id'], test_user['session_id'])
                     if user_session:
-                        logger.info('✅ User-specific execution works in advanced registry')
+                        logger.info('CHECK User-specific execution works in advanced registry')
                     else:
                         execution_conflicts.append('Advanced registry user session creation failed')
                 except Exception as e:
@@ -151,7 +151,7 @@ class AgentRegistrySSoTConsolidationIntegrationTests(SSotAsyncTestCase):
                     session = await advanced_registry.create_user_session(test_user['user_id'], test_user['session_id'])
                     if session:
                         user_sessions.append({'user_id': test_user['user_id'], 'session_id': test_user['session_id'], 'session': session})
-                        logger.info(f"✅ Created session for user {test_user['user_id']}")
+                        logger.info(f"CHECK Created session for user {test_user['user_id']}")
                     else:
                         isolation_conflicts.append(f"Failed to create session for user {test_user['user_id']}")
                 except Exception as e:
@@ -184,7 +184,7 @@ class AgentRegistrySSoTConsolidationIntegrationTests(SSotAsyncTestCase):
                 if hasattr(basic_registry, 'create_user_session'):
                     isolation_conflicts.append('Basic registry unexpectedly supports user isolation')
                 else:
-                    logger.info('✅ Basic registry correctly lacks user isolation (as expected)')
+                    logger.info('CHECK Basic registry correctly lacks user isolation (as expected)')
             except ImportError:
                 logger.info('Basic registry not available for isolation comparison')
             for conflict in isolation_conflicts:
@@ -377,7 +377,7 @@ class AgentRegistrySSoTConsolidationIntegrationTests(SSotAsyncTestCase):
         logger.info(f"  Golden Path Impact: {integration_assessment['golden_path_impact']}")
         logger.info(f"  Consolidation Readiness: {integration_assessment['readiness_status']}")
         for i, conflict in enumerate(integration_conflicts[:3]):
-            logger.error(f'    ❌ {conflict}')
+            logger.error(f'    X {conflict}')
         if len(integration_conflicts) > 3:
             logger.error(f'    ... and {len(integration_conflicts) - 3} more integration conflicts')
         self.assertGreater(len(integration_conflicts), 0, f"EXPECTED FAILURE: Comprehensive integration conflicts detected requiring SSOT consolidation. Found {len(integration_conflicts)} integration conflicts across all test areas. Risk Level: {integration_assessment['risk_level']}, Golden Path Impact: {integration_assessment['golden_path_impact']}")

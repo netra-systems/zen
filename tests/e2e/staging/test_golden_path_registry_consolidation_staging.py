@@ -8,7 +8,7 @@ EXPECTED BEHAVIOR: Tests must validate the complete user journey works end-to-en
 in staging regardless of registry implementation challenges.
 
 Business Impact:
-- Validates Golden Path: Users login → get AI responses
+- Validates Golden Path: Users login -> get AI responses
 - Protects $500K+ ARR functionality in production-like environment
 - Ensures staging environment reflects production readiness
 - Validates real WebSocket event delivery in cloud environment
@@ -654,14 +654,14 @@ class GoldenPathRegistryConsolidationStagingTests(SSotAsyncTestCase):
         logger.info(f"Golden Path Success Rate: {golden_path_success_rate:.1%}")
         logger.info("Golden Path Steps:")
         for step_name, completed in self.golden_path_steps.items():
-            status = "✓ COMPLETED" if completed else "✗ FAILED"
+            status = "CHECK COMPLETED" if completed else "✗ FAILED"
             logger.info(f"  - {step_name}: {status}")
 
         logger.info(f"WebSocket Events Received: {len(self.received_websocket_events)}")
         logger.info(f"Critical Events: {list(self.critical_events_received)}")
-        logger.info(f"Authentication: {'✓' if self.golden_path_steps.get('user_authentication') else '✗'}")
-        logger.info(f"Agent Execution: {'✓' if self.golden_path_steps.get('agent_execution') else '✗'}")
-        logger.info(f"WebSocket Communication: {'✓' if self.golden_path_steps.get('websocket_events_received') else '✗'}")
+        logger.info(f"Authentication: {'CHECK' if self.golden_path_steps.get('user_authentication') else '✗'}")
+        logger.info(f"Agent Execution: {'CHECK' if self.golden_path_steps.get('agent_execution') else '✗'}")
+        logger.info(f"WebSocket Communication: {'CHECK' if self.golden_path_steps.get('websocket_events_received') else '✗'}")
         logger.info("=== END GOLDEN PATH STAGING SUMMARY ===")
 
         # Golden Path must be highly successful in staging

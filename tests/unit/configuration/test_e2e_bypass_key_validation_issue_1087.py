@@ -52,7 +52,7 @@ class E2EBypassKeyValidationIssue1087Tests(SSotBaseTestCase):
                     f"but got: '{result}'. Environment variable loading failed."
                 )
 
-                print(f"✅ PASS: E2E bypass key loaded from environment variable: {self.test_bypass_key}")
+                print(f"CHECK PASS: E2E bypass key loaded from environment variable: {self.test_bypass_key}")
 
             except ImportError as e:
                 # Handle case where auth service isn't available in unit test environment
@@ -94,7 +94,7 @@ class E2EBypassKeyValidationIssue1087Tests(SSotBaseTestCase):
                     # Verify Secret Manager was called with correct key name
                     mock_secret_manager.assert_called_once_with("e2e-bypass-key")
 
-                    print(f"✅ PASS: E2E bypass key loaded from Secret Manager: {self.secret_manager_key}")
+                    print(f"CHECK PASS: E2E bypass key loaded from Secret Manager: {self.secret_manager_key}")
 
             except ImportError as e:
                 pytest.skip(f"AuthSecretLoader not available in unit test environment: {e}")
@@ -131,7 +131,7 @@ class E2EBypassKeyValidationIssue1087Tests(SSotBaseTestCase):
                         f"Got: '{result}', Expected: None. This is a critical security issue."
                     )
 
-                    print(f"✅ PASS: Security restriction working for {env_name} environment")
+                    print(f"CHECK PASS: Security restriction working for {env_name} environment")
 
                 except ImportError as e:
                     pytest.skip(f"AuthSecretLoader not available in unit test environment: {e}")
@@ -146,7 +146,7 @@ class E2EBypassKeyValidationIssue1087Tests(SSotBaseTestCase):
 
         After configuration fix, this test should PASS.
 
-        Expected: FAIL initially → PASS after fix
+        Expected: FAIL initially -> PASS after fix
         """
         # Mock staging environment with missing bypass key (current issue)
         mock_env = MagicMock()
@@ -177,7 +177,7 @@ class E2EBypassKeyValidationIssue1087Tests(SSotBaseTestCase):
                             "This test will PASS after bypass key is properly configured in staging."
                         )
                     else:
-                        print(f"✅ CONFIGURATION FIXED: E2E bypass key now configured: {result}")
+                        print(f"CHECK CONFIGURATION FIXED: E2E bypass key now configured: {result}")
                         assert result is not None and len(result) > 0, "Bypass key should be non-empty"
 
             except ImportError as e:
@@ -219,14 +219,14 @@ class E2EBypassKeyValidationIssue1087Tests(SSotBaseTestCase):
                             f"Expected bypass key in {env_name} environment: '{expected_result}', "
                             f"but got: '{result}'"
                         )
-                        print(f"✅ PASS: Bypass key allowed in {env_name} environment")
+                        print(f"CHECK PASS: Bypass key allowed in {env_name} environment")
                     else:
                         # Production environments should never return bypass key
                         assert result is None, (
                             f"SECURITY ISSUE: Bypass key returned in {env_name} environment: '{result}'. "
                             f"Production environments must never allow E2E bypass keys."
                         )
-                        print(f"✅ PASS: Bypass key correctly blocked in {env_name} environment")
+                        print(f"CHECK PASS: Bypass key correctly blocked in {env_name} environment")
 
                 except ImportError as e:
                     pytest.skip(f"AuthSecretLoader not available in unit test environment: {e}")

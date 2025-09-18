@@ -38,7 +38,8 @@ except ImportError as e:
 
 class TestWebSocketConnection:
     Real WebSocket connection for testing instead of mocks."
-    Real WebSocket connection for testing instead of mocks."
+    Real WebSocket connection for testing instead of mocks.""
+
 
     def __init__(self):
         self.messages_sent = []
@@ -102,7 +103,8 @@ class MissingWebSocketEventsValidator:
 
     def setup_test_environment(self):
         Setup test environment with mocked WebSocket infrastructure."
-        Setup test environment with mocked WebSocket infrastructure."
+        Setup test environment with mocked WebSocket infrastructure.""
+
         try:
             if 'WebSocketBridgeFactory' in globals():
                 self.websocket_factory = WebSocketBridgeFactory()
@@ -194,7 +196,7 @@ class MissingWebSocketEventsValidator:
                 messages = await self.test_connection.get_messages()
                 if messages and any(msg.get('event_type') == event_name for msg in messages):
                     result['events_received'].append(event_name)
-                    logger.info(f"✓ Event {event_name} captured successfully)"
+                    logger.info(f"CHECK Event {event_name} captured successfully)"
                 else:
                     result['events_missing'].append(event_name)
                     logger.warning(f✗ Event {event_name} NOT captured")"
@@ -269,7 +271,7 @@ class MissingWebSocketEventsValidator:
                 messages = await self.test_connection.get_messages()
                 if messages and any(msg.get('event_type') == event_name for msg in messages):
                     result['events_received'].append(event_name)
-                    logger.info(f✓ Tool event {event_name} captured successfully)
+                    logger.info(fCHECK Tool event {event_name} captured successfully)
                 else:
                     result['events_missing'].append(event_name)
                     logger.warning(f✗ Tool event {event_name} NOT captured)
@@ -349,7 +351,7 @@ class MissingWebSocketEventsValidator:
                 messages = await self.test_connection.get_messages()
                 if messages and any(msg.get('event_type') == event_name for msg in messages):
                     result['events_received'].append(event_name)
-                    logger.info(f✓ Status event {event_name} captured successfully)
+                    logger.info(fCHECK Status event {event_name} captured successfully)
                 else:
                     result['events_missing'].append(event_name)
                     logger.warning(f✗ Status event {event_name} NOT captured")"
@@ -386,18 +388,19 @@ class MissingWebSocketEventsValidator:
 
         for test_name, test_coro in test_functions:
             logger.info(f\n🔍 Running: {test_name})"
-            logger.info(f\n🔍 Running: {test_name})"
+            logger.info(f\n🔍 Running: {test_name})""
+
             try:
                 result = await test_coro
                 test_results[test_name] = result
 
                 if result.get('success', False):
-                    logger.info(f"✅ {test_name}: PASSED)"
+                    logger.info(f"CHECK {test_name}: PASSED)"
                 else:
-                    logger.error(f❌ {test_name}: FAILED - Missing events: {result.get('events_missing', []})
+                    logger.error(fX {test_name}: FAILED - Missing events: {result.get('events_missing', []})
 
             except Exception as e:
-                logger.error(f❌ {test_name}: EXCEPTION - {e})
+                logger.error(fX {test_name}: EXCEPTION - {e})
                 test_results[test_name] = {
                     'test_name': test_name,
                     'success': False,
@@ -431,24 +434,26 @@ class MissingWebSocketEventsValidator:
         logger.info(fEvents Missing: {len(self.test_results['events_missing']})
 
         if self.test_results['events_missing']:
-            logger.error(f\n❌ MISSING EVENTS:)"
-            logger.error(f\n❌ MISSING EVENTS:)"
+            logger.error(f\nX MISSING EVENTS:)"
+            logger.error(f\nX MISSING EVENTS:)""
+
             for event in self.test_results['events_missing']:
-                criticality = "🚨 CRITICAL if event in critical_missing else ⚠️  NORMAL"
+                criticality = "🚨 CRITICAL if event in critical_missing else WARNING️  NORMAL"
                 logger.error(f  {criticality}: {event})
 
         if critical_missing:
             logger.error(f\n🚨 CRITICAL MISSING EVENTS (Frontend Impact):)"
-            logger.error(f\n🚨 CRITICAL MISSING EVENTS (Frontend Impact):)"
+            logger.error(f\n🚨 CRITICAL MISSING EVENTS (Frontend Impact):)""
+
             for event in critical_missing:
                 logger.error(f"  - {event}: Users will not see real-time updates)"
         else:
-            logger.info(f\n✅ No critical events missing!)
+            logger.info(f\nCHECK No critical events missing!)
 
         # Test-by-test breakdown
         logger.info(f\n📋 TEST BREAKDOWN:)
         for test_name, result in test_results.items():
-            status = ✅ PASS" if result.get('success', False) else ❌ FAIL"
+            status = CHECK PASS" if result.get('success', False) else X FAIL"
             logger.info(f  {status}: {test_name})
             if not result.get('success', False) and 'events_missing' in result:
                 for missing in result['events_missing']:
@@ -459,7 +464,8 @@ class MissingWebSocketEventsValidator:
 @pytest.mark.asyncio
 @pytest.mark.critical
 async def test_missing_websocket_events():
-    ""Pytest wrapper for missing WebSocket events validation."
+    ""Pytest wrapper for missing WebSocket events validation.""
+
     validator = MissingWebSocketEventsValidator()
     results = await validator.run_comprehensive_missing_events_test()
 

@@ -56,13 +56,13 @@ class ImportFixValidationIntegrationTests(SSotBaseTestCase):
         
         EXPECTED: PASS - proves shared.isolated_environment import works
         """
-        print("\n✅ VALIDATION TEST: Shared IsolatedEnvironment basic import...")
+        print("\nCHECK VALIDATION TEST: Shared IsolatedEnvironment basic import...")
         
         try:
             # This should work - it's the correct SSOT import
             from shared.isolated_environment import IsolatedEnvironment
             
-            print("✅ VALIDATION PASSED: Import successful")
+            print("CHECK VALIDATION PASSED: Import successful")
             print(f"   Module: {IsolatedEnvironment.__module__}")
             print(f"   Class: {IsolatedEnvironment.__name__}")
             
@@ -81,7 +81,7 @@ class ImportFixValidationIntegrationTests(SSotBaseTestCase):
         
         EXPECTED: PASS - proves instantiation works
         """
-        print("\n✅ VALIDATION TEST: IsolatedEnvironment instantiation...")
+        print("\nCHECK VALIDATION TEST: IsolatedEnvironment instantiation...")
         
         from shared.isolated_environment import IsolatedEnvironment
         
@@ -90,7 +90,7 @@ class ImportFixValidationIntegrationTests(SSotBaseTestCase):
             env = IsolatedEnvironment()
             self.assertIsNotNone(env)
             
-            print("✅ VALIDATION PASSED: Instantiation successful")
+            print("CHECK VALIDATION PASSED: Instantiation successful")
             print(f"   Instance type: {type(env).__name__}")
             print(f"   Instance module: {type(env).__module__}")
             
@@ -106,7 +106,7 @@ class ImportFixValidationIntegrationTests(SSotBaseTestCase):
         
         EXPECTED: PASS - proves all expected methods work
         """
-        print("\n✅ VALIDATION TEST: IsolatedEnvironment core methods...")
+        print("\nCHECK VALIDATION TEST: IsolatedEnvironment core methods...")
         
         from shared.isolated_environment import IsolatedEnvironment
         env = IsolatedEnvironment()
@@ -135,9 +135,9 @@ class ImportFixValidationIntegrationTests(SSotBaseTestCase):
             )
             
             method_results[method_name] = "available"
-            print(f"    ✅ {method_name}: available and callable")
+            print(f"    CHECK {method_name}: available and callable")
             
-        print(f"✅ VALIDATION PASSED: All core methods available")
+        print(f"CHECK VALIDATION PASSED: All core methods available")
         print(f"   Methods tested: {list(method_results.keys())}")
         
     def test_demo_configuration_functionality_replacement(self):
@@ -149,7 +149,7 @@ class ImportFixValidationIntegrationTests(SSotBaseTestCase):
         
         EXPECTED: PASS - proves demo.py functionality works with correct import
         """
-        print("\n✅ VALIDATION TEST: Demo configuration functionality replacement...")
+        print("\nCHECK VALIDATION TEST: Demo configuration functionality replacement...")
         
         from shared.isolated_environment import IsolatedEnvironment
         
@@ -194,7 +194,7 @@ class ImportFixValidationIntegrationTests(SSotBaseTestCase):
             self.assertIsInstance(config["auto_create_users"], bool)
             self.assertIsInstance(config["permissive_auth"], bool)
             
-            print("✅ VALIDATION PASSED: Demo configuration functionality works")
+            print("CHECK VALIDATION PASSED: Demo configuration functionality works")
             print(f"   Config keys: {list(config.keys())}")
             print(f"   Config values: {config}")
             
@@ -210,7 +210,7 @@ class ImportFixValidationIntegrationTests(SSotBaseTestCase):
         
         EXPECTED: PASS - proves integration test functionality works with correct import
         """
-        print("\n✅ VALIDATION TEST: Configuration integration functionality replacement...")
+        print("\nCHECK VALIDATION TEST: Configuration integration functionality replacement...")
         
         from shared.isolated_environment import IsolatedEnvironment
         
@@ -246,11 +246,11 @@ class ImportFixValidationIntegrationTests(SSotBaseTestCase):
                 try:
                     result = op_func()
                     operation_results[op_name] = result
-                    print(f"  ✅ {op_name}: {result}")
+                    print(f"  CHECK {op_name}: {result}")
                 except Exception as e:
                     self.fail(f"Operation {op_name} failed: {e}")
             
-            print(f"✅ VALIDATION PASSED: Configuration integration functionality works")
+            print(f"CHECK VALIDATION PASSED: Configuration integration functionality works")
             print(f"   Environment variables tested: {len(test_env_vars)}")
             print(f"   Available variables: {sum(env_access_results.values())}")
             print(f"   Operations tested: {list(operation_results.keys())}")
@@ -274,7 +274,7 @@ class ImportFixComprehensiveValidationTests(SSotBaseTestCase):
         
         EXPECTED: PASS - proves isolation functionality works
         """
-        print("\n✅ VALIDATION TEST: Environment variable isolation preserved...")
+        print("\nCHECK VALIDATION TEST: Environment variable isolation preserved...")
         
         from shared.isolated_environment import IsolatedEnvironment
         
@@ -299,7 +299,7 @@ class ImportFixComprehensiveValidationTests(SSotBaseTestCase):
             
             self.assertEqual(str_result1, str_result2, "String isolation test failed")
             
-            print("✅ VALIDATION PASSED: Environment variable isolation preserved")
+            print("CHECK VALIDATION PASSED: Environment variable isolation preserved")
             print(f"   Test variable result: {result1}")
             print(f"   String test result: {str_result1}")
             print(f"   Both instances behaved identically: True")
@@ -316,7 +316,7 @@ class ImportFixComprehensiveValidationTests(SSotBaseTestCase):
         
         EXPECTED: PASS - proves thread safety works
         """
-        print("\n✅ VALIDATION TEST: Thread safety preserved...")
+        print("\nCHECK VALIDATION TEST: Thread safety preserved...")
         
         from shared.isolated_environment import IsolatedEnvironment
         import threading
@@ -364,7 +364,7 @@ class ImportFixComprehensiveValidationTests(SSotBaseTestCase):
                 f"Expected {expected_result_count} results, got {len(results)}"
             )
             
-            print("✅ VALIDATION PASSED: Thread safety preserved")
+            print("CHECK VALIDATION PASSED: Thread safety preserved")
             print(f"   Threads tested: 5")
             print(f"   Operations per thread: 10")
             print(f"   Total results: {len(results)}")
@@ -383,7 +383,7 @@ class ImportFixComprehensiveValidationTests(SSotBaseTestCase):
         
         EXPECTED: PASS - proves migration is complete and functional
         """
-        print("\n✅ VALIDATION TEST: Migration completeness check...")
+        print("\nCHECK VALIDATION TEST: Migration completeness check...")
         
         from shared.isolated_environment import IsolatedEnvironment
         
@@ -441,14 +441,14 @@ class ImportFixComprehensiveValidationTests(SSotBaseTestCase):
                         "result": result,
                         "type": type(result).__name__
                     }
-                    print(f"    ✅ {test_case['name']}: PASSED")
+                    print(f"    CHECK {test_case['name']}: PASSED")
                     
                 except Exception as e:
                     test_results[test_case['name']] = {
                         "status": "FAILED", 
                         "error": str(e)
                     }
-                    print(f"    ❌ {test_case['name']}: FAILED - {e}")
+                    print(f"    X {test_case['name']}: FAILED - {e}")
                     
             # Check that all tests passed
             failed_tests = [name for name, result in test_results.items() 
@@ -457,7 +457,7 @@ class ImportFixComprehensiveValidationTests(SSotBaseTestCase):
             if failed_tests:
                 self.fail(f"Migration completeness check failed tests: {failed_tests}")
                 
-            print("✅ VALIDATION PASSED: Migration completeness validated")
+            print("CHECK VALIDATION PASSED: Migration completeness validated")
             print(f"   Functionality tests: {len(functionality_tests)}")
             print(f"   Passed: {len([r for r in test_results.values() if r.get('status') == 'PASSED'])}")
             print(f"   Failed: {len(failed_tests)}")
@@ -481,7 +481,7 @@ class ImportFixRegressionPreventionTests(SSotBaseTestCase):
         
         EXPECTED: PASS - proves performance is maintained
         """
-        print("\n✅ VALIDATION TEST: No performance regression...")
+        print("\nCHECK VALIDATION TEST: No performance regression...")
         
         from shared.isolated_environment import IsolatedEnvironment
         import time
@@ -523,7 +523,7 @@ class ImportFixRegressionPreventionTests(SSotBaseTestCase):
                 duration = end_time - start_time
                 performance_results[test['name']] = duration
                 
-                print(f"    ✅ Duration: {duration:.6f}s (max: {test['max_time']}s)")
+                print(f"    CHECK Duration: {duration:.6f}s (max: {test['max_time']}s)")
                 
                 # Check performance requirement
                 self.assertLess(
@@ -531,7 +531,7 @@ class ImportFixRegressionPreventionTests(SSotBaseTestCase):
                     f"Performance regression in {test['name']}: {duration:.6f}s > {test['max_time']}s"
                 )
                 
-            print("✅ VALIDATION PASSED: No performance regression detected")
+            print("CHECK VALIDATION PASSED: No performance regression detected")
             print(f"   Tests completed: {len(performance_tests)}")
             print(f"   Average duration: {sum(performance_results.values()) / len(performance_results):.6f}s")
             
@@ -547,7 +547,7 @@ class ImportFixRegressionPreventionTests(SSotBaseTestCase):
         
         EXPECTED: PASS - proves backward compatibility maintained
         """
-        print("\n✅ VALIDATION TEST: Backward compatibility maintained...")
+        print("\nCHECK VALIDATION TEST: Backward compatibility maintained...")
         
         from shared.isolated_environment import IsolatedEnvironment
         
@@ -588,7 +588,7 @@ class ImportFixRegressionPreventionTests(SSotBaseTestCase):
                         "status": "PASSED",
                         "result": result
                     }
-                    print(f"    ✅ {test['name']}: PASSED")
+                    print(f"    CHECK {test['name']}: PASSED")
                     
                 except Exception as e:
                     compatibility_results[test['name']] = {
@@ -597,7 +597,7 @@ class ImportFixRegressionPreventionTests(SSotBaseTestCase):
                     }
                     self.fail(f"Backward compatibility broken in {test['name']}: {e}")
                     
-            print("✅ VALIDATION PASSED: Backward compatibility maintained")
+            print("CHECK VALIDATION PASSED: Backward compatibility maintained")
             print(f"   Compatibility tests: {len(compatibility_tests)}")
             print(f"   All tests passed: True")
             

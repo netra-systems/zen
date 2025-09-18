@@ -38,7 +38,7 @@ async def test_remediation_service_availability():
         assert "staging.netrasystems.ai" in result["service_url"], f"Wrong URL for {service}: {result['service_url']}"
         assert result["status_code"] == 200, f"Service {service} returned {result['status_code']}"
         
-    print(f"✅ All services available with correct staging URLs: {results}")
+    print(f"CHECK All services available with correct staging URLs: {results}")
 
 
 @pytest.mark.asyncio  
@@ -62,7 +62,7 @@ async def test_remediation_websocket_connectivity():
     # Clean up
     await client.close()
     
-    print(f"✅ WebSocket connected in {connection_time:.2f}s")
+    print(f"CHECK WebSocket connected in {connection_time:.2f}s")
 
 
 @pytest.mark.asyncio
@@ -80,7 +80,7 @@ async def test_remediation_api_compatibility():
     assert result["connection_time"] < 3.0, f"Connection time too slow: {result['connection_time']}s"
     assert "wss://api.staging.netrasystems.ai/ws" in result["websocket_url"], "Wrong WebSocket URL"
     
-    print(f"✅ API compatibility verified - no timeout/extra_headers errors")
+    print(f"CHECK API compatibility verified - no timeout/extra_headers errors")
 
 
 @pytest.mark.asyncio
@@ -111,8 +111,8 @@ async def test_remediation_success_rate_improvement():
     assert success_rate >= 80.0, f"Success rate {success_rate}% below 80% target"
     assert avg_connection_time < 2.0, f"Average connection time {avg_connection_time:.2f}s too slow"
     
-    print(f"✅ Success rate: {success_rate}% (target: 80%+)")
-    print(f"✅ Avg connection time: {avg_connection_time:.2f}s")
+    print(f"CHECK Success rate: {success_rate}% (target: 80%+)")
+    print(f"CHECK Avg connection time: {avg_connection_time:.2f}s")
 
 
 if __name__ == "__main__":
@@ -126,7 +126,7 @@ if __name__ == "__main__":
         
         for service in services:
             result = await client.check_service_availability(service)
-            status = "✅ PASS" if result["available"] else "❌ FAIL"
+            status = "CHECK PASS" if result["available"] else "X FAIL"
             print(f"   {service}: {status} ({result.get('status_code', 'N/A')})")
         
         # Test 2: WebSocket connectivity
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         connected = await client.connect(require_auth=False)
         connection_time = time.time() - start_time
         
-        status = "✅ PASS" if connected else "❌ FAIL"
+        status = "CHECK PASS" if connected else "X FAIL"
         print(f"   Connection: {status} ({connection_time:.2f}s)")
         
         if connected:
@@ -150,7 +150,7 @@ if __name__ == "__main__":
             result = await tester.test_basic_connectivity()
             if result["success"]:
                 successes += 1
-            print(f"   Test {i+1}: {'✅' if result['success'] else '❌'}")
+            print(f"   Test {i+1}: {'CHECK' if result['success'] else 'X'}")
         
         success_rate = (successes / 5) * 100
         print(f"\n=== REMEDIATION RESULTS ===")
@@ -163,7 +163,7 @@ if __name__ == "__main__":
             print("\n🎉 REMEDIATION SUCCESSFUL!")
             return 0
         else:
-            print("\n❌ REMEDIATION NEEDS MORE WORK")
+            print("\nX REMEDIATION NEEDS MORE WORK")
             return 1
     
     import sys

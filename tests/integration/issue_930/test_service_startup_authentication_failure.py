@@ -308,11 +308,11 @@ class ServiceStartupAuthenticationFailureTests(SSotAsyncTestCase):
 
                 # Identify the specific configuration issue
                 if "development secret not allowed" in error_message:
-                    print("✓ Identified issue: SERVICE_SECRET is using development default in staging")
+                    print("CHECK Identified issue: SERVICE_SECRET is using development default in staging")
                 elif "invalid JWT configuration" in error_message:
-                    print("✓ Identified issue: JWT_SECRET_STAGING is too short or missing")
+                    print("CHECK Identified issue: JWT_SECRET_STAGING is too short or missing")
                 else:
-                    print(f"✓ Authentication rejection: {error_message}")
+                    print(f"CHECK Authentication rejection: {error_message}")
 
                 # The test succeeds by reproducing the staging failure
                 # This confirms the authentication middleware is working correctly

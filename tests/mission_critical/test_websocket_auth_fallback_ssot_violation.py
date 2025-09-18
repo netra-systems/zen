@@ -1,5 +1,5 @@
-"""
-"""
+""""
+
  ALERT:  MISSION CRITICAL: WebSocket Auth Fallback SSOT Violation
 
 SSOT VIOLATION REPRODUCTION - Test #4 of 5  
@@ -7,26 +7,27 @@ This test EXPOSES the violation where WebSocket implements fallback auth pattern
 that duplicate/bypass the SSOT UnifiedAuthInterface instead of properly delegating.
 
 VIOLATION DETAILS:
-- File: netra_backend/app/websocket_core/user_context_extractor.py
+    - File: netra_backend/app/websocket_core/user_context_extractor.py
 - Lines: 265-324 (_resilient_validation_fallback method)
 - Issue: WebSocket implements complex fallback auth logic duplicating SSOT patterns
 
 EXPECTED BEHAVIOR:
-- BEFORE SSOT FIX: Test PASSES (proving fallback patterns violate SSOT)
+    - BEFORE SSOT FIX: Test PASSES (proving fallback patterns violate SSOT)
 - AFTER SSOT FIX: Test FAILS (proving WebSocket uses UnifiedAuthInterface exclusively)
 
 Business Value Justification (BVJ):
-- Segment: Platform/Engineering - SSOT compliance and maintainability
+    - Segment: Platform/Engineering - SSOT compliance and maintainability
 - Business Goal: System Stability - Eliminate duplicate auth logic maintenance 
-"""
-"""
+""""
+
 - Value Impact: Reduces auth bugs and security vulnerabilities from logic duplication
-- Revenue Impact: Auth fallback bugs could cause service outages ($100K+ revenue risk)
+- Revenue Impact: Auth fallback bugs could cause service outages ($""100K""+ revenue risk)
 
 CRITICAL FALLBACK SSOT REQUIREMENT:
-WebSocket MUST delegate ALL fallback/resilience to UnifiedAuthInterface - NO local patterns.
+    WebSocket MUST delegate ALL fallback/resilience to UnifiedAuthInterface - NO local patterns.
 "
-"
+""
+
 
 import asyncio
 import json
@@ -48,19 +49,22 @@ logger = logging.getLogger(__name__)
 
 class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
     "
-    "
+    ""
+
     SSOT Violation Reproduction: Tests WebSocket fallback auth patterns violate SSOT.
     
     This test proves WebSocket implements its own fallback/resilience patterns
     instead of delegating all fallback logic to UnifiedAuthInterface.
 "
-"
+""
+
 
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_implements_local_fallback_patterns_violation(self):
         """
-    "
+    ""
+
         VIOLATION REPRODUCTION: WebSocket implements local fallback auth patterns.
         
         CURRENT VIOLATION: _resilient_validation_fallback() method (lines 265-324)
@@ -110,7 +114,8 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
             for pattern in fallback_patterns:
                 if pattern in source_code:
                     violations_found.append(fSource contains: {pattern})"
-                    violations_found.append(fSource contains: {pattern})"
+                    violations_found.append(fSource contains: {pattern})""
+
                     fallback_logic_detected = True
                     logger.error(f" ALERT:  FALLBACK PATTERN IN SOURCE: {pattern})"
         
@@ -132,7 +137,8 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_fallback_logic_complexity_violation(self):
-    """
+    """"
+
         VIOLATION REPRODUCTION: WebSocket fallback logic is complex and duplicates SSOT.
         
         This test demonstrates that WebSocket implements complex multi-step
@@ -207,7 +213,8 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_fallback_auth_client_core_duplication_violation(self):
-        """
+        """"
+
         VIOLATION REPRODUCTION: WebSocket duplicates auth_client_core fallback logic.
         
         CURRENT VIOLATION: WebSocket imports and uses auth_client_core directly
@@ -253,7 +260,8 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
                 # Force fallback by mocking primary auth failure
                 with patch.object(extractor, '_validate_token_with_unified_interface', 
                                   side_effect=Exception(Force fallback)):"
-                                  side_effect=Exception(Force fallback)):"
+                                  side_effect=Exception(Force fallback)):""
+
                     
                     try:
                         test_token = "test.duplication.token"
@@ -279,7 +287,8 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
                 logger.critical( ALERT:  AUTH_CLIENT_CORE DUPLICATION VIOLATIONS:)
                 for violation in violations:
                     logger.critical(f ALERT:  - {violation})"
-                    logger.critical(f ALERT:  - {violation})"
+                    logger.critical(f ALERT:  - {violation})""
+
                     
                 logger.critical(" ALERT:  WebSocket should ONLY use UnifiedAuthInterface)"
                 logger.critical( ALERT:  NO DIRECT auth_client_core access allowed)
@@ -292,19 +301,22 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
         except Exception as e:
             logger.warning(f WARNING: [U+FE0F] Duplication test failed: {e})
             pytest.skip(Cannot test auth_client_core duplication)"
-            pytest.skip(Cannot test auth_client_core duplication)"
+            pytest.skip(Cannot test auth_client_core duplication)""
+
 
     @pytest.mark.asyncio 
     @pytest.mark.integration
     async def test_websocket_fallback_resilience_pattern_duplication_violation(self):
         """
-    "
+    ""
+
         INTEGRATION VIOLATION TEST: WebSocket duplicates resilience patterns from auth_client_core.
         
         This test demonstrates that WebSocket implements the same resilience patterns
         (retry logic, error handling, etc.) that should be centralized in UnifiedAuthInterface.
         "
-        "
+        ""
+
         if NoDockerModeDetector.is_no_docker_mode():
             pytest.skip(Integration test requires services")"
             
@@ -339,7 +351,8 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
                 # Force fallback path  
                 with patch.object(extractor, '_validate_token_with_unified_interface',
                                   side_effect=Exception(Primary auth unavailable)):"
-                                  side_effect=Exception(Primary auth unavailable)):"
+                                  side_effect=Exception(Primary auth unavailable)):""
+
                     
                     try:
                         test_token = "test.resilience.token"
@@ -353,7 +366,8 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
                         if len(env_accesses) > 0:
                             resilience_patterns_detected.append(environment_resilience_config)
                             logger.error( ALERT:  RESILIENCE VIOLATION: WebSocket accesses resilience config)"
-                            logger.error( ALERT:  RESILIENCE VIOLATION: WebSocket accesses resilience config)"
+                            logger.error( ALERT:  RESILIENCE VIOLATION: WebSocket accesses resilience config)""
+
                         
                         # Check for error handling patterns
                         if user_context and user_context.get(user_id") == resilient_user:"
@@ -371,16 +385,19 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
         
         if resilience_patterns_detected:
             logger.critical( ALERT:  RESILIENCE PATTERN DUPLICATION VIOLATIONS:)"
-            logger.critical( ALERT:  RESILIENCE PATTERN DUPLICATION VIOLATIONS:)"
+            logger.critical( ALERT:  RESILIENCE PATTERN DUPLICATION VIOLATIONS:)""
+
             for pattern in resilience_patterns_detected:
                 logger.critical(f" ALERT:  - {pattern})"
                 
             logger.critical( ALERT:  ALL RESILIENCE PATTERNS SHOULD BE IN UnifiedAuthInterface)
             logger.critical( ALERT:  WebSocket should delegate resilience, not implement it)"
-            logger.critical( ALERT:  WebSocket should delegate resilience, not implement it)"
+            logger.critical( ALERT:  WebSocket should delegate resilience, not implement it)""
+
             
             assert len(resilience_patterns_detected) > 0, fRESILIENCE DUPLICATION: {resilience_patterns_detected}"
-            assert len(resilience_patterns_detected) > 0, fRESILIENCE DUPLICATION: {resilience_patterns_detected}"
+            assert len(resilience_patterns_detected) > 0, fRESILIENCE DUPLICATION: {resilience_patterns_detected}""
+
             return True
         else:
             pytest.fail(VIOLATION NOT REPRODUCED: No resilience pattern duplication detected)
@@ -388,7 +405,8 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_fallback_creates_auth_state_violation(self):
-        """
+        """"
+
         VIOLATION REPRODUCTION: WebSocket fallback creates auth state independently.
         
         This test shows that WebSocket fallback logic constructs user authentication
@@ -417,11 +435,13 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
             # Force fallback
             with patch.object(extractor, '_validate_token_with_unified_interface',
                               side_effect=Exception(Primary auth failed)):"
-                              side_effect=Exception(Primary auth failed)):"
+                              side_effect=Exception(Primary auth failed)):""
+
                 
                 try:
                     test_token = test.state.token"
-                    test_token = test.state.token"
+                    test_token = test.state.token""
+
                     user_context = await extractor.extract_user_context_from_token(test_token)
                     
                     if user_context:
@@ -456,7 +476,8 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
             logger.critical( ALERT:  AUTH STATE CONSTRUCTION VIOLATIONS:)
             for violation in state_construction_violations:
                 logger.critical(f ALERT:  - {violation})"
-                logger.critical(f ALERT:  - {violation})"
+                logger.critical(f ALERT:  - {violation})""
+
                 
             logger.critical(" ALERT:  WebSocket should receive complete auth state from UnifiedAuthInterface)"
             logger.critical( ALERT:  NO LOCAL auth state construction allowed)

@@ -302,7 +302,7 @@ class FactoryOverheadAnalysisTests(SSotBaseTestCase):
         self.assertGreater(
             over_engineered_overhead,
             simple_factory_overhead * 2,
-            f"❌ PERFORMANCE IMPACT VALIDATED: Over-engineered factory overhead ({over_engineered_overhead:.2f}%) "
+            f"X PERFORMANCE IMPACT VALIDATED: Over-engineered factory overhead ({over_engineered_overhead:.2f}%) "
             f"should be >2x simple factory overhead ({simple_factory_overhead:.2f}%) to justify removal."
         )
 
@@ -376,7 +376,7 @@ class FactoryOverheadAnalysisTests(SSotBaseTestCase):
         self.assertGreater(
             memory_waste_over_engineered,
             memory_waste_simple * 3,
-            f"❌ MEMORY OVERHEAD VALIDATED: Over-engineered factory memory overhead ({memory_waste_over_engineered:.1f}%) "
+            f"X MEMORY OVERHEAD VALIDATED: Over-engineered factory memory overhead ({memory_waste_over_engineered:.1f}%) "
             f"should be >3x simple factory overhead ({memory_waste_simple:.1f}%) to justify cleanup."
         )
 
@@ -476,7 +476,7 @@ class FactoryOverheadAnalysisTests(SSotBaseTestCase):
         self.assertGreater(
             gc_impact_difference,
             5,
-            f"❌ GC IMPACT VALIDATED: GC efficiency difference ({gc_impact_difference:.1f}%) "
+            f"X GC IMPACT VALIDATED: GC efficiency difference ({gc_impact_difference:.1f}%) "
             f"between over-engineered and direct creation should be >5% to justify cleanup."
         )
 
@@ -565,7 +565,7 @@ class FactoryOverheadAnalysisTests(SSotBaseTestCase):
         self.assertGreater(
             throughput_degradation,
             20,
-            f"❌ CONCURRENCY IMPACT VALIDATED: Over-engineered factory throughput degradation ({throughput_degradation:.1f}%) "
+            f"X CONCURRENCY IMPACT VALIDATED: Over-engineered factory throughput degradation ({throughput_degradation:.1f}%) "
             f"at {max_users} concurrent users should be >20% to justify cleanup."
         )
 
@@ -695,7 +695,7 @@ class FactoryOverheadAnalysisTests(SSotBaseTestCase):
         self.assertGreaterEqual(
             total_improvement_score,
             15,
-            f"✅ PERFORMANCE IMPROVEMENT VALIDATED: Average improvement score ({total_improvement_score:.1f}%) "
+            f"CHECK PERFORMANCE IMPROVEMENT VALIDATED: Average improvement score ({total_improvement_score:.1f}%) "
             f"demonstrates significant performance benefits from factory cleanup."
         )
 

@@ -377,10 +377,10 @@ if __name__ == "__main__":
     ])
     
     if exit_code == 0:
-        print("\n✅ ALL ADAPTER TESTS PASSED")
+        print("\nCHECK ALL ADAPTER TESTS PASSED")
         print("LegacyToSSOTAdapter is ready for production use")
     else:
-        print(f"\n❌ ADAPTER TESTS FAILED (exit code: {exit_code})")
+        print(f"\nX ADAPTER TESTS FAILED (exit code: {exit_code})")
         print("Adapter needs fixes before migration can continue")
     
     exit(exit_code)

@@ -48,7 +48,7 @@ class E2EAuthMethodResolutionIssue622Tests(SSotBaseTestCase):
         assert asyncio.iscoroutinefunction(create_authenticated_test_user)
         from test_framework.ssot.e2e_auth_helper import create_authenticated_test_user as test_user_func
         assert callable(test_user_func)
-        print('✅ All E2E test import patterns working')
+        print('CHECK All E2E test import patterns working')
 
     @pytest.mark.integration
     def test_instance_method_availability(self):
@@ -60,7 +60,7 @@ class E2EAuthMethodResolutionIssue622Tests(SSotBaseTestCase):
             method = getattr(auth_helper, 'create_authenticated_test_user')
             assert callable(method)
             assert asyncio.iscoroutinefunction(method)
-            print('✅ Instance method create_authenticated_test_user available')
+            print('CHECK Instance method create_authenticated_test_user available')
         else:
             pytest.skip('Instance method create_authenticated_test_user not available - Issue #622 not fully fixed')
 
@@ -81,7 +81,7 @@ class E2EAuthMethodResolutionIssue622Tests(SSotBaseTestCase):
             assert user2.user_id == 'test-user-2'
             both_have_jwt_tokens = user1.jwt_token and user2.jwt_token
             assert both_have_jwt_tokens
-            print('✅ Both methods produce equivalent AuthenticatedUser results')
+            print('CHECK Both methods produce equivalent AuthenticatedUser results')
         else:
             pytest.skip('Compatibility method not available - testing main method only')
 
@@ -101,7 +101,7 @@ class E2EAuthMethodResolutionIssue622Tests(SSotBaseTestCase):
             assert user.is_test_user == True
         tokens = [user.jwt_token for user in users]
         assert len(set(tokens)) == len(tokens)
-        print(f'✅ Generated {len(users)} users with unique JWT tokens')
+        print(f'CHECK Generated {len(users)} users with unique JWT tokens')
 
     @pytest.mark.integration
     async def test_standalone_function_execution(self):
@@ -115,7 +115,7 @@ class E2EAuthMethodResolutionIssue622Tests(SSotBaseTestCase):
         assert 'jwt_token' in result or 'access_token' in result
         assert result['email'] == 'standalone@example.com'
         assert result['user_id'] == 'standalone-user-123'
-        print('✅ Standalone function execution successful')
+        print('CHECK Standalone function execution successful')
 
     @pytest.mark.integration
     def test_affected_test_file_patterns(self):
@@ -133,7 +133,7 @@ class E2EAuthMethodResolutionIssue622Tests(SSotBaseTestCase):
         failing_patterns = [f for f, r in results.items() if not r['method_available']]
         if failing_patterns:
             pytest.skip(f'Method not available for patterns: {failing_patterns}')
-        print(f'✅ All {len(results)} affected E2E test patterns validated')
+        print(f'CHECK All {len(results)} affected E2E test patterns validated')
 
     @pytest.mark.integration
     async def test_backwards_compatibility_complete(self):
@@ -164,11 +164,11 @@ class E2EAuthMethodResolutionIssue622Tests(SSotBaseTestCase):
         failing_tests = [t for t in compatibility_tests if not t[1]]
         print(f'Compatibility test results:')
         for test_name, passed, error in compatibility_tests:
-            status = '✅ PASS' if passed else '❌ FAIL'
+            status = 'CHECK PASS' if passed else 'X FAIL'
             error_msg = f' - {error}' if error else ''
             print(f'  {status}: {test_name}{error_msg}')
         assert len(passing_tests) >= 2, f'Insufficient backwards compatibility: {len(passing_tests)}/3 tests passing'
-        print(f'✅ Backwards compatibility validated: {len(passing_tests)}/{len(compatibility_tests)} tests passing')
+        print(f'CHECK Backwards compatibility validated: {len(passing_tests)}/{len(compatibility_tests)} tests passing')
 
 class Issue622ValidationChecklistTests(SSotBaseTestCase):
     """Validation checklist specifically for Issue #622 resolution."""
@@ -208,7 +208,7 @@ class Issue622ValidationChecklistTests(SSotBaseTestCase):
         print(f'\nIssue #622 Fix Validation Checklist:')
         print(f"{'=' * 50}")
         for check_name, passed in checklist.items():
-            status = '✅ PASS' if passed else '❌ FAIL'
+            status = 'CHECK PASS' if passed else 'X FAIL'
             print(f"{status}: {check_name.replace('_', ' ').title()}")
         print(f'\nOverall Result: {passing_checks}/{total_checks} checks passing')
         critical_checks = ['original_method_exists', 'compatibility_method_exists', 'both_methods_callable', 'standalone_import_works']

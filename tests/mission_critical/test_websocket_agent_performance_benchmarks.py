@@ -15,7 +15,7 @@ Performance Targets:
 - Token efficiency: ≥10 tokens/second
 - Memory efficiency: <50MB per user session
 
-Critical Path: Performance Monitoring → SLA Compliance → Enterprise Retention
+Critical Path: Performance Monitoring -> SLA Compliance -> Enterprise Retention
 """
 
 import asyncio
@@ -175,7 +175,7 @@ class WebSocketAgentPerformanceBenchmarkTests(SSotAsyncTestCase):
                 f"Response failed cost optimization validation: {cost_results['business_value_summary']}"
             )
             
-        logger.info("✅ BENCHMARK: Golden Path completion time validation PASSED")
+        logger.info("CHECK BENCHMARK: Golden Path completion time validation PASSED")
         
     @pytest.mark.asyncio
     @pytest.mark.critical  
@@ -300,7 +300,7 @@ class WebSocketAgentPerformanceBenchmarkTests(SSotAsyncTestCase):
                         f"Critical cost optimization requirement '{requirement}' insufficient: {score:.2f} < 0.8"
                     )
                     
-        logger.info("✅ ENHANCED: Sophisticated business value scoring validation PASSED")
+        logger.info("CHECK ENHANCED: Sophisticated business value scoring validation PASSED")
         
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -394,7 +394,7 @@ class WebSocketAgentPerformanceBenchmarkTests(SSotAsyncTestCase):
             f"(high: {high_quality['quality_score']:.3f}, low: {low_quality['quality_score']:.3f})"
         )
         
-        logger.info("✅ ADVANCED: Error recovery and quality degradation detection PASSED")
+        logger.info("CHECK ADVANCED: Error recovery and quality degradation detection PASSED")
 
 
 if __name__ == "__main__":
@@ -433,4 +433,4 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"[FAIL] Error running performance tests: {e}")
         
-    print("\n✅ Performance benchmark test execution completed.")
+    print("\nCHECK Performance benchmark test execution completed.")

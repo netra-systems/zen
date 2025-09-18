@@ -4,7 +4,7 @@ Test Auth Service Backend Coordination Integration
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure auth service and backend maintain coordination for Golden Path
-- Value Impact: Validates auth integration preserves login→AI response flow for $500K+ ARR
+- Value Impact: Validates auth integration preserves login->AI response flow for $500K+ ARR
 - Strategic Impact: Core platform auth coordination enabling all user interactions
 
 Issue #1176: Master Plan Golden Path validation - Auth service backend coordination

@@ -59,7 +59,7 @@ class ImportFailureReproduction(unittest.TestCase):
                 print(f"Import failed as expected: {type(e).__name__}: {e}")
                 raise
 
-        print(f"✓ Successfully reproduced import failure: {context.exception}")
+        print(f"CHECK Successfully reproduced import failure: {context.exception}")
         self.failed_imports.append("netra_backend.app.db.supply_database_manager")
 
     def test_agent_class_keyerror_reproduction(self):
@@ -77,7 +77,7 @@ class ImportFailureReproduction(unittest.TestCase):
             try:
                 with self.timeout_context(self.timeout_duration):
                     __import__(module_name)
-                    print(f"✓ {module_name} imported successfully")
+                    print(f"CHECK {module_name} imported successfully")
             except TimeoutException:
                 print(f"✗ {module_name} TIMEOUT - hanging import detected")
                 self.hanging_imports.append(module_name)
@@ -119,7 +119,7 @@ class ImportFailureReproduction(unittest.TestCase):
 
         print(f"Import chain length: {len(import_chain)}")
         if len(import_chain) > 20:
-            print("⚠️  Very long import chain detected - potential circular imports")
+            print("WARNING️  Very long import chain detected - potential circular imports")
 
     def test_import_timeout_simulation(self):
         """Test the 217-second timeout scenario with shorter duration"""
@@ -140,7 +140,7 @@ class ImportFailureReproduction(unittest.TestCase):
                 with self.timeout_context(5):  # 5 second timeout for testing
                     __import__(module_name)
                     duration = time.time() - start_time
-                    print(f"✓ {module_name} imported in {duration:.2f}s")
+                    print(f"CHECK {module_name} imported in {duration:.2f}s")
 
             except TimeoutException:
                 duration = time.time() - start_time
@@ -177,7 +177,7 @@ class ImportFailureReproduction(unittest.TestCase):
             print(f"Attempt {i+1} memory: {current_memory:.2f} MB (growth: +{memory_growth:.2f} MB)")
 
             if memory_growth > 50:  # 50MB growth threshold
-                print("⚠️  Significant memory growth detected during import attempts")
+                print("WARNING️  Significant memory growth detected during import attempts")
 
     def tearDown(self):
         """Report test results"""
@@ -194,7 +194,7 @@ class ImportFailureReproduction(unittest.TestCase):
 
         # Determine if we successfully reproduced the issue
         if self.failed_imports or self.hanging_imports:
-            print("\n✓ SUCCESS: Issue #1079 import failures successfully reproduced")
+            print("\nCHECK SUCCESS: Issue #1079 import failures successfully reproduced")
         else:
             print("\n✗ FAILURE: Could not reproduce Issue #1079 import failures")
 

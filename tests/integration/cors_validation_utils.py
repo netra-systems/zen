@@ -287,9 +287,9 @@ def format_cors_validation_report(validation_results: Dict[str, Any]) -> str:
     report_lines = []
 
     if validation_results["valid"]:
-        report_lines.append("✅ CORS Validation: PASSED")
+        report_lines.append("CHECK CORS Validation: PASSED")
     else:
-        report_lines.append("❌ CORS Validation: FAILED")
+        report_lines.append("X CORS Validation: FAILED")
 
     report_lines.append("")
 
@@ -309,7 +309,7 @@ def format_cors_validation_report(validation_results: Dict[str, Any]) -> str:
     if errors:
         report_lines.append("Errors:")
         for error in errors:
-            report_lines.append(f"  ❌ {error.get('message', str(error))}")
+            report_lines.append(f"  X {error.get('message', str(error))}")
         report_lines.append("")
 
     # Warnings
@@ -317,6 +317,6 @@ def format_cors_validation_report(validation_results: Dict[str, Any]) -> str:
     if warnings:
         report_lines.append("Warnings:")
         for warning in warnings:
-            report_lines.append(f"  ⚠️ {warning.get('message', str(warning))}")
+            report_lines.append(f"  WARNING️ {warning.get('message', str(warning))}")
 
     return "\n".join(report_lines)

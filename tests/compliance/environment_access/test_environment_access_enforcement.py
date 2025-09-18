@@ -78,7 +78,7 @@ class EnvironmentAccessEnforcementTests(SSotBaseTestCase):
 
         # STRICT ENFORCEMENT: No new violations allowed
         assert violation_change <= 0, (
-            f"❌ ENFORCEMENT FAILURE: {violation_change} new environment access violations detected! "
+            f"X ENFORCEMENT FAILURE: {violation_change} new environment access violations detected! "
             f"New violations prevent SSOT migration progress. "
             f"Use shared.isolated_environment instead of direct os.environ access. "
             f"Issue #711 requires maintaining or reducing violation count during migration."
@@ -107,7 +107,7 @@ class EnvironmentAccessEnforcementTests(SSotBaseTestCase):
         # Log critical service compliance
         print(f"\n🔒 Critical Service Compliance Enforcement:")
         for service_name, violations in critical_service_violations.items():
-            status = "✅ COMPLIANT" if len(violations) == 0 else "❌ VIOLATIONS"
+            status = "CHECK COMPLIANT" if len(violations) == 0 else "X VIOLATIONS"
             print(f"  {service_name}: {status} ({len(violations)} violations)")
 
             if violations:
@@ -120,7 +120,7 @@ class EnvironmentAccessEnforcementTests(SSotBaseTestCase):
         total_critical_violations = sum(len(v) for v in critical_service_violations.values())
 
         assert total_critical_violations == 0, (
-            f"❌ CRITICAL SERVICE COMPLIANCE FAILURE: "
+            f"X CRITICAL SERVICE COMPLIANCE FAILURE: "
             f"Found {total_critical_violations} violations in critical services. "
             f"Critical services must be 100% SSOT compliant as they provide utilities to other services. "
             f"Violations in: {[s for s, v in critical_service_violations.items() if v]}"
@@ -163,7 +163,7 @@ class EnvironmentAccessEnforcementTests(SSotBaseTestCase):
 
         for service_name, violations in service_violations.items():
             violation_count = len(violations)
-            status = "✅ WITHIN" if violation_count <= self.max_allowed_violations_per_service else "❌ EXCEEDS"
+            status = "CHECK WITHIN" if violation_count <= self.max_allowed_violations_per_service else "X EXCEEDS"
             print(f"  {service_name}: {violation_count} violations - {status} threshold")
 
         if threshold_violations:
@@ -177,7 +177,7 @@ class EnvironmentAccessEnforcementTests(SSotBaseTestCase):
 
         # ENFORCEMENT: Services must stay within thresholds
         assert len(threshold_violations) == 0, (
-            f"❌ SERVICE THRESHOLD COMPLIANCE FAILURE: "
+            f"X SERVICE THRESHOLD COMPLIANCE FAILURE: "
             f"{len(threshold_violations)} services exceed violation thresholds. "
             f"Services must reduce violations during SSOT migration. "
             f"Exceeding services: {[v['service'] for v in threshold_violations]}"
@@ -216,7 +216,7 @@ class EnvironmentAccessEnforcementTests(SSotBaseTestCase):
 
         # ENFORCEMENT: Total system must stay within limits
         assert total_violations <= self.max_allowed_violations_total, (
-            f"❌ SYSTEM VIOLATION LIMIT EXCEEDED: "
+            f"X SYSTEM VIOLATION LIMIT EXCEEDED: "
             f"Total violations ({total_violations}) exceed system limit ({self.max_allowed_violations_total}). "
             f"Immediate remediation required to continue SSOT migration. "
             f"Top violating services: {dict(list(service_distribution.items())[:3])}"
@@ -254,14 +254,14 @@ class EnvironmentAccessEnforcementTests(SSotBaseTestCase):
                     rel_path = str(Path(violation['file']).relative_to(self.project_root))
                     print(f"      - {rel_path}:{violation['line']}")
 
-            print(f"\n  ✅ Correct SSOT import patterns:")
+            print(f"\n  CHECK Correct SSOT import patterns:")
             print(f"    • from shared.isolated_environment import IsolatedEnvironment")
             print(f"    • from shared.isolated_environment import get_env")
             print(f"    • Use self.get_env() in test classes")
 
         # ENFORCEMENT: No incorrect import patterns allowed
         assert len(import_violations) == 0, (
-            f"❌ IMPORT PATTERN ENFORCEMENT FAILURE: "
+            f"X IMPORT PATTERN ENFORCEMENT FAILURE: "
             f"Found {len(import_violations)} incorrect import patterns. "
             f"All environment access must use SSOT imports from shared.isolated_environment. "
             f"Replace direct 'import os' with proper SSOT imports."
@@ -299,14 +299,14 @@ class EnvironmentAccessEnforcementTests(SSotBaseTestCase):
                     rel_path = str(Path(violation['file']).relative_to(self.project_root))
                     print(f"      - {rel_path}:{violation['line']} - {violation['code'][:60]}...")
 
-            print(f"\n  ✅ Correct test environment patterns:")
+            print(f"\n  CHECK Correct test environment patterns:")
             print(f"    • Use self.get_env_var() instead of os.environ")
             print(f"    • Use self.set_env_var() instead of os.environ assignment")
             print(f"    • Use self.temp_env_vars() context manager")
 
         # ENFORCEMENT: Tests must use SSOT patterns
         assert len(test_violations) == 0, (
-            f"❌ TEST SSOT COMPLIANCE FAILURE: "
+            f"X TEST SSOT COMPLIANCE FAILURE: "
             f"Found {len(test_violations)} environment violations in test files. "
             f"Tests must use SSotBaseTestCase environment utilities for proper isolation. "
             f"Replace direct os.environ access with self.get_env_var() and self.set_env_var()."

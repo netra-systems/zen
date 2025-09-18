@@ -1,18 +1,18 @@
-"Mission Critical Agent Factory SSOT Validation Tests."
+"""Mission Critical Agent Factory SSOT Validation Tests.
 
-CRITICAL MISSION: Protect $500K+ ARR Golden Path functionality through agent factory SSOT compliance.
+CRITICAL MISSION: Protect "500K" ARR Golden Path functionality through agent factory SSOT compliance.
 
 This test suite validates that agent factory patterns follow SSOT principles and ensure
 complete user isolation. Factory pattern violations directly impact Golden Path business value.
 
 Business Impact:
-- Revenue Protection: $500K+ ARR depends on reliable agent execution
+    - Revenue Protection: "500K" ARR depends on reliable agent execution
 - User Experience: Chat functionality requires proper agent isolation
 - System Stability: Factory SSOT prevents race conditions and state contamination
 - Security: User isolation prevents data leakage between sessions
 
 Test Strategy:
-1. Test FAILS with current codebase (proving factory violations exist)
+    1. Test FAILS with current codebase (proving factory violations exist)
 2. Validate AgentRegistry creates isolated instances per user
 3. Test WebSocket manager factory maintains user separation
 4. Ensure no shared state across concurrent users
@@ -21,7 +21,7 @@ Test Strategy:
 Created: 2025-9-12
 Issue: #686 ExecutionEngine consolidation blocking Golden Path
 Priority: MISSION CRITICAL - Protects core business value
-""
+"""
 
 import asyncio
 import threading
@@ -37,8 +37,8 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 class AgentFactorySsotValidationTests(SSotAsyncTestCase):
-    Mission critical validation of agent factory SSOT compliance."
-    Mission critical validation of agent factory SSOT compliance."
+    """Mission critical validation of agent factory SSOT compliance."""
+
 
     def setUp(self):
         "Set up test environment for factory validation."
@@ -47,19 +47,21 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
         self.test_user_contexts = []
 
     def tearDown(self):
-        ""Clean up test resources."
+        ""Clean up test resources.""
+
         super().tearDown()
         # Clean up any created contexts
         self.test_user_contexts.clear()
 
     def test_agent_registry_factory_user_isolation_ssot_compliance(self):
-        TEST FAILS: AgentRegistry factory allows shared state between users.""
+        """TEST FAILS: AgentRegistry factory allows shared state between users.
 
         CRITICAL BUSINESS IMPACT: Shared state causes WebSocket events to be delivered
-        to wrong users, directly violating $500K+ ARR Golden Path user experience.
+        to wrong users, directly violating $500K ARR Golden Path user experience.
 
         EXPECTED FAILURE: Multiple users get same AgentRegistry instance.
         PASSES AFTER: Each user gets isolated AgentRegistry with unique WebSocket manager.
+        """
         
         try:
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -92,7 +94,8 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
                 raise AssertionError(
                     f"CRITICAL FAILURE: AgentRegistry factory failed for user {context.user_id}: {e}."
                     fIssue #686: Factory pattern must work for all users."
-                    fIssue #686: Factory pattern must work for all users."
+                    fIssue #686: Factory pattern must work for all users.""
+
                 )
 
         # CRITICAL TEST: Each user must get unique registry instance
@@ -107,7 +110,7 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
             fFound {len(unique_ids)} unique instances for {len(registries)} users. "
             f"Instance IDs: {registry_ids}."
             fBUSINESS IMPACT: Shared state causes WebSocket events delivered to wrong users. 
-            fIssue #686: Factory must create isolated instances per user for $500K+ ARR protection.
+            fIssue #686: Factory must create isolated instances per user for ""500K"" ARR protection.
         )
 
         # Validate user context isolation if available
@@ -132,7 +135,8 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
         EXPECTED FAILURE: WebSocket managers shared between users.
         PASSES AFTER: Each user gets isolated WebSocket manager with no cross-contamination.
         "
-        "
+        ""
+
         try:
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         except ImportError as e:
@@ -196,7 +200,7 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
                         fCRITICAL SSOT VIOLATION: WebSocket managers shared between users. ""
                         fManager 1 ID: {id(ws_manager1)}, Manager 2 ID: {id(ws_manager2)}. 
                         fBUSINESS IMPACT: WebSocket events sent to wrong users breaks Golden Path. 
-                        f"Issue #686: WebSocket isolation critical for $500K+ ARR protection."
+                        f"Issue #686: WebSocket isolation critical for ""500K"" ARR protection."
                     )
 
                     # Validate user ID isolation
@@ -207,10 +211,12 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
                         self.assertNotEqual(
                             user1_id, user2_id,
                             fCRITICAL SSOT VIOLATION: WebSocket managers have same user ID. "
-                            fCRITICAL SSOT VIOLATION: WebSocket managers have same user ID. "
+                            fCRITICAL SSOT VIOLATION: WebSocket managers have same user ID. ""
+
                             fBoth managers report user ID: {user1_id}. 
                             fIssue #686: WebSocket user isolation broken."
-                            fIssue #686: WebSocket user isolation broken."
+                            fIssue #686: WebSocket user isolation broken.""
+
                         )
 
     async def test_concurrent_agent_execution_context_isolation(self):
@@ -297,7 +303,8 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
         self.assertEqual(
             len(unique_engine_ids), len(successful_results),
             fCRITICAL SSOT VIOLATION: Shared execution engine instances in concurrent execution. "
-            fCRITICAL SSOT VIOLATION: Shared execution engine instances in concurrent execution. "
+            fCRITICAL SSOT VIOLATION: Shared execution engine instances in concurrent execution. ""
+
             fFound {len(unique_engine_ids)} unique engines for {len(successful_results)} users. 
             fEngine IDs: {engine_ids}. "
             fEngine IDs: {engine_ids}. "
@@ -323,7 +330,8 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
 
     async def test_agent_factory_memory_isolation_ssot_compliance(self):
         TEST FAILS: Agent factories create shared memory state between users."
-        TEST FAILS: Agent factories create shared memory state between users."
+        TEST FAILS: Agent factories create shared memory state between users.""
+
 
         CRITICAL BUSINESS IMPACT: Memory leaks and state contamination between users
         causes incorrect agent responses and potential data leakage.
@@ -331,7 +339,8 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
         EXPECTED FAILURE: Agent instances share memory state.
         PASSES AFTER: Complete memory isolation between user agent instances.
         "
-        "
+        ""
+
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
         except ImportError as e:
@@ -372,7 +381,8 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
                 raise AssertionError(
                     fCRITICAL FAILURE: Engine creation failed for {user_info['user_id']}: {e}. 
                     fIssue #686: Factory must work for all users."
-                    fIssue #686: Factory must work for all users."
+                    fIssue #686: Factory must work for all users.""
+
                 )
 
         # CRITICAL TEST: Engines must not share memory state
@@ -424,7 +434,8 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
         EXPECTED FAILURE: User resources not cleaned up after session ends.
         PASSES AFTER: Factory implements proper cleanup and resource management.
 "
-"
+""
+
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
         except ImportError as e:
@@ -485,7 +496,8 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
             object_count_increase, max_allowed_increase,
             f"CRITICAL MEMORY LEAK: Object count increased by {object_count_increase}"
             fafter creating/destroying {num_test_users} engines. "
-            fafter creating/destroying {num_test_users} engines. "
+            fafter creating/destroying {num_test_users} engines. ""
+
             fInitial: {initial_object_count}, Current: {current_object_count}. 
             fBUSINESS IMPACT: Memory leaks cause Golden Path service degradation. "
             fBUSINESS IMPACT: Memory leaks cause Golden Path service degradation. "

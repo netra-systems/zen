@@ -78,7 +78,7 @@ class TestInfrastructureFailureAnalysis:
         high_severity_issues = [issue for issue in docker_issues if issue['severity'] == 'HIGH']
         assert len(high_severity_issues) == 3
 
-        print("✅ Docker Infrastructure Failures: 4 issues documented, 3 high severity")
+        print("CHECK Docker Infrastructure Failures: 4 issues documented, 3 high severity")
         for issue in docker_issues:
             print(f"   [{issue['severity']}] {issue['issue']}")
 
@@ -118,7 +118,7 @@ class TestInfrastructureFailureAnalysis:
         if import_conflicts:
             pytest.fail(f"Import conflicts detected: {import_conflicts}")
 
-        print("✅ Import Dependencies: All critical imports working correctly")
+        print("CHECK Import Dependencies: All critical imports working correctly")
 
     def test_missing_optional_dependencies(self):
         """Test and document missing optional dependencies"""
@@ -141,7 +141,7 @@ class TestInfrastructureFailureAnalysis:
                 missing_deps.append((dep_name, description))
 
         # Document results
-        print(f"✅ Optional Dependencies Analysis: {len(available_deps)} available, {len(missing_deps)} missing")
+        print(f"CHECK Optional Dependencies Analysis: {len(available_deps)} available, {len(missing_deps)} missing")
 
         if available_deps:
             print("   Available dependencies:")
@@ -170,9 +170,9 @@ class TestInfrastructureFailureAnalysis:
             runner_error = str(e)
 
         if not test_runner_available:
-            print(f"⚠️  Unified Test Runner Import Issue: {runner_error}")
+            print(f"WARNING️  Unified Test Runner Import Issue: {runner_error}")
         else:
-            print("✅ Unified Test Runner: Import successful")
+            print("CHECK Unified Test Runner: Import successful")
 
         # Test runner should be available but may have runtime issues
         # This is not a failure of SSOT implementation
@@ -200,7 +200,7 @@ class TestInfrastructureFailureAnalysis:
             else:
                 missing_paths.append(path)
 
-        print(f"✅ File System Dependencies: {len(existing_paths)}/{len(expected_paths)} critical paths exist")
+        print(f"CHECK File System Dependencies: {len(existing_paths)}/{len(expected_paths)} critical paths exist")
 
         if missing_paths:
             print("   Missing paths:")
@@ -245,7 +245,7 @@ class TestInfrastructureFailureAnalysis:
 
         assert legacy_compatibility_works, "Legacy compatibility validation failed"
 
-        print("✅ Infrastructure Workarounds: All validation methods work without Docker")
+        print("CHECK Infrastructure Workarounds: All validation methods work without Docker")
 
 
 def test_infrastructure_repair_recommendations():
@@ -301,7 +301,7 @@ def test_infrastructure_repair_recommendations():
     total_actions = sum(len(r['actions']) for r in recommendations)
     assert total_actions >= 15
 
-    print("✅ Infrastructure Repair Recommendations Generated:")
+    print("CHECK Infrastructure Repair Recommendations Generated:")
     for rec in recommendations:
         print(f"   [{rec['priority']}] {rec['category']}: {len(rec['actions'])} actions")
 

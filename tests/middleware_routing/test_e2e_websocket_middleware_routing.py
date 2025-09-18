@@ -333,18 +333,18 @@ class WebSocketMiddlewareE2ETests:
                     print(f'Testing {description}: {path}')
                     try:
                         with client.websocket_connect(path) as websocket:
-                            print(f'✅ Connection established to {path}')
+                            print(f'CHECK Connection established to {path}')
                             try:
                                 websocket.send_json({'type': 'test', 'message': 'hello'})
-                                print(f'✅ Message sent to {path}')
+                                print(f'CHECK Message sent to {path}')
                             except Exception as send_error:
-                                print(f'⚠️ Message send failed for {path}: {send_error}')
+                                print(f'WARNING️ Message send failed for {path}: {send_error}')
                         self.record_metric(f'production_websockets_{test_name}_success', 1)
-                        print(f'✅ {test_name} completed successfully')
+                        print(f'CHECK {test_name} completed successfully')
                     except Exception as e:
                         self.websocket_errors.append((test_name, str(e)))
                         error_str = str(e).lower()
-                        print(f'❌ {test_name} failed: {e}')
+                        print(f'X {test_name} failed: {e}')
                         if 'routing.py' in error_str and 'line 716' in error_str:
                             self.record_metric(f'production_websockets_{test_name}_exact_error_match', 1)
                             print(f'🎯 EXACT MATCH: {test_name} reproduced the target routing.py line 716 error!')
@@ -353,10 +353,10 @@ class WebSocketMiddlewareE2ETests:
                             print(f'🎯 CLOSE MATCH: {test_name} has middleware_stack error - likely related')
                         elif 'routing' in error_str:
                             self.record_metric(f'production_websockets_{test_name}_routing_related', 1)
-                            print(f'⚠️ RELATED: {test_name} has routing-related error')
+                            print(f'WARNING️ RELATED: {test_name} has routing-related error')
         except Exception as e:
             self.websocket_errors.append(('production_app_setup', str(e)))
-            print(f'❌ Production app setup failed: {e}')
+            print(f'X Production app setup failed: {e}')
             raise AssertionError(f'Production WebSocket reproduction failed: {e}')
 
     def teardown_method(self, method=None):
@@ -378,12 +378,12 @@ class WebSocketMiddlewareE2ETests:
                 elif 'websocket' in error_lower and 'routing' in error_lower:
                     print('🎯 WEBSOCKET ROUTING: WebSocket-specific routing error')
                 elif 'upgrade' in error_lower:
-                    print('⚠️ UPGRADE ISSUE: WebSocket upgrade failure')
+                    print('WARNING️ UPGRADE ISSUE: WebSocket upgrade failure')
                 elif 'middleware' in error_lower:
-                    print('⚠️ MIDDLEWARE ISSUE: Middleware-related WebSocket failure')
+                    print('WARNING️ MIDDLEWARE ISSUE: Middleware-related WebSocket failure')
                 print('-' * 60)
         else:
-            print('✅ No WebSocket errors detected - may need more aggressive testing')
+            print('CHECK No WebSocket errors detected - may need more aggressive testing')
         print(f'\n📊 TOTAL ERRORS CAPTURED: {len(self.websocket_errors)}')
         print(f'📊 UNIQUE ERROR SOURCES: {len(set((e[0] for e in self.websocket_errors)))}')
         routing_errors = [e for e in self.websocket_errors if 'routing' in e[1].lower()]

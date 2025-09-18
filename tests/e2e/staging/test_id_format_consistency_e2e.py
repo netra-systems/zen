@@ -11,7 +11,7 @@ Business Value Protection:
 - Staging validation prevents production deployment of broken ID patterns
 - User flows complete successfully with structured ID formats
 
-Critical Validation: Staging Environment → Production Readiness → Business Continuity
+Critical Validation: Staging Environment -> Production Readiness -> Business Continuity
 """
 import pytest
 import asyncio
@@ -46,7 +46,7 @@ class IdFormatConsistencyE2EStagingTests(SSotAsyncTestCase):
         produces session IDs that follow SSOT format patterns.
 
         Business Impact: $500K+ ARR - Authentication is entry point for all user value
-        E2E Flow: User Login → Auth Service → Session ID → Backend Integration
+        E2E Flow: User Login -> Auth Service -> Session ID -> Backend Integration
         """
         try:
             auth_request_id = f'e2e_auth_req_{int(time.time())}'
@@ -63,12 +63,12 @@ class IdFormatConsistencyE2EStagingTests(SSotAsyncTestCase):
             assert backend_validation_result['valid'], f"E2E STAGING BACKEND INTEGRATION FAILURE: Session ID '{session_id}' not accepted by backend service: {backend_validation_result['error']}"
             backend_user_id = backend_validation_result['user_id']
             assert backend_user_id == self.e2e_test_user_id, f"E2E STAGING USER EXTRACTION FAILURE: Backend extracted '{backend_user_id}', expected '{self.e2e_test_user_id}'"
-            print(f'\n✅ E2E STAGING AUTHENTICATION ID CONSISTENCY SUCCESS:')
-            print(f'   ✓ Auth Request ID: {auth_request_id}')
-            print(f'   ✓ Session ID: {session_id}')
-            print(f'   ✓ User Context: {session_user_context}')
-            print(f"   ✓ Backend Integration: {backend_validation_result['valid']}")
-            print(f'   ✓ User Extraction: {backend_user_id}')
+            print(f'\nCHECK E2E STAGING AUTHENTICATION ID CONSISTENCY SUCCESS:')
+            print(f'   CHECK Auth Request ID: {auth_request_id}')
+            print(f'   CHECK Session ID: {session_id}')
+            print(f'   CHECK User Context: {session_user_context}')
+            print(f"   CHECK Backend Integration: {backend_validation_result['valid']}")
+            print(f'   CHECK User Extraction: {backend_user_id}')
             print(f'   Status: Authentication ID consistency validated in staging')
         except Exception as e:
             pytest.fail(f'E2E STAGING AUTH CRITICAL FAILURE - Authentication ID consistency broken: {e}')
@@ -80,7 +80,7 @@ class IdFormatConsistencyE2EStagingTests(SSotAsyncTestCase):
         environment using SSOT-formatted connection IDs.
 
         Business Impact: $500K+ ARR - WebSocket connections enable real-time AI chat
-        E2E Flow: Session → WebSocket Connect → Connection ID → Event Routing
+        E2E Flow: Session -> WebSocket Connect -> Connection ID -> Event Routing
         """
         try:
             staging_session_id = self.unified_generator.generate_session_id(user_id=self.e2e_test_user_id, request_id='e2e_websocket_integration')
@@ -102,12 +102,12 @@ class IdFormatConsistencyE2EStagingTests(SSotAsyncTestCase):
                 assert delivered_connection_id == established_connection_id, f"E2E STAGING EVENT ROUTING FAILURE: Event {i} routed to '{delivered_connection_id}', expected '{established_connection_id}'"
             connection_persistence_result = await self._simulate_staging_websocket_persistence(established_connection_id, duration_seconds=30)
             assert connection_persistence_result['persistent'], f"E2E STAGING CONNECTION PERSISTENCE FAILURE: Connection dropped after {connection_persistence_result['duration']}s: {connection_persistence_result['error']}"
-            print(f'\n✅ E2E STAGING WEBSOCKET CONNECTION INTEGRATION SUCCESS:')
-            print(f'   ✓ Session ID: {staging_session_id}')
-            print(f'   ✓ Connection ID: {established_connection_id}')
-            print(f"   ✓ WebSocket Connected: {websocket_connection_result['connected']}")
-            print(f'   ✓ Events Delivered: {len(successful_deliveries)}/{len(test_agent_events)}')
-            print(f"   ✓ Connection Persistent: {connection_persistence_result['persistent']}")
+            print(f'\nCHECK E2E STAGING WEBSOCKET CONNECTION INTEGRATION SUCCESS:')
+            print(f'   CHECK Session ID: {staging_session_id}')
+            print(f'   CHECK Connection ID: {established_connection_id}')
+            print(f"   CHECK WebSocket Connected: {websocket_connection_result['connected']}")
+            print(f'   CHECK Events Delivered: {len(successful_deliveries)}/{len(test_agent_events)}')
+            print(f"   CHECK Connection Persistent: {connection_persistence_result['persistent']}")
             print(f'   Status: WebSocket connection ID integration validated in staging')
         except Exception as e:
             pytest.fail(f'E2E STAGING WEBSOCKET CRITICAL FAILURE - WebSocket integration broken: {e}')
@@ -119,7 +119,7 @@ class IdFormatConsistencyE2EStagingTests(SSotAsyncTestCase):
         generate and use SSOT-formatted client IDs for data operations.
 
         Business Impact: $500K+ ARR - Database operations store user data for AI responses
-        E2E Flow: User Request → Database Factories → Client IDs → Data Operations
+        E2E Flow: User Request -> Database Factories -> Client IDs -> Data Operations
         """
         try:
             staging_request_id = f'e2e_db_staging_{int(time.time())}'
@@ -144,14 +144,14 @@ class IdFormatConsistencyE2EStagingTests(SSotAsyncTestCase):
             redis_user_context = extracted_user_contexts['redis']
             clickhouse_user_context = extracted_user_contexts['clickhouse']
             assert redis_user_context == clickhouse_user_context, f"E2E STAGING USER CONTEXT MISMATCH: Redis '{redis_user_context}' != ClickHouse '{clickhouse_user_context}'"
-            print(f'\n✅ E2E STAGING DATABASE CLIENT ID INTEGRATION SUCCESS:')
-            print(f'   ✓ Request ID: {staging_request_id}')
-            print(f'   ✓ Redis Client ID: {redis_client_id}')
-            print(f'   ✓ ClickHouse Client ID: {clickhouse_client_id}')
-            print(f"   ✓ Redis Operations: {redis_operation_result['success']}")
-            print(f"   ✓ ClickHouse Operations: {clickhouse_operation_result['success']}")
-            print(f"   ✓ Cross-service Correlation: {correlation_test_result['correlated']}")
-            print(f'   ✓ User Context Consistency: {redis_user_context} == {clickhouse_user_context}')
+            print(f'\nCHECK E2E STAGING DATABASE CLIENT ID INTEGRATION SUCCESS:')
+            print(f'   CHECK Request ID: {staging_request_id}')
+            print(f'   CHECK Redis Client ID: {redis_client_id}')
+            print(f'   CHECK ClickHouse Client ID: {clickhouse_client_id}')
+            print(f"   CHECK Redis Operations: {redis_operation_result['success']}")
+            print(f"   CHECK ClickHouse Operations: {clickhouse_operation_result['success']}")
+            print(f"   CHECK Cross-service Correlation: {correlation_test_result['correlated']}")
+            print(f'   CHECK User Context Consistency: {redis_user_context} == {clickhouse_user_context}')
             print(f'   Status: Database client ID integration validated in staging')
         except Exception as e:
             pytest.fail(f'E2E STAGING DATABASE CRITICAL FAILURE - Database integration broken: {e}')
@@ -163,7 +163,7 @@ class IdFormatConsistencyE2EStagingTests(SSotAsyncTestCase):
         maintains consistency and traceability using SSOT audit ID formats.
 
         Business Impact: $500K+ ARR - Audit trails required for compliance and debugging
-        E2E Flow: User Operations → Audit Generation → Compliance Reporting → Regulatory Requirements
+        E2E Flow: User Operations -> Audit Generation -> Compliance Reporting -> Regulatory Requirements
         """
         try:
             audit_test_request_id = f'e2e_audit_staging_{int(time.time())}'
@@ -204,15 +204,15 @@ class IdFormatConsistencyE2EStagingTests(SSotAsyncTestCase):
             assert user_traceability_result['traceable'], f"E2E STAGING AUDIT TRACEABILITY FAILURE: Cannot trace all audit records to user: {user_traceability_result['error']}"
             traceable_records = user_traceability_result['traceable_records']
             assert traceable_records == len(audit_records), f"E2E STAGING TRACEABILITY COUNT FAILURE: {traceable_records}/{len(audit_records)} records traceable to user '{self.e2e_test_user_id}'"
-            print(f'\n✅ E2E STAGING AUDIT TRAIL CONSISTENCY SUCCESS:')
-            print(f'   ✓ Audit Records Generated: {len(audit_records)}')
-            print(f'   ✓ Staging System Acceptance: {len(successful_audits)}/{len(audit_records)}')
-            print(f"   ✓ Compliance Report Generated: {compliance_report_result['report_generated']}")
-            print(f'   ✓ Report Coverage: {list(actual_record_types)}')
-            print(f'   ✓ Temporal Consistency: {timestamp_range}s range')
-            print(f'   ✓ User Traceability: {traceable_records}/{len(audit_records)} records')
+            print(f'\nCHECK E2E STAGING AUDIT TRAIL CONSISTENCY SUCCESS:')
+            print(f'   CHECK Audit Records Generated: {len(audit_records)}')
+            print(f'   CHECK Staging System Acceptance: {len(successful_audits)}/{len(audit_records)}')
+            print(f"   CHECK Compliance Report Generated: {compliance_report_result['report_generated']}")
+            print(f'   CHECK Report Coverage: {list(actual_record_types)}')
+            print(f'   CHECK Temporal Consistency: {timestamp_range}s range')
+            print(f'   CHECK User Traceability: {traceable_records}/{len(audit_records)} records')
             for record_type, audit_id, _ in audit_records:
-                print(f'   ✓ {record_type.upper():12} -> {audit_id}')
+                print(f'   CHECK {record_type.upper():12} -> {audit_id}')
             print(f'   Status: Audit trail consistency validated in staging environment')
         except Exception as e:
             pytest.fail(f'E2E STAGING AUDIT CRITICAL FAILURE - Audit trail consistency broken: {e}')

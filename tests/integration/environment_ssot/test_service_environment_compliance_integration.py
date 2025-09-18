@@ -78,7 +78,7 @@ class ServiceEnvironmentComplianceIntegrationTests(SSotAsyncTestCase):
 
             print(f"  {service_name}:")
             print(f"    📁 Total files: {total_files}")
-            print(f"    ✅ Compliant: {compliant_count} ({compliance_percentage:.1f}%)")
+            print(f"    CHECK Compliant: {compliant_count} ({compliance_percentage:.1f}%)")
             print(f"    🚨 Violations: {violation_count}")
 
             if result['sample_violations']:
@@ -116,7 +116,7 @@ class ServiceEnvironmentComplianceIntegrationTests(SSotAsyncTestCase):
 
         # Log shared utility analysis
         print(f"\n🔗 Shared Environment Utility Integration:")
-        print(f"  ✅ Services using shared utilities: {len(shared_utility_usage['compliant_services'])}")
+        print(f"  CHECK Services using shared utilities: {len(shared_utility_usage['compliant_services'])}")
         print(f"  🔄 Services with duplicate implementations: {len(shared_utility_usage['duplicate_implementations'])}")
 
         if shared_utility_usage['compliant_services']:
@@ -125,7 +125,7 @@ class ServiceEnvironmentComplianceIntegrationTests(SSotAsyncTestCase):
                 print(f"    • {service}")
 
         if shared_utility_usage['duplicate_implementations']:
-            print(f"  ⚠️ Services with duplicate implementations:")
+            print(f"  WARNING️ Services with duplicate implementations:")
             for service, details in shared_utility_usage['duplicate_implementations'].items():
                 print(f"    • {service}: {details['duplicate_files']} files with duplicates")
 
@@ -150,8 +150,8 @@ class ServiceEnvironmentComplianceIntegrationTests(SSotAsyncTestCase):
 
         # Log consistency analysis
         print(f"\n⚙️ Environment Configuration Consistency:")
-        print(f"  ✅ Consistent patterns: {len(config_consistency['consistent_patterns'])}")
-        print(f"  ⚠️ Inconsistent patterns: {len(config_consistency['inconsistent_patterns'])}")
+        print(f"  CHECK Consistent patterns: {len(config_consistency['consistent_patterns'])}")
+        print(f"  WARNING️ Inconsistent patterns: {len(config_consistency['inconsistent_patterns'])}")
 
         if config_consistency['consistent_patterns']:
             print(f"  📋 Consistent configuration patterns:")
@@ -197,7 +197,7 @@ class ServiceEnvironmentComplianceIntegrationTests(SSotAsyncTestCase):
             success = result['success']
             import_errors = result['import_errors']
 
-            status = "✅ SUCCESS" if success else "❌ FAILED"
+            status = "CHECK SUCCESS" if success else "X FAILED"
             print(f"  {service_name}: {status}")
 
             if import_errors:

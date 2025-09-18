@@ -360,7 +360,7 @@ class DeprecationCategoryCoverageTests(SSotBaseTestCase):
         
         # Guidance for migration planning
         if high_priority_categories:
-            print(f"\n⚠️  High-priority categories need immediate attention: {high_priority_categories}")
+            print(f"\nWARNING️  High-priority categories need immediate attention: {high_priority_categories}")
             
         # Store for test validation
         self.migration_priorities = sorted_priorities
@@ -427,7 +427,7 @@ class DeprecationCategoryCoverageTests(SSotBaseTestCase):
                         results['canonical_files'] += 1
                         
             except Exception as e:
-                print(f"⚠️  Could not analyze {py_file}: {e}")
+                print(f"WARNING️  Could not analyze {py_file}: {e}")
         
         return results
 

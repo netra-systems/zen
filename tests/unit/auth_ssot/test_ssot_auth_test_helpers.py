@@ -75,11 +75,11 @@ class SSOTAuthTestHelpersTests(SSotAsyncTestCase):
                 )
             
             self.record_metric("ssot_auth_helper_import", "success")
-            self.logger.info("✅ Successfully imported SSOTAuthTestHelper")
+            self.logger.info("CHECK Successfully imported SSOTAuthTestHelper")
             
         except ImportError as e:
             self.record_metric("ssot_auth_helper_import", "failed")
-            self.logger.error(f"❌ Could not import SSOTAuthTestHelper: {e}")
+            self.logger.error(f"X Could not import SSOTAuthTestHelper: {e}")
             self.fail(f"SSOTAuthTestHelper import failed: {e}")
     
     async def test_ssot_auth_helper_initialization_without_auth_client(self):
@@ -103,11 +103,11 @@ class SSOTAuthTestHelpersTests(SSotAsyncTestCase):
                 self.assertIsNone(helper.auth_client)
                 
                 self.record_metric("auth_helper_graceful_degradation", "success")
-                self.logger.info("✅ SSOTAuthTestHelper handles missing auth client gracefully")
+                self.logger.info("CHECK SSOTAuthTestHelper handles missing auth client gracefully")
                 
         except Exception as e:
             self.record_metric("auth_helper_graceful_degradation", "failed")
-            self.logger.error(f"❌ Auth helper graceful degradation failed: {e}")
+            self.logger.error(f"X Auth helper graceful degradation failed: {e}")
             self.fail(f"Auth helper should handle missing client gracefully: {e}")
     
     async def test_ssot_auth_helper_initialization_with_mock_client(self):
@@ -134,11 +134,11 @@ class SSOTAuthTestHelpersTests(SSotAsyncTestCase):
             self.assertEqual(helper.auth_client, mock_auth_client)
             
             self.record_metric("auth_helper_mock_client", "success")
-            self.logger.info("✅ SSOTAuthTestHelper accepts mock auth client")
+            self.logger.info("CHECK SSOTAuthTestHelper accepts mock auth client")
             
         except Exception as e:
             self.record_metric("auth_helper_mock_client", "failed")
-            self.logger.error(f"❌ Auth helper mock client initialization failed: {e}")
+            self.logger.error(f"X Auth helper mock client initialization failed: {e}")
             self.fail(f"Auth helper should accept mock client: {e}")
     
     async def test_create_test_user_with_token_delegates_to_auth_service(self):
@@ -194,11 +194,11 @@ class SSOTAuthTestHelpersTests(SSotAsyncTestCase):
             
             # Verify no JWT operations were used (delegated to auth service)
             self.record_metric("create_user_delegation", "success")
-            self.logger.info("✅ create_test_user_with_token properly delegates to auth service")
+            self.logger.info("CHECK create_test_user_with_token properly delegates to auth service")
             
         except Exception as e:
             self.record_metric("create_user_delegation", "failed")
-            self.logger.error(f"❌ create_test_user_with_token delegation failed: {e}")
+            self.logger.error(f"X create_test_user_with_token delegation failed: {e}")
             self.fail(f"User creation should delegate to auth service: {e}")
     
     async def test_validate_token_via_service_delegates_to_auth_service(self):
@@ -237,11 +237,11 @@ class SSOTAuthTestHelpersTests(SSotAsyncTestCase):
             
             # Verify no JWT decode operations were used
             self.record_metric("validate_token_delegation", "success")
-            self.logger.info("✅ validate_token_via_service properly delegates to auth service")
+            self.logger.info("CHECK validate_token_via_service properly delegates to auth service")
             
         except Exception as e:
             self.record_metric("validate_token_delegation", "failed")
-            self.logger.error(f"❌ validate_token_via_service delegation failed: {e}")
+            self.logger.error(f"X validate_token_via_service delegation failed: {e}")
             self.fail(f"Token validation should delegate to auth service: {e}")
     
     async def test_create_websocket_auth_token_delegates_to_auth_service(self):
@@ -277,11 +277,11 @@ class SSOTAuthTestHelpersTests(SSotAsyncTestCase):
             self.assertEqual(websocket_token, "websocket_token_123")
             
             self.record_metric("websocket_token_delegation", "success")
-            self.logger.info("✅ create_websocket_auth_token properly delegates to auth service")
+            self.logger.info("CHECK create_websocket_auth_token properly delegates to auth service")
             
         except Exception as e:
             self.record_metric("websocket_token_delegation", "failed")
-            self.logger.error(f"❌ create_websocket_auth_token delegation failed: {e}")
+            self.logger.error(f"X create_websocket_auth_token delegation failed: {e}")
             self.fail(f"WebSocket token creation should delegate to auth service: {e}")
     
     async def test_create_websocket_auth_token_fallback_when_no_websocket_method(self):
@@ -318,11 +318,11 @@ class SSOTAuthTestHelpersTests(SSotAsyncTestCase):
             self.assertEqual(websocket_token, "fallback_websocket_token_456")
             
             self.record_metric("websocket_token_fallback", "success")
-            self.logger.info("✅ WebSocket token creation falls back to regular token generation")
+            self.logger.info("CHECK WebSocket token creation falls back to regular token generation")
             
         except Exception as e:
             self.record_metric("websocket_token_fallback", "failed")
-            self.logger.error(f"❌ WebSocket token fallback failed: {e}")
+            self.logger.error(f"X WebSocket token fallback failed: {e}")
             self.fail(f"WebSocket token should fall back to regular generation: {e}")
     
     async def test_get_user_from_token_delegates_to_validation(self):
@@ -360,11 +360,11 @@ class SSOTAuthTestHelpersTests(SSotAsyncTestCase):
             self.assertEqual(user_info["permissions"], ["read", "write", "admin"])
             
             self.record_metric("get_user_from_token_delegation", "success")
-            self.logger.info("✅ get_user_from_token properly delegates to auth service validation")
+            self.logger.info("CHECK get_user_from_token properly delegates to auth service validation")
             
         except Exception as e:
             self.record_metric("get_user_from_token_delegation", "failed")
-            self.logger.error(f"❌ get_user_from_token delegation failed: {e}")
+            self.logger.error(f"X get_user_from_token delegation failed: {e}")
             self.fail(f"User lookup should delegate to auth service validation: {e}")
     
     async def test_get_user_from_token_handles_invalid_token(self):
@@ -397,11 +397,11 @@ class SSOTAuthTestHelpersTests(SSotAsyncTestCase):
             self.assertIsNone(user_info)
             
             self.record_metric("invalid_token_handling", "success")
-            self.logger.info("✅ get_user_from_token handles invalid tokens gracefully")
+            self.logger.info("CHECK get_user_from_token handles invalid tokens gracefully")
             
         except Exception as e:
             self.record_metric("invalid_token_handling", "failed")
-            self.logger.error(f"❌ Invalid token handling failed: {e}")
+            self.logger.error(f"X Invalid token handling failed: {e}")
             self.fail(f"Invalid token should be handled gracefully: {e}")
     
     async def test_create_multiple_test_users_for_isolation_testing(self):
@@ -453,11 +453,11 @@ class SSOTAuthTestHelpersTests(SSotAsyncTestCase):
             
             self.record_metric("multiple_users_creation", "success")
             self.record_metric("users_created_count", 3)
-            self.logger.info("✅ Successfully created multiple test users for isolation testing")
+            self.logger.info("CHECK Successfully created multiple test users for isolation testing")
             
         except Exception as e:
             self.record_metric("multiple_users_creation", "failed")
-            self.logger.error(f"❌ Multiple users creation failed: {e}")
+            self.logger.error(f"X Multiple users creation failed: {e}")
             self.fail(f"Multiple user creation should work via auth service: {e}")
 
 
@@ -509,11 +509,11 @@ class SSOTAuthTestHelpersConvenienceFunctionsTests(SSotAsyncTestCase):
                 )
                 
                 self.record_metric("convenience_create_token", "success")
-                self.logger.info("✅ create_test_auth_token convenience function works")
+                self.logger.info("CHECK create_test_auth_token convenience function works")
                 
         except Exception as e:
             self.record_metric("convenience_create_token", "failed")
-            self.logger.error(f"❌ create_test_auth_token convenience function failed: {e}")
+            self.logger.error(f"X create_test_auth_token convenience function failed: {e}")
             self.fail(f"Convenience token creation should work: {e}")
     
     async def test_validate_test_token_convenience_function(self):
@@ -543,11 +543,11 @@ class SSOTAuthTestHelpersConvenienceFunctionsTests(SSotAsyncTestCase):
                 mock_helper.validate_token_via_service.assert_called_once_with("test_validation_token")
                 
                 self.record_metric("convenience_validate_token", "success")
-                self.logger.info("✅ validate_test_token convenience function works")
+                self.logger.info("CHECK validate_test_token convenience function works")
                 
         except Exception as e:
             self.record_metric("convenience_validate_token", "failed")
-            self.logger.error(f"❌ validate_test_token convenience function failed: {e}")
+            self.logger.error(f"X validate_test_token convenience function failed: {e}")
             self.fail(f"Convenience token validation should work: {e}")
     
     async def test_convenience_functions_handle_auth_service_unavailable(self):
@@ -572,11 +572,11 @@ class SSOTAuthTestHelpersConvenienceFunctionsTests(SSotAsyncTestCase):
                     await validate_test_token("test_token")
                 
                 self.record_metric("convenience_error_handling", "success")
-                self.logger.info("✅ Convenience functions handle auth service unavailability")
+                self.logger.info("CHECK Convenience functions handle auth service unavailability")
                 
         except Exception as e:
             self.record_metric("convenience_error_handling", "failed")
-            self.logger.error(f"❌ Convenience function error handling failed: {e}")
+            self.logger.error(f"X Convenience function error handling failed: {e}")
             self.fail(f"Convenience functions should handle errors gracefully: {e}")
 
 
@@ -612,11 +612,11 @@ class SSOTAuthTestHelpersAsyncContextManagerTests(SSotAsyncTestCase):
                 self.assertEqual(context_helper, helper)
                 
                 self.record_metric("context_manager_entry", "success")
-                self.logger.info("✅ Auth helper async context manager entry works")
+                self.logger.info("CHECK Auth helper async context manager entry works")
                 
         except Exception as e:
             self.record_metric("context_manager_entry", "failed")
-            self.logger.error(f"❌ Context manager entry failed: {e}")
+            self.logger.error(f"X Context manager entry failed: {e}")
             self.fail(f"Async context manager entry should work: {e}")
     
     async def test_auth_helper_context_manager_cleanup_on_exit(self):
@@ -651,11 +651,11 @@ class SSOTAuthTestHelpersAsyncContextManagerTests(SSotAsyncTestCase):
             # After context exit, cleanup should have been called
             # (In practice, this would call delete_user if available)
             self.record_metric("context_manager_cleanup", "success")
-            self.logger.info("✅ Auth helper context manager cleanup works")
+            self.logger.info("CHECK Auth helper context manager cleanup works")
             
         except Exception as e:
             self.record_metric("context_manager_cleanup", "failed") 
-            self.logger.error(f"❌ Context manager cleanup failed: {e}")
+            self.logger.error(f"X Context manager cleanup failed: {e}")
             self.fail(f"Context manager cleanup should work: {e}")
 
 
@@ -692,11 +692,11 @@ class SSOTAuthTestHelpersErrorHandlingTests(SSotAsyncTestCase):
                 await helper.create_test_user_with_token()
             
             self.record_metric("connection_error_handling", "success")
-            self.logger.info("✅ Helper handles auth service connection errors")
+            self.logger.info("CHECK Helper handles auth service connection errors")
             
         except Exception as e:
             self.record_metric("connection_error_handling", "failed")
-            self.logger.error(f"❌ Connection error handling failed: {e}")
+            self.logger.error(f"X Connection error handling failed: {e}")
             self.fail(f"Should handle connection errors gracefully: {e}")
     
     async def test_helper_handles_auth_service_timeout_errors(self):
@@ -719,11 +719,11 @@ class SSOTAuthTestHelpersErrorHandlingTests(SSotAsyncTestCase):
                 await helper.validate_token_via_service("test_token")
             
             self.record_metric("timeout_error_handling", "success")
-            self.logger.info("✅ Helper handles auth service timeout errors")
+            self.logger.info("CHECK Helper handles auth service timeout errors")
             
         except Exception as e:
             self.record_metric("timeout_error_handling", "failed")
-            self.logger.error(f"❌ Timeout error handling failed: {e}")
+            self.logger.error(f"X Timeout error handling failed: {e}")
             self.fail(f"Should handle timeout errors gracefully: {e}")
     
     async def test_helper_handles_malformed_auth_service_responses(self):
@@ -752,9 +752,9 @@ class SSOTAuthTestHelpersErrorHandlingTests(SSotAsyncTestCase):
                 self.assertIn("response", str(e).lower())
                 self.record_metric("malformed_response_handling", "clear_error")
             
-            self.logger.info("✅ Helper handles malformed auth service responses")
+            self.logger.info("CHECK Helper handles malformed auth service responses")
             
         except Exception as e:
             self.record_metric("malformed_response_handling", "failed")
-            self.logger.error(f"❌ Malformed response handling failed: {e}")
+            self.logger.error(f"X Malformed response handling failed: {e}")
             # Don't fail test - this is testing error handling itself

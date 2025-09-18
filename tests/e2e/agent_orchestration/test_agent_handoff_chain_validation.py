@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Protects $500K+ ARR by preventing agent execution failures in production
 
 These tests validate the complete agent handoff chain in the Supervisor Agent orchestration:
-Triage → Data Helper → APEX Optimizer → Actions → Reporting
+Triage -> Data Helper -> APEX Optimizer -> Actions -> Reporting
 
 Each handoff must transfer context correctly, maintain user isolation, and ensure
 reliable progression through the complete workflow chain.
@@ -77,7 +77,7 @@ class AgentHandoffChainValidationTests(SSotAsyncTestCase):
     E2E Tests for Agent Handoff Chain Validation.
     
     These tests validate the complete agent orchestration chain:
-    Supervisor → Triage → Data Helper → APEX Optimizer → Actions → Reporting
+    Supervisor -> Triage -> Data Helper -> APEX Optimizer -> Actions -> Reporting
     """
     
     def setUp(self):
@@ -172,7 +172,7 @@ class AgentHandoffChainValidationTests(SSotAsyncTestCase):
                        f"Chain execution took too long: {chain_validation.total_execution_time:.1f}s")
         
         # Log success metrics
-        logger.info(f"✅ Complete agent handoff chain test succeeded: "
+        logger.info(f"CHECK Complete agent handoff chain test succeeded: "
                    f"sequence_length={len(chain_validation.actual_sequence)}, "
                    f"context_score={chain_validation.context_preservation_score:.2f}, "
                    f"execution_time={chain_validation.total_execution_time:.1f}s")
@@ -240,7 +240,7 @@ class AgentHandoffChainValidationTests(SSotAsyncTestCase):
             context_tracking_request["context_validation_markers"]
         )
         
-        logger.info("✅ Handoff context preservation test completed successfully")
+        logger.info("CHECK Handoff context preservation test completed successfully")
         await websocket.close()
 
     @pytest.mark.asyncio
@@ -306,7 +306,7 @@ class AgentHandoffChainValidationTests(SSotAsyncTestCase):
         # Validate recovery results
         await self._validate_failure_recovery_results(recovery_results, failure_scenarios)
         
-        logger.info(f"✅ Handoff chain failure recovery test completed: "
+        logger.info(f"CHECK Handoff chain failure recovery test completed: "
                    f"{len(recovery_results)} scenarios tested")
         await websocket.close()
 
@@ -390,7 +390,7 @@ class AgentHandoffChainValidationTests(SSotAsyncTestCase):
         self.assertLess(avg_execution_time, self.chain_timeout,
                        f"Average concurrent execution time too high: {avg_execution_time:.1f}s")
         
-        logger.info(f"✅ Concurrent handoff chains test completed: "
+        logger.info(f"CHECK Concurrent handoff chains test completed: "
                    f"{len(successful_chains)}/{len(concurrent_sessions)} successful, "
                    f"avg_time={avg_execution_time:.1f}s")
         

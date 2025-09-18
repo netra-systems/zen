@@ -67,12 +67,13 @@ class TestThreadsFixIntegration:
     async def test_normal_case_with_proper_metadata(self, db_session, thread_repo):
         """Test normal case: thread with proper metadata."""
         # Create thread with proper metadata
-user_id = 7c5e1032-ed21-4aea-b12a-aeddf3622bec
+user_id = 7c5e1032-ed21-""4aea""-b12a-aeddf3622bec
 await self.create_test_thread( )
 db_session,
 "thread_1,"
 {user_id: user_id, title: Test Thread}"
-{user_id: user_id, title: Test Thread}"
+{user_id: user_id, title: Test Thread}""
+
         
 
         # Query threads for user
@@ -89,7 +90,8 @@ assert threads[0].metadata_[user_id] == user_id
 pass
             # Create thread with NULL metadata
 await self.create_test_thread(db_session, thread_null, None)"
-await self.create_test_thread(db_session, thread_null, None)"
+await self.create_test_thread(db_session, thread_null, None)""
+
 
             # Create thread with proper metadata for same user
 user_id = "test-user-123"
@@ -121,7 +123,8 @@ assert len(threads) == 0
 @pytest.mark.asyncio
     async def test_mixed_metadata_scenarios(self, db_session, thread_repo):
     Test multiple threads with various metadata states."
-    Test multiple threads with various metadata states."
+    Test multiple threads with various metadata states.""
+
 pass
 user_id = "test-user-456"
 
@@ -180,7 +183,8 @@ assert len(threads) == 1
 
                             # Query without whitespace should also find it
 threads = await thread_repo.find_by_user(db_session, user-with-spaces)"
-threads = await thread_repo.find_by_user(db_session, user-with-spaces)"
+threads = await thread_repo.find_by_user(db_session, user-with-spaces)""
+
 assert len(threads) == 1
 
 @pytest.mark.asyncio
@@ -226,7 +230,8 @@ class TestActualPostgreSQLBehavior:
 @pytest.mark.asyncio
     async def test_jsonb_query_simulation(self):
     Simulate what happens with PostgreSQL JSONB queries."
-    Simulate what happens with PostgreSQL JSONB queries."
+    Simulate what happens with PostgreSQL JSONB queries.""
+
 
         # Simulate thread data as it would be in PostgreSQL
 threads_data = [
@@ -241,7 +246,8 @@ threads_data = [
         
 
 async def jsonb_extract(metadata, key):
-    ""Simulate PostgreSQL's ->> operator.'"
+    ""Simulate PostgreSQL's ->> operator.'""
+
 pass
 if metadata is None:
     await asyncio.sleep(0)
@@ -252,7 +258,8 @@ return str(metadata.get(key)) if key in metadata else None
 
             # Simulate query: WHERE metadata_->>'user_id' = 'user123'
 target_user = user123"
-target_user = user123"
+target_user = user123""
+
 matched = []
 
 for thread in threads_data:

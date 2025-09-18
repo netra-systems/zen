@@ -119,7 +119,7 @@ class CrossServiceAuthFlowTest(SSotAsyncTestCase):
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 
-                logger.info(f"✅ Auth service token issuance working: token length {len(access_token)}")
+                logger.info(f"CHECK Auth service token issuance working: token length {len(access_token)}")
                 
         except httpx.ConnectError:
             pytest.skip("Cannot connect to auth service")
@@ -201,7 +201,7 @@ class CrossServiceAuthFlowTest(SSotAsyncTestCase):
                     # This test should fail because Issue #501 exists
                     pytest.fail(f"Backend service token validation failed for {len(failed_validations)} endpoints: {failed_validations}. This indicates Issue #501 cross-service auth breakdown.")
                 
-                logger.info("✅ Backend service token validation working correctly")
+                logger.info("CHECK Backend service token validation working correctly")
                 
         except httpx.ConnectError:
             pytest.skip("Cannot connect to backend service")
@@ -272,7 +272,7 @@ class CrossServiceAuthFlowTest(SSotAsyncTestCase):
                     # This indicates the root cause of Issue #501
                     pytest.fail(f"JWT secret synchronization failure detected: Auth service issues tokens that backend cannot decode. Status: {backend_decode_result['status_code']}")
                 
-                logger.info("✅ JWT secret synchronization appears correct")
+                logger.info("CHECK JWT secret synchronization appears correct")
                 
         except Exception as e:
             pytest.fail(f"JWT secret synchronization test failed: {e}")
@@ -337,7 +337,7 @@ class CrossServiceAuthFlowTest(SSotAsyncTestCase):
                     logger.error(f"No authentication header formats work: {json.dumps(format_results, indent=2)}")
                     pytest.fail(f"No authentication header formats accepted by backend service. This may be contributing to Issue #501.")
                 
-                logger.info(f"✅ Working auth header formats found: {len(working_formats)}")
+                logger.info(f"CHECK Working auth header formats found: {len(working_formats)}")
                 
         except Exception as e:
             pytest.fail(f"Auth header format validation test failed: {e}")
@@ -403,7 +403,7 @@ class CrossServiceAuthFlowTest(SSotAsyncTestCase):
                     if timing_analysis["token_lifetime_seconds"] < 60:  # Less than 1 minute
                         logger.warning(f"Very short token lifetime: {timing_analysis['token_lifetime_seconds']}s")
                     
-                    logger.info(f"✅ Token timing analysis completed: {timing_analysis['token_lifetime_seconds']}s lifetime")
+                    logger.info(f"CHECK Token timing analysis completed: {timing_analysis['token_lifetime_seconds']}s lifetime")
                     
                 except Exception as decode_error:
                     pytest.fail(f"Could not decode token for timing analysis: {decode_error}")
@@ -453,9 +453,9 @@ if __name__ == "__main__":
             try:
                 method = getattr(test_instance, method_name)
                 await method()
-                print(f"✅ {method_name} completed")
+                print(f"CHECK {method_name} completed")
             except Exception as e:
-                print(f"❌ {method_name} failed: {e}")
+                print(f"X {method_name} failed: {e}")
         
         print(f"\n📊 Final Results: {json.dumps(test_instance.test_results, indent=2)}")
     

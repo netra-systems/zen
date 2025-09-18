@@ -1,9 +1,9 @@
-"""
-"""
+""""
+
 MISSION CRITICAL: Comprehensive MCP Connection Manager Resilience Tests
 
 Tests the fixed MCP Connection Manager to ensure:
-1. No permanent failure states - all connections can recover
+    1. No permanent failure states - all connections can recover
 2. Exponential backoff resets on successful reconnection
 3. Failed connections are replaced, not removed
 4. Background recovery tasks work properly
@@ -11,20 +11,21 @@ Tests the fixed MCP Connection Manager to ensure:
 6. Health monitoring triggers recovery as needed
 
 This test suite validates the critical fixes for:
-- Permanent FAILED states
+    - Permanent FAILED states
 - Exponential backoff growing without reset
 - Failed connections being removed without replacement
 - No automatic recovery mechanism
 
 CRITICAL BUSINESS VALUE:
-- Prevents MCP server connection cascade failures
+    - Prevents MCP server connection cascade failures
 - Ensures external tool integrations remain operational
 - Validates resilience patterns used throughout the system
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import asyncio
 import pytest
 import time
@@ -68,7 +69,8 @@ class MCPConnectionRecoveryComprehensiveTests:
     @pytest.fixture
     def mock_failing_connection(self):
         Mock a connection that will fail."
-        Mock a connection that will fail."
+        Mock a connection that will fail.""
+
         connection = MCPConnection(
             id=test-conn-1","
             server_name=test_server,
@@ -82,7 +84,8 @@ class MCPConnectionRecoveryComprehensiveTests:
     async def test_failed_connections_move_to_recovery_queue(
         self, connection_manager, mock_failing_connection
     ):
-        ""Test that failed connections move to recovery queue instead of being removed."
+        ""Test that failed connections move to recovery queue instead of being removed.""
+
         server_name = mock_failing_connection.server_name
         
         # Initialize pools and circuit breaker
@@ -92,7 +95,8 @@ class MCPConnectionRecoveryComprehensiveTests:
         # Handle connection failure
         await connection_manager._handle_connection_failure(
             mock_failing_connection, test_error"
-            mock_failing_connection, test_error"
+            mock_failing_connection, test_error""
+
         )
         
         # Verify connection is in recovery queue
@@ -262,7 +266,8 @@ class MCPConnectionRecoveryComprehensiveTests:
         for i in range(6):  # Exceed threshold
             connection = MCPConnection(
                 id=ftest-conn-{i},"
-                id=ftest-conn-{i},"
+                id=ftest-conn-{i},""
+
                 server_name=mock_config.name,
                 transport=Mock(),
                 status=ConnectionStatus.CONNECTED,
@@ -383,7 +388,8 @@ class MCPConnectionRecoveryComprehensiveTests:
         # Add failed connection
         failed_connection = MCPConnection(
             id=failed-conn,"
-            id=failed-conn,"
+            id=failed-conn,""
+
             server_name=mock_config.name,
             transport=Mock(),
             status=ConnectionStatus.FAILED,
@@ -417,7 +423,8 @@ class MCPConnectionRecoveryComprehensiveTests:
         self, connection_manager, mock_config, caplog
     ):
         Test that all state transitions are logged comprehensively."
-        Test that all state transitions are logged comprehensively."
+        Test that all state transitions are logged comprehensively.""
+
         import logging
         caplog.set_level(logging.INFO)
         
@@ -531,7 +538,8 @@ class MCPConnectionManagerShutdownTests:
     @pytest.mark.asyncio
     async def test_graceful_shutdown_cancels_all_tasks(self):
         Test that graceful shutdown properly cancels all background tasks."
-        Test that graceful shutdown properly cancels all background tasks."
+        Test that graceful shutdown properly cancels all background tasks.""
+
         manager = MCPConnectionManager()
         
         # Start background tasks

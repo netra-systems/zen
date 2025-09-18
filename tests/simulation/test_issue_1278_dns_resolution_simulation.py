@@ -230,7 +230,7 @@ class TestIssue1278DNSResolutionSimulation(AsyncBaseTestCase):
             ssl_validation_results.append(validation_result)
             
             if ssl_match == expected_match:
-                self.logger.info(f"✓ SSL validation correct for {domain}: {description}")
+                self.logger.info(f"CHECK SSL validation correct for {domain}: {description}")
             else:
                 self.logger.warning(f"✗ SSL validation mismatch for {domain}: "
                                   f"expected {expected_match}, got {ssl_match}")
@@ -258,7 +258,7 @@ class TestIssue1278DNSResolutionSimulation(AsyncBaseTestCase):
         assert len(problematic_validations) > 0, \
             "Should identify problematic domain patterns"
 
-        self.logger.info("✅ SSL certificate domain validation simulation completed")
+        self.logger.info("CHECK SSL certificate domain validation simulation completed")
 
     @pytest.mark.simulation
     @pytest.mark.issue_1278
@@ -467,4 +467,4 @@ class TestIssue1278DNSResolutionSimulation(AsyncBaseTestCase):
         assert health_check_success_rate <= 50.0, \
             f"Health check success rate should be low during Issue #1278: {health_check_success_rate:.1f}%"
 
-        self.logger.info("✅ Load balancer health check impact simulation completed")
+        self.logger.info("CHECK Load balancer health check impact simulation completed")

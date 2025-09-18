@@ -345,7 +345,7 @@ class TestIssue1278InfrastructureHealthValidation(SSotBaseTestCase):
                     dependency_issues.append(issue_description)
                     self.logger.error(f"Dependency issue: {issue_description}")
                 elif status == 'healthy':
-                    self.logger.info(f"✓ {category}: healthy")
+                    self.logger.info(f"CHECK {category}: healthy")
                 else:
                     self.logger.warning(f"? {category}: {status}")
 

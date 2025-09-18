@@ -72,7 +72,7 @@ class Issue860WindowsWebSocketFailuresTests(BaseIntegrationTest):
                 "OSError" in str(type(error).__name__)  # Generic OS error
             ]), f"Expected Windows connection error, got: {error}"
 
-            print(f"✓ Reproduced connection failure for {url_path}: {error}")
+            print(f"CHECK Reproduced connection failure for {url_path}: {error}")
 
     @pytest.mark.asyncio
     @pytest.mark.unit
@@ -156,7 +156,7 @@ class Issue860WindowsWebSocketFailuresTests(BaseIntegrationTest):
         assert len(windows_errors) > 0, \
             f"Expected Windows connection errors, got: {failed_attempts}"
 
-        print(f"✓ Reproduced {len(windows_errors)} Windows WebSocket connection failures")
+        print(f"CHECK Reproduced {len(windows_errors)} Windows WebSocket connection failures")
         for attempt in windows_errors:
             print(f"  - {attempt['url']}: {attempt['status']} ({attempt['error']})")
 
@@ -213,7 +213,7 @@ class Issue860WindowsWebSocketFailuresTests(BaseIntegrationTest):
         assert len(failed_discoveries) > 0, \
             "Expected service discovery failures when services not running"
 
-        print(f"✓ Service discovery failed appropriately: {failed_discoveries}")
+        print(f"CHECK Service discovery failed appropriately: {failed_discoveries}")
 
     @pytest.mark.unit
     def test_websocket_factory_windows_compatibility(self):
@@ -236,7 +236,7 @@ class Issue860WindowsWebSocketFailuresTests(BaseIntegrationTest):
                 )
 
             error = exc_info.value
-            print(f"✓ WebSocket factory failed appropriately: {error}")
+            print(f"CHECK WebSocket factory failed appropriately: {error}")
 
         except ImportError as e:
             pytest.skip(f"WebSocket components not available for testing: {e}")
@@ -288,7 +288,7 @@ class Issue860WindowsWebSocketFailuresTests(BaseIntegrationTest):
             "ConnectionRefusedError" in final_error["error_type"]
         ]), f"Expected connection refused error, got: {final_error}"
 
-        print(f"✓ Reproduced retry exhaustion pattern: {connection_errors}")
+        print(f"CHECK Reproduced retry exhaustion pattern: {connection_errors}")
 
     @pytest.mark.unit
     def test_docker_bypass_environment_detection(self):

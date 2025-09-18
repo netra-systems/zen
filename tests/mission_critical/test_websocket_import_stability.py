@@ -1,25 +1,26 @@
-"""
-"""
+""""
+
 Mission Critical: WebSocket Import Stability Tests
 
 Business Value Justification:
-- Segment: Platform/Internal (Mission Critical Infrastructure)
-"""
-"""
-- Business Goal: Prevent $120K+ MRR loss from chat outages
+    - Segment: Platform/Internal (Mission Critical Infrastructure)
+""""
+
+- Business Goal: Prevent $""120K""+ MRR loss from chat outages
 - Value Impact: Ensure 90% of business value (chat) never fails due to import errors
 - Strategic Impact: Continuous monitoring of Cloud Run import stability
 
 CRITICAL MISSION: Test suite that would have caught the EXACT import time" bug"
-that caused WebSocket authentication circuit breaker failures, threatening $120K+ MRR.
+that caused WebSocket authentication circuit breaker failures, threatening $""120K""+ MRR.
 
 PURPOSE: 
-1. WOULD HAVE CAUGHT the original bug - Tests exact NameError scenarios in circuit breaker
+    1. WOULD HAVE CAUGHT the original bug - Tests exact NameError scenarios in circuit breaker
 2. VALIDATES the fix works - Confirms time import and time.time() calls function correctly  
 3. PREVENTS regression - Ensures this type of import error never happens again
 4. COVERS circuit breaker paths - Tests lines 471, 487, 525, 561 in unified_websocket_auth.py
 "
-"
+""
+
 
 import asyncio
 import gc
@@ -40,11 +41,12 @@ from netra_backend.app.websocket_core.event_validator import AgentEventValidator
 
 
 class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
-    """
+    """"
+
     CRITICAL: Tests the exact lines that failed due to missing import time
     
     This test class targets the specific circuit breaker authentication code in
-    unified_websocket_auth.py that caused the $120K+ MRR business risk.
+    unified_websocket_auth.py that caused the $""120K""+ MRR business risk.
     
     FAILURE OF ANY TEST = IMMEDIATE DEPLOYMENT BLOCK
 ""
@@ -68,7 +70,8 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
             # Create instance to trigger any import issues during initialization
             auth_instance = UnifiedWebSocketAuth()
             assert auth_instance is not None, UnifiedWebSocketAuth initialization failed"
-            assert auth_instance is not None, UnifiedWebSocketAuth initialization failed"
+            assert auth_instance is not None, UnifiedWebSocketAuth initialization failed""
+
             
         except NameError as e:
             if time" in str(e) and not defined in str(e):"
@@ -81,7 +84,8 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
     @pytest.mark.unit
     async def test_circuit_breaker_time_calls_exact_lines(self):
         """
-        "
+        ""
+
         CRITICAL: Tests the exact lines that called time.time() and failed.
         
         This test targets:
@@ -113,7 +117,8 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
         except NameError as e:
             if time in str(e):
                 pytest.fail(fCRITICAL BUG REPRODUCED: Line 496 time.time() failed: {e})"
-                pytest.fail(fCRITICAL BUG REPRODUCED: Line 496 time.time() failed: {e})"
+                pytest.fail(fCRITICAL BUG REPRODUCED: Line 496 time.time() failed: {e})""
+
             raise
         
         # Test 3: _check_concurrent_token_cache (line 534: time.time() comparison)
@@ -143,7 +148,8 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.integration
     async def test_circuit_breaker_state_transitions_with_time(self):
-    """
+    """"
+
         CRITICAL: Tests circuit breaker state transitions that use time.time().
         
         This validates the exact business logic that was broken by missing import time.
@@ -177,7 +183,8 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
             # Should transition to HALF_OPEN (uses time.time() on line 480)
             state = await auth._check_circuit_breaker()
             assert state == HALF_OPEN, Circuit breaker should transition to HALF_OPEN"
-            assert state == HALF_OPEN, Circuit breaker should transition to HALF_OPEN"
+            assert state == HALF_OPEN, Circuit breaker should transition to HALF_OPEN""
+
             
             # Record success to close circuit breaker
             await auth._record_circuit_breaker_success()
@@ -188,7 +195,8 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
                 pass
             
             print(PASS: All circuit breaker time.time() transitions work correctly)"
-            print(PASS: All circuit breaker time.time() transitions work correctly)"
+            print(PASS: All circuit breaker time.time() transitions work correctly)""
+
             
             # Restore original timeout
             auth._circuit_breaker["reset_timeout] = original_reset_timeout"
@@ -201,7 +209,8 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.integration
     async def test_concurrent_token_cache_timing_logic(self):
-    """
+    """"
+
         CRITICAL: Tests concurrent token cache timing that uses time.time().
         
         This validates the exact caching logic (lines 534, 570) that was broken
@@ -253,7 +262,8 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
     @pytest.mark.regression
     def test_import_time_regression_simulation(self):
         """
-        "
+        ""
+
         CRITICAL: Simulates the exact regression to prove tests would catch it.
         
         This test temporarily removes the 'time' import to verify that our tests
@@ -287,7 +297,8 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
     @pytest.mark.e2e
     async def test_full_websocket_auth_flow_with_circuit_breaker(self"):"
         """
-        "
+        ""
+
         CRITICAL: Full WebSocket authentication flow with circuit breaker timing.
         
         This is the ultimate test - full end-to-end WebSocket authentication
@@ -333,16 +344,19 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
 
 class WebSocketImportStabilityOriginalTests(BaseTestCase):
     "
-    "
+    ""
+
     Original import stability tests (preserved for backward compatibility).
 "
-"
+""
+
     
     @pytest.mark.mission_critical
     @pytest.mark.smoke
     async def test_basic_websocket_import_sanity(self):
         """
-        "
+        ""
+
         Mission Critical: Basic WebSocket import sanity check.
         
         This test MUST PASS in all environments. Failure indicates critical
@@ -376,13 +390,15 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
     @pytest.mark.integration
     async def test_websocket_exception_handler_import_stability(self):
         """
-    "
+    ""
+
         Mission Critical: Exception handler import stability.
         
         Validates that exception handlers (line 1293-1294 in websocket.py) 
         don't fail with import errors under any conditions.'
 "
-"
+""
+
         auth_helper = E2EAuthHelper()
         ws_manager = RealWebSocketConnectionManager()
         
@@ -394,7 +410,8 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
             websocket_client = await ws_manager.create_authenticated_connection(
                 user_token=user_token,
                 endpoint=/ws/chat"
-                endpoint=/ws/chat"
+                endpoint=/ws/chat""
+
             )
             
             await websocket_client.connect()
@@ -434,7 +451,8 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.e2e
     async def test_chat_flow_import_regression_prevention(self):
-    """
+    """"
+
         Mission Critical: Prevent chat flow import regression.
         
         This test ensures chat functionality never regresses due to import issues.
@@ -500,13 +518,15 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.performance
     async def test_import_system_performance_baseline(self):
-    """
+    """"
+
         Mission Critical: Import system performance baseline.
         
         Monitors import performance to detect degradation that could lead
         to Cloud Run timeout issues.
 "
-"
+""
+
         import_performance_tests = [
             {
                 "module: netra_backend.app.websocket_core.utils,"
@@ -548,10 +568,11 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
                 if execution_time_ms > test_case[max_time_ms]:
                     pytest.fail(
                         fPERFORMANCE REGRESSION: {test_case['module']}.{test_case['function']} 
-                        f"took {execution_time_ms:.2f}ms (max: {test_case['max_time_ms']}ms)"
+                        f"took {execution_time_ms:.""2f""}ms (max: {test_case['max_time_ms']}ms)"
                     )
                 
-                print(fPASS: {test_case['function']} executed in {execution_time_ms:.2f}ms)
+                print(fPASS: {test_case['function']} executed in {execution_time_ms:.""2f""}ms)""
+
                 
             except Exception as e:
                 if "time in str(e) and not defined in str(e):"
@@ -561,7 +582,8 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.concurrent
     async def test_concurrent_websocket_import_stability(self):
-    """
+    """"
+
         Mission Critical: Concurrent WebSocket import stability.
         
         Tests import stability under concurrent load (production scenario).
@@ -697,7 +719,8 @@ class CloudRunEnvironmentCompatibilityTests(BaseTestCase):
     @pytest.mark.smoke
     def test_critical_module_availability(self):
         """
-    "
+    ""
+
         Test availability of critical modules that caused failures.
         
         Validates that all modules in the import chain are properly available.

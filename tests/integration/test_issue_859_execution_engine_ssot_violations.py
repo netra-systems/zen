@@ -182,7 +182,7 @@ class Issue859ExecutionEngineSSotViolationsTests(SSotAsyncTestCase):
         assert len(non_ssot_implementations) == 0, violation_message
         assert len(ssot_implementations) == 1, f"Expected exactly 1 SSOT implementation, found {len(ssot_implementations)}"
 
-        logger.info("✅ SSOT_VIOLATION_TEST: All execution engines consolidated to UserExecutionEngine SSOT")
+        logger.info("CHECK SSOT_VIOLATION_TEST: All execution engines consolidated to UserExecutionEngine SSOT")
 
     async def test_user_isolation_failure_cross_contamination(self):
         """
@@ -253,7 +253,7 @@ class Issue859ExecutionEngineSSotViolationsTests(SSotAsyncTestCase):
 
         assert engine1_stats['user_id'] != engine2_stats['user_id'], "Execution stats not isolated by user"
 
-        logger.info("✅ USER_ISOLATION_TEST: User isolation working correctly - no cross-contamination detected")
+        logger.info("CHECK USER_ISOLATION_TEST: User isolation working correctly - no cross-contamination detected")
 
     async def test_memory_leak_resource_cleanup_failures(self):
         """
@@ -337,7 +337,7 @@ class Issue859ExecutionEngineSSotViolationsTests(SSotAsyncTestCase):
                 assert not engine.is_active(), f"Engine {engine.engine_id} still active after cleanup"
                 assert engine._is_active == False, f"Engine {engine.engine_id} internal state not cleaned"
 
-            logger.info("✅ MEMORY_LEAK_TEST: Resource cleanup working correctly - no significant memory leaks")
+            logger.info("CHECK MEMORY_LEAK_TEST: Resource cleanup working correctly - no significant memory leaks")
 
         finally:
             # Ensure cleanup happens even if test fails
@@ -444,7 +444,7 @@ class Issue859ExecutionEngineSSotViolationsTests(SSotAsyncTestCase):
         assert all(uid == user1_id for uid in user1_event_user_ids), f"User1 events contaminated: {user1_event_user_ids}"
         assert all(uid == user2_id for uid in user2_event_user_ids), f"User2 events contaminated: {user2_event_user_ids}"
 
-        logger.info("✅ WEBSOCKET_SECURITY_TEST: WebSocket event isolation working correctly - no cross-user exposure")
+        logger.info("CHECK WEBSOCKET_SECURITY_TEST: WebSocket event isolation working correctly - no cross-user exposure")
 
     async def test_golden_path_protection_business_functionality(self):
         """
@@ -526,7 +526,7 @@ class Issue859ExecutionEngineSSotViolationsTests(SSotAsyncTestCase):
         # Verify WebSocket emitter was called for user notifications
         assert mock_websocket_emitter.user_id == user_id, "WebSocket emitter not user-isolated"
 
-        logger.info("✅ GOLDEN_PATH_TEST: Golden Path business functionality protected - $500K+ ARR safe")
+        logger.info("CHECK GOLDEN_PATH_TEST: Golden Path business functionality protected - $500K+ ARR safe")
 
     async def test_concurrent_execution_race_conditions(self):
         """
@@ -645,7 +645,7 @@ class Issue859ExecutionEngineSSotViolationsTests(SSotAsyncTestCase):
                 f"User {i} stats contaminated with wrong user_id: {user_stats['user_id']}"
             )
 
-        logger.info("✅ CONCURRENT_EXECUTION_TEST: No race conditions detected - concurrent execution safe")
+        logger.info("CHECK CONCURRENT_EXECUTION_TEST: No race conditions detected - concurrent execution safe")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 """Phase 1 Unit Tests: Execution Engine Factory Fragmentation Reproduction (Issue #1123)
 
 CRITICAL BUSINESS VALUE: These tests reproduce factory fragmentation issues that block
-the Golden Path user flow (login → AI response), protecting $500K+ ARR functionality.
+the Golden Path user flow (login -> AI response), protecting $500K+ ARR functionality.
 
 EXPECTED BEHAVIOR: All tests in this file should INITIALLY FAIL to demonstrate
 the factory fragmentation problems. They will pass after SSOT consolidation.

@@ -2,7 +2,7 @@
 GOLDEN PATH COVERAGE: Agent Orchestration Core Comprehensive Tests
 
 Business Impact: $500K+ ARR - Protects core agent execution pipeline
-Coverage Target: 0% → 80% for critical orchestration logic
+Coverage Target: 0% -> 80% for critical orchestration logic
 Priority: P0 - Critical business functionality
 
 Tests the complete agent orchestration pipeline from user request

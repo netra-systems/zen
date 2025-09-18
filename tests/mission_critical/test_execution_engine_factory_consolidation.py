@@ -1,13 +1,13 @@
 "ExecutionEngine Factory Consolidation - Mission Critical Validation"
 
 Business Value Justification:
-- Segment: Platform/Architecture
+    - Segment: Platform/Architecture
 - Business Goal: Code Quality & Maintainability
-- Value Impact: Prevents factory pattern proliferation affecting $500K+ ARR system stability
+- Value Impact: Prevents factory pattern proliferation affecting $""500K"" plus ARR system stability
 - Strategic Impact: Reduces architectural complexity from 78 factory classes to essential patterns
 
 CRITICAL FACTORY CONSOLIDATION VALIDATION:
-This test validates ExecutionEngine factory patterns are consolidated into a single
+    This test validates ExecutionEngine factory patterns are consolidated into a single
 authoritative factory that creates only UserExecutionEngine instances, preventing
 factory proliferation and ensuring thread-safe, isolated engine creation.
 
@@ -31,7 +31,8 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
     Validates ExecutionEngine factory consolidation and thread safety."
-    Validates ExecutionEngine factory consolidation and thread safety."
+    Validates ExecutionEngine factory consolidation and thread safety.""
+
 
     def setUp(self):
         "Set up factory consolidation test environment."
@@ -46,7 +47,8 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
         ]
 
     def test_single_execution_engine_factory_exists(self):
-        ""Validate only one ExecutionEngine factory is available as SSOT."
+        ""Validate only one ExecutionEngine factory is available as SSOT.""
+
         try:
             # Test canonical factory import
             from netra_backend.app.agents.supervisor.execution_engine_factory import ()
@@ -65,7 +67,8 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
             params = list(method_signature.parameters.keys())
             self.assertIn('user_context', params, 
                          Factory should accept user_context parameter)"
-                         Factory should accept user_context parameter)"
+                         Factory should accept user_context parameter)""
+
             
         except ImportError as e:
             self.skipTest(fExecutionEngine factory not available during consolidation: {e}")"
@@ -95,7 +98,8 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
                 engine_context = engine.get_user_context()
                 self.assertEqual(engine_context.user_id, context.user_id,
                                Factory created engine with wrong user context)"
-                               Factory created engine with wrong user context)"
+                               Factory created engine with wrong user context)""
+
                 self.assertEqual(engine_context.run_id, context.run_id,
                                Factory created engine with wrong run_id")"
             
@@ -109,7 +113,8 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
 
     def test_no_duplicate_factory_implementations(self):
         Validate no duplicate ExecutionEngine factory implementations exist."
-        Validate no duplicate ExecutionEngine factory implementations exist."
+        Validate no duplicate ExecutionEngine factory implementations exist.""
+
         factory_implementations = []
         
         # Known potential factory locations to check
@@ -131,7 +136,8 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
                         'factory' in attr_name.lower() and 
                         'execution' in attr_name.lower()):
                         factory_implementations.append(f{factory_path}.{attr_name})"
-                        factory_implementations.append(f{factory_path}.{attr_name})"
+                        factory_implementations.append(f{factory_path}.{attr_name})""
+
                     elif (callable(attr) and 
                           'create' in attr_name.lower() and 
                           'execution' in attr_name.lower()):
@@ -148,7 +154,8 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
         )
 
     def test_factory_thread_safety_concurrent_creation(self):
-        ""Validate factory creates isolated engines safely during concurrent access."
+        ""Validate factory creates isolated engines safely during concurrent access.""
+
         try:
             from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 ExecutionEngineFactory
@@ -294,7 +301,8 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
 
     def test_factory_integration_with_websocket_bridge(self):
         Validate factory creates engines properly integrated with WebSocket bridges."
-        Validate factory creates engines properly integrated with WebSocket bridges."
+        Validate factory creates engines properly integrated with WebSocket bridges.""
+
         try:
             from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 ExecutionEngineFactory
@@ -327,7 +335,8 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
 
     def test_factory_creates_engines_with_proper_cleanup(self):
         Validate factory creates engines with proper cleanup capabilities."
-        Validate factory creates engines with proper cleanup capabilities."
+        Validate factory creates engines with proper cleanup capabilities.""
+
         try:
             from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 ExecutionEngineFactory
@@ -361,11 +370,13 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
             self.skipTest(ExecutionEngine factory not available during consolidation)
 
     def test_no_legacy_factory_patterns_in_codebase(self):
-        ""Validate no legacy factory patterns exist in production code."
+        ""Validate no legacy factory patterns exist in production code.""
+
         from pathlib import Path
         
         netra_backend_root = Path(__file__).parent.parent.parent / netra_backend"
-        netra_backend_root = Path(__file__).parent.parent.parent / netra_backend"
+        netra_backend_root = Path(__file__).parent.parent.parent / netra_backend""
+
         legacy_patterns = []
         
         # Patterns that indicate legacy factory usage
@@ -375,7 +386,8 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
             CompatibilityExecutionEngineFactory","
             create_legacy_execution_engine,
             get_execution_engine_adapter"
-            get_execution_engine_adapter"
+            get_execution_engine_adapter""
+
         ]
         
         # Scan Python files for legacy patterns
@@ -409,7 +421,7 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
             )
             
             # Performance benchmarks
-            max_creation_time = 0.1  # 100ms per engine creation
+            max_creation_time = 0.1  # ""100ms"" per engine creation
             num_engines = 10
             
             creation_times = []
@@ -438,10 +450,11 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
             
             self.assertLess(avg_creation_time, max_creation_time,
                            fAverage engine creation time {avg_creation_time:.3f}s exceeds limit {max_creation_time}s)"
-                           fAverage engine creation time {avg_creation_time:.3f}s exceeds limit {max_creation_time}s)"
+                           fAverage engine creation time {avg_creation_time:."3f"}s exceeds limit {max_creation_time}s)""
+
             
             self.assertLess(max_observed_time, max_creation_time * 2,
-                           f"Maximum engine creation time {max_observed_time:.3f}s exceeds reasonable limit)"
+                           f"Maximum engine creation time {max_observed_time:.""3f""}s exceeds reasonable limit)"
             
         except ImportError:
             self.skipTest(ExecutionEngine factory not available during consolidation")"

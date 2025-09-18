@@ -17,7 +17,7 @@ Testing Strategy:
 - Use staging GCP environment for real validation
 - Focus on business outcomes over technical details
 - Measure customer-facing metrics
-- Validate Golden Path user flow: login → AI responses
+- Validate Golden Path user flow: login -> AI responses
 """
 
 import asyncio
@@ -89,7 +89,7 @@ class CustomerExperienceQualityTests:
         flow_start = time.time()
 
         try:
-            # Simulate customer login → message → AI response flow
+            # Simulate customer login -> message -> AI response flow
             # NOTE: Using demo mode for isolated testing environment
 
             # Step 1: WebSocket connection (should be <5s)
@@ -480,7 +480,7 @@ class CustomerExperienceQualityTests:
         print(f"\n--- {test_category} Customer Metrics ---")
 
         for metric in self.validator.metrics:
-            status_emoji = "✅" if metric.status == "PASS" else "❌" if metric.status == "FAIL" else "⚠️"
+            status_emoji = "CHECK" if metric.status == "PASS" else "X" if metric.status == "FAIL" else "WARNING️"
             print(f"{status_emoji} {metric.name}: {metric.actual_value:.2f} {metric.unit} "
                   f"(target: {metric.target_value:.2f})")
             print(f"   Business Impact: {metric.business_impact}")
@@ -493,10 +493,10 @@ class CustomerExperienceQualityTests:
             print(f"\n🚨 BUSINESS RISK: HIGH ({len(failed_metrics)} failed metrics)")
             print("   Action Required: Immediate business impact mitigation needed")
         elif warning_metrics:
-            print(f"\n⚠️ BUSINESS RISK: MEDIUM ({len(warning_metrics)} warning metrics)")
+            print(f"\nWARNING️ BUSINESS RISK: MEDIUM ({len(warning_metrics)} warning metrics)")
             print("   Action Recommended: Performance optimization needed")
         else:
-            print(f"\n✅ BUSINESS RISK: LOW (All metrics within targets)")
+            print(f"\nCHECK BUSINESS RISK: LOW (All metrics within targets)")
             print("   Status: Customer experience quality maintained")
 
 if __name__ == "__main__":
@@ -535,11 +535,11 @@ if __name__ == "__main__":
                 print(f"   - {failure.name}: {failure.business_impact}")
             sys.exit(1)
         else:
-            print("\n✅ BUSINESS OUTCOME: CUSTOMER EXPERIENCE QUALITY ACCEPTABLE")
+            print("\nCHECK BUSINESS OUTCOME: CUSTOMER EXPERIENCE QUALITY ACCEPTABLE")
             print("Golden Path user flow validated for revenue protection")
             sys.exit(0)
 
     except Exception as e:
-        print(f"\n❌ BUSINESS VALIDATION FAILED: {e}")
+        print(f"\nX BUSINESS VALIDATION FAILED: {e}")
         print("Cannot validate customer experience quality")
         sys.exit(1)

@@ -359,7 +359,7 @@ class GoldenPathBroadcastStagingTests(SSotAsyncTestCase):
                      f"Golden Path agent event delivery is inconsistent, blocking $500K+ ARR user experience. "
                      f"SSOT remediation required for reliable broadcast functionality.")
         else:
-            logger.info("✓ Golden Path agent event delivery consistency validated")
+            logger.info("CHECK Golden Path agent event delivery consistency validated")
 
     async def test_concurrent_user_broadcast_isolation_staging(self):
         """
@@ -489,7 +489,7 @@ class GoldenPathBroadcastStagingTests(SSotAsyncTestCase):
                          f"Cross-user event leakage violates security requirements and blocks enterprise deployment. "
                          f"SSOT remediation required for secure user isolation.")
             else:
-                logger.info("✓ Concurrent user broadcast isolation validated")
+                logger.info("CHECK Concurrent user broadcast isolation validated")
 
         finally:
             # Cleanup: disconnect all clients
@@ -641,7 +641,7 @@ class GoldenPathBroadcastStagingTests(SSotAsyncTestCase):
                              f"Performance degradation affects user experience and system scalability. "
                              f"SSOT remediation required for consistent broadcast performance.")
                 else:
-                    logger.info("✓ Broadcast performance under load validated")
+                    logger.info("CHECK Broadcast performance under load validated")
 
             else:
                 self.fail("BROADCAST LOAD TEST FAILURE: No successful requests completed. "

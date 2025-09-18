@@ -117,7 +117,7 @@ class WebSocketAuthModesTests(SSotBaseTestCase):
                 await client.receive_message(timeout=2.0)
         error_message = str(cm.exception).lower()
         self.assertTrue(any((indicator in error_message for indicator in ['1011', 'unauthorized', 'auth', 'token'])), f'Expected auth-related error, got: {cm.exception}')
-        self.logger.info(f'✅ Reproduced 1011 error condition: {cm.exception}')
+        self.logger.info(f'CHECK Reproduced 1011 error condition: {cm.exception}')
 
     async def test_relaxed_auth_mode_not_implemented(self):
         """
@@ -145,7 +145,7 @@ class WebSocketAuthModesTests(SSotBaseTestCase):
         except Exception as e:
             error_message = str(e).lower()
             self.assertTrue(any((indicator in error_message for indicator in ['relaxed', 'not implemented', 'not found'])), f'Expected relaxed auth implementation error, got: {e}')
-            self.logger.info(f'✅ Relaxed auth correctly failed (not implemented): {e}')
+            self.logger.info(f'CHECK Relaxed auth correctly failed (not implemented): {e}')
 
     async def test_demo_auth_mode_not_implemented(self):
         """
@@ -175,7 +175,7 @@ class WebSocketAuthModesTests(SSotBaseTestCase):
         except Exception as e:
             error_message = str(e).lower()
             self.assertTrue(any((indicator in error_message for indicator in ['demo', 'not implemented', 'not found'])), f'Expected demo auth implementation error, got: {e}')
-            self.logger.info(f'✅ Demo auth correctly failed (not implemented): {e}')
+            self.logger.info(f'CHECK Demo auth correctly failed (not implemented): {e}')
 
     async def test_emergency_auth_mode_not_implemented(self):
         """
@@ -204,7 +204,7 @@ class WebSocketAuthModesTests(SSotBaseTestCase):
         except Exception as e:
             error_message = str(e).lower()
             self.assertTrue(any((indicator in error_message for indicator in ['emergency', 'not implemented', 'not found'])), f'Expected emergency auth implementation error, got: {e}')
-            self.logger.info(f'✅ Emergency auth correctly failed (not implemented): {e}')
+            self.logger.info(f'CHECK Emergency auth correctly failed (not implemented): {e}')
 
     async def test_gcp_load_balancer_header_stripping_simulation(self):
         """
@@ -227,7 +227,7 @@ class WebSocketAuthModesTests(SSotBaseTestCase):
                 await client.receive_message(timeout=2.0)
         error_message = str(cm.exception).lower()
         self.assertTrue(any((indicator in error_message for indicator in ['1011', 'unauthorized', 'auth', 'token', 'forbidden'])), f'Expected 1011/auth error, got: {cm.exception}')
-        self.logger.info(f'✅ Reproduced GCP Load Balancer auth stripping issue: {cm.exception}')
+        self.logger.info(f'CHECK Reproduced GCP Load Balancer auth stripping issue: {cm.exception}')
         self.assertTrue(True, 'Successfully reproduced production 1011 error scenario')
 
     async def test_concurrent_auth_modes_isolation(self):
@@ -250,9 +250,9 @@ class WebSocketAuthModesTests(SSotBaseTestCase):
             expected_failures = len(tasks) - expected_successes
             self.assertEqual(success_count, expected_successes, f'Expected {expected_successes} successes, got {success_count}')
             self.assertEqual(failure_count, expected_failures, f'Expected {expected_failures} failures, got {failure_count}')
-            self.logger.info(f'✅ Concurrent auth test: {success_count} successes, {failure_count} failures')
+            self.logger.info(f'CHECK Concurrent auth test: {success_count} successes, {failure_count} failures')
         except Exception as e:
-            self.logger.info(f'✅ Concurrent auth test failed as expected: {e}')
+            self.logger.info(f'CHECK Concurrent auth test failed as expected: {e}')
             self.assertTrue(True, 'Concurrent auth test correctly failed (features not implemented)')
 
     async def _test_concurrent_auth_mode(self, auth_mode: str, headers: Dict[str, str]) -> bool:
@@ -297,7 +297,7 @@ class AuthModeEnvironmentDetectionTests(SSotBaseTestCase):
                     detected_mode = detector.detect_from_environment()
                     self.assertEqual(detected_mode, expected_mode, f'Environment {env_vars} should detect {expected_mode}')
                 except (ImportError, AttributeError, NotImplementedError) as e:
-                    self.logger.info(f'✅ Auth mode detection correctly failed: {e}')
+                    self.logger.info(f'CHECK Auth mode detection correctly failed: {e}')
                     self.assertTrue(True, 'Auth mode detection not implemented (expected)')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

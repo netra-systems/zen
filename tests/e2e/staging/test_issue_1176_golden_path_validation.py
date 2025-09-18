@@ -3,7 +3,7 @@
 TARGET: Golden Path Validation - End-to-End User Journey Failures
 
 This module tests the complete Golden Path user flow in staging environment:
-1. Complete user login → AI response flow validation
+1. Complete user login -> AI response flow validation
 2. Real authentication with actual JWT/OAuth flows
 3. WebSocket events validation throughout entire user journey
 4. Factory pattern validation in production-like environment
@@ -55,7 +55,7 @@ class TestGoldenPathValidationStaging(SSotAsyncTestCase):
         }
 
     async def test_complete_user_login_to_ai_response_flow(self, staging_config):
-        """Test complete Golden Path: login → AI response in staging.
+        """Test complete Golden Path: login -> AI response in staging.
 
         This test validates the entire user journey with real services
         in staging environment. Must fail if any part of Golden Path is broken.

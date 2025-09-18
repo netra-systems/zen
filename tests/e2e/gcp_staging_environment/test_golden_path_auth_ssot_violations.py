@@ -7,7 +7,7 @@ Expected: Demonstrate authentication failures blocking $500K+ ARR flow
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise, Platform)  
 - Business Goal: Stability - Protect $500K+ ARR Golden Path functionality
-- Value Impact: Ensures users can login → get AI responses (90% of platform value)
+- Value Impact: Ensures users can login -> get AI responses (90% of platform value)
 - Strategic Impact: SSOT compliance prevents authentication cascade failures
 """
 
@@ -50,7 +50,7 @@ class GoldenPathAuthSSOTViolationsTests(BaseE2ETest):
         TEST EXPECTATION: FAIL - Proves Golden Path authentication blocked
         
         This test demonstrates how SSOT environment violations prevent
-        the core business flow: Users login → get AI responses.
+        the core business flow: Users login -> get AI responses.
         
         BUSINESS IMPACT: $500K+ ARR at risk due to authentication failures
         VIOLATION SOURCE: Direct os.environ access in auth components
@@ -100,7 +100,7 @@ class GoldenPathAuthSSOTViolationsTests(BaseE2ETest):
                     f"violations in JWT secret resolution."
                 )
             
-            print(f"✅ Authentication succeeded, testing WebSocket connection...")
+            print(f"CHECK Authentication succeeded, testing WebSocket connection...")
             
             # Step 3: User connects to WebSocket (chat interface)  
             websocket_url = f"{staging_config.get('websocket_url', 'wss://netra-staging.com')}/ws"
@@ -115,7 +115,7 @@ class GoldenPathAuthSSOTViolationsTests(BaseE2ETest):
                     timeout=30
                 ) as ws_client:
                     
-                    print(f"✅ WebSocket connected, testing agent interaction...")
+                    print(f"CHECK WebSocket connected, testing agent interaction...")
                     
                     # Step 4: User sends message to agent (core business value)
                     await ws_client.send_json({
@@ -396,7 +396,7 @@ class GoldenPathAuthSSOTViolationsTests(BaseE2ETest):
                 f"Users receive no AI assistance - core platform value blocked."
             )
         
-        print(f"✅ Golden Path completed successfully - this is unexpected!")
+        print(f"CHECK Golden Path completed successfully - this is unexpected!")
         print(f"📊 Events: {event_types}")
         print(f"💡 AI Response: {result.get('content', 'No content')[:100]}...")
         

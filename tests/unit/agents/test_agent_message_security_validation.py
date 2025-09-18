@@ -323,7 +323,7 @@ class AgentMessageSecurityValidationPerformanceTests(SSotAsyncTestCase):
         await asyncio.gather(*test_methods)
         total_execution_time = time.time() - start_time
         assert total_execution_time < 5.0, f'Security test suite took {total_execution_time:.2f}s, expected <5s for rapid feedback'
-        print(f'✅ Security validation suite completed in {total_execution_time:.2f}s')
+        print(f'CHECK Security validation suite completed in {total_execution_time:.2f}s')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

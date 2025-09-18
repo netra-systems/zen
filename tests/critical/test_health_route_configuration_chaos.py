@@ -1,7 +1,7 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
-'''
-'''
+
+"""
 Test suite to expose health route configuration and environment chaos.
 
 This test suite is designed to FAIL and expose the following configuration issues:
@@ -13,8 +13,7 @@ This test suite is designed to FAIL and expose the following configuration issue
 6. Environment variable conflicts affecting health checks
 7. Database connection pool conflicts in health endpoints
 8. Logging configuration inconsistencies in health routes
-'''
-'''
+"""
 
 import asyncio
 import json

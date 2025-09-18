@@ -19,7 +19,7 @@ CRITICAL MULTI-USER SCENARIOS (15 tests):
 4. WebSocket Bridge Coordination (3 tests)
 5. Error Handling & Recovery (3 tests)
 
-COVERAGE TARGET: UserExecutionEngine integration 13% → 35% (+22% improvement)
+COVERAGE TARGET: UserExecutionEngine integration 13% -> 35% (+22% improvement)
 
 SSOT Testing Compliance:
 - Uses test_framework.ssot.base_test_case.SSotAsyncTestCase
@@ -212,7 +212,7 @@ class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
             assert context.session_id.startswith("exec-session")
             assert context.correlation_id.startswith("exec-corr")
         
-        logger.info("✅ Concurrent user execution context creation validated")
+        logger.info("CHECK Concurrent user execution context creation validated")
     
     async def test_user_execution_context_state_isolation(self):
         """Test 2/15: User execution context state isolation across operations"""
@@ -255,7 +255,7 @@ class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
         assert session_1.context.get_state("operation_task_2") is None
         assert session_2.context.get_state("operation_task_1") is None
         
-        logger.info("✅ User execution context state isolation validated")
+        logger.info("CHECK User execution context state isolation validated")
     
     async def test_user_execution_context_lifecycle_management(self):
         """Test 3/15: User execution context lifecycle management across session"""
@@ -298,7 +298,7 @@ class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
         
         assert len(session_events) >= 3  # At least one event per task
         
-        logger.info("✅ User execution context lifecycle management validated")
+        logger.info("CHECK User execution context lifecycle management validated")
 
     # ============================================================================
     # CATEGORY 2: CONCURRENT USER AGENT ORCHESTRATION (3 tests)
@@ -371,7 +371,7 @@ class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
                           if e['user_id'] == session.user_id]
             assert len(user_events) >= 3  # At least one event per agent task
         
-        logger.info("✅ Concurrent multi-user agent orchestration validated")
+        logger.info("CHECK Concurrent multi-user agent orchestration validated")
     
     async def test_user_agent_pipeline_coordination(self):
         """Test 5/15: User agent pipeline coordination and data flow"""
@@ -437,7 +437,7 @@ class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
         # Should have events for each pipeline step
         assert len(session_events) >= 4
         
-        logger.info("✅ User agent pipeline coordination validated")
+        logger.info("CHECK User agent pipeline coordination validated")
     
     async def test_user_agent_failure_and_recovery_orchestration(self):
         """Test 6/15: User agent failure and recovery orchestration patterns"""
@@ -493,7 +493,7 @@ class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
                          if e['session_id'] == session.session_id]
         assert len(session_events) >= 1
         
-        logger.info("✅ User agent failure and recovery orchestration validated")
+        logger.info("CHECK User agent failure and recovery orchestration validated")
 
     # ============================================================================
     # CATEGORY 3: RESOURCE MANAGEMENT & CLEANUP (3 tests)
@@ -565,7 +565,7 @@ class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
         # Validate no resource leaks
         # (This would typically check memory usage, file handles, etc.)
         
-        logger.info("✅ User execution engine resource allocation validated")
+        logger.info("CHECK User execution engine resource allocation validated")
     
     async def test_user_execution_engine_memory_cleanup(self):
         """Test 8/15: User execution engine memory cleanup and garbage collection"""
@@ -608,7 +608,7 @@ class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
         total_events = len(self.global_websocket_events)
         assert total_events >= 10  # At least one event per session
         
-        logger.info("✅ User execution engine memory cleanup validated")
+        logger.info("CHECK User execution engine memory cleanup validated")
     
     async def test_user_execution_engine_resource_isolation(self):
         """Test 9/15: User execution engine resource isolation between users"""
@@ -679,7 +679,7 @@ class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
         assert len(light_user_events) >= 3
         assert len(heavy_user_events) >= 5
         
-        logger.info(f"✅ Resource isolation validated - workflows completed in {total_duration:.2f}s")
+        logger.info(f"CHECK Resource isolation validated - workflows completed in {total_duration:.2f}s")
 
     # ============================================================================
     # CATEGORY 4: WEBSOCKET BRIDGE COORDINATION (3 tests)
@@ -723,7 +723,7 @@ class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
             assert event['session_id'] == session.session_id
             assert 'timestamp' in event
         
-        logger.info("✅ Execution engine WebSocket bridge integration validated")
+        logger.info("CHECK Execution engine WebSocket bridge integration validated")
     
     async def test_multi_user_websocket_event_coordination(self):
         """Test 11/15: Multi-user WebSocket event coordination and isolation"""
@@ -795,7 +795,7 @@ class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
         # Validate total event count
         assert len(self.global_websocket_events) >= 9  # 3 users × 3 tasks minimum
         
-        logger.info("✅ Multi-user WebSocket event coordination validated")
+        logger.info("CHECK Multi-user WebSocket event coordination validated")
     
     async def test_websocket_event_ordering_and_consistency(self):
         """Test 12/15: WebSocket event ordering and consistency in execution flows"""
@@ -854,7 +854,7 @@ class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
             completed_idx = event_types.index('agent_completed')
             assert started_idx < completed_idx, "agent_started should come before agent_completed"
         
-        logger.info("✅ WebSocket event ordering and consistency validated")
+        logger.info("CHECK WebSocket event ordering and consistency validated")
 
     # ============================================================================
     # CATEGORY 5: ERROR HANDLING & RECOVERY (3 tests)
@@ -932,7 +932,7 @@ class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
         assert len(stable_events) >= 3  # Successful execution events
         assert len(error_events) >= 1   # At least some events despite errors
         
-        logger.info("✅ Execution engine error isolation validated")
+        logger.info("CHECK Execution engine error isolation validated")
     
     async def test_execution_engine_graceful_degradation(self):
         """Test 14/15: Execution engine graceful degradation under resource constraints"""
@@ -990,7 +990,7 @@ class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
                          if e['session_id'] == session.session_id]
         assert len(session_events) >= len(successful_tasks)
         
-        logger.info(f"✅ Graceful degradation validated - {len(successful_tasks)}/{len(degradation_results)} tasks succeeded")
+        logger.info(f"CHECK Graceful degradation validated - {len(successful_tasks)}/{len(degradation_results)} tasks succeeded")
     
     async def test_execution_engine_recovery_patterns(self):
         """Test 15/15: Execution engine recovery patterns and resilience"""
@@ -1069,4 +1069,4 @@ class UserExecutionEngineComprehensiveIntegrationTests(SSotAsyncTestCase):
                          if e['session_id'] == session.session_id]
         assert len(session_events) >= len(recovery_scenarios)
         
-        logger.info(f"✅ Recovery patterns validated - {len(successful_recoveries)}/{len(recovery_scenarios)} scenarios recovered")
+        logger.info(f"CHECK Recovery patterns validated - {len(successful_recoveries)}/{len(recovery_scenarios)} scenarios recovered")

@@ -165,11 +165,11 @@ class Issue620TestRunner:
             
             if test_result["passed"]:
                 phase_result["tests_passed"] += 1
-                logger.info(f"   ✅ {test_file} - PASSED")
+                logger.info(f"   CHECK {test_file} - PASSED")
             else:
                 phase_result["tests_failed"] += 1
                 phase_result["success"] = False
-                logger.error(f"   ❌ {test_file} - FAILED")
+                logger.error(f"   X {test_file} - FAILED")
                 
                 if fail_fast:
                     break
@@ -254,9 +254,9 @@ class Issue620TestRunner:
         phase_info = self.test_phases[phase]
         
         if phase_result["success"]:
-            logger.info(f"   ✅ {phase_info['name']} - ALL TESTS PASSED")
+            logger.info(f"   CHECK {phase_info['name']} - ALL TESTS PASSED")
         else:
-            logger.error(f"   ❌ {phase_info['name']} - {phase_result['tests_failed']} TESTS FAILED")
+            logger.error(f"   X {phase_info['name']} - {phase_result['tests_failed']} TESTS FAILED")
         
         logger.info(f"   📊 Tests: {phase_result['tests_passed']}/{phase_result['tests_run']} passed")
         logger.info(f"   ⏱️  Duration: {phase_result['duration']:.2f}s")
@@ -264,9 +264,9 @@ class Issue620TestRunner:
         # Add phase-specific guidance
         if phase == "reproduction":
             if phase_result["success"]:
-                logger.warning("   ⚠️  REPRODUCTION TESTS PASSED - This may indicate migration already complete")
+                logger.warning("   WARNING️  REPRODUCTION TESTS PASSED - This may indicate migration already complete")
             else:
-                logger.info("   ✅ REPRODUCTION TESTS FAILED - This demonstrates the issue exists (expected)")
+                logger.info("   CHECK REPRODUCTION TESTS FAILED - This demonstrates the issue exists (expected)")
         
         elif phase == "golden-path":
             if not phase_result["success"]:
@@ -278,9 +278,9 @@ class Issue620TestRunner:
         
         elif phase == "validation":
             if phase_result["success"]:
-                logger.info("   ✅ MIGRATION VALIDATION PASSED - SSOT migration successful")
+                logger.info("   CHECK MIGRATION VALIDATION PASSED - SSOT migration successful")
             else:
-                logger.warning("   ⚠️  MIGRATION VALIDATION FAILED - Migration incomplete or issues exist")
+                logger.warning("   WARNING️  MIGRATION VALIDATION FAILED - Migration incomplete or issues exist")
     
     def _generate_summary_report(self, results: Dict[str, Any]):
         """Generate comprehensive summary report."""
@@ -289,7 +289,7 @@ class Issue620TestRunner:
         logger.info("=" * 80)
         
         # Overall results
-        logger.info(f"🎯 Overall Result: {'✅ SUCCESS' if results['overall_success'] else '❌ FAILED'}")
+        logger.info(f"🎯 Overall Result: {'CHECK SUCCESS' if results['overall_success'] else 'X FAILED'}")
         logger.info(f"📋 Phases Run: {', '.join(results['phases_run'])}")
         logger.info(f"🧪 Total Tests: {results['total_passed']}/{results['total_tests']} passed")
         
@@ -299,26 +299,26 @@ class Issue620TestRunner:
         # Migration status
         migration_status = results["migration_status"]
         logger.info("\n🔄 MIGRATION STATUS:")
-        logger.info(f"   SSOT Compliance: {'✅' if migration_status['ssot_compliance'] else '❌'}")
-        logger.info(f"   User Isolation: {'✅' if migration_status['user_isolation'] else '❌'}")
-        logger.info(f"   WebSocket Integrity: {'✅' if migration_status['websocket_integrity'] else '❌'}")
-        logger.info(f"   Golden Path Protected: {'✅' if migration_status['golden_path_protected'] else '❌'}")
-        logger.info(f"   Migration Ready: {'✅' if migration_status['migration_ready'] else '❌'}")
+        logger.info(f"   SSOT Compliance: {'CHECK' if migration_status['ssot_compliance'] else 'X'}")
+        logger.info(f"   User Isolation: {'CHECK' if migration_status['user_isolation'] else 'X'}")
+        logger.info(f"   WebSocket Integrity: {'CHECK' if migration_status['websocket_integrity'] else 'X'}")
+        logger.info(f"   Golden Path Protected: {'CHECK' if migration_status['golden_path_protected'] else 'X'}")
+        logger.info(f"   Migration Ready: {'CHECK' if migration_status['migration_ready'] else 'X'}")
         
         # Business impact assessment
         logger.info("\n💰 BUSINESS IMPACT ASSESSMENT:")
         if migration_status['golden_path_protected']:
-            logger.info("   ✅ $500K+ ARR PROTECTED - Core chat functionality working")
+            logger.info("   CHECK $500K+ ARR PROTECTED - Core chat functionality working")
         else:
             logger.error("   🚨 $500K+ ARR AT RISK - Core chat functionality compromised")
         
         if migration_status['user_isolation']:
-            logger.info("   ✅ USER DATA SECURE - No contamination between sessions")
+            logger.info("   CHECK USER DATA SECURE - No contamination between sessions")
         else:
             logger.error("   🚨 SECURITY VULNERABILITY - User data contamination detected")
         
         if migration_status['websocket_integrity']:
-            logger.info("   ✅ REAL-TIME CHAT WORKING - WebSocket events delivered correctly")
+            logger.info("   CHECK REAL-TIME CHAT WORKING - WebSocket events delivered correctly")
         else:
             logger.error("   🚨 CHAT EXPERIENCE DEGRADED - WebSocket event delivery issues")
         
@@ -326,7 +326,7 @@ class Issue620TestRunner:
         logger.info("\n📋 PHASE RESULTS:")
         for phase, phase_result in results["phase_results"].items():
             phase_info = self.test_phases[phase]
-            status = "✅ PASS" if phase_result["success"] else "❌ FAIL"
+            status = "CHECK PASS" if phase_result["success"] else "X FAIL"
             logger.info(f"   {status} {phase_info['name']}")
             logger.info(f"        Tests: {phase_result['tests_passed']}/{phase_result['tests_run']} passed")
             logger.info(f"        Duration: {phase_result['duration']:.2f}s")
@@ -363,18 +363,18 @@ class Issue620TestRunner:
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             user_execution_engine_available = True
-            logger.info("   ✅ UserExecutionEngine available")
+            logger.info("   CHECK UserExecutionEngine available")
         except ImportError:
-            logger.info("   ❌ UserExecutionEngine not available")
+            logger.info("   X UserExecutionEngine not available")
         
         # Check if deprecated ExecutionEngine is available
         execution_engine_available = False
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             execution_engine_available = True
-            logger.info("   ✅ ExecutionEngine available")
+            logger.info("   CHECK ExecutionEngine available")
         except ImportError:
-            logger.info("   ❌ ExecutionEngine not available")
+            logger.info("   X ExecutionEngine not available")
         
         # Determine migration state
         if user_execution_engine_available and not execution_engine_available:

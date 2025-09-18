@@ -2,7 +2,7 @@
 Golden Path Validation Suite - Issue #1278 Phase 4
 
 This test suite validates the complete end-to-end user journey for Issue #1278 remediation:
-1. User login → AI responses (complete golden path)
+1. User login -> AI responses (complete golden path)
 2. All 5 critical WebSocket events work correctly
 3. Business value verification (90% platform value through chat)
 4. Emergency mode compatibility testing
@@ -58,7 +58,7 @@ class TestGoldenPathValidation(SSotAsyncTestCase, unittest.TestCase):
     """
     Golden Path Validation Test Suite
 
-    Tests the complete user journey: login → AI responses → business value
+    Tests the complete user journey: login -> AI responses -> business value
     Focus on actual user experience and business value delivery
     """
 
@@ -89,7 +89,7 @@ class TestGoldenPathValidation(SSotAsyncTestCase, unittest.TestCase):
 
     async def test_complete_golden_path_user_flow(self):
         """
-        Test the complete golden path user flow: login → AI responses
+        Test the complete golden path user flow: login -> AI responses
 
         This validates the primary business value delivery mechanism.
         Success criteria:

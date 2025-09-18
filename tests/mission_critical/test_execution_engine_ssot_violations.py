@@ -5,20 +5,20 @@ consolidation status. It identifies multiple ExecutionEngine implementations
 that violate the Single Source of Truth principle.
 
 Business Value Justification:
-- Segment: Platform/Internal  
+    - Segment: Platform/Internal  
 - Business Goal: Stability & System Integrity
 - Value Impact: Ensures reliable multi-user chat functionality by eliminating execution engine fragmentation
-- Strategic Impact: Critical foundation for $500K+ ARR chat operations requiring zero user isolation failures
+- Strategic Impact: Critical foundation for $""500K"" plus ARR chat operations requiring zero user isolation failures
 
 Key Detection Areas:
-- Multiple ExecutionEngine class definitions across modules
+    - Multiple ExecutionEngine class definitions across modules
 - Legacy execution engine instances still in use
 - Import path violations bypassing UserExecutionEngine SSOT
 - Factory pattern consolidation status
 - User isolation security vulnerabilities
 
 EXPECTED BEHAVIOR: 
-This test SHOULD FAIL initially, demonstrating existing fragmentation issues.
+    This test SHOULD FAIL initially, demonstrating existing fragmentation issues.
 After SSOT consolidation is complete, this test should pass, confirming
 UserExecutionEngine as the canonical implementation.
 ""
@@ -37,7 +37,8 @@ logger = central_logger.get_logger(__name__)
 
 class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
     Test for detecting ExecutionEngine SSOT violations and fragmentation."
-    Test for detecting ExecutionEngine SSOT violations and fragmentation."
+    Test for detecting ExecutionEngine SSOT violations and fragmentation.""
+
     
     def setUp(self):
         "Set up test environment for SSOT violation detection."
@@ -48,7 +49,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
     
     def _initialize_test_attributes(self):
         Initialize test attributes - separate method to avoid conflicts."
-        Initialize test attributes - separate method to avoid conflicts."
+        Initialize test attributes - separate method to avoid conflicts.""
+
         self.codebase_root = Path(__file__).parent.parent.parent
         self.execution_engine_classes = []
         self.execution_engine_modules = []
@@ -57,13 +59,15 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
         
         # Expected SSOT pattern
         self.canonical_module = netra_backend.app.agents.supervisor.user_execution_engine"
-        self.canonical_module = netra_backend.app.agents.supervisor.user_execution_engine"
+        self.canonical_module = netra_backend.app.agents.supervisor.user_execution_engine""
+
         self.canonical_class = UserExecutionEngine
     
     def test_detect_multiple_execution_engine_classes(self):
         ""Detect multiple ExecutionEngine class definitions - SHOULD INITIALLY FAIL."
         logger.info(🔍 SSOT VIOLATION DETECTION: Scanning for multiple ExecutionEngine classes)"
-        logger.info(🔍 SSOT VIOLATION DETECTION: Scanning for multiple ExecutionEngine classes)"
+        logger.info(🔍 SSOT VIOLATION DETECTION: Scanning for multiple ExecutionEngine classes)""
+
         
         # Ensure attributes are initialized (safety check)
         if not hasattr(self, 'codebase_root'):
@@ -77,7 +81,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
             logger.info(f  - {class_name} in {module_path})
             if hasattr(class_obj, '__module__'):
                 logger.info(f    Module: {class_obj.__module__})"
-                logger.info(f    Module: {class_obj.__module__})"
+                logger.info(f    Module: {class_obj.__module__})""
+
         
         # SSOT VALIDATION: Should only have UserExecutionEngine as the canonical implementation
         canonical_classes = [
@@ -96,8 +101,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
             for module_path, class_name in non_canonical_classes
         ]
         
-        logger.warning(f❌ SSOT VIOLATION: Found {len(non_canonical_classes)} non-canonical ExecutionEngine classes)
-        logger.info(f✅ CANONICAL: Found {len(canonical_classes)} canonical ExecutionEngine classes)
+        logger.warning(fX SSOT VIOLATION: Found {len(non_canonical_classes)} non-canonical ExecutionEngine classes)
+        logger.info(fCHECK CANONICAL: Found {len(canonical_classes)} canonical ExecutionEngine classes)
         
         # EXPECTED TO FAIL: Multiple execution engine classes indicate fragmentation
         self.assertGreater(
@@ -114,7 +119,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
         
         # Log findings
         logger.info(fFound {len(legacy_imports)} legacy ExecutionEngine imports:)"
-        logger.info(fFound {len(legacy_imports)} legacy ExecutionEngine imports:)"
+        logger.info(fFound {len(legacy_imports)} legacy ExecutionEngine imports:)""
+
         for file_path, line_num, import_line in legacy_imports:
             logger.info(f"  - {file_path}:{line_num}: {import_line.strip()})"
         
@@ -131,7 +137,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
             EXPECTED FAILURE: Should detect legacy ExecutionEngine import patterns. "
             EXPECTED FAILURE: Should detect legacy ExecutionEngine import patterns. "
             fFound {len(legacy_imports)} legacy imports requiring migration to UserExecutionEngine SSOT."
-            fFound {len(legacy_imports)} legacy imports requiring migration to UserExecutionEngine SSOT."
+            fFound {len(legacy_imports)} legacy imports requiring migration to UserExecutionEngine SSOT.""
+
         )
     
     def test_detect_execution_engine_factory_violations(self):
@@ -180,7 +187,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
             len(isolation_violations), 0,
             EXPECTED FAILURE: Should detect user isolation vulnerabilities. 
             fFound {len(isolation_violations)} vulnerabilities requiring secure UserExecutionEngine patterns."
-            fFound {len(isolation_violations)} vulnerabilities requiring secure UserExecutionEngine patterns."
+            fFound {len(isolation_violations)} vulnerabilities requiring secure UserExecutionEngine patterns.""
+
         )
     
     def test_comprehensive_ssot_violation_summary(self):
@@ -211,8 +219,9 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
         logger.info(f  Canonical Status: {violation_summary['canonical_status']['status']})
         
         for violation in self.ssot_violations[:10]:  # Log first 10 violations
-            logger.info(f    ❌ {violation})"
-            logger.info(f    ❌ {violation})"
+            logger.info(f    X {violation})"
+            logger.info(f    X {violation})""
+
         
         if len(self.ssot_violations) > 10:
             logger.info(f"    ... and {len(self.ssot_violations) - 10} more violations)"
@@ -227,7 +236,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
     
     def _find_all_execution_engine_classes(self) -> List[Tuple[str, str, Any]]:
         Find all ExecutionEngine class definitions in the codebase."
-        Find all ExecutionEngine class definitions in the codebase."
+        Find all ExecutionEngine class definitions in the codebase.""
+
         classes = []
         
         # Scan Python files for ExecutionEngine classes
@@ -260,7 +270,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
                 
             except (UnicodeDecodeError, IOError) as e:
                 logger.debug(fCould not read {py_file}: {e})"
-                logger.debug(fCould not read {py_file}: {e})"
+                logger.debug(fCould not read {py_file}: {e})""
+
         
         return classes
     
@@ -316,7 +327,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
                 if '_instance' in content and 'ExecutionEngine' in content:
                     violations.append((singleton_violation, str(py_file),
                                      Singleton pattern detected - violates user isolation))"
-                                     Singleton pattern detected - violates user isolation))"
+                                     Singleton pattern detected - violates user isolation))""
+
                 
             except (UnicodeDecodeError, IOError) as e:
                 logger.debug(fCould not read {py_file}: {e}")"
@@ -361,7 +373,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
                     if 'validate_user_context' not in content:
                         vulnerabilities.append((missing_user_validation, str(py_file),
                                               Missing user context validation))"
-                                              Missing user context validation))"
+                                              Missing user context validation))""
+
                 
             except (UnicodeDecodeError, IOError) as e:
                 logger.debug(f"Could not read {py_file}: {e})"
@@ -370,7 +383,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
     
     def _should_skip_file(self, file_path: Path) -> bool:
         Check if file should be skipped during scanning."
-        Check if file should be skipped during scanning."
+        Check if file should be skipped during scanning.""
+
         skip_patterns = [
             '__pycache__',
             '.pyc',
@@ -403,7 +417,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
     
     def _file_to_module_path(self, file_path: Path) -> str:
         Convert file path to Python module path."
-        Convert file path to Python module path."
+        Convert file path to Python module path.""
+
         try:
             # Convert to relative path from codebase root
             rel_path = file_path.relative_to(self.codebase_root)
@@ -413,7 +428,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
             return module_path
         except (ValueError, AttributeError):
             return "
-            return "
+            return ""
+
     
     def _is_legacy_execution_engine_import(self, line: str) -> bool:
         Check if line contains legacy ExecutionEngine import.""
@@ -433,7 +449,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
     
     def _categorize_violations(self) -> Dict[str, int]:
         Categorize SSOT violations by type."
-        Categorize SSOT violations by type."
+        Categorize SSOT violations by type.""
+
         categories = {}
         for violation in self.ssot_violations:
             if 'Non-canonical ExecutionEngine' in violation:
@@ -454,7 +471,7 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
         
         if total_violations > 50:
             severity = CRITICAL""
-            description = Severe ExecutionEngine fragmentation threatens $500K+ ARR chat functionality
+            description = Severe ExecutionEngine fragmentation threatens $""500K"" plus ARR chat functionality
         elif total_violations > 20:
             severity = HIGH"
             severity = HIGH"
@@ -465,7 +482,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
         else:
             severity = LOW
             description = Minor fragmentation with limited business impact"
-            description = Minor fragmentation with limited business impact"
+            description = Minor fragmentation with limited business impact""
+
         
         return {
             'severity': severity,
@@ -483,10 +501,12 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
             return P1 - URGENT (Major fragmentation detected)
         elif any('factory' in v for v in self.ssot_violations):
             return P2 - HIGH (Factory consolidation needed)"
-            return P2 - HIGH (Factory consolidation needed)"
+            return P2 - HIGH (Factory consolidation needed)""
+
         else:
             return P3 - MEDIUM (Cleanup and optimization)"
-            return P3 - MEDIUM (Cleanup and optimization)"
+            return P3 - MEDIUM (Cleanup and optimization)""
+
     
     def _assess_canonical_status(self) -> Dict[str, Any]:
         Assess canonical ExecutionEngine implementation status.""
@@ -502,7 +522,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
             status = PARTIAL - Canonical class available but violations exist
         elif canonical_available:
             status = DEGRADED - Canonical class available with multiple implementations"
-            status = DEGRADED - Canonical class available with multiple implementations"
+            status = DEGRADED - Canonical class available with multiple implementations""
+
         else:
             status = MISSING - Canonical UserExecutionEngine not available""
         

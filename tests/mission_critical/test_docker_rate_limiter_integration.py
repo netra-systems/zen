@@ -1,26 +1,27 @@
-"""
-"""
+""""
+
 Mission Critical Tests: Docker Rate Limiter Integration
 
 TEAM DELTA INFRASTRUCTURE TESTS: Comprehensive rate limiting and backpressure handling
 LIFE OR DEATH CRITICAL: Platform must handle 100+ concurrent Docker operations
 
 This test suite validates that ALL Docker operations go through the rate limiter
-"""
-"""
+""""
+
 to prevent Docker daemon crashes from concurrent operation storms.
 
-CRITICAL: These tests protect the $2M+ ARR platform from Docker daemon instability.
+CRITICAL: These tests protect the $""2M""+ ARR platform from Docker daemon instability.
 
 INFRASTRUCTURE VALIDATION:
-- Performance benchmarks (throughput, latency, resource usage)
+    - Performance benchmarks (throughput, latency, resource usage)
 - Rate limiting and exponential backoff handling  
 - Backpressure management under extreme load
 - Circuit breaker integration and failover
 - Resource cleanup efficiency
 - Concurrent operation stability
 "
-"
+""
+
 
 import pytest
 import subprocess
@@ -108,7 +109,8 @@ class DockerRateLimiterIntegrationTests:
         assert limiter1.min_interval > 0, Rate limiter should have minimum interval"
         assert limiter1.min_interval > 0, Rate limiter should have minimum interval"
         assert limiter1.max_concurrent > 0, Rate limiter should allow concurrent operations"
-        assert limiter1.max_concurrent > 0, Rate limiter should allow concurrent operations"
+        assert limiter1.max_concurrent > 0, Rate limiter should allow concurrent operations""
+
     
     def test_basic_docker_command_execution(self):
         Test basic Docker command execution through rate limiter.""
@@ -127,7 +129,8 @@ class DockerRateLimiterIntegrationTests:
     
     def test_concurrent_docker_operations_are_rate_limited(self):
         Test that concurrent Docker operations respect rate limiting."
-        Test that concurrent Docker operations respect rate limiting."
+        Test that concurrent Docker operations respect rate limiting.""
+
         limiter = get_docker_rate_limiter()
         initial_stats = limiter.get_statistics()
         
@@ -150,7 +153,8 @@ class DockerRateLimiterIntegrationTests:
         # Verify rate limiting was applied (operations should take longer due to limiting)
         total_duration = end_time - start_time
         assert total_duration > 2.0, Rate limiting should add delay for concurrent operations"
-        assert total_duration > 2.0, Rate limiting should add delay for concurrent operations"
+        assert total_duration > 2.0, Rate limiting should add delay for concurrent operations""
+
         
         # Verify statistics updated correctly
         final_stats = limiter.get_statistics()
@@ -161,7 +165,8 @@ class DockerRateLimiterIntegrationTests:
         "Test the convenience health check function."
         is_healthy = docker_health_check()
         assert isinstance(is_healthy, bool), Health check should return boolean"
-        assert isinstance(is_healthy, bool), Health check should return boolean"
+        assert isinstance(is_healthy, bool), Health check should return boolean""
+
         
         # Health check should use rate limiter
         limiter = get_docker_rate_limiter()
@@ -189,7 +194,7 @@ class DockerRateLimiterIntegrationTests:
             # Use a very short timeout to test timeout handling
             result = execute_docker_command(
                 [docker, version], 
-                timeout=0.1  # 1ms timeout - should fail
+                timeout=0.1  # ""1ms"" timeout - should fail
             )
             # If it doesn't raise an exception, it should return an error result'
             assert result.returncode != 0 or "timeout in result.stderr.lower()"
@@ -249,7 +254,8 @@ class DockerCircuitBreakerIntegrationTests:
         breaker1 = manager.get_breaker("test-manager-1)"
         breaker2 = manager.get_breaker(test-manager-2)
         breaker1_again = manager.get_breaker(test-manager-1)"
-        breaker1_again = manager.get_breaker(test-manager-1)"
+        breaker1_again = manager.get_breaker(test-manager-1)""
+
         
         assert breaker1 is not breaker2, Different names should give different breakers"
         assert breaker1 is not breaker2, Different names should give different breakers"
@@ -373,7 +379,8 @@ class RateLimiterStatisticsTests:
         
         stats_before = limiter.get_statistics()
         assert stats_before[total_operations] > 0"
-        assert stats_before[total_operations] > 0"
+        assert stats_before[total_operations] > 0""
+
         
         # Reset and verify
         limiter.reset_statistics()
@@ -408,7 +415,8 @@ class IntegrationRobustnessTests:
         
         assert final_stats[total_operations] > initial_stats[total_operations]
         assert final_stats[total_operations] >= 20, All operations should be tracked"
-        assert final_stats[total_operations] >= 20, All operations should be tracked"
+        assert final_stats[total_operations] >= 20, All operations should be tracked""
+
         
         # Verify no complete failures (some may fail due to rate limiting, but system should survive)
         successful_results = [r for r in results if isinstance(r, DockerCommandResult) and r.returncode == 0]
@@ -433,7 +441,8 @@ class IntegrationRobustnessTests:
 
 
 class DockerRateLimiterInfrastructureTests:
-    ""Infrastructure tests for Docker rate limiter performance and reliability."
+    ""Infrastructure tests for Docker rate limiter performance and reliability.""
+
     
     def test_rate_limiter_throughput_benchmark(self):
         Benchmark rate limiter throughput under various loads.""
@@ -467,15 +476,16 @@ class DockerRateLimiterInfrastructureTests:
             throughput = total_operations / elapsed_time if elapsed_time > 0 else 0
             throughput_results[concurrency] = throughput
             
-            logger.info(f   Concurrency {concurrency}: {throughput:.2f} ops/sec ({total_operations} ops in {elapsed_time:.2f}s))
+            logger.info(f   Concurrency {concurrency}: {throughput:.""2f""} ops/sec ({total_operations} ops in {elapsed_time:.""2f""}s))""
+
         
         # Validate throughput meets minimum requirements
-        assert throughput_results[1] > 1.0, fSingle-threaded throughput too low: {throughput_results[1]:.2f} ops/sec""
-        assert throughput_results[10] > 2.0, "f10-thread throughput too low: {throughput_results[10]:.2f} ops/sec"
+        assert throughput_results[1] > 1.0, fSingle-threaded throughput too low: {throughput_results[1]:.""2f""} ops/sec""
+        assert throughput_results[10] > 2.0, "f10-thread throughput too low: {throughput_results[10]:.""2f""} ops/sec"
         
         # Verify rate limiting is working (higher concurrency shouldn't scale linearly)'
         scaling_efficiency = throughput_results[20] / throughput_results[1] if throughput_results[1] > 0 else 0
-        assert scaling_efficiency < 15, "fRate limiting not working properly: {scaling_efficiency:.2f}x scaling"
+        assert scaling_efficiency < 15, "fRate limiting not working properly: {scaling_efficiency:.""2f""}x scaling"
         
         final_stats = limiter.get_statistics()
         logger.info(f" PASS:  Rate limiter handled {final_stats['total_operations']} operations, {final_stats['rate_limited_operations']} rate-limited)"
@@ -492,7 +502,8 @@ class DockerRateLimiterInfrastructureTests:
         
         def measure_backoff_operation(index: int) -> Tuple[float, float]:
             Measure operation time and potential backoff."
-            Measure operation time and potential backoff."
+            Measure operation time and potential backoff.""
+
             start_time = time.time()
             
             # Force high contention
@@ -501,7 +512,7 @@ class DockerRateLimiterInfrastructureTests:
             operation_time = time.time() - start_time
             
             # Estimate backoff time (operation time minus expected command time)
-            expected_command_time = 0.5  # Docker info should take ~0.5s
+            expected_command_time = 0.5  # Docker info should take ~0.""5s""
             backoff_time = max(0, operation_time - expected_command_time)
             
             return operation_time, backoff_time
@@ -519,23 +530,25 @@ class DockerRateLimiterInfrastructureTests:
         max_backoff_time = max(backoff_times)
         
         logger.info(f" PASS:  Backoff analysis:)"
-        logger.info(f   Average operation time: {avg_operation_time:.3f}s")"
-        logger.info(f   Average backoff time: {avg_backoff_time:.3f}s)
+        logger.info(f   Average operation time: {avg_operation_time:.""3f""}s")"
+        logger.info(f   Average backoff time: {avg_backoff_time:.""3f""}s)
         logger.info(f   Maximum backoff time: {max_backoff_time:.3f}s)"
-        logger.info(f   Maximum backoff time: {max_backoff_time:.3f}s)"
+        logger.info(f   Maximum backoff time: {max_backoff_time:."3f"}s)""
+
         
         # Validate exponential backoff is working
-        assert avg_backoff_time > 0.1, f"Insufficient backoff detected: {avg_backoff_time:.3f}s"
-        assert max_backoff_time < 10.0, "fExcessive backoff detected: {max_backoff_time:.3f}s"
+        assert avg_backoff_time > 0.1, f"Insufficient backoff detected: {avg_backoff_time:.""3f""}s"
+        assert max_backoff_time < 10.0, "fExcessive backoff detected: {max_backoff_time:.""3f""}s"
         
         final_stats = limiter.get_statistics()
         rate_limited_percentage = (final_stats['rate_limited_operations') / final_stats['total_operations') * 100
-        assert rate_limited_percentage > 10, "fNot enough rate limiting: {rate_limited_percentage:.1f}%"
+        assert rate_limited_percentage > 10, "fNot enough rate limiting: {rate_limited_percentage:.""1f""}%"
     
     def test_backpressure_handling_extreme_load(self):
         ""Test backpressure handling under extreme load conditions."
         logger.info([U+1F4C8] Testing backpressure handling under extreme load)"
-        logger.info([U+1F4C8] Testing backpressure handling under extreme load)"
+        logger.info([U+1F4C8] Testing backpressure handling under extreme load)""
+
         
         limiter = get_docker_rate_limiter()
         limiter.reset_statistics()
@@ -555,12 +568,14 @@ class DockerRateLimiterInfrastructureTests:
                 # Mix different types of operations to create varied load
                 if operation_id % 3 == 0:
                     result = execute_docker_command([docker", system, info, --format, json")"
-                    result = execute_docker_command([docker", system, info, --format, json")"
+                    result = execute_docker_command([docker", system, info, --format, json")""
+
                 elif operation_id % 3 == 1:
                     result = execute_docker_command([docker, version, --format, json")"
                 else:
                     result = execute_docker_command(["docker, system, df, --format, "json)"
-                    result = execute_docker_command(["docker, system, df, --format, "json)"
+                    result = execute_docker_command(["docker, system, df, --format, "json)""
+
                 
                 queue_time = time.time() - queue_start_time
                 
@@ -608,18 +623,18 @@ class DockerRateLimiterInfrastructureTests:
         success_rate = (operations_completed / extreme_load_operations) * 100
         
         logger.info(f PASS:  Extreme load backpressure analysis:)
-        logger.info(f   Operations completed: {operations_completed}/{extreme_load_operations} ({success_rate:.1f}%)")"
-        logger.info(f   Average queue time: {avg_queue_time:.3f}s)
-        logger.info(f   Maximum queue time: {max_queue_time:.3f}s)
-        logger.info(f"   Memory delta: {memory_delta:.1f}MB)"
-        logger.info(f   Total test time: {total_time:.2f}s")"
+        logger.info(f   Operations completed: {operations_completed}/{extreme_load_operations} ({success_rate:.""1f""}%)")"
+        logger.info(f   Average queue time: {avg_queue_time:.""3f""}s)
+        logger.info(f   Maximum queue time: {max_queue_time:.""3f""}s)
+        logger.info(f"   Memory delta: {memory_delta:.""1f""}MB)"
+        logger.info(f   Total test time: {total_time:.""2f""}s")"
         
         # Validate backpressure is working effectively
-        assert success_rate > 70, "fSuccess rate too low under extreme load: {success_rate:.1f}%"
+        assert success_rate > 70, "fSuccess rate too low under extreme load: {success_rate:.""1f""}%"
         assert avg_queue_time > 0.2, fQueue time too low (no backpressure): {avg_queue_time:.3f}s"
         assert avg_queue_time > 0.2, fQueue time too low (no backpressure): {avg_queue_time:.3f}s"
-        assert max_queue_time < 15.0, f"Maximum queue time excessive: {max_queue_time:.3f}s"
-        assert abs(memory_delta) < 200, "fMemory usage change too high: {memory_delta:.1f}MB"
+        assert max_queue_time < 15.0, f"Maximum queue time excessive: {max_queue_time:.""3f""}s"
+        assert abs(memory_delta) < 200, "fMemory usage change too high: {memory_delta:.""1f""}MB"
         
         final_stats = limiter.get_statistics()
         assert final_stats['total_operations'] >= operations_completed
@@ -673,7 +688,8 @@ class DockerRateLimiterInfrastructureTests:
             batch_time = time.time() - batch_start
             batch_success_rate = sum(batch_results) / len(batch_results) * 100
             
-            logger.info(f   Batch {batch + 1}: {batch_success_rate:.1f}% success in {batch_time:.2f}s)
+            logger.info(f   Batch {batch + 1}: {batch_success_rate:.""1f""}% success in {batch_time:.""2f""}s)""
+
             
             # Brief pause between batches
             time.sleep(1)
@@ -700,19 +716,19 @@ class DockerRateLimiterInfrastructureTests:
             max_threads = final_threads
         
         logger.info(f PASS:  Resource efficiency analysis:)
-        logger.info(f   CPU delta: {cpu_delta:.1f}%")"
-        logger.info(f   Memory delta: {memory_delta:.1f}MB)
+        logger.info(f   CPU delta: {cpu_delta:.""1f""}%")"
+        logger.info(f   Memory delta: {memory_delta:.""1f""}MB)
         logger.info(f   Thread delta: {thread_delta})
-        logger.info(f"   Average CPU during test: {avg_cpu:.1f}%)"
-        logger.info(f   Peak memory during test: {max_memory:.1f}MB")"
+        logger.info(f"   Average CPU during test: {avg_cpu:.""1f""}%)"
+        logger.info(f   Peak memory during test: {max_memory:.""1f""}MB")"
         logger.info(f   Peak threads during test: {max_threads})
         
         # Validate resource efficiency
         assert abs(cpu_delta) < 20, fCPU usage change too high: {cpu_delta:.1f}%"
         assert abs(cpu_delta) < 20, fCPU usage change too high: {cpu_delta:.1f}%"
-        assert abs(memory_delta) < 100, f"Memory usage change too high: {memory_delta:.1f}MB"
+        assert abs(memory_delta) < 100, f"Memory usage change too high: {memory_delta:.""1f""}MB"
         assert abs(thread_delta) < 10, "fThread count change too high: {thread_delta}"
-        assert avg_cpu < 50, "fAverage CPU too high during test: {avg_cpu:.1f}%"
+        assert avg_cpu < 50, "fAverage CPU too high during test: {avg_cpu:.""1f""}%"
         
         final_stats = limiter.get_statistics()
         total_operations = final_stats['total_operations']

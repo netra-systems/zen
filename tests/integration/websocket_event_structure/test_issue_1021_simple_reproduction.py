@@ -76,7 +76,7 @@ class TestIssue1021SimpleReproduction(unittest.TestCase):
                 mismatch_found = True
                 print(f"\nMISMATCH: Frontend expects 'payload' field, backend uses 'data' field")
             else:
-                print(f"\n✅ STRUCTURE ALIGNMENT: Both backend and frontend use 'payload' field")
+                print(f"\nCHECK STRUCTURE ALIGNMENT: Both backend and frontend use 'payload' field")
 
         # Check data nesting (AFTER Issue #1021 fix)
         backend_tool_name = None
@@ -95,9 +95,9 @@ class TestIssue1021SimpleReproduction(unittest.TestCase):
             # Check if access paths are now aligned
             if backend_emitted_structure.get('payload', {}).get('tool_name') == \
                frontend_expected_structure.get('payload', {}).get('tool_name'):
-                print("✅ ACCESS PATHS ALIGNED: Both use 'payload.tool_name' - Issue #1021 RESOLVED!")
+                print("CHECK ACCESS PATHS ALIGNED: Both use 'payload.tool_name' - Issue #1021 RESOLVED!")
             else:
-                print("❌ ACCESS PATHS STILL MISALIGNED")
+                print("X ACCESS PATHS STILL MISALIGNED")
 
         # Simulate frontend processing failure
         def simulate_frontend_processing(event_data):

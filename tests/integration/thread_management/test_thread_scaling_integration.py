@@ -354,7 +354,7 @@ class ThreadScalingIntegrationTests(SSotAsyncTestCase):
                 assert throughput > user_count * 0.5, \
                     f"Throughput too low at {user_count} users: {throughput} ops/sec"
                 
-            print(f"✓ {user_count} users: {avg_operation_time:.1f}ms avg, {p95_time:.1f}ms P95, {throughput:.1f} ops/sec")
+            print(f"CHECK {user_count} users: {avg_operation_time:.1f}ms avg, {p95_time:.1f}ms P95, {throughput:.1f} ops/sec")
         
         # Analyze scaling characteristics across all user counts
         if len(scaling_results) > 1:
@@ -499,7 +499,7 @@ class ThreadScalingIntegrationTests(SSotAsyncTestCase):
             assert retrieve_all_time < max_acceptable_retrieve_time, \
                 f"Full retrieval too slow at {message_count} messages: {retrieve_all_time}ms"
             
-            print(f"✓ {message_count} messages: retrieve_all={retrieve_all_time:.1f}ms, recent={retrieve_recent_time:.1f}ms")
+            print(f"CHECK {message_count} messages: retrieve_all={retrieve_all_time:.1f}ms, recent={retrieve_recent_time:.1f}ms")
         
         # Analyze scaling characteristics across volume levels
         if len(volume_scaling_results) > 1:
@@ -670,7 +670,7 @@ class ThreadScalingIntegrationTests(SSotAsyncTestCase):
             assert operations_memory_usage < 50, \
                 f"Operations memory usage too high in scenario {scenario_index}: {operations_memory_usage}MB"
             
-            print(f"✓ Scenario {scenario_index + 1}: {total_objects} objects, "
+            print(f"CHECK Scenario {scenario_index + 1}: {total_objects} objects, "
                   f"{scenario_memory_usage:.1f}MB ({memory_per_object*1024:.1f}KB/object)")
         
         # Analyze memory scaling trends
@@ -836,7 +836,7 @@ class ThreadScalingIntegrationTests(SSotAsyncTestCase):
             assert operations_per_second > operation_count * 0.3, \
                 f"Database throughput too low at {operation_count} operations: {operations_per_second} ops/sec"
             
-            print(f"✓ {operation_count} ops: {avg_wait_time:.1f}ms avg wait, {operations_per_second:.1f} ops/sec")
+            print(f"CHECK {operation_count} ops: {avg_wait_time:.1f}ms avg wait, {operations_per_second:.1f} ops/sec")
         
         # Analyze database scaling characteristics
         if len(db_scaling_results) > 1:

@@ -653,7 +653,7 @@ class BusinessScalabilityTests:
                           if test_category.lower().replace(' ', '_') in m.name.lower().replace(' ', '_')]
 
         for metric in category_metrics:
-            status_emoji = "✅" if metric.status == "PASS" else "❌" if metric.status == "FAIL" else "⚠️"
+            status_emoji = "CHECK" if metric.status == "PASS" else "X" if metric.status == "FAIL" else "WARNING️"
             
             # Format the value based on unit
             if metric.unit in ["seconds", "MB/connection", "dollars/request"]:
@@ -686,10 +686,10 @@ class BusinessScalabilityTests:
             print(f"\n🚨 SCALABILITY RISK: CRITICAL ({len(critical_failures)} critical failures)")
             print("   Business Impact: Scalability limitations may prevent business growth")
         elif failed_metrics:
-            print(f"\n⚠️ SCALABILITY RISK: HIGH ({len(failed_metrics)} failed metrics)")
+            print(f"\nWARNING️ SCALABILITY RISK: HIGH ({len(failed_metrics)} failed metrics)")
             print("   Business Impact: Scalability issues may affect growth capacity")
         else:
-            print(f"\n✅ SCALABILITY RISK: LOW (All metrics within targets)")
+            print(f"\nCHECK SCALABILITY RISK: LOW (All metrics within targets)")
             print("   Business Impact: Scalability supports business growth requirements")
 
 if __name__ == "__main__":
@@ -731,15 +731,15 @@ if __name__ == "__main__":
                 print(f"   - {failure.name}: {failure.business_impact}")
             sys.exit(1)
         elif len(high_risk_failures) > 3:
-            print("\n⚠️ BUSINESS OUTCOME: HIGH SCALABILITY RISK")
+            print("\nWARNING️ BUSINESS OUTCOME: HIGH SCALABILITY RISK")
             print("Multiple scalability issues may limit business growth potential")
             sys.exit(1)
         else:
-            print("\n✅ BUSINESS OUTCOME: SCALABILITY REQUIREMENTS MET")
+            print("\nCHECK BUSINESS OUTCOME: SCALABILITY REQUIREMENTS MET")
             print("Scalability metrics support business growth and market expansion")
             sys.exit(0)
 
     except Exception as e:
-        print(f"\n❌ SCALABILITY VALIDATION FAILED: {e}")
+        print(f"\nX SCALABILITY VALIDATION FAILED: {e}")
         print("Cannot validate scalability requirements for business growth")
         sys.exit(1)

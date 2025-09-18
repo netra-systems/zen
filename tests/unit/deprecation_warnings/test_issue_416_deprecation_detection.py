@@ -69,7 +69,7 @@ class DeprecationWarningDetectionTests(SSotBaseTestCase):
                 # Force re-import to trigger the warning
                 import netra_backend.app.websocket_core
                 importlib.reload(netra_backend.app.websocket_core)
-                print(f"✓ Import successful, checking for warnings...")
+                print(f"CHECK Import successful, checking for warnings...")
             except Exception as e:
                 print(f"✗ Import failed: {e}")
                 
@@ -103,7 +103,7 @@ class DeprecationWarningDetectionTests(SSotBaseTestCase):
         # ASSERTION: This should FAIL initially, proving the test can detect warnings
         self.assertGreater(
             total_detected, 0,
-            "❌ EXPECTED FAILURE: Should detect ISSUE #1144 deprecation warnings. "
+            "X EXPECTED FAILURE: Should detect ISSUE #1144 deprecation warnings. "
             "If this passes, the deprecation warnings are already fixed!"
         )
         
@@ -126,7 +126,7 @@ class DeprecationWarningDetectionTests(SSotBaseTestCase):
         # Should find at least one deprecation warning
         self.assertGreater(
             len(deprecation_warnings), 0,
-            "❌ EXPECTED FAILURE: Should detect deprecation warnings"
+            "X EXPECTED FAILURE: Should detect deprecation warnings"
         )
         
         for warning in deprecation_warnings:
@@ -150,7 +150,7 @@ class DeprecationWarningDetectionTests(SSotBaseTestCase):
                 
                 self.assertEqual(
                     len(missing_elements), 0,
-                    f"❌ EXPECTED FAILURE: Warning missing elements: {missing_elements}"
+                    f"X EXPECTED FAILURE: Warning missing elements: {missing_elements}"
                 )
                 
     def test_deprecated_import_pattern_discovery(self):
@@ -193,7 +193,7 @@ class DeprecationWarningDetectionTests(SSotBaseTestCase):
         # ASSERTION: Should FAIL initially, proving deprecated imports exist
         self.assertGreater(
             len(deprecated_imports), 0,
-            "❌ EXPECTED FAILURE: Should find files with deprecated import patterns. "
+            "X EXPECTED FAILURE: Should find files with deprecated import patterns. "
             "If this passes, all imports are already migrated!"
         )
         
@@ -236,7 +236,7 @@ class DeprecationWarningDetectionTests(SSotBaseTestCase):
                 ], capture_output=True, text=True)
                 
                 if result.returncode == 0:
-                    print(f"  ✓ Canonical import works")
+                    print(f"  CHECK Canonical import works")
                     working_migrations += 1
                 else:
                     print(f"  ✗ Canonical import failed: {result.stderr}")
@@ -257,7 +257,7 @@ class DeprecationWarningDetectionTests(SSotBaseTestCase):
         # ASSERTION: Should have high migration success rate
         self.assertGreaterEqual(
             migration_success_rate, 0.5,
-            f"❌ EXPECTED FAILURE: Migration paths should work. "
+            f"X EXPECTED FAILURE: Migration paths should work. "
             f"Success rate: {migration_success_rate:.1%}"
         )
 
@@ -307,7 +307,7 @@ print("Import completed")
             # ASSERTION: Should detect warning with correct location
             self.assertTrue(
                 warning_found,
-                "❌ EXPECTED FAILURE: Should detect ISSUE #1144 deprecation warning"
+                "X EXPECTED FAILURE: Should detect ISSUE #1144 deprecation warning"
             )
             
         finally:

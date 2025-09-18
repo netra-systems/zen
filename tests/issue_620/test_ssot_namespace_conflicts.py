@@ -36,12 +36,12 @@ class SSotNamespaceConflictsTests(SSotBaseTestCase):
             classes_are_same = DeprecatedEngine == UserExecutionEngine
             logger.info(f'Classes are same: {classes_are_same}')
             if not classes_are_same:
-                logger.warning('❌ SSOT VIOLATION DETECTED: Different ExecutionEngine classes exist')
+                logger.warning('X SSOT VIOLATION DETECTED: Different ExecutionEngine classes exist')
                 pytest.fail(f'SSOT VIOLATION: DeprecatedEngine ({DeprecatedEngine}) != UserExecutionEngine ({UserExecutionEngine}). Multiple ExecutionEngine implementations detected - security risk for user isolation.')
             else:
-                logger.info('✅ SSOT COMPLIANCE: ExecutionEngine properly aliased to UserExecutionEngine')
+                logger.info('CHECK SSOT COMPLIANCE: ExecutionEngine properly aliased to UserExecutionEngine')
         except ImportError as e:
-            logger.info(f'✅ MIGRATION SUCCESS: Deprecated ExecutionEngine import not found: {e}')
+            logger.info(f'CHECK MIGRATION SUCCESS: Deprecated ExecutionEngine import not found: {e}')
         try:
             deprecated_params = None
             ssot_params = None
@@ -57,10 +57,10 @@ class SSotNamespaceConflictsTests(SSotBaseTestCase):
             if deprecated_params is not None and ssot_params is not None:
                 signatures_match = list(deprecated_params.keys()) == list(ssot_params.keys())
                 if not signatures_match:
-                    logger.warning('❌ CONSTRUCTOR INCOMPATIBILITY: Different ExecutionEngine constructor signatures')
+                    logger.warning('X CONSTRUCTOR INCOMPATIBILITY: Different ExecutionEngine constructor signatures')
                     pytest.fail(f'CONSTRUCTOR INCOMPATIBILITY: Deprecated: {list(deprecated_params.keys())} vs SSOT: {list(ssot_params.keys())}. This proves multiple incompatible ExecutionEngine implementations exist.')
                 else:
-                    logger.info('✅ CONSTRUCTOR COMPATIBILITY: Signatures match')
+                    logger.info('CHECK CONSTRUCTOR COMPATIBILITY: Signatures match')
         except Exception as e:
             logger.error(f'Error testing constructor compatibility: {e}')
 
@@ -98,13 +98,13 @@ class SSotNamespaceConflictsTests(SSotBaseTestCase):
         if len(execution_engine_classes) > 1:
             unique_classes = set(execution_engine_classes)
             if len(unique_classes) > 1:
-                logger.warning(f'❌ SSOT VIOLATION: {len(unique_classes)} different ExecutionEngine classes found')
+                logger.warning(f'X SSOT VIOLATION: {len(unique_classes)} different ExecutionEngine classes found')
                 class_info = [(cls.__name__, cls.__module__) for cls in unique_classes]
                 pytest.fail(f'SSOT VIOLATION: {len(unique_classes)} different ExecutionEngine classes detected: {class_info}. This creates user isolation security vulnerabilities.')
             else:
-                logger.info('✅ SSOT COMPLIANCE: All ExecutionEngine imports resolve to same class')
+                logger.info('CHECK SSOT COMPLIANCE: All ExecutionEngine imports resolve to same class')
         else:
-            logger.info('✅ SINGLE EXECUTION ENGINE: Only one ExecutionEngine class found')
+            logger.info('CHECK SINGLE EXECUTION ENGINE: Only one ExecutionEngine class found')
 
     def test_class_hierarchy_consistency(self):
         """REPRODUCTION TEST: ExecutionEngine class hierarchies are inconsistent.
@@ -125,7 +125,7 @@ class SSotNamespaceConflictsTests(SSotBaseTestCase):
         except ImportError:
             pytest.fail('CRITICAL: UserExecutionEngine not available - SSOT missing')
         if len(execution_engine_classes) < 2:
-            logger.info('✅ Only one ExecutionEngine implementation found - SSOT compliant')
+            logger.info('CHECK Only one ExecutionEngine implementation found - SSOT compliant')
             return
         base_classes_info = []
         method_sets = []
@@ -140,15 +140,15 @@ class SSotNamespaceConflictsTests(SSotBaseTestCase):
             (name1, base1), (name2, base2) = base_classes_info
             (_, methods1), (_, methods2) = method_sets
             if base1 != base2:
-                logger.warning(f'❌ HIERARCHY VIOLATION: Different base classes - {name1}: {base1} vs {name2}: {base2}')
+                logger.warning(f'X HIERARCHY VIOLATION: Different base classes - {name1}: {base1} vs {name2}: {base2}')
             common_methods = methods1.intersection(methods2)
             unique_to_1 = methods1 - methods2
             unique_to_2 = methods2 - methods1
             if unique_to_1 or unique_to_2:
-                logger.warning(f'❌ METHOD SIGNATURE VIOLATION: Unique to {name1}: {unique_to_1}, Unique to {name2}: {unique_to_2}')
+                logger.warning(f'X METHOD SIGNATURE VIOLATION: Unique to {name1}: {unique_to_1}, Unique to {name2}: {unique_to_2}')
                 pytest.fail(f'METHOD SIGNATURE VIOLATION: ExecutionEngine implementations have different capabilities. {name1} unique methods: {unique_to_1}, {name2} unique methods: {unique_to_2}. This proves SSOT violation - multiple incompatible implementations.')
             else:
-                logger.info('✅ METHOD COMPATIBILITY: All ExecutionEngine implementations have same methods')
+                logger.info('CHECK METHOD COMPATIBILITY: All ExecutionEngine implementations have same methods')
 
 class ExecutionEngineFactoryViolationsTests(SSotBaseTestCase):
     """Test suite to reproduce factory pattern SSOT violations."""
@@ -172,16 +172,16 @@ class ExecutionEngineFactoryViolationsTests(SSotBaseTestCase):
                 continue
         logger.info(f'Found {len(factory_results)} working factory methods')
         if len(factory_results) < 2:
-            logger.info('✅ SSOT COMPLIANT: Only one factory method available')
+            logger.info('CHECK SSOT COMPLIANT: Only one factory method available')
             return
         factory_types = [type(result) for _, result in factory_results]
         unique_types = set(factory_types)
         if len(unique_types) > 1:
             type_info = [(name, type(result).__name__) for name, result in factory_results]
-            logger.warning(f'❌ FACTORY SSOT VIOLATION: Different types from different factories: {type_info}')
+            logger.warning(f'X FACTORY SSOT VIOLATION: Different types from different factories: {type_info}')
             pytest.fail(f'FACTORY SSOT VIOLATION: {len(unique_types)} different ExecutionEngine types from factories. Factory results: {type_info}. This creates user isolation inconsistencies.')
         else:
-            logger.info('✅ FACTORY CONSISTENCY: All factory methods create same type')
+            logger.info('CHECK FACTORY CONSISTENCY: All factory methods create same type')
 
     def _try_direct_constructor(self):
         """Try direct ExecutionEngine constructor."""

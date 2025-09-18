@@ -7,7 +7,7 @@ Expected: These tests should FAIL initially to prove violations exist
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise, Platform)
 - Business Goal: Stability - Protect $500K+ ARR Golden Path functionality
-- Value Impact: Ensures users can login → get AI responses (90% of platform value) 
+- Value Impact: Ensures users can login -> get AI responses (90% of platform value) 
 - Strategic Impact: SSOT compliance prevents authentication vulnerabilities
 """
 
@@ -110,7 +110,7 @@ class AuthStartupValidatorSSOTViolationsTests(BaseUnitTest):
         vulnerabilities by bypassing proper environment isolation. This is the
         core mechanism blocking Golden Path user login.
         
-        BUSINESS IMPACT: Users cannot login → get AI responses
+        BUSINESS IMPACT: Users cannot login -> get AI responses
         """
         env = get_env()
         env.enable_isolation()
@@ -152,7 +152,7 @@ class AuthStartupValidatorSSOTViolationsTests(BaseUnitTest):
                 
         except Exception as e:
             # Expected exception - this might be how the violation manifests
-            print(f"⚠️  Exception during JWT validation test (may indicate violation): {str(e)}")
+            print(f"WARNING️  Exception during JWT validation test (may indicate violation): {str(e)}")
             # Re-raise to show the test failure
             raise
         finally:

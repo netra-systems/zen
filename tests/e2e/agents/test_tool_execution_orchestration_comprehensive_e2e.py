@@ -66,7 +66,7 @@ class ToolExecutionOrchestrationE2ETests(BaseE2ETest):
             self.tool_executions[user.user_id] = []
             self.tool_results[user.user_id] = {}
             self.orchestration_flows[user.user_id] = {'sequential_tools': [], 'parallel_tools': [], 'dependency_chain': {}, 'execution_timeline': []}
-        self.logger.info(f'✅ PASS: Tool orchestration test environment ready - {len(self.test_users)} users authenticated')
+        self.logger.info(f'CHECK PASS: Tool orchestration test environment ready - {len(self.test_users)} users authenticated')
 
     async def test_sequential_tool_execution_chain(self):
         """
@@ -107,7 +107,7 @@ class ToolExecutionOrchestrationE2ETests(BaseE2ETest):
                                 record['completed_at'] = time.time()
                                 record['duration'] = record['completed_at'] - record['started_at']
                                 break
-                        self.logger.info(f'✅ Tool completed: {tool_name}')
+                        self.logger.info(f'CHECK Tool completed: {tool_name}')
                     elif event_type == 'agent_completed':
                         break
             except Exception as e:
@@ -143,11 +143,11 @@ class ToolExecutionOrchestrationE2ETests(BaseE2ETest):
                 if next_expected_tool in tool_names:
                     next_position = tool_names.index(next_expected_tool)
                     assert expected_position < next_position, f'Tool sequence violation: {expected_tool} should come before {next_expected_tool}'
-        self.logger.info(f'✅ PASS: Sequential tool execution validated successfully')
+        self.logger.info(f'CHECK PASS: Sequential tool execution validated successfully')
         self.logger.info(f'🔧 Tools executed: {len(tool_execution_sequence)}')
-        self.logger.info(f'✅ Successful completions: {len(completed_tools)}')
+        self.logger.info(f'CHECK Successful completions: {len(completed_tools)}')
         self.logger.info(f'⏱️ Total execution time: {total_duration:.2f}s')
-        self.logger.info(f"📋 Tool sequence: {' → '.join([r['tool_name'] for r in tool_execution_sequence[:5]])}")
+        self.logger.info(f"📋 Tool sequence: {' -> '.join([r['tool_name'] for r in tool_execution_sequence[:5]])}")
 
     async def test_parallel_tool_execution_coordination(self):
         """
@@ -187,7 +187,7 @@ class ToolExecutionOrchestrationE2ETests(BaseE2ETest):
                         currently_executing.discard(tool_name)
                         tool_end_times[tool_name] = current_time
                         concurrent_executions.append({'tool_name': tool_name, 'action': 'completed', 'timestamp': current_time, 'concurrent_count': len(currently_executing)})
-                        self.logger.info(f'✅ Tool completed: {tool_name} (concurrent: {len(currently_executing)})')
+                        self.logger.info(f'CHECK Tool completed: {tool_name} (concurrent: {len(currently_executing)})')
                     elif event_type == 'agent_completed':
                         break
             except Exception as e:
@@ -223,7 +223,7 @@ class ToolExecutionOrchestrationE2ETests(BaseE2ETest):
         if concurrency_peaks:
             avg_concurrency = sum(concurrency_peaks) / len(concurrency_peaks)
             assert avg_concurrency >= 1.5, f'Average concurrency too low: {avg_concurrency:.2f}'
-        self.logger.info(f'✅ PASS: Parallel tool execution validated successfully')
+        self.logger.info(f'CHECK PASS: Parallel tool execution validated successfully')
         self.logger.info(f'🚀 Max concurrent tools: {max_concurrent_tools}')
         self.logger.info(f'⚡ Parallelization efficiency: {parallelization_efficiency:.2f}x')
         self.logger.info(f'🔗 Overlapping tool pairs: {overlapping_pairs}')
@@ -251,7 +251,7 @@ class ToolExecutionOrchestrationE2ETests(BaseE2ETest):
                     if event_type == 'orchestration_decision':
                         decision_info = {'decision_point': event_data.get('decision_point', 'unknown'), 'condition': event_data.get('condition', 'unknown'), 'selected_branch': event_data.get('selected_branch', 'unknown'), 'timestamp': time.time()}
                         orchestration_flow['decision_points'].append(decision_info)
-                        self.logger.info(f"🔀 Orchestration decision: {decision_info['decision_point']} → {decision_info['selected_branch']}")
+                        self.logger.info(f"🔀 Orchestration decision: {decision_info['decision_point']} -> {decision_info['selected_branch']}")
                     elif event_type == 'conditional_tool_execution':
                         conditional_info = {'tool_name': event_data.get('tool_name', 'unknown'), 'condition_met': event_data.get('condition_met', False), 'branch_context': event_data.get('branch_context', 'unknown'), 'timestamp': time.time()}
                         orchestration_flow['conditional_executions'].append(conditional_info)
@@ -294,7 +294,7 @@ class ToolExecutionOrchestrationE2ETests(BaseE2ETest):
             earliest_execution = min(execution_times) if execution_times else float('inf')
             if earliest_execution != float('inf'):
                 assert earliest_decision <= earliest_execution + 1.0, 'Decisions should generally precede executions'
-        self.logger.info(f'✅ PASS: Complex tool orchestration validated successfully')
+        self.logger.info(f'CHECK PASS: Complex tool orchestration validated successfully')
         self.logger.info(f"🔀 Decision points: {len(orchestration_flow['decision_points'])}")
         self.logger.info(f"🎯 Conditional executions: {len(orchestration_flow['conditional_executions'])}")
         self.logger.info(f"📊 Result aggregations: {len(orchestration_flow['result_aggregations'])}")
@@ -367,7 +367,7 @@ class ToolExecutionOrchestrationE2ETests(BaseE2ETest):
             for fallback in fallbacks:
                 assert fallback['original_tool'] != 'unknown', f'Fallback missing original tool: {fallback}'
                 assert fallback['fallback_tool'] != 'unknown', f'Fallback missing fallback tool: {fallback}'
-        self.logger.info(f'✅ PASS: Tool error recovery orchestration validated')
+        self.logger.info(f'CHECK PASS: Tool error recovery orchestration validated')
         self.logger.info(f"🚨 Tool errors handled: {len(error_recovery_flow['tool_errors'])}")
         self.logger.info(f"🔄 Recovery actions: {len(error_recovery_flow['recovery_actions'])}")
         self.logger.info(f"🔧 Fallback executions: {len(error_recovery_flow['fallback_executions'])}")

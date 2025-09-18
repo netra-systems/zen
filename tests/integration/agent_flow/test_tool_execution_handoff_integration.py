@@ -11,7 +11,7 @@ CRITICAL REQUIREMENTS per CLAUDE.md:
 - Uses SSOT BaseTestCase patterns from test_framework/ssot/base_test_case.py
 - NO MOCKS for integration tests - uses real agent services and infrastructure
 - Tests must validate $500K+ ARR chat functionality with complex tool usage
-- WebSocket events must track tool_executing → tool_completed transitions
+- WebSocket events must track tool_executing -> tool_completed transitions
 - Agent execution must handle tool timeouts and error scenarios gracefully
 - Tests must validate tool handoffs between different agent types
 - Tests must pass or fail meaningfully (no test cheating allowed)
@@ -93,7 +93,7 @@ class ToolExecutionHandoffIntegrationTests(SSotAsyncTestCase):
     handoffs between different types of tools and agents.
     
     Tests protect $500K+ ARR chat functionality by validating:
-    - Tool_executing → tool_completed transitions work reliably
+    - Tool_executing -> tool_completed transitions work reliably
     - Complex tool handoffs during agent execution
     - Tool timeouts and error scenarios are handled gracefully
     - Multi-agent tool coordination and handoffs
@@ -303,7 +303,7 @@ class ToolExecutionHandoffIntegrationTests(SSotAsyncTestCase):
     @pytest.mark.tool_execution
     async def test_tool_executing_to_tool_completed_transitions(self):
         """
-        Test tool_executing → tool_completed transitions work reliably.
+        Test tool_executing -> tool_completed transitions work reliably.
         
         This test validates that the critical WebSocket events for tool execution
         are properly sent and received, enabling users to see real-time tool

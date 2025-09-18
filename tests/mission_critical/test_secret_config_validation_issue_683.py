@@ -1,21 +1,22 @@
-"""
-"""
+""""
+
 Test Secret Configuration Validation for Issue #683
 
 This test reproduces the configuration validation failures identified in staging environment
-"""
-"""
+""""
+
 configuration validation tests. Focus on SecretConfig class validation and secret injection
 bridge gaps between SecretConfig and GCP deployment.
 
-Business Impact: Protects $500K+ ARR staging validation pipeline
+Business Impact: Protects $""500K"" plus ARR staging validation pipeline
 Priority: P0 - Mission Critical
 
 Issue #683: Staging environment configuration validation failures
 Root Cause: Secret injection bridge gaps between SecretConfig and GCP deployment
 Test Strategy: Reproduce actual secret configuration validation failures
 "
-"
+""
+
 
 import pytest
 from unittest.mock import patch, MagicMock
@@ -25,13 +26,15 @@ from shared.isolated_environment import IsolatedEnvironment
 
 class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
     "
-    "
+    ""
+
     Unit tests to reproduce secret configuration validation failures in staging environment.
 
     These tests identify specific validation gaps in SecretConfig class that cause
     staging deployment failures.
 "
-"
+""
+
 
     def setup_method(self, method):
         "Set up test environment for secret configuration validation."
@@ -52,7 +55,8 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
         super().teardown_method(method)
 
     def test_secret_config_missing_required_secrets_staging(self):
-    """
+    """"
+
         REPRODUCER: Test secret configuration validation failure when required secrets are missing.
 
         This reproduces the actual staging environment issue where SecretConfig
@@ -91,7 +95,8 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
 
                 # This should fail because the secret is not available
                 if secret_name == jwt-secret-key:"
-                if secret_name == jwt-secret-key:"
+                if secret_name == jwt-secret-key:""
+
                     jwt_secret = self.env.get('JWT_SECRET_KEY')
                     if not jwt_secret or jwt_secret.strip() == '':
                         raise ValueError(f"JWT secret validation failed: missing required secret '{secret_name}' for field '{target_field}')"
@@ -110,7 +115,8 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
             assert missing required secret in str(exc_info.value) or validation failed in str(exc_info.value)
 
     def test_secret_config_project_id_resolution_failure(self):
-        """
+        """"
+
         REPRODUCER: Test SecretReference project ID resolution failure in staging.
 
         This reproduces the issue where SecretReference._get_project_id_safe()
@@ -137,7 +143,8 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
         )
 
     def test_secret_config_validation_with_partial_secrets(self):
-        """
+        """"
+
         REPRODUCER: Test validation failure with partially configured secrets.
 
         This reproduces staging issues where some secrets are configured but others are missing,
@@ -169,7 +176,8 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
 
     def test_unified_secrets_manager_staging_initialization(self):
         """
-        "
+        ""
+
         REPRODUCER: Test UnifiedSecretsManager initialization failure in staging environment.
 
         This reproduces the issue where UnifiedSecretsManager fails to initialize
@@ -253,7 +261,8 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
                 assert project_id == expected_id, (
                     fEnvironment isolation failed: {env_name} environment 
                     fexpected project ID '{expected_id}', got '{project_id}'"
-                    fexpected project ID '{expected_id}', got '{project_id}'"
+                    fexpected project ID '{expected_id}', got '{project_id}'""
+
                 )
 
 

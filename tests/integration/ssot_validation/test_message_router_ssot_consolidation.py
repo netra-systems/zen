@@ -82,10 +82,10 @@ class MessageRouterSSOTConsolidationTests(SSotAsyncTestCase, unittest.TestCase):
             self.fail(f"MessageRouter SSOT violation: {len(unique_class_ids)} different class objects")
         else:
             # SSOT compliance verified
-            print(f"\n✅ MessageRouter SSOT COMPLIANCE VERIFIED:")
+            print(f"\nCHECK MessageRouter SSOT COMPLIANCE VERIFIED:")
             print(f"All {len(router_classes)} imports resolve to same class object (ID: {list(unique_class_ids)[0]})")
             for import_path, info in router_classes.items():
-                print(f"  ✅ {import_path}")
+                print(f"  CHECK {import_path}")
     
     async def test_message_router_inheritance_consistency(self):
         """Validate MessageRouter inheritance hierarchy is consistent."""
@@ -111,7 +111,7 @@ class MessageRouterSSOTConsolidationTests(SSotAsyncTestCase, unittest.TestCase):
                     "MessageRouter should inherit from CanonicalMessageRouter or be the same class"
                 )
             
-            print(f"\n✅ MessageRouter Inheritance Hierarchy:")
+            print(f"\nCHECK MessageRouter Inheritance Hierarchy:")
             print(f"  CanonicalMessageRouter: {id(CanonicalMessageRouter)}")
             print(f"  MessageRouter: {id(MessageRouter)} (same: {MessageRouter == CanonicalMessageRouter})")
             print(f"  QualityMessageRouter: {id(QualityMessageRouter)} (inherits: {issubclass(QualityMessageRouter, CanonicalMessageRouter)})")
@@ -149,7 +149,7 @@ class MessageRouterSSOTConsolidationTests(SSotAsyncTestCase, unittest.TestCase):
                 )
             else:
                 # Same class - SSOT compliance verified
-                print("✅ MessageRouter classes are identical - SSOT compliance verified")
+                print("CHECK MessageRouter classes are identical - SSOT compliance verified")
                 
         except ImportError as e:
             self.skipTest(f"Cannot import MessageRouter for functionality test: {e}")
@@ -210,7 +210,7 @@ class MessageRouterSSOTConsolidationTests(SSotAsyncTestCase, unittest.TestCase):
         print(f"  Potentially problematic: {len(problematic_routers)}")
         
         if problematic_routers:
-            print(f"\n⚠️  Potentially problematic implementations:")
+            print(f"\nWARNING️  Potentially problematic implementations:")
             for impl in problematic_routers[:5]:  # Show first 5
                 print(f"    {impl['class_name']} in {impl['file']}")
         
@@ -253,16 +253,16 @@ class MessageRouterSSOTConsolidationTests(SSotAsyncTestCase, unittest.TestCase):
         failed_imports = [path for path, result in import_success.items() if not result['success']]
         
         if failed_imports:
-            print(f"\n❌ Failed compatibility imports:")
+            print(f"\nX Failed compatibility imports:")
             for path in failed_imports:
                 error = import_success[path].get('error', 'Unknown error')
                 print(f"    {path}: {error}")
             
             self.fail(f"Backward compatibility broken for imports: {failed_imports}")
         else:
-            print(f"\n✅ All MessageRouter compatibility imports working:")
+            print(f"\nCHECK All MessageRouter compatibility imports working:")
             for path in import_success.keys():
-                print(f"    ✅ {path}")
+                print(f"    CHECK {path}")
 
 
 class MessageRouterSSOTFunctionalityTests(SSotAsyncTestCase):
@@ -281,7 +281,7 @@ class MessageRouterSSOTFunctionalityTests(SSotAsyncTestCase):
             self.assertTrue(hasattr(router, 'route_message') or hasattr(router, 'handle_message'),
                            "MessageRouter should have message handling capability")
             
-            print(f"\n✅ MessageRouter basic functionality test passed")
+            print(f"\nCHECK MessageRouter basic functionality test passed")
             print(f"    Router class: {router.__class__.__name__}")
             print(f"    Available methods: {[m for m in dir(router) if not m.startswith('_')]}")
             
@@ -300,7 +300,7 @@ class MessageRouterSSOTFunctionalityTests(SSotAsyncTestCase):
             self.assertIsInstance(SSOT_INFO, dict, "SSOT_INFO should be a dictionary")
             self.assertIn('canonical_class', SSOT_INFO, "SSOT_INFO should specify canonical class")
             
-            print(f"\n✅ MessageRouter SSOT metadata available:")
+            print(f"\nCHECK MessageRouter SSOT metadata available:")
             for key, value in SSOT_INFO.items():
                 print(f"    {key}: {value}")
                 

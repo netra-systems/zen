@@ -98,7 +98,7 @@ class TestLevel1QuickHealthChecks:
             cert_info = validator.get_ssl_certificate_info(hostname)
 
             if cert_info is None:
-                pytest.fail(f"❌ SSL Certificate FAILED for {service}: {hostname} - Cannot retrieve certificate")
+                pytest.fail(f"X SSL Certificate FAILED for {service}: {hostname} - Cannot retrieve certificate")
 
             # Validate domain coverage
             domain_valid = validator.validate_domain_in_certificate(cert_info, hostname)
@@ -111,15 +111,15 @@ class TestLevel1QuickHealthChecks:
             }
 
             # PASS criteria: SSL certificate exists and covers the domain
-            assert cert_info is not None, f"❌ SSL Certificate missing for {service}: {hostname}"
-            assert domain_valid, f"❌ SSL Certificate does not cover domain {hostname} for {service}"
+            assert cert_info is not None, f"X SSL Certificate missing for {service}: {hostname}"
+            assert domain_valid, f"X SSL Certificate does not cover domain {hostname} for {service}"
 
-            logger.info(f"✅ SSL Certificate OK for {service}: {hostname}")
+            logger.info(f"CHECK SSL Certificate OK for {service}: {hostname}")
 
         # Log summary of SSL validation
         logger.info("SSL Certificate Validation Summary:")
         for service, result in ssl_results.items():
-            logger.info(f"  {service}: ✅ Valid SSL for {result['hostname']}")
+            logger.info(f"  {service}: CHECK Valid SSL for {result['hostname']}")
 
     def test_basic_http_connectivity_no_503_errors(self):
         """
@@ -150,14 +150,14 @@ class TestLevel1QuickHealthChecks:
                     }
 
                     # CRITICAL: NOT HTTP 503 (any other response indicates infrastructure working)
-                    assert response.status_code != 503, f"❌ HTTP 503 Service Unavailable for {service}: {url} - Issue #1278 infrastructure failure"
+                    assert response.status_code != 503, f"X HTTP 503 Service Unavailable for {service}: {url} - Issue #1278 infrastructure failure"
 
                     # Log successful connection
-                    logger.info(f"✅ HTTP Response {response.status_code} for {service} in {connection_time:.2f}s")
+                    logger.info(f"CHECK HTTP Response {response.status_code} for {service} in {connection_time:.2f}s")
 
                     # Warn on slow responses but don't fail (may be application issue)
                     if connection_time > 10.0:
-                        logger.warning(f"⚠️ SLOW RESPONSE: {service} took {connection_time:.2f}s (may indicate VPC connector stress)")
+                        logger.warning(f"WARNING️ SLOW RESPONSE: {service} took {connection_time:.2f}s (may indicate VPC connector stress)")
 
                 except httpx.TimeoutException:
                     connectivity_results[service] = {
@@ -166,7 +166,7 @@ class TestLevel1QuickHealthChecks:
                         "response_time": 30.0,
                         "no_503_error": False
                     }
-                    pytest.fail(f"❌ TIMEOUT: {service} health check exceeded 30s - VPC connector likely overwhelmed")
+                    pytest.fail(f"X TIMEOUT: {service} health check exceeded 30s - VPC connector likely overwhelmed")
 
                 except httpx.ConnectError as e:
                     connectivity_results[service] = {
@@ -175,15 +175,15 @@ class TestLevel1QuickHealthChecks:
                         "response_time": time.time() - start_time,
                         "no_503_error": False
                     }
-                    pytest.fail(f"❌ CONNECTION ERROR: {service} - {e} - Infrastructure connectivity failure")
+                    pytest.fail(f"X CONNECTION ERROR: {service} - {e} - Infrastructure connectivity failure")
 
         # Log connectivity summary
         logger.info("HTTP Connectivity Validation Summary:")
         for service, result in connectivity_results.items():
             if result.get("no_503_error"):
-                logger.info(f"  {service}: ✅ HTTP {result['status_code']} ({result['response_time']:.2f}s)")
+                logger.info(f"  {service}: CHECK HTTP {result['status_code']} ({result['response_time']:.2f}s)")
             else:
-                logger.error(f"  {service}: ❌ Connection failed")
+                logger.error(f"  {service}: X Connection failed")
 
     def test_load_balancer_consistency_validation(self):
         """
@@ -246,19 +246,19 @@ class TestLevel1QuickHealthChecks:
 
             # PASS criteria: Consistent responses (not all 503 or timeouts)
             non_503_responses = [code for code in response_codes if code != 503 and code != 0]
-            assert len(non_503_responses) >= 3, f"❌ Load balancer failing for {service}: {response_codes} - Majority HTTP 503/timeout errors"
+            assert len(non_503_responses) >= 3, f"X Load balancer failing for {service}: {response_codes} - Majority HTTP 503/timeout errors"
 
             # Validate response time consistency (no extreme outliers)
             avg_time = load_balancer_results[service]["avg_response_time"]
             max_time = max(response_times)
-            assert max_time < (avg_time * 3), f"❌ Load balancer inconsistent for {service}: max {max_time:.2f}s vs avg {avg_time:.2f}s"
+            assert max_time < (avg_time * 3), f"X Load balancer inconsistent for {service}: max {max_time:.2f}s vs avg {avg_time:.2f}s"
 
-            logger.info(f"✅ Load balancer consistent for {service}: {response_codes}, avg {avg_time:.2f}s")
+            logger.info(f"CHECK Load balancer consistent for {service}: {response_codes}, avg {avg_time:.2f}s")
 
         # Log load balancer summary
         logger.info("Load Balancer Validation Summary:")
         for service, result in load_balancer_results.items():
-            logger.info(f"  {service}: ✅ Consistent routing, avg {result['avg_response_time']:.2f}s")
+            logger.info(f"  {service}: CHECK Consistent routing, avg {result['avg_response_time']:.2f}s")
 
     def test_vpc_connector_basic_capacity_validation(self):
         """
@@ -299,9 +299,9 @@ class TestLevel1QuickHealthChecks:
                     # Any response (even error) means VPC connector allowing connections
                     if response.status_code in [200, 500, 404, 401, 403]:
                         vpc_results["successful_connections"] += 1
-                        logger.info(f"✅ VPC connector allows connection to {service}: HTTP {response.status_code} ({connection_time:.2f}s)")
+                        logger.info(f"CHECK VPC connector allows connection to {service}: HTTP {response.status_code} ({connection_time:.2f}s)")
                     elif response.status_code == 503:
-                        logger.warning(f"⚠️ Service unavailable for {service}: HTTP 503 (may indicate VPC capacity issues)")
+                        logger.warning(f"WARNING️ Service unavailable for {service}: HTTP 503 (may indicate VPC capacity issues)")
                         vpc_results["failed_connections"] += 1
 
             except httpx.ConnectTimeout:
@@ -310,7 +310,7 @@ class TestLevel1QuickHealthChecks:
                     "error": "timeout",
                     "success": False
                 }
-                logger.error(f"❌ Connection timeout for {service} (VPC connector likely saturated)")
+                logger.error(f"X Connection timeout for {service} (VPC connector likely saturated)")
 
             except httpx.ConnectError as e:
                 vpc_results["failed_connections"] += 1
@@ -318,7 +318,7 @@ class TestLevel1QuickHealthChecks:
                     "error": str(e),
                     "success": False
                 }
-                logger.error(f"❌ Connection error for {service}: {e} (VPC connector issue)")
+                logger.error(f"X Connection error for {service}: {e} (VPC connector issue)")
 
         # Analyze VPC connector capacity
         total_services = vpc_results["total_services"]
@@ -326,20 +326,20 @@ class TestLevel1QuickHealthChecks:
 
         # PASS criteria: At least 66% of services responsive (VPC connector working)
         success_rate = successful / total_services
-        assert success_rate >= 0.66, f"❌ VPC connector appears overwhelmed: {successful}/{total_services} connections successful ({success_rate:.1%})"
+        assert success_rate >= 0.66, f"X VPC connector appears overwhelmed: {successful}/{total_services} connections successful ({success_rate:.1%})"
 
         # Validate connection times reasonable
         if vpc_results["connection_times"]:
             avg_connection_time = sum(vpc_results["connection_times"]) / len(vpc_results["connection_times"])
-            assert avg_connection_time < 15.0, f"❌ VPC connector performance degraded: {avg_connection_time:.2f}s average connection time"
+            assert avg_connection_time < 15.0, f"X VPC connector performance degraded: {avg_connection_time:.2f}s average connection time"
 
-            logger.info(f"✅ VPC connector performance acceptable: {avg_connection_time:.2f}s average")
+            logger.info(f"CHECK VPC connector performance acceptable: {avg_connection_time:.2f}s average")
 
         # Log VPC connector summary
         if success_rate == 1.0:
-            logger.info(f"✅ VPC connector fully operational: {successful}/{total_services} services accessible")
+            logger.info(f"CHECK VPC connector fully operational: {successful}/{total_services} services accessible")
         else:
-            logger.info(f"⚠️ VPC connector partially operational: {successful}/{total_services} services accessible ({success_rate:.1%})")
+            logger.info(f"WARNING️ VPC connector partially operational: {successful}/{total_services} services accessible ({success_rate:.1%})")
 
     @pytest.mark.asyncio
     async def test_concurrent_connection_basic_load(self):
@@ -407,12 +407,12 @@ class TestLevel1QuickHealthChecks:
         # PASS criteria: < 30% HTTP 503 errors under light concurrent load
         if total_requests > 0:
             failure_rate = http_503_errors / total_requests
-            assert failure_rate < 0.30, f"❌ High HTTP 503 failure rate under light load: {failure_rate:.1%} - VPC connector likely overwhelmed"
+            assert failure_rate < 0.30, f"X High HTTP 503 failure rate under light load: {failure_rate:.1%} - VPC connector likely overwhelmed"
 
             if failure_rate == 0:
-                logger.info(f"✅ Zero HTTP 503 errors under concurrent load - VPC connector handling capacity well")
+                logger.info(f"CHECK Zero HTTP 503 errors under concurrent load - VPC connector handling capacity well")
             else:
-                logger.info(f"⚠️ Some HTTP 503 errors ({failure_rate:.1%}) but within acceptable range for light load")
+                logger.info(f"WARNING️ Some HTTP 503 errors ({failure_rate:.1%}) but within acceptable range for light load")
 
         # Validate reasonable response times
         connection_times = [r["connection_time"] for r in all_results if r["success"]]
@@ -420,7 +420,7 @@ class TestLevel1QuickHealthChecks:
             avg_time = sum(connection_times) / len(connection_times)
             max_time = max(connection_times)
 
-            assert avg_time < 10.0, f"❌ Poor performance under concurrent load: {avg_time:.2f}s average"
-            assert max_time < 20.0, f"❌ Some requests very slow under concurrent load: {max_time:.2f}s maximum"
+            assert avg_time < 10.0, f"X Poor performance under concurrent load: {avg_time:.2f}s average"
+            assert max_time < 20.0, f"X Some requests very slow under concurrent load: {max_time:.2f}s maximum"
 
-            logger.info(f"✅ Concurrent load performance acceptable: {avg_time:.2f}s avg, {max_time:.2f}s max")
+            logger.info(f"CHECK Concurrent load performance acceptable: {avg_time:.2f}s avg, {max_time:.2f}s max")

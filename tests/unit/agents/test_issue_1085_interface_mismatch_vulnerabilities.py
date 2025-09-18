@@ -76,14 +76,14 @@ class InterfaceMismatchVulnerabilitiesTests:
         except TypeError as e:
             error_message = str(e)
             if 'UserExecutionContext' in error_message or 'DeepAgentState' in error_message:
-                print(f'✅ VULNERABILITY CONFIRMED: Type mismatch detected: {error_message}')
+                print(f'CHECK VULNERABILITY CONFIRMED: Type mismatch detected: {error_message}')
                 assert True
             else:
                 raise
         except AttributeError as e:
             error_message = str(e)
             if 'create_child_context' in error_message:
-                print(f'✅ VULNERABILITY CONFIRMED: Interface mismatch detected: {error_message}')
+                print(f'CHECK VULNERABILITY CONFIRMED: Interface mismatch detected: {error_message}')
                 assert True
             else:
                 raise
@@ -119,7 +119,7 @@ class InterfaceMismatchVulnerabilitiesTests:
         for class_name, methods in compatibility_matrix.items():
             print(f'  {class_name}:')
             for method_name, has_method in methods.items():
-                status = '✅ SECURE' if has_method else '🚨 VULNERABLE'
+                status = 'CHECK SECURE' if has_method else '🚨 VULNERABLE'
                 print(f'    {method_name}: {status}')
 
 @pytest.mark.unit

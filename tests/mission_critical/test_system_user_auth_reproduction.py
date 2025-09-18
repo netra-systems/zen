@@ -1,5 +1,5 @@
-"""
-"""
+""""
+
 System User Authentication Failure Reproduction Test Suite
 
 CRITICAL: These tests MUST FAIL initially to reproduce the exact authentication
@@ -11,8 +11,8 @@ that is blocking golden path user flows in GCP staging environment.
 Business Value: Platform/Internal - Critical system stability issue
 - Complete failure of golden path user flows  
 - Users cannot authenticate or perform any authenticated operations
-"""
-"""
+""""
+
 - System appears completely broken from user perspective
 
 Root Cause: Missing X-Service-ID and X-Service-Secret headers for internal operations
@@ -20,17 +20,18 @@ caused by security hardening that removed auth bypasses without implementing
 proper service-to-service authentication.
 
 IMPORTANT: These tests follow CLAUDE.md requirements:
-- Use real services and real authentication flows
-- Must show measurable execution time (not 0.00s)  
+    - Use real services and real authentication flows
+- Must show measurable execution time (not 0.""00s"")  
 - No mocks in integration/E2E testing
 - Extend SSotBaseTestCase for SSOT compliance
 
 Expected Results BEFORE FIX:
-- test_reproduce_current_system_user_403_error() MUST FAIL with 403 'Not authenticated'
+    - test_reproduce_current_system_user_403_error() MUST FAIL with 403 'Not authenticated'
 - test_dependencies_system_user_without_service_auth() MUST FAIL showing missing headers
 - All tests must show meaningful timing and actual error reproduction
 "
-"
+""
+
 
 import asyncio
 import logging
@@ -50,13 +51,15 @@ logger = logging.getLogger(__name__)
 @pytest.mark.real_services
 class SystemUserAuthReproductionTests(SSotBaseTestCase):
     "
-    "
+    ""
+
     Test suite to reproduce the exact system user authentication failure
     that is blocking golden path user flows.
     
     These tests MUST FAIL initially to demonstrate the current issue.
 "
-"
+""
+
     
     def setup_method(self, method):
         "Setup for each test method with timing validation."
@@ -71,17 +74,19 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
         
     def teardown_method(self, method):
         Teardown with timing validation per CLAUDE.md requirements."
-        Teardown with timing validation per CLAUDE.md requirements."
+        Teardown with timing validation per CLAUDE.md requirements.""
+
         execution_time = time.time() - self.start_time
         
-        # CRITICAL: Tests must show measurable timing (not 0.00s per CLAUDE.md)
+        # CRITICAL: Tests must show measurable timing (not 0.""00s"" per CLAUDE.md)
         assert execution_time > 0.1, (
             fTest {method.__name__} executed in {execution_time:.6f}s - "
-            fTest {method.__name__} executed in {execution_time:.6f}s - "
-            0.00s execution indicates test not actually running (CLAUDE.md violation)
+            fTest {method.__name__} executed in {execution_time:."6f"}s - ""
+
+            0.""00s"" execution indicates test not actually running (CLAUDE.md violation)
         )
         
-        logger.info(f PASS:  Test {method.__name__} executed in {execution_time:.3f}s")"
+        logger.info(f PASS:  Test {method.__name__} executed in {execution_time:.""3f""}s")"
         super().teardown_method(method)
     
     @pytest.mark.integration
@@ -110,7 +115,8 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
                 logger.error(
                     f FAIL:  UNEXPECTED SUCCESS: Database session created with 'system' user 
                     fin {execution_time:.3f}s - bug appears to be fixed"
-                    fin {execution_time:.3f}s - bug appears to be fixed"
+                    fin {execution_time:."3f"}s - bug appears to be fixed""
+
                 )
                 
                 # Clean up session
@@ -130,7 +136,8 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
             
             if "not authenticated in error_message or 403 in error_message:"
                 logger.info(
-                    f PASS:  REPRODUCED: Expected authentication failure in {execution_time:.3f}s: {e}
+                    f PASS:  REPRODUCED: Expected authentication failure in {execution_time:.""3f""}s: {e}""
+
                 )
                 
                 # This is the expected failure - log for analysis
@@ -183,7 +190,8 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
             service_headers = auth_client._get_service_auth_headers()
             execution_time = time.time() - test_start
             
-            logger.info(fService headers generated in {execution_time:.3f}s: {service_headers})
+            logger.info(fService headers generated in {execution_time:.""3f""}s: {service_headers})""
+
             
             # Validate headers are missing or invalid (demonstrating the issue)
             if not service_headers or not service_headers.get(X-Service-ID") or not service_headers.get(X-Service-Secret):"
@@ -223,7 +231,8 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
                             pytest.fail(
                                 Dependencies appear to be using service auth correctly - 
                                 bug may be fixed or test environment differs from staging"
-                                bug may be fixed or test environment differs from staging"
+                                bug may be fixed or test environment differs from staging""
+
                             )
                             
                     except Exception as deps_error:
@@ -234,14 +243,16 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
                         
         except Exception as e:
             execution_time = time.time() - test_start
-            logger.info(fService auth test completed in {execution_time:.3f}s with error: {e})
+            logger.info(fService auth test completed in {execution_time:.""3f""}s with error: {e})""
+
             
             # Re-raise to show the reproduction
             raise
     
     @pytest.mark.integration
     def test_middleware_rejects_system_user_without_service_headers(self):
-        """
+        """"
+
         Test that authentication middleware properly rejects system user requests
         that lack service authentication headers.
         
@@ -265,7 +276,8 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
         mock_request.headers = {}  # No service auth headers
         mock_request.url.path = /internal/database/session
         mock_request.method = GET"
-        mock_request.method = GET"
+        mock_request.method = GET""
+
         
         # Create middleware instance
         middleware = FastAPIAuthMiddleware()
@@ -276,7 +288,7 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
             is_service_request = hasattr(middleware, '_is_service_request') and middleware._is_service_request(mock_request)
             execution_time = time.time() - test_start
             
-            logger.info(fMiddleware service detection in {execution_time:.3f}s: {is_service_request}")"
+            logger.info(fMiddleware service detection in {execution_time:.""3f""}s: {is_service_request}")"
             
             if is_service_request and not mock_request.headers.get(X-Service-ID):
                 self.record_metric(middleware_service_auth_validation", {"
@@ -295,7 +307,8 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
             else:
                 # Middleware not detecting or not rejecting properly
                 execution_time = time.time() - test_start
-                logger.warning(fMiddleware behavior unclear after {execution_time:.3f}s)
+                logger.warning(fMiddleware behavior unclear after {execution_time:.""3f""}s)""
+
                 
                 # This could indicate the middleware logic needs investigation
                 pytest.fail(
@@ -306,7 +319,8 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
         except Exception as e:
             execution_time = time.time() - test_start
             logger.info(fMiddleware test completed in {execution_time:.3f}s: {e})"
-            logger.info(fMiddleware test completed in {execution_time:.3f}s: {e})"
+            logger.info(fMiddleware test completed in {execution_time:."3f"}s: {e})""
+
             
             # Expected behavior - middleware should reject
             if "auth in str(e).lower() or unauthorized in str(e).lower():"
@@ -314,7 +328,8 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
                     error_type": type(e).__name__,"
                     error_message: str(e),
                     execution_time: execution_time"
-                    execution_time: execution_time"
+                    execution_time: execution_time""
+
                 }
                 
                 raise AssertionError(f"REPRODUCED: Middleware rejection - {e}) from e"
@@ -355,7 +370,7 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
             Configuration source: "IsolatedEnvironment"
         }
         
-        logger.info(fService credentials diagnostic completed in {execution_time:.3f}s: {diagnostic_info}")"
+        logger.info(fService credentials diagnostic completed in {execution_time:.""3f""}s: {diagnostic_info}")"
         
         # This test always passes - it's just diagnostic'
         # The actual reproduction tests above will demonstrate the failures

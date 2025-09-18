@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Value Impact: Ensures core platform value delivery (90% of business value)
 - Revenue Impact: Protects $500K+ ARR from complete service failures
 
-These tests validate the complete Golden Path user flow (login → AI responses)
+These tests validate the complete Golden Path user flow (login -> AI responses)
 in the real staging environment to detect and monitor Issue #1278 patterns.
 """
 
@@ -45,7 +45,7 @@ class TestIssue1278GoldenPathValidation(SSotAsyncTestCase):
     @pytest.mark.issue_1278
     @pytest.mark.expected_failure  # Expected to fail until infrastructure fixed
     async def test_golden_path_user_login_to_ai_response_complete_flow(self):
-        """Test complete Golden Path: user login → AI response (EXPECTED TO FAIL)."""
+        """Test complete Golden Path: user login -> AI response (EXPECTED TO FAIL)."""
 
         self.logger.info("Starting Golden Path validation for Issue #1278")
 
@@ -67,7 +67,7 @@ class TestIssue1278GoldenPathValidation(SSotAsyncTestCase):
             else:
                 pytest.fail(f"Backend health check failed: {backend_health}")
 
-        self.logger.info("✓ Backend health check passed")
+        self.logger.info("CHECK Backend health check passed")
 
         # Step 2: Test user authentication flow
         self.logger.info("Step 2: Testing authentication...")
@@ -79,7 +79,7 @@ class TestIssue1278GoldenPathValidation(SSotAsyncTestCase):
                 self.logger.error("Issue #1278 detected: Authentication service unavailable")
                 pytest.skip("Issue #1278 detected: Authentication service unavailable")
 
-            self.logger.info("✓ Authentication successful")
+            self.logger.info("CHECK Authentication successful")
 
         except Exception as e:
             error_str = str(e).lower()
@@ -97,7 +97,7 @@ class TestIssue1278GoldenPathValidation(SSotAsyncTestCase):
                 self.logger.error("Issue #1278 detected: WebSocket connectivity failure")
                 pytest.skip("Issue #1278 detected: WebSocket connectivity failure")
 
-            self.logger.info("✓ WebSocket connectivity successful")
+            self.logger.info("CHECK WebSocket connectivity successful")
 
         except Exception as e:
             error_str = str(e).lower()
@@ -125,7 +125,7 @@ class TestIssue1278GoldenPathValidation(SSotAsyncTestCase):
                 self.logger.error("Golden Path failed: No AI response delivered to user")
                 pytest.fail("Golden Path failed: No AI response delivered to user")
 
-            self.logger.info("✓ Agent execution successful - Golden Path validated")
+            self.logger.info("CHECK Agent execution successful - Golden Path validated")
 
         except Exception as e:
             error_str = str(e).lower()

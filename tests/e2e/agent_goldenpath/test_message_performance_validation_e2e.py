@@ -236,7 +236,7 @@ class MessagePerformanceValidationE2ETests(SSotAsyncTestCase):
         assert first_event_compliance >= 0.8, f"First event latency SLA compliance too low: {first_event_compliance:.1%} (min 80%). Max first event time: {max(first_event_times):.1f}s, SLA limit: {self.__class__.ENTERPRISE_SLAS['first_event_latency']}s"
         failing_grades = [grade for grade in performance_grades if grade in ['F', 'D']]
         assert len(failing_grades) == 0, f'No simple queries should have failing performance grades. Failing grades: {failing_grades}, SLA violations: {sla_violations}'
-        self.logger.info('✅ Simple query performance SLA compliance validated')
+        self.logger.info('CHECK Simple query performance SLA compliance validated')
 
     async def test_complex_analysis_performance_sla(self):
         """
@@ -289,7 +289,7 @@ class MessagePerformanceValidationE2ETests(SSotAsyncTestCase):
         performance_grades = [r['analysis']['performance_grade'] for r in performance_results]
         failing_grades = [grade for grade in performance_grades if grade == 'F']
         assert len(failing_grades) == 0, f'No complex analyses should have failing performance grades. Grades: {performance_grades}'
-        self.logger.info('✅ Complex analysis performance SLA compliance validated')
+        self.logger.info('CHECK Complex analysis performance SLA compliance validated')
 
     async def test_concurrent_load_performance_degradation(self):
         """
@@ -358,7 +358,7 @@ class MessagePerformanceValidationE2ETests(SSotAsyncTestCase):
             max_concurrent_time = max(concurrent_response_times)
             reasonable_limit = self.__class__.ENTERPRISE_SLAS['complex_analysis_response_time'] * 1.5
             assert max_concurrent_time <= reasonable_limit, f'Maximum concurrent response time exceeds reasonable limit: {max_concurrent_time:.1f}s > {reasonable_limit:.1f}s'
-        self.logger.info('✅ Concurrent load performance degradation validated')
+        self.logger.info('CHECK Concurrent load performance degradation validated')
 
     async def test_websocket_event_timing_precision(self):
         """
@@ -423,7 +423,7 @@ class MessagePerformanceValidationE2ETests(SSotAsyncTestCase):
             complexity = result['test_config']['complexity']
             consistency = result['timing_consistency']
             self.logger.info(f"   {complexity.title()}: {consistency.get('avg_gap', 0):.1f}s avg, {consistency.get('max_gap', 0):.1f}s max, {result['total_events']} events")
-        self.logger.info('✅ WebSocket event timing precision validated')
+        self.logger.info('CHECK WebSocket event timing precision validated')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

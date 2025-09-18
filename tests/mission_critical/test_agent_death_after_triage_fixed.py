@@ -11,7 +11,7 @@ This test verifies the FIX for a CRITICAL production bug where:
 6. No errors are logged, system appears healthy
 
 With the NEW IMPLEMENTATION:
-- ExecutionTracker monitors all agent executions
+    - ExecutionTracker monitors all agent executions
 - HeartbeatMonitor detects agent death within 30 seconds
 - TimeoutManager enforces execution timeouts
 - WebSocket sends proper error notifications
@@ -85,7 +85,8 @@ class DeathDetectionVerifier:
 
     def _has_heartbeat_status(self) -> bool:
         Check if we received heartbeat status information"
-        Check if we received heartbeat status information"
+        Check if we received heartbeat status information""
+
         return any('heartbeat' in event.get('data', {} for event in self.events)
 
 
@@ -237,8 +238,8 @@ print(=*80")"
 detection_successful = death_detected or timeout_detected
 
 assert detection_successful, \
-fCRITICAL FAILURE: New execution tracking system failed to detect agent death!  \
-formatted_string
+    fCRITICAL FAILURE: New execution tracking system failed to detect agent death!  \
+    formatted_string
 
 print( PASS:  SUCCESS: New execution tracking system detected agent death/timeout!)
 print([U+1F41B] BUG IS FIXED: Silent agent death is now detected!)
@@ -260,7 +261,8 @@ print(All tests MUST PASS to confirm bug is fixed)"
 print(All tests MUST PASS to confirm bug is fixed)"
 print(="*80 +  )"
 )"
-)"
+)""
+
 
 
 }

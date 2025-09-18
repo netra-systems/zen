@@ -60,36 +60,36 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         try:
             self.assertEqual(1, 1)
             self.assertNotEqual(1, 2)
-            print("   ✅ assertEqual/assertNotEqual: Working")
+            print("   CHECK assertEqual/assertNotEqual: Working")
         except Exception as e:
-            print(f"   ❌ assertEqual/assertNotEqual: {e}")
+            print(f"   X assertEqual/assertNotEqual: {e}")
             raise
         
         # Test boolean assertions
         try:
             self.assertTrue(True)
             self.assertFalse(False)
-            print("   ✅ assertTrue/assertFalse: Working")
+            print("   CHECK assertTrue/assertFalse: Working")
         except Exception as e:
-            print(f"   ❌ assertTrue/assertFalse: {e}")
+            print(f"   X assertTrue/assertFalse: {e}")
             raise
         
         # Test None assertions
         try:
             self.assertIsNone(None)
             self.assertIsNotNone("not none")
-            print("   ✅ assertIsNone/assertIsNotNone: Working")
+            print("   CHECK assertIsNone/assertIsNotNone: Working")
         except Exception as e:
-            print(f"   ❌ assertIsNone/assertIsNotNone: {e}")
+            print(f"   X assertIsNone/assertIsNotNone: {e}")
             raise
         
         # Test membership assertions
         try:
             self.assertIn("a", "abc")
             self.assertNotIn("d", "abc")
-            print("   ✅ assertIn/assertNotIn: Working")
+            print("   CHECK assertIn/assertNotIn: Working")
         except Exception as e:
-            print(f"   ❌ assertIn/assertNotIn: {e}")
+            print(f"   X assertIn/assertNotIn: {e}")
             raise
         
         # Test comparison assertions
@@ -98,44 +98,44 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
             self.assertLess(1, 2)
             self.assertGreaterEqual(2, 2)
             self.assertLessEqual(1, 1)
-            print("   ✅ Comparison assertions: Working")
+            print("   CHECK Comparison assertions: Working")
         except Exception as e:
-            print(f"   ❌ Comparison assertions: {e}")
+            print(f"   X Comparison assertions: {e}")
             raise
         
         # Test type assertions
         try:
             self.assertIsInstance("test", str)
             self.assertNotIsInstance("test", int)
-            print("   ✅ Type assertions: Working")
+            print("   CHECK Type assertions: Working")
         except Exception as e:
-            print(f"   ❌ Type assertions: {e}")
+            print(f"   X Type assertions: {e}")
             raise
         
         # Test identity assertions
         try:
             self.assertIs(True, True)
             self.assertIsNot(True, False)
-            print("   ✅ Identity assertions: Working")
+            print("   CHECK Identity assertions: Working")
         except Exception as e:
-            print(f"   ❌ Identity assertions: {e}")
+            print(f"   X Identity assertions: {e}")
             raise
         
         # Test approximate equality
         try:
             self.assertAlmostEqual(3.14159, 3.14160, places=4)
             self.assertAlmostEqual(3.14159, 3.14160, delta=0.00001)
-            print("   ✅ Approximate equality: Working")
+            print("   CHECK Approximate equality: Working")
         except Exception as e:
-            print(f"   ❌ Approximate equality: {e}")
+            print(f"   X Approximate equality: {e}")
             raise
         
         print("\n2. Recording compatibility metrics:")
         self.record_metric("assertion_methods_tested", 16)
         self.record_metric("assertion_compatibility", "100%")
         
-        print("   ✅ All unittest assertion methods work in SSOT base class")
-        print("   ✅ Migrated tests can continue using familiar patterns")
+        print("   CHECK All unittest assertion methods work in SSOT base class")
+        print("   CHECK Migrated tests can continue using familiar patterns")
         
         print("\n" + "="*70)
     
@@ -156,23 +156,23 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         assert hasattr(self, '_metrics'), "Metrics not initialized"
         assert hasattr(self, '_env'), "Environment not initialized"
         assert hasattr(self, '_cleanup_callbacks'), "Cleanup callbacks not initialized"
-        print("   ✅ SSOT components properly initialized")
+        print("   CHECK SSOT components properly initialized")
         
         # Test that environment is accessible
         env = self.get_env()
         assert env is not None, "Environment should be accessible"
-        print("   ✅ Environment isolation accessible")
+        print("   CHECK Environment isolation accessible")
         
         # Test that metrics are working
         self.record_metric("lifecycle_validation", "success")
         assert self.get_metric("lifecycle_validation") == "success"
-        print("   ✅ Metrics recording functional")
+        print("   CHECK Metrics recording functional")
         
         # Test that test context is available
         context = self.get_test_context()
         assert context is not None, "Test context should be available"
         assert context.test_id is not None, "Test ID should be set"
-        print(f"   ✅ Test context available: {context.test_id}")
+        print(f"   CHECK Test context available: {context.test_id}")
         
         print("\n2. Testing enhanced SSOT capabilities:")
         
@@ -183,7 +183,7 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         self.set_env_var(test_var, test_value)
         retrieved = self.get_env_var(test_var)
         assert retrieved == test_value, f"Expected {test_value}, got {retrieved}"
-        print("   ✅ Environment variable management working")
+        print("   CHECK Environment variable management working")
         
         # Test temporary environment variables
         with self.temp_env_vars(TEMP_VAR="temp_value"):
@@ -191,7 +191,7 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         
         # Should be cleaned up automatically
         assert self.get_env_var("TEMP_VAR") is None
-        print("   ✅ Temporary environment variables working")
+        print("   CHECK Temporary environment variables working")
         
         # Test cleanup callback registration
         cleanup_called = False
@@ -201,7 +201,7 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         
         self.add_cleanup(test_cleanup)
         # Note: cleanup will be called during teardown_method
-        print("   ✅ Cleanup callback registration working")
+        print("   CHECK Cleanup callback registration working")
         
         print("\n3. Recording lifecycle metrics:")
         self.record_metric("lifecycle_components_validated", 4)
@@ -210,7 +210,7 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         # Clean up test environment variable
         self.delete_env_var(test_var)
         
-        print("   ✅ All lifecycle functionality preserved and enhanced")
+        print("   CHECK All lifecycle functionality preserved and enhanced")
         print("\n" + "="*70)
     
     def test_environment_isolation_enhancement(self):
@@ -233,18 +233,18 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         self.set_env_var(test_key, test_value)
         retrieved = self.get_env_var(test_key)
         assert retrieved == test_value, f"Basic env operation failed: {retrieved} != {test_value}"
-        print("   ✅ Basic environment operations working")
+        print("   CHECK Basic environment operations working")
         
         # Test default value handling
         non_existent = self.get_env_var("NON_EXISTENT_VAR", "default_value")
         assert non_existent == "default_value", "Default value handling failed"
-        print("   ✅ Default value handling working")
+        print("   CHECK Default value handling working")
         
         # Test environment variable deletion
         self.delete_env_var(test_key)
         deleted_value = self.get_env_var(test_key)
         assert deleted_value is None, "Environment variable not properly deleted"
-        print("   ✅ Environment variable deletion working")
+        print("   CHECK Environment variable deletion working")
         
         print("\n2. Testing advanced isolation features:")
         
@@ -262,7 +262,7 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         restored_value = self.get_env_var("TEST_CONTEXT_VAR")
         assert restored_value == original_value, "Environment not properly restored"
         assert self.get_env_var("ANOTHER_VAR") is None, "Temporary variable not cleaned up"
-        print("   ✅ Context manager isolation working")
+        print("   CHECK Context manager isolation working")
         
         # Test environment state preservation across operations
         self.set_env_var("PERSISTENT_VAR", "persistent_value")
@@ -273,16 +273,16 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         
         # Persistent var should still be there after context
         assert self.get_env_var("PERSISTENT_VAR") == "persistent_value"
-        print("   ✅ Environment state preservation working")
+        print("   CHECK Environment state preservation working")
         
         print("\n3. Testing SSOT assertion utilities:")
         
         # Test SSOT-specific environment assertions
         self.assert_env_var_set("PERSISTENT_VAR", "persistent_value")
-        print("   ✅ Environment variable assertion working")
+        print("   CHECK Environment variable assertion working")
         
         self.assert_env_var_not_set("NON_EXISTENT_VAR")
-        print("   ✅ Environment variable non-existence assertion working")
+        print("   CHECK Environment variable non-existence assertion working")
         
         print("\n4. Recording isolation metrics:")
         self.record_metric("environment_isolation_features_tested", 7)
@@ -291,8 +291,8 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         # Clean up
         self.delete_env_var("PERSISTENT_VAR")
         
-        print("   ✅ Environment isolation enhanced beyond direct os.environ")
-        print("   ✅ Migrated tests get better environment management")
+        print("   CHECK Environment isolation enhanced beyond direct os.environ")
+        print("   CHECK Migrated tests get better environment management")
         print("\n" + "="*70)
     
     def test_exception_handling_preservation(self):
@@ -311,18 +311,18 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         try:
             with self.expect_exception(ValueError):
                 raise ValueError("Expected test error")
-            print("   ✅ Basic exception expectation working")
+            print("   CHECK Basic exception expectation working")
         except Exception as e:
-            print(f"   ❌ Basic exception expectation failed: {e}")
+            print(f"   X Basic exception expectation failed: {e}")
             raise
         
         # Test exception with message pattern matching
         try:
             with self.expect_exception(ValueError, message_pattern="test.*error"):
                 raise ValueError("test error message")
-            print("   ✅ Exception message pattern matching working")
+            print("   CHECK Exception message pattern matching working")
         except Exception as e:
-            print(f"   ❌ Exception message pattern matching failed: {e}")
+            print(f"   X Exception message pattern matching failed: {e}")
             raise
         
         # Test that wrong exception type is caught
@@ -332,9 +332,9 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
             assert False, "Should have failed with wrong exception type"
         except AssertionError:
             pass  # Expected behavior
-            print("   ✅ Wrong exception type properly detected")
+            print("   CHECK Wrong exception type properly detected")
         except Exception as e:
-            print(f"   ❌ Wrong exception handling failed: {e}")
+            print(f"   X Wrong exception handling failed: {e}")
             raise
         
         print("\n2. Testing exception context integration:")
@@ -357,13 +357,13 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         
         # Metrics should still be accessible
         assert self.get_metric("before_exception") is True
-        print("   ✅ Test context preserved during exception handling")
+        print("   CHECK Test context preserved during exception handling")
         
         print("\n3. Recording exception handling metrics:")
         self.record_metric("exception_handling_patterns_tested", 4)
         self.record_metric("exception_context_preservation", True)
         
-        print("   ✅ All exception handling patterns preserved")
+        print("   CHECK All exception handling patterns preserved")
         print("\n" + "="*70)
     
     def test_metrics_and_context_enhancement(self):
@@ -387,19 +387,19 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         assert self.get_metric("test_metric") == "test_value"
         assert self.get_metric("numeric_metric") == 42
         assert self.get_metric("boolean_metric") is True
-        print("   ✅ Basic metrics recording working")
+        print("   CHECK Basic metrics recording working")
         
         # Test default value handling
         non_existent = self.get_metric("non_existent_metric", "default")
         assert non_existent == "default"
-        print("   ✅ Metrics default value handling working")
+        print("   CHECK Metrics default value handling working")
         
         # Test all metrics retrieval
         all_metrics = self.get_all_metrics()
         assert "test_metric" in all_metrics
         assert "execution_time" in all_metrics  # Built-in metric
         assert all_metrics["test_metric"] == "test_value"
-        print("   ✅ All metrics retrieval working")
+        print("   CHECK All metrics retrieval working")
         
         print("\n2. Testing built-in metrics tracking:")
         
@@ -408,7 +408,7 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         # Note: execution_time will be calculated in teardown_method
         start_time = self.get_metrics().start_time
         assert start_time is not None, "Start time should be recorded"
-        print("   ✅ Automatic timing tracking working")
+        print("   CHECK Automatic timing tracking working")
         
         # Test business metrics tracking
         self.increment_db_query_count(3)
@@ -422,7 +422,7 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         
         self.increment_llm_requests(4)
         assert self.get_llm_requests_count() == 4
-        print("   ✅ Business metrics tracking working")
+        print("   CHECK Business metrics tracking working")
         
         print("\n3. Testing context tracking capabilities:")
         
@@ -433,12 +433,12 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         assert context.test_name == "test_metrics_and_context_enhancement"
         assert context.trace_id is not None
         assert context.user_id is not None
-        print(f"   ✅ Test context tracking: {context.test_id}")
+        print(f"   CHECK Test context tracking: {context.test_id}")
         
         # Test context metadata
         context.metadata["test_phase"] = "validation"
         assert context.metadata["test_phase"] == "validation"
-        print("   ✅ Context metadata working")
+        print("   CHECK Context metadata working")
         
         print("\n4. Testing SSOT assertion utilities:")
         
@@ -447,19 +447,19 @@ class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
         self.record_metric("assertion_test_2", "value2")
         
         self.assert_metrics_recorded("assertion_test_1", "assertion_test_2")
-        print("   ✅ Metrics assertion utility working")
+        print("   CHECK Metrics assertion utility working")
         
         # Test execution time assertion (should be well under 30 seconds)
         self.assert_execution_time_under(30.0)
-        print("   ✅ Execution time assertion working")
+        print("   CHECK Execution time assertion working")
         
         print("\n5. Recording enhancement metrics:")
         self.record_metric("metrics_features_tested", 8)
         self.record_metric("context_features_tested", 3)
         self.record_metric("business_metrics_tested", 4)
         
-        print("   ✅ Enhanced metrics and context capabilities functional")
-        print("   ✅ Migrated tests get improved observability")
+        print("   CHECK Enhanced metrics and context capabilities functional")
+        print("   CHECK Migrated tests get improved observability")
         print("\n" + "="*70)
 
 
@@ -485,7 +485,7 @@ class SsotMigrationAsyncFunctionalPreservationTests(SSotAsyncTestCase):
         
         result = await async_operation()
         assert result == "async_result"
-        print("   ✅ Basic async operations working")
+        print("   CHECK Basic async operations working")
         
         # Test async wait condition utility
         condition_met = False
@@ -507,7 +507,7 @@ class SsotMigrationAsyncFunctionalPreservationTests(SSotAsyncTestCase):
         
         assert condition_met
         await task
-        print("   ✅ Async wait condition utility working")
+        print("   CHECK Async wait condition utility working")
         
         print("\n2. Testing async timeout handling:")
         
@@ -521,7 +521,7 @@ class SsotMigrationAsyncFunctionalPreservationTests(SSotAsyncTestCase):
             assert False, "Should have timed out"
         except TimeoutError:
             pass  # Expected
-        print("   ✅ Async timeout handling working")
+        print("   CHECK Async timeout handling working")
         
         print("\n3. Testing async environment management:")
         
@@ -530,13 +530,13 @@ class SsotMigrationAsyncFunctionalPreservationTests(SSotAsyncTestCase):
             assert self.get_env_var("ASYNC_TEST_VAR") == "async_value"
         
         assert self.get_env_var("ASYNC_TEST_VAR") is None
-        print("   ✅ Async environment management working")
+        print("   CHECK Async environment management working")
         
         print("\n4. Recording async preservation metrics:")
         self.record_metric("async_features_tested", 4)
         self.record_metric("async_functionality_status", "fully_preserved")
         
-        print("   ✅ All async functionality preserved in SSOT migration")
+        print("   CHECK All async functionality preserved in SSOT migration")
         print("\n" + "="*70)
 
 
@@ -555,10 +555,10 @@ if __name__ == "__main__":
         sync_test.test_exception_handling_preservation()
         sync_test.test_metrics_and_context_enhancement()
         
-        print("\n✅ All sync functionality preservation tests passed!")
+        print("\nCHECK All sync functionality preservation tests passed!")
         
     except Exception as e:
-        print(f"\n❌ Sync functionality test failed: {e}")
+        print(f"\nX Sync functionality test failed: {e}")
         raise
     finally:
         sync_test.teardown_method(None)
@@ -571,10 +571,10 @@ if __name__ == "__main__":
         
         try:
             await async_test.test_async_functionality_preservation()
-            print("\n✅ All async functionality preservation tests passed!")
+            print("\nCHECK All async functionality preservation tests passed!")
             
         except Exception as e:
-            print(f"\n❌ Async functionality test failed: {e}")
+            print(f"\nX Async functionality test failed: {e}")
             raise
         finally:
             async_test.teardown_method(None)
@@ -583,7 +583,7 @@ if __name__ == "__main__":
     asyncio.run(run_async_tests())
     
     print("\n" + "="*70)
-    print("✅ FUNCTIONAL PRESERVATION VALIDATION COMPLETE")
+    print("CHECK FUNCTIONAL PRESERVATION VALIDATION COMPLETE")
     print("="*70)
     print("All SSOT migration functionality preservation tests passed!")
     print("Migrated tests will maintain full compatibility with enhanced capabilities.")

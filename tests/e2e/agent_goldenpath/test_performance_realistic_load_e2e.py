@@ -23,7 +23,7 @@ CRITICAL: These tests must demonstrate actual performance characteristics under 
 No mocking concurrency, load simulation, or performance measurement bypassing.
 
 GitHub Issue: #861 Agent Golden Path Messages Test Creation - STEP 1
-Coverage Target: 0.9% → 25% improvement (Priority Scenario #4)
+Coverage Target: 0.9% -> 25% improvement (Priority Scenario #4)
 """
 import asyncio
 import pytest
@@ -242,7 +242,7 @@ class PerformanceRealisticLoadE2ETests(SSotAsyncTestCase):
         if successful_metrics:
             avg_response_length = statistics.mean((m.response_length for m in successful_metrics))
             assert avg_response_length >= 80, f'Response quality degraded under load: {avg_response_length:.0f} avg chars (expected ≥80 for business questions)'
-        self.logger.info('✅ Moderate concurrent user load validation passed')
+        self.logger.info('CHECK Moderate concurrent user load validation passed')
 
     async def test_high_concurrent_user_load(self):
         """
@@ -308,7 +308,7 @@ class PerformanceRealisticLoadE2ETests(SSotAsyncTestCase):
             if response_times:
                 avg_time = statistics.mean(response_times)
                 self.logger.info(f'   {agent_type}: {avg_time:.1f}s avg ({len(response_times)} samples)')
-        self.logger.info('✅ High concurrent user load validation passed')
+        self.logger.info('CHECK High concurrent user load validation passed')
 
     async def test_sustained_load_performance(self):
         """
@@ -381,7 +381,7 @@ class PerformanceRealisticLoadE2ETests(SSotAsyncTestCase):
             assert coefficient_of_variation <= 0.4, f'Response time too inconsistent across rounds: CV={coefficient_of_variation:.2f} (expected ≤0.4). System should provide consistent performance over time.'
         failed_rounds = [r for r in all_round_results if r.success_rate == 0]
         assert len(failed_rounds) == 0, f'Complete failure detected in {len(failed_rounds)} rounds. System should not have complete failures during sustained load.'
-        self.logger.info('✅ Sustained load performance validation passed')
+        self.logger.info('CHECK Sustained load performance validation passed')
 
     async def test_mixed_agent_load_distribution(self):
         """
@@ -463,7 +463,7 @@ class PerformanceRealisticLoadE2ETests(SSotAsyncTestCase):
             for agent_type, successes in success_distribution.items():
                 success_percentage = successes / total_successes
                 assert success_percentage >= 0.1, f'{agent_type} has too few successes under mixed load: {success_percentage:.1%} (expected ≥10% of total successes)'
-        self.logger.info('✅ Mixed agent load distribution validation passed')
+        self.logger.info('CHECK Mixed agent load distribution validation passed')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

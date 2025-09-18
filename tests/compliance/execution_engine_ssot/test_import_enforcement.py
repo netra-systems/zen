@@ -60,14 +60,14 @@ class ImportEnforcementTests(SSotBaseTestCase):
                 rel_path = file_path.relative_to(self.project_root)
                 print(f"   📁 {rel_path}:")
                 for import_info in imports:
-                    print(f"      ❌ {import_info}")
+                    print(f"      X {import_info}")
 
         # TEST SHOULD FAIL NOW - Forbidden imports detected
         total_violations = sum(len(imports) for imports in forbidden_imports.values())
         self.assertGreater(
             total_violations,
             0,
-            f"❌ SSOT VIOLATION: Found {total_violations} forbidden execution engine imports. "
+            f"X SSOT VIOLATION: Found {total_violations} forbidden execution engine imports. "
             f"Only SSOT imports allowed: {self.allowed_ssot_imports}"
         )
 
@@ -84,14 +84,14 @@ class ImportEnforcementTests(SSotBaseTestCase):
                 rel_path = file_path.relative_to(self.project_root)
                 print(f"   📁 {rel_path}:")
                 for violation in violations:
-                    print(f"      ❌ {violation}")
+                    print(f"      X {violation}")
                     violation_count += 1
 
         # TEST SHOULD FAIL NOW - Import statement violations found
         self.assertGreater(
             violation_count,
             0,
-            f"❌ SSOT VIOLATION: Found {violation_count} non-SSOT import statements. "
+            f"X SSOT VIOLATION: Found {violation_count} non-SSOT import statements. "
             "All execution engine imports must use SSOT pattern."
         )
 
@@ -108,14 +108,14 @@ class ImportEnforcementTests(SSotBaseTestCase):
                 rel_path = file_path.relative_to(self.project_root)
                 print(f"   📁 {rel_path}:")
                 for violation in violations:
-                    print(f"      ❌ {violation}")
+                    print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - String-based imports detected
         total_violations = sum(len(violations) for violations in string_imports.values())
         self.assertGreater(
             total_violations,
             0,
-            f"❌ SSOT VIOLATION: Found {total_violations} string-based execution engine imports. "
+            f"X SSOT VIOLATION: Found {total_violations} string-based execution engine imports. "
             "These bypass SSOT enforcement and create security vulnerabilities."
         )
 
@@ -132,14 +132,14 @@ class ImportEnforcementTests(SSotBaseTestCase):
                 rel_path = file_path.relative_to(self.project_root)
                 print(f"   📁 {rel_path}:")
                 for violation in violations:
-                    print(f"      ❌ {violation}")
+                    print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - Dynamic imports detected
         total_violations = sum(len(violations) for violations in dynamic_imports.values())
         self.assertGreater(
             total_violations,
             0,
-            f"❌ SSOT VIOLATION: Found {total_violations} dynamic execution engine imports. "
+            f"X SSOT VIOLATION: Found {total_violations} dynamic execution engine imports. "
             "Dynamic imports must be refactored to use SSOT pattern."
         )
 
@@ -156,14 +156,14 @@ class ImportEnforcementTests(SSotBaseTestCase):
                 rel_path = file_path.relative_to(self.project_root)
                 print(f"   📁 {rel_path}:")
                 for violation in violations:
-                    print(f"      ❌ {violation}")
+                    print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - Import alias violations detected
         total_violations = sum(len(violations) for violations in alias_violations.values())
         self.assertGreater(
             total_violations,
             0,
-            f"❌ SSOT VIOLATION: Found {total_violations} import alias violations. "
+            f"X SSOT VIOLATION: Found {total_violations} import alias violations. "
             "Aliases must not obscure SSOT compliance."
         )
 

@@ -9,7 +9,7 @@ properly sent, causing 100% of WebSocket connections to fail on production.
 
 Business Value Justification:
 - Segment: Platform/Critical
-- Business Goal: Restore Golden Path functionality (users login → get AI responses)
+- Business Goal: Restore Golden Path functionality (users login -> get AI responses)
 - Value Impact: Prevents 100% WebSocket connection failures in production
 - Revenue Impact: Critical for $500K+ ARR dependency on chat functionality
 """

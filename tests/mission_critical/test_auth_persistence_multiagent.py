@@ -1,19 +1,19 @@
-"""
-"""
+""""
+
 Mission Critical Test: Authentication Persistence in Multi-Agent Workflows
 
 Tests that authentication context is properly maintained across:
-1. Agent handoffs
+    1. Agent handoffs
 2. WebSocket reconnections
 3. Token refreshes during agent execution
 4. Concurrent multi-user agent operations
-"""
-"""
+""""
+
 
 """
 """
-"""
-"""
+""""
+
 import asyncio
 import uuid
 import jwt
@@ -51,7 +51,8 @@ class AuthPersistenceMultiAgentTests:
             "email: test@example.com,"
             exp: datetime.utcnow() + timedelta(hours=1),
             iat: datetime.utcnow()"
-            iat: datetime.utcnow()"
+            iat: datetime.utcnow()""
+
         }
         return jwt.encode(payload, "test-secret, algorithm=HS256)"
     

@@ -19,7 +19,7 @@ CRITICAL GOLDEN PATH SCENARIOS (20 tests):
 4. Multi-User Isolation (4 tests)
 5. Error Handling & Recovery (4 tests)
 
-COVERAGE TARGET: BaseAgent integration 23% → 45% (+22% improvement)
+COVERAGE TARGET: BaseAgent integration 23% -> 45% (+22% improvement)
 
 SSOT Testing Compliance:
 - Uses test_framework.ssot.base_test_case.SSotAsyncTestCase
@@ -149,7 +149,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
         assert base_agent.session_id == self.session_id
         assert hasattr(base_agent, 'websocket_emitter')
         
-        logger.info(f"✅ BaseAgent created successfully with user_id: {self.user_id}")
+        logger.info(f"CHECK BaseAgent created successfully with user_id: {self.user_id}")
     
     async def test_base_agent_factory_pattern_isolation(self):
         """Test 2/20: Agent factory creates isolated instances per user"""
@@ -190,7 +190,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
         assert agent_1.user_execution_context != agent_2.user_execution_context
         assert id(agent_1) != id(agent_2)  # Different object instances
         
-        logger.info("✅ Factory pattern creates properly isolated agent instances")
+        logger.info("CHECK Factory pattern creates properly isolated agent instances")
     
     async def test_base_agent_initialization_with_tool_dispatcher(self):
         """Test 3/20: BaseAgent initialization with tool dispatcher integration"""
@@ -217,7 +217,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
         assert hasattr(base_agent, 'tool_dispatcher')
         assert base_agent.tool_dispatcher == mock_tool_dispatcher
         
-        logger.info("✅ BaseAgent initialized with tool dispatcher integration")
+        logger.info("CHECK BaseAgent initialized with tool dispatcher integration")
     
     async def test_base_agent_registry_integration(self):
         """Test 4/20: BaseAgent registration in AgentRegistry with user isolation"""
@@ -246,7 +246,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
         assert registered_agent == base_agent
         assert registered_agent.user_id == self.user_id
         
-        logger.info(f"✅ BaseAgent successfully registered in AgentRegistry with ID: {agent_id}")
+        logger.info(f"CHECK BaseAgent successfully registered in AgentRegistry with ID: {agent_id}")
 
     # ============================================================================
     # CATEGORY 2: AGENT LIFECYCLE MANAGEMENT (4 tests) 
@@ -278,7 +278,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
         assert start_event['user_id'] == self.user_id
         assert start_event['session_id'] == self.session_id
         
-        logger.info("✅ BaseAgent start lifecycle emits proper WebSocket events")
+        logger.info("CHECK BaseAgent start lifecycle emits proper WebSocket events")
     
     async def test_base_agent_execution_lifecycle(self):
         """Test 6/20: BaseAgent execution lifecycle with thinking and completion events"""
@@ -310,7 +310,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
         assert 'agent_thinking' in event_types  
         assert 'agent_completed' in event_types
         
-        logger.info("✅ BaseAgent execution lifecycle emits all required events")
+        logger.info("CHECK BaseAgent execution lifecycle emits all required events")
     
     async def test_base_agent_cleanup_lifecycle(self):
         """Test 7/20: BaseAgent cleanup and resource management"""
@@ -341,7 +341,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
         
         # Validate proper cleanup
         # Note: actual cleanup validation depends on BaseAgent implementation
-        logger.info("✅ BaseAgent cleanup lifecycle manages resources properly")
+        logger.info("CHECK BaseAgent cleanup lifecycle manages resources properly")
     
     async def test_base_agent_concurrent_lifecycle(self):
         """Test 8/20: Multiple BaseAgent instances with concurrent lifecycles"""
@@ -381,7 +381,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
         assert len(completed_users) == 3
         assert len(set(completed_users)) == 3  # All different user IDs
         
-        logger.info("✅ Multiple BaseAgent concurrent lifecycles execute successfully")
+        logger.info("CHECK Multiple BaseAgent concurrent lifecycles execute successfully")
 
     # ============================================================================
     # CATEGORY 3: WEBSOCKET EVENT INTEGRATION (4 tests)
@@ -417,7 +417,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
         assert event['session_id'] == self.session_id
         assert 'timestamp' in event
         
-        logger.info("✅ WebSocket agent_started event integration validated")
+        logger.info("CHECK WebSocket agent_started event integration validated")
     
     async def test_websocket_agent_thinking_event_integration(self):
         """Test 10/20: WebSocket agent_thinking event during task execution"""
@@ -447,7 +447,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
         assert event['user_id'] == self.user_id
         assert 'data' in event
         
-        logger.info("✅ WebSocket agent_thinking event integration validated")
+        logger.info("CHECK WebSocket agent_thinking event integration validated")
     
     async def test_websocket_agent_completed_event_integration(self):
         """Test 11/20: WebSocket agent_completed event with result data"""
@@ -478,7 +478,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
         assert event['user_id'] == self.user_id
         assert event['session_id'] == self.session_id
         
-        logger.info("✅ WebSocket agent_completed event integration validated")
+        logger.info("CHECK WebSocket agent_completed event integration validated")
     
     async def test_websocket_event_user_isolation(self):
         """Test 12/20: WebSocket events properly isolated per user"""
@@ -531,7 +531,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
             assert event['user_id'] == user_2_context.user_id
             assert event['session_id'] == user_2_context.session_id
         
-        logger.info("✅ WebSocket events properly isolated per user")
+        logger.info("CHECK WebSocket events properly isolated per user")
 
     # ============================================================================
     # CATEGORY 4: MULTI-USER ISOLATION (4 tests)
@@ -579,7 +579,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
         user_ids = [result[1] for result in results]
         assert len(set(user_ids)) == 3  # All different user IDs
         
-        logger.info("✅ Multi-user agent context isolation validated")
+        logger.info("CHECK Multi-user agent context isolation validated")
     
     async def test_concurrent_user_state_isolation(self):
         """Test 14/20: Concurrent users with isolated agent state"""
@@ -623,7 +623,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
         for original_id, agent_id in results:
             assert original_id == agent_id
         
-        logger.info("✅ Concurrent user state isolation validated")
+        logger.info("CHECK Concurrent user state isolation validated")
     
     async def test_user_session_isolation(self):
         """Test 15/20: User session isolation across different sessions"""
@@ -673,7 +673,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
             session_events = [e for e in self.websocket_events_captured if e['session_id'] == session_id]
             assert len(session_events) >= 1  # At least agent_started event
             
-        logger.info("✅ User session isolation validated across multiple sessions")
+        logger.info("CHECK User session isolation validated across multiple sessions")
     
     async def test_user_resource_cleanup_isolation(self):
         """Test 16/20: User resource cleanup does not affect other users"""
@@ -719,7 +719,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
         user_2_events = [e for e in self.websocket_events_captured if e['user_id'] == user_2_context.user_id]
         assert len(user_2_events) >= 2  # Started + task execution events
         
-        logger.info("✅ User resource cleanup isolation validated")
+        logger.info("CHECK User resource cleanup isolation validated")
 
     # ============================================================================
     # CATEGORY 5: ERROR HANDLING & RECOVERY (4 tests)
@@ -753,7 +753,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
             # If errors bubble up, they should be meaningful
             assert "WebSocket" in str(e) or "connection" in str(e)
         
-        logger.info("✅ Agent initialization error handling validated")
+        logger.info("CHECK Agent initialization error handling validated")
     
     async def test_agent_execution_error_recovery(self):
         """Test 18/20: Agent execution error recovery and user notification"""
@@ -793,7 +793,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
         error_events = [e for e in self.websocket_events_captured 
                        if 'error' in e.get('data', {}).get('status', '').lower()]
         
-        logger.info("✅ Agent execution error recovery validated")
+        logger.info("CHECK Agent execution error recovery validated")
     
     async def test_websocket_connection_failure_recovery(self):
         """Test 19/20: WebSocket connection failure recovery patterns"""
@@ -836,7 +836,7 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
             # WebSocket failures should not prevent core agent functionality
             logger.info(f"WebSocket failure handled gracefully: {e}")
         
-        logger.info("✅ WebSocket connection failure recovery validated")
+        logger.info("CHECK WebSocket connection failure recovery validated")
     
     async def test_multi_user_error_isolation(self):
         """Test 20/20: Errors in one user's agent do not affect other users"""
@@ -889,4 +889,4 @@ class BaseAgentInfrastructureIntegrationTests(SSotAsyncTestCase):
                         if e['user_id'] == stable_user_context.user_id]
         assert len(stable_events) >= 2  # At least start + execute events
         
-        logger.info("✅ Multi-user error isolation validated - stable users unaffected")
+        logger.info("CHECK Multi-user error isolation validated - stable users unaffected")

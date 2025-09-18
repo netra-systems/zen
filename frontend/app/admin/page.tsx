@@ -1,9 +1,11 @@
 'use client';
 
 import { NextPage } from 'next';
+import { useState } from 'react';
 import { authService } from '@/auth';
 import { AuthGuard } from '@/components/AuthGuard';
-import { Shield, Settings, Users, Database, Activity, FileText, LucideIcon } from 'lucide-react';
+import WebSocketAuthMonitor from '@/components/admin/WebSocketAuthMonitor';
+import { Shield, Settings, Users, Database, Activity, FileText, LucideIcon, Wifi } from 'lucide-react';
 
 interface AdminStat {
   label: string;
@@ -17,18 +19,63 @@ interface AdminSection {
   description: string;
   icon: LucideIcon;
   color: string;
+  href?: string;
+  isTab?: boolean;
 }
 import { motion } from 'framer-motion';
 
 const AdminPage: NextPage = () => {
   authService.useAuth(); // Authentication check only
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
 
   return (
     <AuthGuard>
       <div className="container mx-auto p-6 space-y-6">
         <AdminHeader />
-        <AdminQuickStats />
-        <AdminDashboard />
+
+        {/* Navigation Tabs */}
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'dashboard'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Shield className="w-4 h-4" />
+                <span>Dashboard</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('websocket-auth')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'websocket-auth'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Wifi className="w-4 h-4" />
+                <span>WebSocket Auth Monitor</span>
+              </div>
+            </button>
+          </nav>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'dashboard' && (
+          <>
+            <AdminQuickStats />
+            <AdminDashboard setActiveTab={setActiveTab} />
+          </>
+        )}
+
+        {activeTab === 'websocket-auth' && (
+          <WebSocketAuthMonitor />
+        )}
       </div>
     </AuthGuard>
   );
@@ -87,13 +134,21 @@ const createStatCard = (stat: AdminStat, index: number) => {
   );
 };
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
   const adminSections = [
+    {
+      title: 'WebSocket Auth Monitor',
+      description: 'Real-time WebSocket authentication monitoring and diagnostics',
+      icon: Wifi,
+      color: 'bg-blue-500',
+      href: 'websocket-auth',
+      isTab: true
+    },
     {
       title: 'System Settings',
       description: 'Configure system-wide settings and preferences',
       icon: Settings,
-      color: 'bg-blue-500',
+      color: 'bg-gray-500',
       href: '#'
     },
     {
@@ -121,20 +176,30 @@ const AdminDashboard = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {adminSections.map((section, index) => createAdminSectionCard(section, index))}
+      {adminSections.map((section, index) => createAdminSectionCard(section, index, setActiveTab))}
     </div>
   );
 };
 
-const createAdminSectionCard = (section: AdminSection, index: number) => {
+const createAdminSectionCard = (section: AdminSection, index: number, setActiveTab?: (tab: string) => void) => {
   const Icon = section.icon;
+
+  const handleClick = () => {
+    if (section.isTab && section.href && setActiveTab) {
+      setActiveTab(section.href);
+    }
+  };
+
   return (
     <motion.div
       key={section.title}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
-      className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow cursor-pointer"
+      onClick={handleClick}
+      className={`bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow cursor-pointer ${
+        section.isTab ? 'hover:border-blue-300' : ''
+      }`}
     >
       <div className="flex items-start space-x-4">
         <div className={`w-12 h-12 ${section.color} rounded-lg flex items-center justify-center`}>
@@ -143,6 +208,13 @@ const createAdminSectionCard = (section: AdminSection, index: number) => {
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">{section.title}</h3>
           <p className="text-sm text-gray-600">{section.description}</p>
+          {section.isTab && (
+            <div className="mt-2">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Click to open
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

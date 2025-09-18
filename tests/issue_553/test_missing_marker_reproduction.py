@@ -57,7 +57,7 @@ class MissingMarkerReproductionTests:
         error_output = result.stderr.lower()
         assert 'unknown_marker' in error_output or 'unregistered' in error_output, f'Expected marker error not found in: {result.stderr}'
         temp_test_file.unlink()
-        print(f'✅ REPRODUCTION CONFIRMED: Pytest collection fails with undefined markers')
+        print(f'CHECK REPRODUCTION CONFIRMED: Pytest collection fails with undefined markers')
         print(f'Error output: {result.stderr}')
 
     @pytest.mark.unit
@@ -116,7 +116,7 @@ class MissingMarkerReproductionTests:
         print(f'  Markers used in test files: {len(used_markers)}')
         print(f'  Undefined markers found: {len(undefined_markers)}')
         if undefined_markers:
-            print(f'\n❌ UNDEFINED MARKERS FOUND:')
+            print(f'\nX UNDEFINED MARKERS FOUND:')
             for marker in sorted(undefined_markers):
                 print(f'    - {marker}')
         assert len(defined_markers) > 0, 'Should find some defined markers'
@@ -147,7 +147,7 @@ class MissingMarkerReproductionTests:
         print(f'\n📋 PYTEST COLLECTION RESULTS:')
         failed_collections = []
         for path, result in collection_results.items():
-            status_icon = '✅' if result['status'] == 'success' else '❌'
+            status_icon = 'CHECK' if result['status'] == 'success' else 'X'
             print(f"  {status_icon} {path}: {result['status']}")
             if result['status'] == 'failed':
                 failed_collections.append(path)
@@ -156,7 +156,7 @@ class MissingMarkerReproductionTests:
             print(f'\n🚨 COLLECTION FAILURES FOUND: {len(failed_collections)} directories')
             print('This confirms Issue #553: pytest marker configuration missing markers')
         else:
-            print(f'\n✅ ALL COLLECTIONS SUCCESSFUL')
+            print(f'\nCHECK ALL COLLECTIONS SUCCESSFUL')
             print('This suggests markers may already be properly configured')
         return collection_results
 
@@ -187,7 +187,7 @@ class MissingMarkerReproductionTests:
             print(f"  Permissive markers result: {('FAILED' if permissive_result.returncode != 0 else 'PASSED')}")
             assert strict_result.returncode != 0, 'Strict markers should fail with undefined marker'
             assert permissive_result.returncode == 0, 'Permissive markers should pass with undefined marker'
-            print(f'✅ CONFIRMED: Issue is strict-markers + undefined markers combination')
+            print(f'CHECK CONFIRMED: Issue is strict-markers + undefined markers combination')
             return {'strict_failed': strict_result.returncode != 0, 'permissive_passed': permissive_result.returncode == 0, 'strict_error': strict_result.stderr, 'permissive_output': permissive_result.stdout}
         finally:
             temp_file.unlink()

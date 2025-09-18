@@ -1,18 +1,18 @@
-"""
-"""
+""""
+
 Simple Issue #601 Validation Test - Strategic Validation Mocking
 
 This test validates the core fix for Issue #601 without complex infrastructure dependencies.
 It demonstrates that strategic mocking of _run_comprehensive_validation prevents deadlocks.
 
-Business Value: $500K+ ARR platform reliability protection
-"""
-"""
+Business Value: $""500K"" plus ARR platform reliability protection
+""""
+
 
 """
 """
-"""
-"""
+""""
+
 import asyncio
 import gc
 import os
@@ -63,7 +63,7 @@ class Issue601ValidationFixTests:
         app.state = MagicMock()
         orchestrator = StartupOrchestrator(app)
 
-        # ✅ ISSUE #601 FIX: Strategic mocking to prevent validation deadlock
+        # CHECK ISSUE #601 FIX: Strategic mocking to prevent validation deadlock
         validation_mocked = False
         
         async def mock_validation_method():
@@ -100,7 +100,7 @@ class Issue601ValidationFixTests:
             assert validation_mocked, Validation method was not called""
             assert app.state.startup_complete, "Startup completion flag not set"
             
-            print(f✅ Issue #601 Fix Validated - Duration: {duration:.3f}s")"
+            print(fCHECK Issue #601 Fix Validated - Duration: {duration:.""3f""}s")"
             
         except asyncio.TimeoutError:
             pytest.fail(ISSUE #601 NOT FIXED: Test still hangs despite strategic mocking)
@@ -157,12 +157,13 @@ class Issue601ValidationFixTests:
         # Validate memory behavior
         final_memory = psutil.Process().memory_info().rss
         total_increase = final_memory - initial_memory
-        max_allowed_increase = 20 * 1024 * 1024  # 20MB reasonable limit
+        max_allowed_increase = 20 * 1024 * 1024  # ""20MB"" reasonable limit
 
         assert total_increase < max_allowed_increase, \
-            fMemory leak detected: {total_increase / 1024 / 1024:.2f}MB increase""
+            fMemory leak detected: {total_increase / 1024 / 1024:.""2f""}MB increase""
 
-        print(f✅ Memory leak detection works with fix - Total increase: {total_increase / 1024 / 1024:.2f}MB)
+        print(fCHECK Memory leak detection works with fix - Total increase: {total_increase / 1024 / 1024:.""2f""}MB)""
+
 
     @pytest.mark.asyncio
     async def test_original_hang_scenario_reproduction(self):
@@ -199,12 +200,14 @@ class Issue601ValidationFixTests:
         duration = time.time() - start_time
         assert duration >= 2.5, fShould have timed out, but completed in {duration}s""
         
-        print(f✅ Original hang scenario reproduced - timed out after {duration:.3f}s)
+        print(fCHECK Original hang scenario reproduced - timed out after {duration:.""3f""}s)""
+
 
 
 # Direct execution for quick validation
 if __name__ == __main__:"
-if __name__ == __main__:"
+if __name__ == __main__:""
+
     import unittest
     
     print("Issue #601 Simple Validation Test)"
@@ -216,7 +219,8 @@ if __name__ == __main__:"
     result = runner.run(suite)
     
     if result.wasSuccessful():
-        print(✅ Issue #601 fix validation PASSED)
+        print(CHECK Issue #601 fix validation PASSED)
     else:
-        print(❌ Issue #601 fix validation FAILED"")"
-        print(❌ Issue #601 fix validation FAILED"")"
+        print(X Issue #601 fix validation FAILED"")"
+        print(X Issue #601 fix validation FAILED"")""
+

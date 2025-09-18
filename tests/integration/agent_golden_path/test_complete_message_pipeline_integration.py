@@ -22,7 +22,7 @@ CRITICAL DESIGN:
 - Comprehensive error handling and timeout controls
 
 SCOPE:
-1. Complete user message → agent execution → AI response pipeline
+1. Complete user message -> agent execution -> AI response pipeline
 2. WebSocket event delivery validation throughout the process
 3. Agent context creation and maintenance during execution
 4. Business value validation of AI responses (actionable, problem-solving)
@@ -376,7 +376,7 @@ class CompleteMessagePipelineIntegrationTests(SSotAsyncTestCase):
         """
         test_start_time = time.time()
         print(f"[PIPELINE] Starting complete message pipeline integration test")
-        print(f"[PIPELINE] Target: Full user → agent → AI response pipeline with business value validation")
+        print(f"[PIPELINE] Target: Full user -> agent -> AI response pipeline with business value validation")
         print(f"[PIPELINE] Environment: {self.test_env}")
         
         # Create authenticated test user with business context

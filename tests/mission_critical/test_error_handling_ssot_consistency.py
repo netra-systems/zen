@@ -4,7 +4,7 @@ This test suite ensures that error handling follows SSOT principles
 and that duplicate error class definitions are eliminated.
 
 Tests verify:
-1. No duplicate error class definitions exist
+    1. No duplicate error class definitions exist
 2. All error imports use canonical sources
 3. Error handling is consistent across the system
 4. WebSocket errors properly integrate with centralized error system
@@ -44,7 +44,8 @@ class ErrorClassDefinition:
 
     @dataclass
 class ImportStatement:
-    ""Represents an import statement found in code"
+    ""Represents an import statement found in code""
+
     file_path: str
     line_number: int
     module: str
@@ -65,7 +66,8 @@ class ErrorHandlingSSOTValidator:
 
     def find_all_error_class_definitions(self) -> Dict[str, List[ErrorClassDefinition]]:
         Find all error class definitions in the codebase"
-        Find all error class definitions in the codebase"
+        Find all error class definitions in the codebase""
+
         error_classes = {
         "WebSocketError: [],"
         ErrorContext: []
@@ -78,7 +80,8 @@ class ErrorHandlingSSOTValidator:
         self.project_root / shared,"
         self.project_root / shared,"
         self.project_root / tests"
-        self.project_root / tests"
+        self.project_root / tests""
+
     
 
         for search_path in search_paths:
@@ -113,7 +116,8 @@ class ErrorHandlingSSOTValidator:
         if node.name == WebSocketError:
         is_canonical = module_path == self.canonical_websocket_error_path
         elif node.name == ErrorContext:"
-        elif node.name == ErrorContext:"
+        elif node.name == ErrorContext:""
+
         is_canonical = module_path == self.canonical_error_context_path
 
         definition = ErrorClassDefinition( )
@@ -135,7 +139,8 @@ class ErrorHandlingSSOTValidator:
         imports = {
         WebSocketError: [],
         ErrorContext: []"
-        ErrorContext: []"
+        ErrorContext: []""
+
     
 
         search_paths = [
@@ -172,7 +177,8 @@ class ErrorHandlingSSOTValidator:
 
         except Exception as e:
         self.warnings_found.append("
-        self.warnings_found.append("
+        self.warnings_found.append(""
+
 
         return imports
 
@@ -210,14 +216,16 @@ class ErrorHandlingSSOTValidator:
 
     def validate_correct_imports(self, imports: Dict[str, List[ImportStatement)) -> bool:
         Validate that all imports use the canonical source"
-        Validate that all imports use the canonical source"
+        Validate that all imports use the canonical source""
+
         all_valid = True
 
         for class_name, import_list in imports.items():
         canonical_module = ( )
         self.canonical_websocket_error_path
         if class_name == WebSocketError"
-        if class_name == WebSocketError"
+        if class_name == WebSocketError""
+
         else self.canonical_error_context_path
         
 
@@ -245,11 +253,13 @@ class ErrorHandlingSSOTValidator:
     def check_agent_communication_file(self) -> bool:
         Specifically check agent_communication.py for local error definitions""
         agent_comm_path = self.project_root / netra_backend / app / agents / agent_communication.py"
-        agent_comm_path = self.project_root / netra_backend / app / agents / agent_communication.py"
+        agent_comm_path = self.project_root / netra_backend / app / agents / agent_communication.py""
+
 
         if not agent_comm_path.exists():
         self.warnings_found.append("
-        self.warnings_found.append("
+        self.warnings_found.append(""
+
         return True
 
         with open(agent_comm_path, 'r', encoding='utf-8') as f:
@@ -276,7 +286,8 @@ class ErrorHandlingSSOTValidator:
 
     def validate_error_handling_consistency(self) -> bool:
         Validate that error handling is consistent across the system"
-        Validate that error handling is consistent across the system"
+        Validate that error handling is consistent across the system""
+
         all_valid = True
 
     # Find all agent files
@@ -289,7 +300,8 @@ class ErrorHandlingSSOTValidator:
 
         for file_path in agent_files:
         if __pycache__ in str(file_path):"
-        if __pycache__ in str(file_path):"
+        if __pycache__ in str(file_path):""
+
         continue
 
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -309,7 +321,8 @@ class ErrorHandlingSSOTValidator:
         if re.search(r'\bErrorContext\b', content):
         self.errors_found.append( )
         formatted_stringt import from canonical source"
-        formatted_stringt import from canonical source"
+        formatted_stringt import from canonical source""
+
                                     
         all_valid = False
 
@@ -338,7 +351,8 @@ class ErrorHandlingSSOTValidator:
 
 
 class TestErrorHandlingSSOTConsistency:
-        ""Test suite for error handling SSOT consistency"
+        ""Test suite for error handling SSOT consistency""
+
 
         @pytest.fixture
     def validator(self):
@@ -359,7 +373,8 @@ class TestErrorHandlingSSOTConsistency:
 
         canonical_count = sum(1 for d in non_test_websocket_errors if d.is_canonical)
         assert canonical_count == 1, formatted_string"
-        assert canonical_count == 1, formatted_string"
+        assert canonical_count == 1, formatted_string""
+
 
     # The only non-test definition should be canonical
         non_canonical = [item for item in []]
@@ -377,7 +392,8 @@ class TestErrorHandlingSSOTConsistency:
 
         canonical_count = sum(1 for d in non_test_error_contexts if d.is_canonical)
         assert canonical_count >= 1, formatted_string"
-        assert canonical_count >= 1, formatted_string"
+        assert canonical_count >= 1, formatted_string""
+
 
     def test_agent_communication_uses_canonical_imports(self, validator):
         Test that agent_communication.py uses canonical imports, not local definitions""
@@ -395,7 +411,8 @@ class TestErrorHandlingSSOTConsistency:
         "Test that error handling is consistent across all agent files"
         result = validator.validate_error_handling_consistency()
         assert result, formatted_string"
-        assert result, formatted_string"
+        assert result, formatted_string""
+
 
     def test_websocket_error_inheritance_chain(self):
         "Test that WebSocketError properly inherits from NetraException"
@@ -417,7 +434,8 @@ class TestErrorHandlingSSOTConsistency:
         for field in required_fields:
         assert field in CanonicalErrorContext.model_fields, "( )"
         formatted_string"
-        formatted_string"
+        formatted_string""
+
         
 
     def test_full_ssot_validation(self, validator):
@@ -444,7 +462,8 @@ class TestErrorHandlingSSOTConsistency:
 
 @pytest.mark.asyncio
     async def test_websocket_error_handling_in_runtime(self):
-    ""Test that WebSocket errors are handled correctly at runtime"
+    ""Test that WebSocket errors are handled correctly at runtime""
+
 from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
 
                         # Create a test instance
@@ -489,7 +508,8 @@ class TestAgent(AgentCommunicationMixin):
         print(MIGRATION NOTICE: This file previously used direct pytest execution.")"
         print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")"
         print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
-        print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
+        print(For more info: reports/TEST_EXECUTION_GUIDE.md"")""
+
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

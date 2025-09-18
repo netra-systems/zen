@@ -156,9 +156,9 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase):
             unique_ids = set(cls_id for _, _, cls_id in imports)
             if len(unique_ids) > 1:
                 violation_count += 1
-                print(f"    ❌ VIOLATION: {len(unique_ids)} different class objects")
+                print(f"    X VIOLATION: {len(unique_ids)} different class objects")
             else:
-                print(f"    ✅ OK: Single class object")
+                print(f"    CHECK OK: Single class object")
 
             for path, cls, cls_id in imports:
                 print(f"    - {path} (id: {cls_id})")
@@ -268,7 +268,7 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase):
         for module_path, status in redirection_status.items():
             print(f"{module_path}:")
             if 'error' in status:
-                print(f"  ❌ Import error: {status['error']}")
+                print(f"  X Import error: {status['error']}")
             else:
                 print(f"  - SSOT comment: {status['has_ssot_comment']}")
                 print(f"  - Import redirect: {status['has_import_redirect']}")
@@ -293,9 +293,9 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase):
         print(f"Import violations: {len(self.import_violations)}")
 
         if hasattr(self, '_outcome') and self._outcome.errors:
-            print("❌ Test detected SSOT violations - THIS IS EXPECTED initially")
+            print("X Test detected SSOT violations - THIS IS EXPECTED initially")
         else:
-            print("✅ No SSOT violations detected")
+            print("CHECK No SSOT violations detected")
 
 
 if __name__ == '__main__':

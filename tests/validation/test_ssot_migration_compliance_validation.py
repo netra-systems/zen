@@ -80,10 +80,10 @@ class SsotMigrationComplianceValidationTests(SSotBaseTestCase):
         print(f"\n3. Issue #1097 Validation:")
         expected_violations = self.expected_legacy_files
         if len(unittest_violations) == expected_violations:
-            print(f"   ✅ CONFIRMED: Found expected {expected_violations} unittest.TestCase violations")
+            print(f"   CHECK CONFIRMED: Found expected {expected_violations} unittest.TestCase violations")
             print("   These files are the exact target for Issue #1097 migration.")
         elif len(unittest_violations) > expected_violations:
-            print(f"   ⚠️  NOTICE: Found {len(unittest_violations)} violations, expected {expected_violations}")
+            print(f"   WARNING️  NOTICE: Found {len(unittest_violations)} violations, expected {expected_violations}")
             print("   Additional files may have been added since audit.")
         elif len(unittest_violations) < expected_violations:
             print(f"   🎉 PROGRESS: Found {len(unittest_violations)} violations, expected {expected_violations}")
@@ -164,10 +164,10 @@ class SsotMigrationComplianceValidationTests(SSotBaseTestCase):
         
         print(f"\n3. Migration Success Validation:")
         if len(non_compliant) == 0:
-            print("   ✅ SUCCESS: 100% SSOT compliance achieved!")
+            print("   CHECK SUCCESS: 100% SSOT compliance achieved!")
             print("   All mission-critical tests now use proper SSOT patterns.")
         else:
-            print(f"   ❌ INCOMPLETE: {len(non_compliant)} files still need migration")
+            print(f"   X INCOMPLETE: {len(non_compliant)} files still need migration")
             print("   Non-compliant files:")
             for file_name in non_compliant:
                 print(f"     - {file_name}")
@@ -244,9 +244,9 @@ class SsotMigrationComplianceValidationTests(SSotBaseTestCase):
         
         print(f"\n3. Environment Isolation Assessment:")
         if len(direct_environ_violations) == 0:
-            print("   ✅ EXCELLENT: No direct os.environ violations found")
+            print("   CHECK EXCELLENT: No direct os.environ violations found")
         else:
-            print(f"   ⚠️  ATTENTION: {len(direct_environ_violations)} files use direct os.environ")
+            print(f"   WARNING️  ATTENTION: {len(direct_environ_violations)} files use direct os.environ")
             print("   These should be reviewed for SSOT environment patterns:")
             for violation in direct_environ_violations:
                 print(f"     - {violation}")
@@ -317,12 +317,12 @@ class SsotMigrationComplianceValidationTests(SSotBaseTestCase):
         
         print(f"\n3. Migration Assessment:")
         if len(legacy_lifecycle_patterns) == 0:
-            print("   ✅ SUCCESS: No legacy setUp/tearDown patterns found")
+            print("   CHECK SUCCESS: No legacy setUp/tearDown patterns found")
         else:
             print(f"   📋 TODO: {len(legacy_lifecycle_patterns)} files need lifecycle migration")
             
         if len(mixed_patterns) > 0:
-            print(f"   ⚠️  REVIEW: {len(mixed_patterns)} files have mixed patterns")
+            print(f"   WARNING️  REVIEW: {len(mixed_patterns)} files have mixed patterns")
             print("   These may be using compatibility mode or need cleanup:")
             for mixed_file in mixed_patterns:
                 print(f"     - {mixed_file}")
@@ -383,9 +383,9 @@ class SsotMigrationComplianceValidationTests(SSotBaseTestCase):
         self.record_metric("remaining_files_to_migrate", unittest_violations)
         
         print(f"\n3. Business Value Protection:")
-        print("   ✅ $500K+ ARR test infrastructure stability maintained")
-        print("   ✅ Mission-critical functionality validation preserved")
-        print("   ✅ SSOT compliance improving test reliability")
+        print("   CHECK $500K+ ARR test infrastructure stability maintained")
+        print("   CHECK Mission-critical functionality validation preserved")
+        print("   CHECK SSOT compliance improving test reliability")
         
         # Validate business requirements are met
         assert total_files > 0, "No test files found - unable to validate business protection"
@@ -428,7 +428,7 @@ if __name__ == "__main__":
         print("\n🧪 Running progress tracking...")
         test_instance.test_migration_progress_tracking()
         
-        print("\n✅ All validation tests completed successfully!")
+        print("\nCHECK All validation tests completed successfully!")
         
     except AssertionError as e:
         print(f"\n🚨 EXPECTED TEST FAILURE: {e}")
@@ -436,7 +436,7 @@ if __name__ == "__main__":
         print("The test will PASS after successful SSOT migration.")
         
     except Exception as e:
-        print(f"\n❌ UNEXPECTED ERROR: {e}")
+        print(f"\nX UNEXPECTED ERROR: {e}")
         
     finally:
         test_instance.teardown_method(None)

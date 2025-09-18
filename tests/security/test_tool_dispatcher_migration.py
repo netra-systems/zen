@@ -113,7 +113,7 @@
             # REMOVED_SYNTAX_ERROR: """Test deprecation warning when using dispatch method on global instance."""
             # REMOVED_SYNTAX_ERROR: dispatcher = ToolDispatcher()
 
-            # REMOVED_SYNTAX_ERROR: with pytest.warns(DeprecationWarning, match="ToolDispatcher.dispatch\\(\\) called on global instance"):
+            # REMOVED_SYNTAX_ERROR: with pytest.warns(DeprecationWarning, match="ToolDispatcher.dispatch\\\\\\1\\\\\\1 called on global instance"):
                 # This will warn about unsafe global usage
                 # REMOVED_SYNTAX_ERROR: await dispatcher.dispatch("nonexistent_tool")
 
@@ -122,7 +122,7 @@
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: dispatcher = ToolDispatcher()
 
-    # REMOVED_SYNTAX_ERROR: with pytest.warns(DeprecationWarning, match="ToolDispatcher.register_tool\\(\\) called on global instance"):
+    # REMOVED_SYNTAX_ERROR: with pytest.warns(DeprecationWarning, match="ToolDispatcher.register_tool\\\\\\1\\\\\\1 called on global instance"):
         # REMOVED_SYNTAX_ERROR: dispatcher.register_tool("test_tool", lambda x: None "result", "Test tool")
 
 

@@ -191,13 +191,13 @@ if __name__ == "__main__":
     result = validate_collection_warnings()
 
     if result['warnings_reproduced']:
-        print("✅ SUCCESS: Pytest collection warnings successfully reproduced")
+        print("CHECK SUCCESS: Pytest collection warnings successfully reproduced")
         print("\nThis confirms Issue #999 is present in this test file.")
         print("Expected warnings should include:")
         print("- cannot collect test class 'WebSocketConnectionTests' because it has a __init__ constructor")
         print("- cannot collect test class 'DatabaseConnectionTests' because it has a __init__ constructor")
     else:
-        print("❌ WARNING: Pytest collection warnings not detected")
+        print("X WARNING: Pytest collection warnings not detected")
         print("This may indicate the issue is not properly reproduced.")
 
     print("\n" + "=" * 60)

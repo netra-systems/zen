@@ -315,7 +315,7 @@ class TestStagingConfigurationAlignment(SSotBaseTestCase):
         if violations:
             error_msg = "Deprecated staging domain patterns found (per Issue #1278):\n"
             for violation in violations:
-                error_msg += f"  ❌ {violation}\n"
+                error_msg += f"  X {violation}\n"
             error_msg += "\nUse *.netrasystems.ai domains instead of *.staging.netrasystems.ai"
             pytest.fail(error_msg)
 

@@ -1,9 +1,9 @@
-"""
-"""
+""""
+
 Mission Critical Test: Load Balancer SSL Certificate Validation
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure secure HTTPS access for all users
 - Value Impact: Prevents SSL certificate errors that block user access and damage trust
 - Strategic Impact: Validates production-like security configuration in staging
@@ -14,10 +14,11 @@ warnings and prevent user access, resulting in 100% user impact.
 
 This addresses GitHub issue #113: GCP Load Balancer SSL Configuration
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import asyncio
 import ssl
 import socket
@@ -32,13 +33,15 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
     "
-    "
+    ""
+
     Test SSL certificate validity for load balancer domains.
     
     MISSION CRITICAL: Invalid SSL certificates cause browser warnings and prevent
     secure access, resulting in complete user access failures.
 "
-"
+""
+
     
     # Load balancer domains that require valid SSL certificates
     LOAD_BALANCER_DOMAINS = [
@@ -104,7 +107,8 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
                 if ssl_info['insecure_protocols']:
                     ssl_failures.append(
                         fInsecure SSL protocols detected for {domain}: {ssl_info['insecure_protocols']}"
-                        fInsecure SSL protocols detected for {domain}: {ssl_info['insecure_protocols']}"
+                        fInsecure SSL protocols detected for {domain}: {ssl_info['insecure_protocols']}""
+
                     )
                 
             except Exception as e:
@@ -126,7 +130,8 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
                 fREQUIRED ACTIONS:\n
                 f"1. Verify SSL certificates are properly configured in load balancer\n"
                 f2. Check certificate validity and expiration dates\n"
-                f2. Check certificate validity and expiration dates\n"
+                f2. Check certificate validity and expiration dates\n""
+
                 f3. Validate certificate chain includes intermediate certificates\n
                 f4. Ensure hostname matches in certificate subject/SAN fields\n"
                 f4. Ensure hostname matches in certificate subject/SAN fields\n"
@@ -138,7 +143,8 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_load_balancer_ssl_security_configuration(self):
-        """
+        """"
+
         HARD FAIL: Load balancer SSL configuration MUST meet security standards.
         
         This test validates that SSL configuration follows security best practices
@@ -170,7 +176,8 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
                 if security_info['deprecated_protocols']:
                     security_failures.append(
                         fDeprecated SSL protocols enabled for {domain}: {security_info['deprecated_protocols']}"
-                        fDeprecated SSL protocols enabled for {domain}: {security_info['deprecated_protocols']}"
+                        fDeprecated SSL protocols enabled for {domain}: {security_info['deprecated_protocols']}""
+
                     )
                 
             except Exception as e:
@@ -192,7 +199,8 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
                 fREQUIRED ACTIONS:\n
                 f"1. Configure strong SSL ciphers (AES-256, ChaCha20)\n"
                 f2. Enable HSTS headers with appropriate max-age\n"
-                f2. Enable HSTS headers with appropriate max-age\n"
+                f2. Enable HSTS headers with appropriate max-age\n""
+
                 f3. Ensure secure renegotiation is supported\n
                 f4. Disable deprecated SSL/TLS protocols\n"
                 f4. Disable deprecated SSL/TLS protocols\n"
@@ -203,7 +211,8 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_ssl_certificate_trust_chain_complete(self):
-    """
+    """"
+
         HARD FAIL: SSL certificate trust chain MUST be complete and valid.
         
         This test validates that the complete certificate trust chain is properly
@@ -221,7 +230,8 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
                 if not chain_info['complete_chain']:
                     trust_chain_failures.append(
                         fIncomplete certificate chain for {domain}: missing {chain_info['missing_certificates']}"
-                        fIncomplete certificate chain for {domain}: missing {chain_info['missing_certificates']}"
+                        fIncomplete certificate chain for {domain}: missing {chain_info['missing_certificates']}""
+
                     )
                 
                 # Check root certificate
@@ -252,7 +262,8 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
                 fIncomplete or invalid certificate chains cause browser warnings\n
                 f"and prevent users from establishing secure connections.\n\n"
                 fFAILURES:\n{error_report}\n\n"
-                fFAILURES:\n{error_report}\n\n"
+                fFAILURES:\n{error_report}\n\n""
+
                 fREQUIRED ACTIONS:\n
                 f1. Ensure complete certificate chain is configured in load balancer\n"
                 f1. Ensure complete certificate chain is configured in load balancer\n"
@@ -319,7 +330,8 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
     
     async def _check_ssl_security_configuration(self, domain: str) -> Dict:
         Check SSL security configuration."
-        Check SSL security configuration."
+        Check SSL security configuration.""
+
         try:
             # Check HTTP headers for security configuration
             async with aiohttp.ClientSession() as session:
@@ -383,7 +395,8 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
     
     def _verify_hostname_match(self, cert: Dict, hostname: str) -> bool:
         Verify SSL certificate hostname matching."
-        Verify SSL certificate hostname matching."
+        Verify SSL certificate hostname matching.""
+
         try:
             # Check subject common name
             subject = dict(x[0] for x in cert.get('subject', [])
@@ -416,13 +429,15 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
                     f    - Days Until Expiry: {result.get('days_until_expiry', 'Unknown')}\n
                     f"    - Chain Valid: {result.get('certificate_chain_valid', False)}\n"
                     f    - Hostname Matches: {result.get('hostname_matches', False)}"
-                    f    - Hostname Matches: {result.get('hostname_matches', False)}"
+                    f    - Hostname Matches: {result.get('hostname_matches', False)}""
+
                 )
         
         return \n.join(report_parts)
     
     def _build_ssl_security_failure_report(self, security_results: Dict, failures: List[str) -> str:
-        ""Build SSL security failure report."
+        ""Build SSL security failure report.""
+
         report_parts = []
         
         for domain, result in security_results.items():
@@ -441,7 +456,8 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
     
     def _build_trust_chain_failure_report(self, trust_chain_results: Dict, failures: List[str) -> str:
         Build certificate trust chain failure report."
-        Build certificate trust chain failure report."
+        Build certificate trust chain failure report.""
+
         report_parts = []
         
         for domain, result in trust_chain_results.items():
@@ -481,7 +497,8 @@ if __name__ == __main__:"
         try:
             await test_instance.test_ssl_certificate_trust_chain_complete()
             print( PASS:  SSL certificate trust chain complete and valid)"
-            print( PASS:  SSL certificate trust chain complete and valid)"
+            print( PASS:  SSL certificate trust chain complete and valid)""
+
         except AssertionError as e:
             print(f FAIL:  SSL trust chain failures:\n{e}")"
             return False

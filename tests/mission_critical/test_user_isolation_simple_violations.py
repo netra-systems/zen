@@ -43,7 +43,7 @@ class TestUserIsolationSimpleViolations(SSotBaseTestCase):
                 violation = "CRITICAL: Same manager instance returned for different users"
                 isolation_violations.append(violation)
                 self.violations_found.append(violation)
-                print("✓ VIOLATION DETECTED: Same manager instance for different users")
+                print("CHECK VIOLATION DETECTED: Same manager instance for different users")
 
             # Test 2: Check if connection registries are shared
             if hasattr(manager1, '_connections') and hasattr(manager2, '_connections'):
@@ -51,7 +51,7 @@ class TestUserIsolationSimpleViolations(SSotBaseTestCase):
                     violation = "CRITICAL: Shared connection registry between users"
                     isolation_violations.append(violation)
                     self.violations_found.append(violation)
-                    print("✓ VIOLATION DETECTED: Shared connection registry")
+                    print("CHECK VIOLATION DETECTED: Shared connection registry")
 
             # Test 3: Check if user connection mappings are shared
             if hasattr(manager1, '_user_connections') and hasattr(manager2, '_user_connections'):
@@ -59,7 +59,7 @@ class TestUserIsolationSimpleViolations(SSotBaseTestCase):
                     violation = "CRITICAL: Shared user connection mapping"
                     isolation_violations.append(violation)
                     self.violations_found.append(violation)
-                    print("✓ VIOLATION DETECTED: Shared user connection mapping")
+                    print("CHECK VIOLATION DETECTED: Shared user connection mapping")
 
             # Test 4: Check registry sharing
             if hasattr(manager1, 'registry') and hasattr(manager2, 'registry'):
@@ -67,7 +67,7 @@ class TestUserIsolationSimpleViolations(SSotBaseTestCase):
                     violation = "CRITICAL: Shared registry between users"
                     isolation_violations.append(violation)
                     self.violations_found.append(violation)
-                    print("✓ VIOLATION DETECTED: Shared registry")
+                    print("CHECK VIOLATION DETECTED: Shared registry")
 
             # Test 5: Check if managers are different classes (anti-test)
             if manager1.__class__ is not manager2.__class__:
@@ -127,7 +127,7 @@ class TestUserIsolationSimpleViolations(SSotBaseTestCase):
                         violation = f"CRITICAL: Factory returned same instance for calls {i} and {j}"
                         factory_violations.append(violation)
                         self.violations_found.append(violation)
-                        print(f"✓ VIOLATION DETECTED: Same instance at positions {i} and {j}")
+                        print(f"CHECK VIOLATION DETECTED: Same instance at positions {i} and {j}")
 
         except Exception as e:
             violation = f"Factory sharing test failed: {e}"

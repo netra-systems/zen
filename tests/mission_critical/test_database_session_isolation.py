@@ -7,7 +7,6 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
 """
-"""
         """Send JSON message.""""""
         """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed)"
@@ -19,13 +18,13 @@ class TestWebSocketConnection:
         self._closed = True
         self.is_connected = False
 """
-"""
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()"""
         return self.messages_sent.copy()"""
         """
-        """
+        """"
+
         MISSION CRITICAL: Database Session Isolation Test Suite
         =========================================================
         This comprehensive test suite verifies that database sessions are properly isolated
@@ -41,7 +40,8 @@ class TestWebSocketConnection:
         7. Proper session lifecycle management"""
         7. Proper session lifecycle management"""
         These tests MUST FAIL until the session isolation refactoring is complete."""
-        These tests MUST FAIL until the session isolation refactoring is complete."""
+        These tests MUST FAIL until the session isolation refactoring is complete.""""
+
 
 import asyncio
 import pytest
@@ -173,7 +173,8 @@ from shared.isolated_environment import get_env
 @pytest.mark.asyncio"""
 """"""
 This test should PASS to prove the anti-pattern is prevented."""
-This test should PASS to prove the anti-pattern is prevented."""
+This test should PASS to prove the anti-pattern is prevented.""""
+
 pass
         # Test the core principle: SupervisorAgent should not accept db_session parameter
 llm_manager = Magic        websocket_bridge = Magic
@@ -208,9 +209,10 @@ logger.info(" PASS:  SUCCESS: Sessions are properly handled through UserExecutio
 
 @pytest.mark.asyncio
     async def test_concurrent_users_share_supervisor_session(self, session_factory, session_tracker):
-""""""
+    """"""
 This test should PASS to prove proper isolation is maintained."""
-This test should PASS to prove proper isolation is maintained."""
+This test should PASS to prove proper isolation is maintained.""""
+
 pass
 llm_manager = Magic        websocket_bridge = Magic
 results = []
@@ -263,9 +265,10 @@ logger.info("formatted_string)"
 
 @pytest.mark.asyncio
     async def test_agent_registry_singleton_pattern_breaks_isolation(self, session_factory, session_tracker):
-""""""
+    """"""
 CRITICAL TEST: Verify that AgentRegistry singleton pattern breaks session isolation."""
-CRITICAL TEST: Verify that AgentRegistry singleton pattern breaks session isolation."""
+CRITICAL TEST: Verify that AgentRegistry singleton pattern breaks session isolation.""""
+
 llm_manager = Magic        tool_dispatcher = Magic
             # Get the singleton instance
 registry1 = AgentRegistry()
@@ -286,9 +289,10 @@ logger.info("[U+2713] AgentRegistry creates separate instances - good for isolat
 
 @pytest.mark.asyncio
     async def test_execution_engine_global_state_contamination(self):
-""""""
+    """"""
 This test should PASS to prove proper isolation is implemented."""
-This test should PASS to prove proper isolation is implemented."""
+This test should PASS to prove proper isolation is implemented.""""
+
 pass
                         # ExecutionEngine now requires proper instantiation through factory methods
                         # Direct instantiation should be prevented
@@ -326,10 +330,11 @@ pass
 
 @pytest.mark.asyncio
     async def test_websocket_bridge_singleton_affects_all_users(self):
-"""
+    """
 """
 CRITICAL TEST: Verify that AgentWebSocketBridge singleton affects all users."""
-CRITICAL TEST: Verify that AgentWebSocketBridge singleton affects all users."""
+CRITICAL TEST: Verify that AgentWebSocketBridge singleton affects all users.""""
+
 pass
                                                             # Get first instance
 bridge1 = AgentWebSocketBridge()
@@ -349,9 +354,10 @@ logger.info("[U+2713] AgentWebSocketBridge creates separate instances)"
 
 @pytest.mark.asyncio
     async def test_tool_dispatcher_shared_executor(self):
-""""""
+    """"""
 This test should PASS to prove proper isolation is implemented."""
-This test should PASS to prove proper isolation is implemented."""
+This test should PASS to prove proper isolation is implemented.""""
+
 pass
                                                                         # ToolDispatcher now requires proper instantiation through factory methods
                                                                         # Direct instantiation should be prevented
@@ -393,13 +399,13 @@ raise
 
 @pytest.mark.asyncio
     async def test_database_transaction_isolation_breach(self, session_factory, session_tracker):
-"""
+    """
 """
 CRITICAL TEST: Demonstrate transaction isolation breach with shared sessions.""""""
 shared_data = {"transactions: []}"
 
 async def user_transaction(user_id: str, shared_session: Optional[AsyncSession], use_shared: bool):
-"""Simulate a user transaction."""
+    """Simulate a user transaction."""
 if use_shared and shared_session:
         # User incorrectly uses shared session"""
         # User incorrectly uses shared session"""
@@ -442,7 +448,7 @@ async with session_factory() as shared_session:
                                 # Simulate multiple users, some using shared session
 tasks = []
 for i in range(5):
-use_shared = i % 2 == 0  # Half use shared session
+    use_shared = i % 2 == 0  # Half use shared session
 tasks.append(user_transaction("formatted_string, shared_session, use_shared))"
 
 results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -459,7 +465,7 @@ assert len(violations['shared_sessions']) > 0, "Shared sessions detected"
 
 @pytest.mark.asyncio
     async def test_request_scoped_session_pattern(self, session_factory):
-"""
+    """
 """
 pass"""
 pass"""
@@ -511,9 +517,10 @@ class ProperAgentExecutor:
 
 @pytest.mark.asyncio
     async def test_dependency_injection_session_leakage(self):
-""""""
+    """"""
 This test should PASS to prove the anti-pattern is detected and prevented."""
-This test should PASS to prove the anti-pattern is detected and prevented."""
+This test should PASS to prove the anti-pattern is detected and prevented.""""
+
 pass
 from fastapi import Request
 
@@ -559,7 +566,8 @@ class TestSessionLifecycleManagement:
 """
 """
 CRITICAL TEST: Verify sessions are not properly closed after requests."""
-CRITICAL TEST: Verify sessions are not properly closed after requests."""
+CRITICAL TEST: Verify sessions are not properly closed after requests.""""
+
 pass
 unclosed_sessions = []
 """
@@ -589,7 +597,7 @@ logger.error("formatted_string)"
 
 @pytest.mark.asyncio
     async def test_session_context_manager_violations(self, session_factory):
-""""""
+    """"""
 TEST: Demonstrate violations of session context manager pattern."""
 TEST: Demonstrate violations of session context manager pattern."""
 """
@@ -650,7 +658,8 @@ class TestConcurrentUserSimulation:
 @pytest.mark.asyncio"""
 """"""
 This test should PASS to prove isolation prevents anti-patterns."""
-This test should PASS to prove isolation prevents anti-patterns."""
+This test should PASS to prove isolation prevents anti-patterns.""""
+
 
         # Setup proper infrastructure (correct pattern)
 llm_manager = Magic        websocket_bridge = AgentWebSocketBridge()
@@ -685,7 +694,7 @@ supervisor = Magic        supervisor.db_session = None  # Simulate proper isolat
                         # Metrics collection
 metrics = {'total_requests': 0,, 'successful_requests': 0,, 'failed_requests': 0,, 'session_conflicts': 0,, 'average_response_time': 0,, 'max_response_time': 0}
 async def simulate_user_interaction(user_id: str, request_num: int):
-"""Simulate a complete user interaction with proper isolation."""
+    """Simulate a complete user interaction with proper isolation."""
 start_time = time.time()
 
 try:
@@ -725,9 +734,9 @@ requests_per_user = 5
 
 all_tasks = []
 for user_num in range(num_users):
-user_id = "formatted_string"
+    user_id = "formatted_string"
 for req_num in range(requests_per_user):
-all_tasks.append(simulate_user_interaction(user_id, req_num))
+    all_tasks.append(simulate_user_interaction(user_id, req_num))
 
                                     # Run all requests concurrently
 await asyncio.gather(*all_tasks, return_exceptions=True)
@@ -740,12 +749,14 @@ success_rate = (metrics['successful_requests'] / metrics['total_requests']) * 10
 logger.info(f''' )'
 pass
 PASS:  CONCURRENT USER TEST RESULTS (PROPER ISOLATION):
-- Total Requests: {metrics['total_requests']}
+    - Total Requests: {metrics['total_requests']}
 - Successful Requests: {metrics['successful_requests']}
 - Session Conflicts: {metrics['session_conflicts']} (should be 0)
 - Failed Requests: {metrics['failed_requests']} (should be 0)
-- Success Rate: {success_rate:.1f}%
-- Max Response Time: {metrics['max_response_time']:.3f}s
+- Success Rate: {success_rate:.""1f""}%""
+
+- Max Response Time: {metrics['max_response_time']:.""3f""}s""
+
 ''')'
 
                                         # Assert success to prove proper isolation
@@ -757,7 +768,7 @@ logger.info("formatted_string)"
 
 @pytest.mark.asyncio
     async def test_comprehensive_session_isolation_violations():
-""""""
+    """"""
 This test should PASS to prove proper isolation is implemented.""""""
 logger.info(""" )"
 PASS:  PASS:  PASS:  DATABASE SESSION ISOLATION ANTI-PATTERNS NOW PREVENTED  PASS:  PASS:  PASS:
@@ -793,14 +804,14 @@ The following anti-patterns are now properly handled:
 - Protection: Runtime checks prevent isolation breaches
 
 BUSINESS IMPACT RESOLVED:
--  PASS:  System can safely handle 10+ concurrent users
+    -  PASS:  System can safely handle 10+ concurrent users
 -  PASS:  Zero risk of data leakage between customers
 -  PASS:  Database transaction isolation maintained under load
 -  PASS:  WebSocket events properly isolated per user
 -  PASS:  System scales properly with concurrent users
 
 IMPLEMENTATION STATUS:
-1.  PASS:  UserExecutionContext implemented for request isolation
+    1.  PASS:  UserExecutionContext implemented for request isolation
 2.  PASS:  Session storage removed from global objects
 3.  PASS:  Dependency injection provides per-request sessions"""
 3.  PASS:  Dependency injection provides per-request sessions"""

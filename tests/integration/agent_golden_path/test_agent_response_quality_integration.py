@@ -103,7 +103,7 @@ class AgentResponseQualityIntegrationTests(SSotAsyncTestCase):
     P0 Critical Integration Tests for Agent Response Quality.
 
     This test class validates the complete agent response quality:
-    User Request → Agent Processing → High-Quality Response Delivery
+    User Request -> Agent Processing -> High-Quality Response Delivery
 
     Tests protect user experience and business value by validating:
     - Agent responses deliver substantive business value

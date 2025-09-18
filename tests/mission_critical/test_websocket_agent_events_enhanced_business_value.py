@@ -13,7 +13,7 @@ Enhanced Coverage Goals:
 - Implement performance benchmarks and concurrent user isolation
 - Validate multi-agent workflows and error recovery patterns
 
-Critical Path: WebSocket Events → Agent Quality → Business Value Delivery
+Critical Path: WebSocket Events -> Agent Quality -> Business Value Delivery
 """
 
 import asyncio
@@ -532,7 +532,7 @@ class EnhancedWebSocketAgentBusinessValueTests(SSotAsyncTestCase):
                 f"Insufficient actionable steps: {quality.actionable_steps_count} (required: 5+)"
             )
             
-            logger.info("✅ ENHANCED: Sophisticated agent response quality validation PASSED")
+            logger.info("CHECK ENHANCED: Sophisticated agent response quality validation PASSED")
             
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -658,7 +658,7 @@ class EnhancedWebSocketAgentBusinessValueTests(SSotAsyncTestCase):
                 logger.info(f"  Performance degradation: {degradation:.1%}")
                 logger.info(f"  Average response time: {avg_response_time:.1f}s")
                 
-            logger.info("✅ ENHANCED: Concurrent user isolation and performance validation PASSED")
+            logger.info("CHECK ENHANCED: Concurrent user isolation and performance validation PASSED")
             
         finally:
             # Cleanup concurrent contexts
@@ -891,7 +891,7 @@ class EnhancedWebSocketAgentBusinessValueTests(SSotAsyncTestCase):
                 f"(required: 2+ for comprehensive strategy)"
             )
             
-            logger.info("✅ ENHANCED: Multi-agent workflow business value enhancement PASSED")
+            logger.info("CHECK ENHANCED: Multi-agent workflow business value enhancement PASSED")
             
     def _calculate_coordination_effectiveness(self, agent_handoffs: List[Dict], 
                                            tool_integrations: List[Dict],
@@ -938,7 +938,7 @@ if __name__ == "__main__":
     print("ENHANCED BUSINESS VALUE TESTS - ISSUE #1059 PHASE 2")
     print("Sophisticated Agent Response Quality Validation")
     print("=" * 80)
-    print("\nTarget: 15% → 35% coverage improvement through enhanced validation")
+    print("\nTarget: 15% -> 35% coverage improvement through enhanced validation")
     print("Features: Performance benchmarks, concurrency testing, multi-agent coordination")
     print("\nRunning enhanced business value validation tests...")
     
@@ -967,4 +967,4 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"[FAIL] Error running enhanced tests: {e}")
         
-    print("\n✅ Enhanced business value test execution completed.")
+    print("\nCHECK Enhanced business value test execution completed.")

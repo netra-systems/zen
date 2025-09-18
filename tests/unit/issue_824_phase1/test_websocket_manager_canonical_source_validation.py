@@ -49,7 +49,7 @@ class WebSocketManagerCanonicalSourceValidationTests(SSotAsyncTestCase):
             self.assertTrue(hasattr(CanonicalWSM, method_name),
                           f"Canonical WebSocketManager missing expected method: {method_name}")
 
-        logger.info("✅ Canonical WebSocketManager validated successfully")
+        logger.info("CHECK Canonical WebSocketManager validated successfully")
 
     def test_no_duplicate_websocket_manager_classes_active(self):
         """Test that no duplicate WebSocket Manager implementations are simultaneously active."""
@@ -97,7 +97,7 @@ class WebSocketManagerCanonicalSourceValidationTests(SSotAsyncTestCase):
                     self.fail(f"SSOT VIOLATION: Duplicate WebSocketManager implementation found in "
                             f"{info['module']} (id: {info['id']}) != canonical (id: {canonical_class_id})")
 
-        logger.info("✅ No duplicate WebSocketManager implementations detected")
+        logger.info("CHECK No duplicate WebSocketManager implementations detected")
 
     def test_websocket_manager_import_consistency(self):
         """Test that all WebSocket Manager import paths resolve to same canonical source."""
@@ -119,11 +119,11 @@ class WebSocketManagerCanonicalSourceValidationTests(SSotAsyncTestCase):
                         'id': id(websocket_manager_class),
                         'module_file': getattr(module, '__file__', 'unknown')
                     }
-                    logger.info(f"✓ Successfully imported {import_path} (id: {id(websocket_manager_class)})")
+                    logger.info(f"CHECK Successfully imported {import_path} (id: {id(websocket_manager_class)})")
                 else:
-                    logger.warning(f"⚠ Class {class_name} not found in {module_path}")
+                    logger.warning(f"WARNING Class {class_name} not found in {module_path}")
             except ImportError as e:
-                logger.warning(f"⚠ Could not import {import_path}: {e}")
+                logger.warning(f"WARNING Could not import {import_path}: {e}")
 
         # If we have multiple imports, they should all be the same class object
         if len(imported_classes) > 1:
@@ -133,7 +133,7 @@ class WebSocketManagerCanonicalSourceValidationTests(SSotAsyncTestCase):
                 self.fail(f"SSOT VIOLATION: Import paths resolve to different classes:\n" +
                          "\n".join(details))
 
-        logger.info("✅ WebSocket Manager import consistency validated")
+        logger.info("CHECK WebSocket Manager import consistency validated")
 
     def test_websocket_manager_ssot_enforcement(self):
         """Test that SSOT WebSocket Manager prevents multiple instance patterns."""
@@ -157,11 +157,11 @@ class WebSocketManagerCanonicalSourceValidationTests(SSotAsyncTestCase):
         try:
             # This should not raise TypeError for abstract class
             inspect.signature(WebSocketManager.__init__)
-            logger.info("✓ WebSocketManager is instantiable (not abstract)")
+            logger.info("CHECK WebSocketManager is instantiable (not abstract)")
         except Exception as e:
             self.fail(f"WebSocketManager appears to be abstract or malformed: {e}")
 
-        logger.info("✅ WebSocket Manager SSOT enforcement validated")
+        logger.info("CHECK WebSocket Manager SSOT enforcement validated")
 
     def test_deprecated_factory_patterns_redirect_to_ssot(self):
         """Test that deprecated factory patterns properly redirect to SSOT."""
@@ -176,12 +176,12 @@ class WebSocketManagerCanonicalSourceValidationTests(SSotAsyncTestCase):
                 self.assertIn("DEPRECATED", factory_doc.upper(),
                              "Factory function should be marked as deprecated")
 
-            logger.info("✓ Deprecated factory properly warns about deprecation")
+            logger.info("CHECK Deprecated factory properly warns about deprecation")
 
         except ImportError:
             logger.info("ℹ Factory module not found - likely already removed (acceptable)")
 
-        logger.info("✅ Deprecated factory pattern redirection validated")
+        logger.info("CHECK Deprecated factory pattern redirection validated")
 
 
 if __name__ == '__main__':

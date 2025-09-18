@@ -4,7 +4,7 @@ Tests the system's ability to handle insufficient data scenarios by focusing on'
 data collection, user education, and value demonstration.
 
 Business Value Justification (BVJ):
-- Segment: Free, Early (Conversion focus)
+    - Segment: Free, Early (Conversion focus)
 - Business Goal: Convert users by demonstrating value potential
 - Value Impact: Educate users on optimization possibilities
 - Strategic Impact: Increases user engagement and data collection success
@@ -31,7 +31,8 @@ logger = central_logger.get_logger(__name__)
 
 class InsufficientDataHandlingTests:
     Test suite for insufficient data handling scenarios in orchestration."
-    Test suite for insufficient data handling scenarios in orchestration."
+    Test suite for insufficient data handling scenarios in orchestration.""
+
     
     # === Test Data Fixtures ===
     
@@ -110,7 +111,8 @@ class InsufficientDataHandlingTests:
                 infrastructure
             ],
             completeness: 0.25"
-            completeness: 0.25"
+            completeness: 0.25""
+
         }
     
     @pytest.fixture
@@ -120,7 +122,8 @@ class InsufficientDataHandlingTests:
             user_request": Want to reduce costs by 50%,"
             available_data: {
                 goal: 50% cost reduction"
-                goal: 50% cost reduction"
+                goal: 50% cost reduction""
+
             },
             "missing_data: ["
                 current_costs,
@@ -129,7 +132,8 @@ class InsufficientDataHandlingTests:
                 flexibility,"
                 flexibility,"
                 constraints"
-                constraints"
+                constraints""
+
             ],
             completeness: 0.18
         }
@@ -138,7 +142,8 @@ class InsufficientDataHandlingTests:
     
     @pytest.mark.asyncio
     async def test_insufficient_data_workflow_selection(self, insufficient_vague_request):
-        ""Test that insufficient data triggers data collection workflow."
+        ""Test that insufficient data triggers data collection workflow.""
+
         from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
         
         orchestrator = WorkflowOrchestrator(None, None, None)
@@ -163,7 +168,8 @@ class InsufficientDataHandlingTests:
     @pytest.mark.asyncio
     async def test_clarification_request_generation(self, insufficient_vague_request):
         Test generation of clarification requests for vague input."
-        Test generation of clarification requests for vague input."
+        Test generation of clarification requests for vague input.""
+
         from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
         
         agent = TriageSubAgent()
@@ -175,7 +181,8 @@ class InsufficientDataHandlingTests:
                 clarification_request": {"
                     message: I can help you optimize several areas. Could you tell me more?,
                     options: ["
-                    options: ["
+                    options: [""
+
                         {
                             category": AI/LLM Cost Optimization,"
                             description: Reduce AI spending by 30-70%,
@@ -188,7 +195,7 @@ class InsufficientDataHandlingTests:
                         },
                         {
                             category: Scale Optimization,
-                            description": Handle 10x more requests efficiently,"
+                            description": Handle ""10x"" more requests efficiently,"
                             next_question: What's your current request volume?'
                         },
                         {
@@ -203,7 +210,8 @@ class InsufficientDataHandlingTests:
                     General optimization request,"
                     General optimization request,"
                     Possible focus areas: cost, performance, scale, quality"
-                    Possible focus areas: cost, performance, scale, quality"
+                    Possible focus areas: cost, performance, scale, quality""
+
                 ]
             }
             
@@ -225,7 +233,8 @@ class InsufficientDataHandlingTests:
     @pytest.mark.asyncio
     async def test_educational_content_delivery(self, insufficient_general_help_request):
         Test that educational content is provided with insufficient data."
-        Test that educational content is provided with insufficient data."
+        Test that educational content is provided with insufficient data.""
+
         from netra_backend.app.agents.data_helper_agent import DataHelperAgent
         
         agent = DataHelperAgent(None, None, None)
@@ -252,7 +261,8 @@ class InsufficientDataHandlingTests:
                                 "scenario: Repetitive queries,"
                                 optimization: Add caching layer,
                                 potential_savings: 30-40%"
-                                potential_savings: 30-40%"
+                                potential_savings: 30-40%""
+
                             }
                         ]
                     },
@@ -281,7 +291,8 @@ class InsufficientDataHandlingTests:
                 data_collection_template": {"
                     format: questionnaire,
                     "sections: [costs", usage, requirements, constraints]"
-                    "sections: [costs", usage, requirements, constraints]"
+                    "sections: [costs", usage, requirements, constraints]""
+
                 }
             }
             
@@ -306,7 +317,8 @@ class InsufficientDataHandlingTests:
             assert success_stories in education
             assert "getting_started in education"
             assert education[getting_started][time_required] == 10-15 minutes"
-            assert education[getting_started][time_required] == 10-15 minutes"
+            assert education[getting_started][time_required] == 10-15 minutes""
+
     
     @pytest.mark.asyncio
     async def test_value_demonstration_without_data(self, insufficient_new_user_request):
@@ -349,7 +361,8 @@ class InsufficientDataHandlingTests:
                             "impact: 20-35% efficiency gain,"
                             effort: Medium,
                             example: Better routing, load balancing"
-                            example: Better routing, load balancing"
+                            example: Better routing, load balancing""
+
                         }
                     ],
                     "roi_projection: {"
@@ -369,7 +382,8 @@ class InsufficientDataHandlingTests:
             state = DeepAgentState(
                 user_request=insufficient_new_user_request[user_request],
                 user_status=new"
-                user_status=new"
+                user_status=new""
+
             )
             
             context = ExecutionContext(
@@ -392,7 +406,8 @@ class InsufficientDataHandlingTests:
     @pytest.mark.asyncio
     async def test_progressive_data_collection(self, insufficient_problem_only_request):
         Test progressive data collection strategy."
-        Test progressive data collection strategy."
+        Test progressive data collection strategy.""
+
         from netra_backend.app.agents.data_helper_agent import DataHelperAgent
         
         agent = DataHelperAgent(None, None, None)
@@ -404,10 +419,11 @@ class InsufficientDataHandlingTests:
                     stage_1_minimal": {"
                         description: Just 3 questions to start,
                         questions: ["
-                        questions: ["
+                        questions: [""
+
                             {
                                 q": Estimated monthly AI spend?,"
-                                format: Range is fine (e.g., $5K-10K),
+                                format: Range is fine (e.g., $""5K""-""10K""),
                                 why": Baseline for savings calculation"
                             },
                             {
@@ -452,7 +468,8 @@ class InsufficientDataHandlingTests:
             context = ExecutionContext(
                 run_id=test-insufficient-4,
                 agent_name=data_helper,"
-                agent_name=data_helper,"
+                agent_name=data_helper,""
+
                 state=state
             )
             
@@ -479,20 +496,20 @@ class InsufficientDataHandlingTests:
                 quick_template: {"
                     title": Quick Info Form - Copy & Fill,"
                     template: 
-=== AI OPTIMIZATION QUICK FORM ===
+    === AI OPTIMIZATION QUICK FORM ===
 
 Current Situation:
-- Monthly AI/LLM Spend: $________
+    - Monthly AI/LLM Spend: $________
 - Primary AI Model: ____________
 - Main Use Case: ______________
 - Daily Request Volume: ________
 
 Goals:
-- Target Cost Reduction: 50% (your goal)
+    - Target Cost Reduction: 50% (your goal)
 - Acceptable Trade-offs: ______________
 
 Constraints:
-- Must Maintain (check all that apply):
+    - Must Maintain (check all that apply):
   [ ] Response time < ___ seconds
   [ ] Quality score > ___%
   [ ] 99.9% uptime
@@ -514,7 +531,8 @@ Quick Win Opportunities (check if interested):
                     "guided_chat: Answer questions interactively,"
                     upload_invoice: Share recent AI service invoice,
                     connect_api: Grant read-only API access for automatic analysis"
-                    connect_api: Grant read-only API access for automatic analysis"
+                    connect_api: Grant read-only API access for automatic analysis""
+
                 }
             }
             
@@ -579,7 +597,8 @@ Quick Win Opportunities (check if interested):
             }
             
             state = DeepAgentState(user_request=empty_request[user_request)"
-            state = DeepAgentState(user_request=empty_request[user_request)"
+            state = DeepAgentState(user_request=empty_request[user_request)""
+
             context = ExecutionContext(
                 run_id=test-empty-1","
                 agent_name=triage,
@@ -600,7 +619,8 @@ Quick Win Opportunities (check if interested):
             user_request": Can you help without seeing our data?,"
             available_data: {
                 concern: data_privacy"
-                concern: data_privacy"
+                concern: data_privacy""
+
             },
             "completeness: 0.10"
         }
@@ -615,7 +635,8 @@ Quick Win Opportunities (check if interested):
                 "privacy_conscious_approach: {"
                     message: Absolutely! We can work with anonymized or approximate data.,
                     options: ["
-                    options: ["
+                    options: [""
+
                         {
                             "level: Fully Anonymous,"
                             description: Share only patterns, no actual values,
@@ -640,7 +661,8 @@ Quick Win Opportunities (check if interested):
                         No sharing with third parties,"
                         No sharing with third parties,"
                         Audit trail of all data usage"
-                        Audit trail of all data usage"
+                        Audit trail of all data usage""
+
                     ],
                     alternative: {
                         self_service": Here's a guide to optimize on your own,'"
@@ -680,7 +702,7 @@ Quick Win Opportunities (check if interested):
                     hook: "Most companies waste 40-60% of their AI budget unnecessarily,"
                     social_proof": {"
                         statistics: 87% of our users reduce costs within 2 weeks,
-                        testimonial: 'Saved $15K in the first month' - TechStartup CEO","
+                        testimonial: 'Saved $""15K"" in the first month' - TechStartup CEO","
                         "logos: [Company A, Company B, Company C]"
                     },
                     "urgency_creation: {"
@@ -715,7 +737,8 @@ Quick Win Opportunities (check if interested):
             context = ExecutionContext(
                 run_id=test-conversion-1,
                 agent_name=reporting,"
-                agent_name=reporting,"
+                agent_name=reporting,""
+
                 state=state
             )
             
@@ -735,7 +758,8 @@ Quick Win Opportunities (check if interested):
     @pytest.mark.asyncio
     async def test_minimal_workflow_execution(self, insufficient_vague_request):
         Test that insufficient data triggers minimal workflow."
-        Test that insufficient data triggers minimal workflow."
+        Test that insufficient data triggers minimal workflow.""
+
         from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
         
         orchestrator = WorkflowOrchestrator(None, None, None)
@@ -797,7 +821,8 @@ Quick Win Opportunities (check if interested):
                 
                 if completeness >= 0.80:
                     assert mode == full_optimization"
-                    assert mode == full_optimization"
+                    assert mode == full_optimization""
+
                 elif completeness >= 0.40:
                     assert optimization" in mode"
                 else:
@@ -871,10 +896,11 @@ Quick Win Opportunities (check if interested):
                         message: Just answer 3 questions to unlock personalized recommendations,
                         "questions: [Monthly spend?, Main use case?, Biggest pain point?],"
                         time_required: < 2 minutes"
-                        time_required: < 2 minutes"
+                        time_required: < 2 minutes""
+
                     },
                     "motivation: {"
-                        peer_comparison: Companies like yours save $5-15K monthly,
+                        peer_comparison: Companies like yours save $5-""15K"" monthly,
                         quick_win": Most users see first savings within 48 hours,"
                         support: We guide you through every step
                     },

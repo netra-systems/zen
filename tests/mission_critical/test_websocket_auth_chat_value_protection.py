@@ -1,51 +1,52 @@
-"""
-"""
+""""
+
 Mission Critical Tests for WebSocket Authentication Chat Value Protection
 
  ALERT:  ALERT:  ALERT:  MISSION CRITICAL - BUSINESS VALUE PROTECTION  ALERT:  ALERT:  ALERT: 
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free -> Enterprise) - Chat is 90% of platform value delivery
-- Business Goal: PROTECT $120K+ MRR by ensuring chat functionality never fails
+    - Segment: ALL (Free -> Enterprise) - Chat is 90% of platform value delivery
+- Business Goal: PROTECT $""120K""+ MRR by ensuring chat functionality never fails
 - Value Impact: Chat downtime = immediate revenue loss and customer churn
-"""
-"""
+""""
+
 - Strategic Impact: Authentication must NEVER block legitimate users from chat
 
 MISSION CRITICAL REQUIREMENTS:
-[U+1F6E1][U+FE0F] Chat Value Protection: Authentication must enable chat, never block it
+    [U+1F6E1][U+FE0F] Chat Value Protection: Authentication must enable chat, never block it
 [U+1F512] Security Without Barriers: Strong security that doesn't impede user experience'
  LIGHTNING:  Zero Downtime: Authentication failures must not cause chat outages
 [U+1F3C3] Performance First: Sub-second authentication for real-time chat experience
  CYCLE:  Graceful Degradation: Fallback mechanisms for authentication service issues
 
 This test suite validates Mission Critical Chat Value Protection:
-- Authentication ENABLES chat functionality (never blocks legitimate users)
+    - Authentication ENABLES chat functionality (never blocks legitimate users)
 - Chat sessions survive authentication edge cases and service disruptions
 - Real-time performance requirements for chat responsiveness
 - Business continuity during authentication service degradation
 - Revenue protection through reliable authenticated chat delivery
 
 MISSION CRITICAL SCENARIOS:
-Chat Value Protection:
-- Legitimate users ALWAYS get through to chat (zero false negatives)
+    Chat Value Protection:
+    - Legitimate users ALWAYS get through to chat (zero false negatives)
 - Chat sessions remain stable during authentication token refresh
 - Multi-user chat isolation without authentication cross-contamination
 - Chat history and context preserved across authentication events
 
 Business Continuity:
-- Chat functionality degrades gracefully during auth service outages
+    - Chat functionality degrades gracefully during auth service outages
 - Revenue-generating chat interactions complete despite authentication hiccups
 - Enterprise customers receive priority authentication processing
 - Customer support can override authentication blocks in emergencies
 
 Following MISSION CRITICAL requirements:
-- Tests FAIL HARD if chat functionality is blocked by authentication
+    - Tests FAIL HARD if chat functionality is blocked by authentication
 - Tests validate business value delivery, not just technical correctness
 - Performance requirements reflect real-time chat user expectations
 - Revenue impact assessment for any authentication-related failures
 "
-"
+""
+
 
 import asyncio
 import pytest
@@ -64,11 +65,12 @@ from shared.isolated_environment import get_env
 @pytest.mark.mission_critical
 class WebSocketAuthChatValueProtectionTests:
     "
-    "
+    ""
+
      ALERT:  MISSION CRITICAL tests for WebSocket authentication chat value protection.
     
     CRITICAL: These tests ensure authentication ENABLES chat functionality
-    and NEVER blocks legitimate users from accessing $120K+ MRR chat platform.
+    and NEVER blocks legitimate users from accessing $""120K""+ MRR chat platform.
     
     Tests focus on:
     1. Zero false negatives - legitimate users always access chat
@@ -77,7 +79,8 @@ class WebSocketAuthChatValueProtectionTests:
     4. Revenue protection through reliable authenticated chat delivery
     5. Performance requirements for real-time chat experience
 "
-"
+""
+
     
     @classmethod
     def setup_class(cls):
@@ -249,12 +252,13 @@ class WebSocketAuthChatValueProtectionTests:
         # Performance requirements for chat access
         for result in successful_access:
             access_time = result.get('chat_access_time_ms', 0)
-            assert access_time < 5000, "f FAIL:  CHAT UX FAILURE: User {result['user_index']} took {access_time}ms to access chat (limit: 5000ms)"
+            assert access_time < 5000, "f FAIL:  CHAT UX FAILURE: User {result['user_index']} took {access_time}ms to access chat (limit: ""5000ms"")"
         
         # Business impact validation
         business_success = [r for r in successful_access if r.get('business_impact') == 'SUCCESS - Revenue protected']
         assert len(business_success) == legitimate_user_count, All legitimate users must protect revenue through chat access"
-        assert len(business_success) == legitimate_user_count, All legitimate users must protect revenue through chat access"
+        assert len(business_success) == legitimate_user_count, All legitimate users must protect revenue through chat access""
+
     
     def test_chat_sessions_survive_authentication_token_refresh(self):
         " CYCLE:  MISSION CRITICAL: Chat sessions survive authentication token refresh."
@@ -335,7 +339,8 @@ class WebSocketAuthChatValueProtectionTests:
                     assert new_token is not None, New token must be provided"
                     assert new_token is not None, New token must be provided"
                     assert new_token != refresh_user.jwt_token, New token must be different"
-                    assert new_token != refresh_user.jwt_token, New token must be different"
+                    assert new_token != refresh_user.jwt_token, New token must be different""
+
                     
                     # Phase 3: Continue chat with new token
                     for i in range(3):
@@ -388,7 +393,8 @@ class WebSocketAuthChatValueProtectionTests:
         assert refresh_result['chat_messages_sent'] >= 6, "All chat messages must be sent"
         assert refresh_result['chat_responses_received'] >= 6, "All chat responses must be received"
         assert refresh_result['chat_history_accessible'] is True, Chat history must remain accessible"
-        assert refresh_result['chat_history_accessible'] is True, Chat history must remain accessible"
+        assert refresh_result['chat_history_accessible'] is True, Chat history must remain accessible""
+
     
     def test_business_continuity_during_auth_service_degradation(self):
         "[U+1F3E5] MISSION CRITICAL: Business continuity during auth service degradation."
@@ -531,7 +537,8 @@ class WebSocketAuthChatValueProtectionTests:
         
         # MISSION CRITICAL business continuity validations
         assert continuity_result['business_continuity_maintained'] is True, Business continuity must be maintained"
-        assert continuity_result['business_continuity_maintained'] is True, Business continuity must be maintained"
+        assert continuity_result['business_continuity_maintained'] is True, Business continuity must be maintained""
+
         
         # Validate individual scenarios
         scenarios = continuity_result['continuity_scenarios']
@@ -562,7 +569,8 @@ class WebSocketAuthChatValueProtectionTests:
         regular_user = self.auth_helper.create_authenticated_user(
             email=f'regular_user_{int(time.time())}@regular.com',
             user_id=fregular_user_{int(time.time())},"
-            user_id=fregular_user_{int(time.time())},"
+            user_id=fregular_user_{int(time.time())},""
+
             full_name='Regular User',
             permissions=['websocket', 'chat']
         
@@ -570,7 +578,8 @@ class WebSocketAuthChatValueProtectionTests:
             "Test enterprise users get priority authentication processing."
             
             async def authenticate_user_with_timing(user_data, user_type):
-                ""Authenticate user and measure timing."
+                ""Authenticate user and measure timing.""
+
                 start_time = time.time()
                 
                 websocket_headers = {
@@ -659,14 +668,15 @@ class WebSocketAuthChatValueProtectionTests:
         assert enterprise_result['auth_success'] is True, Enterprise user authentication must succeed"
         assert enterprise_result['auth_success'] is True, Enterprise user authentication must succeed"
         assert regular_result['auth_success'] is True, Regular user authentication must succeed"
-        assert regular_result['auth_success'] is True, Regular user authentication must succeed"
+        assert regular_result['auth_success'] is True, Regular user authentication must succeed""
+
         
         # Enterprise user should have better performance
         enterprise_time = enterprise_result['auth_time_ms']
         regular_time = regular_result['auth_time_ms']
         
         # Enterprise authentication should be fast (absolute requirement)
-        assert enterprise_time < 3000, "fEnterprise auth too slow: {enterprise_time}ms (limit: 3000ms)"
+        assert enterprise_time < 3000, "fEnterprise auth too slow: {enterprise_time}ms (limit: ""3000ms"")"
         
         # Enterprise should receive priority processing indicators
         enterprise_priority = enterprise_result.get('priority_processing', False)

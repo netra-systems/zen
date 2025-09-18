@@ -66,18 +66,18 @@ class RealServiceMessageRoutingTests(SSotAsyncTestCase):
         self.logger.info(f'  Critical services: {len(critical_scenarios)}')
         self.logger.info(f'  Critical service protection rate: {critical_protection_rate * 100:.1f}%')
         for result in integration_results:
-            status = '✅' if result['integration_success'] else '❌'
+            status = 'CHECK' if result['integration_success'] else 'X'
             critical_marker = '🔥' if result['critical_for_golden_path'] else '📋'
             service_name = result['scenario_name']
             self.logger.info(f'  {status} {critical_marker} {service_name}: Service integration')
             for operation_result in result.get('operation_results', []):
                 op_name = operation_result['operation']
                 op_success = operation_result['success']
-                op_status = '✅' if op_success else '❌'
+                op_status = 'CHECK' if op_success else 'X'
                 self.logger.info(f'    {op_status} {op_name}')
         min_critical_protection_rate = 0.8
         if overall_integration_success and critical_protection_rate >= min_critical_protection_rate:
-            self.logger.info(f'✅ INFRASTRUCTURE COMPATIBLE: Real service integration maintained ({critical_protection_rate * 100:.1f}% critical services)')
+            self.logger.info(f'CHECK INFRASTRUCTURE COMPATIBLE: Real service integration maintained ({critical_protection_rate * 100:.1f}% critical services)')
         else:
             failed_services = [r['scenario_name'] for r in integration_results if not r['integration_success']]
             failed_critical = [r['scenario_name'] for r in critical_results if not r['integration_success']]
@@ -86,7 +86,7 @@ class RealServiceMessageRoutingTests(SSotAsyncTestCase):
                 warning_details.append(f'Critical service protection {critical_protection_rate * 100:.1f}% below required {min_critical_protection_rate * 100:.1f}%')
             if failed_critical:
                 warning_details.append(f'Failed critical services: {failed_critical}')
-            self.logger.warning(f"⚠️ INFRASTRUCTURE RISK: Real service integration compatibility issues detected. Failed services: {failed_services}. Issues: {' | '.join(warning_details)}. This may cause production integration issues during MessageRouter SSOT consolidation.")
+            self.logger.warning(f"WARNING️ INFRASTRUCTURE RISK: Real service integration compatibility issues detected. Failed services: {failed_services}. Issues: {' | '.join(warning_details)}. This may cause production integration issues during MessageRouter SSOT consolidation.")
         self.assertTrue(True, 'Real service integration compatibility analysis completed - warnings logged for infrastructure team')
 
     async def _test_service_integration_scenario(self, scenario: Dict[str, Any]) -> Dict[str, Any]:
@@ -218,13 +218,13 @@ class RealServiceMessageRoutingTests(SSotAsyncTestCase):
                 overall_transition_stability = False
         self.logger.info('Service integration SSOT transition stability analysis:')
         for result in transition_results:
-            status = '✅' if result['transition_stable'] else '❌'
+            status = 'CHECK' if result['transition_stable'] else 'X'
             self.logger.info(f"  {status} {result['scenario_name']}: Transition stability")
         if overall_transition_stability:
-            self.logger.info('✅ INFRASTRUCTURE STABLE: Service integration remains stable during SSOT transition')
+            self.logger.info('CHECK INFRASTRUCTURE STABLE: Service integration remains stable during SSOT transition')
         else:
             failed_scenarios = [r['scenario_name'] for r in transition_results if not r['transition_stable']]
-            self.logger.warning(f'⚠️ INFRASTRUCTURE RISK: Service integration stability concerns during SSOT transition. Unstable scenarios: {failed_scenarios}. Consider gradual transition approach or additional integration testing.')
+            self.logger.warning(f'WARNING️ INFRASTRUCTURE RISK: Service integration stability concerns during SSOT transition. Unstable scenarios: {failed_scenarios}. Consider gradual transition approach or additional integration testing.')
         self.assertTrue(True, 'SSOT transition stability analysis completed - results logged for infrastructure planning')
 
     async def _test_ssot_transition_scenario(self, scenario: Dict[str, Any]) -> Dict[str, Any]:

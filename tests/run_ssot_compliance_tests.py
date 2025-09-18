@@ -123,7 +123,7 @@ class SSotComplianceTestRunner:
         results["status"] = "PASSED" if len(self.critical_failures) == 0 else "FAILED"
         results["critical_failures"] = self.critical_failures
 
-        print(f"\n✅ QUICK COMPLIANCE CHECK: {results['status']}")
+        print(f"\nCHECK QUICK COMPLIANCE CHECK: {results['status']}")
         return results
 
     def _run_full_compliance_suite(self) -> Dict:
@@ -202,7 +202,7 @@ class SSotComplianceTestRunner:
         if test_result["passed"]:
             results["deployment_gate"] = "PASSED"
             results["business_impact"] = "PROTECTED"
-            print("✅ DEPLOYMENT GATE: PASSED - Safe to deploy")
+            print("CHECK DEPLOYMENT GATE: PASSED - Safe to deploy")
         else:
             results["deployment_gate"] = "BLOCKED"
             results["business_impact"] = "AT_RISK"
@@ -250,7 +250,7 @@ class SSotComplianceTestRunner:
             with open(baseline_file, 'w') as f:
                 json.dump(baseline_data, f, indent=2)
 
-            print(f"✅ Baseline updated: {len(filtered_violations)} violations recorded")
+            print(f"CHECK Baseline updated: {len(filtered_violations)} violations recorded")
 
             return {
                 "status": "UPDATED",
@@ -279,7 +279,7 @@ class SSotComplianceTestRunner:
         passed_tests = sum(1 for t in results["tests"] if t["passed"])
         results["category_status"] = "PASSED" if passed_tests == len(unit_tests) else "PARTIAL"
 
-        print(f"  ✅ Unit Tests: {passed_tests}/{len(unit_tests)} passed")
+        print(f"  CHECK Unit Tests: {passed_tests}/{len(unit_tests)} passed")
         return results
 
     def _run_integration_test_category(self) -> Dict:
@@ -299,7 +299,7 @@ class SSotComplianceTestRunner:
         passed_tests = sum(1 for t in results["tests"] if t["passed"])
         results["category_status"] = "PASSED" if passed_tests == len(integration_tests) else "PARTIAL"
 
-        print(f"  ✅ Integration Tests: {passed_tests}/{len(integration_tests)} passed")
+        print(f"  CHECK Integration Tests: {passed_tests}/{len(integration_tests)} passed")
         return results
 
     def _run_mission_critical_category(self) -> Dict:
@@ -443,16 +443,16 @@ class SSotComplianceTestRunner:
         print(f"\nBusiness Impact: {business_continuity}")
 
         if business_continuity == "AT_RISK":
-            print("⚠️ WARNING: Changes may impact $500K+ ARR Golden Path")
+            print("WARNING️ WARNING: Changes may impact $500K+ ARR Golden Path")
         elif business_continuity == "PROTECTED":
-            print("✅ SUCCESS: Business continuity maintained")
+            print("CHECK SUCCESS: Business continuity maintained")
 
         # Deployment recommendation
         print(f"\nDeployment Recommendation:")
         if overall_status in ["FULL_COMPLIANCE", "PARTIAL_COMPLIANCE"]:
-            print("✅ SAFE TO DEPLOY: SSOT compliance acceptable")
+            print("CHECK SAFE TO DEPLOY: SSOT compliance acceptable")
         elif overall_status == "MINIMAL_COMPLIANCE":
-            print("⚠️ DEPLOY WITH CAUTION: Monitor for issues")
+            print("WARNING️ DEPLOY WITH CAUTION: Monitor for issues")
         else:
             print("🚨 DO NOT DEPLOY: Critical compliance failures")
 

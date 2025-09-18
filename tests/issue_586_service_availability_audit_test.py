@@ -121,12 +121,12 @@ class ServiceAvailabilityAuditTest:
                     
                     if response.status_code < 500:
                         test_result["services_healthy"] += 1
-                        print(f"  ✅ HEALTHY: {response.status_code} ({response_time:.1f}ms)")
+                        print(f"  CHECK HEALTHY: {response.status_code} ({response_time:.1f}ms)")
                     else:
                         test_result["services_failed"] += 1
                         test_result["failed_services"].append(service_name)
                         service_result["error"] = f"HTTP {response.status_code}"
-                        print(f"  ❌ FAILED: {response.status_code} ({response_time:.1f}ms)")
+                        print(f"  X FAILED: {response.status_code} ({response_time:.1f}ms)")
                         self.service_issues.append(f"{service_name}_http_{response.status_code}")
                         
                     service_results[service_name] = service_result
@@ -140,7 +140,7 @@ class ServiceAvailabilityAuditTest:
                         "healthy": False
                     }
                     service_results[service_name] = service_result
-                    print(f"  ❌ TIMEOUT: {service_name}")
+                    print(f"  X TIMEOUT: {service_name}")
                     self.service_issues.append(f"{service_name}_timeout")
                     
                 except httpx.ConnectError as e:
@@ -152,7 +152,7 @@ class ServiceAvailabilityAuditTest:
                         "healthy": False
                     }
                     service_results[service_name] = service_result
-                    print(f"  ❌ CONNECTION ERROR: {service_name} - {str(e)}")
+                    print(f"  X CONNECTION ERROR: {service_name} - {str(e)}")
                     self.service_issues.append(f"{service_name}_connection_error")
                     
                 except Exception as e:
@@ -164,7 +164,7 @@ class ServiceAvailabilityAuditTest:
                         "healthy": False
                     }
                     service_results[service_name] = service_result
-                    print(f"  ❌ ERROR: {service_name} - {str(e)}")
+                    print(f"  X ERROR: {service_name} - {str(e)}")
                     self.service_issues.append(f"{service_name}_unexpected_error")
                     
                 await asyncio.sleep(0.1)  # Brief delay between requests
@@ -228,19 +228,19 @@ class ServiceAvailabilityAuditTest:
                                     status = dependencies[dep_key]
                                     if isinstance(status, dict) and status.get("healthy", False):
                                         test_result["healthy_dependencies"] += 1
-                                        print(f"  ✅ {dep}: {status}")
+                                        print(f"  CHECK {dep}: {status}")
                                     else:
                                         test_result["failed_dependencies"] += 1
                                         test_result["missing_dependencies"].append(dep)
-                                        print(f"  ❌ {dep}: {status}")
+                                        print(f"  X {dep}: {status}")
                                         self.service_issues.append(f"dependency_{dep_key}_failed")
                                 else:
                                     test_result["failed_dependencies"] += 1
                                     test_result["missing_dependencies"].append(dep)
-                                    print(f"  ⚠️  {dep}: Not reported in health check")
+                                    print(f"  WARNING️  {dep}: Not reported in health check")
                                     self.service_issues.append(f"dependency_{dep_key}_missing")
                     else:
-                        print("  ⚠️  No dependency information in health response")
+                        print("  WARNING️  No dependency information in health response")
                         # Assume all dependencies are missing
                         for category, deps in self.service_dependencies.items():
                             for dep in deps:
@@ -248,13 +248,13 @@ class ServiceAvailabilityAuditTest:
                                 test_result["missing_dependencies"].append(dep)
                                 self.service_issues.append(f"dependency_{dep.lower()}_not_reported")
                 else:
-                    print(f"  ❌ Health endpoint returned {health_response.status_code}")
+                    print(f"  X Health endpoint returned {health_response.status_code}")
                     # Mark all dependencies as unknown
                     test_result["failed_dependencies"] = test_result["total_dependencies"]
                     test_result["missing_dependencies"] = [dep for deps in self.service_dependencies.values() for dep in deps]
                     
         except Exception as e:
-            print(f"  ❌ Failed to check dependencies: {str(e)}")
+            print(f"  X Failed to check dependencies: {str(e)}")
             test_result["failed_dependencies"] = test_result["total_dependencies"]
             test_result["missing_dependencies"] = [dep for deps in self.service_dependencies.values() for dep in deps]
             self.service_issues.append("dependency_check_failed")
@@ -314,11 +314,11 @@ class ServiceAvailabilityAuditTest:
                     
                     if response.status_code in expected_statuses:
                         test_result["routing_successful"] += 1
-                        print(f"  ✅ {test['name']}: {response.status_code} (expected)")
+                        print(f"  CHECK {test['name']}: {response.status_code} (expected)")
                     else:
                         test_result["routing_failed"] += 1
                         test_result["configuration_issues"].append(f"{test['name']}: got {response.status_code}, expected {expected_statuses}")
-                        print(f"  ❌ {test['name']}: {response.status_code} (expected {expected_statuses})")
+                        print(f"  X {test['name']}: {response.status_code} (expected {expected_statuses})")
                         self.service_issues.append(f"routing_{test['name'].lower().replace(' ', '_')}_failed")
                     
                     # Check for load balancer headers
@@ -326,16 +326,16 @@ class ServiceAvailabilityAuditTest:
                     lb_header_count = sum(1 for header in lb_headers if header in response.headers)
                     
                     if lb_header_count >= 2:
-                        print(f"    ✅ Load balancer headers detected: {lb_header_count}/{len(lb_headers)}")
+                        print(f"    CHECK Load balancer headers detected: {lb_header_count}/{len(lb_headers)}")
                     else:
-                        print(f"    ⚠️  Few load balancer headers: {lb_header_count}/{len(lb_headers)}")
+                        print(f"    WARNING️  Few load balancer headers: {lb_header_count}/{len(lb_headers)}")
                         if "load_balancer_headers_missing" not in self.service_issues:
                             self.service_issues.append("load_balancer_headers_missing")
                     
                 except Exception as e:
                     test_result["routing_failed"] += 1
                     test_result["configuration_issues"].append(f"{test['name']}: {str(e)}")
-                    print(f"  ❌ {test['name']}: ERROR - {str(e)}")
+                    print(f"  X {test['name']}: ERROR - {str(e)}")
                     self.service_issues.append(f"routing_{test['name'].lower().replace(' ', '_')}_error")
         
         # Calculate routing health
@@ -426,7 +426,7 @@ async def test_issue_586_service_availability_audit():
     # This test doesn't assert failure - it's purely investigative
     # The goal is to gather comprehensive service health data
     
-    print(f"\n✅ Service availability audit completed!")
+    print(f"\nCHECK Service availability audit completed!")
     print(f"Found {results['total_service_issues']} service issues to investigate")
     
     return results
@@ -445,7 +445,7 @@ if __name__ == "__main__":
             print(f"Service health: {results['overall_service_health']}")
             print(f"Issues: {', '.join(results['service_issues_found'])}")
         else:
-            print(f"✅ All services appear healthy - Issue #586 may be resolved")
+            print(f"CHECK All services appear healthy - Issue #586 may be resolved")
             
         return results
     

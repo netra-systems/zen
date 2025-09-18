@@ -1,7 +1,7 @@
 """Phase 1 Unit Tests: Execution Engine Factory SSOT Violations (Issue #884)
 
 CRITICAL BUSINESS VALUE: These tests reproduce execution engine factory fragmentation
-issues that block the Golden Path user flow (login → AI response), protecting $500K+ ARR.
+issues that block the Golden Path user flow (login -> AI response), protecting $500K+ ARR.
 
 EXPECTED BEHAVIOR: All tests in this file should INITIALLY FAIL to demonstrate
 SSOT violations in execution engine factory patterns. They will pass after consolidation.

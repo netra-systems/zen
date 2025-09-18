@@ -2,7 +2,7 @@
 GOLDEN PATH COVERAGE: WebSocket Agent Event Integration Tests
 
 Business Impact: $500K+ ARR - Real-time chat functionality critical for user experience
-Coverage Target: Minimal → 90% for WebSocket agent event integration
+Coverage Target: Minimal -> 90% for WebSocket agent event integration
 Priority: P0 - Core chat value delivery mechanism
 
 Tests comprehensive WebSocket event integration during agent execution.

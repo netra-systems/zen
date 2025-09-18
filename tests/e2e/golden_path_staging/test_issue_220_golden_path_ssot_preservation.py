@@ -40,7 +40,7 @@ class GoldenPathSSOTPreservationTests(SSotAsyncTestCase):
         }
         
     async def test_login_to_ai_response_flow_with_ssot(self):
-        """Test complete Golden Path flow: Login → AI Response with SSOT."""
+        """Test complete Golden Path flow: Login -> AI Response with SSOT."""
         # CRITICAL: End-to-end user flow must work with SSOT patterns
         
         golden_path_steps = [
@@ -117,9 +117,9 @@ class GoldenPathSSOTPreservationTests(SSotAsyncTestCase):
         )
         
         # Log successful Golden Path execution
-        print(f"\n✅ GOLDEN PATH WITH SSOT SUCCESSFUL:")
+        print(f"\nCHECK GOLDEN PATH WITH SSOT SUCCESSFUL:")
         for step, result in step_results.items():
-            status = "✅ PASS" if result.get('success') else "❌ FAIL"
+            status = "CHECK PASS" if result.get('success') else "X FAIL"
             duration = result.get('duration', 0)
             print(f"    {step}: {status} ({duration:.2f}s)")
     
@@ -158,9 +158,9 @@ class GoldenPathSSOTPreservationTests(SSotAsyncTestCase):
             event_order_valid = await self._validate_event_ordering(events_collected)
             self.assertTrue(event_order_valid, "WebSocket event ordering invalid with SSOT")
             
-            print(f"\n✅ ALL 5 WEBSOCKET EVENTS DELIVERED WITH SSOT:")
+            print(f"\nCHECK ALL 5 WEBSOCKET EVENTS DELIVERED WITH SSOT:")
             for event_type, result in event_delivery_results.items():
-                print(f"    {event_type}: ✅ {result['count']} times")
+                print(f"    {event_type}: CHECK {result['count']} times")
             
         except Exception as e:
             self.fail(f"WebSocket events test failed with SSOT: {str(e)}")
@@ -228,10 +228,10 @@ class GoldenPathSSOTPreservationTests(SSotAsyncTestCase):
             f"User isolation violated - duplicate user IDs: {user_ids}"
         )
         
-        print(f"\n✅ MULTI-USER GOLDEN PATH ISOLATION VERIFIED:")
+        print(f"\nCHECK MULTI-USER GOLDEN PATH ISOLATION VERIFIED:")
         print(f"    Concurrent users: {len(successful_executions)}")
         for result in successful_executions:
-            print(f"    User {result['user_id']}: ✅ {result['duration']:.2f}s, {result['events_received']} events")
+            print(f"    User {result['user_id']}: CHECK {result['duration']:.2f}s, {result['events_received']} events")
 
     async def test_chat_functionality_business_value_delivery(self):
         """Validate chat delivers substantive business value (90% of platform)."""
@@ -301,14 +301,14 @@ class GoldenPathSSOTPreservationTests(SSotAsyncTestCase):
             f"Chat responses lack business value. Average score: {average_value_score}"
         )
         
-        print(f"\n✅ CHAT BUSINESS VALUE DELIVERY VERIFIED:")
+        print(f"\nCHECK CHAT BUSINESS VALUE DELIVERY VERIFIED:")
         print(f"    Successful queries: {len(successful_queries)}/{len(business_value_queries)}")
         print(f"    Average value score: {average_value_score:.2f}")
         for query, result in business_value_results.items():
             if result.get('success'):
                 score = result.get('value_score', 0)
                 indicators = result.get('value_indicators', [])
-                print(f"    Query: {query[:50]}... → Score: {score:.2f}, Indicators: {indicators}")
+                print(f"    Query: {query[:50]}... -> Score: {score:.2f}, Indicators: {indicators}")
 
     # Helper methods for Golden Path testing
     

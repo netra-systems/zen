@@ -108,7 +108,7 @@ class WebSocketEventSequenceIntegrationTests(SSotAsyncTestCase):
     P0 Critical Integration Tests for WebSocket Event Sequence Delivery.
 
     This test class validates the complete WebSocket event sequence:
-    Agent Execution → Event Generation → Event Delivery → User Experience
+    Agent Execution -> Event Generation -> Event Delivery -> User Experience
 
     Tests protect real-time user experience by validating:
     - All 5 critical WebSocket events delivered in correct sequence

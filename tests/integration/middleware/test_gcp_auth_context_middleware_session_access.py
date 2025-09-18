@@ -81,7 +81,7 @@ class GCPAuthContextMiddlewareSessionAccessTests(SSotBaseTestCase):
             assert data["status"] == "success", f"Session access failed in GCP auth context pattern: {data}"
             assert data["session_available"] is True, "Session should be available for GCP auth context middleware"
 
-        print("✅ GCP Auth Context middleware session access pattern works (Issue #1127 fixed)")
+        print("CHECK GCP Auth Context middleware session access pattern works (Issue #1127 fixed)")
 
     def test_middleware_chain_with_gcp_auth_context_enabled(self):
         """Test middleware chain when GCP auth context middleware is actually enabled.
@@ -131,7 +131,7 @@ class GCPAuthContextMiddlewareSessionAccessTests(SSotBaseTestCase):
             # Should not fail due to session middleware issues
             assert response.status_code in [200, 404], f"Request with GCP headers failed: {response.status_code} - {response.text}"
 
-        print("✅ GCP Auth Context middleware chain works with SessionMiddleware")
+        print("CHECK GCP Auth Context middleware chain works with SessionMiddleware")
 
     def test_session_persistence_across_requests(self):
         """Test session data persists across requests in GCP auth context.
@@ -184,7 +184,7 @@ class GCPAuthContextMiddlewareSessionAccessTests(SSotBaseTestCase):
             assert get_data["session_data"]["user_id"] == "gcp-test-user-123"
             assert get_data["session_data"]["session_id"] == "gcp-session-456"
 
-        print("✅ Session data persists across requests in GCP auth context pattern")
+        print("CHECK Session data persists across requests in GCP auth context pattern")
 
     def test_session_access_with_real_fastapi_request(self):
         """Test session access with real FastAPI Request object.
@@ -246,7 +246,7 @@ class GCPAuthContextMiddlewareSessionAccessTests(SSotBaseTestCase):
             assert data["session_accessible"] is True, f"Session not accessible in middleware: {data.get('session_error')}"
             assert data["session_error"] is None, f"Session access error in middleware: {data['session_error']}"
 
-        print("✅ Real FastAPI Request session access works in middleware pattern")
+        print("CHECK Real FastAPI Request session access works in middleware pattern")
 
     def test_session_access_error_handling(self):
         """Test graceful handling when SessionMiddleware is missing.
@@ -286,7 +286,7 @@ class GCPAuthContextMiddlewareSessionAccessTests(SSotBaseTestCase):
             assert data["status"] == "expected_error_reproduced", f"Did not reproduce Issue #1127 error: {data}"
             assert "SessionMiddleware must be installed" in data["error"]
 
-        print("✅ Successfully reproduced Issue #1127 error condition when SessionMiddleware is missing")
+        print("CHECK Successfully reproduced Issue #1127 error condition when SessionMiddleware is missing")
 
     def test_concurrent_gcp_auth_context_session_access(self):
         """Test concurrent session access in GCP auth context pattern.
@@ -357,9 +357,9 @@ class GCPAuthContextMiddlewareSessionAccessTests(SSotBaseTestCase):
                 assert result["session_available"] is True
             else:
                 error_count += 1
-                print(f"❌ Request {result['request_id']} failed: {result['error']}")
+                print(f"X Request {result['request_id']} failed: {result['error']}")
 
         assert error_count == 0, f"Some concurrent requests failed: {error_count} errors out of {len(results)} requests"
         assert success_count == 20, f"Expected 20 successful requests, got {success_count}"
 
-        print(f"✅ All {success_count} concurrent GCP auth context session access requests succeeded")
+        print(f"CHECK All {success_count} concurrent GCP auth context session access requests succeeded")

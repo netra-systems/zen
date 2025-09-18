@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 This test suite validates the complete Golden Path user flow with auth service
 delegation using the staging GCP environment:
 
-1. Users login → get AI responses (complete end-to-end flow)
+1. Users login -> get AI responses (complete end-to-end flow)
 2. WebSocket authentication using delegated auth patterns
 3. Agent execution working with delegated authentication
 4. Multi-user isolation maintained with delegation

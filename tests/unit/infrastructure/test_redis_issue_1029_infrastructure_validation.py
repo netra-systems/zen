@@ -78,10 +78,10 @@ class RedisIssue1029InfrastructureValidationTests(SSotBaseTestCase):
             redis_url = env.get('REDIS_URL', f'redis://{redis_host}:6379/0')
             print(f'📍 Current Redis Host: {redis_host}')
             print(f'📍 Current Redis URL: {redis_url}')
-            assert 'localhost' not in redis_url.lower(), f"❌ ISSUE #1029 CONFIRMED: Staging Redis URL contains 'localhost': {redis_url}. This causes GCP Memory Store connectivity failure! Expected GCP Memory Store endpoint like 'redis://10.45.240.3:6379/0'"
+            assert 'localhost' not in redis_url.lower(), f"X ISSUE #1029 CONFIRMED: Staging Redis URL contains 'localhost': {redis_url}. This causes GCP Memory Store connectivity failure! Expected GCP Memory Store endpoint like 'redis://10.45.240.3:6379/0'"
             expected_gcp_patterns = ['10.45.240.3', '10.45.240']
             gcp_pattern_found = any((pattern in redis_url for pattern in expected_gcp_patterns))
-            assert gcp_pattern_found, f'❌ ISSUE #1029 CONFIRMED: Staging Redis URL missing GCP Memory Store pattern: {redis_url}. Expected patterns: {expected_gcp_patterns}. This indicates improper GCP infrastructure configuration!'
+            assert gcp_pattern_found, f'X ISSUE #1029 CONFIRMED: Staging Redis URL missing GCP Memory Store pattern: {redis_url}. Expected patterns: {expected_gcp_patterns}. This indicates improper GCP infrastructure configuration!'
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -105,7 +105,7 @@ class RedisIssue1029InfrastructureValidationTests(SSotBaseTestCase):
             env = IsolatedEnvironment()
             gcp_project = env.get('GCP_PROJECT_ID')
             print(f'📍 GCP Project ID: {gcp_project}')
-            assert gcp_project == 'netra-staging', f"❌ ISSUE #1029 CONFIRMED: GCP Project ID not configured: {gcp_project}. Expected 'netra-staging' for proper Secret Manager integration!"
+            assert gcp_project == 'netra-staging', f"X ISSUE #1029 CONFIRMED: GCP Project ID not configured: {gcp_project}. Expected 'netra-staging' for proper Secret Manager integration!"
             secret_manager_available = False
             try:
                 from google.cloud import secretmanager
@@ -113,7 +113,7 @@ class RedisIssue1029InfrastructureValidationTests(SSotBaseTestCase):
             except ImportError:
                 secret_manager_available = False
             print(f'📍 Secret Manager Available: {secret_manager_available}')
-            assert secret_manager_available, f'❌ ISSUE #1029 CONFIRMED: GCP Secret Manager client not available. This prevents proper Redis credential retrieval in GCP environment!'
+            assert secret_manager_available, f'X ISSUE #1029 CONFIRMED: GCP Secret Manager client not available. This prevents proper Redis credential retrieval in GCP environment!'
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -137,11 +137,11 @@ class RedisIssue1029InfrastructureValidationTests(SSotBaseTestCase):
             env = IsolatedEnvironment()
             vpc_connector = env.get('VPC_CONNECTOR')
             print(f'📍 VPC Connector: {vpc_connector}')
-            assert vpc_connector is not None, f'❌ ISSUE #1029 CONFIRMED: VPC_CONNECTOR not configured: {vpc_connector}. This prevents Cloud Run from accessing GCP Memory Store Redis!'
+            assert vpc_connector is not None, f'X ISSUE #1029 CONFIRMED: VPC_CONNECTOR not configured: {vpc_connector}. This prevents Cloud Run from accessing GCP Memory Store Redis!'
             if vpc_connector:
                 expected_patterns = ['projects/', 'locations/', 'connectors/']
                 pattern_matches = all((pattern in vpc_connector for pattern in expected_patterns))
-                assert pattern_matches, f'❌ ISSUE #1029 CONFIRMED: VPC_CONNECTOR malformed: {vpc_connector}. Expected format: projects/PROJECT/locations/LOCATION/connectors/CONNECTOR'
+                assert pattern_matches, f'X ISSUE #1029 CONFIRMED: VPC_CONNECTOR malformed: {vpc_connector}. Expected format: projects/PROJECT/locations/LOCATION/connectors/CONNECTOR'
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -169,8 +169,8 @@ class RedisIssue1029InfrastructureValidationTests(SSotBaseTestCase):
             print(f'📍 Memory Store Port: {redis_port}')
             if redis_host:
                 is_internal_ip = redis_host.startswith('10.')
-                assert is_internal_ip, f'❌ ISSUE #1029 CONFIRMED: Redis host not GCP internal IP: {redis_host}. GCP Memory Store uses internal IP addresses (10.x.x.x range). External/localhost addresses cause connectivity failures!'
-                assert redis_port == '6379', f'❌ ISSUE #1029 CONFIRMED: Redis port not standard: {redis_port}. GCP Memory Store uses port 6379. Incorrect port causes connection failures!'
+                assert is_internal_ip, f'X ISSUE #1029 CONFIRMED: Redis host not GCP internal IP: {redis_host}. GCP Memory Store uses internal IP addresses (10.x.x.x range). External/localhost addresses cause connectivity failures!'
+                assert redis_port == '6379', f'X ISSUE #1029 CONFIRMED: Redis port not standard: {redis_port}. GCP Memory Store uses port 6379. Incorrect port causes connection failures!'
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -198,11 +198,11 @@ class RedisIssue1029InfrastructureValidationTests(SSotBaseTestCase):
             production_redis_host = production_env.get('REDIS_HOST')
         print(f'📍 Staging Redis Host: {staging_redis_host}')
         print(f'📍 Production Redis Host: {production_redis_host}')
-        assert staging_redis_host != production_redis_host, f'❌ ISSUE #1029 CONFIRMED: Staging and production Redis hosts are identical: staging={staging_redis_host}, production={production_redis_host}. This indicates improper environment isolation!'
+        assert staging_redis_host != production_redis_host, f'X ISSUE #1029 CONFIRMED: Staging and production Redis hosts are identical: staging={staging_redis_host}, production={production_redis_host}. This indicates improper environment isolation!'
         for env_name, host in [('staging', staging_redis_host), ('production', production_redis_host)]:
             if host:
                 is_internal_ip = host.startswith('10.')
-                assert is_internal_ip, f'❌ ISSUE #1029 CONFIRMED: {env_name} Redis host not GCP internal IP: {host}. Both environments should use GCP Memory Store internal IPs!'
+                assert is_internal_ip, f'X ISSUE #1029 CONFIRMED: {env_name} Redis host not GCP internal IP: {host}. Both environments should use GCP Memory Store internal IPs!'
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

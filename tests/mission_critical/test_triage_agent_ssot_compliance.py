@@ -8,7 +8,6 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
 """
-"""
         """Send JSON message.""""""
         """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed)"
@@ -20,7 +19,6 @@ class TestWebSocketConnection:
         self._closed = True
         self.is_connected = False
 """
-"""
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()"""
@@ -30,7 +28,8 @@ class TestWebSocketConnection:
         Integration test suite to verify TriageSubAgent SSOT compliance after fixes."""
         Integration test suite to verify TriageSubAgent SSOT compliance after fixes."""
         This test suite confirms that all SSOT violations have been fixed."""
-        This test suite confirms that all SSOT violations have been fixed."""
+        This test suite confirms that all SSOT violations have been fixed.""""
+
 
 import asyncio
 import unittest

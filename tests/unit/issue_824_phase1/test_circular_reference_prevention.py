@@ -145,7 +145,7 @@ class CircularReferencePreventionValidationTests(SSotAsyncTestCase):
             self.fail(f"CIRCULAR IMPORT DETECTED: Found {len(cycles)} circular dependencies:\n" +
                      "\n".join(f"  {cycle}" for cycle in cycle_descriptions))
 
-        logger.info("✅ No circular import dependencies detected")
+        logger.info("CHECK No circular import dependencies detected")
 
     def test_websocket_manager_import_safety(self):
         """Test that WebSocket Manager can be imported without circular reference issues."""
@@ -164,7 +164,7 @@ class CircularReferencePreventionValidationTests(SSotAsyncTestCase):
         try:
             # Test importing the canonical WebSocket Manager
             from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-            logger.info("✓ WebSocketManager imported successfully")
+            logger.info("CHECK WebSocketManager imported successfully")
 
             # Verify it's actually usable (not just importable)
             self.assertTrue(inspect.isclass(WebSocketManager))
@@ -174,7 +174,7 @@ class CircularReferencePreventionValidationTests(SSotAsyncTestCase):
             methods = [method for method in dir(WebSocketManager) if not method.startswith('_')]
             self.assertGreater(len(methods), 0, "WebSocketManager should have public methods")
 
-            logger.info(f"✓ WebSocketManager has {len(methods)} public methods")
+            logger.info(f"CHECK WebSocketManager has {len(methods)} public methods")
 
         except ImportError as e:
             if "circular" in str(e).lower():
@@ -184,23 +184,23 @@ class CircularReferencePreventionValidationTests(SSotAsyncTestCase):
         except Exception as e:
             self.fail(f"WEBSOCKET MANAGER IMPORT FAILED: {e}")
 
-        logger.info("✅ WebSocket Manager import safety validated")
+        logger.info("CHECK WebSocket Manager import safety validated")
 
     def test_factory_import_isolation(self):
         """Test that factory module imports don't create circular dependencies."""
         try:
             # Test importing factory module
             from netra_backend.app.websocket_core import websocket_manager_factory
-            logger.info("✓ Factory module imported successfully")
+            logger.info("CHECK Factory module imported successfully")
 
             # Test that factory doesn't cause circular issues with manager
             from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-            logger.info("✓ Manager imported after factory without issues")
+            logger.info("CHECK Manager imported after factory without issues")
 
             # Test reverse order
             importlib.reload(sys.modules['netra_backend.app.websocket_core.unified_manager'])
             from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-            logger.info("✓ Factory imported after manager reload without issues")
+            logger.info("CHECK Factory imported after manager reload without issues")
 
         except ImportError as e:
             if "circular" in str(e).lower():
@@ -212,54 +212,54 @@ class CircularReferencePreventionValidationTests(SSotAsyncTestCase):
         except Exception as e:
             self.fail(f"FACTORY IMPORT SAFETY TEST FAILED: {e}")
 
-        logger.info("✅ Factory import isolation validated")
+        logger.info("CHECK Factory import isolation validated")
 
     def test_websocket_route_integration_safety(self):
         """Test that WebSocket route integration doesn't create circular dependencies."""
         try:
             # Test importing WebSocket routes
             from netra_backend.app.routes import websocket
-            logger.info("✓ WebSocket routes imported successfully")
+            logger.info("CHECK WebSocket routes imported successfully")
 
             # Test that routes can access WebSocket manager without cycles
             from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-            logger.info("✓ Manager accessible from routes without circular issues")
+            logger.info("CHECK Manager accessible from routes without circular issues")
 
         except ImportError as e:
             if "circular" in str(e).lower():
                 self.fail(f"ROUTE CIRCULAR IMPORT: {e}")
             else:
-                logger.warning(f"⚠ Route import issue (may be acceptable): {e}")
+                logger.warning(f"WARNING Route import issue (may be acceptable): {e}")
         except Exception as e:
-            logger.warning(f"⚠ Route integration test issue (may be acceptable): {e}")
+            logger.warning(f"WARNING Route integration test issue (may be acceptable): {e}")
 
-        logger.info("✅ WebSocket route integration safety validated")
+        logger.info("CHECK WebSocket route integration safety validated")
 
     def test_protocol_import_dependencies(self):
         """Test that protocol definitions don't create import cycles."""
         try:
             # Test importing protocols module
             from netra_backend.app.websocket_core import protocols
-            logger.info("✓ Protocols module imported successfully")
+            logger.info("CHECK Protocols module imported successfully")
 
             # Test that protocols and manager can coexist
             from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-            logger.info("✓ Manager and protocols coexist without circular issues")
+            logger.info("CHECK Manager and protocols coexist without circular issues")
 
             # Verify protocols don't depend on manager implementation
             protocol_source = inspect.getsource(protocols)
             if "unified_manager" in protocol_source.lower():
-                logger.warning("⚠ Protocols may have tight coupling to manager implementation")
+                logger.warning("WARNING Protocols may have tight coupling to manager implementation")
 
         except ImportError as e:
             if "circular" in str(e).lower():
                 self.fail(f"PROTOCOL CIRCULAR IMPORT: {e}")
             else:
-                logger.warning(f"⚠ Protocol import issue: {e}")
+                logger.warning(f"WARNING Protocol import issue: {e}")
         except Exception as e:
-            logger.warning(f"⚠ Protocol dependency test issue: {e}")
+            logger.warning(f"WARNING Protocol dependency test issue: {e}")
 
-        logger.info("✅ Protocol import dependencies validated")
+        logger.info("CHECK Protocol import dependencies validated")
 
     def test_import_order_independence(self):
         """Test that WebSocket components can be imported in any order without cycles."""
@@ -290,19 +290,19 @@ class CircularReferencePreventionValidationTests(SSotAsyncTestCase):
                 for module_name in import_order:
                     try:
                         importlib.import_module(module_name)
-                        logger.info(f"  ✓ {module_name} imported successfully")
+                        logger.info(f"  CHECK {module_name} imported successfully")
                     except ImportError as e:
                         if "circular" in str(e).lower():
                             self.fail(f"CIRCULAR IMPORT in order {i} at {module_name}: {e}")
                         else:
-                            logger.warning(f"  ⚠ {module_name} not available: {e}")
+                            logger.warning(f"  WARNING {module_name} not available: {e}")
 
-                logger.info(f"✓ Import order {i} completed without circular issues")
+                logger.info(f"CHECK Import order {i} completed without circular issues")
 
             except Exception as e:
                 self.fail(f"IMPORT ORDER {i} FAILED: {e}")
 
-        logger.info("✅ Import order independence validated")
+        logger.info("CHECK Import order independence validated")
 
 
 if __name__ == '__main__':

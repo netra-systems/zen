@@ -2,30 +2,30 @@
 "MISSION CRITICAL: WebSocket Health Check SSOT Integration Tests"
 
 THIS SUITE FOCUSES ON THE CRITICAL VIOLATIONS IN WEBSOCKET HEALTH ENDPOINTS.
-Business Value: $500K+ ARR - Validates health check functionality during SSOT migration
+Business Value: $""500K"" plus ARR - Validates health check functionality during SSOT migration
 
 PURPOSE:
-- Focus on critical violations in websocket_ssot.py lines 1439, 1470, 1496
+    - Focus on critical violations in websocket_ssot.py lines 1439, 1470, 1496
 - Test health endpoint functionality with SSOT patterns
 - Test configuration endpoint integrity during migration
 - Validate statistics endpoint functionality preservation
 - Ensure no silent failures during health check operations
 
 CRITICAL HEALTH ENDPOINTS:
-1. websocket_health_check() - Line 1439 violation
+    1. websocket_health_check() - Line 1439 violation
 2. get_websocket_config() - Line 1470 violation  
 3. websocket_detailed_stats() - Line 1496 violation
 
 HEALTH CHECK BUSINESS VALUE:
-Health checks are critical for:
-- Production deployment validation
+    Health checks are critical for:
+    - Production deployment validation
 - Load balancer health monitoring
 - Auto-scaling decision making
 - Incident detection and alerting
 - Customer SLA compliance
 
 INTEGRATION STRATEGY:
-- Test real health endpoint functionality (not mocked)
+    - Test real health endpoint functionality (not mocked)
 - Validate health check data integrity
 - Test endpoint availability during migration
 - Ensure health checks don't fail silently'
@@ -58,7 +58,8 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 class WebSocketHealthSSotTests(SSotAsyncTestCase):
-    ""Mission Critical: WebSocket Health Check SSOT Integration Tests"
+    ""Mission Critical: WebSocket Health Check SSOT Integration Tests""
+
     
     These tests validate the health check endpoints during factory pattern migration:
     1. Health check endpoint functionality preservation
@@ -80,10 +81,12 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
         logger.info(f[HEALTH CHECK TEST] Setup complete for health validation)
 
     def teardown_method(self, method):
-        ""Clean up health check test environment."
+        ""Clean up health check test environment.""
+
         super().teardown_method(method)
         logger.info([HEALTH CHECK TEST] Teardown complete)"
-        logger.info([HEALTH CHECK TEST] Teardown complete)"
+        logger.info([HEALTH CHECK TEST] Teardown complete)""
+
 
     @pytest.mark.asyncio
     async def test_websocket_health_check_endpoint_integrity(self):
@@ -121,7 +124,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             assert "status in health_result, Health check missing required 'status' field"
             assert timestamp in health_result, "Health check missing required 'timestamp' field"
             
-            logger.info(f[HEALTH CHECK SUCCESS] Health check completed in {execution_time:.2f}s)
+            logger.info(f[HEALTH CHECK SUCCESS] Health check completed in {execution_time:.""2f""}s)
             logger.info(f[HEALTH STATUS] Status: {health_result.get('status')}")"
             
             # Validate health check status values
@@ -132,7 +135,8 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             
             # Test timestamp validity
             timestamp_str = health_result.get(timestamp)"
-            timestamp_str = health_result.get(timestamp)"
+            timestamp_str = health_result.get(timestamp)""
+
             try:
                 # Validate timestamp format
                 timestamp_parsed = datetime.fromisoformat(timestamp_str.replace('Z', '+0:0'))
@@ -151,7 +155,8 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
                 
                 # Expected components for WebSocket health
                 expected_components = [factory, message_router, connection_monitor]"
-                expected_components = [factory, message_router, connection_monitor]"
+                expected_components = [factory, message_router, connection_monitor]""
+
                 
                 for component in expected_components:
                     if component in components:
@@ -163,11 +168,13 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
                 
                 # At least one component should be reporting status
                 assert len(components) > 0, Health check must report component status"
-                assert len(components) > 0, Health check must report component status"
+                assert len(components) > 0, Health check must report component status""
+
             
             # Performance validation - health check should be fast
             assert execution_time < 10.0, fHealth check too slow: {execution_time}s > 10s"
-            assert execution_time < 10.0, fHealth check too slow: {execution_time}s > 10s"
+            assert execution_time < 10.0, fHealth check too slow: {execution_time}s > "10s"""
+
             
             logger.info([HEALTH ENDPOINT SUCCESS] WebSocket health check endpoint working correctly)
             
@@ -189,7 +196,8 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
                 logger.info([MIGRATION NOTE] Health check failure related to factory migration - expected during transition)
             else:
                 pytest.fail(fCRITICAL: Health check endpoint system failure - {e})"
-                pytest.fail(fCRITICAL: Health check endpoint system failure - {e})"
+                pytest.fail(fCRITICAL: Health check endpoint system failure - {e})""
+
 
     @pytest.mark.asyncio
     async def test_websocket_config_endpoint_data_integrity(self):
@@ -221,9 +229,10 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             
             # CRITICAL: Config must return structured data
             assert isinstance(config_result, dict), Config endpoint must return dictionary"
-            assert isinstance(config_result, dict), Config endpoint must return dictionary"
+            assert isinstance(config_result, dict), Config endpoint must return dictionary""
+
             
-            logger.info(f[CONFIG SUCCESS] Configuration retrieved in {execution_time:.2f}s")"
+            logger.info(f[CONFIG SUCCESS] Configuration retrieved in {execution_time:.""2f""}s")"
             
             # Check for error responses
             if error in config_result:
@@ -280,10 +289,11 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             else:
                 logger.warning([CONFIG STRUCTURE WARNING] Unexpected configuration response structure)
                 logger.info(f[CONFIG CONTENT] Response keys: {list(config_result.keys())})"
-                logger.info(f[CONFIG CONTENT] Response keys: {list(config_result.keys())})"
+                logger.info(f[CONFIG CONTENT] Response keys: {list(config_result.keys())})""
+
             
             # Performance validation
-            assert execution_time < 5.0, f"Config endpoint too slow: {execution_time}s > 5s"
+            assert execution_time < 5.0, f"Config endpoint too slow: {execution_time}s > ""5s"""
             
             logger.info([CONFIG ENDPOINT SUCCESS] Configuration endpoint working correctly)
             
@@ -335,7 +345,8 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             # CRITICAL: Stats must return structured data
             assert isinstance(stats_result, dict), Stats endpoint must return dictionary""
             
-            logger.info(f[STATS SUCCESS] Statistics retrieved in {execution_time:.2f}s)
+            logger.info(f[STATS SUCCESS] Statistics retrieved in {execution_time:.""2f""}s)""
+
             
             # Check for error responses
             if error in stats_result:
@@ -351,7 +362,8 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             else:
                 # Validate statistics structure
                 logger.info([STATS STRUCTURE] Statistics data retrieved successfully)"
-                logger.info([STATS STRUCTURE] Statistics data retrieved successfully)"
+                logger.info([STATS STRUCTURE] Statistics data retrieved successfully)""
+
                 
                 # Check for SSOT-specific statistics
                 if "ssot_stats in stats_result:"
@@ -380,7 +392,8 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
                 if active_components" in stats_result:"
                     active_components = stats_result[active_components]
                     logger.info(f[ACTIVE COMPONENTS] Found {len(active_components)} component categories)"
-                    logger.info(f[ACTIVE COMPONENTS] Found {len(active_components)} component categories)"
+                    logger.info(f[ACTIVE COMPONENTS] Found {len(active_components)} component categories)""
+
                     
                     # Components should be structured data
                     assert isinstance(active_components, dict), "Active components must be dictionary"
@@ -399,16 +412,19 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
                 
                 # Basic validation - at least some statistical data should be present
                 expected_sections = [ssot_stats, active_components, performance_metrics]"
-                expected_sections = [ssot_stats, active_components, performance_metrics]"
+                expected_sections = [ssot_stats, active_components, performance_metrics]""
+
                 found_sections = [section for section in expected_sections if section in stats_result]
                 assert len(found_sections) > 0, fStatistics missing expected sections: {expected_sections}"
-                assert len(found_sections) > 0, fStatistics missing expected sections: {expected_sections}"
+                assert len(found_sections) > 0, fStatistics missing expected sections: {expected_sections}""
+
                 
                 logger.info(f[STATS VALIDATION SUCCESS] Found data sections: {found_sections})
             
             # Performance validation
             assert execution_time < 10.0, fStats endpoint too slow: {execution_time}s > 10s"
-            assert execution_time < 10.0, fStats endpoint too slow: {execution_time}s > 10s"
+            assert execution_time < 10.0, fStats endpoint too slow: {execution_time}s > "10s"""
+
             
             logger.info("[STATS ENDPOINT SUCCESS] Statistics endpoint working correctly)"
             
@@ -494,17 +510,19 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             logger.info(f  Failed endpoints: {len(failed_endpoints)})
             
             for endpoint in successful_endpoints:
-                logger.info(f    ✅ {endpoint['endpoint']}: {endpoint['status']})"
-                logger.info(f    ✅ {endpoint['endpoint']}: {endpoint['status']})"
+                logger.info(f    CHECK {endpoint['endpoint']}: {endpoint['status']})"
+                logger.info(f    CHECK {endpoint['endpoint']}: {endpoint['status']})""
+
                 
             for endpoint in failed_endpoints:
-                logger.warning(f"    ❌ {endpoint['endpoint']}: {endpoint.get('error', 'unknown error')}))"
+                logger.warning(f"    X {endpoint['endpoint']}: {endpoint.get('error', 'unknown error')}))"
             
             # Production readiness criteria:
             # - At least health check must work (critical for load balancer)
             # - Other endpoints can fail during migration but should be documented
             health_check_working = any(ep[endpoint] == health_check and ep[success] for ep in endpoints_tested)"
-            health_check_working = any(ep[endpoint] == health_check and ep[success] for ep in endpoints_tested)"
+            health_check_working = any(ep[endpoint] == health_check and ep[success] for ep in endpoints_tested)""
+
             
             if health_check_working:
                 logger.info("[PRODUCTION READY] Health check endpoint working - minimum production readiness achieved)"
@@ -544,7 +562,8 @@ if __name__ == "__main__:"
     print(MIGRATION NOTICE: This file previously used direct pytest execution.)
     print("Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
     print(For more info: reports/TEST_EXECUTION_GUIDE.md)"
-    print(For more info: reports/TEST_EXECUTION_GUIDE.md)"
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md)""
+
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

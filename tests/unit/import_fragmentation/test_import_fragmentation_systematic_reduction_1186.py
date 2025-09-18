@@ -62,7 +62,7 @@ class ImportFragmentationSystematicReductionTests(unittest.TestCase):
         self.assertLess(
             total_fragmentation_count, 
             self.target_fragmentation_count, 
-            f"❌ BASELINE VIOLATION: Found {total_fragmentation_count} fragmented UserExecutionEngine imports. "
+            f"X BASELINE VIOLATION: Found {total_fragmentation_count} fragmented UserExecutionEngine imports. "
             f"SSOT target is <{self.target_fragmentation_count}. "
             f"Reduction of {total_fragmentation_count - self.target_fragmentation_count} imports required.\n"
             f"Top 10 fragmentation sources:\n"
@@ -97,7 +97,7 @@ class ImportFragmentationSystematicReductionTests(unittest.TestCase):
         self.assertGreater(
             canonical_percentage,
             self.target_canonical_usage,
-            f"❌ BASELINE VIOLATION: Canonical import usage is {canonical_percentage:.1f}%. "
+            f"X BASELINE VIOLATION: Canonical import usage is {canonical_percentage:.1f}%. "
             f"SSOT target is >{self.target_canonical_usage}%. "
             f"Need to improve canonical usage by {self.target_canonical_usage - canonical_percentage:.1f}%.\n"
             f"Current breakdown:\n"
@@ -128,7 +128,7 @@ class ImportFragmentationSystematicReductionTests(unittest.TestCase):
         self.assertEqual(
             legacy_count,
             0,
-            f"❌ BASELINE VIOLATION: Found {legacy_count} legacy execution engine import patterns. "
+            f"X BASELINE VIOLATION: Found {legacy_count} legacy execution engine import patterns. "
             f"SSOT consolidation requires elimination of all legacy patterns.\n"
             f"Legacy patterns detected:\n"
             + '\n'.join([f"  - {path}: {pattern}" for path, pattern in legacy_patterns[:10]])
@@ -165,7 +165,7 @@ class ImportFragmentationSystematicReductionTests(unittest.TestCase):
         self.assertEqual(
             unique_paths,
             1,
-            f"❌ BASELINE VIOLATION: Found {unique_paths} different import paths for UserExecutionEngine. "
+            f"X BASELINE VIOLATION: Found {unique_paths} different import paths for UserExecutionEngine. "
             f"SSOT requires exactly 1 canonical import path.\n"
             f"Path consolidation required for {unique_paths - 1} non-canonical paths:\n"
             + '\n'.join([f"  - '{path}' used {count} times" for path, count in sorted_paths])
@@ -193,7 +193,7 @@ class ImportFragmentationSystematicReductionTests(unittest.TestCase):
         self.assertEqual(
             violation_count,
             0,
-            f"❌ BASELINE VIOLATION: Found {violation_count} service boundary violations. "
+            f"X BASELINE VIOLATION: Found {violation_count} service boundary violations. "
             f"Each service should use independent import patterns.\n"
             f"Boundary violations detected:\n"
             + '\n'.join([f"  - {service}: {violation}" for service, violation in boundary_violations])
@@ -411,9 +411,9 @@ class ImportFragmentationSystematicReductionTests(unittest.TestCase):
 if __name__ == '__main__':
     print("🚨 Issue #1186 Import Fragmentation Systematic Reduction - Baseline Detection")
     print("=" * 80)
-    print("⚠️  WARNING: These tests are DESIGNED TO FAIL to establish baseline metrics")
+    print("WARNING️  WARNING: These tests are DESIGNED TO FAIL to establish baseline metrics")
     print("📊 Expected: 5 test failures showing import fragmentation violations")
-    print("🎯 Goal: Baseline measurement for 446→<5 fragmentation reduction")
+    print("🎯 Goal: Baseline measurement for 446-><5 fragmentation reduction")
     print("💰 Impact: Enables $500K+ ARR SSOT architecture consolidation")
     print("=" * 80)
     

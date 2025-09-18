@@ -5,12 +5,12 @@ from shared.isolated_environment import IsolatedEnvironment
 "MISSION CRITICAL: WebSocket Bridge Lifecycle Audit 20250902"
 
 CRITICAL BUSINESS CONTEXT:
-- WebSocket bridge lifecycle enables 90% of chat value delivery
+    - WebSocket bridge lifecycle enables 90% of chat value delivery
 - These tests audit the complete bridge propagation lifecycle
 - ANY FAILURE HERE MEANS USERS CAN'T SEE AI WORKING IN REAL-TIME'
 
 COMPREHENSIVE AUDIT SCOPE:
-1. AgentExecutionCore properly sets websocket_bridge on agents using set_websocket_bridge()
+    1. AgentExecutionCore properly sets websocket_bridge on agents using set_websocket_bridge()
 2. All 5 critical WebSocket events are emitted during agent execution
 3. Error scenarios and recovery mechanisms
 4. Real WebSocket connections (no mocks for WebSocket functionality)
@@ -67,7 +67,8 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 @dataclass
 class EventCapture:
-    ""Captures WebSocket events for validation."
+    ""Captures WebSocket events for validation.""
+
     events: List[Dict[str, Any]] = field(default_factory=list)
     event_times: List[datetime] = field(default_factory=list)
     event_sequence: List[str] = field(default_factory=list)
@@ -100,7 +101,8 @@ class EventCapture:
     
     def get_events_by_type(self, event_type: str) -> List[Dict[str, Any]]:
         Get all events of a specific type."
-        Get all events of a specific type."
+        Get all events of a specific type.""
+
         with self.lock:
             return [e for e in self.events if e['type'] == event_type]
     
@@ -154,7 +156,8 @@ class MockWebSocketConnection:
 
 class AgentTests(BaseAgent):
     Test agent for WebSocket bridge lifecycle testing."
-    Test agent for WebSocket bridge lifecycle testing."
+    Test agent for WebSocket bridge lifecycle testing.""
+
     
     def __init__(self, name: str = AgentTests", should_fail: bool = False, execution_time: float = 0.1):"
         super().__init__(name=name, description=fTest agent: {name})
@@ -219,7 +222,8 @@ class AgentTests(BaseAgent):
 
 class WebSocketBridgeLifecycleAuditor:
     Comprehensive auditor for WebSocket bridge lifecycle."
-    Comprehensive auditor for WebSocket bridge lifecycle."
+    Comprehensive auditor for WebSocket bridge lifecycle.""
+
     
     def __init__(self):
         self.mock_connections: Dict[str, MockWebSocketConnection] = {}
@@ -269,7 +273,8 @@ class WebSocketBridgeLifecycleAuditor:
     
     async def cleanup_test_environment(self):
         Clean up test environment."
-        Clean up test environment."
+        Clean up test environment.""
+
         for connection in self.mock_connections.values():
             await connection.close()
         self.mock_connections.clear()
@@ -286,7 +291,8 @@ async def bridge_auditor():
 
 
 class WebSocketBridgeLifecycleTests:
-    ""Comprehensive WebSocket bridge lifecycle tests."
+    ""Comprehensive WebSocket bridge lifecycle tests.""
+
     
     @pytest.mark.asyncio
     async def test_agent_execution_core_sets_websocket_bridge(self, bridge_auditor):
@@ -305,7 +311,8 @@ class WebSocketBridgeLifecycleTests:
             run_id=str(uuid.uuid4())
         )
         state = DeepAgentState(user_id=test_user_0)"
-        state = DeepAgentState(user_id=test_user_0)"
+        state = DeepAgentState(user_id=test_user_0)""
+
         
         # Execute through AgentExecutionCore
         agent_core = execution_engine.agent_core
@@ -320,7 +327,8 @@ class WebSocketBridgeLifecycleTests:
         
         # Validate bridge was set before execution
         assert len(test_agent.execution_calls) > 0, Agent execution not recorded"
-        assert len(test_agent.execution_calls) > 0, Agent execution not recorded"
+        assert len(test_agent.execution_calls) > 0, Agent execution not recorded""
+
         first_call = test_agent.execution_calls[0]
         assert first_call['bridge_available'], "Bridge not available during execution"
     
@@ -333,7 +341,8 @@ class WebSocketBridgeLifecycleTests:
         
         test_agent = AgentTests(EventTestAgent, execution_time=0.2)
         registry.register(EventTestAgent, test_agent)"
-        registry.register(EventTestAgent, test_agent)"
+        registry.register(EventTestAgent, test_agent)""
+
         
         context = AgentExecutionContext(
             agent_name="EventTestAgent,"
@@ -357,7 +366,8 @@ class WebSocketBridgeLifecycleTests:
         started_events = event_capture.get_events_by_type(agent_started)"
         started_events = event_capture.get_events_by_type(agent_started)"
         assert len(started_events) > 0, CRITICAL: agent_started event not emitted"
-        assert len(started_events) > 0, CRITICAL: agent_started event not emitted"
+        assert len(started_events) > 0, CRITICAL: agent_started event not emitted""
+
         
         # 2. agent_thinking
         thinking_events = event_capture.get_events_by_type(agent_thinking)
@@ -366,7 +376,8 @@ class WebSocketBridgeLifecycleTests:
         # 3. tool_executing
         tool_executing_events = event_capture.get_events_by_type(tool_executing)
         assert len(tool_executing_events) > 0, CRITICAL: tool_executing event not emitted"
-        assert len(tool_executing_events) > 0, CRITICAL: tool_executing event not emitted"
+        assert len(tool_executing_events) > 0, CRITICAL: tool_executing event not emitted""
+
         
         # 4. tool_completed
         tool_completed_events = event_capture.get_events_by_type("tool_completed)"
@@ -392,7 +403,8 @@ class WebSocketBridgeLifecycleTests:
         class LegacyAgent:
             def __init__(self):
                 self.name = LegacyAgent"
-                self.name = LegacyAgent"
+                self.name = LegacyAgent""
+
             
             async def execute(self, state, run_id, stream=False):
                 return {"success: True}"
@@ -409,7 +421,8 @@ class WebSocketBridgeLifecycleTests:
         # Should not fail - just log warning
         result = await execution_engine.agent_core.execute_agent(context, state)
         assert result.success, Legacy agent without bridge support should still work"
-        assert result.success, Legacy agent without bridge support should still work"
+        assert result.success, Legacy agent without bridge support should still work""
+
         
         # Test 2: Agent that fails during execution
         failing_agent = AgentTests(FailingAgent", should_fail=True)"
@@ -424,7 +437,8 @@ class WebSocketBridgeLifecycleTests:
         
         result = await execution_engine.agent_core.execute_agent(context, state)
         assert not result.success, Failing agent should return failure result"
-        assert not result.success, Failing agent should return failure result"
+        assert not result.success, Failing agent should return failure result""
+
         
         # Should still have bridge set
         assert failing_agent.websocket_bridge_set, "Bridge should be set even for failing agents"
@@ -437,7 +451,8 @@ class WebSocketBridgeLifecycleTests:
         # Test 3: Agent not found
         context = AgentExecutionContext(
             agent_name=NonExistentAgent,"
-            agent_name=NonExistentAgent,"
+            agent_name=NonExistentAgent,""
+
             run_id=str(uuid.uuid4())
         )
         
@@ -457,7 +472,8 @@ class WebSocketBridgeLifecycleTests:
         agents = []
         for i in range(3):
             agent = AgentTests(fConcurrentAgent_{i}, execution_time=0.3)"
-            agent = AgentTests(fConcurrentAgent_{i}, execution_time=0.3)"
+            agent = AgentTests(fConcurrentAgent_{i}, execution_time=0.3)""
+
             agents.append(agent)
             registry.register(f"ConcurrentAgent_{i}, agent)"
         
@@ -495,7 +511,8 @@ class WebSocketBridgeLifecycleTests:
             agent = agents[i]
             assert agent.websocket_bridge_set, f"Agent {i} bridge not set"
             assert agent.run_id_received is not None, fAgent {i} run_id not received"
-            assert agent.run_id_received is not None, fAgent {i} run_id not received"
+            assert agent.run_id_received is not None, fAgent {i} run_id not received""
+
             
             # Each agent should have different run_id
             for j, other_agent in enumerate(agents):
@@ -518,7 +535,8 @@ class WebSocketBridgeLifecycleTests:
             run_id=str(uuid.uuid4())
         )
         state = DeepAgentState(user_id=test_user_0)"
-        state = DeepAgentState(user_id=test_user_0)"
+        state = DeepAgentState(user_id=test_user_0)""
+
         
         bridge_auditor.event_captures["test_user_0].clear()"
         
@@ -533,7 +551,8 @@ class WebSocketBridgeLifecycleTests:
         
         # Should have at least initial thinking + heartbeat thinking events
         assert len(thinking_events) >= 2, Should have multiple thinking events from heartbeat"
-        assert len(thinking_events) >= 2, Should have multiple thinking events from heartbeat"
+        assert len(thinking_events) >= 2, Should have multiple thinking events from heartbeat""
+
         
         # Validate heartbeat timing
         event_times = [e['timestamp'] for e in thinking_events]
@@ -541,7 +560,8 @@ class WebSocketBridgeLifecycleTests:
             time_diff = (event_times[1] - event_times[0].total_seconds()
             # Should be approximately the heartbeat interval (5 seconds by default)
             assert time_diff <= 6.0, fHeartbeat interval too long: {time_diff}s"
-            assert time_diff <= 6.0, fHeartbeat interval too long: {time_diff}s"
+            assert time_diff <= 6.0, fHeartbeat interval too long: {time_diff}s""
+
     
     @pytest.mark.asyncio
     async def test_bridge_lifecycle_with_execution_engine(self, bridge_auditor):
@@ -552,7 +572,8 @@ class WebSocketBridgeLifecycleTests:
         
         test_agent = AgentTests(ExecutionEngineAgent)
         registry.register(ExecutionEngineAgent, test_agent)"
-        registry.register(ExecutionEngineAgent, test_agent)"
+        registry.register(ExecutionEngineAgent, test_agent)""
+
         
         # Test pipeline execution through ExecutionEngine
         pipeline_steps = [
@@ -566,7 +587,8 @@ class WebSocketBridgeLifecycleTests:
         state = DeepAgentState(user_id=test_user_0)
         
         bridge_auditor.event_captures[test_user_0].clear()"
-        bridge_auditor.event_captures[test_user_0].clear()"
+        bridge_auditor.event_captures[test_user_0].clear()""
+
         
         # Execute through ExecutionEngine (this would normally be called by supervisor)
         context = AgentExecutionContext(
@@ -591,7 +613,8 @@ class WebSocketBridgeLifecycleTests:
     @pytest.mark.asyncio
     async def test_bridge_error_handling_when_not_set(self, bridge_auditor):
         Test proper error handling when bridge is not set."
-        Test proper error handling when bridge is not set."
+        Test proper error handling when bridge is not set.""
+
         
         # Setup
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
@@ -614,7 +637,8 @@ class WebSocketBridgeLifecycleTests:
         
         context = AgentExecutionContext(
             agent_name=BridgeRequiredAgent,"
-            agent_name=BridgeRequiredAgent,"
+            agent_name=BridgeRequiredAgent,""
+
             run_id=str(uuid.uuid4())
         )
         state = DeepAgentState(user_id="test_user_0)"
@@ -634,7 +658,8 @@ class WebSocketBridgeLifecycleTests:
         class EventIntensiveAgent(BaseAgent):
             async def __init__(self):
                 super().__init__(name=EventIntensiveAgent)"
-                super().__init__(name=EventIntensiveAgent)"
+                super().__init__(name=EventIntensiveAgent)""
+
                 
             async def execute(self, state, run_id, stream=False):
                 # Emit many events in specific order
@@ -654,7 +679,8 @@ class WebSocketBridgeLifecycleTests:
             run_id=str(uuid.uuid4())
         )
         state = DeepAgentState(user_id=test_user_0)"
-        state = DeepAgentState(user_id=test_user_0)"
+        state = DeepAgentState(user_id=test_user_0)""
+
         
         bridge_auditor.event_captures[test_user_0"].clear()"
         
@@ -670,7 +696,8 @@ class WebSocketBridgeLifecycleTests:
         
         # First event should be agent_started
         assert all_events[0]['type'] == 'agent_started', First event should be agent_started"
-        assert all_events[0]['type'] == 'agent_started', First event should be agent_started"
+        assert all_events[0]['type'] == 'agent_started', First event should be agent_started""
+
         
         # Last event should be agent_completed
         assert all_events[-1]['type'] == 'agent_completed', "Last event should be agent_completed"
@@ -688,7 +715,8 @@ class WebSocketBridgeLifecycleTests:
     
     @pytest.mark.asyncio
     async def test_bridge_lifecycle_performance_under_load(self, bridge_auditor):
-        ""Test bridge lifecycle performance under concurrent load."
+        ""Test bridge lifecycle performance under concurrent load.""
+
         
         # Setup with multiple connections for load testing
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment(num_connections=5)
@@ -750,7 +778,8 @@ class WebSocketBridgeLifecycleTests:
     @pytest.mark.asyncio
     async def test_real_websocket_connection_integration(self, bridge_auditor):
         Test with real WebSocket connections (if available)."
-        Test with real WebSocket connections (if available)."
+        Test with real WebSocket connections (if available).""
+
         
         # This test attempts to use real WebSocket infrastructure
         # Falls back to mocks if real infrastructure not available
@@ -827,7 +856,8 @@ class WebSocketBridgeEdgeCasesTests:
     @pytest.mark.asyncio
     async def test_bridge_timeout_scenarios(self, bridge_auditor):
         Test bridge behavior during timeout scenarios."
-        Test bridge behavior during timeout scenarios."
+        Test bridge behavior during timeout scenarios.""
+
         
         execution_engine, registry, bridges = await bridge_auditor.setup_test_environment()
         
@@ -844,7 +874,8 @@ class WebSocketBridgeEdgeCasesTests:
         
         agent = SlowAgent()
         registry.register(SlowAgent, agent)"
-        registry.register(SlowAgent, agent)"
+        registry.register(SlowAgent, agent)""
+
         
         context = AgentExecutionContext(
             agent_name=SlowAgent","
@@ -863,10 +894,12 @@ class WebSocketBridgeEdgeCasesTests:
         
         # Should still have initial events before timeout
         event_capture = bridge_auditor.event_captures[test_user_0]"
-        event_capture = bridge_auditor.event_captures[test_user_0]"
+        event_capture = bridge_auditor.event_captures[test_user_0]""
+
         started_events = event_capture.get_events_by_type(agent_started)
         thinking_events = event_capture.get_events_by_type(agent_thinking)"
-        thinking_events = event_capture.get_events_by_type(agent_thinking)"
+        thinking_events = event_capture.get_events_by_type(agent_thinking)""
+
         
         assert len(started_events) > 0, "Should have agent_started before timeout"
         assert len(thinking_events) >= 1, "Should have some thinking events before timeout"
@@ -881,7 +914,8 @@ class WebSocketBridgeEdgeCasesTests:
         num_iterations = 50
         
         initial_event_count = len(bridge_auditor.event_captures[test_user_0].events)"
-        initial_event_count = len(bridge_auditor.event_captures[test_user_0].events)"
+        initial_event_count = len(bridge_auditor.event_captures[test_user_0].events)""
+
         
         for i in range(num_iterations):
             agent = AgentTests(f"LeakTestAgent_{i}, execution_time=0.1)"
@@ -909,7 +943,8 @@ class WebSocketBridgeEdgeCasesTests:
         # Test WebSocket bridge history management
         # (In real implementation, bridge should limit history size)
         assert final_event_count < 10000, Event capture growing without bounds - potential memory leak"
-        assert final_event_count < 10000, Event capture growing without bounds - potential memory leak"
+        assert final_event_count < 10000, Event capture growing without bounds - potential memory leak""
+
 
 
 if __name__ == __main__":"

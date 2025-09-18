@@ -205,7 +205,7 @@ class E2EStagingImportValidationIssue881Tests(SSotBaseTestCase):
         print(f'Failed imports: {total_imports - successful_imports}/{total_imports}')
         print(f'Import success rate: {successful_imports / total_imports * 100:.1f}%')
         for chain, success in import_chain_results.items():
-            status = '✅ SUCCESS' if success else '❌ FAILED'
+            status = 'CHECK SUCCESS' if success else 'X FAILED'
             print(f'  {chain}: {status}')
         if self.import_failures:
             print(f'\nIDENTIFIED IMPORT FAILURES ({len(self.import_failures)}):')

@@ -112,7 +112,7 @@ class ServiceToServiceAuthFailuresTests(BaseIntegrationTest):
                         # HTTP-level authentication failure (also valid reproduction)
                         assert response.status_code in [401, 403], f"Expected 401/403 authentication error, got: {response.status_code}"
 
-                    logger.error("✅ REPRODUCTION SUCCESS: Backend to Auth Service 403 authentication failure")
+                    logger.error("CHECK REPRODUCTION SUCCESS: Backend to Auth Service 403 authentication failure")
                     logger.error(f"   Status Code: {response.status_code}")
                     logger.error(f"   Response: {response.text[:200]}")
                     logger.error("   This reproduces production pattern: service:netra-backend authentication failure")
@@ -149,19 +149,19 @@ class ServiceToServiceAuthFailuresTests(BaseIntegrationTest):
 
                 # CRITICAL: Validation should fail
                 assert validation_result.get("valid") is False, "Token validation should fail with invalid service token"
-                logger.error("✅ REPRODUCTION SUCCESS: Service token validation failure")
+                logger.error("CHECK REPRODUCTION SUCCESS: Service token validation failure")
                 logger.error(f"   Validation Result: {validation_result}")
 
             except AuthServiceValidationError as e:
                 # Expected authentication error
-                logger.error("✅ REPRODUCTION SUCCESS: AuthServiceValidationError raised")
+                logger.error("CHECK REPRODUCTION SUCCESS: AuthServiceValidationError raised")
                 logger.error(f"   Error: {e}")
                 logger.error("   This reproduces service token validation failures")
                 assert True, "Service token validation failure reproduced"
 
             except Exception as e:
                 # Other authentication-related errors also valid
-                logger.error(f"✅ REPRODUCTION SUCCESS: Authentication error raised: {e}")
+                logger.error(f"CHECK REPRODUCTION SUCCESS: Authentication error raised: {e}")
                 assert True, "Authentication failure reproduced"
 
     @pytest.mark.integration
@@ -198,7 +198,7 @@ class ServiceToServiceAuthFailuresTests(BaseIntegrationTest):
             # CRITICAL: Multiple failures should occur (reproducing cascading auth issues)
             assert authentication_failures >= 3, f"Expected multiple authentication failures, got: {authentication_failures}"
 
-            logger.error("✅ REPRODUCTION SUCCESS: Circuit breaker authentication failures")
+            logger.error("CHECK REPRODUCTION SUCCESS: Circuit breaker authentication failures")
             logger.error(f"   Total Failures: {authentication_failures}")
             logger.error("   This reproduces cascading service authentication issues")
 
@@ -261,11 +261,11 @@ class ServiceToServiceAuthFailuresTests(BaseIntegrationTest):
                             # CRITICAL: Should fail with secret mismatch
                             assert result.get("authenticated") is False, "GCP secret mismatch should cause authentication failure"
 
-                        logger.error("✅ REPRODUCTION SUCCESS: GCP Secret Manager sync failure")
+                        logger.error("CHECK REPRODUCTION SUCCESS: GCP Secret Manager sync failure")
                         logger.error("   Different SECRET_SECRET versions loaded by different services")
 
                 except Exception as e:
-                    logger.error(f"✅ REPRODUCTION SUCCESS: GCP integration error: {e}")
+                    logger.error(f"CHECK REPRODUCTION SUCCESS: GCP integration error: {e}")
                     assert True, "GCP Secret Manager synchronization failure reproduced"
 
 
@@ -311,7 +311,7 @@ class RequestScopedSessionAuthFailureTests(BaseIntegrationTest):
 
             except Exception as e:
                 # Expected authentication failure
-                logger.error("✅ REPRODUCTION SUCCESS: Database session authentication failure")
+                logger.error("CHECK REPRODUCTION SUCCESS: Database session authentication failure")
                 logger.error(f"   Error: {e}")
                 logger.error("   This reproduces get_request_scoped_db_session authentication errors")
                 assert True, "Database session authentication failure reproduced"
@@ -364,13 +364,13 @@ class RequestScopedSessionAuthFailureTests(BaseIntegrationTest):
             assert e.status_code == 403, f"Expected 403 authentication error, got: {e.status_code}"
             assert "Not authenticated" in str(e.detail), f"Expected 'Not authenticated', got: {e.detail}"
 
-            logger.error("✅ REPRODUCTION SUCCESS: Service user auth middleware rejection")
+            logger.error("CHECK REPRODUCTION SUCCESS: Service user auth middleware rejection")
             logger.error(f"   Status Code: {e.status_code}")
             logger.error(f"   Detail: {e.detail}")
             logger.error("   This reproduces middleware authentication rejection pattern")
 
         except Exception as e:
-            logger.error(f"✅ REPRODUCTION SUCCESS: Authentication middleware error: {e}")
+            logger.error(f"CHECK REPRODUCTION SUCCESS: Authentication middleware error: {e}")
             assert True, "Middleware authentication failure reproduced"
 
 
@@ -404,12 +404,12 @@ class Issue1037IntegrationSuiteTests:
 
         # Document test strategy
         integration_test_coverage = [
-            "✅ Backend to Auth Service 403 reproduction",
-            "✅ Service token validation failures",
-            "✅ Circuit breaker authentication cascades",
-            "✅ GCP Secret Manager sync issues",
-            "✅ Database session authentication failures",
-            "✅ Middleware authentication rejection"
+            "CHECK Backend to Auth Service 403 reproduction",
+            "CHECK Service token validation failures",
+            "CHECK Circuit breaker authentication cascades",
+            "CHECK GCP Secret Manager sync issues",
+            "CHECK Database session authentication failures",
+            "CHECK Middleware authentication rejection"
         ]
 
         for test_case in integration_test_coverage:

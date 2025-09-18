@@ -27,7 +27,7 @@ class SafeRemovalValidationTests:
             required_methods = ['get_database_url', 'get_redis_url', 'get_cors_origins', 'is_development', 'is_production']
             available_methods = [method for method in dir(config_manager) if not method.startswith('_')]
             assert len(available_methods) >= 5, f'Canonical UnifiedConfigManager only has {len(available_methods)} methods: {available_methods}. Insufficient functionality to replace deprecated manager safely.'
-            print(f'✅ Canonical UnifiedConfigManager has {len(available_methods)} methods available')
+            print(f'CHECK Canonical UnifiedConfigManager has {len(available_methods)} methods available')
         except ImportError as e:
             pytest.fail(f'Cannot import canonical UnifiedConfigManager: {e}')
         except Exception as e:
@@ -48,7 +48,7 @@ class SafeRemovalValidationTests:
             except Exception:
                 continue
         assert len(files_importing_deprecated) == 0, f'CRITICAL FILES IMPORT DEPRECATED MANAGER: {files_importing_deprecated}. These files must be updated before safe removal is possible.'
-        print(f'✅ No critical files import deprecated configuration manager')
+        print(f'CHECK No critical files import deprecated configuration manager')
 
     def test_deployment_scripts_use_canonical_config(self):
         """SHOULD PASS: Deployment scripts reference canonical config"""
@@ -70,7 +70,7 @@ class SafeRemovalValidationTests:
         mixed_references = len(deprecated_references) > 0 and len(canonical_references) > 0
         assert not mixed_references, f'DEPLOYMENT SCRIPTS HAVE MIXED REFERENCES: Deprecated: {deprecated_references}, Canonical: {canonical_references}. Must standardize on canonical before safe removal.'
         if len(canonical_references) > 0:
-            print(f'✅ Deployment scripts use canonical configuration: {canonical_references}')
+            print(f'CHECK Deployment scripts use canonical configuration: {canonical_references}')
         else:
             print(f"ℹ️ Deployment scripts don't explicitly reference configuration (acceptable)")
 
@@ -94,7 +94,7 @@ class SafeRemovalValidationTests:
                         continue
         deprecated_percentage = len(deprecated_test_imports) / max(total_test_files, 1) * 100
         assert deprecated_percentage < 25, f'TOO MANY TEST FILES USE DEPRECATED MANAGER: {len(deprecated_test_imports)}/{total_test_files} ({deprecated_percentage:.1f}%) files: {deprecated_test_imports[:5]}... Must migrate majority of tests before safe removal.'
-        print(f'✅ Only {len(deprecated_test_imports)}/{total_test_files} test files ({deprecated_percentage:.1f}%) use deprecated manager')
+        print(f'CHECK Only {len(deprecated_test_imports)}/{total_test_files} test files ({deprecated_percentage:.1f}%) use deprecated manager')
 
     def test_circular_import_prevention(self):
         """MUST PASS: Removing deprecated manager won't create circular imports"""
@@ -103,7 +103,7 @@ class SafeRemovalValidationTests:
             from netra_backend.app.core.configuration.base import UnifiedConfigManager
             config = UnifiedConfigManager()
             assert config is not None, 'Canonical UnifiedConfigManager has circular import issues'
-            print('✅ Canonical UnifiedConfigManager has no circular import issues')
+            print('CHECK Canonical UnifiedConfigManager has no circular import issues')
         except ImportError as e:
             pytest.fail(f'Circular import detected in canonical UnifiedConfigManager: {e}')
         except Exception as e:
@@ -128,7 +128,7 @@ class SafeRemovalValidationTests:
                         method_results[method_name] = f'error: {e}'
                 successful_methods = sum((1 for result in method_results.values() if result == 'success'))
                 assert successful_methods >= 1, f'Canonical UnifiedConfigManager methods failing: {method_results}. Environment variable handling may be broken.'
-                print(f'✅ Canonical UnifiedConfigManager successfully executed {successful_methods}/{len(method_results)} methods')
+                print(f'CHECK Canonical UnifiedConfigManager successfully executed {successful_methods}/{len(method_results)} methods')
         except ImportError as e:
             pytest.fail(f'Cannot test canonical UnifiedConfigManager environment handling: {e}')
 
@@ -144,9 +144,9 @@ class MigrationPrerequisitesTests:
         file_size = deprecated_path.stat().st_size
         backup_strategy_needed = file_size > 50000
         if backup_strategy_needed:
-            print(f'⚠️ Large deprecated file ({file_size} bytes) requires careful backup strategy')
+            print(f'WARNING️ Large deprecated file ({file_size} bytes) requires careful backup strategy')
         else:
-            print(f'✅ Small deprecated file ({file_size} bytes) - standard backup sufficient')
+            print(f'CHECK Small deprecated file ({file_size} bytes) - standard backup sufficient')
         assert True, 'Backup verification readiness check'
 
     def test_rollback_plan_feasibility(self):
@@ -159,7 +159,7 @@ class MigrationPrerequisitesTests:
             content = canonical_path.read_text(encoding='utf-8')
             has_config_logic = any((keyword in content.lower() for keyword in ['database', 'redis', 'environment', 'config', 'setting']))
             assert has_config_logic, 'Canonical configuration lacks configuration logic - rollback risky'
-            print(f'✅ Canonical configuration ({canonical_size} bytes) ready for rollback if needed')
+            print(f'CHECK Canonical configuration ({canonical_size} bytes) ready for rollback if needed')
         except Exception as e:
             pytest.fail(f'Cannot analyze canonical configuration for rollback: {e}')
 if __name__ == '__main__':

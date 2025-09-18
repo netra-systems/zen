@@ -297,7 +297,7 @@ class Issue1116MultiUserAgentExecutionTests(SSotAsyncTestCase):
             f"Agent execution contamination events: {len(self.agent_execution_contamination)}. " \
             f"Enterprise customers can access each other's sensitive execution contexts!"
         
-        print("✅ PASS: Perfect agent execution isolation achieved")
+        print("CHECK PASS: Perfect agent execution isolation achieved")
     
     @pytest.mark.asyncio 
     async def test_websocket_event_delivery_contamination_REAL_CONNECTIONS(self):
@@ -463,7 +463,7 @@ class Issue1116MultiUserAgentExecutionTests(SSotAsyncTestCase):
             f"WebSocket contamination events: {len(self.websocket_contamination_events)}. " \
             f"Enterprise customers receive other customers' sensitive chat events!"
         
-        print("✅ PASS: Perfect WebSocket event delivery isolation achieved")
+        print("CHECK PASS: Perfect WebSocket event delivery isolation achieved")
     
     @pytest.mark.asyncio
     async def test_database_session_contamination_REAL_DATABASE(self):
@@ -620,7 +620,7 @@ class Issue1116MultiUserAgentExecutionTests(SSotAsyncTestCase):
             f"Database contamination events: {len(self.database_contamination_events)}. " \
             f"Enterprise customers can access other customers' database contexts and sensitive data!"
         
-        print("✅ PASS: Perfect database session isolation achieved")
+        print("CHECK PASS: Perfect database session isolation achieved")
     
     @pytest.mark.asyncio
     async def test_end_to_end_multi_user_isolation_COMPREHENSIVE_REAL_SERVICES(self):
@@ -708,7 +708,7 @@ class Issue1116MultiUserAgentExecutionTests(SSotAsyncTestCase):
             f"Revenue at Risk: $500K+ ARR. " \
             f"IMMEDIATE REMEDIATION REQUIRED: Singleton pattern creates multi-service contamination!"
         
-        print("✅ PASS: Perfect end-to-end user isolation achieved across all real services")
+        print("CHECK PASS: Perfect end-to-end user isolation achieved across all real services")
     
     def teardown_method(self, method):
         """Clean up integration test environment and log comprehensive evidence."""

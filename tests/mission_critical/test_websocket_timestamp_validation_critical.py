@@ -1,31 +1,33 @@
-"""
-"""
+""""
+
 Mission Critical Tests for WebSocket Timestamp Validation
 
 Business Value Justification:
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Risk Reduction & System Stability
 - Value Impact: CRITICAL protection of WebSocket-based chat (90% of business value)
 - Strategic Impact: Non-negotiable functionality that must NEVER break
 
 MISSION CRITICAL REQUIREMENTS:
-- Fast execution for CI/CD pipeline (<30s total)
+    - Fast execution for CI/CD pipeline (<""30s"" total)
 - No external dependencies beyond essential services
 - Hard failures on any timestamp validation regression
 - Protection of core WebSocket chat functionality
 
 This test suite validates the staging error:
-WebSocketMessage timestamp - Input should be a valid number, unable to parse string as a number "
+    WebSocketMessage timestamp - Input should be a valid number, unable to parse string as a number "
 WebSocketMessage timestamp - Input should be a valid number, unable to parse string as a number "
 [type=float_parsing, input_value='2025-9-08T16:50:1.447585', input_type=str]"
-[type=float_parsing, input_value='2025-9-08T16:50:1.447585', input_type=str]"
+[type=float_parsing, input_value='2025-9-08T16:50:1.447585', input_type=str]""
+
 
 CRITICAL: If these tests fail, WebSocket chat is BROKEN and deployment must be BLOCKED.
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import pytest
 import time
 import json
@@ -47,7 +49,8 @@ class WebSocketTimestampValidationCriticalTests:
     "Mission critical tests for timestamp validation - MUST NEVER FAIL."
 
     def test_iso_datetime_string_rejection_critical(self):
-        """
+        """"
+
         MISSION CRITICAL: ISO datetime strings MUST be rejected.
         
         This test MUST FAIL initially to prove timestamp validation is broken.
@@ -97,7 +100,8 @@ class WebSocketTimestampValidationCriticalTests:
         for timestamp in valid_timestamps:
             message_data = {
                 type: user_message,
-                payload: {"content": "Test message"},"
+                payload: {"content": "Test message"},""
+
                 timestamp: timestamp,
                 user_id": critical-user"
             }
@@ -110,7 +114,8 @@ class WebSocketTimestampValidationCriticalTests:
                 pytest.fail(fCRITICAL: Valid timestamp {timestamp} rejected: {e})
 
     def test_critical_agent_events_timestamp_validation(self):
-        """
+        """"
+
         MISSION CRITICAL: Agent events that deliver business value must validate timestamps.
         
         These are the 5 critical events that enable chat functionality:
@@ -149,7 +154,8 @@ class WebSocketTimestampValidationCriticalTests:
             assert len(timestamp_errors) > 0, "fCRITICAL: {event_type} timestamp validation broken"
 
     def test_create_standard_message_timestamp_safety(self):
-    """
+    """"
+
         MISSION CRITICAL: Standard message creation must generate safe timestamps.
         
         The create_standard_message function MUST generate float timestamps.
@@ -168,16 +174,19 @@ class WebSocketTimestampValidationCriticalTests:
         # Must be close to current time (within 2 seconds)
         time_diff = abs(message.timestamp - time.time())
         assert time_diff < 2.0, fCRITICAL: Generated timestamp too far from current: {time_diff}s"
-        assert time_diff < 2.0, fCRITICAL: Generated timestamp too far from current: {time_diff}s"
+        assert time_diff < 2.0, fCRITICAL: Generated timestamp too far from current: {time_diff}s""
+
 
     def test_timestamp_validation_performance_critical(self):
         """
-    "
+    ""
+
         MISSION CRITICAL: Timestamp validation must not impact performance.
         
-        Validation overhead must be <0.1ms per message to avoid chat lag.
+        Validation overhead must be <0.""1ms"" per message to avoid chat lag.
         "
-        "
+        ""
+
         message_data = {
             type": heartbeat,"
             payload: {},
@@ -192,12 +201,13 @@ class WebSocketTimestampValidationCriticalTests:
         for _ in range(iterations):
             WebSocketMessage(**message_data)
             message_data[timestamp] = time.time()  # Update for next iteration"
-            message_data[timestamp] = time.time()  # Update for next iteration"
+            message_data[timestamp] = time.time()  # Update for next iteration""
+
         
         end_time = time.perf_counter()
         avg_time_ms = ((end_time - start_time) / iterations) * 1000
         
-        # CRITICAL: Must be under 0.1ms per validation
+        # CRITICAL: Must be under 0.""1ms"" per validation
         assert avg_time_ms < 0.1, f"CRITICAL: Timestamp validation too slow: {avg_time_ms}ms"
 
     def test_message_type_normalization_with_timestamp(self):
@@ -244,7 +254,8 @@ class WebSocketTimestampValidationCriticalTests:
             "payload: {},"
             timestamp: None,  # Explicitly None
             user_id: none-timestamp-user"
-            user_id: none-timestamp-user"
+            user_id: none-timestamp-user""
+
         }
         
         # This MUST work - None is explicitly allowed
@@ -255,7 +266,8 @@ class WebSocketTimestampValidationCriticalTests:
             pytest.fail(fCRITICAL: None timestamp rejected: {e})
 
     def test_string_numeric_rejection_critical(self):
-    """
+    """"
+
         MISSION CRITICAL: String numeric values must be rejected.
         
         Even if strings contain valid numbers, they must be rejected to enforce type safety.
@@ -274,7 +286,8 @@ class WebSocketTimestampValidationCriticalTests:
                 payload": {typing: True},"
                 timestamp: string_timestamp,  # String numeric should fail
                 user_id: string-numeric-user"
-                user_id: string-numeric-user"
+                user_id: string-numeric-user""
+
             }
             
             with pytest.raises(ValidationError) as exc_info:
@@ -287,7 +300,8 @@ class WebSocketTimestampValidationCriticalTests:
             assert timestamp_errors[0]['type'] == 'float_parsing', "CRITICAL: Wrong error type for string numeric"
 
     def test_edge_case_timestamps_critical(self):
-    """
+    """"
+
         MISSION CRITICAL: Edge case timestamps must be handled safely.
         
         System must gracefully handle extreme values without crashing.
@@ -309,7 +323,8 @@ class WebSocketTimestampValidationCriticalTests:
             try:
                 message = WebSocketMessage(**message_data)
                 assert message.timestamp == timestamp, fCRITICAL: Edge case {timestamp} not preserved"
-                assert message.timestamp == timestamp, fCRITICAL: Edge case {timestamp} not preserved"
+                assert message.timestamp == timestamp, fCRITICAL: Edge case {timestamp} not preserved""
+
             except Exception as e:
                 pytest.fail(f"CRITICAL: Valid edge case {timestamp} rejected: {e})"
         
@@ -334,11 +349,13 @@ class WebSocketTimestampValidationCriticalTests:
 
 class CriticalTimestampValidationRegressionPreventionTests:
     Regression prevention tests - these must NEVER regress."
-    Regression prevention tests - these must NEVER regress."
+    Regression prevention tests - these must NEVER regress.""
+
 
     def test_staging_error_exact_reproduction(self):
         """
-    "
+    ""
+
         REGRESSION PREVENTION: Exact staging error must be reproducible.
         
         This test locks in the exact error that occurred in staging.
@@ -353,7 +370,8 @@ class CriticalTimestampValidationRegressionPreventionTests:
                 "user_request: Execute unified_data_agent with "data": {"'query': 'Analyze system performance metrics for Q4 2024', 'metrics': ['cpu', 'memory', 'disk'], 'timeframe': '3_months'"},"
                 message_id: req_61eebcb6,
                 user: staging-e2e-user-1"
-                user: staging-e2e-user-1"
+                user: staging-e2e-user-1""
+
             },
             "timestamp: 2025-9-08T16:50:1.447585,  # Exact problematic value"
             message_id: req_61eebcb6,
@@ -404,7 +422,8 @@ class CriticalTimestampValidationRegressionPreventionTests:
         
         # But valid chat MUST work
         chat_data[timestamp] = time.time()"
-        chat_data[timestamp] = time.time()"
+        chat_data[timestamp] = time.time()""
+
         
         try:
             message = WebSocketMessage(**chat_data)

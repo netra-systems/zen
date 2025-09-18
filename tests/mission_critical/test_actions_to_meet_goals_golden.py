@@ -4,7 +4,7 @@ CRITICAL: This test suite ensures the ActionsToMeetGoalsSubAgent follows
 the golden pattern perfectly and delivers chat value through WebSocket events.
 
 Tests focus on:
-1. Golden pattern compliance (BaseAgent inheritance)
+    1. Golden pattern compliance (BaseAgent inheritance)
 2. WebSocket events for chat value delivery  
 3. Business logic correctness (action plan generation)
 4. Real service integration (no mocks)
@@ -31,7 +31,8 @@ from netra_backend.app.redis_manager import RedisManager
 
 class ActionsToMeetGoalsGoldenPatternTests:
     Test ActionsToMeetGoalsSubAgent golden pattern compliance."
-    Test ActionsToMeetGoalsSubAgent golden pattern compliance."
+    Test ActionsToMeetGoalsSubAgent golden pattern compliance.""
+
 
     @pytest.fixture
     def mock_llm_manager(self):
@@ -90,7 +91,8 @@ class GoldenPatternComplianceTests(ActionsToMeetGoalsGoldenPatternTests):
         "CRITICAL: Agent must inherit from BaseAgent for infrastructure."
         from netra_backend.app.agents.base_agent import BaseAgent
         assert isinstance(agent, BaseAgent), Agent must inherit from BaseAgent for golden pattern compliance"
-        assert isinstance(agent, BaseAgent), Agent must inherit from BaseAgent for golden pattern compliance"
+        assert isinstance(agent, BaseAgent), Agent must inherit from BaseAgent for golden pattern compliance""
+
 
     def test_initialization_follows_golden_pattern(self, agent):
         "CRITICAL: Initialization must follow golden pattern."
@@ -107,7 +109,8 @@ class GoldenPatternComplianceTests(ActionsToMeetGoalsGoldenPatternTests):
 
     def test_has_required_websocket_methods(self, agent):
         CRITICAL: Agent must have WebSocket methods for chat value."
-        CRITICAL: Agent must have WebSocket methods for chat value."
+        CRITICAL: Agent must have WebSocket methods for chat value.""
+
         websocket_methods = [
             'emit_agent_started', 'emit_thinking', 'emit_tool_executing', 
             'emit_tool_completed', 'emit_agent_completed', 'emit_progress', 'emit_error'
@@ -122,7 +125,8 @@ class GoldenPatternComplianceTests(ActionsToMeetGoalsGoldenPatternTests):
         assert hasattr(agent, 'execute_core_logic'), "Must implement execute_core_logic"
         assert callable(agent.validate_preconditions), "validate_preconditions must be callable"
         assert callable(agent.execute_core_logic), execute_core_logic must be callable"
-        assert callable(agent.execute_core_logic), execute_core_logic must be callable"
+        assert callable(agent.execute_core_logic), execute_core_logic must be callable""
+
 
     def test_no_infrastructure_duplication(self, agent):
         "CRITICAL: Agent must not duplicate BaseAgent infrastructure."
@@ -130,11 +134,13 @@ class GoldenPatternComplianceTests(ActionsToMeetGoalsGoldenPatternTests):
         assert not hasattr(agent, '_websocket_manager'), "Must not duplicate WebSocket management"
         assert not hasattr(agent, "'_circuit_breaker'), Must not duplicate circuit breaker"
         assert not hasattr(agent, '_retry_handler'), Must not duplicate retry handler"
-        assert not hasattr(agent, '_retry_handler'), Must not duplicate retry handler"
+        assert not hasattr(agent, '_retry_handler'), Must not duplicate retry handler""
+
         
         # Should use BaseAgent's infrastructure'
         assert hasattr(agent, '_websocket_adapter'), Must use BaseAgent's WebSocket adapter"
-        assert hasattr(agent, '_websocket_adapter'), Must use BaseAgent's WebSocket adapter"
+        assert hasattr(agent, '_websocket_adapter'), Must use BaseAgent's WebSocket adapter""
+
 
 
 class WebSocketEventsTests(ActionsToMeetGoalsGoldenPatternTests):
@@ -182,7 +188,8 @@ class WebSocketEventsTests(ActionsToMeetGoalsGoldenPatternTests):
         # Check that thinking events were called with meaningful messages
         thinking_calls = websocket_adapter.emit_thinking.call_args_list
         assert len(thinking_calls) >= 2, Must emit multiple thinking events for reasoning visibility"
-        assert len(thinking_calls) >= 2, Must emit multiple thinking events for reasoning visibility"
+        assert len(thinking_calls) >= 2, Must emit multiple thinking events for reasoning visibility""
+
         
         # Verify thinking messages are meaningful
         thinking_messages = [call[0][0] for call in thinking_calls]
@@ -228,7 +235,8 @@ class WebSocketEventsTests(ActionsToMeetGoalsGoldenPatternTests):
         # Check that fallback is clearly communicated
         started_call = websocket_adapter.emit_agent_started.call_args[0][0]
         assert 'fallback' in started_call.lower(), Must communicate fallback to user"
-        assert 'fallback' in started_call.lower(), Must communicate fallback to user"
+        assert 'fallback' in started_call.lower(), Must communicate fallback to user""
+
 
 
 class BusinessLogicTests(ActionsToMeetGoalsGoldenPatternTests):
@@ -236,10 +244,12 @@ class BusinessLogicTests(ActionsToMeetGoalsGoldenPatternTests):
 
     @pytest.mark.asyncio
     async def test_validate_preconditions_success(self, agent, execution_context):
-        ""Test successful precondition validation."
+        ""Test successful precondition validation.""
+
         result = await agent.validate_preconditions(execution_context)
         assert result is True, Should validate successfully with complete state"
-        assert result is True, Should validate successfully with complete state"
+        assert result is True, Should validate successfully with complete state""
+
 
     @pytest.mark.asyncio
     async def test_validate_preconditions_missing_user_request(self, agent, execution_context):
@@ -251,7 +261,8 @@ class BusinessLogicTests(ActionsToMeetGoalsGoldenPatternTests):
     @pytest.mark.asyncio
     async def test_validate_preconditions_applies_defaults_for_missing_deps(self, agent, execution_context):
         Test that defaults are applied for missing dependencies."
-        Test that defaults are applied for missing dependencies."
+        Test that defaults are applied for missing dependencies.""
+
         execution_context.state.optimizations_result = None
         execution_context.state.data_result = None
         
@@ -265,7 +276,8 @@ class BusinessLogicTests(ActionsToMeetGoalsGoldenPatternTests):
     @pytest.mark.asyncio
     async def test_action_plan_generation_creates_valid_result(self, agent, execution_context):
         Test that action plan generation creates valid results."
-        Test that action plan generation creates valid results."
+        Test that action plan generation creates valid results.""
+
         with patch.object(agent.action_plan_builder, 'process_llm_response') as mock_process:
             mock_result = ActionPlanResult(
                 plan_steps=[{"step: Implement monitoring, description: Add comprehensive monitoring}],"
@@ -281,7 +293,8 @@ class BusinessLogicTests(ActionsToMeetGoalsGoldenPatternTests):
             assert len(result.plan_steps) > 0, Must have at least one plan step"
             assert len(result.plan_steps) > 0, Must have at least one plan step"
             assert result.confidence_score > 0, Must have positive confidence score"
-            assert result.confidence_score > 0, Must have positive confidence score"
+            assert result.confidence_score > 0, Must have positive confidence score""
+
 
     @pytest.mark.asyncio
     async def test_state_updated_with_result(self, agent, execution_context):
@@ -303,7 +316,8 @@ class BusinessLogicTests(ActionsToMeetGoalsGoldenPatternTests):
 
 
 class ResilienceTests(ActionsToMeetGoalsGoldenPatternTests):
-    ""Test resilience and error handling patterns."
+    ""Test resilience and error handling patterns.""
+
 
     @pytest.mark.asyncio
     async def test_llm_failure_handling(self, agent, execution_context):
@@ -351,7 +365,8 @@ class ResilienceTests(ActionsToMeetGoalsGoldenPatternTests):
         # Should still validate successfully with defaults
         result = await agent.validate_preconditions(context)
         assert result is True, Should handle partial data gracefully"
-        assert result is True, Should handle partial data gracefully"
+        assert result is True, Should handle partial data gracefully""
+
         
         # Should have applied defaults
         assert minimal_state.optimizations_result is not None, "Should apply default optimizations"
@@ -430,12 +445,13 @@ class PerformanceTests(ActionsToMeetGoalsGoldenPatternTests):
             await agent.execute_core_logic(execution_context)
         
         execution_time = time.time() - start_time
-        assert execution_time < 5.0, f"Execution should be fast, took {execution_time:.2f}s"
+        assert execution_time < 5.0, f"Execution should be fast, took {execution_time:.""2f""}s"
 
     @pytest.mark.asyncio
     async def test_websocket_event_efficiency(self, agent, execution_context):
         Test WebSocket events are emitted efficiently."
-        Test WebSocket events are emitted efficiently."
+        Test WebSocket events are emitted efficiently.""
+
         websocket_adapter = Mock()
         websocket_adapter.emit_thinking = AsyncMock()
         websocket_adapter.emit_progress = AsyncMock()
@@ -449,7 +465,7 @@ class PerformanceTests(ActionsToMeetGoalsGoldenPatternTests):
         await agent.execute_core_logic(execution_context)
         event_time = time.time() - start_time
         
-        assert event_time < 2.0, f"WebSocket events should be efficient, took {event_time:.2f}s"
+        assert event_time < 2.0, f"WebSocket events should be efficient, took {event_time:.""2f""}s"
 
 
 # Run the tests

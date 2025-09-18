@@ -104,7 +104,7 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
             # Test legacy import path (should work via compatibility bridge)
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
-            print(f"   ✅ Legacy import successful: {ExecutionEngine.__name__}")
+            print(f"   CHECK Legacy import successful: {ExecutionEngine.__name__}")
             print(f"   Module: {ExecutionEngine.__module__}")
             
             # Check if using compatibility mode
@@ -114,10 +114,10 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
             )
             
             if is_compatibility:
-                print(f"   ⚠️  COMPATIBILITY MODE: Legacy import using compatibility bridge")
+                print(f"   WARNING️  COMPATIBILITY MODE: Legacy import using compatibility bridge")
                 print(f"   Impact: Performance overhead, migration incomplete")
             else:
-                print(f"   ✅ DIRECT MODE: Legacy import resolved directly")
+                print(f"   CHECK DIRECT MODE: Legacy import resolved directly")
             
             # Try to initialize legacy ExecutionEngine
             mock_registry = self._create_mock_agent_registry()
@@ -132,7 +132,7 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
                         websocket_bridge=mock_websocket_bridge,
                         user_context=self.user_contexts[0]
                     )
-                    print(f"   ✅ Legacy factory initialization successful")
+                    print(f"   CHECK Legacy factory initialization successful")
                 else:
                     # Direct initialization (old pattern)
                     engine = UserExecutionEngine(
@@ -140,7 +140,7 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
                         websocket_bridge=mock_websocket_bridge,
                         user_context=self.user_contexts[0]
                     )
-                    print(f"   ✅ Direct initialization successful")
+                    print(f"   CHECK Direct initialization successful")
                 
                 # Validate engine properties
                 engine_info = {
@@ -157,9 +157,9 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
                 if hasattr(engine, 'get_execution_stats'):
                     try:
                         stats = await engine.get_execution_stats()
-                        print(f"   ✅ Engine responsive: {len(stats)} stat fields")
+                        print(f"   CHECK Engine responsive: {len(stats)} stat fields")
                     except Exception as e:
-                        print(f"   ⚠️  Engine stats error: {e}")
+                        print(f"   WARNING️  Engine stats error: {e}")
                 
                 # Clean up engine
                 if hasattr(engine, 'cleanup'):
@@ -174,7 +174,7 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
                 }
                 
             except Exception as init_error:
-                print(f"   ❌ Legacy initialization failed: {init_error}")
+                print(f"   X Legacy initialization failed: {init_error}")
                 self.execution_engines['legacy'] = {
                     'engine': None,
                     'info': {},
@@ -191,7 +191,7 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
                 )
                 
         except ImportError as import_error:
-            print(f"   ❌ Legacy import failed: {import_error}")
+            print(f"   X Legacy import failed: {import_error}")
             
             # This failure demonstrates migration issues
             assert False, (
@@ -217,7 +217,7 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
             # Test modern SSOT import path
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             
-            print(f"   ✅ SSOT import successful: {UserExecutionEngine.__name__}")
+            print(f"   CHECK SSOT import successful: {UserExecutionEngine.__name__}")
             print(f"   Module: {UserExecutionEngine.__module__}")
             
             # Test modern initialization with proper dependencies
@@ -232,7 +232,7 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
                     websocket_emitter=websocket_emitter
                 )
                 
-                print(f"   ✅ Modern initialization successful")
+                print(f"   CHECK Modern initialization successful")
                 
                 # Validate modern engine properties
                 engine_info = {
@@ -250,7 +250,7 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
                 # Test engine capabilities
                 if hasattr(engine, 'get_execution_stats'):
                     stats = await engine.get_execution_stats()
-                    print(f"   ✅ Engine responsive: {len(stats)} stat fields")
+                    print(f"   CHECK Engine responsive: {len(stats)} stat fields")
                     
                 # Test user isolation properties
                 isolation_status = engine.get_isolation_status()
@@ -267,7 +267,7 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
                 }
                 
             except Exception as init_error:
-                print(f"   ❌ SSOT initialization failed: {init_error}")
+                print(f"   X SSOT initialization failed: {init_error}")
                 
                 assert False, (
                     f"CRITICAL: SSOT UserExecutionEngine initialization failed. "
@@ -317,10 +317,10 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
                         'websocket_emitter': websocket_emitter
                     }
                     
-                    print(f"   ✅ Created engine for user {user_context.user_id[:8]}...")
+                    print(f"   CHECK Created engine for user {user_context.user_id[:8]}...")
                     
                 except Exception as e:
-                    print(f"   ❌ Failed to create engine for user {user_context.user_id}: {e}")
+                    print(f"   X Failed to create engine for user {user_context.user_id}: {e}")
                     continue
             
             if len(user_engines) < 2:
@@ -362,12 +362,12 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
                 try:
                     result = await asyncio.wait_for(task, timeout=30.0)
                     execution_results[user_id] = result
-                    print(f"   ✅ User {user_id[:8]}... execution completed")
+                    print(f"   CHECK User {user_id[:8]}... execution completed")
                 except asyncio.TimeoutError:
                     print(f"   ⏱️  User {user_id[:8]}... execution timed out")
                     execution_results[user_id] = {'status': 'TIMEOUT', 'error': 'Execution timed out'}
                 except Exception as e:
-                    print(f"   ❌ User {user_id[:8]}... execution failed: {e}")
+                    print(f"   X User {user_id[:8]}... execution failed: {e}")
                     execution_results[user_id] = {'status': 'ERROR', 'error': str(e)}
             
             concurrent_duration = time.time() - start_time
@@ -383,7 +383,7 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
                 try:
                     await user_engine_info['engine'].cleanup()
                 except Exception as e:
-                    print(f"   ⚠️  Cleanup error: {e}")
+                    print(f"   WARNING️  Cleanup error: {e}")
             
         except Exception as e:
             assert False, f"Multi-user isolation test failed: {e}"
@@ -554,7 +554,7 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
             if not result.get('isolated', False):
                 isolation_issues.append(f"User {user_id[:8]}... execution not marked as isolated")
             
-            print(f"   ✅ User {user_id[:8]}... isolation validated")
+            print(f"   CHECK User {user_id[:8]}... isolation validated")
         
         if isolation_issues:
             assert False, (
@@ -565,7 +565,7 @@ class ExecutionEngineImportResolutionTests(SSotAsyncTestCase):
                 f"CRITICAL: Multi-user deployment unsafe until isolation issues resolved."
             )
         else:
-            print(f"   ✅ User isolation validation passed for {len(execution_results)} users")
+            print(f"   CHECK User isolation validation passed for {len(execution_results)} users")
 
 
 if __name__ == '__main__':

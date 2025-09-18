@@ -352,7 +352,7 @@ class JWTSSOTIssue1078E2EStagingTests(BaseE2ETest):
                         f"JWT SECRET SYNCHRONIZATION FAILURE (Issue #1078):\n"
                         f"Auth service token rejected by backend endpoints:\n\n" +
                         "\n".join([
-                            f"  ❌ {path} ({result['description']}): Status {result['status']}"
+                            f"  X {path} ({result['description']}): Status {result['status']}"
                             for path, result in auth_errors.items()
                         ]) +
                         f"\n\n🚨 CRITICAL JWT SECRET MISMATCH DETECTED!\n"
@@ -372,7 +372,7 @@ class JWTSSOTIssue1078E2EStagingTests(BaseE2ETest):
                     pytest.fail(
                         f"BACKEND ENDPOINT ERRORS (Issue #1078):\n" +
                         "\n".join([
-                            f"  ⚠️  {path}: Status {result['status']}"
+                            f"  WARNING️  {path}: Status {result['status']}"
                             for path, result in other_errors.items()
                         ]) +
                         "\n\nSome backend endpoints have issues that prevent JWT validation testing."

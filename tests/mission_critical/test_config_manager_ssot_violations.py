@@ -1,12 +1,12 @@
-"""
-"""
+""""
+
 Test SSOT Config Manager Violations - Issue #667
 
 EXPECTED TO FAIL - Reproduces Current SSOT Violations
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
-- Business Goal: System Stability - Prevent $120K+ MRR Golden Path failures
+    - Segment: Platform/Internal
+- Business Goal: System Stability - Prevent $""120K""+ MRR Golden Path failures
 - Value Impact: Demonstrates how 3 duplicate config managers create auth failures
 - Strategic Impact: Provides clear evidence of SSOT violations blocking Golden Path
 
@@ -14,18 +14,19 @@ PURPOSE: This test is EXPECTED TO FAIL until Issue #667 is resolved.
 It demonstrates the exact SSOT violations that cause Golden Path auth failures.
 
 Test Coverage:
-1. Import conflicts between 3 configuration managers
+    1. Import conflicts between 3 configuration managers
 2. Method signature conflicts causing runtime errors
 3. Environment access pattern violations
 4. Auth configuration conflicts affecting login flow
 
-CRITICAL: This test protects $500K+ ARR by detecting configuration management
+CRITICAL: This test protects $""500K"" plus ARR by detecting configuration management
 failures that prevent user login and AI chat functionality.
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import pytest
 import sys
 from typing import Any, Dict, List
@@ -41,7 +42,8 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
     "Test suite to reproduce and validate config manager SSOT violations."
 
     def test_config_manager_import_conflicts_detected(self):
-    """
+    """"
+
         EXPECTED TO FAIL - Detect import conflicts between 3 config managers.
 
         This test demonstrates how having 3 different configuration managers
@@ -52,7 +54,8 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
             netra_backend.app.core.configuration.base.UnifiedConfigManager","
             netra_backend.app.core.configuration.base.UnifiedConfigManager,
             netra_backend.app.services.configuration_service.ConfigurationManager"
-            netra_backend.app.services.configuration_service.ConfigurationManager"
+            netra_backend.app.services.configuration_service.ConfigurationManager""
+
         ]
 
         imported_managers = []
@@ -83,7 +86,8 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
         )
 
     def test_config_manager_method_signature_conflicts(self):
-    """
+    """"
+
         EXPECTED TO FAIL - Detect method signature conflicts between managers.
 
         Different config managers may have conflicting method signatures
@@ -145,13 +149,15 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
 
     def test_environment_access_ssot_violations_detected(self):
         """
-        "
+        ""
+
         EXPECTED TO FAIL - Detect direct os.environ access violations in config managers.
 
         Config managers should use IsolatedEnvironment, not direct os.environ access.
         This test scans for violations that cause environment detection failures.
 "
-"
+""
+
         import os
         import ast
         from pathlib import Path
@@ -276,18 +282,20 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
         assert len(config_conflicts) == 0, (
             fSSOT VIOLATION: Auth configuration conflicts detected: {config_conflicts}. 
             fDifferent config managers return different auth settings, 
-            f"causing Golden Path login failures worth $500K+ ARR protection."
+            f"causing Golden Path login failures worth $""500K"" plus ARR protection."
         )
 
     def test_config_manager_singleton_vs_factory_pattern_conflicts(self):
         """
-        "
+        ""
+
         EXPECTED TO FAIL - Detect singleton vs factory pattern conflicts.
 
         Mixed singleton and factory patterns in config managers create
         race conditions and state sharing issues in multi-user scenarios.
 "
-"
+""
+
         singleton_managers = []
         factory_managers = []
 

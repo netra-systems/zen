@@ -77,12 +77,12 @@ class Issue1186UserExecutionEngineServiceIntegrationTests(unittest.TestCase):
                     missing_methods.append(method)
 
             # Report results
-            print(f"✅ WebSocket interface methods available: {len(available_methods)}")
+            print(f"CHECK WebSocket interface methods available: {len(available_methods)}")
             for method in available_methods:
-                print(f"  ✓ {method}")
+                print(f"  CHECK {method}")
 
             if missing_methods:
-                print(f"⚠️  WebSocket interface methods missing: {len(missing_methods)}")
+                print(f"WARNING️  WebSocket interface methods missing: {len(missing_methods)}")
                 for method in missing_methods:
                     print(f"  ✗ {method}")
 
@@ -99,7 +99,7 @@ class Issue1186UserExecutionEngineServiceIntegrationTests(unittest.TestCase):
                 self.assertGreater(len(sig.parameters), 0,
                                  "set_websocket_emitter should accept WebSocket emitter parameter")
 
-            print("✅ WebSocket integration interface validation passed")
+            print("CHECK WebSocket integration interface validation passed")
 
         except ImportError as e:
             self.fail(f"INTEGRATION FAILURE: UserExecutionEngine import failed: {e}")
@@ -136,7 +136,7 @@ class Issue1186UserExecutionEngineServiceIntegrationTests(unittest.TestCase):
 
             print(f"📊 Agent Registry Integration Compatibility: {available_count}/{total_count}")
             for method, status in integration_compatibility.items():
-                symbol = "✓" if status == 'AVAILABLE' else "✗"
+                symbol = "CHECK" if status == 'AVAILABLE' else "✗"
                 print(f"  {symbol} {method}: {status}")
 
             # Test mock integration with AgentRegistry
@@ -152,10 +152,10 @@ class Issue1186UserExecutionEngineServiceIntegrationTests(unittest.TestCase):
                         self.assertTrue(hasattr(engine_class, 'set_agent_registry'),
                                       "UserExecutionEngine should support AgentRegistry integration")
 
-                print("✅ Agent Registry integration interface validated")
+                print("CHECK Agent Registry integration interface validated")
 
             except Exception as e:
-                print(f"⚠️  Agent Registry mock integration warning: {e}")
+                print(f"WARNING️  Agent Registry mock integration warning: {e}")
 
         except ImportError as e:
             self.fail(f"INTEGRATION FAILURE: Agent Registry integration test failed: {e}")
@@ -198,9 +198,9 @@ class Issue1186UserExecutionEngineServiceIntegrationTests(unittest.TestCase):
             print(f"🏗️  Factory Service Integration: {callable_count}/{total_count} methods callable")
             for method, status in service_integration_status.items():
                 if status == 'CALLABLE':
-                    symbol = "✓"
+                    symbol = "CHECK"
                 elif status == 'NOT_CALLABLE':
-                    symbol = "⚠️"
+                    symbol = "WARNING️"
                 else:
                     symbol = "✗"
                 print(f"  {symbol} {method}: {status}")
@@ -213,7 +213,7 @@ class Issue1186UserExecutionEngineServiceIntegrationTests(unittest.TestCase):
                 self.assertEqual(service_integration_status[method], 'CALLABLE',
                                f"Factory method {method} must be callable")
 
-            print("✅ ExecutionEngineFactory service integration validated")
+            print("CHECK ExecutionEngineFactory service integration validated")
 
         except ImportError as e:
             self.fail(f"INTEGRATION FAILURE: ExecutionEngineFactory import failed: {e}")
@@ -269,11 +269,11 @@ class Issue1186UserExecutionEngineServiceIntegrationTests(unittest.TestCase):
             print(f"🔒 User Context Isolation Tests: {passed_count}/{total_count} passed")
             for result in isolation_test_results:
                 if result['validation'] == 'PASSED':
-                    symbol = "✓"
+                    symbol = "CHECK"
                 elif result['validation'] == 'FAILED':
                     symbol = "✗"
                 else:
-                    symbol = "⚠️"
+                    symbol = "WARNING️"
 
                 print(f"  {symbol} {result['user']}: {result['validation']}")
 
@@ -281,10 +281,10 @@ class Issue1186UserExecutionEngineServiceIntegrationTests(unittest.TestCase):
             self.assertGreater(passed_count, 0,
                              "At least one user context validation should pass")
 
-            print("✅ User context isolation service integration validated")
+            print("CHECK User context isolation service integration validated")
 
         except ImportError as e:
-            print(f"⚠️  User context integration validation skipped: {e}")
+            print(f"WARNING️  User context integration validation skipped: {e}")
 
     def test_service_boundary_integration_validation(self):
         """Test service boundary integration after consolidation.
@@ -349,9 +349,9 @@ class Issue1186UserExecutionEngineServiceIntegrationTests(unittest.TestCase):
 
         for service_name, result in boundary_validation_results.items():
             if result['status'] == 'BOUNDARY_INTACT':
-                symbol = "✓"
+                symbol = "CHECK"
             elif result['status'] == 'BOUNDARY_VIOLATION':
-                symbol = "⚠️"
+                symbol = "WARNING️"
             else:
                 symbol = "✗"
 
@@ -368,7 +368,7 @@ class Issue1186UserExecutionEngineServiceIntegrationTests(unittest.TestCase):
                              ['BOUNDARY_INTACT', 'BOUNDARY_VIOLATION'],
                              f"Critical service {service} must be available")
 
-        print("✅ Service boundary integration validation completed")
+        print("CHECK Service boundary integration validation completed")
 
     def test_business_workflow_integration_continuity(self):
         """Test business workflow integration continuity after consolidation.
@@ -446,7 +446,7 @@ class Issue1186UserExecutionEngineServiceIntegrationTests(unittest.TestCase):
 
         for test in workflow_integration_tests:
             if test['status'] in ['IMPORT_SUCCESS', 'INTERFACE_AVAILABLE']:
-                symbol = "✓"
+                symbol = "CHECK"
             else:
                 symbol = "✗"
 
@@ -457,7 +457,7 @@ class Issue1186UserExecutionEngineServiceIntegrationTests(unittest.TestCase):
         self.assertGreater(success_count, 0,
                           "At least one business workflow must be functional")
 
-        print("✅ Business workflow integration continuity validated")
+        print("CHECK Business workflow integration continuity validated")
 
 
 if __name__ == '__main__':

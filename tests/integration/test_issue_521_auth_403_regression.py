@@ -179,7 +179,7 @@ class Issue521AuthenticationRegressionTests(SSotBaseTestCase):
         """
         Test: Validate Golden Path user workflow after Issue #521 resolution
         
-        This test ensures that the core business value (users login → get AI responses)
+        This test ensures that the core business value (users login -> get AI responses)
         is restored after fixing the service authentication failures. This represents
         the ultimate validation that Issue #521 resolution protects $500K+ ARR.
         

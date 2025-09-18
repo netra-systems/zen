@@ -7,10 +7,12 @@ class WebSocketTestHelper:
         self._closed = False
         
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.""
+
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)""
+
         self.messages_sent.append(message)
         
     async def close(self, code: int = 1000, reason: str = Normal closure"):"
@@ -20,20 +22,23 @@ class WebSocketTestHelper:
         
     def get_messages(self) -> list:
         Get all sent messages."
-        Get all sent messages."
+        Get all sent messages.""
+
         return self.messages_sent.copy()
 
 "
-"
+""
+
 Comprehensive test for the critical agent_handler async context manager fix.
 
 Tests the actual message flow through the agent handler to ensure:
-1. The fix correctly uses async with instead of async for
+    1. The fix correctly uses async with instead of async for
 2. Messages are properly routed
 3. WebSocket events are sent
 4. Database sessions are properly managed
 "
-"
+""
+
 
 import pytest
 import asyncio
@@ -205,7 +210,8 @@ class AgentHandlerComprehensiveFixTests:
                 websocket = WebSocketTestHelper()
                 mock_service.handle_start_agent = AsyncMock(
                     side_effect=Exception(Service error)"
-                    side_effect=Exception(Service error)"
+                    side_effect=Exception(Service error)""
+
                 )
                 mock_service_class.return_value = mock_service
                 
@@ -223,7 +229,8 @@ class AgentHandlerComprehensiveFixTests:
                 assert handler.processing_stats[errors] > 0
 
     async def test_concurrent_message_handling(self):
-        ""Test that multiple concurrent messages can be handled."
+        ""Test that multiple concurrent messages can be handled.""
+
         
         handler = AgentMessageHandler()
         

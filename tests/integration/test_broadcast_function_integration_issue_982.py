@@ -158,7 +158,7 @@ class BroadcastFunctionConsistencyTests(SSotAsyncTestCase):
                      f"Single canonical implementation required.")
         else:
             # If no issues found, this might indicate SSOT remediation is complete
-            print("✓ Consistent behavior detected - SSOT remediation may be complete")
+            print("CHECK Consistent behavior detected - SSOT remediation may be complete")
 
     async def test_concurrent_broadcast_consistency(self):
         """
@@ -245,7 +245,7 @@ class BroadcastFunctionConsistencyTests(SSotAsyncTestCase):
                      f"with concurrent broadcast handling. Issues: {concurrent_issues}. "
                      f"Inconsistent concurrent behavior creates race conditions and violates SSOT principles.")
         else:
-            print("✓ Consistent concurrent behavior detected")
+            print("CHECK Consistent concurrent behavior detected")
 
 
 @pytest.mark.integration
@@ -374,7 +374,7 @@ class BroadcastUserIsolationSecurityTests(SSotAsyncTestCase):
                      f"Cross-user data leakage violates security requirements and SSOT principles. "
                      f"Perfect user isolation required for $500K+ ARR protection.")
         else:
-            print("✓ User isolation security validated")
+            print("CHECK User isolation security validated")
 
     async def test_broadcast_function_memory_isolation(self):
         """
@@ -464,7 +464,7 @@ class BroadcastUserIsolationSecurityTests(SSotAsyncTestCase):
                      f"Issues: {memory_issues}. "
                      f"Shared state between users creates security vulnerabilities and violates SSOT principles.")
         else:
-            print("✓ Memory isolation validated")
+            print("CHECK Memory isolation validated")
 
 
 @pytest.mark.integration
@@ -535,7 +535,7 @@ class ConvenienceFunctionIntegrationTests(SSotAsyncTestCase):
                      f"Issues: {integration_issues}. "
                      f"Multiple approaches to same functionality violate SSOT principles.")
         else:
-            print("✓ Convenience function integration validated")
+            print("CHECK Convenience function integration validated")
 
 
 if __name__ == "__main__":

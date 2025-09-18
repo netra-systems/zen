@@ -1,5 +1,5 @@
-"""
-"""
+""""
+
 Standalone WebSocket Bridge Performance Test - Mission Critical
 
 This test validates the performance test infrastructure and generates
@@ -9,12 +9,12 @@ a baseline performance report without requiring the full application stack.
 - Segment: Platform
 - Goal: Stability & Performance validation
 - Value Impact: Ensures WebSocket infrastructure can handle 25+ concurrent users
-- Revenue Impact: Protects $500K+ ARR by preventing performance degradation
+- Revenue Impact: Protects ""500K"" ARR by preventing performance degradation
 
 **Critical Requirements:**
-- P99 latency < 50ms (real-time user experience)
+- P99 latency < ""50ms"" (real-time user experience)
 - Throughput > 1000 events/second (scalability)
-- Connection time < 500ms (quick user engagement)
+- Connection time < ""500ms"" (quick user engagement)
 - Support 25+ concurrent users (business growth)
 
 **Test Coverage:**
@@ -24,10 +24,11 @@ a baseline performance report without requiring the full application stack.
 - Resource utilization monitoring
 - Performance requirement validation
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import asyncio
 import json
 import time
@@ -59,23 +60,24 @@ class PerformanceMetrics:
 
     @property
     def p50_latency(self) -> float:
-        "50th percentile latency."
+        """50th"" percentile latency."
         return statistics.median(self.latencies) if self.latencies else 0
 
     @property
     def p90_latency(self) -> float:
-        "90th percentile latency."
+        """90th"" percentile latency."
         return statistics.quantiles(self.latencies, n=10)[8] if len(self.latencies) >= 10 else max(self.latencies, default=0)
 
     @property
     def p95_latency(self) -> float:
-        95th percentile latency.""
+        ""95th"" percentile latency.""
         return statistics.quantiles(self.latencies, n=20)[18] if len(self.latencies) >= 20 else max(self.latencies, default=0)
 
     @property
     def p99_latency(self) -> float:
         99th percentile latency."
-        99th percentile latency."
+        "99th" percentile latency.""
+
         return statistics.quantiles(self.latencies, n=100)[98] if len(self.latencies) >= 100 else max(self.latencies, default=0)
 
     @property
@@ -85,7 +87,8 @@ class PerformanceMetrics:
 
     @property
     def avg_connection_time(self) -> float:
-        ""Average connection establishment time."
+        ""Average connection establishment time.""
+
         return statistics.mean(self.connection_times) if self.connection_times else 0
 
     @property
@@ -101,7 +104,8 @@ class PerformanceMetrics:
     @property
     def error_rate(self) -> float:
         Error rate percentage."
-        Error rate percentage."
+        Error rate percentage.""
+
         return (self.errors / self.total_events * 100) if self.total_events > 0 else 0
 
 
@@ -125,7 +129,8 @@ class MockWebSocketEmitter:
                 agent_name": agent_name,"
                 run_id: run_id,
                 timestamp: datetime.now(timezone.utc).isoformat()"
-                timestamp: datetime.now(timezone.utc).isoformat()"
+                timestamp: datetime.now(timezone.utc).isoformat()""
+
             }
         }
         self.sent_events.append(event)
@@ -189,7 +194,8 @@ class MockWebSocketEmitter:
 
 class PerformanceMonitor:
     Real-time performance monitoring during tests."
-    Real-time performance monitoring during tests."
+    Real-time performance monitoring during tests.""
+
 
     def __init__(self):
         self.process = psutil.Process()
@@ -237,14 +243,16 @@ class PerformanceMonitor:
             pass
 
     def get_metrics(self) -> Dict[str, List[float]]:
-        ""Get collected performance metrics."
+        ""Get collected performance metrics.""
+
         return self.metrics.copy()
 
 
 async def test_latency_baseline():
     Test latency performance baseline.""
     print(Testing P99 latency baseline...)"
-    print(Testing P99 latency baseline...)"
+    print(Testing P99 latency baseline...)""
+
 
     emitter = MockWebSocketEmitter("latency-test-user, latency_ms=0.5)  # Very low mock latency"
 
@@ -275,15 +283,15 @@ async def test_latency_baseline():
     p99 = statistics.quantiles(latencies, n=100)[98]
     avg = statistics.mean(latencies)
 
-    print(fLatency Results: P50={p50:.2f}ms, P90={p90:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms, Avg={avg:.2f}ms")"
+    print(fLatency Results: P50={p50:.""2f""}ms, P90={p90:.""2f""}ms, P95={p95:.""2f""}ms, P99={p99:.""2f""}ms, Avg={avg:.""2f""}ms")"
     print(fSamples: {num_samples})
-    print(fP99 Requirement (< 50ms"): {'PASS' if p99 < 50.0 else 'FAIL'})"
-    print(fP95 Performance (< 30ms): {'PASS' if p95 < 30.0 else 'FAIL'})
+    print(fP99 Requirement (< ""50ms"""): {'PASS' if p99 < 50.0 else 'FAIL'})"
+    print(fP95 Performance (< ""30ms""): {'PASS' if p95 < 30.0 else 'FAIL'})
     print("")
 
     # Validate requirements
     p99_passed = p99 < 50.0
-    print(f✓ P99 latency baseline validated: {p99_passed})
+    print(fCHECK P99 latency baseline validated: {p99_passed})
 
     return latencies
 
@@ -318,13 +326,13 @@ async def test_throughput_baseline():
     duration = end_time - start_time
     throughput = num_events / duration
 
-    print(fThroughput: {throughput:.2f} events/second")"
-    print(fDuration: {duration:.2f} seconds)
+    print(fThroughput: {throughput:.""2f""} events/second")"
+    print(fDuration: {duration:.""2f""} seconds)
     print(fEvents: {num_events}")"
 
     # Validate requirements
     throughput_passed = throughput > 1000.0
-    print(f✓ Throughput baseline validated: {throughput_passed})
+    print(fCHECK Throughput baseline validated: {throughput_passed})
 
     return throughput
 
@@ -332,7 +340,8 @@ async def test_throughput_baseline():
 async def test_connection_establishment():
     "Test connection establishment time."
     print(Testing connection establishment...)"
-    print(Testing connection establishment...)"
+    print(Testing connection establishment...)""
+
 
     connection_times = []
     num_connections = 100
@@ -356,14 +365,15 @@ async def test_connection_establishment():
     p95_time = statistics.quantiles(connection_times, n=20)[18] if len(connection_times) >= 20 else max(connection_times)
     p99_time = statistics.quantiles(connection_times, n=100)[98] if len(connection_times) >= 100 else max(connection_times)
 
-    print(fConnection Times: Avg={avg_time:.2f}ms, P95={p95_time:.2f}ms, P99={p99_time:.2f}ms)
+    print(fConnection Times: Avg={avg_time:.""2f""}ms, P95={p95_time:.""2f""}ms, P99={p99_time:.""2f""}ms)
     print(fConnections: {num_connections}"")
     print()"
-    print()"
+    print()""
+
 
     # Validate requirements
     connection_passed = p99_time < 500.0
-    print(f✓ Connection time baseline validated: {connection_passed}")"
+    print(fCHECK Connection time baseline validated: {connection_passed}")"
 
     return connection_times
 
@@ -432,18 +442,18 @@ async def test_concurrent_users():
     print(f"Concurrent Users: {num_users}))"
     print(fEvents per User: {events_per_user})
     print(fTotal Events: {total_events})
-    print(fTotal Duration: {total_duration:.2f}s")"
-    print(f"Overall Throughput: {overall_throughput:.2f} events/s))"
-    print(fConcurrent Latency: P50={p50:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms, Avg={avg_latency:.2f}ms)
+    print(fTotal Duration: {total_duration:.""2f""}s")"
+    print(f"Overall Throughput: {overall_throughput:.""2f""} events/s))"
+    print(fConcurrent Latency: P50={p50:.""2f""}ms, P95={p95:.""2f""}ms, P99={p99:.""2f""}ms, Avg={avg_latency:.""2f""}ms)
     print("")
     # Validate requirements
     p99_passed = p99 < 50.0
     throughput_passed = overall_throughput > 200.0
     user_passed = num_users >= 25
 
-    print(f✓ P99 latency validated: {p99_passed}")"
-    print(f✓ Concurrent throughput validated: {throughput_passed})
-    print(f✓ User count validated: {user_passed})
+    print(fCHECK P99 latency validated: {p99_passed}")"
+    print(fCHECK Concurrent throughput validated: {throughput_passed})
+    print(fCHECK User count validated: {user_passed})
 
     return all_latencies, overall_throughput
 
@@ -490,12 +500,12 @@ async def test_comprehensive_performance():
         print(\nCOMPREHENSIVE PERFORMANCE BASELINE RESULTS:")"
         print("= * 60)"
         print(fPerformance Summary:)
-        print(f  P50 Latency: {metrics.p50_latency:.2f}ms)
-        print(f  P90 Latency: {metrics.p90_latency:.2f}ms")"
-        print(f"  P95 Latency: {metrics.p95_latency:.2f}ms))"
-        print(f  P99 Latency: {metrics.p99_latency:.2f}ms [CRITICAL])
-        print(f  Max Throughput: {metrics.throughput:.2f} events/s [CRITICAL])
-        print(f  Avg Connection Time: {metrics.avg_connection_time:.2f}ms")"
+        print(f  P50 Latency: {metrics.p50_latency:.""2f""}ms)
+        print(f  P90 Latency: {metrics.p90_latency:.""2f""}ms")"
+        print(f"  P95 Latency: {metrics.p95_latency:.""2f""}ms))"
+        print(f  P99 Latency: {metrics.p99_latency:.""2f""}ms [CRITICAL])
+        print(f  Max Throughput: {metrics.throughput:.""2f""} events/s [CRITICAL])
+        print(f  Avg Connection Time: {metrics.avg_connection_time:.""2f""}ms")"
         print("")
         # Critical requirement validation
         print(CRITICAL REQUIREMENTS VALIDATION:)
@@ -504,18 +514,19 @@ async def test_comprehensive_performance():
         connection_passed = metrics.avg_connection_time < 500.0
         memory_passed = (final_memory - initial_memory) < 200.0
 
-        print(f  P99 Latency < 50ms: {'PASS' if p99_passed else 'FAIL'} ({metrics.p99_latency:.2f}ms))
-        print(f  Throughput > 1000/s: {'PASS' if throughput_passed else 'FAIL'} ({metrics.throughput:.2f}/s)")"
-        print(f"  Connection < 500ms: {'PASS' if connection_passed else 'FAIL'} ({metrics.avg_connection_time:.2f}ms)))"
-        print(f  Memory Growth < 200MB: {'PASS' if memory_passed else 'FAIL'} ({final_memory - initial_memory:.2f}MB))
+        print(f  P99 Latency < ""50ms"": {'PASS' if p99_passed else 'FAIL'} ({metrics.p99_latency:.""2f""}ms))
+        print(f  Throughput > 1000/s: {'PASS' if throughput_passed else 'FAIL'} ({metrics.throughput:.""2f""}/s)")"
+        print(f"  Connection < ""500ms"": {'PASS' if connection_passed else 'FAIL'} ({metrics.avg_connection_time:.""2f""}ms)))"
+        print(f  Memory Growth < ""200MB"": {'PASS' if memory_passed else 'FAIL'} ({final_memory - initial_memory:.""2f""}MB))""
+
 
         all_passed = all([p99_passed, throughput_passed, connection_passed, memory_passed)
 
         if all_passed:
-            print(\n✓ ALL PERFORMANCE REQUIREMENTS PASSED!")"
+            print(\nCHECK ALL PERFORMANCE REQUIREMENTS PASSED!")"
             print(WebSocket bridge ready for production with 25+ concurrent users")"
         else:
-            print(\n❌ SOME PERFORMANCE REQUIREMENTS FAILED!)
+            print(\nX SOME PERFORMANCE REQUIREMENTS FAILED!)
             print(Performance optimization required before production)
 
         return metrics
@@ -525,7 +536,8 @@ async def test_comprehensive_performance():
 
 
 def generate_performance_report(metrics: PerformanceMetrics) -> str:
-    ""Generate a comprehensive performance baseline report."
+    ""Generate a comprehensive performance baseline report.""
+
 
     p99_pass = PASS if metrics.p99_latency < 50.0 else FAIL"
     p99_pass = PASS if metrics.p99_latency < 50.0 else FAIL"
@@ -535,40 +547,51 @@ def generate_performance_report(metrics: PerformanceMetrics) -> str:
     report = f'''# WebSocket Bridge Performance Baseline Report'
 
 **Generated:** {datetime.now(timezone.utc).isoformat()}
-**Test Duration:** {metrics.test_duration:.2f} seconds
+**Test Duration:** {metrics.test_duration:.""2f""} seconds""
+
 **Total Events:** {metrics.total_events}
 
 ## Executive Summary
 
 This report validates the WebSocket bridge performance against critical business requirements:
-- **P99 Latency:** {p99_pass} ({metrics.p99_latency:.2f}ms < 50ms)
-- **Throughput:** {throughput_pass} ({metrics.throughput:.2f} > 1000 events/s)
-- **Connection Time:** {connection_pass} ({metrics.avg_connection_time:.2f}ms < 500ms)
+    - **P99 Latency:** {p99_pass} ({metrics.p99_latency:.""2f""}ms < ""50ms"")
+- **Throughput:** {throughput_pass} ({metrics.throughput:.""2f""} > 1000 events/s)""
+
+- **Connection Time:** {connection_pass} ({metrics.avg_connection_time:.""2f""}ms < ""500ms"")
 
 ## Detailed Performance Metrics
 
 ### Latency Distribution
-- **P50 (Median):** {metrics.p50_latency:.2f}ms
-- **P90:** {metrics.p90_latency:.2f}ms
-- **P95:** {metrics.p95_latency:.2f}ms
-- **P99:** {metrics.p99_latency:.2f}ms [CRITICAL REQUIREMENT]
-- **Average:** {metrics.avg_latency:.2f}ms
+- **P50 (Median):** {metrics.p50_latency:.""2f""}ms""
+
+- **P90:** {metrics.p90_latency:.""2f""}ms""
+
+- **P95:** {metrics.p95_latency:.""2f""}ms""
+
+- **P99:** {metrics.p99_latency:.""2f""}ms [CRITICAL REQUIREMENT]""
+
+- **Average:** {metrics.avg_latency:.""2f""}ms""
+
 
 ### Throughput Performance
-- **Overall Throughput:** {metrics.throughput:.2f} events/second [CRITICAL REQUIREMENT]
+- **Overall Throughput:** {metrics.throughput:.""2f""} events/second [CRITICAL REQUIREMENT]""
+
 
 ### Connection Performance
-- **Average Connection Time:** {metrics.avg_connection_time:.2f}ms
-- **Connection Requirement:** < 500ms
+- **Average Connection Time:** {metrics.avg_connection_time:.""2f""}ms""
+
+- **Connection Requirement:** < ""500ms""
 
 ### Resource Utilization
-- **Average CPU Usage:** {metrics.avg_cpu_usage:.2f}%
-- **Average Memory Usage:** {metrics.avg_memory_usage:.2f}MB
+- **Average CPU Usage:** {metrics.avg_cpu_usage:.""2f""}%""
+
+- **Average Memory Usage:** {metrics.avg_memory_usage:.""2f""}MB""
+
 
 ## Business Impact
 
 The WebSocket bridge performance directly impacts:
-1. **User Experience:** Low latency ensures real-time chat feels responsive
+    1. **User Experience:** Low latency ensures real-time chat feels responsive
 2. **Scalability:** High throughput supports concurrent user growth
 3. **Reliability:** Stable performance maintains user trust
 4. **Cost Efficiency:** Predictable resource usage controls infrastructure costs
@@ -576,7 +599,7 @@ The WebSocket bridge performance directly impacts:
 ## Recommendations
 
 Based on performance results:
-- System meets all critical performance requirements
+    - System meets all critical performance requirements
 - Ready for production deployment with 25+ concurrent users
 - WebSocket infrastructure can support business growth targets
 

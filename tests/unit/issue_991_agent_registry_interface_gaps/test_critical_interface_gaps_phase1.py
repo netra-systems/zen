@@ -433,7 +433,7 @@ class CriticalInterfaceGapsPhase1Tests(SSotAsyncTestCase):
         TEST DESIGNED TO FAIL: Prove Golden Path is blocked by missing methods.
         
         This test specifically focuses on methods that directly block the Golden Path
-        user flow: Users login → get AI responses.
+        user flow: Users login -> get AI responses.
         """
         try:
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry

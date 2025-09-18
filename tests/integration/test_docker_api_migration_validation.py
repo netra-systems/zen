@@ -102,7 +102,7 @@ class DockerAPIMigrationValidationTests:
             except (OSError, UnicodeDecodeError):
                 continue
         assert working_pattern_files, 'Should find at least some start_services_smart() usage patterns in codebase'
-        print(f'\n✅ Found {len(working_call_details)} start_services_smart() calls:')
+        print(f'\nCHECK Found {len(working_call_details)} start_services_smart() calls:')
         for detail in working_call_details[:5]:
             print(f"  {detail['file']}:{detail['line']} - {detail['content']}")
         self.working_patterns_found = working_call_details
@@ -118,7 +118,7 @@ class DockerAPIMigrationValidationTests:
             smart_params = list(smart_sig.parameters.keys())
             expected_params = ['self', 'services', 'wait_healthy']
             assert all((param in smart_params for param in expected_params)), f'start_services_smart should have {expected_params}, got: {smart_params}'
-        print('✅ API signatures are consistent')
+        print('CHECK API signatures are consistent')
 
     def test_working_docker_api_pattern_integration(self):
         """PASSING TEST: Validate the working Docker API pattern works correctly.
@@ -141,7 +141,7 @@ class DockerAPIMigrationValidationTests:
         with patch.object(manager, 'start_services_smart', side_effect=mock_start_services_smart):
             result = asyncio.run(manager.start_services_smart(services=['postgres', 'redis', 'backend'], wait_healthy=True))
             assert result == True, 'Backend services pattern should work'
-        print('✅ Working Docker API pattern validated')
+        print('CHECK Working Docker API pattern validated')
 
     def test_legacy_api_compatibility_removed(self):
         """PASSING TEST: Validate legacy API compatibility has been intentionally removed.
@@ -154,7 +154,7 @@ class DockerAPIMigrationValidationTests:
         for legacy_params in legacy_combinations:
             with pytest.raises(TypeError):
                 manager.acquire_environment(**legacy_params)
-        print(f'✅ All {len(legacy_combinations)} legacy parameter combinations properly rejected')
+        print(f'CHECK All {len(legacy_combinations)} legacy parameter combinations properly rejected')
 
 @pytest.mark.integration
 class AuthServiceAPIPatternMigrationTests:
@@ -180,7 +180,7 @@ class AuthServiceAPIPatternMigrationTests:
                 return success
         result = asyncio.run(correct_pattern())
         assert result == True, 'Correct pattern should work'
-        print('✅ Auth service migration pattern validated')
+        print('CHECK Auth service migration pattern validated')
 
     def test_comprehensive_auth_service_dependencies_pattern(self):
         """PASSING TEST: Validate comprehensive auth service dependency startup pattern."""
@@ -200,7 +200,7 @@ class AuthServiceAPIPatternMigrationTests:
         with patch.object(manager, 'start_services_smart', side_effect=mock_successful_start):
             result = asyncio.run(manager.start_services_smart(services=['postgres', 'redis', 'auth'], wait_healthy=True))
             assert result == True, 'Minimal auth setup should succeed'
-        print('✅ Comprehensive auth service dependency patterns validated')
+        print('CHECK Comprehensive auth service dependency patterns validated')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

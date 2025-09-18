@@ -7,10 +7,12 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.""
+
         if self._closed:
         raise RuntimeError(WebSocket is closed)"
-        raise RuntimeError(WebSocket is closed)"
+        raise RuntimeError(WebSocket is closed)""
+
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = Normal closure"):"
@@ -20,7 +22,8 @@ class TestWebSocketConnection:
 
     def get_messages(self) -> list:
         Get all sent messages."
-        Get all sent messages."
+        Get all sent messages.""
+
         return self.messages_sent.copy()
 
         '''
@@ -121,7 +124,8 @@ class TestWebSocketConnection:
         Test that failed agent notifications raise WebSocketSendFailureError."
         print("")
         PASS:  Testing: Agent notification failure...)"
-        PASS:  Testing: Agent notification failure...)"
+        PASS:  Testing: Agent notification failure...)""
+
 
                                             # Create mock WebSocket bridge that returns failure
         websocket = TestWebSocketConnection()
@@ -150,7 +154,8 @@ class TestWebSocketConnection:
 
     async def test_message_buffer_overflow():
         Test that message buffer overflow raises WebSocketBufferOverflowError."
-        Test that message buffer overflow raises WebSocketBufferOverflowError."
+        Test that message buffer overflow raises WebSocketBufferOverflowError.""
+
         print()
         PASS:  Testing: Message buffer overflow...")"
 
@@ -181,7 +186,8 @@ class TestWebSocketConnection:
         return True
         except Exception as e:
         print(formatted_string)"
-        print(formatted_string)"
+        print(formatted_string)""
+
         return False
 
 

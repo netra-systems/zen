@@ -105,7 +105,7 @@ class CrossServiceIDConsistencyTests(SSotAsyncTestCase, BaseIntegrationTest):
         
         integration_failures = []
         
-        # Test 1: Backend → Auth Service ID validation
+        # Test 1: Backend -> Auth Service ID validation
         try:
             auth_client = await auth_service_client()
             
@@ -132,7 +132,7 @@ class CrossServiceIDConsistencyTests(SSotAsyncTestCase, BaseIntegrationTest):
                 'likely_cause': 'ID format incompatibility'
             })
         
-        # Test 2: Auth Service → Backend ID format expectations  
+        # Test 2: Auth Service -> Backend ID format expectations  
         try:
             # Simulate auth service creating user session with structured ID
             structured_user_id = f"user_1_{str(uuid.uuid4())[:8]}"

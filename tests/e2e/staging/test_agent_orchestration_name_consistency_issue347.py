@@ -73,7 +73,7 @@ class AgentOrchestrationNameConsistencyE2ETests(SSotAsyncTestCase):
             self.llm_manager = LLMManager()
         except Exception as e:
             # Fallback for staging environment issues
-            print(f"⚠️ Using mock LLM manager in staging: {e}")
+            print(f"WARNING️ Using mock LLM manager in staging: {e}")
             self.llm_manager = Mock(spec=LLMManager)
         
         # Initialize staging registry with real components
@@ -85,7 +85,7 @@ class AgentOrchestrationNameConsistencyE2ETests(SSotAsyncTestCase):
         try:
             self.websocket_manager = get_websocket_manager()
         except Exception as e:
-            print(f"⚠️ Using mock WebSocket manager in staging: {e}")
+            print(f"WARNING️ Using mock WebSocket manager in staging: {e}")
             self.websocket_manager = Mock()
             self.websocket_manager.notify_agent_started = AsyncMock()
             self.websocket_manager.notify_agent_completed = AsyncMock()
@@ -139,7 +139,7 @@ class AgentOrchestrationNameConsistencyE2ETests(SSotAsyncTestCase):
                 )
                 
                 if agent is not None:
-                    print(f"    ✅ Agent '{step_name}' created successfully")
+                    print(f"    CHECK Agent '{step_name}' created successfully")
                     orchestration_results["successful_steps"].append(step_name)
                     
                     # Simulate agent execution events
@@ -151,15 +151,15 @@ class AgentOrchestrationNameConsistencyE2ETests(SSotAsyncTestCase):
                     
                 elif self.staging_registry.has(step_name):
                     # Agent name recognized but creation might be factory pattern
-                    print(f"    ⚠️ Agent '{step_name}' recognized but creation returned None (factory pattern)")
+                    print(f"    WARNING️ Agent '{step_name}' recognized but creation returned None (factory pattern)")
                     orchestration_results["successful_steps"].append(step_name)
                     
                 else:
-                    print(f"    ❌ Agent '{step_name}' not found in registry")
+                    print(f"    X Agent '{step_name}' not found in registry")
                     orchestration_results["failed_steps"].append(step_name)
                     
             except Exception as e:
-                print(f"    ❌ Failed to create agent '{step_name}': {e}")
+                print(f"    X Failed to create agent '{step_name}': {e}")
                 orchestration_results["failed_steps"].append(step_name)
         
         # Validate Golden Path workflow success
@@ -232,20 +232,20 @@ class AgentOrchestrationNameConsistencyE2ETests(SSotAsyncTestCase):
                 
                 if should_succeed:
                     if agent_created or name_recognized:
-                        print(f"    ✅ Expected success: '{step_name}' worked as expected")
+                        print(f"    CHECK Expected success: '{step_name}' worked as expected")
                         orchestration_failure_results["expected_successes"].append(step_name)
                     else:
-                        print(f"    ❌ Unexpected failure: '{step_name}' should have worked")
+                        print(f"    X Unexpected failure: '{step_name}' should have worked")
                         orchestration_failure_results["unexpected_failures"].append(step_name)
                 else:
                     if agent_created or name_recognized:
-                        print(f"    ⚠️ Unexpected success: '{step_name}' should have failed")
+                        print(f"    WARNING️ Unexpected success: '{step_name}' should have failed")
                         orchestration_failure_results["unexpected_successes"].append(step_name)
                         orchestration_failure_results["naming_issues"].append(
                             f"Agent name '{step_name}' unexpectedly worked - might indicate naming fix"
                         )
                     else:
-                        print(f"    ✅ Expected failure: '{step_name}' correctly failed")
+                        print(f"    CHECK Expected failure: '{step_name}' correctly failed")
                         orchestration_failure_results["expected_failures"].append(step_name)
                         orchestration_failure_results["naming_issues"].append(
                             f"Agent name '{step_name}' failed as expected - confirms naming issue"
@@ -253,10 +253,10 @@ class AgentOrchestrationNameConsistencyE2ETests(SSotAsyncTestCase):
                 
             except Exception as e:
                 if should_succeed:
-                    print(f"    ❌ Unexpected exception for '{step_name}': {e}")
+                    print(f"    X Unexpected exception for '{step_name}': {e}")
                     orchestration_failure_results["unexpected_failures"].append(step_name)
                 else:
-                    print(f"    ✅ Expected exception for '{step_name}': {e}")
+                    print(f"    CHECK Expected exception for '{step_name}': {e}")
                     orchestration_failure_results["expected_failures"].append(step_name)
         
         print(f"\n📊 Orchestration Naming Issue Results:")
@@ -274,9 +274,9 @@ class AgentOrchestrationNameConsistencyE2ETests(SSotAsyncTestCase):
         
         for incorrect_name in expected_incorrect_names:
             if incorrect_name in orchestration_failure_results["expected_failures"]:
-                print(f"✅ Confirmed: '{incorrect_name}' correctly failed (demonstrates issue)")
+                print(f"CHECK Confirmed: '{incorrect_name}' correctly failed (demonstrates issue)")
             elif incorrect_name in orchestration_failure_results["unexpected_successes"]:
-                print(f"⚠️ Unexpected: '{incorrect_name}' worked (issue may be fixed)")
+                print(f"WARNING️ Unexpected: '{incorrect_name}' worked (issue may be fixed)")
             
         # At least some incorrect names should fail, demonstrating the issue
         total_expected_failures = len(orchestration_failure_results["expected_failures"])
@@ -320,7 +320,7 @@ class StagingAgentWorkflowIntegrationTests(SSotAsyncTestCase):
                 llm_manager=self.llm_manager
             )
         except Exception as e:
-            print(f"⚠️ Mock orchestrator due to: {e}")
+            print(f"WARNING️ Mock orchestrator due to: {e}")
             self.orchestrator = Mock(spec=WorkflowOrchestrator)
     
     async def asyncTearDown(self):
@@ -396,7 +396,7 @@ class StagingAgentWorkflowIntegrationTests(SSotAsyncTestCase):
                             "status": "success",
                             "execution_time": execution_time
                         }
-                        print(f"      ✅ Agent {agent_name} successful ({execution_time:.3f}s)")
+                        print(f"      CHECK Agent {agent_name} successful ({execution_time:.3f}s)")
                     else:
                         phase_results["failed_agents"].append(agent_name)
                         workflow_execution_results["agent_performance"][agent_name] = {
@@ -404,7 +404,7 @@ class StagingAgentWorkflowIntegrationTests(SSotAsyncTestCase):
                             "execution_time": execution_time,
                             "reason": "agent_not_found"
                         }
-                        print(f"      ❌ Agent {agent_name} not found")
+                        print(f"      X Agent {agent_name} not found")
                         
                         if phase_config["critical"]:
                             workflow_execution_results["critical_failures"].append(agent_name)
@@ -417,7 +417,7 @@ class StagingAgentWorkflowIntegrationTests(SSotAsyncTestCase):
                         "execution_time": execution_time,
                         "reason": str(e)
                     }
-                    print(f"      ❌ Agent {agent_name} error: {e}")
+                    print(f"      X Agent {agent_name} error: {e}")
                     
                     if phase_config["critical"]:
                         workflow_execution_results["critical_failures"].append(agent_name)
@@ -450,7 +450,7 @@ class StagingAgentWorkflowIntegrationTests(SSotAsyncTestCase):
         # Print detailed agent performance
         print(f"\n🤖 Agent Performance Summary:")
         for agent_name, perf in workflow_execution_results["agent_performance"].items():
-            status_emoji = "✅" if perf["status"] == "success" else "❌"
+            status_emoji = "CHECK" if perf["status"] == "success" else "X"
             print(f"   {status_emoji} {agent_name}: {perf['status']} ({perf['execution_time']:.3f}s)")
             if perf["status"] != "success":
                 print(f"      Reason: {perf.get('reason', 'unknown')}")

@@ -75,7 +75,7 @@ class StarletteRoutingErrorTestRunner:
         os.chdir(self.test_directory.parent.parent)  # Navigate to project root
         
         self.environment_setup = True
-        print("✅ Environment configured for routing error reproduction")
+        print("CHECK Environment configured for routing error reproduction")
     
     def run_test_phase(self, phase_name: str, test_commands: List[str]) -> List[TestResult]:
         """Run a phase of tests and capture results."""
@@ -126,9 +126,9 @@ class StarletteRoutingErrorTestRunner:
             
             # Print immediate feedback
             if result.status == "passed":
-                print(f"   ✅ PASSED")
+                print(f"   CHECK PASSED")
             else:
-                print(f"   ❌ FAILED")
+                print(f"   X FAILED")
                 if result.routing_error_indicators:
                     print(f"   🎯 ROUTING PATTERNS DETECTED: {len(result.routing_error_indicators)}")
                 
@@ -203,7 +203,7 @@ class StarletteRoutingErrorTestRunner:
             # Check for high correlation patterns
             correlation_matches = [p for p in result.routing_error_indicators if p in self.correlation_patterns]
             if correlation_matches:
-                print(f"      ⚠️ HIGH CORRELATION PATTERNS: {correlation_matches}")
+                print(f"      WARNING️ HIGH CORRELATION PATTERNS: {correlation_matches}")
         
         if result.middleware_conflicts:
             print(f"      🔧 MIDDLEWARE CONFLICTS: {result.middleware_conflicts}")
@@ -271,7 +271,7 @@ class StarletteRoutingErrorTestRunner:
         if tests_with_target_patterns:
             print(f"\n🏆 SUCCESS: TARGET ROUTING ERROR PATTERNS DETECTED!")
             for test in tests_with_target_patterns:
-                print(f"   ✅ {test.test_name}: {test.routing_error_indicators}")
+                print(f"   CHECK {test.test_name}: {test.routing_error_indicators}")
         
         # Middleware conflict analysis
         tests_with_conflicts = [r for r in self.results if r.middleware_conflicts]
@@ -303,19 +303,19 @@ class StarletteRoutingErrorTestRunner:
         
         if tests_with_target_patterns:
             print("   🎯 SUCCESS: Target routing error reproduced!")
-            print("   → Focus on the tests that detected target patterns")
-            print("   → Analyze middleware configurations from successful reproductions")
-            print("   → Implement fixes based on identified root causes")
+            print("   -> Focus on the tests that detected target patterns")
+            print("   -> Analyze middleware configurations from successful reproductions")
+            print("   -> Implement fixes based on identified root causes")
         elif tests_with_routing_patterns:
-            print("   ⚠️ PARTIAL SUCCESS: Related routing errors detected")
-            print("   → Investigate high-correlation patterns for clues") 
-            print("   → Consider environment differences from production")
-            print("   → Try increasing test stress levels or timing variations")
+            print("   WARNING️ PARTIAL SUCCESS: Related routing errors detected")
+            print("   -> Investigate high-correlation patterns for clues") 
+            print("   -> Consider environment differences from production")
+            print("   -> Try increasing test stress levels or timing variations")
         else:
-            print("   ❌ No routing errors reproduced in current test run")
-            print("   → Verify production environment configuration matches test setup")
-            print("   → Consider external dependencies not captured in tests")
-            print("   → Review production logs for additional error context")
+            print("   X No routing errors reproduced in current test run")
+            print("   -> Verify production environment configuration matches test setup")
+            print("   -> Consider external dependencies not captured in tests")
+            print("   -> Review production logs for additional error context")
         
         if tests_with_conflicts:
             print("   🔧 Middleware conflicts detected - investigate ordering issues")
@@ -376,12 +376,12 @@ class StarletteRoutingErrorTestRunner:
             self.generate_comprehensive_report()
             
         except KeyboardInterrupt:
-            print("\n⚠️ Test execution interrupted by user")
+            print("\nWARNING️ Test execution interrupted by user")
             if self.results:
                 print("Generating partial report from completed tests...")
                 self.generate_comprehensive_report()
         except Exception as e:
-            print(f"\n❌ Test execution failed: {e}")
+            print(f"\nX Test execution failed: {e}")
             if self.results:
                 print("Generating partial report from completed tests...")
                 self.generate_comprehensive_report()

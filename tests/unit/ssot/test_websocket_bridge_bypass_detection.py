@@ -263,7 +263,7 @@ class WebSocketBridgeBypassDetectionTests(SSotBaseTestCase):
         # Generate detailed failure message for remediation guidance
         if all_violations:
             failure_message = [
-                f"❌ WEBSOCKET BRIDGE BYPASS VIOLATIONS DETECTED ❌",
+                f"X WEBSOCKET BRIDGE BYPASS VIOLATIONS DETECTED X",
                 f"",
                 f"Found {total_violation_instances} direct WebSocketManager imports across {total_violation_files} agent files.",
                 f"These violations must be eliminated to enforce SSOT bridge pattern compliance.",
@@ -290,24 +290,24 @@ class WebSocketBridgeBypassDetectionTests(SSotBaseTestCase):
                 f"🔧 BRIDGE PATTERN REMEDIATION GUIDE:",
                 f"",
                 f"1. Remove direct WebSocket imports:",
-                f"   ❌ from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
-                f"   ✅ # No direct WebSocket imports needed in agents",
+                f"   X from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
+                f"   CHECK # No direct WebSocket imports needed in agents",
                 f"",
                 f"2. Use AgentRegistry bridge pattern:",
-                f"   ❌ websocket_manager.send_agent_started(...)",
-                f"   ✅ registry.websocket_bridge.send_agent_started(...)",
+                f"   X websocket_manager.send_agent_started(...)",
+                f"   CHECK registry.websocket_bridge.send_agent_started(...)",
                 f"",
                 f"3. Update agent initialization:",
-                f"   ❌ def __init__(self, websocket_manager: WebSocketManager)",
-                f"   ✅ def __init__(self, registry: AgentRegistry)",
+                f"   X def __init__(self, websocket_manager: WebSocketManager)",
+                f"   CHECK def __init__(self, registry: AgentRegistry)",
                 f"",
                 f"4. Access bridge through registry:",
-                f"   ✅ bridge = await registry.get_websocket_bridge(user_id)",
-                f"   ✅ await bridge.send_agent_thinking(...)",
+                f"   CHECK bridge = await registry.get_websocket_bridge(user_id)",
+                f"   CHECK await bridge.send_agent_thinking(...)",
                 f"",
                 f"5. Update constructor calls in factories and executors:",
-                f"   ❌ Agent(websocket_manager=manager)",
-                f"   ✅ Agent(registry=agent_registry)",
+                f"   X Agent(websocket_manager=manager)",
+                f"   CHECK Agent(registry=agent_registry)",
                 f"",
                 f"🎯 SUCCESS CRITERIA:",
                 f"• Zero direct WebSocketManager imports in agents",
@@ -323,9 +323,9 @@ class WebSocketBridgeBypassDetectionTests(SSotBaseTestCase):
         self.record_metric("test_result", "PASS")
 
         # Success message
-        print("✅ WEBSOCKET BRIDGE PATTERN COMPLIANCE ACHIEVED")
-        print("✅ Zero direct WebSocketManager imports in agents")
-        print("✅ All agents use AgentRegistry bridge pattern")
+        print("CHECK WEBSOCKET BRIDGE PATTERN COMPLIANCE ACHIEVED")
+        print("CHECK Zero direct WebSocketManager imports in agents")
+        print("CHECK All agents use AgentRegistry bridge pattern")
 
     def test_no_direct_websocket_usage_in_agent_methods(self):
         """
@@ -378,7 +378,7 @@ class WebSocketBridgeBypassDetectionTests(SSotBaseTestCase):
         # Bridge pattern enforcement requires zero direct usage
         if usage_instances > 0:
             failure_message = [
-                f"❌ DIRECT WEBSOCKET USAGE PATTERN VIOLATIONS ❌",
+                f"X DIRECT WEBSOCKET USAGE PATTERN VIOLATIONS X",
                 f"",
                 f"Direct Usage: {usage_instances} instances across {usage_files} files",
                 f"Bridge Usage: {bridge_instances} instances across {bridge_files} files",
@@ -404,12 +404,12 @@ class WebSocketBridgeBypassDetectionTests(SSotBaseTestCase):
                 f"",
                 f"🔧 BRIDGE PATTERN CONVERSION:",
                 f"",
-                f"❌ ELIMINATE DIRECT PATTERNS:",
+                f"X ELIMINATE DIRECT PATTERNS:",
                 f"   websocket_manager.send_agent_started(...)",
                 f"   self.websocket_manager.send_agent_thinking(...)",
                 f"   context.websocket_manager.send_tool_executing(...)",
                 f"",
-                f"✅ USE BRIDGE PATTERNS:",
+                f"CHECK USE BRIDGE PATTERNS:",
                 f"   bridge.send_agent_started(...)",
                 f"   await registry.websocket_bridge.send_agent_thinking(...)",
                 f"   user_bridge.send_tool_executing(...)",
@@ -425,9 +425,9 @@ class WebSocketBridgeBypassDetectionTests(SSotBaseTestCase):
 
         # Success state (POST-REMEDIATION)
         self.record_metric("direct_usage_eliminated", True)
-        print(f"✅ DIRECT WEBSOCKET USAGE ELIMINATED")
-        print(f"✅ Bridge Usage: {bridge_instances} instances")
-        print(f"✅ Direct Usage: {usage_instances} instances")
+        print(f"CHECK DIRECT WEBSOCKET USAGE ELIMINATED")
+        print(f"CHECK Bridge Usage: {bridge_instances} instances")
+        print(f"CHECK Direct Usage: {usage_instances} instances")
 
     def test_agent_registry_bridge_pattern_coverage(self):
         """
@@ -493,7 +493,7 @@ class WebSocketBridgeBypassDetectionTests(SSotBaseTestCase):
 
         if bridge_coverage_ratio < target_coverage or len(missing_bridge_files) > 5:
             failure_message = [
-                f"❌ INSUFFICIENT AGENT REGISTRY BRIDGE PATTERN COVERAGE ❌",
+                f"X INSUFFICIENT AGENT REGISTRY BRIDGE PATTERN COVERAGE X",
                 f"",
                 f"Bridge Coverage: {bridge_coverage_ratio:.1%} (Target: {target_coverage:.0%})",
                 f"Registry Usage: {registry_using_files}/{total_agent_files} agent files",
@@ -506,15 +506,15 @@ class WebSocketBridgeBypassDetectionTests(SSotBaseTestCase):
             ]
 
             for file_path, matches in registry_usage.items():
-                failure_message.append(f"✅ {file_path} ({len(matches)} usages)")
+                failure_message.append(f"CHECK {file_path} ({len(matches)} usages)")
 
             if missing_bridge_files:
                 failure_message.append(f"")
                 failure_message.append(f"AGENTS MISSING BRIDGE PATTERN:")
                 for file_path in missing_bridge_files[:10]:  # Show first 10
-                    failure_message.append(f"❌ {file_path}")
+                    failure_message.append(f"X {file_path}")
                 if len(missing_bridge_files) > 10:
-                    failure_message.append(f"❌ ... and {len(missing_bridge_files) - 10} more files")
+                    failure_message.append(f"X ... and {len(missing_bridge_files) - 10} more files")
 
             failure_message.extend([
                 f"",
@@ -544,9 +544,9 @@ class WebSocketBridgeBypassDetectionTests(SSotBaseTestCase):
 
         # Success state
         self.record_metric("bridge_pattern_coverage_achieved", True)
-        print(f"✅ AGENT REGISTRY BRIDGE PATTERN COVERAGE: {bridge_coverage_ratio:.1%}")
-        print(f"✅ Registry Usage: {registry_using_files}/{total_agent_files} agent files")
-        print(f"✅ Bridge Instances: {registry_instances} total usages")
+        print(f"CHECK AGENT REGISTRY BRIDGE PATTERN COVERAGE: {bridge_coverage_ratio:.1%}")
+        print(f"CHECK Registry Usage: {registry_using_files}/{total_agent_files} agent files")
+        print(f"CHECK Bridge Instances: {registry_instances} total usages")
 
     def test_websocket_ssot_bridge_architecture_validation(self):
         """
@@ -616,7 +616,7 @@ class WebSocketBridgeBypassDetectionTests(SSotBaseTestCase):
 
         if failed_requirements:
             failure_message = [
-                f"❌ WEBSOCKET SSOT BRIDGE ARCHITECTURE VALIDATION FAILED ❌",
+                f"X WEBSOCKET SSOT BRIDGE ARCHITECTURE VALIDATION FAILED X",
                 f"",
                 f"Bridge Compliance Score: {bridge_compliance_score:.1f}% (Target: 100%)",
                 f"",
@@ -631,7 +631,7 @@ class WebSocketBridgeBypassDetectionTests(SSotBaseTestCase):
             ]
 
             for requirement in failed_requirements:
-                failure_message.append(f"❌ {requirement}")
+                failure_message.append(f"X {requirement}")
 
             failure_message.extend([
                 f"",
@@ -656,9 +656,9 @@ class WebSocketBridgeBypassDetectionTests(SSotBaseTestCase):
         self.record_metric("websocket_bridge_architecture_compliant", True)
 
         print("🏆 WEBSOCKET SSOT BRIDGE ARCHITECTURE VALIDATION COMPLETE")
-        print(f"✅ Bridge Compliance Score: {bridge_compliance_score:.1f}%")
-        print("✅ All architecture requirements satisfied")
-        print("✅ WebSocket bridge bypass remediation COMPLETE")
+        print(f"CHECK Bridge Compliance Score: {bridge_compliance_score:.1f}%")
+        print("CHECK All architecture requirements satisfied")
+        print("CHECK WebSocket bridge bypass remediation COMPLETE")
 
     def teardown_method(self, method=None):
         """Clean up after WebSocket bridge bypass detection tests."""

@@ -35,7 +35,7 @@ class Issue597SimpleImportValidationTests(unittest.TestCase):
             from netra_backend.app.core.auth_startup_validator import validate_auth_at_startup
         
         error_message = str(context.exception)
-        print(f"✅ EXPECTED FAILURE: ImportError as expected: {error_message}")
+        print(f"CHECK EXPECTED FAILURE: ImportError as expected: {error_message}")
         
         # Validate that the error mentions the specific function name
         self.assertIn("validate_auth_at_startup", error_message)
@@ -49,7 +49,7 @@ class Issue597SimpleImportValidationTests(unittest.TestCase):
         
         try:
             from netra_backend.app.core.auth_startup_validator import validate_auth_startup
-            print("✅ SUCCESS: validate_auth_startup imported successfully")
+            print("CHECK SUCCESS: validate_auth_startup imported successfully")
             
             # Basic validation that it's a function
             self.assertTrue(callable(validate_auth_startup))
@@ -72,11 +72,11 @@ class Issue597SimpleImportValidationTests(unittest.TestCase):
             
             # Validate correct function exists
             self.assertTrue(hasattr(auth_module, 'validate_auth_startup'))
-            print("✅ SUCCESS: validate_auth_startup found in module")
+            print("CHECK SUCCESS: validate_auth_startup found in module")
             
             # Validate wrong function does NOT exist
             self.assertFalse(hasattr(auth_module, 'validate_auth_at_startup'))
-            print("✅ SUCCESS: validate_auth_at_startup correctly NOT found in module")
+            print("CHECK SUCCESS: validate_auth_at_startup correctly NOT found in module")
             
         except ImportError as e:
             self.fail(f"CRITICAL: Cannot import auth_startup_validator module: {e}")
@@ -95,7 +95,7 @@ class Issue597SimpleImportValidationTests(unittest.TestCase):
         print(f"📋 Function is async: {is_async}")
         
         self.assertTrue(is_async, "validate_auth_startup should be an async function")
-        print("✅ SUCCESS: Function signature validation passed")
+        print("CHECK SUCCESS: Function signature validation passed")
     
     def test_import_variations(self):
         """
@@ -108,7 +108,7 @@ class Issue597SimpleImportValidationTests(unittest.TestCase):
             import netra_backend.app.core.auth_startup_validator
             func = netra_backend.app.core.auth_startup_validator.validate_auth_startup
             self.assertTrue(callable(func))
-            print("✅ SUCCESS: Full module import works")
+            print("CHECK SUCCESS: Full module import works")
         except Exception as e:
             self.fail(f"Full module import failed: {e}")
         
@@ -117,7 +117,7 @@ class Issue597SimpleImportValidationTests(unittest.TestCase):
             import netra_backend.app.core.auth_startup_validator as auth_val
             func = auth_val.validate_auth_startup
             self.assertTrue(callable(func))
-            print("✅ SUCCESS: Alias import works")
+            print("CHECK SUCCESS: Alias import works")
         except Exception as e:
             self.fail(f"Alias import failed: {e}")
 
@@ -145,7 +145,7 @@ class Issue597RealWorldScenariosTests(unittest.TestCase):
             with self.assertRaises(ImportError):
                 exec(import_statement)
             
-            print(f"✅ CONFIRMED: Import fails as expected")
+            print(f"CHECK CONFIRMED: Import fails as expected")
     
     def test_corrected_imports_work(self):
         """
@@ -165,7 +165,7 @@ class Issue597RealWorldScenariosTests(unittest.TestCase):
             
             try:
                 exec(import_statement)
-                print(f"✅ SUCCESS: Import works correctly")
+                print(f"CHECK SUCCESS: Import works correctly")
             except ImportError as e:
                 self.fail(f"UNEXPECTED: Corrected import failed: {import_statement} - {e}")
 

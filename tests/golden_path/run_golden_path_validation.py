@@ -3,7 +3,7 @@
 Golden Path Validation Runner - Issue #1278 Phase 4
 
 This script runs the comprehensive golden path validation suite to ensure
-that the complete user journey (login → AI responses) works correctly
+that the complete user journey (login -> AI responses) works correctly
 and delivers the expected 90% business value through chat functionality.
 
 Validation Areas:
@@ -120,10 +120,10 @@ class GoldenPathValidationRunner:
         for component_name, test_func in component_tests:
             try:
                 await test_func()
-                print(f"    ✅ {component_name}: Available and functional")
+                print(f"    CHECK {component_name}: Available and functional")
                 self.results.passed_tests += 1
             except Exception as e:
-                print(f"    ❌ {component_name}: {str(e)}")
+                print(f"    X {component_name}: {str(e)}")
                 self.results.failed_tests.append(f"Component: {component_name}")
 
             self.results.total_tests += 1
@@ -146,10 +146,10 @@ class GoldenPathValidationRunner:
             try:
                 # Simulate event validation (real implementation would test actual events)
                 await self._simulate_event_test(event)
-                print(f"    ✅ Event: {event} - Delivery validated")
+                print(f"    CHECK Event: {event} - Delivery validated")
                 events_working += 1
             except Exception as e:
-                print(f"    ❌ Event: {event} - {str(e)}")
+                print(f"    X Event: {event} - {str(e)}")
                 self.results.failed_tests.append(f"WebSocket Event: {event}")
 
             self.results.total_tests += 1
@@ -173,11 +173,11 @@ class GoldenPathValidationRunner:
         for scenario in business_scenarios:
             try:
                 value_score = await self._simulate_business_value_test(scenario)
-                print(f"    ✅ Business Value: {scenario} - Score: {value_score:.1%}")
+                print(f"    CHECK Business Value: {scenario} - Score: {value_score:.1%}")
                 value_scores.append(value_score)
                 self.results.passed_tests += 1
             except Exception as e:
-                print(f"    ❌ Business Value: {scenario} - {str(e)}")
+                print(f"    X Business Value: {scenario} - {str(e)}")
                 self.results.failed_tests.append(f"Business Value: {scenario}")
                 value_scores.append(0.0)
 
@@ -202,11 +202,11 @@ class GoldenPathValidationRunner:
         for scenario_name, scenario_desc in emergency_scenarios:
             try:
                 emergency_score = await self._simulate_emergency_test(scenario_name)
-                print(f"    ✅ Emergency Mode: {scenario_name} - Score: {emergency_score:.1%}")
+                print(f"    CHECK Emergency Mode: {scenario_name} - Score: {emergency_score:.1%}")
                 emergency_scores.append(emergency_score)
                 self.results.passed_tests += 1
             except Exception as e:
-                print(f"    ❌ Emergency Mode: {scenario_name} - {str(e)}")
+                print(f"    X Emergency Mode: {scenario_name} - {str(e)}")
                 self.results.failed_tests.append(f"Emergency Mode: {scenario_name}")
                 emergency_scores.append(0.0)
 
@@ -220,7 +220,7 @@ class GoldenPathValidationRunner:
         print("  🔗 Testing end-to-end integration...")
 
         integration_tests = [
-            "Complete user journey (login → response)",
+            "Complete user journey (login -> response)",
             "Event sequence validation",
             "Performance requirements",
             "Error recovery mechanisms"
@@ -229,10 +229,10 @@ class GoldenPathValidationRunner:
         for test_name in integration_tests:
             try:
                 await self._simulate_integration_test(test_name)
-                print(f"    ✅ Integration: {test_name}")
+                print(f"    CHECK Integration: {test_name}")
                 self.results.passed_tests += 1
             except Exception as e:
-                print(f"    ❌ Integration: {test_name} - {str(e)}")
+                print(f"    X Integration: {test_name} - {str(e)}")
                 self.results.failed_tests.append(f"Integration: {test_name}")
 
             self.results.total_tests += 1
@@ -364,23 +364,23 @@ class GoldenPathValidationRunner:
 
         # Business impact assessment
         if self.results.overall_score >= 0.8:
-            status = "✅ EXCELLENT"
+            status = "CHECK EXCELLENT"
             impact = "Golden path is protecting $500K+ ARR effectively"
         elif self.results.overall_score >= 0.7:
-            status = "⚠️ GOOD"
+            status = "WARNING️ GOOD"
             impact = "Golden path is functional but has room for improvement"
         elif self.results.overall_score >= 0.6:
             status = "🔶 ACCEPTABLE"
             impact = "Golden path is working but requires attention"
         else:
-            status = "❌ NEEDS ATTENTION"
+            status = "X NEEDS ATTENTION"
             impact = "Golden path issues may impact business value delivery"
 
         print(f"\n🎯 Status: {status}")
         print(f"💰 Business Impact: {impact}")
 
         if self.results.failed_tests:
-            print(f"\n❌ Failed Tests:")
+            print(f"\nX Failed Tests:")
             for failure in self.results.failed_tests:
                 print(f"  - {failure}")
 

@@ -234,7 +234,7 @@ class Issue962SingleConfigurationManagerValidationTests(SSotBaseTestCase, unitte
         for method_name, description in expected_methods:
             if hasattr(config_manager, method_name):
                 available_methods.append((method_name, description))
-                print(f"✓ API METHOD: {method_name} - {description}")
+                print(f"CHECK API METHOD: {method_name} - {description}")
             else:
                 missing_methods.append((method_name, description))
                 print(f"✗ MISSING: {method_name} - {description}")
@@ -243,7 +243,7 @@ class Issue962SingleConfigurationManagerValidationTests(SSotBaseTestCase, unitte
         try:
             # Test basic configuration access
             test_config = config_manager.get("DATABASE_URL", default="test")
-            print(f"✓ BASIC ACCESS: get() method works (returned: type={type(test_config).__name__})")
+            print(f"CHECK BASIC ACCESS: get() method works (returned: type={type(test_config).__name__})")
         except Exception as e:
             missing_methods.append(("basic_get", f"Basic get() access failed: {e}"))
             print(f"✗ BASIC ACCESS FAILED: {e}")

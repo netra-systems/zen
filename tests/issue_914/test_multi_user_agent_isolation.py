@@ -147,7 +147,7 @@ class MultiUserAgentIsolationTests(SSotAsyncTestCase):
                                f"Session {i} should be unique object")
                 session_ids.add(session_id)
 
-            print(f"✅ Created {len(user_sessions)} isolated user sessions")
+            print(f"CHECK Created {len(user_sessions)} isolated user sessions")
 
             # Test concurrent operations on different user sessions
             async def perform_user_operation(session, user_ctx):
@@ -180,7 +180,7 @@ class MultiUserAgentIsolationTests(SSotAsyncTestCase):
                 self.assertEqual(metrics['user_id'], result['user_id'],
                                "Session metrics should match user_id")
 
-            print(f"✅ Concurrent operations successful for {len(operation_results)} users")
+            print(f"CHECK Concurrent operations successful for {len(operation_results)} users")
 
             # Cleanup all user sessions
             cleanup_results = await asyncio.gather(*[
@@ -194,8 +194,8 @@ class MultiUserAgentIsolationTests(SSotAsyncTestCase):
             self.assertEqual(successful_cleanups, len(self.test_users),
                            "All user sessions should be cleaned successfully")
 
-            print(f"✅ Cleaned up {successful_cleanups} user sessions")
-            print("✅ CONCURRENT USER ISOLATION: Advanced registry handles multiple users correctly")
+            print(f"CHECK Cleaned up {successful_cleanups} user sessions")
+            print("CHECK CONCURRENT USER ISOLATION: Advanced registry handles multiple users correctly")
 
         except ImportError as e:
             self.skipTest(f"Could not test concurrent user isolation: {e}")
@@ -261,7 +261,7 @@ class MultiUserAgentIsolationTests(SSotAsyncTestCase):
             self.assertNotIn("modified_field", user2_agent.user_data,
                            "User 2's data should not be affected by user 1's modifications")
 
-            print("✅ USER DATA ISOLATION: Private data remains isolated between users")
+            print("CHECK USER DATA ISOLATION: Private data remains isolated between users")
             print("🔒 SECURITY: No data leakage between user sessions detected")
 
             # Cleanup
@@ -320,7 +320,7 @@ class MultiUserAgentIsolationTests(SSotAsyncTestCase):
             self.assertGreaterEqual(populated_agent_count, expected_agents,
                                   f"Should have at least {expected_agents} agents")
 
-            print(f"✅ Created {populated_user_count} user sessions with {populated_agent_count} total agents")
+            print(f"CHECK Created {populated_user_count} user sessions with {populated_agent_count} total agents")
 
             # Test selective cleanup (clean up one user at a time)
             for session_info in session_data[:2]:  # Clean first 2 users
@@ -356,7 +356,7 @@ class MultiUserAgentIsolationTests(SSotAsyncTestCase):
             self.assertEqual(final_agent_count, initial_agent_count,
                            "Agent count should return to initial state")
 
-            print("✅ MEMORY ISOLATION: User session memory properly isolated and cleaned")
+            print("CHECK MEMORY ISOLATION: User session memory properly isolated and cleaned")
             print("🔧 RESOURCE MANAGEMENT: No memory leaks detected between user sessions")
 
         except ImportError as e:
@@ -418,7 +418,7 @@ class MultiUserAgentIsolationTests(SSotAsyncTestCase):
             self.assertEqual(len(created_sessions), thread_count,
                            f"All {thread_count} sessions should be created")
 
-            print(f"✅ Thread-safe session creation: {len(created_sessions)} concurrent sessions")
+            print(f"CHECK Thread-safe session creation: {len(created_sessions)} concurrent sessions")
 
             # Verify all sessions have unique identities
             session_objects = list(created_sessions.values())
@@ -449,8 +449,8 @@ class MultiUserAgentIsolationTests(SSotAsyncTestCase):
             self.assertEqual(len(cleanup_results), thread_count,
                            f"All {thread_count} sessions should be cleaned")
 
-            print(f"✅ Thread-safe cleanup: {len(cleanup_results)} concurrent cleanups")
-            print("✅ THREAD SAFETY: User isolation robust under concurrent access")
+            print(f"CHECK Thread-safe cleanup: {len(cleanup_results)} concurrent cleanups")
+            print("CHECK THREAD SAFETY: User isolation robust under concurrent access")
 
         except ImportError as e:
             self.skipTest(f"Could not test thread safety: {e}")
@@ -553,7 +553,7 @@ class MultiUserAgentIsolationTests(SSotAsyncTestCase):
             self.assertEqual(successful_cleanups, user_count,
                            "All cleanups should succeed")
 
-            print("✅ USER ISOLATION PERFORMANCE: All operations within acceptable limits")
+            print("CHECK USER ISOLATION PERFORMANCE: All operations within acceptable limits")
             print("⚡ PRODUCTION READY: User isolation has minimal performance overhead")
 
         except ImportError as e:
@@ -582,7 +582,7 @@ if __name__ == '__main__':
         print("🔒 SECURITY: User data isolation validated")
         print("⚡ PERFORMANCE: User isolation overhead within limits")
     else:
-        print("⚠️  Some user isolation tests failed - review multi-user support")
+        print("WARNING️  Some user isolation tests failed - review multi-user support")
 
     if result.failures:
         print("\nFAILURES:")

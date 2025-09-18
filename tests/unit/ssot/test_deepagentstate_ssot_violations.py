@@ -56,7 +56,7 @@ class DeepAgentStateSSotViolationTests:
         )
 
         # SUCCESS: Only SSOT path exists, duplicate is removed
-        print(f"✅ SSOT REMEDIATION SUCCESSFUL:")
+        print(f"CHECK SSOT REMEDIATION SUCCESSFUL:")
         print(f"   - Deprecated path removed: netra_backend.app.agents.state.DeepAgentState")
         print(f"   - SSOT path active: {ssot_module.__file__ if ssot_module else 'None'}")
         print(f"   - Single source of truth established for DeepAgentState")

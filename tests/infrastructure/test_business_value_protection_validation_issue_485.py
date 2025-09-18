@@ -38,7 +38,7 @@ class BusinessValueProtectionValidationTests(SSotBaseTestCase):
         FAIL FIRST: Test golden path validation capability is functional.
         
         This test should initially FAIL to demonstrate that our capability to
-        validate the golden path (user login → AI responses) is not reliable
+        validate the golden path (user login -> AI responses) is not reliable
         due to test infrastructure issues.
         """
         golden_path_validation_issues = []

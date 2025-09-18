@@ -40,19 +40,19 @@ def lazy_import(module_path: str, component: str = None):
 "MISSION CRITICAL: Database Golden Path Session Factory Test Suite"
 
 THIS SUITE VALIDATES GOLDEN PATH DATABASE SESSION CREATION
-Business Value: $500K+ ARR - Ensures WebSocket connections can create database sessions
+Business Value: $""500K"" plus ARR - Ensures WebSocket connections can create database sessions
 
 CRITICAL GOLDEN PATH FLOWS TO VALIDATE:
-1. WebSocket manager can successfully create database sessions
+    1. WebSocket manager can successfully create database sessions
 2. User login flow can create database sessions for authentication
 3. Agent execution can access database through session factory
 
 DESIGNED TO FAIL PRE-SSOT REFACTOR:
-- Tests will FAIL when session factory is missing or broken
+    - Tests will FAIL when session factory is missing or broken
 - Tests will FAIL when WebSocket manager cannot access database
 
 DESIGNED TO PASS POST-SSOT REFACTOR:
-- Tests will PASS when session factory works in all golden path flows
+    - Tests will PASS when session factory works in all golden path flows
 - Tests will PASS when WebSocket manager can create sessions
 - Tests will PASS when user authentication can access database
 
@@ -91,13 +91,15 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
         )
 
     "
-    "
+    ""
+
     Test suite to validate database session factory in golden path flows.
     
     These tests ensure that the DatabaseManager provides session creation
     capabilities that WebSocket managers and user flows depend on.
 "
-"
+""
+
     
     def setup_method(self, method=None):
         Setup with enhanced golden path tracking.""
@@ -110,7 +112,8 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
         self._flow_failures = []
         
     async def test_websocket_manager_can_create_database_sessions(self):
-        """
+        """"
+
         DESIGNED TO PASS: WebSocket manager successfully creates DB sessions
         
         This test validates the critical flow where WebSocket manager needs
@@ -140,7 +143,8 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
             if hasattr(db_manager, 'get_session_factory'):
                 session_methods_available.append('get_session_factory')
                 logger.info([U+2713] WebSocket manager can use get_session_factory)"
-                logger.info([U+2713] WebSocket manager can use get_session_factory)"
+                logger.info([U+2713] WebSocket manager can use get_session_factory)""
+
             
             # Pattern 3: create_session method
             if hasattr(db_manager, 'create_session'):
@@ -167,7 +171,8 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
                     DatabaseManager has no session creation methods available for WebSocket manager. "
                     DatabaseManager has no session creation methods available for WebSocket manager. "
                     fAvailable methods: {[m for m in dir(db_manager) if not m.startswith('_')]}"
-                    fAvailable methods: {[m for m in dir(db_manager) if not m.startswith('_')]}"
+                    fAvailable methods: {[m for m in dir(db_manager) if not m.startswith('_')]}""
+
                 )
                 self.record_metric(websocket_session_creation_unavailable, True)
             
@@ -197,11 +202,13 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
             )
         
         logger.info([U+2713] WebSocket manager database session creation validated)"
-        logger.info([U+2713] WebSocket manager database session creation validated)"
+        logger.info([U+2713] WebSocket manager database session creation validated)""
+
     
     async def test_user_login_database_session_creation_works(self):
         """
-        "
+        ""
+
         DESIGNED TO PASS: User login flow can create database sessions
         
         This test validates that user authentication flows can access
@@ -242,7 +249,8 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
             # Pattern 3: Direct database manager usage
             login_db_patterns.append('direct_database_manager_usage')
             logger.info([U+2713] Login flow can use DatabaseManager directly)"
-            logger.info([U+2713] Login flow can use DatabaseManager directly)"
+            logger.info([U+2713] Login flow can use DatabaseManager directly)""
+
             
             self.record_metric("login_database_patterns, login_db_patterns)"
             
@@ -270,7 +278,8 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
             "flow: user_login_database_sessions,"
             success: login_session_success,
             error: login_session_error"
-            error: login_session_error"
+            error: login_session_error""
+
         }
         self._golden_path_flows.append(flow_result)
         
@@ -280,20 +289,23 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
                 f"GOLDEN PATH FAILURE: User login flow cannot access database sessions."
                 fError: {login_session_error}. 
                 This blocks user authentication and chat access."
-                This blocks user authentication and chat access."
+                This blocks user authentication and chat access.""
+
             )
         
         logger.info([U+2713] User login database session access validated")"
     
     async def test_agent_execution_database_access_works(self):
         """
-    "
+    ""
+
         DESIGNED TO PASS: Agents can access database through session factory
         
         This test validates that agent execution flows can access database
         sessions for data retrieval and storage during AI processing.
         "
-        "
+        ""
+
         self.record_metric(golden_path_flow, agent_execution_database_access)
         
         agent_db_success = False
@@ -322,7 +334,8 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
             # Pattern 3: Agent metrics and logging
             agent_db_patterns.append('agent_metrics_logging_db')
             logger.info([U+2713] Agents can access database for metrics/logging)"
-            logger.info([U+2713] Agents can access database for metrics/logging)"
+            logger.info([U+2713] Agents can access database for metrics/logging)""
+
             
             self.record_metric("agent_database_patterns, agent_db_patterns)"
             
@@ -350,7 +363,8 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
             "flow: agent_execution_database_access,"
             success: agent_db_success,
             error: agent_db_error"
-            error: agent_db_error"
+            error: agent_db_error""
+
         }
         self._golden_path_flows.append(flow_result)
         
@@ -360,7 +374,8 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
                 f"GOLDEN PATH FAILURE: Agent execution cannot access database sessions."
                 fError: {agent_db_error}. 
                 This blocks AI processing and data-driven agent responses."
-                This blocks AI processing and data-driven agent responses."
+                This blocks AI processing and data-driven agent responses.""
+
             )
         
         logger.info([U+2713] Agent execution database access validated")"
@@ -378,7 +393,8 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
                     session = await db_manager.get_async_session()
                     self.record_metric(websocket_session_creation_test, success)
                     logger.debug(WebSocket session creation pattern test passed)"
-                    logger.debug(WebSocket session creation pattern test passed)"
+                    logger.debug(WebSocket session creation pattern test passed)""
+
             
             elif 'initialize' in session_methods:
                 # Mock initialization
@@ -410,7 +426,8 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
         except Exception as e:
             self.record_metric(login_database_operations_error, str(e))
             logger.warning(fLogin database operations test failed: {e})"
-            logger.warning(fLogin database operations test failed: {e})"
+            logger.warning(fLogin database operations test failed: {e})""
+
     
     async def _test_agent_database_operations(self, db_manager):
         "Test agent execution database operations."
@@ -432,7 +449,8 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
         except Exception as e:
             self.record_metric(agent_database_operations_error, str(e))
             logger.warning(fAgent database operations test failed: {e})"
-            logger.warning(fAgent database operations test failed: {e})"
+            logger.warning(fAgent database operations test failed: {e})""
+
     
     def teardown_method(self, method=None):
         "Enhanced teardown with golden path metrics."
@@ -462,7 +480,8 @@ if __name__ == __main__:
     print(MIGRATION NOTICE: This file previously used direct pytest execution.")"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)
     print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
-    print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md"")""
+
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

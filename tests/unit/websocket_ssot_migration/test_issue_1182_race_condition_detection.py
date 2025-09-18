@@ -137,7 +137,7 @@ class WebSocketManagerRaceConditionDetectionTests(SSotAsyncTestCase):
                 }
                 
             except Exception as e:
-                logger.error(f"❌ Initialization failed for user {user_index}: {e}")
+                logger.error(f"X Initialization failed for user {user_index}: {e}")
                 return {
                     'user_index': user_index,
                     'success': False,
@@ -303,7 +303,7 @@ class WebSocketManagerRaceConditionDetectionTests(SSotAsyncTestCase):
                 }
                 
             except Exception as e:
-                logger.error(f"❌ User isolation test failed for user {user_index}: {e}")
+                logger.error(f"X User isolation test failed for user {user_index}: {e}")
                 return {
                     'user_index': user_index,
                     'success': False,
@@ -475,7 +475,7 @@ class WebSocketManagerRaceConditionDetectionTests(SSotAsyncTestCase):
                 }
                 
             except Exception as e:
-                logger.error(f"❌ Event delivery test failed for user {user_index}: {e}")
+                logger.error(f"X Event delivery test failed for user {user_index}: {e}")
                 return {
                     'user_index': user_index,
                     'success': False,

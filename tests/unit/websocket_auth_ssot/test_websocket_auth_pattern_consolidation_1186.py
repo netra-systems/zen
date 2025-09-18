@@ -60,7 +60,7 @@ class WebSocketAuthenticationSSOTPatternConsolidationTests(unittest.TestCase):
         self.assertLessEqual(
             pattern_count, 
             self.target_auth_patterns, 
-            f"❌ BASELINE VIOLATION: Found {pattern_count} different WebSocket auth patterns. "
+            f"X BASELINE VIOLATION: Found {pattern_count} different WebSocket auth patterns. "
             f"SSOT target is exactly {self.target_auth_patterns} canonical pattern. "
             f"Consolidation of {pattern_count - self.target_auth_patterns} patterns required.\n"
             f"Auth patterns detected:\n"
@@ -89,7 +89,7 @@ class WebSocketAuthenticationSSOTPatternConsolidationTests(unittest.TestCase):
         self.assertEqual(
             bypass_count,
             0,
-            f"❌ BASELINE VIOLATION: Found {bypass_count} authentication bypass mechanisms. "
+            f"X BASELINE VIOLATION: Found {bypass_count} authentication bypass mechanisms. "
             f"Security requires elimination of all bypass patterns.\n"
             f"Bypass mechanisms detected:\n"
             + '\n'.join([f"  - {path}: {mechanism}" for path, mechanism in bypass_mechanisms])
@@ -118,7 +118,7 @@ class WebSocketAuthenticationSSOTPatternConsolidationTests(unittest.TestCase):
         self.assertEqual(
             path_count,
             1,
-            f"❌ BASELINE VIOLATION: Found {path_count} different auth validation paths. "
+            f"X BASELINE VIOLATION: Found {path_count} different auth validation paths. "
             f"SSOT requires exactly 1 canonical validation path.\n"
             f"Validation paths detected:\n"
             + '\n'.join([f"  - {path}: {impl}" for path, impl in validation_paths])
@@ -148,7 +148,7 @@ class WebSocketAuthenticationSSOTPatternConsolidationTests(unittest.TestCase):
         self.assertEqual(
             implementation_count,
             1,
-            f"❌ BASELINE VIOLATION: Found {implementation_count} different JWT validation implementations. "
+            f"X BASELINE VIOLATION: Found {implementation_count} different JWT validation implementations. "
             f"SSOT requires exactly 1 consistent JWT validation approach.\n"
             f"JWT implementations detected:\n"
             + '\n'.join([f"  - {impl}: {len(files)} files" for impl, files in jwt_implementations.items()])
@@ -176,7 +176,7 @@ class WebSocketAuthenticationSSOTPatternConsolidationTests(unittest.TestCase):
         self.assertEqual(
             inconsistency_count,
             0,
-            f"❌ BASELINE VIOLATION: Found {inconsistency_count} cross-service auth pattern inconsistencies. "
+            f"X BASELINE VIOLATION: Found {inconsistency_count} cross-service auth pattern inconsistencies. "
             f"SSOT requires consistent auth patterns across all services.\n"
             f"Inconsistencies detected:\n"
             + '\n'.join([f"  - {service}: {inconsistency}" for service, inconsistency in cross_service_inconsistencies])
@@ -418,9 +418,9 @@ class WebSocketAuthenticationSSOTPatternConsolidationTests(unittest.TestCase):
 if __name__ == '__main__':
     print("🚨 Issue #1186 WebSocket Auth SSOT Pattern Consolidation - Baseline Detection")
     print("=" * 80)
-    print("⚠️  WARNING: These tests are DESIGNED TO FAIL to establish baseline metrics")
+    print("WARNING️  WARNING: These tests are DESIGNED TO FAIL to establish baseline metrics")
     print("📊 Expected: 5 test failures showing WebSocket auth pattern violations")
-    print("🎯 Goal: Baseline measurement for 4→1 auth pattern consolidation")
+    print("🎯 Goal: Baseline measurement for 4->1 auth pattern consolidation")
     print("💰 Impact: Secures $500K+ ARR functionality with enterprise auth")
     print("=" * 80)
     

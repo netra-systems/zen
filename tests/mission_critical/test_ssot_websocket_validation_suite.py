@@ -2,26 +2,26 @@
 "MISSION CRITICAL: SSOT WebSocket Validation Suite Runner"
 
 THIS SUITE ORCHESTRATES ALL SSOT WEBSOCKET FACTORY PATTERN VALIDATION TESTS.
-Business Value: $500K+ ARR - Comprehensive WebSocket SSOT migration validation
+Business Value: $""500K"" plus ARR - Comprehensive WebSocket SSOT migration validation
 
 PURPOSE:
-- Orchestrate all SSOT WebSocket factory pattern validation tests
+    - Orchestrate all SSOT WebSocket factory pattern validation tests
 - Provide unified execution and reporting for migration validation
 - Track test results across different migration phases
 - Generate comprehensive validation reports for stakeholders
 
 TEST SUITES INCLUDED:
-1. test_ssot_websocket_factory_compliance.py - Factory pattern compliance validation
+    1. test_ssot_websocket_factory_compliance.py - Factory pattern compliance validation
 2. test_websocket_factory_migration.py - Migration process validation  
 3. test_websocket_health_ssot.py - Health endpoint SSOT integration validation
 
 EXECUTION PHASES:
-- PRE-MIGRATION: Validate current violations exist and SSOT patterns work
+    - PRE-MIGRATION: Validate current violations exist and SSOT patterns work
 - DURING-MIGRATION: Track progress and ensure no regressions
 - POST-MIGRATION: Validate successful remediation and full functionality
 
 BUSINESS IMPACT:
-These tests protect the Golden Path during migration, ensuring users can
+    These tests protect the Golden Path during migration, ensuring users can
 continue to login and receive AI responses throughout the SSOT remediation.
 
 
@@ -47,7 +47,8 @@ from loguru import logger
 
 @dataclass
 class ResultTests:
-    ""Test execution result data structure."
+    ""Test execution result data structure.""
+
     test_file: str
     test_name: str
     status: str  # passed, failed", skipped, error"
@@ -73,7 +74,8 @@ class SsotWebSocketValidationSuite:
     def detect_migration_phase(self) -> str:
         ""Detect current migration phase based on codebase state."
         logger.info([MIGRATION PHASE] Detecting current migration phase...)"
-        logger.info([MIGRATION PHASE] Detecting current migration phase...)"
+        logger.info([MIGRATION PHASE] Detecting current migration phase...)""
+
         
         # Check for deprecated factory imports in critical files
         websocket_ssot_path = os.path.join(project_root, netra_backend/app/routes/websocket_ssot.py")"
@@ -91,7 +93,8 @@ class SsotWebSocketValidationSuite:
         else:
             logger.info([POST-MIGRATION] Detected post-migration state - no violations found) 
             return post-migration"
-            return post-migration"
+            return post-migration""
+
 
     async def run_test_file(self, test_file: str) -> List[ResultTests]:
         "Run a single test file and collect results."
@@ -119,7 +122,8 @@ class SsotWebSocketValidationSuite:
                 "-x,  # Stop on first failure for debugging"
                 --json-report,
                 --json-report-file=/tmp/pytest_report.json"
-                --json-report-file=/tmp/pytest_report.json"
+                --json-report-file=/tmp/pytest_report.json""
+
             ], capture_output=True, text=True, timeout=300)
             
             duration = time.time() - start_time
@@ -128,7 +132,7 @@ class SsotWebSocketValidationSuite:
             test_results = []
             
             if result.returncode == 0:
-                logger.info(f[TEST SUCCESS] {test_file} completed successfully in {duration:.2f}s")"
+                logger.info(f[TEST SUCCESS] {test_file} completed successfully in {duration:.""2f""}s")"
                 test_results.append(ResultTests(
                     test_file=test_file,
                     test_name=overall,
@@ -155,7 +159,8 @@ class SsotWebSocketValidationSuite:
                         status=expected_failure,
                         duration=duration,
                         error_message=Factory migration in progress"
-                        error_message=Factory migration in progress"
+                        error_message=Factory migration in progress""
+
                     ))
                 else:
                     logger.error(f"[TEST FAILURE] {test_file} system failure)"
@@ -163,7 +168,8 @@ class SsotWebSocketValidationSuite:
                         test_file=test_file,
                         test_name=system_error,
                         status=failed,"
-                        status=failed,"
+                        status=failed,""
+
                         duration=duration,
                         error_message=result.stderr[:500]  # Truncate long errors
                     ))
@@ -171,7 +177,7 @@ class SsotWebSocketValidationSuite:
             return test_results
             
         except subprocess.TimeoutExpired:
-            logger.error(f[TEST TIMEOUT] {test_file} timed out after 300s")"
+            logger.error(f[TEST TIMEOUT] {test_file} timed out after ""300s""")"
             return [ResultTests(
                 test_file=test_file,
                 test_name=timeout,
@@ -182,7 +188,8 @@ class SsotWebSocketValidationSuite:
             
         except Exception as e:
             logger.error(f[TEST EXECUTION ERROR] Failed to run {test_file}: {e})"
-            logger.error(f[TEST EXECUTION ERROR] Failed to run {test_file}: {e})"
+            logger.error(f[TEST EXECUTION ERROR] Failed to run {test_file}: {e})""
+
             return [ResultTests(
                 test_file=test_file,
                 test_name="execution_error,"
@@ -194,7 +201,8 @@ class SsotWebSocketValidationSuite:
     async def run_all_tests(self) -> Dict[str, Any]:
         "Run all SSOT WebSocket validation tests."
         logger.info(f[SUITE START] Starting SSOT WebSocket validation suite: {self.suite_id})"
-        logger.info(f[SUITE START] Starting SSOT WebSocket validation suite: {self.suite_id})"
+        logger.info(f[SUITE START] Starting SSOT WebSocket validation suite: {self.suite_id})""
+
         
         migration_phase = self.detect_migration_phase()
         
@@ -280,7 +288,7 @@ class SsotWebSocketValidationSuite:
             critical_failures: len(critical_failures),
             migration_related_issues: len(migration_failures),"
             migration_related_issues: len(migration_failures),"
-            arr_at_risk": $500K+ ARR if impact_level == HIGH else No immediate risk"
+            arr_at_risk": $""500K"" plus ARR if impact_level == HIGH else No immediate risk"
         }
 
     def assess_migration_readiness(self) -> Dict[str, Any]:
@@ -297,14 +305,16 @@ class SsotWebSocketValidationSuite:
             readiness = NOT_READY"
             readiness = NOT_READY"
             description = Multiple system issues - resolve before migration"
-            description = Multiple system issues - resolve before migration"
+            description = Multiple system issues - resolve before migration""
+
             
         return {
             readiness_status: readiness,
             description": description,"
             blocking_issues: len(system_errors),
             recommendation: self.get_migration_recommendation(readiness)"
-            recommendation: self.get_migration_recommendation(readiness)"
+            recommendation: self.get_migration_recommendation(readiness)""
+
         }
 
     def get_migration_recommendation(self, readiness: str) -> str:
@@ -312,7 +322,7 @@ class SsotWebSocketValidationSuite:
         recommendations = {
             READY": Proceed with SSOT migration. All validation tests confirm system stability.,"
             READY_WITH_CAUTION: Proceed with migration but monitor closely. Address minor issues post-migration.,
-            NOT_READY: "Do not proceed with migration. Resolve system issues first to protect $500K+ ARR."
+            NOT_READY: "Do not proceed with migration. Resolve system issues first to protect $""500K"" plus ARR."
         }
         return recommendations.get(readiness, Unknown readiness status")"
 
@@ -323,15 +333,15 @@ class SsotWebSocketValidationSuite:
         print(=*80)
         print(fSuite ID: {summary['suite_id']}"")
         print(fExecution Time: {summary['execution_time']})
-        print(fTotal Duration: {summary['total_duration_seconds']:.2f} seconds"")
+        print(fTotal Duration: {summary['total_duration_seconds']:.""2f""} seconds"")
         print(fMigration Phase: {summary['migration_phase']})
         
         print(f\nTEST SUMMARY:"")
         ts = summary['test_summary']
         print(f  Total Tests: {ts['total_tests']})
-        print(f  ✅ Passed: {ts['passed']}"")
-        print(f  ❌ Failed: {ts['failed']})
-        print(f  ⚠️ Expected Failures: {ts['expected_failures']}"")
+        print(f  CHECK Passed: {ts['passed']}"")
+        print(f  X Failed: {ts['failed']})
+        print(f  WARNING️ Expected Failures: {ts['expected_failures']}"")
         print(f  🚨 Errors: {ts['errors']})
         
         print(f\nBUSINESS IMPACT ASSESSMENT:"")
@@ -351,9 +361,9 @@ class SsotWebSocketValidationSuite:
         
         print(f\nDETAILED RESULTS:)
         for result in summary['detailed_results']:
-            status_icon = {passed": "✅, failed: ❌, expected_failure: "⚠️, error: 🚨}"
+            status_icon = {passed": "CHECK, failed: X, expected_failure: "WARNING️, error: 🚨}"
             icon = status_icon.get(result['status'], ❓)
-            print(f"  {icon} {result['test_file']}: {result['status']} ({result['duration']:.2f}s))"
+            print(f"  {icon} {result['test_file']}: {result['status']} ({result['duration']:.""2f""}s))"
             if result['error_message']:
                 print(f      Error: {result['error_message'][:100]}...)
         
@@ -383,14 +393,16 @@ async def main():
     business_impact = summary['business_impact_assessment']
     if business_impact['impact_level'] == HIGH":"
         print(\n🚨 HIGH BUSINESS IMPACT DETECTED - REVIEW REQUIRED)"
-        print(\n🚨 HIGH BUSINESS IMPACT DETECTED - REVIEW REQUIRED)"
+        print(\n🚨 HIGH BUSINESS IMPACT DETECTED - REVIEW REQUIRED)""
+
         return 1
     elif business_impact['impact_level'] == MEDIUM":"
-        print(\n⚠️ MEDIUM BUSINESS IMPACT - MONITOR CLOSELY)"
-        print(\n⚠️ MEDIUM BUSINESS IMPACT - MONITOR CLOSELY)"
+        print(\nWARNING️ MEDIUM BUSINESS IMPACT - MONITOR CLOSELY)"
+        print(\nWARNING️ MEDIUM BUSINESS IMPACT - MONITOR CLOSELY)""
+
         return 0
     else:
-        print(\n✅ LOW BUSINESS IMPACT - VALIDATION SUCCESSFUL")"
+        print(\nCHECK LOW BUSINESS IMPACT - VALIDATION SUCCESSFUL")"
         return 0
 
 

@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 
 Test Categories:
 1. Staging deployment health and service status validation
-2. Complete Golden Path user flow validation (login → AI response)
+2. Complete Golden Path user flow validation (login -> AI response)
 3. WebSocket event delivery validation with all 5 critical events
 4. Database connectivity and data consistency across Redis/PostgreSQL/ClickHouse
 5. Performance benchmarking and resource utilization validation
@@ -411,7 +411,7 @@ class GoldenPathValidationTests(BaseIntegrationTest):
         MISSION CRITICAL: Validate complete Golden Path user flow in staging.
         
         Business Impact: Protects $500K+ ARR by ensuring core user journey works.
-        Tests: Authentication → WebSocket → Agent Execution → AI Response
+        Tests: Authentication -> WebSocket -> Agent Execution -> AI Response
         """
         golden_path_result = await self.validator.validate_golden_path_user_flow()
         self.log_test_result('golden_path_staging_validation', golden_path_result)

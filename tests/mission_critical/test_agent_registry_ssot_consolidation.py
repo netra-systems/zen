@@ -1,20 +1,21 @@
-"""
-"""
+""""
+
 SSOT Agent Registry Consolidation Validation Tests
 
 Issue #845: Critical P0 test suite for validating AgentRegistry SSOT consolidation
-Business Impact: $500K+ ARR Golden Path protection (login → AI responses)
+Business Impact: $"500K" plus ARR Golden Path protection (login -> AI responses)
 
-"""
-"""
+""""
+
 Tests duplicate AgentRegistry consolidation from:
-- Basic: /netra_backend/app/agents/registry.py (419 lines) → TO BE ELIMINATED
-- Advanced: /netra_backend/app/agents/supervisor/agent_registry.py (1,817 lines) → SSOT TARGET
+    - Basic: /netra_backend/app/agents/registry.py (419 lines) -> TO BE ELIMINATED
+- Advanced: /netra_backend/app/agents/supervisor/agent_registry.py (1,817 lines) -> SSOT TARGET
 
 Created: 2025-1-13 - SSOT Gardner agents focus
 Priority: P0 (Critical/Blocking) - Must pass before consolidation
 "
-"
+""
+
 
 import pytest
 import asyncio
@@ -73,7 +74,8 @@ class AgentRegistrySSoTConsolidationTests(SSotAsyncTestCase):
 
     async def test_advanced_registry_features_retained(self):
         """
-        "
+        ""
+
         CRITICAL: Ensure advanced features not broken by consolidation
         
         Business Impact: User isolation and WebSocket features must be preserved
@@ -86,7 +88,8 @@ class AgentRegistrySSoTConsolidationTests(SSotAsyncTestCase):
         )
         
         self.assertIsNotNone(user_session, User session creation must work)"
-        self.assertIsNotNone(user_session, User session creation must work)"
+        self.assertIsNotNone(user_session, User session creation must work)""
+
         
         # Test WebSocket bridge integration (critical for Golden Path)
         if hasattr(self.advanced_registry, 'set_websocket_manager'):
@@ -106,7 +109,8 @@ class AgentRegistrySSoTConsolidationTests(SSotAsyncTestCase):
 
     def test_import_path_compatibility(self):
         """
-        "
+        ""
+
         CRITICAL: Validate import paths resolve correctly after consolidation
 
         Business Impact: All existing code must continue working after consolidation
@@ -137,11 +141,13 @@ class AgentRegistrySSoTConsolidationTests(SSotAsyncTestCase):
         # Verify the classes are identical objects (not just same name)
         self.assertIs(BasicRegistry, AdvancedRegistry,
                      SSOT consolidation complete: both import paths resolve to identical class objects)"
-                     SSOT consolidation complete: both import paths resolve to identical class objects)"
+                     SSOT consolidation complete: both import paths resolve to identical class objects)""
+
 
     async def test_interface_consistency_validation(self):
         """
-    "
+    ""
+
         CRITICAL: Check interface consistency between implementations
         
         Business Impact: Ensures drop-in replacement possible during consolidation
@@ -172,14 +178,16 @@ class AgentRegistrySSoTConsolidationTests(SSotAsyncTestCase):
                 advanced_method = getattr(self.advanced_registry, method_name)
                 self.assertTrue(callable(advanced_method), 
                                fAdvanced registry {method_name} must be callable)"
-                               fAdvanced registry {method_name} must be callable)"
+                               fAdvanced registry {method_name} must be callable)""
+
 
     async def test_no_functionality_regression(self):
         """
-    "
+    ""
+
         CRITICAL: Comprehensive regression test suite
         
-        Business Impact: Ensures Golden Path (login → AI responses) still works
+        Business Impact: Ensures Golden Path (login -> AI responses) still works
         Expected: PASS - all core functionality must be preserved
         "
         "

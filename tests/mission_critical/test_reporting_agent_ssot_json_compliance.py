@@ -1,9 +1,9 @@
-"""
-"""
+""""
+
 MISSION CRITICAL: ReportingSubAgent SSOT JSON Compliance Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal 
+    - Segment: Platform/Internal 
 - Business Goal: SSOT compliance for Golden Path reliability
 - Value Impact: Consistent JSON handling across all agent operations
 - Strategic Impact: Eliminates JSON parsing inconsistencies affecting user experience
@@ -12,13 +12,14 @@ These tests MUST FAIL before remediation and PASS after remediation.
 They detect SSOT violations in ReportingSubAgent JSON handling.
 
 EXPECTED BEHAVIOR:
-- Tests FAIL NOW (proving violation exists)  
+    - Tests FAIL NOW (proving violation exists)  
 - Tests PASS after migrating to unified_json_handler SSOT
 "
-"
+""
 
-"""
-"""
+
+""""
+
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import ast
 import inspect
@@ -59,7 +60,8 @@ class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
                         direct_json_imports.append(fLine {node.lineno}: import json)
             elif isinstance(node, ast.ImportFrom) and node.module == 'json':
                 direct_json_imports.append(fLine {node.lineno}: from json import ...)"
-                direct_json_imports.append(fLine {node.lineno}: from json import ...)"
+                direct_json_imports.append(fLine {node.lineno}: from json import ...)""
+
         
         # THIS TEST MUST FAIL NOW - Direct json import exists
         self.assertEqual([), direct_json_imports, 
@@ -99,7 +101,8 @@ class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
         EXPECTED: PASS NOW - Already imports LLMResponseParser and JSONErrorFixer  
         EXPECTED: PASS AFTER - Should also import UnifiedJSONSerializer
         "
-        "
+        ""
+
         with open(self.reporting_agent_path, 'r') as f:
             content = f.read()
         
@@ -122,7 +125,8 @@ class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
                      ReportingSubAgent must import from SSOT unified_json_handler module)
     
     def test_reporting_agent_cache_methods_use_ssot_json(self):
-        ""CRITICAL: Cache methods MUST use SSOT JSON serialization."
+        ""CRITICAL: Cache methods MUST use SSOT JSON serialization.""
+
         
         EXPECTED: FAIL NOW - Cache methods use direct json.loads/dumps
         EXPECTED: PASS AFTER - Cache methods use UnifiedJSONSerializer
@@ -156,7 +160,8 @@ class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
     
     def test_unified_json_handler_has_required_serializer_methods(self):
         Verify SSOT unified_json_handler provides the required serialization methods."
-        Verify SSOT unified_json_handler provides the required serialization methods."
+        Verify SSOT unified_json_handler provides the required serialization methods.""
+
         with open(self.unified_json_handler_path, 'r') as f:
             content = f.read()
         
@@ -200,7 +205,8 @@ class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
             for pattern in duplicate_patterns:
                 if pattern in line and 'JSONErrorFixer' not in line:
                     violations.append(fLine {i}: {line.strip()})"
-                    violations.append(fLine {i}: {line.strip()})"
+                    violations.append(fLine {i}: {line.strip()})""
+
         
         # Should have no custom JSON error handling outside SSOT
         self.assertEqual([), violations,

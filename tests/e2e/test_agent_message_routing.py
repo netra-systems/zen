@@ -177,7 +177,7 @@ class EnterpriseAgentCoordinationMonitor:
     ):
         """Record an interaction between agents."""
         if not self.active_workflow:
-            logger.warning("⚠️  No active workflow to record interaction")
+            logger.warning("WARNING️  No active workflow to record interaction")
             return
         
         interaction = AgentInteraction(
@@ -203,7 +203,7 @@ class EnterpriseAgentCoordinationMonitor:
         if phase not in self.active_workflow.phases_completed:
             self.active_workflow.phases_completed.append(phase)
         
-        logger.info(f"🤝 Agent Interaction: {from_agent.value} → {to_agent.value} ({message_type}) in {phase.value}")
+        logger.info(f"🤝 Agent Interaction: {from_agent.value} -> {to_agent.value} ({message_type}) in {phase.value}")
         self._log_business_coordination_feedback(interaction)
     
     def _analyze_context_preservation(self, interaction: AgentInteraction) -> bool:
@@ -243,7 +243,7 @@ class EnterpriseAgentCoordinationMonitor:
     def complete_workflow(self, final_result: Dict[str, Any]):
         """Complete the active workflow with final results."""
         if not self.active_workflow:
-            logger.warning("⚠️  No active workflow to complete")
+            logger.warning("WARNING️  No active workflow to complete")
             return
         
         self.active_workflow.end_time = time.time()
@@ -399,7 +399,7 @@ class EnterpriseAgentCoordinationMonitor:
         # Report on agent involvement
         for agent_type in AgentType:
             involved = agent_type in self.active_workflow.agents_involved
-            status = "✅ ACTIVE" if involved else "❌ NOT USED"
+            status = "CHECK ACTIVE" if involved else "X NOT USED"
             business_impact = self._get_agent_business_impact(agent_type, involved)
             report_lines.append(f"  🤖 {agent_type.value}: {status} - {business_impact}")
         
@@ -411,7 +411,7 @@ class EnterpriseAgentCoordinationMonitor:
         
         for phase in AgentCoordinationPhase:
             completed = phase in self.active_workflow.phases_completed
-            status = "✅ COMPLETED" if completed else "❌ SKIPPED"
+            status = "CHECK COMPLETED" if completed else "X SKIPPED"
             phase_value = self._get_phase_business_value(phase, completed)
             report_lines.append(f"  📍 {phase.value}: {status} - {phase_value}")
         
@@ -425,9 +425,9 @@ class EnterpriseAgentCoordinationMonitor:
             # Show first 10 interactions
             for i, interaction in enumerate(self.active_workflow.interactions[:10]):
                 relative_time = interaction.timestamp - self.active_workflow.start_time
-                context_status = "✅" if interaction.context_preserved else "❌"
+                context_status = "CHECK" if interaction.context_preserved else "X"
                 report_lines.append(
-                    f"  {i+1:2d}. [{relative_time:6.2f}s] {interaction.from_agent.value} → "
+                    f"  {i+1:2d}. [{relative_time:6.2f}s] {interaction.from_agent.value} -> "
                     f"{interaction.to_agent.value} ({interaction.message_type}) {context_status}"
                 )
             
@@ -441,15 +441,15 @@ class EnterpriseAgentCoordinationMonitor:
         ])
         
         if analysis.business_value_score >= 90.0:
-            report_lines.append("  ✅ Excellent multi-agent coordination - premium value delivered")
+            report_lines.append("  CHECK Excellent multi-agent coordination - premium value delivered")
         elif analysis.business_value_score >= 70.0:
-            report_lines.append("  ✅ Good coordination - acceptable sophisticated AI workflows")
+            report_lines.append("  CHECK Good coordination - acceptable sophisticated AI workflows")
         else:
-            report_lines.append("  ❌ Poor coordination - advanced AI capabilities at risk")
+            report_lines.append("  X Poor coordination - advanced AI capabilities at risk")
             report_lines.append("  🔧 IMMEDIATE ACTION: Investigate agent coordination system")
         
         if analysis.context_preservation_rate < 0.8:
-            report_lines.append("  ⚠️  LOW CONTEXT PRESERVATION: Risk of fragmented AI responses")
+            report_lines.append("  WARNING️  LOW CONTEXT PRESERVATION: Risk of fragmented AI responses")
         
         if analysis.agents_coordinated < 3:
             report_lines.append("  📉 LIMITED AGENT DIVERSITY: Missing sophisticated workflow value")
@@ -534,18 +534,18 @@ class RealStagingAgentCoordinator:
                                     'status': 'available',
                                     'last_health_check': time.time()
                                 }
-                                logger.success(f"✅ {agent_type.value} agent available")
+                                logger.success(f"CHECK {agent_type.value} agent available")
                             else:
-                                logger.warning(f"⚠️  {agent_type.value} agent health check failed: {response.status}")
+                                logger.warning(f"WARNING️  {agent_type.value} agent health check failed: {response.status}")
                                 
                     except Exception as e:
-                        logger.warning(f"⚠️  Could not connect to {agent_type.value} agent: {e}")
+                        logger.warning(f"WARNING️  Could not connect to {agent_type.value} agent: {e}")
             
             logger.success(f"🎭 Agent coordination initialized with {len(self.active_agents)} agents")
             return len(self.active_agents) >= 2  # Need at least 2 agents for coordination
             
         except Exception as e:
-            logger.error(f"❌ Failed to initialize agent coordination: {e}")
+            logger.error(f"X Failed to initialize agent coordination: {e}")
             return False
     
     async def execute_complex_workflow(
@@ -589,7 +589,7 @@ class RealStagingAgentCoordinator:
             return final_result
             
         except Exception as e:
-            logger.error(f"❌ Complex workflow failed: {e}")
+            logger.error(f"X Complex workflow failed: {e}")
             return {
                 'success': False,
                 'error': str(e),
@@ -930,7 +930,7 @@ class RealStagingAgentCoordinator:
     async def _call_agent(self, agent_type: AgentType, request_data: Dict[str, Any]) -> Dict[str, Any]:
         """Call a specific agent with request data."""
         if agent_type not in self.active_agents:
-            logger.warning(f"⚠️  Agent {agent_type.value} not available")
+            logger.warning(f"WARNING️  Agent {agent_type.value} not available")
             return {'error': 'Agent not available'}
         
         try:
@@ -952,15 +952,15 @@ class RealStagingAgentCoordinator:
                     
                     if response.status == 200:
                         result = await response.json()
-                        logger.success(f"✅ {agent_type.value} agent executed successfully")
+                        logger.success(f"CHECK {agent_type.value} agent executed successfully")
                         return result
                     else:
                         error_text = await response.text()
-                        logger.error(f"❌ {agent_type.value} agent execution failed: {response.status}")
+                        logger.error(f"X {agent_type.value} agent execution failed: {response.status}")
                         return {'error': f"Agent execution failed: {error_text}"}
                         
         except Exception as e:
-            logger.error(f"❌ Error calling {agent_type.value} agent: {e}")
+            logger.error(f"X Error calling {agent_type.value} agent: {e}")
             return {'error': str(e)}
 
 
@@ -1007,12 +1007,12 @@ class TestAgentMessageRouting(SSotAsyncTestCase):
             )
             
             if response.status_code == 200:
-                cls.logger.success("✅ GCP staging environment ready for agent coordination")
+                cls.logger.success("CHECK GCP staging environment ready for agent coordination")
             else:
-                cls.logger.warning(f"⚠️  Staging health check returned: {response.status_code}")
+                cls.logger.warning(f"WARNING️  Staging health check returned: {response.status_code}")
                 
         except Exception as e:
-            cls.logger.warning(f"⚠️  Could not validate staging environment: {e}")
+            cls.logger.warning(f"WARNING️  Could not validate staging environment: {e}")
     
     def setup_method(self, method=None):
         """Setup for each test method."""
@@ -1080,11 +1080,11 @@ class TestAgentMessageRouting(SSotAsyncTestCase):
             auth_result = await self._authenticate_staging_user()
             
             if not auth_result['success']:
-                pytest.fail(f"❌ CRITICAL: Authentication failed - {auth_result['error']}")
+                pytest.fail(f"X CRITICAL: Authentication failed - {auth_result['error']}")
             
             user_id = auth_result['user_id']
             auth_token = auth_result['access_token']
-            logger.success(f"✅ Authenticated for agent coordination: {user_id}")
+            logger.success(f"CHECK Authenticated for agent coordination: {user_id}")
             
             # Phase 2: Initialize Agent Coordination
             logger.info("🎭 Phase 2: Initializing agent coordination system...")
@@ -1097,7 +1097,7 @@ class TestAgentMessageRouting(SSotAsyncTestCase):
             if not coordination_ready:
                 pytest.skip("Insufficient agents available for coordination testing")
             
-            logger.success("✅ Agent coordination system initialized")
+            logger.success("CHECK Agent coordination system initialized")
             
             # Phase 3: Execute Complex Multi-Agent Workflow
             logger.info("🤖 Phase 3: Executing complex multi-agent workflow...")
@@ -1121,52 +1121,52 @@ class TestAgentMessageRouting(SSotAsyncTestCase):
             
             # Assert critical coordination requirements
             assert analysis.agents_coordinated >= 3, (
-                f"❌ CRITICAL: Insufficient agent coordination ({analysis.agents_coordinated} < 3) "
+                f"X CRITICAL: Insufficient agent coordination ({analysis.agents_coordinated} < 3) "
                 "- Advanced workflows require multiple agents"
             )
             
             assert analysis.phases_completed >= 4, (
-                f"❌ CRITICAL: Incomplete workflow phases ({analysis.phases_completed} < 4) "
+                f"X CRITICAL: Incomplete workflow phases ({analysis.phases_completed} < 4) "
                 "- Sophisticated analysis requires complete workflow"
             )
             
             assert analysis.context_preservation_rate >= 0.7, (
-                f"❌ CRITICAL: Poor context preservation ({analysis.context_preservation_rate:.1%} < 70%) "
+                f"X CRITICAL: Poor context preservation ({analysis.context_preservation_rate:.1%} < 70%) "
                 "- Agent coordination quality insufficient"
             )
             
             assert analysis.business_value_score >= 60.0, (
-                f"❌ CRITICAL: Low coordination value ({analysis.business_value_score:.1f}/100) "
+                f"X CRITICAL: Low coordination value ({analysis.business_value_score:.1f}/100) "
                 "- Multi-agent workflows not delivering premium value"
             )
             
             assert analysis.is_coordination_successful(), (
-                "❌ CRITICAL: Agent coordination does not meet business requirements"
+                "X CRITICAL: Agent coordination does not meet business requirements"
             )
             
             # Phase 5: Validate Workflow Result Quality
             logger.info("📊 Phase 5: Validating workflow result quality...")
             
             assert workflow_result.get('success', False), (
-                f"❌ CRITICAL: Workflow execution failed - {workflow_result.get('error', 'Unknown error')}"
+                f"X CRITICAL: Workflow execution failed - {workflow_result.get('error', 'Unknown error')}"
             )
             
             # Validate comprehensive analysis structure
             comprehensive_analysis = workflow_result.get('comprehensive_analysis', {})
             assert len(comprehensive_analysis) >= 3, (
-                "❌ CRITICAL: Insufficient analysis depth - missing comprehensive insights"
+                "X CRITICAL: Insufficient analysis depth - missing comprehensive insights"
             )
             
             # Validate actionable recommendations
             recommendations = workflow_result.get('actionable_recommendations', [])
             assert len(recommendations) >= 2, (
-                "❌ CRITICAL: Insufficient recommendations - missing actionable insights"
+                "X CRITICAL: Insufficient recommendations - missing actionable insights"
             )
             
             # Validate implementation roadmap
             roadmap = workflow_result.get('implementation_roadmap', {})
             assert 'phases' in roadmap and len(roadmap['phases']) >= 2, (
-                "❌ CRITICAL: Missing implementation roadmap - incomplete strategic guidance"
+                "X CRITICAL: Missing implementation roadmap - incomplete strategic guidance"
             )
             
             # Phase 6: Performance and Efficiency Validation
@@ -1175,13 +1175,13 @@ class TestAgentMessageRouting(SSotAsyncTestCase):
             if analysis.performance_metrics:
                 total_duration = analysis.performance_metrics.get('total_duration', 0)
                 assert total_duration <= 120.0, (
-                    f"❌ PERFORMANCE: Workflow too slow ({total_duration:.2f}s > 120s) "
+                    f"X PERFORMANCE: Workflow too slow ({total_duration:.2f}s > 120s) "
                     "- Coordination efficiency poor"
                 )
                 
                 coordination_efficiency = analysis.coordination_efficiency
                 assert coordination_efficiency >= 0.1, (
-                    f"❌ PERFORMANCE: Low coordination rate ({coordination_efficiency:.2f} < 0.1) "
+                    f"X PERFORMANCE: Low coordination rate ({coordination_efficiency:.2f} < 0.1) "
                     "- Agent interactions too slow"
                 )
             
@@ -1195,7 +1195,7 @@ class TestAgentMessageRouting(SSotAsyncTestCase):
             logger.success(f"🔗 Context Preservation: {analysis.context_preservation_rate:.1%}")
             
         except Exception as e:
-            logger.error(f"❌ FATAL ERROR in multi-agent coordination test: {e}")
+            logger.error(f"X FATAL ERROR in multi-agent coordination test: {e}")
             raise
     
     @pytest.mark.asyncio
@@ -1280,9 +1280,9 @@ class TestAgentMessageRouting(SSotAsyncTestCase):
             # Assert SLA compliance
             if sla_violations:
                 violation_summary = "; ".join(sla_violations)
-                pytest.fail(f"❌ Coordination performance SLA violations: {violation_summary}")
+                pytest.fail(f"X Coordination performance SLA violations: {violation_summary}")
             
-            logger.success("✅ All agent coordination performance SLAs met")
+            logger.success("CHECK All agent coordination performance SLAs met")
             logger.info(f"📊 Performance metrics: {performance_metrics}")
             
         finally:
@@ -1348,7 +1348,7 @@ class TestAgentMessageRouting(SSotAsyncTestCase):
             logger.info(f"🧹 Cleaning up coordination test user: {auth_result.get('user_email')}")
             # Could implement user deletion if needed
         except Exception as e:
-            logger.warning(f"⚠️  User cleanup warning: {e}")
+            logger.warning(f"WARNING️  User cleanup warning: {e}")
 
 
 if __name__ == '__main__':

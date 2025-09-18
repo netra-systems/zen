@@ -408,7 +408,7 @@ class IntegrationCoverageValidationTests:
         
         for result in coverage_results:
             if result['coverage_validated']:
-                logger.info(f"✓ {result['component']}: {result['business_impact']}")
+                logger.info(f"CHECK {result['component']}: {result['business_impact']}")
             else:
                 logger.warning(f"✗ {result['component']}: Integration tests not available")
     
@@ -587,7 +587,7 @@ class MockServiceRealismTests:
             logger.info(f"Mock service realism validated: {len(realistic_services)}/{len(mock_realism_results)} services realistic")
             
             for result in mock_realism_results:
-                status = "✓" if result['realistic_interface'] and result['business_logic_testable'] else "✗"
+                status = "CHECK" if result['realistic_interface'] and result['business_logic_testable'] else "✗"
                 logger.info(f"{status} {result['service_name']}: Interface={result['realistic_interface']}, Testable={result['business_logic_testable']}")
             
         except ImportError as e:

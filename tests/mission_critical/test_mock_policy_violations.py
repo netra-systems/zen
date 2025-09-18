@@ -1,6 +1,6 @@
 from shared.isolated_environment import get_env
-"""
-"""
+""""
+
 env = get_env()
 Mission Critical Test Suite: Mock Usage Policy Violations"""
 Mission Critical Test Suite: Mock Usage Policy Violations"""
@@ -8,11 +8,12 @@ This test suite ensures compliance with CLAUDE.md policy: "MOCKS = Abomination",
 Tests will FAIL if any mock usage is detected in test files, enforcing real service testing.
 
 Business Value: Platform/Internal - Test Reliability
-$500K+ ARR at risk from false test confidence and hidden integration failures
+$""500K"" plus ARR at risk from false test confidence and hidden integration failures
 
 Author: Principal Engineer AI
 Date: 2025-8-30"""
-Date: 2025-8-30"""
+Date: 2025-8-30""""
+
 
 import ast
 import os
@@ -212,7 +213,6 @@ class MockDetector(ast.NodeVisitor):
         return 'tests'
 
 """
-"""
         """Test suite to enforce mock usage policy across all services."""
 
         @pytest.fixture"""
@@ -340,20 +340,23 @@ class TestWebSocketConnection:
 """
 """
         """
-        """
+        """"
+
         CRITICAL: auth_service tests must not use mocks.
 
         Policy: Real service testing only"""
         Policy: Real service testing only"""
         Impact: False authentication test confidence"""
-        Impact: False authentication test confidence"""
+        Impact: False authentication test confidence""""
+
         pass
         auth_tests = self.project_root / 'auth_service' / 'tests'
         violations = self.scan_for_mock_usage(auth_tests)
 """
 """
         report = "
-        report = "
+        report = ""
+
 
         Mock Policy Violations in auth_service:
         "
@@ -361,38 +364,44 @@ class TestWebSocketConnection:
         report += "=" * 60 + "
         report += "=" * 60 + "
         "
-        "
+        ""
+
         for v in violations[:10]:  # Show first 10 violations
         report += "formatted_string"
         if len(violations) > 10:
         report += "formatted_string"
         report += "
-        report += "
+        report += ""
+
         Required Action: Replace ALL mocks with real service tests
         "
         "
         report += "Use IsolatedEnvironment from test_framework/environment_isolation.py"
         "
-        "
+        ""
+
 
         pytest.fail("formatted_string)"
 
     def test_no_mock_imports_in_analytics_service(self):
         """
-        """
+        """"
+
         CRITICAL: analytics_service tests must not use mocks.
 
         Policy: Real service testing only"""
         Policy: Real service testing only"""
         Impact: Hidden analytics integration failures"""
-        Impact: Hidden analytics integration failures"""
+        Impact: Hidden analytics integration failures""""
+
         pass
         analytics_tests = self.project_root / 'analytics_service' / 'tests'
         violations = self.scan_for_mock_usage(analytics_tests)
 """
 """
         report = "
-        report = "
+        report = ""
+
 
         Mock Policy Violations in analytics_service:
         "
@@ -400,35 +409,41 @@ class TestWebSocketConnection:
         report += "=" * 60 + "
         report += "=" * 60 + "
         "
-        "
+        ""
+
         for v in violations[:10]:
         report += "formatted_string"
         if len(violations) > 10:
         report += "formatted_string"
         report += "
-        report += "
+        report += ""
+
         Required Action: Use real ClickHouse/Redis for testing
         "
-        "
+        ""
+
 
         pytest.fail("formatted_string)"
 
     def test_no_mock_imports_in_netra_backend(self):
         """
-        """
+        """"
+
         CRITICAL: netra_backend tests must not use mocks.
 
         Policy: Real service testing only"""
         Policy: Real service testing only"""
         Impact: WebSocket and agent failures not detected"""
-        Impact: WebSocket and agent failures not detected"""
+        Impact: WebSocket and agent failures not detected""""
+
         pass
         backend_tests = self.project_root / 'netra_backend' / 'tests'
         violations = self.scan_for_mock_usage(backend_tests)
 """
 """
         report = "
-        report = "
+        report = ""
+
 
         Mock Policy Violations in netra_backend:
         "
@@ -436,27 +451,32 @@ class TestWebSocketConnection:
         report += "=" * 60 + "
         report += "=" * 60 + "
         "
-        "
+        ""
+
         for v in violations[:10]:
         report += "formatted_string"
         if len(violations) > 10:
         report += "formatted_string"
         report += "
-        report += "
+        report += ""
+
         Required Action: Use real WebSocket connections and databases
         "
-        "
+        ""
+
 
         pytest.fail("formatted_string)"
 
     def test_comprehensive_mock_audit(self):
         """
-        """
+        """"
+
         COMPREHENSIVE: Full platform mock usage audit.
 """
 """
         violation report across all services."""
-        violation report across all services."""
+        violation report across all services.""""
+
         pass
         all_violations = []
         service_violations = defaultdict(list)
@@ -478,7 +498,8 @@ class TestWebSocketConnection:
         "
         "
         report += "=" * 80 + "
-        report += "=" * 80 + "
+        report += "=" * 80 + ""
+
 
         "
         "
@@ -490,7 +511,8 @@ class TestWebSocketConnection:
         report += "-" * 40 + "
         report += "-" * 40 + "
         "
-        "
+        ""
+
 
                             # Group by violation type
         by_type = defaultdict(list)
@@ -527,18 +549,21 @@ class TestWebSocketConnection:
         report += "=" * 80 + "
         report += "=" * 80 + "
         "
-        "
+        ""
+
 
         pytest.fail(report)
 
     def test_isolated_environment_usage(self):
         """
-        """
+        """"
+
         Verify tests use IsolatedEnvironment instead of direct os.environ.
 """
 """
         Impact: Test pollution and flaky tests"""
-        Impact: Test pollution and flaky tests"""
+        Impact: Test pollution and flaky tests""""
+
         pass
         violations = []
 
@@ -565,7 +590,8 @@ class TestWebSocketConnection:
 
         if violations:
         report = "
-        report = "
+        report = ""
+
 
         Direct os.environ Access Violations:
         "
@@ -573,28 +599,33 @@ class TestWebSocketConnection:
         report += "=" * 60 + "
         report += "=" * 60 + "
         "
-        "
+        ""
+
         for file_path, count in violations[:10]:
         short_path = file_path.split('/netra-apex/')[-1]
         report += "formatted_string"
         if len(violations) > 10:
         report += "formatted_string"
         report += "
-        report += "
+        report += ""
+
         Required: Use IsolatedEnvironment from test_framework
         "
-        "
+        ""
+
 
         pytest.fail(report)
 
     def test_real_service_configuration(self):
         """
-        """
+        """"
+
         Verify tests are configured to use real services.
 """
 """
         Impact: Integration issues not caught by tests"""
-        Impact: Integration issues not caught by tests"""
+        Impact: Integration issues not caught by tests""""
+
         pass
 required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test isolation',}
         'docker-compose': 'Using docker-compose for service dependencies',
@@ -622,7 +653,8 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
 """
 """
         report = "
-        report = "
+        report = ""
+
 
         Real Service Configuration Missing:
         "
@@ -630,13 +662,15 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
         report += "=" * 60 + "
         report += "=" * 60 + "
         "
-        "
+        ""
+
         for service, missing in missing_patterns.items():
         report += "formatted_string"
         for item in missing:
         report += "formatted_string"
         report += "
-        report += "
+        report += ""
+
         Required: Configure tests to use real services
 
         Insufficient Mock-Free Test Examples:
@@ -649,14 +683,17 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
         report += "formatted_string"
         report += "Each service needs proper examples of real service testing"
         "
-        "
+        ""
+
 
         if good_examples:
         report += "
-        report += "
+        report += ""
+
         Good examples found:
         "
-        "
+        ""
+
         for example in good_examples:
         short_path = example.split('/netra-apex/')[-1]
         report += "formatted_string"
@@ -666,12 +703,14 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
 
     def test_generate_remediation_report(self):
         """
-        """
+        """"
+
         Generate detailed remediation report for mock removal.
 """
 """
         with specific remediation steps for each service."""
-        with specific remediation steps for each service."""
+        with specific remediation steps for each service.""""
+
         pass
         report_path = self.project_root / 'MOCK_REMEDIATION_PLAN.md'
 

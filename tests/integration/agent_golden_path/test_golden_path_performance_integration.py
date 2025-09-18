@@ -72,7 +72,7 @@ class GoldenPathPerformanceIntegrationTests(SSotAsyncTestCase):
     P0 Critical Integration Tests for Golden Path Performance Validation.
 
     This test class validates Golden Path performance characteristics:
-    Performance Benchmarking → Scalability Testing → Resource Optimization
+    Performance Benchmarking -> Scalability Testing -> Resource Optimization
 
     Tests protect $500K+ ARR platform scalability by validating:
     - Golden Path performance benchmarks meeting business SLAs

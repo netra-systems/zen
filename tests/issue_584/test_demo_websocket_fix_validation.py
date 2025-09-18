@@ -47,7 +47,7 @@ class DemoWebSocketFixValidationTests(unittest.TestCase):
             
         print("\nSSot Compliance Results:")
         for result in ssot_compliance_results:
-            print(f"  ✅ {result}")
+            print(f"  CHECK {result}")
         
         # After fix, should have NO SSOT violations
         violations = [result for result in ssot_compliance_results if "VIOLATION" in result]

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""
-"""
+""""
+
 Unified Corpus Admin tests - Testing the new SSOT implementation.
 These tests ensure the unified corpus admin works correctly after consolidation.
 
@@ -9,8 +9,8 @@ CRITICAL: These tests validate the new UnifiedCorpusAdmin implementation.
 """
 """
 """
-"""
-"""
+""""
+
 import asyncio
 import unittest
 import sys
@@ -29,11 +29,13 @@ sys.path.insert(0, str(project_root))
 
 class UnifiedCorpusAdminTests(unittest.IsolatedAsyncioTestCase):
     "
-    "
+    ""
+
     Test the new UnifiedCorpusAdmin implementation.
     Uses standard unittest for better compatibility.
 "
-"
+""
+
     
     async def asyncSetUp(self):
         "Set up test environment"
@@ -45,7 +47,8 @@ class UnifiedCorpusAdminTests(unittest.IsolatedAsyncioTestCase):
     
     def _create_user_context(self, user_id: str) -> Dict[str, Any]:
         Create a user execution context for testing"
-        Create a user execution context for testing"
+        Create a user execution context for testing""
+
         return {
             'user_id': user_id,
             'request_id': f'req_{user_id}_{id(self)}',
@@ -70,7 +73,8 @@ class UnifiedCorpusAdminTests(unittest.IsolatedAsyncioTestCase):
             thread_id=test_thread,"
             thread_id=test_thread,"
             session_id=test_session"
-            session_id=test_session"
+            session_id=test_session""
+
         )
         
         # Create unified admin
@@ -79,7 +83,8 @@ class UnifiedCorpusAdminTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(admin.context.user_id, test_user)
     
     async def test_factory_pattern(self):
-        ""Test that the factory pattern works"
+        ""Test that the factory pattern works""
+
         from netra_backend.app.admin.corpus import ()
             UnifiedCorpusAdminFactory,
             UserExecutionContext
@@ -107,7 +112,8 @@ class UnifiedCorpusAdminTests(unittest.IsolatedAsyncioTestCase):
     
     async def test_multi_user_isolation(self):
         Test that different users get isolated admin instances"
-        Test that different users get isolated admin instances"
+        Test that different users get isolated admin instances""
+
         from netra_backend.app.admin.corpus import ()
             UnifiedCorpusAdminFactory,
             UserExecutionContext
@@ -139,7 +145,8 @@ class UnifiedCorpusAdminTests(unittest.IsolatedAsyncioTestCase):
         # Should have different user IDs
         self.assertEqual(admin1.context.user_id, user1)
         self.assertEqual(admin2.context.user_id, user2)"
-        self.assertEqual(admin2.context.user_id, user2)"
+        self.assertEqual(admin2.context.user_id, user2)""
+
         
         # Should have different corpus paths
         self.assertNotEqual(admin1.user_corpus_path, admin2.user_corpus_path)
@@ -165,7 +172,8 @@ class UnifiedCorpusAdminTests(unittest.IsolatedAsyncioTestCase):
             thread_id=test_thread,"
             thread_id=test_thread,"
             session_id=test_session"
-            session_id=test_session"
+            session_id=test_session""
+
         )
         
         # Create unified admin
@@ -209,7 +217,8 @@ class UnifiedCorpusAdminTests(unittest.IsolatedAsyncioTestCase):
         
         validation_error = DocumentValidationError(
             message=Validation failed,"
-            message=Validation failed,"
+            message=Validation failed,""
+
             details={'document': 'doc_123', 'errors': ['Missing metadata']}
         self.assertIsInstance(validation_error, CorpusAdminError)
         
@@ -223,7 +232,8 @@ class UnifiedCorpusAdminTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(upload_error.details['file'], 'test.txt')
     
     async def test_compatibility_layer(self):
-        ""Test that the compatibility layer works for legacy imports"
+        ""Test that the compatibility layer works for legacy imports""
+
         from netra_backend.app.admin.corpus import ()
             CorpusAdminSubAgent,
             CorpusCRUDOperations,
@@ -313,7 +323,8 @@ class UnifiedCorpusAdminTests(unittest.IsolatedAsyncioTestCase):
     
     async def test_concurrent_operations(self):
         Test thread safety with concurrent corpus operations"
-        Test thread safety with concurrent corpus operations"
+        Test thread safety with concurrent corpus operations""
+
         from netra_backend.app.admin.corpus import ()
             UnifiedCorpusAdminFactory,
             UserExecutionContext

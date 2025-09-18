@@ -1,4 +1,4 @@
-'''Service Availability Checker for E2E Tests'
+"""Service Availability Checker for E2E Tests
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal
@@ -9,8 +9,7 @@ Business Value Justification (BVJ):
 This module provides comprehensive service availability detection for E2E tests.
 It checks actual connectivity to databases and external services, not just
 environment variables or flags.
-'''
-'''
+"""
 
 import asyncio
 import logging
@@ -57,7 +56,7 @@ class ServiceStatus:
     error: Optional[str] = None
 
 
-    @dataclass
+@dataclass
 class ServiceAvailability:
     """Complete service availability configuration."""
 
@@ -79,35 +78,36 @@ class ServiceAvailability:
         """Check if real databases are available."""
         return self.postgresql.available and self.redis.available
 
-        @property
+    @property
     def has_real_llm_apis(self) -> bool:
         """Check if real LLM APIs are available."""
         return self.openai_api.available or self.anthropic_api.available
 
-        @property
+    @property
     def summary(self) -> Dict[str, Any]:
         """Get summary of service availability."""
         return {
-        "databases: {"
-        "postgresql: self.postgresql.available,"
-        "redis: self.redis.available,"
-        "clickhouse: self.clickhouse.available,"
-        },
-        "apis: {"
-        "openai: self.openai_api.available,"
-        "anthropic: self.anthropic_api.available,"
-        },
-        "configuration: {"
-        "use_real_services: self.use_real_services,"
-        "use_real_llm: self.use_real_llm,"
-        "has_real_databases: self.has_real_databases,"
-        "has_real_llm_apis: self.has_real_llm_apis,"
-    
-    
+            "databases": {
+                "postgresql": self.postgresql.available,
+                "redis": self.redis.available,
+                "clickhouse": self.clickhouse.available,
+            },
+            "apis": {
+                "openai": self.openai_api.available,
+                "anthropic": self.anthropic_api.available,
+            },
+            "configuration": {
+                "use_real_services": self.use_real_services,
+                "use_real_llm": self.use_real_llm,
+                "has_real_databases": self.has_real_databases,
+                "has_real_llm_apis": self.has_real_llm_apis,
+            }
+        }
+
 
 
 class ServiceAvailabilityChecker:
-        """Checks actual availability of services for E2E testing."""
+    """Checks actual availability of services for E2E testing."""
 
     def __init__(self, timeout: float = 15.0):
         '''Initialize service availability checker.
@@ -555,55 +555,51 @@ class ServiceAvailabilityChecker:
         return await checker.check_all_services()
 
 
-            # CLI interface for manual testing
-    async def main():
-        """CLI interface for testing service availability."""
-        import sys
+# CLI interface for manual testing
+async def main():
+    """CLI interface for testing service availability."""
+    import sys
 
-        print("Checking service availability...)"
-        print("= * 50)"
+    print("Checking service availability...")
+    print("=" * 50)
 
-        availability = await get_service_availability()
+    availability = await get_service_availability()
 
     # Print detailed results
-        print(f"Environment Flags:)"
-        print("")
-        print("")
-        print()
+    print(f"Environment Flags:")
+    print(f"  USE_REAL_SERVICES: {availability.use_real_services}")
+    print(f"  USE_REAL_LLM: {availability.use_real_llm}")
+    print()
 
-        print("Database Services:)"
-        for service in [availability.postgresql, availability.redis, availability.clickhouse]:
-        status = "[OK]" if service.available else "[FAIL]  # Use ASCII characters for Windows compatibility"
-        print("")
+    print("Database Services:")
+    for service in [availability.postgresql, availability.redis, availability.clickhouse]:
+        status = "[OK]" if service.available else "[FAIL]"  # Use ASCII characters for Windows compatibility
+        print(f"  {service.name}: {status}")
         if service.error:
-        print("")
-        print()
+            print(f"    Error: {service.error}")
+    print()
 
-        print("API Services:)"
-        for service in [availability.openai_api, availability.anthropic_api]:
-        status = "[OK]" if service.available else "[FAIL]  # Use ASCII characters for Windows compatibility"
-        print("")
+    print("API Services:")
+    for service in [availability.openai_api, availability.anthropic_api]:
+        status = "[OK]" if service.available else "[FAIL]"  # Use ASCII characters for Windows compatibility
+        print(f"  {service.name}: {status}")
         if service.error:
-        print("")
-        print()
+            print(f"    Error: {service.error}")
+    print()
 
-        print("Summary:)"
-        print("")
-        print("")
+    print("Summary:")
+    print(f"  Real databases available: {availability.has_real_databases}")
+    print(f"  Real LLM APIs available: {availability.has_real_llm_apis}")
 
-                    # Exit with error code if critical services unavailable
-        if not availability.has_real_databases and availability.use_real_services:
-        print("ERROR: USE_REAL_SERVICES=true but databases not available)"
+    # Exit with error code if critical services unavailable
+    if not availability.has_real_databases and availability.use_real_services:
+        print("ERROR: USE_REAL_SERVICES=true but databases not available")
         sys.exit(1)
 
-        if not availability.has_real_llm_apis and availability.use_real_llm:
-        print("ERROR: USE_REAL_LLM=true but LLM APIs not available)"
+    if not availability.has_real_llm_apis and availability.use_real_llm:
+        print("ERROR: USE_REAL_LLM=true but LLM APIs not available")
         sys.exit(1)
 
 
-        if __name__ == "__main__:"
-        asyncio.run(main())
-
-))))))))))))))))))))))))))))
-]]]]
-}}}}}}
+if __name__ == "__main__":
+    asyncio.run(main())

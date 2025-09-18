@@ -107,9 +107,9 @@ class SupervisorSystemLevelSSotConflictsTests(SSotBaseTestCase):
                        f"Expected: 1 SSOT reference. Found: {registry_supervisor_refs}")
                        
         elif len(registry_supervisor_refs) == 0:
-            logger.warning("⚠️  No supervisor registry references found - may indicate configuration issues")
+            logger.warning("WARNING️  No supervisor registry references found - may indicate configuration issues")
         else:
-            logger.info("✓ All system components reference the same supervisor")
+            logger.info("CHECK All system components reference the same supervisor")
 
     def test_supervisor_execution_engine_confusion_SHOULD_FAIL(self):
         """FAILING - Shows ExecutionEngine conflicts with multiple supervisors
@@ -205,7 +205,7 @@ class SupervisorSystemLevelSSotConflictsTests(SSotBaseTestCase):
                            f"have supervisor-specific logic that may conflict with multiple implementations. "
                            f"Expected: Unified supervisor interface. Found: {execution_engine_conflicts}")
         else:
-            logger.info("✓ No obvious execution engine conflicts detected")
+            logger.info("CHECK No obvious execution engine conflicts detected")
 
     async def test_supervisor_websocket_event_delivery_race_SHOULD_FAIL(self):
         """FAILING - Shows potential WebSocket event delivery conflicts
@@ -244,7 +244,7 @@ class SupervisorSystemLevelSSotConflictsTests(SSotBaseTestCase):
                     websocket_bridge=websocket_bridge
                 )
                 supervisors_created.append(("SSOT", ssot_supervisor))
-                logger.info("✓ Created SSOT supervisor instance")
+                logger.info("CHECK Created SSOT supervisor instance")
             except Exception as e:
                 logger.warning(f"Could not create SSOT supervisor: {e}")
             
@@ -255,7 +255,7 @@ class SupervisorSystemLevelSSotConflictsTests(SSotBaseTestCase):
                     websocket_bridge=websocket_bridge
                 )
                 supervisors_created.append(("Consolidated", consolidated_supervisor))
-                logger.info("✓ Created Consolidated supervisor instance")
+                logger.info("CHECK Created Consolidated supervisor instance")
             except Exception as e:
                 logger.warning(f"Could not create Consolidated supervisor: {e}")
                 
@@ -311,9 +311,9 @@ class SupervisorSystemLevelSSotConflictsTests(SSotBaseTestCase):
                                f"can emit WebSocket events simultaneously. Expected: 1 SSOT emitter. "
                                f"Found: {successful_emissions}")
                 else:
-                    logger.info("✓ Only one supervisor successfully emits WebSocket events")
+                    logger.info("CHECK Only one supervisor successfully emits WebSocket events")
             else:
-                logger.warning("⚠️  No WebSocket events were emitted by any supervisor")
+                logger.warning("WARNING️  No WebSocket events were emitted by any supervisor")
                 
         except Exception as e:
             logger.error(f"WebSocket event test failed: {e}")
@@ -422,9 +422,9 @@ class SupervisorSystemLevelSSotConflictsTests(SSotBaseTestCase):
                            f"supervisor implementations. Expected: Unified factory pattern. "
                            f"Conflicts: {conflicts}")
             else:
-                logger.info("✓ Factory patterns are consistent between supervisors")
+                logger.info("CHECK Factory patterns are consistent between supervisors")
         else:
-            logger.info("✓ Only one supervisor factory pattern found")
+            logger.info("CHECK Only one supervisor factory pattern found")
 
 
 # After SSOT remediation validation tests (currently skipped)
@@ -439,7 +439,7 @@ class SupervisorSystemLevelSSotValidationTests(SSotBaseTestCase):
         Currently SKIPPED: Will be enabled after SSOT remediation.
         After remediation: Will pass when unified system integration exists.
         """
-        logger.info("✅ VALIDATING: Clean supervisor system integration")
+        logger.info("CHECK VALIDATING: Clean supervisor system integration")
         
         # Import the SSOT SupervisorAgent
         from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
@@ -454,7 +454,7 @@ class SupervisorSystemLevelSSotValidationTests(SSotBaseTestCase):
             
             # Should be able to create supervisor via factory
             # (This would be a more complex test in real implementation)
-            logger.info("✓ SSOT supervisor integrates properly with AgentInstanceFactory")
+            logger.info("CHECK SSOT supervisor integrates properly with AgentInstanceFactory")
             
         except ImportError as e:
             pytest.fail(f"SSOT supervisor system integration failed: {e}")
@@ -466,7 +466,7 @@ class SupervisorSystemLevelSSotValidationTests(SSotBaseTestCase):
         Currently SKIPPED: Will be enabled after SSOT remediation.
         After remediation: Will pass when unified WebSocket integration exists.
         """
-        logger.info("✅ VALIDATING: Unified supervisor WebSocket integration")
+        logger.info("CHECK VALIDATING: Unified supervisor WebSocket integration")
         
         # Import the SSOT SupervisorAgent
         from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
@@ -484,7 +484,7 @@ class SupervisorSystemLevelSSotValidationTests(SSotBaseTestCase):
         assert supervisor is not None, "SSOT supervisor should create successfully"
         assert hasattr(supervisor, 'websocket_bridge'), "SSOT supervisor should have WebSocket bridge"
         
-        logger.info("✓ SSOT supervisor integrates properly with WebSocket systems")
+        logger.info("CHECK SSOT supervisor integrates properly with WebSocket systems")
 
 
 if __name__ == "__main__":
@@ -498,26 +498,26 @@ if __name__ == "__main__":
         
         try:
             test_instance.test_supervisor_registry_integration_conflict_SHOULD_FAIL()
-            print("❌ Registry integration conflict test unexpectedly passed")
+            print("X Registry integration conflict test unexpectedly passed")
         except AssertionError as e:
-            print(f"✅ Registry integration conflict exposed: {e}")
+            print(f"CHECK Registry integration conflict exposed: {e}")
         except Exception as e:
-            print(f"⚠️  Registry integration test error: {e}")
+            print(f"WARNING️  Registry integration test error: {e}")
         
         try:
             test_instance.test_supervisor_execution_engine_confusion_SHOULD_FAIL()
-            print("❌ Execution engine conflict test unexpectedly passed")
+            print("X Execution engine conflict test unexpectedly passed")
         except AssertionError as e:
-            print(f"✅ Execution engine conflict exposed: {e}")
+            print(f"CHECK Execution engine conflict exposed: {e}")
         except Exception as e:
-            print(f"⚠️  Execution engine test error: {e}")
+            print(f"WARNING️  Execution engine test error: {e}")
         
         try:
             await test_instance.test_supervisor_websocket_event_delivery_race_SHOULD_FAIL()
-            print("❌ WebSocket event conflict test unexpectedly passed")
+            print("X WebSocket event conflict test unexpectedly passed")
         except AssertionError as e:
-            print(f"✅ WebSocket event conflict exposed: {e}")
+            print(f"CHECK WebSocket event conflict exposed: {e}")
         except Exception as e:
-            print(f"⚠️  WebSocket event test error: {e}")
+            print(f"WARNING️  WebSocket event test error: {e}")
     
     asyncio.run(run_analysis())

@@ -12,7 +12,7 @@ and that no manual docker-compose commands are being executed outside of the cen
 CRITICAL: Per CLAUDE.md Section 7.1, all Docker operations MUST go through UnifiedDockerManager.
 
 INFRASTRUCTURE VALIDATION:
-- Compliance auditing and violation detection
+    - Compliance auditing and violation detection
 - Performance impact of compliance enforcement
 - Automated remediation and fix generation
 - Continuous monitoring and alerting for violations
@@ -93,7 +93,8 @@ class DockerComplianceAuditor:
         self.manager = get_default_manager()
 
     def audit_file_for_docker_commands(self, file_path: Path) -> List[Dict]:
-        ""Check a file for direct docker/docker-compose commands"
+        ""Check a file for direct docker/docker-compose commands""
+
         violations = []
 
     # Skip non-Python and non-script files for command analysis
@@ -104,7 +105,8 @@ class DockerComplianceAuditor:
         with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
         content = f.read()
         lines = content.split( )"
-        lines = content.split( )"
+        lines = content.split( )""
+
         )
 
         for line_num, line in enumerate(lines, 1):
@@ -150,7 +152,8 @@ class DockerComplianceAuditor:
 
         except Exception as e:
         logger.warning(formatted_string)"
-        logger.warning(formatted_string)"
+        logger.warning(formatted_string)""
+
 
         return violations
 
@@ -189,7 +192,8 @@ class DockerComplianceAuditor:
 
     def audit_frontend_service_integration(self) -> Dict:
         Verify frontend service is properly integrated in UnifiedDockerManager"
-        Verify frontend service is properly integrated in UnifiedDockerManager"
+        Verify frontend service is properly integrated in UnifiedDockerManager""
+
         results = {
         'frontend_in_configs': False,
         'frontend_in_health_checks': False,
@@ -225,7 +229,8 @@ class DockerComplianceAuditor:
     def run_audit(self) -> Dict:
         "Run complete Docker compliance audit"
         logger.info( SEARCH:  Starting Docker Management Compliance Audit...)"
-        logger.info( SEARCH:  Starting Docker Management Compliance Audit...)"
+        logger.info( SEARCH:  Starting Docker Management Compliance Audit...)""
+
 
     # Find all relevant files
         patterns = ['**/*.py', '**/*.sh', '**/*.bat', '**/*.ps1']
@@ -329,7 +334,8 @@ class DockerComplianceInfrastructureTests:
     def __init__(self):
         pass
         self.logger = logging.getLogger("
-        self.logger = logging.getLogger("
+        self.logger = logging.getLogger(""
+
         self.project_root = project_root
 
     def test_compliance_audit_performance_scalability(self) -> ComplianceMetrics:
@@ -375,7 +381,8 @@ class DockerComplianceInfrastructureTests:
         assert memory_per_file < 0.5, formatted_string"
         assert memory_per_file < 0.5, formatted_string"
         assert audit_duration < 30000, formatted_string"
-        assert audit_duration < 30000, formatted_string"
+        assert audit_duration < 30000, formatted_string""
+
 
         return metrics
 
@@ -390,7 +397,8 @@ class DockerComplianceInfrastructureTests:
         for test_case in test_cases:
         # Write test file
         test_file = self.project_root / temp_compliance_test.py"
-        test_file = self.project_root / temp_compliance_test.py"
+        test_file = self.project_root / temp_compliance_test.py""
+
         try:
         with open(test_file, 'w') as f:
         f.write(test_case['code')
@@ -523,7 +531,8 @@ class DockerComplianceInfrastructureTests:
                         # Effectiveness assertions
         assert effectiveness_rate >= 80, "formatted_string"
         assert avg_quality >= 6.0, formatted_string"
-        assert avg_quality >= 6.0, formatted_string"
+        assert avg_quality >= 6.0, formatted_string""
+
 
         return {
         'effectiveness_rate': effectiveness_rate,
@@ -539,7 +548,8 @@ class DockerComplianceInfrastructureTests:
 
     def compliance_monitoring_cycle(cycle_id: int) -> Dict[str, Any]:
         Single monitoring cycle for performance testing."
-        Single monitoring cycle for performance testing."
+        Single monitoring cycle for performance testing.""
+
         start_time = time.time()
         initial_memory = psutil.virtual_memory().used / (1024 * 1024)
 
@@ -630,7 +640,8 @@ class DockerComplianceInfrastructureTests:
         assert avg_monitoring_time < 1000, ""
         assert max_monitoring_time < 5000, "formatted_string"
         assert failed_cycles == 0, formatted_string"
-        assert failed_cycles == 0, formatted_string"
+        assert failed_cycles == 0, formatted_string""
+
 
         return {
         'success_rate': success_rate,
@@ -743,7 +754,8 @@ class DockerComplianceInfrastructureTests:
         assert avg_risk_score < 7.0, formatted_string"
         assert avg_risk_score < 7.0, formatted_string"
         assert estimated_remediation_hours < 40, formatted_string"
-        assert estimated_remediation_hours < 40, formatted_string"
+        assert estimated_remediation_hours < 40, formatted_string""
+
 
         return {
         'total_violations': total_violations,
@@ -856,7 +868,8 @@ class DockerComplianceInfrastructureTests:
                                                         # Ensure at least one Docker Compose file exists
         existing_compose_files = [item for item in []]
         assert len(existing_compose_files) > 0, No Docker Compose files found"
-        assert len(existing_compose_files) > 0, No Docker Compose files found"
+        assert len(existing_compose_files) > 0, No Docker Compose files found""
+
 
         return {
         'platform': current_platform,
@@ -877,12 +890,14 @@ class DockerComplianceInfrastructureTests:
         return categories
 
     def _create_compliance_test_cases(self) -> List[Dict[str, Any]]:
-        ""Create test cases for compliance violation detection."
+        ""Create test cases for compliance violation detection.""
+
         return [
         {
         'name': 'compliant_code',
         code: from test_framework.unified_docker_manager import get_default_manager"
-        code: from test_framework.unified_docker_manager import get_default_manager"
+        code: from test_framework.unified_docker_manager import get_default_manager""
+
         manager = get_default_manager()
         manager.start_services()","
         'expected_violations': 0

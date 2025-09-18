@@ -18,7 +18,7 @@ CRITICAL FACTORY PATTERN SCENARIOS (10 tests):
 3. Resource Management & Cleanup (2 tests)
 4. Configuration Inheritance (2 tests)
 
-COVERAGE TARGET: AgentInstanceFactory integration 10% → 40% (+30% improvement)
+COVERAGE TARGET: AgentInstanceFactory integration 10% -> 40% (+30% improvement)
 
 SSOT Testing Compliance:
 - Uses test_framework.ssot.base_test_case.SSotAsyncTestCase
@@ -245,7 +245,7 @@ class AgentInstanceFactoryComprehensiveIntegrationTests(SSotAsyncTestCase):
                 assert id(agent) != id(other_agent)
                 assert agent.user_execution_context != other_agent.user_execution_context
         
-        logger.info("✅ Agent factory user isolation patterns validated")
+        logger.info("CHECK Agent factory user isolation patterns validated")
     
     async def test_concurrent_agent_factory_creation_isolation(self):
         """Test 2/10: Concurrent agent creation maintains proper isolation"""
@@ -330,7 +330,7 @@ class AgentInstanceFactoryComprehensiveIntegrationTests(SSotAsyncTestCase):
         agent_ids = [id(agent) for agent in all_agents]
         assert len(set(agent_ids)) == 18
         
-        logger.info("✅ Concurrent agent factory creation isolation validated")
+        logger.info("CHECK Concurrent agent factory creation isolation validated")
     
     async def test_factory_user_context_inheritance_patterns(self):
         """Test 3/10: Factory ensures proper user context inheritance in created agents"""
@@ -404,7 +404,7 @@ class AgentInstanceFactoryComprehensiveIntegrationTests(SSotAsyncTestCase):
             assert result["context_inheritance"], f"Context inheritance failed for {result['agent_type']}" 
             assert result["state_inheritance"], f"State inheritance failed for {result['agent_type']}"
         
-        logger.info("✅ Factory user context inheritance patterns validated")
+        logger.info("CHECK Factory user context inheritance patterns validated")
 
     # ============================================================================
     # CATEGORY 2: INSTANCE LIFECYCLE MANAGEMENT (3 tests)
@@ -493,7 +493,7 @@ class AgentInstanceFactoryComprehensiveIntegrationTests(SSotAsyncTestCase):
             if hasattr(agent, 'cleanup'):
                 await agent.cleanup()
         
-        logger.info("✅ Agent factory instance lifecycle tracking validated")
+        logger.info("CHECK Agent factory instance lifecycle tracking validated")
     
     async def test_factory_instance_configuration_management(self):
         """Test 5/10: Factory manages instance configuration inheritance and customization"""
@@ -587,7 +587,7 @@ class AgentInstanceFactoryComprehensiveIntegrationTests(SSotAsyncTestCase):
             # Result should indicate successful configuration usage
             # (This depends on agent implementation)
         
-        logger.info("✅ Factory instance configuration management validated")
+        logger.info("CHECK Factory instance configuration management validated")
     
     async def test_factory_instance_resource_allocation_patterns(self):
         """Test 6/10: Factory properly allocates and manages resources for instances"""
@@ -692,7 +692,7 @@ class AgentInstanceFactoryComprehensiveIntegrationTests(SSotAsyncTestCase):
         # Validate resource tracking
         assert len(resource_allocations) == len(successful_allocations)
         
-        logger.info(f"✅ Factory resource allocation validated - {len(successful_allocations)}/{len(agent_specs)} successful")
+        logger.info(f"CHECK Factory resource allocation validated - {len(successful_allocations)}/{len(agent_specs)} successful")
 
     # ============================================================================
     # CATEGORY 3: RESOURCE MANAGEMENT & CLEANUP (2 tests)
@@ -777,7 +777,7 @@ class AgentInstanceFactoryComprehensiveIntegrationTests(SSotAsyncTestCase):
                       if e['user_id'] == context.user_id]
         assert len(user_events) >= 8  # At least one event per agent
         
-        logger.info("✅ Factory resource cleanup and garbage collection validated")
+        logger.info("CHECK Factory resource cleanup and garbage collection validated")
     
     async def test_factory_memory_leak_prevention(self):
         """Test 8/10: Factory prevents memory leaks in high-throughput scenarios"""
@@ -867,7 +867,7 @@ class AgentInstanceFactoryComprehensiveIntegrationTests(SSotAsyncTestCase):
         # Should have events from all agent lifecycles
         assert len(user_events) >= total_agents_created
         
-        logger.info(f"✅ Memory leak prevention validated - {total_agents_created} agents processed successfully")
+        logger.info(f"CHECK Memory leak prevention validated - {total_agents_created} agents processed successfully")
 
     # ============================================================================
     # CATEGORY 4: CONFIGURATION INHERITANCE (2 tests)
@@ -988,7 +988,7 @@ class AgentInstanceFactoryComprehensiveIntegrationTests(SSotAsyncTestCase):
             # Agent should execute successfully with inherited configuration
             assert result is not None or True  # Basic execution success
         
-        logger.info("✅ Factory configuration inheritance hierarchy validated")
+        logger.info("CHECK Factory configuration inheritance hierarchy validated")
     
     async def test_factory_configuration_isolation_between_users(self):
         """Test 10/10: Factory maintains configuration isolation between different users"""
@@ -1120,4 +1120,4 @@ class AgentInstanceFactoryComprehensiveIntegrationTests(SSotAsyncTestCase):
             for event in user_events:
                 assert event['user_id'] == user_result['user_id']
         
-        logger.info("✅ Factory configuration isolation between users validated")
+        logger.info("CHECK Factory configuration isolation between users validated")

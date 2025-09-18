@@ -69,7 +69,7 @@ class TestPhase2GoldenPathComponentsNoDocker(SSotAsyncTestCase):
         assert user_context.agent_context['business_intent'] == 'cost_optimization'
         self.record_metric('user_context_creation_success', True)
         self.record_metric('golden_path_core_logic_working', True)
-        print('✅ PASS: User execution context creation works without Docker')
+        print('CHECK PASS: User execution context creation works without Docker')
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -95,7 +95,7 @@ class TestPhase2GoldenPathComponentsNoDocker(SSotAsyncTestCase):
         assert str(user_id) != str(user_id_2), 'ID generator not producing unique IDs'
         self.record_metric('id_generation_system_working', True)
         self.record_metric('all_golden_path_id_types_valid', True)
-        print('✅ PASS: ID generation system works without Docker')
+        print('CHECK PASS: ID generation system works without Docker')
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -129,7 +129,7 @@ class TestPhase2GoldenPathComponentsNoDocker(SSotAsyncTestCase):
         assert parsed_message['type'] == golden_path_message['type'], 'JSON serialization corrupted message'
         self.record_metric('golden_path_message_validation_working', True)
         self.record_metric('message_serialization_working', True)
-        print('✅ PASS: Golden Path message structure validation works without Docker')
+        print('CHECK PASS: Golden Path message structure validation works without Docker')
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -160,7 +160,7 @@ class TestPhase2GoldenPathComponentsNoDocker(SSotAsyncTestCase):
         self.record_metric('websocket_events_validation_working', True)
         self.record_metric('all_required_events_valid', True)
         self.record_metric('event_sequence_validation_working', True)
-        print('✅ PASS: WebSocket event types validation works without Docker')
+        print('CHECK PASS: WebSocket event types validation works without Docker')
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -199,7 +199,7 @@ class TestPhase2GoldenPathComponentsNoDocker(SSotAsyncTestCase):
         self.record_metric('business_value_validation_working', True)
         self.record_metric('cost_optimization_structure_valid', True)
         self.record_metric('business_value_serialization_working', True)
-        print('✅ PASS: Business value structure validation works without Docker')
+        print('CHECK PASS: Business value structure validation works without Docker')
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -251,7 +251,7 @@ class TestPhase2GoldenPathComponentsNoDocker(SSotAsyncTestCase):
         self.record_metric('async_workflow_logic_working', True)
         self.record_metric('workflow_sequence_valid', True)
         self.record_metric('workflow_timing_acceptable', total_time < 1.0)
-        print(f'✅ PASS: Async Golden Path workflow logic works without Docker ({total_time:.3f}s)')
+        print(f'CHECK PASS: Async Golden Path workflow logic works without Docker ({total_time:.3f}s)')
 
 class TestPhase2GoldenPathBusinessLogic(SSotAsyncTestCase):
     """
@@ -292,7 +292,7 @@ class TestPhase2GoldenPathBusinessLogic(SSotAsyncTestCase):
         self.record_metric('monthly_savings', monthly_savings)
         self.record_metric('annual_savings', annual_savings)
         self.record_metric('optimization_percentage', total_optimization_factor)
-        print(f'✅ PASS: Cost optimization calculation logic works (${monthly_savings:.2f}/month)')
+        print(f'CHECK PASS: Cost optimization calculation logic works (${monthly_savings:.2f}/month)')
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -330,7 +330,7 @@ class TestPhase2GoldenPathBusinessLogic(SSotAsyncTestCase):
         self.record_metric('permission_logic_working', True)
         self.record_metric('golden_path_permission_validation', True)
         self.record_metric('tier_access_validation', True)
-        print('✅ PASS: Golden Path user permissions logic works without Docker')
+        print('CHECK PASS: Golden Path user permissions logic works without Docker')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

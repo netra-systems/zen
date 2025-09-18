@@ -77,7 +77,7 @@ class PyprojectMarkerConfigurationTests:
             if not marker_pattern.match(marker):
                 invalid_markers.append(marker)
         assert len(invalid_markers) == 0, f'Invalid marker formats: {invalid_markers}'
-        print(f'✅ PYPROJECT STRUCTURE: Valid configuration structure')
+        print(f'CHECK PYPROJECT STRUCTURE: Valid configuration structure')
         print(f'  Markers defined: {len(markers)}')
         print(f"  Test paths: {ini_options.get('testpaths', [])}")
         return {'markers_count': len(markers), 'testpaths': ini_options.get('testpaths', []), 'python_files': ini_options.get('python_files', [])}
@@ -129,7 +129,7 @@ class PyprojectMarkerConfigurationTests:
         print(f"  With descriptions: {len(marker_analysis['valid_descriptions'])}")
         print(f"  Missing descriptions: {len(marker_analysis['missing_descriptions'])}")
         if marker_analysis['naming_issues']:
-            print(f'\n⚠️ NAMING CONVENTION ISSUES:')
+            print(f'\nWARNING️ NAMING CONVENTION ISSUES:')
             for issue in marker_analysis['naming_issues'][:5]:
                 print(f'    - {issue}')
         quality_score = (len(marker_analysis['valid_names']) / len(markers) * 0.4 + len(marker_analysis['valid_descriptions']) / len(markers) * 0.4 + (1 - len(marker_analysis['naming_issues']) / len(markers)) * 0.2) * 100
@@ -166,7 +166,7 @@ class PyprojectMarkerConfigurationTests:
             assert 'test_integration_functionality' in result.stdout
             assert 'test_e2e_functionality' in result.stdout
             assert 'test_critical_slow_functionality' in result.stdout
-            print(f'✅ CONFIGURATION UPDATE: Update mechanism works correctly')
+            print(f'CHECK CONFIGURATION UPDATE: Update mechanism works correctly')
             return {'base_config_success': True, 'updated_config_success': True, 'markers_added': ['e2e', 'critical', 'slow']}
 
     @pytest.mark.unit
@@ -192,7 +192,7 @@ class PyprojectMarkerConfigurationTests:
                 results[test_case['name']] = {'expected_error': test_case['expected_error'], 'actual_error': result.returncode != 0, 'stderr': result.stderr[:200], 'matches_expectation': (result.returncode != 0) == test_case['expected_error']}
         print(f'\n🔍 CONFIGURATION ERROR HANDLING:')
         for name, result in results.items():
-            status = '✅' if result['matches_expectation'] else '❌'
+            status = 'CHECK' if result['matches_expectation'] else 'X'
             print(f"  {status} {name}: Expected error={result['expected_error']}, Got error={result['actual_error']}")
         error_detection_working = all((r['matches_expectation'] for r in results.values()))
         print(f"\nError detection accuracy: {('100%' if error_detection_working else 'Issues found')}")
@@ -221,9 +221,9 @@ class PyprojectMarkerConfigurationTests:
         compatibility_report = {'pytest_version': current_version, 'config_loading': config_compatible, 'marker_collection': collection_compatible, 'overall_compatible': config_compatible and collection_compatible}
         print(f'\n🔧 PYTEST COMPATIBILITY:')
         print(f'  Pytest version: {current_version}')
-        print(f"  Config loading: {('✅' if config_compatible else '❌')}")
-        print(f"  Marker collection: {('✅' if collection_compatible else '❌')}")
-        print(f"  Overall compatibility: {('✅' if compatibility_report['overall_compatible'] else '❌')}")
+        print(f"  Config loading: {('CHECK' if config_compatible else 'X')}")
+        print(f"  Marker collection: {('CHECK' if collection_compatible else 'X')}")
+        print(f"  Overall compatibility: {('CHECK' if compatibility_report['overall_compatible'] else 'X')}")
         if not config_compatible:
             print(f'  Config error: {config_result.stderr[:200]}')
         if not collection_compatible:
@@ -284,9 +284,9 @@ class PyprojectMarkerConfigurationTests:
                 print(f'    "{marker}: {description}",')
             if len(missing_markers) > 10:
                 print(f'    ... and {len(missing_markers) - 10} more')
-            print(f'\n✅ SOLUTION: Add these {len(missing_markers)} markers to pyproject.toml')
+            print(f'\nCHECK SOLUTION: Add these {len(missing_markers)} markers to pyproject.toml')
         else:
-            print(f'\n✅ NO MISSING MARKERS: All markers properly defined')
+            print(f'\nCHECK NO MISSING MARKERS: All markers properly defined')
         return configuration_update
 
     def _generate_marker_description(self, marker_name: str) -> str:

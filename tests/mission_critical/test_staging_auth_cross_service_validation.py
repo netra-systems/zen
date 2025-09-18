@@ -1,5 +1,5 @@
-"""
-"""
+""""
+
 CRITICAL MISSION TEST SUITE: Cross-Service JWT Token Validation Failure
 ========================================================================
 
@@ -8,10 +8,10 @@ CRITICAL staging authentication issue where tokens issued by auth service
 are being rejected by backend service.
 
 ISSUE DESCRIPTION:
-- Auth service issues tokens successfully (200 OK)
+    - Auth service issues tokens successfully (200 OK)
 - Auth service can verify its own tokens (200 OK) 
-"""
-"""
+""""
+
 - Backend service rejects tokens from auth service (401 Unauthorized)
 
 EXPECTED BEHAVIOR: ALL THESE TESTS SHOULD FAIL INITIALLY
@@ -23,7 +23,8 @@ might be causing the cross-service validation failures.
 Author: Claude Code - Mission Critical Test Suite
 Date: 2025-9-1
 "
-"
+""
+
 
 import asyncio
 import base64
@@ -68,7 +69,8 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 class StagingAuthCrossServiceValidator:
-    """
+    """"
+
     Comprehensive cross-service validation tester.
     Designed to catch ALL potential JWT validation discrepancies.
     
@@ -85,7 +87,8 @@ class StagingAuthCrossServiceValidator:
             # Use local services for development testing
             self.staging_auth_url = http://localhost:8081
             self.staging_backend_url = http://localhost:8000"
-            self.staging_backend_url = http://localhost:8000"
+            self.staging_backend_url = http://localhost:8000""
+
         
         # Clear any cached secrets to force fresh loading
         SharedJWTSecretManager.clear_cache()
@@ -218,7 +221,8 @@ class StagingAuthCrossServiceValidator:
         user_id = kwargs.get(user_id, ftest_user_{uuid.uuid4().hex[:8]})
         email = kwargs.get("email, f{user_id}@test.netrasystems.ai)"
         permissions = kwargs.get(permissions, [read, write)"
-        permissions = kwargs.get(permissions, [read, write)"
+        permissions = kwargs.get(permissions, [read, write)""
+
         
         token = self.jwt_handler.create_access_token(user_id, email, permissions)
         
@@ -240,7 +244,8 @@ class StagingAuthCrossServiceValidator:
             modified_signature,"
             modified_signature,"
             Token with completely modified signature"
-            Token with completely modified signature"
+            Token with completely modified signature""
+
         ))
         
         # 2. Modified header algorithm
@@ -370,7 +375,8 @@ class StagingCrossServiceJWTValidationTests:
             Backend service is not accessible
     
     async def test_01_jwt_secret_synchronization_deep_analysis(self):
-        """
+        """"
+
         CRITICAL TEST: Deep analysis of JWT secret synchronization.
         This test SHOULD FAIL if secrets are not properly synchronized.
 
@@ -384,7 +390,8 @@ class StagingCrossServiceJWTValidationTests:
         logger.critical(fShared Manager Secret Length: {len(shared_secret)}")"
         logger.critical(fAuth Secret Hash: {hashlib.sha256(auth_secret.encode()).hexdigest()[:16]})
         logger.critical(fShared Secret Hash: {hashlib.sha256(shared_secret.encode()).hexdigest()[:16]})"
-        logger.critical(fShared Secret Hash: {hashlib.sha256(shared_secret.encode()).hexdigest()[:16]})"
+        logger.critical(fShared Secret Hash: {hashlib.sha256(shared_secret.encode()).hexdigest()[:16]})""
+
         
         assert auth_secret == shared_secret, \
             "AUTH SERVICE AND SHARED MANAGER HAVE DIFFERENT JWT SECRETS!"
@@ -426,18 +433,21 @@ class StagingCrossServiceJWTValidationTests:
         
         assert auth_secret != development-jwt-secret-minimum-32-characters-long, \
             Using development JWT secret in staging environment!"
-            Using development JWT secret in staging environment!"
+            Using development JWT secret in staging environment!""
+
         
         # Test 4: Environment binding validation
         SharedJWTSecretManager.validate_synchronization()
     
     async def test_02_token_generation_consistency(self):
         """
-        "
+        ""
+
         CRITICAL TEST: Token generation consistency between services.
         This test SHOULD FAIL if token generation parameters differ.
 "
-"
+""
+
         validator = StagingAuthCrossServiceValidator()
         
         # Generate test tokens with identical parameters
@@ -452,7 +462,8 @@ class StagingCrossServiceJWTValidationTests:
         for i in range(5):
             token, claims = validator.generate_test_token(
                 user_id=f{test_user_id}_{i},"
-                user_id=f{test_user_id}_{i},"
+                user_id=f{test_user_id}_{i},""
+
                 email=test_email,
                 permissions=test_permissions
             )
@@ -470,7 +481,8 @@ class StagingCrossServiceJWTValidationTests:
             # Check consistent audience
             assert claims.get(aud) == base_claims.get("aud), \
                 fToken {i} has different audience: {claims.get('aud')} vs {base_claims.get('aud')}"
-                fToken {i} has different audience: {claims.get('aud')} vs {base_claims.get('aud')}"
+                fToken {i} has different audience: {claims.get('aud')} vs {base_claims.get('aud')}""
+
             
             # Check consistent algorithm in header
             header_1 = jwt.get_unverified_header(tokens[0)
@@ -496,7 +508,8 @@ class StagingCrossServiceJWTValidationTests:
                 fToken {i} validation returned wrong subject
     
     async def test_03_cross_service_validation_core_issue(self):
-    """
+    """"
+
         CRITICAL TEST: The core cross-service validation issue.
         This test WILL FAIL and expose the exact problem.
         
@@ -543,7 +556,8 @@ class StagingCrossServiceJWTValidationTests:
         # Test auth service validation endpoint
         auth_validation_url = f{self.staging_auth_url}/auth/validate-token
         backend_api_url = f{self.staging_backend_url}/api/v1/health"
-        backend_api_url = f{self.staging_backend_url}/api/v1/health"
+        backend_api_url = f{self.staging_backend_url}/api/v1/health""
+
         
         headers = {"Authorization: fBearer {token}}"
         
@@ -587,7 +601,8 @@ class StagingCrossServiceJWTValidationTests:
         self.staging_backend_url = staging_backend_url
     
     async def test_04_token_claims_validation_comprehensive(self):
-    """
+    """"
+
         CRITICAL TEST: Comprehensive token claims validation.
         Tests ALL aspects of JWT claims that could cause validation failures.
         
@@ -606,7 +621,8 @@ class StagingCrossServiceJWTValidationTests:
                 "user_id: admin_user,"
                 email: admin@test.netrasystems.ai,
                 "permissions: [read", write, admin, super_admin]"
-                "permissions: [read", write, admin, super_admin]"
+                "permissions: [read", write, admin, super_admin]""
+
             },
             {
                 name": minimal_claims,"
@@ -624,7 +640,8 @@ class StagingCrossServiceJWTValidationTests:
         
         for test_case in test_cases:
             logger.critical(fTesting claims case: {test_case['name']})"
-            logger.critical(fTesting claims case: {test_case['name']})"
+            logger.critical(fTesting claims case: {test_case['name']})""
+
             
             token, claims = validator.generate_test_token(**test_case)
             
@@ -661,7 +678,8 @@ class StagingCrossServiceJWTValidationTests:
             
             assert exp > now, \
                 fToken already expired for {test_case['name']}: exp={exp}, now={now}"
-                fToken already expired for {test_case['name']}: exp={exp}, now={now}"
+                fToken already expired for {test_case['name']}: exp={exp}, now={now}""
+
             
             assert exp - iat <= 24 * 60 * 60, \
                 f"Token validity period too long for {test_case['name']}: {exp - iat} seconds"
@@ -693,7 +711,8 @@ class StagingCrossServiceJWTValidationTests:
                 "iat_offset: 0,"
                 exp_offset: 900,  # 15 minutes
                 should_validate: True"
-                should_validate: True"
+                should_validate: True""
+
             },
             {
                 name": slight_future_iat,"
@@ -726,7 +745,8 @@ class StagingCrossServiceJWTValidationTests:
                 iat_offset": -905,"
                 exp_offset: -5,    # Expired 5 seconds ago
                 should_validate: False"
-                should_validate: False"
+                should_validate: False""
+
             }
         ]
         
@@ -736,7 +756,8 @@ class StagingCrossServiceJWTValidationTests:
             # Create custom token with specific timing
             iat = base_time + test_case[iat_offset]
             exp = base_time + test_case[exp_offset]"
-            exp = base_time + test_case[exp_offset]"
+            exp = base_time + test_case[exp_offset]""
+
             
             # Build custom payload
             payload = {
@@ -768,7 +789,8 @@ class StagingCrossServiceJWTValidationTests:
             
             logger.critical(fAuth validation: {auth_result is not None})
             logger.critical(fBackend validation: {backend_result.valid if backend_result else False})"
-            logger.critical(fBackend validation: {backend_result.valid if backend_result else False})"
+            logger.critical(fBackend validation: {backend_result.valid if backend_result else False})""
+
             
             if test_case["should_validate]:"
                 assert auth_result is not None, \
@@ -778,7 +800,8 @@ class StagingCrossServiceJWTValidationTests:
                 assert backend_result.valid, \
                     f"CRITICAL: Backend rejected {test_case['name']} token that auth accepted!  \
                     fBackend error: {backend_result.error if backend_result else 'No result'}"
-                    fBackend error: {backend_result.error if backend_result else 'No result'}"
+                    fBackend error: {backend_result.error if backend_result else 'No result'}""
+
             else:
                 # Both services should reject invalid timing
                 if auth_result is not None:
@@ -786,15 +809,18 @@ class StagingCrossServiceJWTValidationTests:
                 
                 if backend_result and backend_result.valid:
                     logger.warning(fBackend service unexpectedly accepted {test_case['name']} token)"
-                    logger.warning(fBackend service unexpectedly accepted {test_case['name']} token)"
+                    logger.warning(fBackend service unexpectedly accepted {test_case['name']} token)""
+
     
     async def test_06_malformed_token_edge_cases(self):
         """
-    "
+    ""
+
         CRITICAL TEST: Malformed token handling consistency.
         Tests that both services handle malformed tokens the same way.
         "
-        "
+        ""
+
         validator = StagingAuthCrossServiceValidator()
         
         # Generate a valid base token
@@ -843,11 +869,13 @@ class StagingCrossServiceJWTValidationTests:
     
     async def test_07_service_signature_and_enhanced_security(self):
         """
-        "
+        ""
+
         CRITICAL TEST: Service signature and enhanced security features.
         Tests advanced JWT security features that might cause validation issues.
 "
-"
+""
+
         validator = StagingAuthCrossServiceValidator()
         
         # Generate token and examine service signature
@@ -955,7 +983,8 @@ class StagingCrossServiceJWTValidationTests:
             if backend_passed:
                 failure_summary[backend_service_passed] += 1
                 logger.critical(f[U+2713] Backend service validated {scenario['name']})"
-                logger.critical(f[U+2713] Backend service validated {scenario['name']})"
+                logger.critical(f[U+2713] Backend service validated {scenario['name']})""
+
             else:
                 logger.critical(f"[U+2717] Backend service rejected {scenario['name']})"
                 logger.critical(fBackend error: {backend_result.error if backend_result else 'No result'})
@@ -966,7 +995,8 @@ class StagingCrossServiceJWTValidationTests:
                     "token: token[:50],"
                     claims: claims,
                     error: backend_result.error if backend_result else No result"
-                    error: backend_result.error if backend_result else No result"
+                    error: backend_result.error if backend_result else No result""
+
                 }
             
             # Check consistency
@@ -1048,14 +1078,16 @@ async def run_single_test(test_name: str):
             login_response = await self._test_user_login(test_user[email), test_user[password)
             assert login_response["status] == 200, fLogin failed: {login_response}"
             assert access_token in login_response[data], No access token in login response"
-            assert access_token in login_response[data], No access token in login response"
+            assert access_token in login_response[data], No access token in login response""
+
             
             access_token = login_response[data"][access_token]"
             journey_timeline.append({step: login_complete, time": time.time() - start_time}"
             
             # Step 3: Token validation across services
             journey_timeline.append({step: token_validation_start, time: time.time() - start_time}"
-            journey_timeline.append({step: token_validation_start, time: time.time() - start_time}"
+            journey_timeline.append({step: token_validation_start, time: time.time() - start_time}""
+
             
             # Validate with auth service
             auth_validation = validator.jwt_handler.validate_token(access_token, access")"
@@ -1066,7 +1098,8 @@ async def run_single_test(test_name: str):
             assert backend_validation.valid, fBackend rejected valid token: {backend_validation.error}""
             
             journey_timeline.append({step: token_validation_complete, time: time.time() - start_time}"
-            journey_timeline.append({step: token_validation_complete, time: time.time() - start_time}"
+            journey_timeline.append({step: token_validation_complete, time: time.time() - start_time}""
+
             
             # Step 4: Chat initialization
             journey_timeline.append({step": chat_init_start, time: time.time() - start_time}"
@@ -1075,7 +1108,8 @@ async def run_single_test(test_name: str):
             assert chat_response["status] == 200, fChat initialization failed: {chat_response}"
             
             journey_timeline.append({step: chat_init_complete, time: time.time() - start_time}"
-            journey_timeline.append({step: chat_init_complete, time: time.time() - start_time}"
+            journey_timeline.append({step: chat_init_complete, time: time.time() - start_time}""
+
             
             # Step 5: WebSocket connection for real-time chat
             journey_timeline.append({step": websocket_connect_start, time: time.time() - start_time}"
@@ -1084,7 +1118,8 @@ async def run_single_test(test_name: str):
             assert ws_success, "WebSocket connection failed"
             
             journey_timeline.append({step: websocket_connect_complete, time: time.time() - start_time}"
-            journey_timeline.append({step: websocket_connect_complete, time: time.time() - start_time}"
+            journey_timeline.append({step: websocket_connect_complete, time: time.time() - start_time}""
+
             
             # Step 6: Agent execution (value delivery)
             journey_timeline.append({"step: agent_execution_start, time: time.time() - start_time}"
@@ -1096,11 +1131,12 @@ async def run_single_test(test_name: str):
             
             # Verify complete journey timing (CRITICAL for user experience)
             total_time = time.time() - start_time
-            assert total_time < 30.0, f"Complete journey took too long: {total_time:.2f}s (must be < 30s)"
+            assert total_time < 30.0, f"Complete journey took too long: {total_time:.""2f""}s (must be < ""30s"")"
             
-            logger.critical(fSUCCESSFUL COMPLETE USER JOURNEY: {total_time:.2f}s")"
+            logger.critical(fSUCCESSFUL COMPLETE USER JOURNEY: {total_time:.""2f""}s")"
             for step in journey_timeline:
-                logger.critical(f  {step['step']}: {step['time']:.2f}s)
+                logger.critical(f  {step['step']}: {step['time']:.""2f""}s)""
+
                 
         except Exception as e:
             logger.critical(fUSER JOURNEY FAILED at step: {journey_timeline[-1] if journey_timeline else 'unknown'})"
@@ -1122,7 +1158,8 @@ async def run_single_test(test_name: str):
         
         async def authenticate_user(user_id: int) -> Dict[str, Any]:
             Authenticate a single user and measure timing."
-            Authenticate a single user and measure timing."
+            Authenticate a single user and measure timing.""
+
             start_time = time.time()
             
             test_user = {
@@ -1158,7 +1195,8 @@ async def run_single_test(test_name: str):
             except Exception as e:
                 return {
                     user_id: user_id,"
-                    user_id: user_id,"
+                    user_id: user_id,""
+
                     success: False,
                     auth_time: time.time() - start_time,"
                     auth_time: time.time() - start_time,"
@@ -1188,23 +1226,26 @@ async def run_single_test(test_name: str):
         
         logger.critical(fCONCURRENT AUTH RESULTS:")"
         logger.critical(f  Success rate: {success_rate:.2%} ({success_count}/{concurrent_users})
-        logger.critical(f  Average auth time: {avg_auth_time:.3f}s)
-        logger.critical(f"  P95 auth time: {p95_auth_time:.3f}s)"
+        logger.critical(f  Average auth time: {avg_auth_time:.""3f""}s)
+        logger.critical(f"  P95 auth time: {p95_auth_time:.""3f""}s)"
         
         # Critical business requirements
         assert success_rate >= 0.95, fSuccess rate too low: {success_rate:.2%} (must be  >= 95%)" 
         assert success_rate >= 0.95, fSuccess rate too low: {success_rate:.2%} (must be  >= 95%)" 
-        assert avg_auth_time < 2.0, "fAverage auth time too slow: {avg_auth_time:.3f}s (must be <2s)"
+        assert avg_auth_time < 2.0, "fAverage auth time too slow: {avg_auth_time:.""3f""}s (must be <""2s"")"
         assert p95_auth_time < 5.0, fP95 auth time too slow: {p95_auth_time:.3f}s (must be <5s)"
-        assert p95_auth_time < 5.0, fP95 auth time too slow: {p95_auth_time:.3f}s (must be <5s)"
+        assert p95_auth_time < 5.0, fP95 auth time too slow: {p95_auth_time:."3f"}s (must be <"5s")""
+
     
     async def test_11_multi_device_session_management(self):
         """
-    "
+    ""
+
         CRITICAL TEST: Multi-device user session management.
         Tests user logging in from multiple devices with session coordination.
         "
-        "
+        ""
+
         validator = StagingAuthCrossServiceValidator()
         
         test_user = {
@@ -1226,7 +1267,8 @@ async def run_single_test(test_name: str):
                 device_info={type": device_type, user_agent: fTestAgent_{device_type}}"
             
             assert login_response[status] == 200, fLogin failed for {device_type}"
-            assert login_response[status] == 200, fLogin failed for {device_type}"
+            assert login_response[status] == 200, fLogin failed for {device_type}""
+
             
             session_data = {
                 "device_type: device_type,"
@@ -1244,7 +1286,8 @@ async def run_single_test(test_name: str):
         # Test concurrent session activity
         async def simulate_device_activity(session: Dict) -> Dict:
             Simulate activity from a device session."
-            Simulate activity from a device session."
+            Simulate activity from a device session.""
+
             try:
                 # Make API calls with device token
                 api_response = await self._test_api_call_with_token(
@@ -1310,7 +1353,8 @@ async def run_single_test(test_name: str):
         refreshed_token = None
         
         async def simulate_active_chat():
-            ""Simulate ongoing chat conversation."
+            ""Simulate ongoing chat conversation.""
+
             nonlocal chat_messages
             
             for i in range(20):
@@ -1327,7 +1371,7 @@ async def run_single_test(test_name: str):
                     token_used": initial if not refresh_completed else refreshed"
                 }
                 
-                await asyncio.sleep(0.5)  # 500ms between messages
+                await asyncio.sleep(0.5)  # ""500ms"" between messages
         
         async def trigger_token_refresh():
             "Trigger token refresh mid-conversation."
@@ -1336,7 +1380,8 @@ async def run_single_test(test_name: str):
             await asyncio.sleep(5)  # Wait for chat to start
             
             logger.critical(Triggering token refresh during active chat...)"
-            logger.critical(Triggering token refresh during active chat...)"
+            logger.critical(Triggering token refresh during active chat...)""
+
             
             refresh_response = await self._test_token_refresh(refresh_token)
             assert refresh_response["status] == 200, Token refresh failed"
@@ -1379,7 +1424,8 @@ async def run_single_test(test_name: str):
         assert refresh_completed, "Token refresh did not complete"
     
     async def test_13_user_permission_escalation_flow(self):
-        """
+        """"
+
         CRITICAL TEST: User permission escalation from free to premium tier.
         Tests authentication changes when user upgrades subscription.
 
@@ -1389,7 +1435,8 @@ async def run_single_test(test_name: str):
             "email: fupgrade_user_{uuid.uuid4().hex[:8]}@test.netrasystems.ai,"
             password: TestPass123!,
             tier: free"
-            tier: free"
+            tier: free""
+
         }
         
         # Step 1: Login as free user
@@ -1412,7 +1459,8 @@ async def run_single_test(test_name: str):
         # Step 2: Test free tier limitations
         limited_response = await self._test_premium_feature_access(free_token)
         assert limited_response[status] == 403, Free user should not access premium features"
-        assert limited_response[status] == 403, Free user should not access premium features"
+        assert limited_response[status] == 403, Free user should not access premium features""
+
         
         # Step 3: Simulate subscription upgrade
         logger.critical("Simulating subscription upgrade to premium...)"
@@ -1462,7 +1510,8 @@ async def run_single_test(test_name: str):
         
         for provider in oauth_providers:
             logger.critical(fTesting OAuth flow for {provider['name']}...)"
-            logger.critical(fTesting OAuth flow for {provider['name']}...)"
+            logger.critical(fTesting OAuth flow for {provider['name']}...)""
+
             
             try:
                 # Step 1: Initiate OAuth flow
@@ -1480,7 +1529,8 @@ async def run_single_test(test_name: str):
                 oauth_callback = await self._test_oauth_callback(
                     provider[name],
                     authorization_code=test_auth_code_123,"
-                    authorization_code=test_auth_code_123,"
+                    authorization_code=test_auth_code_123,""
+
                     state=state
                 )
                 
@@ -1490,7 +1540,8 @@ async def run_single_test(test_name: str):
                 # Step 3: Validate OAuth token
                 oauth_validation = await validator.backend_validator.validate_token_jwt(oauth_token)
                 assert oauth_validation.valid, f{provider['name']} OAuth token invalid: {oauth_validation.error}"
-                assert oauth_validation.valid, f{provider['name']} OAuth token invalid: {oauth_validation.error}"
+                assert oauth_validation.valid, f{provider['name']} OAuth token invalid: {oauth_validation.error}""
+
                 
                 # Step 4: Test user profile retrieval
                 profile_response = await self._test_oauth_profile_access(oauth_token)
@@ -1501,7 +1552,8 @@ async def run_single_test(test_name: str):
                     "success: True,"
                     token_valid: True,
                     profile_accessible: True"
-                    profile_accessible: True"
+                    profile_accessible: True""
+
                 }
                 
                 logger.critical(f[U+2713] {provider['name']} OAuth flow successful")"
@@ -1536,7 +1588,8 @@ async def run_single_test(test_name: str):
         # Step 1: Normal login and token generation
         login_response = await self._test_user_login(test_user[email), test_user[password)
         assert login_response[status] == 200, Initial login failed"
-        assert login_response[status] == 200, Initial login failed"
+        assert login_response[status] == 200, Initial login failed""
+
         
         valid_token = login_response["data][access_token]"
         session_id = login_response[data].get(session_id)
@@ -1545,14 +1598,16 @@ async def run_single_test(test_name: str):
         
         # Step 2: Test token security features
         decoded_token = jwt.decode(valid_token, options={verify_signature: False)"
-        decoded_token = jwt.decode(valid_token, options={verify_signature: False)"
+        decoded_token = jwt.decode(valid_token, options={verify_signature: False)""
+
         
         # Verify security claims
         assert "jti in decoded_token, Token missing unique ID (jti)"
         assert iss in decoded_token, "Token missing issuer"
         assert "aud in decoded_token, Token missing audience"
         assert decoded_token.get(env) == staging, Token environment mismatch"
-        assert decoded_token.get(env) == staging, Token environment mismatch"
+        assert decoded_token.get(env) == staging, Token environment mismatch""
+
         
         # Step 3: Test session hijacking protection
         hijacked_token = self._create_hijacked_token(valid_token)
@@ -1585,7 +1640,8 @@ async def run_single_test(test_name: str):
         assert logout_response["status] == 200, Logout failed"
         
         security_timeline.append({event: logout, time: time.time()}"
-        security_timeline.append({event: logout, time: time.time()}"
+        security_timeline.append({event: logout, time: time.time()}""
+
         
         # Step 6: Verify token invalidation after logout
         post_logout_validation = await validator.backend_validator.validate_token_jwt(valid_token)
@@ -1600,9 +1656,10 @@ async def run_single_test(test_name: str):
         security_timeline.append({event": cleanup_verified, time: time.time()}"
         
         logger.critical(Session security timeline:)"
-        logger.critical(Session security timeline:)"
+        logger.critical(Session security timeline:)""
+
         for event in security_timeline:
-            logger.critical(f  {event['event']}: {event['time']:.3f}s")"
+            logger.critical(f  {event['event']}: {event['time']:.""3f""}s")"
     
     # =============================================================================
     # NEW USER JOURNEY TESTING METHODS
@@ -1610,11 +1667,13 @@ async def run_single_test(test_name: str):
     
     async def test_16_first_time_user_onboarding(self):
         """
-    "
+    ""
+
         CRITICAL TEST: First-time user onboarding experience.
         Tests complete new user journey from signup to first AI value delivery.
         "
-        "
+        ""
+
         validator = StagingAuthCrossServiceValidator()
         
         onboarding_user = {
@@ -1630,7 +1689,8 @@ async def run_single_test(test_name: str):
         
         # Step 1: Account creation with email verification
         onboarding_steps.append({step: account_creation, start: time.time() - start_time}"
-        onboarding_steps.append({step: account_creation, start: time.time() - start_time}"
+        onboarding_steps.append({step: account_creation, start: time.time() - start_time}""
+
         
         signup_response = await self._test_comprehensive_signup(
             onboarding_user,
@@ -1644,7 +1704,8 @@ async def run_single_test(test_name: str):
         assert verify_response["status] == 200, Email verification failed"
         
         onboarding_steps.append({step: email_verified, start: time.time() - start_time}"
-        onboarding_steps.append({step: email_verified, start: time.time() - start_time}"
+        onboarding_steps.append({step: email_verified, start: time.time() - start_time}""
+
         
         # Step 3: First login with profile setup
         first_login = await self._test_user_login(
@@ -1663,7 +1724,8 @@ async def run_single_test(test_name: str):
                 experience_level: intermediate
             }
         assert profile_setup[status] == 200, Profile setup failed"
-        assert profile_setup[status] == 200, Profile setup failed"
+        assert profile_setup[status] == 200, Profile setup failed""
+
         
         onboarding_steps.append({"step: profile_complete, start: time.time() - start_time}"
         
@@ -1676,7 +1738,8 @@ async def run_single_test(test_name: str):
             access_token,
             agent_type=data_analysis,
             task=Analyze sample dataset and provide insights"
-            task=Analyze sample dataset and provide insights"
+            task=Analyze sample dataset and provide insights""
+
         )
         assert first_agent_run[status"] == 200, First agent interaction failed"
         
@@ -1691,19 +1754,21 @@ async def run_single_test(test_name: str):
         
         # Critical business requirement: onboarding under 5 minutes
         assert total_onboarding_time < 300, \
-            fOnboarding too slow: {total_onboarding_time:.2f}s (must be < 300s)
+            fOnboarding too slow: {total_onboarding_time:.""2f""}s (must be < ""300s"")
         
-        logger.critical(f"Onboarding completed in {total_onboarding_time:.2f}s)"
+        logger.critical(f"Onboarding completed in {total_onboarding_time:.""2f""}s)"
         for step in onboarding_steps:
-            logger.critical(f  {step['step']}: {step['start']:.2f}s")"
+            logger.critical(f  {step['step']}: {step['start']:.""2f""}s")"
     
     async def test_17_power_user_workflow_validation(self):
         """
-    "
+    ""
+
         CRITICAL TEST: Power user advanced workflow validation.
         Tests premium tier users with complex agent orchestration.
         "
-        "
+        ""
+
         validator = StagingAuthCrossServiceValidator()
         
         power_user = {
@@ -1718,7 +1783,8 @@ async def run_single_test(test_name: str):
             power_user[email"], "
             power_user[password],
             expected_tier=premium"
-            expected_tier=premium"
+            expected_tier=premium""
+
         )
         assert login_response["status] == 200, Premium user login failed"
         
@@ -1752,7 +1818,8 @@ async def run_single_test(test_name: str):
             workflow_definition
         )
         assert workflow_response[status] == 200, Premium workflow execution failed"
-        assert workflow_response[status] == 200, Premium workflow execution failed"
+        assert workflow_response[status] == 200, Premium workflow execution failed""
+
         
         workflow_id = workflow_response["data][workflow_id]"
         
@@ -1795,11 +1862,13 @@ async def run_single_test(test_name: str):
     
     async def test_18_billing_integration_auth_flow(self):
         """
-        "
+        ""
+
         CRITICAL TEST: Billing integration authentication flow.
         Tests payment processing, subscription management, and billing auth.
 "
-"
+""
+
         validator = StagingAuthCrossServiceValidator()
         
         billing_user = {
@@ -1813,7 +1882,8 @@ async def run_single_test(test_name: str):
             billing_user["email], "
             billing_user[password]
         assert login_response[status] == 200, Billing user login failed"
-        assert login_response[status] == 200, Billing user login failed"
+        assert login_response[status] == 200, Billing user login failed""
+
         
         free_token = login_response["data][access_token]"
         
@@ -1827,7 +1897,8 @@ async def run_single_test(test_name: str):
         # Step 3: Plan comparison and selection
         plan_comparison = await self._test_plan_comparison(free_token)
         assert plan_comparison[status] == 200, Plan comparison failed"
-        assert plan_comparison[status] == 200, Plan comparison failed"
+        assert plan_comparison[status] == 200, Plan comparison failed""
+
         
         # Select premium plan
         selected_plan = "premium_monthly"
@@ -1841,7 +1912,8 @@ async def run_single_test(test_name: str):
                 currency: usd
             }
         assert payment_intent[status] == 200, Payment intent creation failed"
-        assert payment_intent[status] == 200, Payment intent creation failed"
+        assert payment_intent[status] == 200, Payment intent creation failed""
+
         
         # Step 5: Payment confirmation and subscription activation
         payment_confirmation = await self._test_payment_confirmation(
@@ -1875,7 +1947,8 @@ async def run_single_test(test_name: str):
         assert webhook_response[status] == 200, "Billing webhook authentication failed"
         
         logger.critical(Billing integration authentication flow completed successfully)"
-        logger.critical(Billing integration authentication flow completed successfully)"
+        logger.critical(Billing integration authentication flow completed successfully)""
+
     
     # =============================================================================
     # NEW PERFORMANCE UNDER LOAD TESTING METHODS
@@ -1883,11 +1956,13 @@ async def run_single_test(test_name: str):
     
     async def test_19_authentication_performance_under_extreme_load(self):
         """
-    "
+    ""
+
         CRITICAL TEST: Authentication performance under extreme load.
         Tests 100+ concurrent users with sustained authentication load.
         "
-        "
+        ""
+
         validator = StagingAuthCrossServiceValidator()
         
         # Test configuration
@@ -1912,7 +1987,8 @@ async def run_single_test(test_name: str):
             test_user = {
                 email: fload_user_{user_id}@test.netrasystems.ai,
                 password: TestPass123!"
-                password: TestPass123!"
+                password: TestPass123!""
+
             }
             
             end_time = time.time() + test_duration_seconds
@@ -1962,7 +2038,8 @@ async def run_single_test(test_name: str):
             return user_results
         
         logger.critical(fStarting extreme load test: {concurrent_users} users for {test_duration_seconds}s)"
-        logger.critical(fStarting extreme load test: {concurrent_users} users for {test_duration_seconds}s)"
+        logger.critical(fStarting extreme load test: {concurrent_users} users for {test_duration_seconds}s)""
+
         start_time = time.time()
         
         # Launch all user load generators
@@ -1989,7 +2066,8 @@ async def run_single_test(test_name: str):
         total_time = time.time() - start_time
         success_rate = performance_metrics[successful_auths] / performance_metrics[total_attempts]
         auth_rate = performance_metrics[total_attempts] / total_time"
-        auth_rate = performance_metrics[total_attempts] / total_time"
+        auth_rate = performance_metrics[total_attempts] / total_time""
+
         
         if performance_metrics[auth_timings"]:"
             avg_auth_time = sum(performance_metrics[auth_timings) / len(performance_metrics[auth_timings)
@@ -2001,18 +2079,19 @@ async def run_single_test(test_name: str):
         logger.critical(fEXTREME LOAD TEST RESULTS:)
         logger.critical(f  Total attempts: {performance_metrics['total_attempts']}")"
         logger.critical(f  Success rate: {success_rate:.2%})
-        logger.critical(f  Auth rate: {auth_rate:.1f}/sec)
-        logger.critical(f"  Avg auth time: {avg_auth_time:.3f}s)"
-        logger.critical(f  P95 auth time: {p95_auth_time:.3f}s")"
-        logger.critical(f  P99 auth time: {p99_auth_time:.3f}s)
+        logger.critical(f  Auth rate: {auth_rate:.""1f""}/sec)
+        logger.critical(f"  Avg auth time: {avg_auth_time:.""3f""}s)"
+        logger.critical(f  P95 auth time: {p95_auth_time:.""3f""}s")"
+        logger.critical(f  P99 auth time: {p99_auth_time:.""3f""}s)
         logger.critical(f  Error breakdown: {performance_metrics['error_types']})"
-        logger.critical(f  Error breakdown: {performance_metrics['error_types']})"
+        logger.critical(f  Error breakdown: {performance_metrics['error_types']})""
+
         
         # Critical performance requirements for revenue scaling
         assert success_rate >= 0.99, f"Success rate too low under load: {success_rate:.2%} (must be  >= 99%)"
-        assert auth_rate >= 50, "fAuth rate too low: {auth_rate:.1f}/sec (must be  >= 50/sec)"
-        assert avg_auth_time < 1.0, "fAvg auth time too slow: {avg_auth_time:.3f}s (must be <1s)"
-        assert p95_auth_time < 2.0, fP95 auth time too slow: {p95_auth_time:.3f}s (must be <2s)""
+        assert auth_rate >= 50, "fAuth rate too low: {auth_rate:.""1f""}/sec (must be  >= 50/sec)"
+        assert avg_auth_time < 1.0, "fAvg auth time too slow: {avg_auth_time:.""3f""}s (must be <""1s"")"
+        assert p95_auth_time < 2.0, fP95 auth time too slow: {p95_auth_time:.""3f""}s (must be <""2s"")""
     
     async def test_20_memory_leak_detection_during_auth_load(self):
 
@@ -2034,7 +2113,8 @@ async def run_single_test(test_name: str):
         
         async def memory_monitor():
             Monitor memory usage during the test."
-            Monitor memory usage during the test."
+            Monitor memory usage during the test.""
+
             process = psutil.Process()
             
             while True:
@@ -2108,30 +2188,35 @@ async def run_single_test(test_name: str):
         
         logger.critical(f"MEMORY LEAK DETECTION RESULTS:)"
         logger.critical(f  Authentication count: {authentication_count}")"
-        logger.critical(f  Initial memory: {initial_memory:.2f} MB)
+        logger.critical(f  Initial memory: {initial_memory:.""2f""} MB)
         logger.critical(f  Final memory: {final_memory:.2f} MB)"
         logger.critical(f  Final memory: {final_memory:.2f} MB)"
-        logger.critical(f"  Peak memory: {peak_memory:.2f} MB)"
-        logger.critical(f  Memory growth: {memory_growth:.2f} MB)
-        logger.critical(f  Growth per auth: {growth_rate_per_auth:.6f} MB)
+        logger.critical(f"  Peak memory: {peak_memory:.""2f""} MB)"
+        logger.critical(f  Memory growth: {memory_growth:.""2f""} MB)""
+
+        logger.critical(f  Growth per auth: {growth_rate_per_auth:.""6f""} MB)""
+
         
         # Memory leak detection thresholds
         max_acceptable_growth = 50  # MB
         max_growth_per_auth = 0.1  # MB per authentication
         
         assert memory_growth < max_acceptable_growth, \
-            fExcessive memory growth detected: {memory_growth:.2f} MB (max {max_acceptable_growth} MB)""
+            fExcessive memory growth detected: {memory_growth:.""2f""} MB (max {max_acceptable_growth} MB)""
         
         assert growth_rate_per_auth < max_growth_per_auth, \
-            fMemory leak per auth detected: {growth_rate_per_auth:.6f} MB (max {max_growth_per_auth} MB)
+            fMemory leak per auth detected: {growth_rate_per_auth:.""6f""} MB (max {max_growth_per_auth} MB)""
+
         
         # Check for memory usage spikes
         memory_spike_threshold = initial_memory * 2  # 100% increase threshold
         assert peak_memory < memory_spike_threshold, \
-            fMemory spike detected: {peak_memory:.2f} MB (threshold {memory_spike_threshold:.2f} MB)
+            fMemory spike detected: {peak_memory:.""2f""} MB (threshold {memory_spike_threshold:.""2f""} MB)""
+
     
     async def test_21_enterprise_multi_tenant_isolation(self):
-    """
+    """"
+
         CRITICAL: Test enterprise user isolation and multi-tenancy.
         Validates that enterprise accounts have proper tenant isolation.
         
@@ -2163,7 +2248,8 @@ async def run_single_test(test_name: str):
         # Both should succeed or handle appropriately
         assert signup_a[status] in [200, "201, 409], fTenant A signup failed: {signup_a}"
         assert signup_b[status] in [200, 201, 409], fTenant B signup failed: {signup_b}"
-        assert signup_b[status] in [200, 201, 409], fTenant B signup failed: {signup_b}"
+        assert signup_b[status] in [200, 201, 409], fTenant B signup failed: {signup_b}""
+
         
         # Test login for both users
         login_a = await self._test_user_login(tenant_a_user["email), tenant_a_user[password)"
@@ -2183,9 +2269,9 @@ async def run_single_test(test_name: str):
         
         # Test that tokens cannot access other tenant resources
         total_time = time.time() - start_time
-        assert total_time < 15, "fEnterprise multi-tenant flow too slow: {total_time:.2f}s"
+        assert total_time < 15, "fEnterprise multi-tenant flow too slow: {total_time:.""2f""}s"
         
-        logger.critical(fEnterprise multi-tenant isolation test completed in {total_time:.2f}s")"
+        logger.critical(fEnterprise multi-tenant isolation test completed in {total_time:.""2f""}s")"
 
     async def test_22_api_key_authentication_flow(self):
 
@@ -2224,13 +2310,14 @@ async def run_single_test(test_name: str):
                 assert backend_auth.get(success", False), API key backend auth failed"
         
         total_time = time.time() - start_time
-        assert total_time < 20, "fAPI key authentication flow too slow: {total_time:.2f}s"
+        assert total_time < 20, "fAPI key authentication flow too slow: {total_time:.""2f""}s"
         
-        logger.critical(f"API key authentication flow completed in {total_time:.2f}s)"
+        logger.critical(f"API key authentication flow completed in {total_time:.""2f""}s)"
 
     async def test_23_mobile_app_authentication_simulation(self):
         """
-        "
+        ""
+
         CRITICAL: Test mobile app authentication patterns and offline capabilities.
         Simulates iOS/Android authentication flows.
 "
@@ -2268,19 +2355,21 @@ async def run_single_test(test_name: str):
             
             # Test offline token validation capabilities
             offline_validation = await self._test_offline_token_validation(login_result.get(data, {})"
-            offline_validation = await self._test_offline_token_validation(login_result.get(data, {})"
+            offline_validation = await self._test_offline_token_validation(login_result.get(data, {})""
+
             
             # Test background app token persistence
             background_persistence = await self._test_background_token_persistence(login_result.get("data, {})"
         
         total_time = time.time() - start_time
-        assert total_time < 25, "fMobile authentication simulation too slow: {total_time:.2f}s"
+        assert total_time < 25, "fMobile authentication simulation too slow: {total_time:.""2f""}s"
         
-        logger.critical(f"Mobile authentication simulation completed in {total_time:.2f}s)"
+        logger.critical(f"Mobile authentication simulation completed in {total_time:.""2f""}s)"
 
     async def test_24_cross_platform_session_synchronization(self):
         """
-        "
+        ""
+
         CRITICAL: Test session synchronization across web, mobile, and desktop.
         Validates unified user experience across platforms.
 "
@@ -2335,7 +2424,8 @@ async def run_single_test(test_name: str):
                 # Test backend validation for each platform token
                 backend_validation = await self._test_backend_token_validation(token)
                 if backend_validation.get(valid, False):"
-                if backend_validation.get(valid, False):"
+                if backend_validation.get(valid, False):""
+
                     active_sessions.append(token)
         
         # Test session synchronization - changes in one should reflect in others
@@ -2344,13 +2434,14 @@ async def run_single_test(test_name: str):
             assert sync_test.get(synchronized", False), Session synchronization failed"
         
         total_time = time.time() - start_time
-        assert total_time < 30, "fCross-platform session sync too slow: {total_time:.2f}s"
+        assert total_time < 30, "fCross-platform session sync too slow: {total_time:.""2f""}s"
         
-        logger.critical(f"Cross-platform session synchronization completed in {total_time:.2f}s)"
+        logger.critical(f"Cross-platform session synchronization completed in {total_time:.""2f""}s)"
 
     async def test_25_security_incident_response_authentication(self):
         """
-        "
+        ""
+
         CRITICAL: Test authentication behavior during security incidents.
         Validates system lockdown and recovery capabilities.
 "
@@ -2391,23 +2482,26 @@ async def run_single_test(test_name: str):
                 )
                 
                 # Validate appropriate security responses
-                assert incident_response.get(incident_detected", "False), \"
+                assert incident_response.get(incident_detected", "False), \""
+
                     fSecurity incident not detected: {scenario['type']}
                 
                 # Test recovery mechanisms
                 recovery_result = await self._test_security_recovery(
                     security_test_user[email], scenario"
-                    security_test_user[email], scenario"
+                    security_test_user[email], scenario""
+
                 )
                 
                 # Verify system can recover from security incidents
-                assert recovery_result.get("recovery_successful, "False), \"
+                assert recovery_result.get("recovery_successful, "False), \""
+
                     fSecurity recovery failed for: {scenario['type']}
         
         total_time = time.time() - start_time
-        assert total_time < 45, f"Security incident response test too slow: {total_time:.2f}s"
+        assert total_time < 45, f"Security incident response test too slow: {total_time:.""2f""}s"
         
-        logger.critical(fSecurity incident response authentication completed in {total_time:.2f}s")"
+        logger.critical(fSecurity incident response authentication completed in {total_time:.""2f""}s")"
     
     # =============================================================================
     # HELPER METHODS FOR COMPREHENSIVE TESTING
@@ -2434,7 +2528,8 @@ async def run_single_test(test_name: str):
             async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.post(
                     f{self.staging_auth_url}/auth/login,"
-                    f{self.staging_auth_url}/auth/login,"
+                    f{self.staging_auth_url}/auth/login,""
+
                     json=login_data
                 )
                 return {"status: response.status_code, data: response.json()}"
@@ -2449,7 +2544,8 @@ async def run_single_test(test_name: str):
             async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.post(
                     f{self.staging_backend_url}/api/chat/initialize,"
-                    f{self.staging_backend_url}/api/chat/initialize,"
+                    f{self.staging_backend_url}/api/chat/initialize,""
+
                     headers=headers
                 )
                 return {status: response.status_code, data: response.json()}
@@ -2469,7 +2565,8 @@ async def run_single_test(test_name: str):
     
     async def _test_agent_execution(self, token: str) -> Dict:
         Test agent execution for value delivery."
-        Test agent execution for value delivery."
+        Test agent execution for value delivery.""
+
         try:
             headers = {Authorization": fBearer {token}}"
             agent_request = {
@@ -2496,7 +2593,8 @@ async def run_single_test(test_name: str):
             async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.get(
                     f{self.staging_backend_url}{endpoint},"
-                    f{self.staging_backend_url}{endpoint},"
+                    f{self.staging_backend_url}{endpoint},""
+
                     headers=headers
                 )
                 return {"status: response.status_code, data: response.json()}"
@@ -2507,7 +2605,8 @@ async def run_single_test(test_name: str):
         "Create a hijacked/modified token for security testing."
         # Decode without verification
         decoded = jwt.decode(original_token, options={verify_signature: False)"
-        decoded = jwt.decode(original_token, options={verify_signature: False)"
+        decoded = jwt.decode(original_token, options={verify_signature: False)""
+
         
         # Modify claims to simulate hijacking
         decoded["sub] = hijacked_user_123"
@@ -2520,7 +2619,8 @@ async def run_single_test(test_name: str):
     
     async def _test_oauth_init(self, provider: str, scope: str, redirect_uri: str = None) -> Dict:
         Test OAuth initialization flow."
-        Test OAuth initialization flow."
+        Test OAuth initialization flow.""
+
         try:
             oauth_data = {
                 provider": provider,"
@@ -2539,7 +2639,8 @@ async def run_single_test(test_name: str):
     
     async def _test_oauth_callback(self, provider: str, authorization_code: str, state: str) -> Dict:
         Test OAuth callback handling."
-        Test OAuth callback handling."
+        Test OAuth callback handling.""
+
         try:
             callback_data = {
                 code": authorization_code,"
@@ -2571,7 +2672,8 @@ async def run_single_test(test_name: str):
     
     async def _test_mfa_setup(self, token: str, method: str) -> Dict:
         Test MFA setup process."
-        Test MFA setup process."
+        Test MFA setup process.""
+
         try:
             headers = {Authorization": fBearer {token}}"
             mfa_data = {method: method}
@@ -2604,7 +2706,8 @@ async def run_single_test(test_name: str):
     
     async def _test_mfa_login(self, email: str, password: str, mfa_code: str) -> Dict:
         Test MFA login process."
-        Test MFA login process."
+        Test MFA login process.""
+
         try:
             login_data = {
                 "email: email,"
@@ -2654,7 +2757,8 @@ async def run_single_test(test_name: str):
     
     async def _test_account_unlock(self, email: str) -> Dict:
         Test account unlock process."
-        Test account unlock process."
+        Test account unlock process.""
+
         try:
             unlock_data = {"email: email}"
             
@@ -2672,7 +2776,8 @@ async def run_single_test(test_name: str):
         try:
             headers = {Authorization: fBearer {token}}
             key_data = {name: name}"
-            key_data = {name: name}"
+            key_data = {name: name}""
+
             
             async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.post(
@@ -2765,7 +2870,8 @@ async def run_single_test(test_name: str):
     
     async def _test_websocket_token_refresh(self, old_token: str, refresh_token: str) -> Dict:
         Test WebSocket token refresh."
-        Test WebSocket token refresh."
+        Test WebSocket token refresh.""
+
         try:
             refresh_data = {"refresh_token: refresh_token}"
             
@@ -2780,7 +2886,8 @@ async def run_single_test(test_name: str):
                     new_token = response.json()["access_token]"
                     ws_test = await self._test_websocket_authentication(new_token)
                     return {success: ws_test[success], new_token: new_token}"
-                    return {success: ws_test[success], new_token: new_token}"
+                    return {success: ws_test[success], new_token: new_token}""
+
                 else:
                     return {"success: False, error: response.text}"
         except Exception as e:
@@ -2794,7 +2901,8 @@ async def run_single_test(test_name: str):
             async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.post(
                     f{self.staging_backend_url}/ws/disconnect,"
-                    f{self.staging_backend_url}/ws/disconnect,"
+                    f{self.staging_backend_url}/ws/disconnect,""
+
                     headers=headers
                 )
                 
@@ -2835,7 +2943,8 @@ async def run_single_test(test_name: str):
     
     async def _test_api_key_backend_auth(self, api_key: str) -> Dict:
         Test API key authentication with backend."
-        Test API key authentication with backend."
+        Test API key authentication with backend.""
+
         try:
             headers = {X-API-Key": api_key}"
             
@@ -2845,7 +2954,8 @@ async def run_single_test(test_name: str):
                     headers=headers
                 )
                 return {success: response.status_code == 200}"
-                return {success: response.status_code == 200}"
+                return {success: response.status_code == 200}""
+
         except Exception as e:
             logger.warning(f"API key backend auth failed: {e}))"
             return {success: False, error: str(e)}
@@ -2888,7 +2998,8 @@ async def run_single_test(test_name: str):
     
     async def _test_background_token_persistence(self, login_data: Dict) -> Dict:
         Test background app token persistence."
-        Test background app token persistence."
+        Test background app token persistence.""
+
         try:
             # Simulate background app behavior
             await asyncio.sleep(0.1)  # Simulate background processing
@@ -2897,7 +3008,8 @@ async def run_single_test(test_name: str):
             if access_token:
                 # Test token still valid after background processing
                 decoded = jwt.decode(access_token, options={verify_signature: False)"
-                decoded = jwt.decode(access_token, options={verify_signature: False)"
+                decoded = jwt.decode(access_token, options={verify_signature: False)""
+
                 current_time = time.time()
                 
                 if decoded.get("exp, 0) > current_time:"
@@ -2975,7 +3087,8 @@ async def run_single_test(test_name: str):
             async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.get(
                     f{self.staging_backend_url}/api/user/preferences,"
-                    f{self.staging_backend_url}/api/user/preferences,"
+                    f{self.staging_backend_url}/api/user/preferences,""
+
                     headers=headers
                 )
                 
@@ -2989,7 +3102,8 @@ async def run_single_test(test_name: str):
     
     async def _simulate_security_incident(self, token: str, scenario: Dict) -> Dict:
         Simulate various security incident scenarios."
-        Simulate various security incident scenarios."
+        Simulate various security incident scenarios.""
+
         try:
             incident_type = scenario[type"]"
             
@@ -3027,7 +3141,8 @@ async def run_single_test(test_name: str):
                 for _ in range(scenario.get(invalid_signatures, 3)):"
                     # Create malformed token
                     malformed_token = token[:-10] + malformed"
-                    malformed_token = token[:-10] + malformed"
+                    malformed_token = token[:-10] + malformed""
+
                     headers = {Authorization: fBearer {malformed_token}}
                     
                     async with httpx.AsyncClient(timeout=5.0) as client:
@@ -3051,7 +3166,8 @@ async def run_single_test(test_name: str):
                         try:
                             await client.get(
                                 f{self.staging_backend_url}/api/status,"
-                                f{self.staging_backend_url}/api/status,"
+                                f{self.staging_backend_url}/api/status,""
+
                                 headers=headers
                             )
                         except:
@@ -3093,7 +3209,8 @@ async def run_single_test(test_name: str):
                         json=recovery_data
                     )
                     return {recovery_successful: response.status_code in [200, 202]}"
-                    return {recovery_successful: response.status_code in [200, 202]}"
+                    return {recovery_successful: response.status_code in [200, 202]}""
+
             
             elif incident_type == "token_hijacking_detected:"
                 # Test token revocation and reissue
@@ -3117,7 +3234,8 @@ async def run_single_test(test_name: str):
                         json=reset_data
                     )
                     return {recovery_successful: response.status_code in [200, 202]}"
-                    return {recovery_successful: response.status_code in [200, 202]}"
+                    return {recovery_successful: response.status_code in [200, 202]}""
+
             
             # For testing purposes, assume recovery mechanisms work
             return {"recovery_successful: True, simulated: True}"
@@ -3127,7 +3245,8 @@ async def run_single_test(test_name: str):
             return {recovery_successful: True, simulated: True, "error: str(e)}"
 
 if __name__ == __main__:
-    """
+    """"
+
     Run the test suite directly for debugging.
     This will execute all tests and provide detailed output.
     
@@ -3145,7 +3264,8 @@ if __name__ == __main__:
         
         try:
             logger.critical(Starting comprehensive cross-service JWT validation test suite...)"
-            logger.critical(Starting comprehensive cross-service JWT validation test suite...)"
+            logger.critical(Starting comprehensive cross-service JWT validation test suite...)""
+
             
             # Original tests
             await test_instance.test_00_setup_comprehensive_diagnostics()

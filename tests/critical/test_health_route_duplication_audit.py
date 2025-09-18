@@ -1,7 +1,7 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
-'''
-'''
+
+"""
 Test suite to expose health route duplication and legacy issues.
 
 This test suite is designed to FAIL and expose the following issues:
@@ -10,8 +10,7 @@ This test suite is designed to FAIL and expose the following issues:
 3. Legacy import patterns and compatibility wrappers
 4. Multiple health check systems with overlapping functionality
 5. Inconsistent response formats across services
-'''
-'''
+"""
 
 import asyncio
 import json

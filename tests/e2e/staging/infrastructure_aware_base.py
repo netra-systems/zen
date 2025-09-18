@@ -573,9 +573,9 @@ def log_infrastructure_test_recommendations(environment: str) -> None:
         logger.info(f"Infrastructure Test Recommendations for {environment}:")
 
         if health_summary.get('overall_status') == 'healthy':
-            logger.info("  ✅ Infrastructure healthy - normal test execution recommended")
+            logger.info("  CHECK Infrastructure healthy - normal test execution recommended")
         elif health_summary.get('overall_status') == 'degraded':
-            logger.warning("  ⚠️  Infrastructure degraded - consider conservative test strategy")
+            logger.warning("  WARNING️  Infrastructure degraded - consider conservative test strategy")
             logger.warning("  📋 Recommendations:")
             logger.warning("     - Use extended timeouts (2x multiplier)")
             logger.warning("     - Enable retry mechanisms")

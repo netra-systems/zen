@@ -186,9 +186,9 @@ class AgentRegistryDuplicationConflictsTests(SSotAsyncTestCase):
         logger.info(f'  Failed imports: {len(failed_imports)}')
         for import_stmt, result in import_resolution_results.items():
             if result.get('success'):
-                logger.info(f"    ✅ {import_stmt} -> {result['object_type']} from {result['object_module']}")
+                logger.info(f"    CHECK {import_stmt} -> {result['object_type']} from {result['object_module']}")
             else:
-                logger.error(f"    ❌ {import_stmt} -> {result['error']}")
+                logger.error(f"    X {import_stmt} -> {result['error']}")
         if failed_imports:
             failed_details = '; '.join([f"{stmt}: {result['error']}" for stmt, result in failed_imports.items()])
             self.fail(f'CRITICAL IMPORT RESOLUTION FAILURE: {len(failed_imports)} import patterns failed. This prevents reliable AgentRegistry usage across the codebase, blocking Golden Path. Failed imports: {failed_details}')

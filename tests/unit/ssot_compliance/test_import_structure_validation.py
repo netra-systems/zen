@@ -114,15 +114,15 @@ class TestImportStructureValidation(SSotBaseTestCase):
                 module = importlib.import_module(import_path)
                 self.assertIsNotNone(module)
                 accessible_imports.append(import_path)
-                self.assertLog(f"✅ Accessible: {import_path}")
+                self.assertLog(f"CHECK Accessible: {import_path}")
 
             except ImportError as e:
                 failed_imports.append((import_path, str(e)))
-                self.assertLog(f"❌ Failed: {import_path} - {e}")
+                self.assertLog(f"X Failed: {import_path} - {e}")
 
             except Exception as e:
                 failed_imports.append((import_path, f"Unexpected error: {e}"))
-                self.assertLog(f"⚠️ Error: {import_path} - {e}")
+                self.assertLog(f"WARNING️ Error: {import_path} - {e}")
 
         # Log summary
         self.assertLog(f"Canonical imports: {len(accessible_imports)}/{len(self.CANONICAL_IMPORT_PATHS)} accessible")
@@ -136,7 +136,7 @@ class TestImportStructureValidation(SSotBaseTestCase):
             f"Failed imports: {failed_imports}"
         )
 
-        self.assertLog("✅ Canonical import accessibility validated")
+        self.assertLog("CHECK Canonical import accessibility validated")
 
     def test_deprecated_import_warnings(self):
         """
@@ -165,10 +165,10 @@ class TestImportStructureValidation(SSotBaseTestCase):
 
                     if deprecation_warnings:
                         warnings_issued.append(deprecated_path)
-                        self.assertLog(f"✅ Warning issued: {deprecated_path}")
+                        self.assertLog(f"CHECK Warning issued: {deprecated_path}")
                     else:
                         no_warnings_issued.append(deprecated_path)
-                        self.assertLog(f"⚠️ No warning: {deprecated_path}")
+                        self.assertLog(f"WARNING️ No warning: {deprecated_path}")
 
                 except ImportError:
                     # Expected for eliminated deprecated imports
@@ -184,7 +184,7 @@ class TestImportStructureValidation(SSotBaseTestCase):
         if no_warnings_issued:
             self.assertLog(f"Missing warnings: {len(no_warnings_issued)} imports (may be eliminated)")
 
-        self.assertLog("✅ Deprecated import warning testing completed")
+        self.assertLog("CHECK Deprecated import warning testing completed")
 
     def test_no_circular_import_dependencies(self):
         """
@@ -201,10 +201,10 @@ class TestImportStructureValidation(SSotBaseTestCase):
         self.circular_dependencies = circular_deps
 
         if circular_deps:
-            self.assertLog(f"⚠️ Found {len(circular_deps)} potential circular dependencies")
+            self.assertLog(f"WARNING️ Found {len(circular_deps)} potential circular dependencies")
 
             for dep in circular_deps[:3]:  # Show first 3
-                cycle_str = " → ".join(dep.cycle_path)
+                cycle_str = " -> ".join(dep.cycle_path)
                 self.assertLog(f"  Cycle: {cycle_str}")
 
             # Allow some circular dependencies during migration but limit them
@@ -214,13 +214,13 @@ class TestImportStructureValidation(SSotBaseTestCase):
                 len(circular_deps), max_allowed_circular,
                 f"Too many circular dependencies ({len(circular_deps)} > {max_allowed_circular}). "
                 f"This can cause import failures and startup issues. "
-                f"Cycles: {[' → '.join(dep.cycle_path) for dep in circular_deps[:3]]}"
+                f"Cycles: {[' -> '.join(dep.cycle_path) for dep in circular_deps[:3]]}"
             )
 
         else:
-            self.assertLog("✅ No circular dependencies detected")
+            self.assertLog("CHECK No circular dependencies detected")
 
-        self.assertLog("✅ Circular dependency testing completed")
+        self.assertLog("CHECK Circular dependency testing completed")
 
     def test_ssot_import_pattern_compliance(self):
         """
@@ -234,7 +234,7 @@ class TestImportStructureValidation(SSotBaseTestCase):
         self.import_violations = violations
 
         if violations:
-            self.assertLog(f"⚠️ Found {len(violations)} import pattern violations")
+            self.assertLog(f"WARNING️ Found {len(violations)} import pattern violations")
 
             # Group by violation type
             by_type = {}
@@ -256,9 +256,9 @@ class TestImportStructureValidation(SSotBaseTestCase):
             )
 
         else:
-            self.assertLog("✅ No import pattern violations found")
+            self.assertLog("CHECK No import pattern violations found")
 
-        self.assertLog("✅ SSOT import pattern compliance validated")
+        self.assertLog("CHECK SSOT import pattern compliance validated")
 
     def test_websocket_canonical_import_functionality(self):
         """
@@ -279,11 +279,11 @@ class TestImportStructureValidation(SSotBaseTestCase):
             self.assertTrue(callable(create_websocket_manager))
             self.assertTrue(callable(ConnectionLifecycleManager))
 
-            self.assertLog("✅ WebSocket canonical imports functional")
+            self.assertLog("CHECK WebSocket canonical imports functional")
 
             # Test that functions have expected signatures
             if hasattr(create_websocket_manager, '__annotations__'):
-                self.assertLog("✅ create_websocket_manager has type annotations")
+                self.assertLog("CHECK create_websocket_manager has type annotations")
 
             # Test error handling functionality
             try:
@@ -295,13 +295,13 @@ class TestImportStructureValidation(SSotBaseTestCase):
                 self.assertTrue(issubclass(FactoryInitializationError, Exception))
                 self.assertTrue(issubclass(WebSocketComponentError, Exception))
 
-                self.assertLog("✅ WebSocket error classes accessible")
+                self.assertLog("CHECK WebSocket error classes accessible")
 
             except ImportError:
-                self.assertLog("⚠️ WebSocket error classes not accessible (may be eliminated)")
+                self.assertLog("WARNING️ WebSocket error classes not accessible (may be eliminated)")
 
         except ImportError as e:
-            self.assertLog(f"⚠️ WebSocket canonical imports not accessible: {e}")
+            self.assertLog(f"WARNING️ WebSocket canonical imports not accessible: {e}")
             # Don't fail test if this is expected during migration
             pass
 
@@ -318,16 +318,16 @@ class TestImportStructureValidation(SSotBaseTestCase):
             from netra_backend.app.core.configuration.base import get_config
 
             self.assertTrue(callable(get_config))
-            self.assertLog("✅ Configuration canonical imports functional")
+            self.assertLog("CHECK Configuration canonical imports functional")
 
             # Test isolated environment access
             from dev_launcher.isolated_environment import IsolatedEnvironment
 
             self.assertIsNotNone(IsolatedEnvironment)
-            self.assertLog("✅ IsolatedEnvironment accessible")
+            self.assertLog("CHECK IsolatedEnvironment accessible")
 
         except ImportError as e:
-            self.assertLog(f"⚠️ Configuration canonical imports not accessible: {e}")
+            self.assertLog(f"WARNING️ Configuration canonical imports not accessible: {e}")
 
     def test_test_framework_ssot_imports(self):
         """
@@ -344,7 +344,7 @@ class TestImportStructureValidation(SSotBaseTestCase):
             self.assertTrue(issubclass(SSotBaseTestCase, object))
             self.assertTrue(issubclass(SSotAsyncTestCase, object))
 
-            self.assertLog("✅ Test framework SSOT imports functional")
+            self.assertLog("CHECK Test framework SSOT imports functional")
 
             # Test additional SSOT utilities
             ssot_utilities = [
@@ -359,9 +359,9 @@ class TestImportStructureValidation(SSotBaseTestCase):
                 try:
                     importlib.import_module(utility)
                     accessible_utilities += 1
-                    self.assertLog(f"✅ Accessible: {utility}")
+                    self.assertLog(f"CHECK Accessible: {utility}")
                 except ImportError:
-                    self.assertLog(f"⚠️ Not accessible: {utility}")
+                    self.assertLog(f"WARNING️ Not accessible: {utility}")
 
             # Require at least 50% of utilities to be accessible
             min_required = len(ssot_utilities) // 2

@@ -190,20 +190,20 @@ def pytest_sessionstart(session):
             print(f"Infrastructure Status: {health.overall_status.value.upper()}")
 
             if health.overall_status == ConnectivityStatus.UNAVAILABLE:
-                print("⚠️  WARNING: Critical infrastructure services are unavailable")
+                print("WARNING️  WARNING: Critical infrastructure services are unavailable")
                 print("Tests may be skipped or run in fallback mode")
             elif health.overall_status == ConnectivityStatus.DEGRADED:
-                print("⚠️  WARNING: Some infrastructure services are degraded")
+                print("WARNING️  WARNING: Some infrastructure services are degraded")
                 print("Tests will run with fallback configuration")
             else:
-                print("✅ Infrastructure health check passed")
+                print("CHECK Infrastructure health check passed")
 
             # Store health for use in fixtures
             session.config._infrastructure_health = health
 
             loop.close()
         except Exception as e:
-            print(f"⚠️  Infrastructure health check failed: {e}")
+            print(f"WARNING️  Infrastructure health check failed: {e}")
             session.config._infrastructure_health = None
     else:
         print("ℹ️  Resilience framework not available - proceeding with standard execution")

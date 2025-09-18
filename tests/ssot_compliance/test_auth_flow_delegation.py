@@ -113,7 +113,7 @@ class AuthFlowDelegationComplianceTests(BaseIntegrationTest):
                 assert user_context.user_id == 'test_user_123'
                 assert auth_info is not None
                 
-                logger.info("✅ ISSUE #1195 COMPLIANCE: WebSocket authentication properly delegates to auth service")
+                logger.info("CHECK ISSUE #1195 COMPLIANCE: WebSocket authentication properly delegates to auth service")
                 
         except Exception as e:
             logger.error(f"WebSocket auth flow test failed: {e}")
@@ -179,7 +179,7 @@ class AuthFlowDelegationComplianceTests(BaseIntegrationTest):
                 # Verify proper user extraction
                 assert user_id == 'test_user_456'
                 
-                logger.info("✅ ISSUE #1195 COMPLIANCE: HTTP route authentication properly delegates to auth service")
+                logger.info("CHECK ISSUE #1195 COMPLIANCE: HTTP route authentication properly delegates to auth service")
                 
         except HTTPException as e:
             if e.status_code == 401:
@@ -238,7 +238,7 @@ class AuthFlowDelegationComplianceTests(BaseIntegrationTest):
                 f"Details: {violation_details}"
             )
         else:
-            logger.info("✅ ISSUE #1195 COMPLIANCE: GCP auth middleware does not contain local JWT decoding")
+            logger.info("CHECK ISSUE #1195 COMPLIANCE: GCP auth middleware does not contain local JWT decoding")
         
         # Test middleware auth context extraction
         try:
@@ -253,11 +253,11 @@ class AuthFlowDelegationComplianceTests(BaseIntegrationTest):
                 
                 if has_decoded_claims:
                     logger.warning(
-                        f"⚠️ ISSUE #1195 WARNING: Middleware auth context contains decoded claims. "
+                        f"WARNING️ ISSUE #1195 WARNING: Middleware auth context contains decoded claims. "
                         f"Verify this comes from auth service delegation, not local decoding."
                     )
                 else:
-                    logger.info("✅ ISSUE #1195 COMPLIANCE: Middleware only extracts token, doesn't decode locally")
+                    logger.info("CHECK ISSUE #1195 COMPLIANCE: Middleware only extracts token, doesn't decode locally")
                     
         except Exception as e:
             logger.warning(f"Middleware auth context test encountered error: {e}")
@@ -323,7 +323,7 @@ class AuthFlowDelegationComplianceTests(BaseIntegrationTest):
         
         if bypasses_found:
             logger.warning(
-                f"⚠️ ISSUE #1195 WARNING: Found {len(bypasses_found)} potential auth bypass patterns. "
+                f"WARNING️ ISSUE #1195 WARNING: Found {len(bypasses_found)} potential auth bypass patterns. "
                 f"Manual investigation required: {bypasses_found}"
             )
             
@@ -331,7 +331,7 @@ class AuthFlowDelegationComplianceTests(BaseIntegrationTest):
             for bypass in bypasses_found:
                 logger.warning(f"Potential auth bypass: {bypass}")
         else:
-            logger.info("✅ ISSUE #1195 COMPLIANCE: No obvious auth bypass patterns found")
+            logger.info("CHECK ISSUE #1195 COMPLIANCE: No obvious auth bypass patterns found")
 
     @pytest.mark.ssot_compliance
     @pytest.mark.auth_flow
@@ -369,7 +369,7 @@ class AuthFlowDelegationComplianceTests(BaseIntegrationTest):
                 # Verify proper error response (should be 401 Unauthorized)
                 assert exc_info.value.status_code == 401
                 
-                logger.info("✅ ISSUE #1195 COMPLIANCE: Auth error handling maintains delegation pattern")
+                logger.info("CHECK ISSUE #1195 COMPLIANCE: Auth error handling maintains delegation pattern")
                 
         except Exception as e:
             logger.error(f"Auth error handling test failed: {e}")
@@ -442,7 +442,7 @@ class AuthFlowDelegationComplianceTests(BaseIntegrationTest):
                 assert user_context.user_id == expected_user_id, \
                     f"User ID mismatch in concurrent flow {i}: expected {expected_user_id}, got {user_context.user_id}"
             
-            logger.info("✅ ISSUE #1195 COMPLIANCE: Concurrent auth flows maintain proper isolation")
+            logger.info("CHECK ISSUE #1195 COMPLIANCE: Concurrent auth flows maintain proper isolation")
             
         except Exception as e:
             logger.error(f"Concurrent auth flow test failed: {e}")

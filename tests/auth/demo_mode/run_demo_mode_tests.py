@@ -94,7 +94,7 @@ class DemoModeTestRunner:
             # Print summary
             if return_code == 0:
                 print("   UNEXPECTED PASS (Tests should fail initially)")
-                print("   ⚠️  This indicates demo features may already be implemented")
+                print("   WARNING️  This indicates demo features may already be implemented")
             else:
                 print("   EXPECTED FAIL (Current restrictive behavior)")
                 print("   This demonstrates need for demo mode implementation")
@@ -163,7 +163,7 @@ class DemoModeTestRunner:
                     if self.run_test_module(str(test_file_path), description):
                         passed_count += 1
                 else:
-                    print(f"\n⚠️  Test file not found: {test_file}")
+                    print(f"\nWARNING️  Test file not found: {test_file}")
                     print(f"   Expected: {test_file_path}")
             
             # Print detailed results if verbose
@@ -216,7 +216,7 @@ class DemoModeTestRunner:
             print("   This demonstrates current restrictive authentication behavior")
             print("   Ready to implement demo mode features to make tests pass")
         elif passed_count < total_count:
-            print(f"\n⚠️  MIXED RESULTS: {passed_count} tests passed unexpectedly")
+            print(f"\nWARNING️  MIXED RESULTS: {passed_count} tests passed unexpectedly")
             print("   Some demo features may already be partially implemented")
             print("   Review passing tests to understand current state")
         else:
@@ -275,7 +275,7 @@ Examples:
         sys.exit(0)
     else:
         # Some tests passed - unexpected initially
-        print(f"\n⚠️  Unexpected results: {len(results) - len(failed_tests)} tests passed")
+        print(f"\nWARNING️  Unexpected results: {len(results) - len(failed_tests)} tests passed")
         sys.exit(1)
 
 

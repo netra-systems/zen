@@ -101,7 +101,7 @@ class DockerManagerSSOTViolationDetectionTests(unittest.TestCase):
                         f"INTERFACE INCONSISTENCY: {interface_keys[0]} vs {interface_keys[i]}\n"
                         f"Differences: {differences}"
                     )
-                    print(f"\n⚠️  {violation_msg}")
+                    print(f"\nWARNING️  {violation_msg}")
 
     def test_legacy_docker_manager_detection(self):
         """Test: Detect legacy Docker Manager code that should be removed."""

@@ -65,13 +65,13 @@ class MissionCriticalFrameworkIntegrationTests:
         integration_report += '\nTOP SSOT COMPLIANT FILES:'
         for result in sorted_results[:5]:
             if 'error' not in result:
-                integration_report += f"\nFile: {result['file']}\nSSOT Score: {result['ssot_compliance_score']}%\nSSOT Inheritance: {('✅' if result['has_ssot_inheritance'] else '❌')}\nLegacy Patterns: {('❌' if result['has_legacy_inheritance'] else '✅')}\n"
+                integration_report += f"\nFile: {result['file']}\nSSOT Score: {result['ssot_compliance_score']}%\nSSOT Inheritance: {('CHECK' if result['has_ssot_inheritance'] else 'X')}\nLegacy Patterns: {('X' if result['has_legacy_inheritance'] else 'CHECK')}\n"
         integration_report += '\nFILES NEEDING SSOT MIGRATION:'
         low_compliance_files = [r for r in sorted_results if r.get('ssot_compliance_score', 0) < 50]
         for result in low_compliance_files[:5]:
             if 'error' not in result:
                 integration_report += f"\nFile: {result['file']}\nSSOT Score: {result['ssot_compliance_score']}%\nIssues: {('Legacy inheritance' if result['has_legacy_inheritance'] else 'Missing SSOT patterns')}\n"
-        integration_report += f"\n\nBUSINESS IMPACT ANALYSIS:\n- Framework Integration: {ssot_compliant_files}/{total_files} files use SSOT patterns\n- Legacy Technical Debt: {legacy_pattern_files} files still use legacy patterns\n- Average Compliance: {average_compliance:.1f}% (Target: >80%)\n\nGOLDEN PATH IMPACT:\n- Test Execution Reliability: {('✅ GOOD' if average_compliance > 70 else '❌ NEEDS IMPROVEMENT')}\n- Framework Consistency: {('✅ GOOD' if ssot_compliant_files > total_files * 0.6 else '❌ NEEDS IMPROVEMENT')}\n- Maintenance Overhead: {('✅ LOW' if legacy_pattern_files < total_files * 0.3 else '❌ HIGH')}\n\nNEXT ACTIONS:\n1. Continue SSOT migration for low-compliance files\n2. Update legacy inheritance patterns\n3. Ensure consistent test framework usage across mission-critical tests\n"
+        integration_report += f"\n\nBUSINESS IMPACT ANALYSIS:\n- Framework Integration: {ssot_compliant_files}/{total_files} files use SSOT patterns\n- Legacy Technical Debt: {legacy_pattern_files} files still use legacy patterns\n- Average Compliance: {average_compliance:.1f}% (Target: >80%)\n\nGOLDEN PATH IMPACT:\n- Test Execution Reliability: {('CHECK GOOD' if average_compliance > 70 else 'X NEEDS IMPROVEMENT')}\n- Framework Consistency: {('CHECK GOOD' if ssot_compliant_files > total_files * 0.6 else 'X NEEDS IMPROVEMENT')}\n- Maintenance Overhead: {('CHECK LOW' if legacy_pattern_files < total_files * 0.3 else 'X HIGH')}\n\nNEXT ACTIONS:\n1. Continue SSOT migration for low-compliance files\n2. Update legacy inheritance patterns\n3. Ensure consistent test framework usage across mission-critical tests\n"
         print(integration_report)
         assert average_compliance >= 60.0, f'SSOT compliance too low for production: {average_compliance:.1f}%\n{integration_report}'
         ssot_percentage = ssot_compliant_files / max(total_files, 1) * 100
@@ -99,7 +99,7 @@ class MissionCriticalFrameworkIntegrationTests:
             stdout_output = ''
             stderr_output = f'Unified test runner execution failed: {str(e)}'
         collected_tests = len([line for line in stdout_output.split('\n') if '::test_' in line])
-        execution_report = f"\nUNIFIED TEST RUNNER EXECUTION ANALYSIS\n======================================\n\nTest Runner: {test_runner_path}\nExecution Success: {('✅' if execution_success else '❌')}\nReturn Code: {(result.returncode if 'result' in locals() else 'N/A')}\nTests Collected: {collected_tests}\n\nEXECUTION OUTPUT ANALYSIS:\nSTDOUT Length: {len(stdout_output)} chars\nSTDERR Length: {len(stderr_output)} chars\n\nSTDOUT SAMPLE (first 300 chars):\n{stdout_output[:300]}\n\nSTDERR SAMPLE (first 300 chars):\n{stderr_output[:300]}\n\nBUSINESS IMPACT:\n- Test Execution Capability: {('✅ OPERATIONAL' if execution_success else '❌ BLOCKED')}\n- Framework Integration: {('✅ WORKING' if collected_tests > 0 else '❌ FAILED')}\n- Golden Path Validation: {('✅ POSSIBLE' if execution_success and collected_tests > 0 else '❌ BLOCKED')}\n\nEXPECTED RESULT: After syntax fixes, test runner should execute mission-critical tests.\nCURRENT STATUS: {('Ready for production validation' if execution_success else 'Requires syntax fixes before execution')}\n\nNEXT ACTION: {('Continue with test execution' if execution_success else 'Fix syntax errors blocking test execution')}\n"
+        execution_report = f"\nUNIFIED TEST RUNNER EXECUTION ANALYSIS\n======================================\n\nTest Runner: {test_runner_path}\nExecution Success: {('CHECK' if execution_success else 'X')}\nReturn Code: {(result.returncode if 'result' in locals() else 'N/A')}\nTests Collected: {collected_tests}\n\nEXECUTION OUTPUT ANALYSIS:\nSTDOUT Length: {len(stdout_output)} chars\nSTDERR Length: {len(stderr_output)} chars\n\nSTDOUT SAMPLE (first 300 chars):\n{stdout_output[:300]}\n\nSTDERR SAMPLE (first 300 chars):\n{stderr_output[:300]}\n\nBUSINESS IMPACT:\n- Test Execution Capability: {('CHECK OPERATIONAL' if execution_success else 'X BLOCKED')}\n- Framework Integration: {('CHECK WORKING' if collected_tests > 0 else 'X FAILED')}\n- Golden Path Validation: {('CHECK POSSIBLE' if execution_success and collected_tests > 0 else 'X BLOCKED')}\n\nEXPECTED RESULT: After syntax fixes, test runner should execute mission-critical tests.\nCURRENT STATUS: {('Ready for production validation' if execution_success else 'Requires syntax fixes before execution')}\n\nNEXT ACTION: {('Continue with test execution' if execution_success else 'Fix syntax errors blocking test execution')}\n"
         print(execution_report)
         assert execution_success, f'Unified test runner failed for mission-critical tests\n{execution_report}'
         assert collected_tests >= 0, f'Test collection failed completely\n{execution_report}'
@@ -147,14 +147,14 @@ class MissionCriticalFrameworkIntegrationTests:
             mock_report += '\nFILES USING LEGACY MOCKS (Need Migration):'
             for result in legacy_mock_results[:5]:
                 if 'error' not in result:
-                    mock_report += f"\nFile: {result['file']}\nCompliance Score: {result['mock_compliance_score']}%\nLegacy Patterns: ✅ (needs SSOT migration)\n"
+                    mock_report += f"\nFile: {result['file']}\nCompliance Score: {result['mock_compliance_score']}%\nLegacy Patterns: CHECK (needs SSOT migration)\n"
         ssot_mock_results = [r for r in mock_integration_results if r.get('uses_ssot_mocks', False)]
         if ssot_mock_results:
             mock_report += '\nFILES USING SSOT MOCKS (Good Examples):'
             for result in ssot_mock_results[:3]:
                 if 'error' not in result:
-                    mock_report += f"\nFile: {result['file']}\nCompliance Score: {result['mock_compliance_score']}%\nSSOT Patterns: ✅\n"
-        mock_report += f"\n\nBUSINESS IMPACT ANALYSIS:\n- Mock Framework Consistency: {ssot_mock_files}/{files_with_mocks} mocked files use SSOT patterns\n- Legacy Technical Debt: {legacy_mock_files} files need mock migration\n- Mock Reliability: {('✅ GOOD' if average_mock_compliance > 80 else '❌ NEEDS IMPROVEMENT')}\n\nTESTING INFRASTRUCTURE HEALTH:\n- SSOT Compliance: {('✅ GOOD' if average_mock_compliance > 70 else '❌ NEEDS IMPROVEMENT')}\n- Maintenance Overhead: {('✅ LOW' if legacy_mock_files < files_with_mocks * 0.4 else '❌ HIGH')}\n\nRECOMMENDATION: {('Continue current SSOT patterns' if average_mock_compliance > 80 else 'Prioritize mock migration to SSOT patterns')}\n"
+                    mock_report += f"\nFile: {result['file']}\nCompliance Score: {result['mock_compliance_score']}%\nSSOT Patterns: CHECK\n"
+        mock_report += f"\n\nBUSINESS IMPACT ANALYSIS:\n- Mock Framework Consistency: {ssot_mock_files}/{files_with_mocks} mocked files use SSOT patterns\n- Legacy Technical Debt: {legacy_mock_files} files need mock migration\n- Mock Reliability: {('CHECK GOOD' if average_mock_compliance > 80 else 'X NEEDS IMPROVEMENT')}\n\nTESTING INFRASTRUCTURE HEALTH:\n- SSOT Compliance: {('CHECK GOOD' if average_mock_compliance > 70 else 'X NEEDS IMPROVEMENT')}\n- Maintenance Overhead: {('CHECK LOW' if legacy_mock_files < files_with_mocks * 0.4 else 'X HIGH')}\n\nRECOMMENDATION: {('Continue current SSOT patterns' if average_mock_compliance > 80 else 'Prioritize mock migration to SSOT patterns')}\n"
         print(mock_report)
 
     @pytest.mark.integration
@@ -203,8 +203,8 @@ class MissionCriticalFrameworkIntegrationTests:
             env_report += '\nFILES USING LEGACY ENVIRONMENT ACCESS (Need Migration):'
             for result in legacy_env_results[:5]:
                 if 'error' not in result:
-                    env_report += f"\nFile: {result['file']}\nCompliance Score: {result['env_compliance_score']}%\nLegacy Patterns: ✅ (needs IsolatedEnvironment migration)\n"
-        env_report += f"\n\nBUSINESS IMPACT ANALYSIS:\n- Environment Management Consistency: {ssot_env_files}/{files_with_env_access} files use SSOT patterns\n- Configuration Security: {('✅ GOOD' if legacy_env_files < files_with_env_access * 0.3 else '❌ NEEDS IMPROVEMENT')}\n- Test Isolation: {('✅ PROPER' if average_env_compliance > 80 else '❌ COMPROMISED')}\n\nSYSTEM HEALTH IMPACT:\n- Environment Isolation: {('✅ GOOD' if ssot_env_files > legacy_env_files else '❌ NEEDS IMPROVEMENT')}\n- Test Reliability: {('✅ HIGH' if average_env_compliance > 70 else '❌ MEDIUM')}\n\nRECOMMENDATION: {('Environment management is SSOT compliant' if average_env_compliance > 85 else 'Prioritize IsolatedEnvironment migration')}\n"
+                    env_report += f"\nFile: {result['file']}\nCompliance Score: {result['env_compliance_score']}%\nLegacy Patterns: CHECK (needs IsolatedEnvironment migration)\n"
+        env_report += f"\n\nBUSINESS IMPACT ANALYSIS:\n- Environment Management Consistency: {ssot_env_files}/{files_with_env_access} files use SSOT patterns\n- Configuration Security: {('CHECK GOOD' if legacy_env_files < files_with_env_access * 0.3 else 'X NEEDS IMPROVEMENT')}\n- Test Isolation: {('CHECK PROPER' if average_env_compliance > 80 else 'X COMPROMISED')}\n\nSYSTEM HEALTH IMPACT:\n- Environment Isolation: {('CHECK GOOD' if ssot_env_files > legacy_env_files else 'X NEEDS IMPROVEMENT')}\n- Test Reliability: {('CHECK HIGH' if average_env_compliance > 70 else 'X MEDIUM')}\n\nRECOMMENDATION: {('Environment management is SSOT compliant' if average_env_compliance > 85 else 'Prioritize IsolatedEnvironment migration')}\n"
         print(env_report)
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

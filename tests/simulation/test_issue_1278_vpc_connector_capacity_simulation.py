@@ -309,7 +309,7 @@ class TestIssue1278VPCConnectorCapacitySimulation(AsyncBaseTestCase):
             self.logger.info(f"  Scenario result: {final_success} after {total_attempts} attempts "
                            f"({final_time:.1f}s total)")
 
-        self.logger.info("✅ VPC connector retry logic validation passed")
+        self.logger.info("CHECK VPC connector retry logic validation passed")
 
     @pytest.mark.simulation
     @pytest.mark.issue_1278
@@ -404,4 +404,4 @@ class TestIssue1278VPCConnectorCapacitySimulation(AsyncBaseTestCase):
                 assert result['error_type'] in ['PERFORMANCE_DEGRADED', None], \
                     f"Connection should be degraded at 90%+ capacity: {result['connection_id']}"
 
-        self.logger.info("✅ Concurrent connection pressure simulation completed")
+        self.logger.info("CHECK Concurrent connection pressure simulation completed")
