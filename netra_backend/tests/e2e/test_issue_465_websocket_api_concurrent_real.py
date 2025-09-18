@@ -18,7 +18,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # SSOT Import Registry compliance
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.config import get_config
 
 
 class Issue465WebSocketAPIConcurrentRealTests(SSotAsyncTestCase):
@@ -32,7 +32,7 @@ class Issue465WebSocketAPIConcurrentRealTests(SSotAsyncTestCase):
     def setUp(self):
         super().setUp()
         self.env = IsolatedEnvironment()
-        self.config = get_unified_config()
+        self.config = get_config()
         
         # Get service URLs from environment
         self.backend_url = self.env.get("BACKEND_URL", "http://localhost:8000")
