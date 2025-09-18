@@ -2438,6 +2438,25 @@ class MessageRouter(ExternalCanonicalMessageRouter):
             logger.error(f"MessageRouter.handle_message failed for user {user_id}: {e}")
             raise
 
+    def add_handler(self, *args, **kwargs):
+        """
+        Backward compatible add_handler method.
+
+        Supports both legacy and modern interfaces:
+        - Legacy: add_handler(handler)
+        - Modern: add_handler(message_type, handler, priority=0)
+        """
+        if len(args) == 1 and len(kwargs) == 0:
+            # Legacy interface: add_handler(handler)
+            handler = args[0]
+            # Use a default message type for legacy handlers
+            from netra_backend.app.websocket_core.types import MessageType
+            message_type = MessageType.USER_MESSAGE  # Default message type
+            return super().add_handler(message_type, handler, priority=0)
+        else:
+            # Modern interface: add_handler(message_type, handler, priority=0)
+            return super().add_handler(*args, **kwargs)
+
     # All methods are inherited from CanonicalMessageRouter
     # This maintains 100% API compatibility
 

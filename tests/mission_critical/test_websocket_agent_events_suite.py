@@ -548,7 +548,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         await pipeline_executor.execute_pipeline(
             pipeline=self.test_pipeline_steps,
             user_context=self.test_user_context,
-            run_id=pipeline_run_001,
+            run_id="pipeline_run_001",
             context={"user_id": "pipeline_user_001", "thread_id": "pipeline_thread_001"},
             db_session=self.mock_db_session  # Session passed as parameter
         )
