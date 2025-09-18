@@ -84,14 +84,11 @@ class InstanceConfig:
             self.name = self.command
         if self.description is None:
             self.description = f"Execute {self.command}"
-        # Set permission mode based on platform if not explicitly set
+        # Set permission mode if not explicitly set
         if self.permission_mode is None:
-            # On Windows, use bypassPermissions to avoid approval prompts
-            # On Mac/Linux, acceptEdits should work fine
-            if platform.system() == "Windows":
-                self.permission_mode = "bypassPermissions"
-            else:
-                self.permission_mode = "acceptEdits"
+            # Default to bypassPermissions for all platforms to avoid approval prompts
+            # This is not OS-specific - it's a general permission configuration
+            self.permission_mode = "bypassPermissions"
 
 @dataclass
 class InstanceStatus:
@@ -1005,9 +1002,9 @@ class ClaudeInstanceOrchestrator:
 ║ Instance: {instance_name:<60}║
 ║ Error: {error_content[:68]:<68}║
 ╠════════════════════════════════════════════════════════════════════════════╣
-║ SOLUTION: zen_orchestrator.py now uses platform-specific permission modes:  ║
-║   • Windows: bypassPermissions (to avoid this exact error)                  ║
-║   • Mac/Linux: acceptEdits (standard mode)                                  ║
+║ SOLUTION: zen_orchestrator.py now uses bypassPermissions by default:        ║
+║   • Default: bypassPermissions (avoids approval prompts on all platforms)   ║
+║   • Users can override via permission_mode in config if needed              ║
 ║                                                                              ║
 ║ Current platform: {platform.system():<58}║
 ║ Using permission mode: {self.instances[instance_name].permission_mode:<52}║
@@ -2419,9 +2416,9 @@ async def main():
                 error_preview = status.error.replace('\n', ' ')[:70]
                 print(f"║ ❌ {name:<20} │ {error_preview:<68} ║")
             print(f"""╠════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SOLUTION: zen_orchestrator.py now auto-detects platform and uses appropriate permission mode║
-║   • Windows → bypassPermissions (prevents approval prompts)                                 ║
-║   • Mac/Linux → acceptEdits (standard mode)                                                 ║
+║ SOLUTION: zen_orchestrator.py defaults to bypassPermissions to avoid approval prompts       ║
+║   • Default: bypassPermissions (works on all platforms)                                     ║
+║   • Users can override via permission_mode in config if needed                              ║
 ║                                                                                              ║
 ║ If still seeing errors, manually set permission mode in your config or update Claude Code.  ║
 ╚════════════════════════════════════════════════════════════════════════════════════════════╝
