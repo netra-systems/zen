@@ -1,48 +1,26 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-17 22:06:01
+**Generated:** 2025-09-17 22:06:20
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 1
+- **Total Tests:** 0
 - **Passed:** 0 (0.0%)
-- **Failed:** 1 (100.0%)
+- **Failed:** 0 (0.0%)
 - **Skipped:** 0
-- **Duration:** 14.28 seconds
+- **Duration:** 10.95 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
-### NORMAL Priority Tests
-
-| Test Name | Status | Duration | File |
-|-----------|--------|----------|------|
-| test_health_check | FAIL failed | 2.149s | test_1_websocket_events_staging.py |
-
-## Failed Tests Details
-
-### FAILED: test_health_check
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_1_websocket_events_staging.py
-- **Duration:** 2.149s
-- **Error:** tests/e2e/staging_test_base.py:328: in wrapper
-    return await func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests/e2e/staging/test_1_websocket_events_staging.py:54: in test_health_check
-    await self.verify_health()
-tests/e2e/staging_test_base.py:265: in verify_health
-    assert data["status"] == "healthy"
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   AssertionError...
-
 ## Pytest Output Format
 
 ```
-test_1_websocket_events_staging.py::test_health_check FAILED
 
 ==================================================
-0 passed, 1 failed in 14.28s
+0 passed, 0 failed in 10.95s
 ```
 
 ## Test Coverage Matrix

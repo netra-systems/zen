@@ -198,6 +198,14 @@ def create_websocket_bridge_with_context(
     )
 
 
+def get_websocket_bridge_factory() -> WebSocketBridgeFactory:
+    """Get a WebSocketBridgeFactory instance.
+    
+    This function provides backward compatibility and standard access to the factory.
+    """
+    return WebSocketBridgeFactory()
+
+
 # Export all public classes and functions
 __all__ = [
     "StandardWebSocketBridge",
@@ -207,6 +215,7 @@ __all__ = [
     "create_agent_bridge_adapter",
     "create_websocket_bridge_for_testing",
     "create_websocket_bridge_with_context",
+    "get_websocket_bridge_factory",
     # Re-export AgentWebSocketBridge for convenience
     "AgentWebSocketBridge",
     "create_agent_websocket_bridge",
