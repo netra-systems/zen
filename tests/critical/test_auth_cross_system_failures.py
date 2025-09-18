@@ -39,7 +39,7 @@ import jwt as pyjwt
 from fastapi.testclient import TestClient
 
     # Set test environment before any imports
-env.set("TESTING", "true", "test"))
+env.set("TESTING", "true", "test")
 env.set("ENVIRONMENT", "test", "test")
 env.set("SKIP_STARTUP_CHECKS", "true", "test")
 env.set("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only", "test")
