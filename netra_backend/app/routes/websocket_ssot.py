@@ -169,19 +169,18 @@ async def get_current_user_401(credentials: HTTPAuthorizationCredentials = Depen
     
     # Delegate to the real auth system
     from netra_backend.app.dependencies import get_request_scoped_db_session as get_db
-    # SSOT REMEDIATION: Use auth service directly instead of auth_integration wrapper
-    from auth_service.auth_core.core.token_validator import TokenValidator
+    # SSOT COMPLIANCE: Use auth integration module instead of direct auth service import
+    from netra_backend.app.auth_integration.auth import _validate_token_with_auth_service
     from netra_backend.app.services.user_service import user_service
-    
+
     try:
         # Get a database session
         db_gen = get_db()
         db = await db_gen.__anext__()
         try:
             token = credentials.credentials
-            # SSOT REMEDIATION: Use auth service directly instead of wrapper functions
-            token_validator = TokenValidator()
-            validation_result = token_validator.validate_token(token)
+            # SSOT COMPLIANCE: Use SSOT auth integration instead of direct service import
+            validation_result = await _validate_token_with_auth_service(token)
             
             # Extract user_id from validation result and get user from database
             user_id = validation_result.get('user_id')
