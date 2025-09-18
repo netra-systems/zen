@@ -44,7 +44,7 @@ def isolated_env():
 
 @pytest.fixture(scope=module)
 async def redis_client(isolated_env):
-    "Real Redis client for testing."
+    """Real Redis client for testing."""
     redis_url = isolated_env.get('REDIS_URL', 'redis://localhost:6381')
     client = redis.from_url(redis_url, decode_responses=True)
     
@@ -58,11 +58,9 @@ async def redis_client(isolated_env):
     await client.close()
 
 
-@pytest.fixture(scope=module)"
-@pytest.fixture(scope=module)""
-
+@pytest.fixture(scope=module)
 async def database_engine(isolated_env):
-    "Real database engine for testing."
+    """Real database engine for testing."""
     database_url = isolated_env.get('DATABASE_URL', 'postgresql+asyncpg://netra:netra@localhost:5434/netra_test')
     engine = create_async_engine(database_url, echo=False)
     
@@ -71,10 +69,9 @@ async def database_engine(isolated_env):
     await engine.dispose()
 
 
-@pytest.fixture(scope=module")"
+@pytest.fixture(scope=module)
 async def backend_client(isolated_env):
-    Real backend client for testing."
-    Real backend client for testing.""
+    """Real backend client for testing."""
 
     backend_url = isolated_env.get('BACKEND_URL', 'http://localhost:8000')
     client = BackendTestClient(backend_url)
