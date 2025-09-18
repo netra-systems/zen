@@ -82,9 +82,9 @@ class LegacyTestAgent(BaseAgent):
 class BaseAgentLifecycleManagementTests(SSotAsyncTestCase):
     """Test suite for agent lifecycle management and state transitions."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.test_agent = MockBaseAgent(name='TestLifecycleAgent', description='Agent for lifecycle testing', enable_reliability=True)
 
     async def asyncTearDown(self):
@@ -160,9 +160,9 @@ class BaseAgentLifecycleManagementTests(SSotAsyncTestCase):
 class BaseAgentUserIsolationTests(SSotAsyncTestCase):
     """Test suite for user context isolation and concurrent execution."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment."""
-        super().setUp()
+        super().setup_method(method)
 
     def create_test_context(self, user_id: str, thread_id: str=None, run_id: str=None) -> UserExecutionContext:
         """Create test user execution context."""
@@ -215,9 +215,9 @@ class BaseAgentUserIsolationTests(SSotAsyncTestCase):
 class BaseAgentWebSocketIntegrationTests(SSotAsyncTestCase):
     """Test suite for WebSocket integration and real-time event emission."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.test_agent = MockBaseAgent(name='WebSocketTestAgent')
         self.mock_bridge = Mock()
 
