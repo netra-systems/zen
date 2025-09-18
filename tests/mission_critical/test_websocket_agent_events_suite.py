@@ -776,12 +776,12 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         self.mock_execution_engine.execute_agent = AsyncMock(side_effect=mock_execute_agent_with_failure)
         
         # Act & Assert: Expect pipeline to fail on second step
-        with pytest.raises(RuntimeError, match=Simulated agent execution failure):
+        with pytest.raises(RuntimeError, match="Simulated agent execution failure"):
             await pipeline_executor.execute_pipeline(
                 pipeline=self.test_pipeline_steps,
                 user_context=self.test_user_context,
-                run_id=pipeline_run_001,"
-                context={"user_id: pipeline_user_001, thread_id: pipeline_thread_001},
+                run_id="pipeline_run_001",
+                context={"user_id": "pipeline_user_001", "thread_id": "pipeline_thread_001"},
                 db_session=self.mock_db_session
             )
         
