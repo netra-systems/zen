@@ -80,8 +80,7 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         "Send JSON message."
         if self._closed:
-            raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)""
+            raise RuntimeError(WebSocket is closed)"""
 
         self.messages_sent.append(message)
 

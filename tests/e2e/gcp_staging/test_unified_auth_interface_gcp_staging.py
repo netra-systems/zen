@@ -3,7 +3,7 @@ E2E GCP Staging Tests for UnifiedAuthInterface - FINAL PHASE
 Real GCP IAM, OAuth providers, and production security testing
 
 Business Value Protection:
-- $500K+ ARR: Secure authentication prevents unauthorized access to customer data
+- 500K+ ARR: Secure authentication prevents unauthorized access to customer data
 - $15K+ MRR per Enterprise: SSO integration and advanced security features
 - Platform trust: Multi-factor authentication and session security
 - Compliance: SOC2, GDPR, and enterprise security requirements
@@ -180,7 +180,7 @@ class UnifiedAuthInterfaceGCPStagingTests(SSotAsyncTestCase):
         """
         HIGH DIFFICULTY: Test advanced session management for enterprise security.
         
-        Business Value: $500K+ ARR protection - prevents session hijacking attacks.
+        Business Value: 500K+ ARR protection - prevents session hijacking attacks.
         Validates: Session isolation, concurrent session limits, device fingerprinting.
         """
         enterprise_user_email = 'enterprise.security@netrasystems.ai'

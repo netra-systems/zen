@@ -3,7 +3,7 @@ Unit tests to reproduce Issue 1184 async/await compatibility issues.
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise) - Mission Critical Infrastructure
-- Business Goal: Restore $500K+ ARR WebSocket chat functionality reliability
+- Business Goal: Restore 500K+ ARR WebSocket chat functionality reliability
 - Value Impact: Prevents WebSocket infrastructure failures that block Golden Path user flow
 - Strategic Impact: Ensures staging environment accurately validates production deployments
 
@@ -159,7 +159,7 @@ class TestWebSocketAsyncCompatibility(SSotAsyncTestCase):
         """
         MISSION CRITICAL: Validate WebSocket manager supports business value.
 
-        This test ensures the WebSocket infrastructure critical to $500K+ ARR is working.
+        This test ensures the WebSocket infrastructure critical to 500K+ ARR is working.
         """
         # Simulate business scenario - multiple users accessing chat simultaneously
         business_users = [

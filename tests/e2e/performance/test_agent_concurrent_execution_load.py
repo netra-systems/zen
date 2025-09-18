@@ -1,6 +1,6 @@
 """E2E Agent Performance Under Load Test - GCP Staging Environment
 
-Business Value: $500K+ ARR protection through concurrent agent execution validation
+Business Value: 500K+ ARR protection through concurrent agent execution validation
 Critical Coverage for Issue #872: Agent performance under load scenarios
 
 REQUIREMENTS:

@@ -1,7 +1,7 @@
 """Phase 1 E2E Tests: Execution Engine Factory Golden Path (Issue #884)
 
 CRITICAL BUSINESS VALUE: These tests reproduce Golden Path failures in execution
-engine factory patterns using staging GCP environment, protecting $500K+ ARR
+engine factory patterns using staging GCP environment, protecting 500K+ ARR
 functionality by validating end-to-end user flow from login to AI response.
 
 EXPECTED BEHAVIOR: All tests in this file should INITIALLY FAIL to demonstrate
@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 - Segment: All Segments (Golden Path is primary revenue driver)
 - Business Goal: Ensure end-to-end user flow works reliably
 - Value Impact: Prevents complete system failure, user abandonment
-- Strategic Impact: $500K+ ARR depends on Golden Path functionality
+- Strategic Impact: 500K+ ARR depends on Golden Path functionality
 
 Test Philosophy:
 - FAILING TESTS FIRST: These tests reproduce real Golden Path failures
@@ -174,7 +174,7 @@ class ExecutionEngineFactoryGoldenPath884Tests(SSotAsyncTestCase):
         golden_path_results['total_duration'] = (time.time() - golden_path_results['start_time']) * 1000
         self.golden_path_failures = golden_path_stage_failures
         self.assertTrue(golden_path_results['overall_success'], f"GOLDEN PATH FAILURE: Golden Path did not complete successfully. Completed {golden_path_results['successful_stages']}/{golden_path_results['total_stages']} stages ({golden_path_results['completion_rate']:.1%}). Stage failures: {golden_path_stage_failures}. Factory coordination prevents complete Golden Path execution.")
-        self.assertTrue(golden_path_results['business_value_delivered'], f'BUSINESS VALUE NOT DELIVERED: Golden Path did not deliver business value to user. AI response delivery failed. Results: {golden_path_results}. Factory issues prevent $500K+ ARR value delivery.')
+        self.assertTrue(golden_path_results['business_value_delivered'], f'BUSINESS VALUE NOT DELIVERED: Golden Path did not deliver business value to user. AI response delivery failed. Results: {golden_path_results}. Factory issues prevent 500K+ ARR value delivery.')
         self.assertEqual(len(golden_path_stage_failures), 0, f'GOLDEN PATH STAGE FAILURES: Found {len(golden_path_stage_failures)} stage failures during Golden Path execution. Failures: {golden_path_stage_failures}. Factory coordination issues cause Golden Path interruptions.')
 
     async def test_concurrent_golden_path_execution_scalability_failures(self):
@@ -322,21 +322,21 @@ class ExecutionEngineFactoryGoldenPath884Tests(SSotAsyncTestCase):
         except Exception as e:
             business_value_failures.append({'metric': 'business_value_test', 'failure_type': 'business_value_test_failure', 'error': str(e), 'description': 'Business value delivery test failed'})
         self.business_value_failures = business_value_failures
-        self.assertTrue(business_value_metrics['value_delivery_success'], f'BUSINESS VALUE NOT DELIVERED: Golden Path failed to deliver business value. Metrics: {business_value_metrics}. Factory coordination issues prevent $500K+ ARR value delivery.')
+        self.assertTrue(business_value_metrics['value_delivery_success'], f'BUSINESS VALUE NOT DELIVERED: Golden Path failed to deliver business value. Metrics: {business_value_metrics}. Factory coordination issues prevent 500K+ ARR value delivery.')
         self.assertEqual(len(business_value_failures), 0, f'BUSINESS VALUE DELIVERY FAILURES: Found {len(business_value_failures)} business value delivery failures. Failures: {business_value_failures}. Factory issues prevent meaningful business value delivery.')
 
     def _log_test_failure_details(self, test_name: str, failure_details: Dict[str, Any]):
         """Log detailed test failure information for analysis."""
         print(f'\n=== EXECUTION ENGINE FACTORY GOLDEN PATH FAILURE: {test_name} ===')
         print(f'Timestamp: {datetime.now().isoformat()}')
-        print(f'Business Impact: Complete Golden Path failure - $500K+ ARR at risk')
+        print(f'Business Impact: Complete Golden Path failure - 500K+ ARR at risk')
         print(f'Issue: #884 Execution Engine Factory Golden Path Failures')
         print('\nFailure Details:')
         for key, value in failure_details.items():
             print(f'  {key}: {value}')
         print('\nGolden Path Impact:')
         print('- User Journey: Complete user flow from login to AI response interrupted')
-        print('- Business Value: $500K+ ARR depends on Golden Path functionality')
+        print('- Business Value: 500K+ ARR depends on Golden Path functionality')
         print('- Customer Experience: User abandonment due to system failures')
         print('- Revenue Impact: Direct impact on conversion and retention')
         print('\nNext Steps:')

@@ -5,7 +5,7 @@ Comprehensive Chat Responsiveness Under Load Tests - Issue #976 Restoration
 
 Business Value Justification (BVJ):
     - Segment: ALL (Free/Early/Mid/Enterprise/Platform)
-- Business Goal: Validate $500K+ plus ARR chat functionality maintains responsiveness under concurrent load
+- Business Goal: Validate 500K+  ARR chat functionality maintains responsiveness under concurrent load
 - Value Impact: Ensures chat system delivers reliable AI responses even with multiple concurrent users
 - Revenue Impact: Protects core business functionality that drives customer retention and conversion
 
@@ -261,8 +261,7 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
         logger.info(f"  Messages: {total_successful_messages}/{total_messages} successful ({message_success_rate:.1%})"
         logger.info(f  Avg response time: {avg_response_time:.""2f""}s")"
         logger.info(f  User contexts created: {self.test_metrics['user_contexts_created']})
-        logger.info(f  WebSocket events: {self.test_metrics['websocket_events_received']})"
-        logger.info(f  WebSocket events: {self.test_metrics['websocket_events_received']})""
+        logger.info(f  WebSocket events: {self.test_metrics['websocket_events_received']})"""
 
 
         # Validate performance requirements

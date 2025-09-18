@@ -7,7 +7,7 @@ Golden Path integration tests.
 
 BVJ (Business Value Justification):
 - Segment: All customer segments (security affects everyone)
-- Business Goal: Enable Golden Path tests that protect $500K+ ARR
+- Business Goal: Enable Golden Path tests that protect 500K+ ARR
 - Value Impact: Prevents import errors blocking critical business flow validation
 - Revenue Impact: Security test availability protects user trust and compliance
 """

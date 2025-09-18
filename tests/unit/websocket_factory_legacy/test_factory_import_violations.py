@@ -7,7 +7,7 @@ After SSOT migration, this test must PASS to prove success.
 Business Value Justification (BVJ):
 - Segment: Platform/Infrastructure
 - Business Goal: Eliminate 2,615 import violations across 655 files
-- Value Impact: Ensures SSOT compliance for $500K+ ARR chat functionality
+- Value Impact: Ensures SSOT compliance for 500K+ ARR chat functionality
 - Revenue Impact: Prevents import chaos from breaking critical WebSocket events
 
 FAILING TEST STRATEGY:

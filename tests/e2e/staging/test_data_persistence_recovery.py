@@ -385,7 +385,7 @@ class DataPersistenceRecoveryTests:
         """
         Test 2: Agent Execution State Recovery After System Interruption
         
-        Business Value: $800K+ ARR protection - Tests that:
+        Business Value: 800K+ ARR protection - Tests that:
         1. Agent execution state is preserved during system interruptions
         2. Long-running agent workflows can be resumed after failures
         3. Partial results and intermediate state are not lost
@@ -615,7 +615,7 @@ class DataPersistenceRecoveryTests:
         """
         Test 3: Multi-User Concurrent Data Integrity with Transaction Isolation
         
-        Business Value: $600K+ ARR protection - Tests that:
+        Business Value: 600K+ ARR protection - Tests that:
         1. Multiple users can operate concurrently without data corruption
         2. Transaction isolation prevents data race conditions
         3. Each user's data remains isolated and consistent

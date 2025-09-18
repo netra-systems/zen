@@ -7,7 +7,7 @@ Targets adapter pattern, event delegation, and agent-websocket coordination.
 Business Value Justification:
 - Segment: Platform/Internal
 - Business Goal: Development Velocity & Risk Reduction
-- Value Impact: Protects $500K+ ARR WebSocket event adapter functionality
+- Value Impact: Protects 500K+ ARR WebSocket event adapter functionality
 - Strategic Impact: Comprehensive coverage for agent WebSocket event emission
 
 Coverage Focus:

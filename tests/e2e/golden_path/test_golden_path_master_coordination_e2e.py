@@ -4,7 +4,7 @@ Test Golden Path Master Coordination E2E
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure complete Golden Path master coordination maintains system excellence
-- Value Impact: Validates end-to-end coordination preserves login->AI response flow for $500K+ ARR
+- Value Impact: Validates end-to-end coordination preserves login->AI response flow for 500K+ ARR
 - Strategic Impact: Complete platform coordination validation ensuring all business value delivery
 
 Issue #1176: Master Plan Golden Path validation - Complete E2E master coordination
@@ -248,7 +248,7 @@ class GoldenPathMasterCoordinationE2ETests(BaseE2ETest):
     @pytest.mark.real_services
     async def test_golden_path_business_value_master_coordination(self):
         """Test Golden Path master coordination maintains business value delivery excellence."""
-        # Business value coordination metrics for $500K+ ARR protection
+        # Business value coordination metrics for 500K+ ARR protection
         business_value_tests = [
             'substantive_ai_response_quality',
             'user_workflow_completion_rate',

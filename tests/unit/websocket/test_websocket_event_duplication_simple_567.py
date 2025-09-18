@@ -4,7 +4,7 @@ Simple Unit Test for Issue #567: WebSocket Event Duplication Prevention
 Simplified unit tests that work with current test framework to validate
 WebSocket event duplication prevention patterns.
 
-Business Impact: Protects $500K+ ARR by ensuring chat functionality reliability
+Business Impact: Protects 500K+ ARR by ensuring chat functionality reliability
 """
 
 import pytest

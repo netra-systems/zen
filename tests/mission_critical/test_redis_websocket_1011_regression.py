@@ -6,7 +6,7 @@ BUSINESS VALUE JUSTIFICATION:
     - Segment: Platform/Internal
 - Business Goal: Chat Functionality Reliability (90% of platform value)
 - Value Impact: Prevents WebSocket 1011 errors that break real-time chat
-- Strategic Impact: Protects $500K+ plus ARR by ensuring reliable WebSocket connections
+- Strategic Impact: Protects 500K+  ARR by ensuring reliable WebSocket connections
 
 This test suite specifically targets the WebSocket 1011 error that was caused by:
     1. Competing Redis managers creating connection conflicts
@@ -107,8 +107,7 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
                         pass
             
         except Exception as e:
-            logger.debug(fRegression cleanup error (non-critical): {e})"
-            logger.debug(fRegression cleanup error (non-critical): {e})""
+            logger.debug(fRegression cleanup error (non-critical): {e})"""
 
         
         await super().asyncTearDown()
@@ -357,8 +356,7 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
                 return {user_id: user_id, success: True}
                 
             except Exception as e:
-                logger.error(fUser {user_id} WebSocket session failed: {e})"
-                logger.error(fUser {user_id} WebSocket session failed: {e})"
+                logger.error(fUser {user_id} WebSocket session failed: {e})""
                 return {"user_id: user_id, success: False, error: str(e)}"
         
         # Run all user sessions concurrently

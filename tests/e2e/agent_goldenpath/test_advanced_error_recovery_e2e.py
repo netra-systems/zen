@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Segment: All Users (System Reliability affects all segments)
 - Business Goal: Platform Reliability & User Trust through Robust Error Handling
 - Value Impact: Validates system resilience critical for maintaining user confidence
-- Strategic Impact: Poor error recovery = user frustration = churn = $500K+ ARR loss
+- Strategic Impact: Poor error recovery = user frustration = churn = 500K+ ARR loss
 
 Test Strategy:
 - REAL SERVICES: Staging GCP Cloud Run environment only (NO Docker)

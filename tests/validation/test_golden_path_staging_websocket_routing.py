@@ -5,7 +5,7 @@ This test validates that the CanonicalMessageRouter SSOT implementation
 works correctly on the staging GCP environment for the Golden Path user flow.
 
 CRITICAL BUSINESS VALUE:
-- Validates $500K+ ARR Golden Path chat functionality on real staging infrastructure
+- Validates 500K+ ARR Golden Path chat functionality on real staging infrastructure
 - Ensures message routing works end-to-end with real WebSocket connections
 - Confirms SSOT consolidation works in production-like environment
 
@@ -376,7 +376,7 @@ def test_canonical_message_router_staging_compatibility():
     )
 
     # Test SSOT info contains staging-relevant information
-    assert SSOT_INFO['business_value'] == '$500K+ ARR Golden Path protection'
+    assert SSOT_INFO['business_value'] == '500K+ ARR Golden Path protection'
     assert SSOT_INFO['canonical_class'] == 'CanonicalMessageRouter'
 
     # Test router creation works

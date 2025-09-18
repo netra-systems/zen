@@ -10,7 +10,7 @@ PURPOSE:
 - Protects against regression back to deprecated patterns
 
 BUSINESS IMPACT:
-- Revenue Protection: $500K+ ARR Golden Path WebSocket functionality
+- Revenue Protection: 500K+ ARR Golden Path WebSocket functionality
 - Security: Prevents multi-user context contamination via factory singletons
 - Development Velocity: Ensures SSOT compliance for reliable testing
 

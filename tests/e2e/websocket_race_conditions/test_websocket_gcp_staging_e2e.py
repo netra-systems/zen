@@ -7,7 +7,7 @@ These tests validate WebSocket behavior in actual GCP Cloud Run staging environm
 
 Business Value Justification:
 1. Segment: Platform/Internal - Chat is King staging environment protection
-2. Business Goal: Prevent $500K+ ARR loss from staging WebSocket failures affecting production confidence
+2. Business Goal: Prevent 500K+ ARR loss from staging WebSocket failures affecting production confidence
 3. Value Impact: Validates mission-critical chat functionality works in production-like GCP environment
 4. Strategic Impact: Ensures staging environment mirrors production WebSocket behavior
 

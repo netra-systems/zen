@@ -4,7 +4,7 @@ Mission Critical Tests for SingletonToFactoryBridge Removal
 
 Business Value Justification:
 - Segment: Platform/Infrastructure
-- Business Goal: Safe legacy code removal without breaking $500K+ ARR chat functionality
+- Business Goal: Safe legacy code removal without breaking 500K+ ARR chat functionality
 - Value Impact: Validates bridge removal doesn't break WebSocket or agent execution
 - Strategic Impact: Enables cleanup of unused legacy code while protecting Golden Path
 
@@ -225,7 +225,7 @@ class TestSingletonBridgeRemovalValidation(SSotBaseTestCase):
         """
         CRITICAL: Test that user-scoped factory patterns work without the bridge.
 
-        This validates multi-user isolation (protecting $500K+ ARR) works without the bridge.
+        This validates multi-user isolation (protecting 500K+ ARR) works without the bridge.
         """
         try:
             from netra_backend.app.core.user_factory_coordinator import get_user_factory_coordinator

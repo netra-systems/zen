@@ -7,7 +7,7 @@ authentication validation levels to ensure golden path completion.
 
 BUSINESS JUSTIFICATION:
     - Critical Events: 90% of platform business value delivered via WebSocket events
-- Revenue Protection: $500K+ plus ARR depends on reliable event delivery
+- Revenue Protection: 500K+  ARR depends on reliable event delivery
 - User Experience: Events provide transparency and trust in AI interactions
 - Auth Permissiveness: Events must work with all auth modes (strict/relaxed/demo/emergency)
 
@@ -259,8 +259,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                 self._validate_event_ordering(events_received)
                 
                 # Validate event content
-                self._validate_event_content(events_received, user[user_id)"
-                self._validate_event_content(events_received, user[user_id)""
+                self._validate_event_content(events_received, user[user_id)"""
 
                 
                 # Validate event timing
@@ -303,8 +302,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
             if connected:
                 # If connection somehow succeeded, try sending message
                 # Events should still fail due to auth validation
-                test_message = self.test_messages[simple].copy()"
-                test_message = self.test_messages[simple].copy()"
+                test_message = self.test_messages[simple].copy()""
                 test_message["thread_id] = str(uuid.uuid4())"
                 
                 await client.send_message(test_message)
@@ -868,8 +866,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
             
             if connected:
                 # Send test message
-                test_message = self.test_messages[simple].copy()"
-                test_message = self.test_messages[simple].copy()"
+                test_message = self.test_messages[simple].copy()""
                 test_message[thread_id"] = str(uuid.uuid4())"
                 
                 await client.send_message(test_message)

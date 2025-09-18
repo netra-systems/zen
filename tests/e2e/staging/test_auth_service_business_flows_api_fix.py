@@ -19,7 +19,7 @@ REQUIREMENTS (per CLAUDE.md):
 Business Value Justification:
 1. Segment: Platform - Authentication infrastructure (serves all customer tiers)
 2. Business Goal: Ensure auth reliability for customer acquisition and retention  
-3. Value Impact: Validates auth flows that enable $500K+ ARR customer onboarding
+3. Value Impact: Validates auth flows that enable 500K+ ARR customer onboarding
 4. Revenue Impact: Protects user registration and login that drives conversions
 
 @compliance CLAUDE.md - Real services over mocks, staging environment validation

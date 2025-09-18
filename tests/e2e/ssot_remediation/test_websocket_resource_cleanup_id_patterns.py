@@ -5,7 +5,7 @@ This test validates WebSocket connections cleanup with consistent ID patterns,
 testing thread_id/run_id pattern consistency to prevent 1011 errors.
 
 Business Value:
-- Critical for $500K+ ARR protection - prevents WebSocket 1011 connection errors
+- Critical for 500K+ ARR protection - prevents WebSocket 1011 connection errors
 - Ensures Golden Path WebSocket flow works reliably
 - Validates resource cleanup doesn't break due to ID pattern mismatches
 

@@ -8,7 +8,7 @@ Approach: Mock auth services, test real coordination patterns
 MISSION CRITICAL: These tests validate the complete authentication flow that enables
 the Golden Path user workflow (Login -> WebSocket -> AI Response) without Docker.
 
-Business Impact: Authentication enables $500K+ ARR user access to AI chat functionality
+Business Impact: Authentication enables 500K+ ARR user access to AI chat functionality
 """
 import pytest
 import asyncio

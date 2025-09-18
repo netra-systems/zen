@@ -10,7 +10,7 @@ Business Impact:
 - Complete Golden Path user flow broken
 - Users cannot login and get AI responses
 - 90% of platform value non-functional
-- $500K+ ARR dependency completely broken
+- 500K+ ARR dependency completely broken
 - Real-time chat experience destroyed
 
 Test Focus:

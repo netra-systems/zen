@@ -3,7 +3,7 @@
 AgentRegistry SSOT Compliance Validation Tests - Issue #1080
 
 MISSION: Validate AgentRegistry SSOT compliance after fixes
-Business Impact: $500K+ plus ARR Golden Path restoration
+Business Impact: 500K+  ARR Golden Path restoration
 
 These tests validate the FIXED state after SSOT consolidation.
 EXPECTED INITIAL RESULT: ALL TESTS FAIL (waiting for fixes)
@@ -432,11 +432,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
                 compliance_details.append(CHECK WebSocket integration present)
                 self.record_metric(websocket_integration_check, PASS")"
             else:
-                compliance_details.append("✗ Missing WebSocket integration)"
-                self.record_metric(websocket_integration_check, FAIL)
-                
-        except Exception as e:
-            compliance_details.append(f✗ WebSocket integration check failed: {e}")"
+                compliance_details.append("✗ Missing WebSocket integration)"")"
             self.record_metric(websocket_integration_check, FAIL)
         
         # Calculate compliance percentage

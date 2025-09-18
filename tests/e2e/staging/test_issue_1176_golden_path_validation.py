@@ -15,7 +15,7 @@ Tests are designed to FAIL when Golden Path is broken, not show false success.
 Business Value Justification:
 - Segment: All Users (Free, Early, Mid, Enterprise)
 - Business Goal: Golden Path Protection & Revenue Protection
-- Value Impact: Ensures complete user journey works for $500K+ ARR
+- Value Impact: Ensures complete user journey works for 500K+ ARR
 - Strategic Impact: Validates end-to-end system integrity protecting business value
 """
 

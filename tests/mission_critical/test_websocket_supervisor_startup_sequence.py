@@ -2,7 +2,7 @@
 
 MISSION CRITICAL TESTS: WebSocket Supervisor Startup Sequence - 1011 Error Prevention
 
-MISSION CRITICAL STATUS: These tests protect $500K+ plus ARR by validating the core
+MISSION CRITICAL STATUS: These tests protect 500K+  ARR by validating the core
 WebSocket supervisor startup sequence that enables chat functionality (90% of platform value).
 
 ROOT CAUSE PROTECTION: Prevents WebSocket 1011 errors in GCP Cloud Run by ensuring
@@ -12,7 +12,7 @@ This addresses the startup race condition that breaks chat functionality.
 BUSINESS IMPACT VALIDATION:
     - Segment: Platform/Revenue - Core Chat Infrastructure  
 - Business Goal: Revenue Protection & Platform Stability
-- Value Impact: Protects $500K+ plus ARR dependent on reliable AI chat functionality
+- Value Impact: Protects 500K+  ARR dependent on reliable AI chat functionality
 - Strategic Impact: Ensures WebSocket-based chat works reliably in production GCP
 
 CRITICAL TEST REQUIREMENTS:
@@ -147,28 +147,7 @@ class MissionCriticalWebSocketTester:
             # Track 1011 errors specifically (the race condition we're preventing)'
             if e.code == 1011:
                 self.error_1011_count += 1
-                self.logger.error(f"WebSocket 1011 error detected - race condition failure: {e})"
-            
-        except Exception as e:
-            self.failed_connections += 1
-            connection_result['error_message'] = str(e)
-            connection_result['error_code'] = getattr(e, 'code', 'unknown')
-        
-        self.connection_attempts.append(connection_result)
-        return connection_result
-    
-    async def stress_test_connections(
-        self, 
-        connection_count: int = 10,
-        concurrent_connections: int = 3,
-        delay_between_batches: float = 1.0
-    ) -> Dict[str, Any]:
-        
-        Stress test WebSocket connections to detect race conditions.
-        
-        This test is designed to trigger the startup race condition by
-        attempting connections during various startup phases.
-""
+                self.logger.error(f"WebSocket 1011 error detected - race condition failure: {e})"""
         stress_test_results = {
             'total_attempted': 0,
             'total_successful': 0,
@@ -485,8 +464,7 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
         
         # Skip WebSocket tests if startup failed (infrastructure issue)
         if not startup_success:
-            self.skipTest(Startup failed - cannot test WebSocket reliability)"
-            self.skipTest(Startup failed - cannot test WebSocket reliability)""
+            self.skipTest(Startup failed - cannot test WebSocket reliability)"""
 
         
         # Validate WebSocket readiness

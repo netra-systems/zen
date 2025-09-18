@@ -120,7 +120,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
             (Free Tier ($0 ARR), free_tier_user),
             (Mid Tier ($50K ARR), mid_tier_user), "
             (Mid Tier ($50K ARR), mid_tier_user), "
-            ("Enterprise ($750K+ ARR), enterprise_user),"
+            ("Enterprise (750K+ ARR), enterprise_user),"
             (Fortune 500 ($1.""5M"" ARR), fortune_500_user)
         ]
         

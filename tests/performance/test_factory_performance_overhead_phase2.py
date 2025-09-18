@@ -8,7 +8,7 @@ justification for factory removal vs preservation decisions. Essential factories
 with acceptable overhead should be preserved, over-engineered factories with
 high overhead should be removed.
 
-Business Impact: $500K+ ARR protection through performance optimization
+Business Impact: 500K+ ARR protection through performance optimization
 Performance Goal: >15% improvement in object creation speed
 
 These tests measure actual performance to guide cleanup decisions.
@@ -523,7 +523,7 @@ class FactoryPerformanceOverheadPhase2Tests(SSotBaseTestCase):
             user_isolation_success_rate = (user_isolation_success / user_isolation_requested) * 100
 
             print(f"\n💼 BUSINESS CRITICAL ANALYSIS:")
-            print(f"  🛡️  User Isolation Factory (CRITICAL for $500K+ ARR):")
+            print(f"  🛡️  User Isolation Factory (CRITICAL for 500K+ ARR):")
             print(f"     CHECK Success rate: {user_isolation_success_rate:.1f}%")
             print(f"     🎯 Business requirement: ≥95% success rate")
 
@@ -546,7 +546,7 @@ class FactoryPerformanceOverheadPhase2Tests(SSotBaseTestCase):
             user_isolation_success_rate,
             95.0,
             f"CHECK USER ISOLATION CONCURRENT PERFORMANCE: User isolation factory achieved {user_isolation_success_rate:.1f}% success rate. "
-            f"Required ≥95% for business-critical multi-user functionality ($500K+ ARR dependency)."
+            f"Required ≥95% for business-critical multi-user functionality (500K+ ARR dependency)."
         )
 
     def test_04_factory_vs_direct_performance_comparison_summary(self):

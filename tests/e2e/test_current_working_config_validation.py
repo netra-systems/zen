@@ -241,10 +241,7 @@ print("")
 print("")
 
 if result.get('requires_auth'):
-    print(" PASS:  WebSocket endpoint requires authentication (expected))"
-
-if result.get('connection_time_ms'):
-    print("")
+    print(" PASS:  WebSocket endpoint requires authentication (expected))""")
 
 if result['error']:
     print("")
@@ -254,9 +251,7 @@ if result['error']:
 if not result['endpoint_accessible'] and result['error']:
                                                                                                             # If there's a connection error, it might be because services aren't running
 if "connection" in result['error'].lower() or "endpoint not accessible in result['error'].lower():"
-    print(" WARNING: [U+FE0F]  WebSocket endpoint not accessible - this may indicate backend service issues)"
-                                                                                                                # Don't fail the test if services aren't fully running yet
-pytest.skip("")
+    print(" WARNING: [U+FE0F]  WebSocket endpoint not accessible - this may indicate backend service issues)""")
 else:
                                                                                                                     # Other errors might indicate real issues
     print("")

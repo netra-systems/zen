@@ -5,7 +5,7 @@ This test module demonstrates critical WebSocket event delivery failures caused
 by AgentRegistry SSOT violations that prevent the 5 mission-critical agent events
 from being delivered to users, blocking the Golden Path chat functionality.
 
-Business Value: Protects $500K+ ARR by identifying registry conflicts that prevent
+Business Value: Protects 500K+ ARR by identifying registry conflicts that prevent
 users from receiving real-time agent progress updates (agent_started, agent_thinking,
 tool_executing, tool_completed, agent_completed) that are essential for chat UX.
 
@@ -120,7 +120,7 @@ class AgentRegistryWebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
                             details += ', '
                         details += f"notification failed ({failure['notification_error']})"
                     failure_details.append(details)
-                self.fail(f"CRITICAL WEBSOCKET INTEGRATION FAILURE: {len(integration_failures)} registry types cannot properly integrate with WebSocket managers. This prevents all 5 critical agent events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed) from being delivered to users, completely blocking $500K+ ARR Golden Path chat functionality. Integration failures: {'; '.join(failure_details)}")
+                self.fail(f"CRITICAL WEBSOCKET INTEGRATION FAILURE: {len(integration_failures)} registry types cannot properly integrate with WebSocket managers. This prevents all 5 critical agent events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed) from being delivered to users, completely blocking 500K+ ARR Golden Path chat functionality. Integration failures: {'; '.join(failure_details)}")
         except Exception as e:
             self.fail(f'Unexpected error during WebSocket integration testing: {e}')
         logger.info('WebSocket manager integration successful - event delivery capability confirmed')
@@ -199,7 +199,7 @@ class AgentRegistryWebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
                     else:
                         summary = f"{failure['registry']}: WebSocket setup failed, no events delivered"
                     failure_summary.append(summary)
-                self.fail(f"CRITICAL AGENT EVENT DELIVERY FAILURE: {len(event_delivery_failures)} registry types cannot deliver all 5 critical WebSocket events required for Golden Path chat functionality. Users will not see real-time agent progress, causing poor UX and lost confidence in the $500K+ ARR chat system. Missing events block essential user feedback. Event delivery failures: {'; '.join(failure_summary)}")
+                self.fail(f"CRITICAL AGENT EVENT DELIVERY FAILURE: {len(event_delivery_failures)} registry types cannot deliver all 5 critical WebSocket events required for Golden Path chat functionality. Users will not see real-time agent progress, causing poor UX and lost confidence in the 500K+ ARR chat system. Missing events block essential user feedback. Event delivery failures: {'; '.join(failure_summary)}")
         except Exception as e:
             self.fail(f'Unexpected error during critical event testing: {e}')
         logger.info('All 5 critical WebSocket events delivered successfully - Golden Path functionality enabled')
@@ -292,7 +292,7 @@ class AgentRegistryWebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
                     else:
                         summary = f"{inconsistency['registry']}: {inconsistency['issue_type']}"
                     inconsistency_summary.append(summary)
-                self.fail(f"CRITICAL EVENT TIMING INCONSISTENCY: {len(timing_inconsistencies)} timing issues detected. Different registry implementations deliver events in inconsistent order or timing, confusing users about agent progress and degrading the Golden Path chat experience. Consistent event delivery is essential for $500K+ ARR chat functionality. Timing issues: {'; '.join(inconsistency_summary)}")
+                self.fail(f"CRITICAL EVENT TIMING INCONSISTENCY: {len(timing_inconsistencies)} timing issues detected. Different registry implementations deliver events in inconsistent order or timing, confusing users about agent progress and degrading the Golden Path chat experience. Consistent event delivery is essential for 500K+ ARR chat functionality. Timing issues: {'; '.join(inconsistency_summary)}")
         except Exception as e:
             self.fail(f'Unexpected error during event timing testing: {e}')
         logger.info('Event timing and ordering consistent across registries - reliable Golden Path UX enabled')
@@ -392,7 +392,7 @@ class AgentRegistryWebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
                     issue_desc = ', '.join(failure['issues'])
                     summary = f"{failure['registry']}: {issue_desc} (events: {failure['events_before_drop']} before drop, {failure['events_after_reconnect']} after reconnect)"
                     failure_summary.append(summary)
-                self.fail(f"CRITICAL WEBSOCKET CONNECTION STATE FAILURE: {len(connection_state_failures)} registry types cannot properly manage WebSocket connection state. This causes critical agent events to be lost when connections drop or reconnect, leaving users without feedback about agent progress. Reliable connection state management is essential for $500K+ ARR Golden Path chat functionality. Connection failures: {'; '.join(failure_summary)}")
+                self.fail(f"CRITICAL WEBSOCKET CONNECTION STATE FAILURE: {len(connection_state_failures)} registry types cannot properly manage WebSocket connection state. This causes critical agent events to be lost when connections drop or reconnect, leaving users without feedback about agent progress. Reliable connection state management is essential for 500K+ ARR Golden Path chat functionality. Connection failures: {'; '.join(failure_summary)}")
         except Exception as e:
             self.fail(f'Unexpected error during connection state testing: {e}')
         logger.info('WebSocket connection state properly managed - reliable event delivery ensured')

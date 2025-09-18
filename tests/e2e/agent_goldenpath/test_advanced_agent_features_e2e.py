@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Segment: Mid-tier and Enterprise Users (Premium Features)
 - Business Goal: Feature Differentiation & Premium Value through Advanced AI Capabilities
 - Value Impact: Validates advanced features that justify premium pricing and enterprise adoption
-- Strategic Impact: Advanced features = competitive advantage = premium revenue = $500K+ ARR
+- Strategic Impact: Advanced features = competitive advantage = premium revenue = 500K+ ARR
 
 Test Strategy:
 - REAL SERVICES: Staging GCP Cloud Run environment only (NO Docker)

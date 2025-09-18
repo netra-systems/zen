@@ -171,10 +171,7 @@ class TestTokenValidationComprehensive:
 
         # Note: We can't fully test token extraction without a real WebSocket connection,'
         # but we've validated the integration points exist'
-        print("PASS: WebSocket authenticator module loaded and configured)"
-
-        except ImportError as e:
-        print("")
+        print("PASS: WebSocket authenticator module loaded and configured)""")
 
     def test_environment_based_validation(self):
         """Test environment-based token validation."""

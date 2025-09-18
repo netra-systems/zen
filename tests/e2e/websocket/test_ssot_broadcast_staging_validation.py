@@ -3,7 +3,7 @@
 Business Value Justification (BVJ):
 - Segment: Enterprise/Platform (Production-ready validation)
 - Business Goal: Golden Path reliability in staging environment
-- Value Impact: Validates $500K+ ARR Golden Path works with SSOT consolidation
+- Value Impact: Validates 500K+ ARR Golden Path works with SSOT consolidation
 - Strategic Impact: Final validation before production SSOT deployment
 
 E2E staging tests for SSOT WebSocket broadcast consolidation:

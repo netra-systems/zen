@@ -2,7 +2,7 @@
 Factory Complexity Analysis - Phase 2 Validation
 Analyzes factory implementations for unnecessary complexity.
 
-Business Impact: $500K+ ARR protection through architectural simplification
+Business Impact: 500K+ ARR protection through architectural simplification
 Created: 2025-09-15
 Purpose: Identify complex factories that exceed reasonable size/complexity limits
 """

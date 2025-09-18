@@ -7,7 +7,7 @@ WebSocket event routing SSOT violations. After consolidation, all tests should P
 
 Business Value Justification:
 - Segment: Platform Infrastructure
-- Business Goal: Chat Functionality Reliability ($500K+ ARR protection)
+- Business Goal: Chat Functionality Reliability (500K+ ARR protection)
 - Value Impact: Ensure all 5 critical WebSocket events work consistently
 - Strategic Impact: User experience consistency and system stability
 

@@ -3,7 +3,7 @@ Test WebSocket Manager Canonical Interface Validation (Issue #996)
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise) - Golden Path Infrastructure
-- Business Goal: Ensure consistent WebSocket Manager interface to protect $500K+ ARR
+- Business Goal: Ensure consistent WebSocket Manager interface to protect 500K+ ARR
 - Value Impact: Prevents interface fragmentation and runtime errors in Golden Path
 - Revenue Impact: Guarantees reliable chat functionality through consistent API
 

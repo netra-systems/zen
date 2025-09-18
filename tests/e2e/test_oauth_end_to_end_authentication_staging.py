@@ -143,14 +143,7 @@ class OAuthEndToEndAuthenticationStagingTests(SSotAsyncTestCase):
                 assert response is not None, "WebSocket must respond to authenticated message"
                 
             except asyncio.TimeoutError:
-                print(" WARNING: [U+FE0F] WebSocket response timeout (may be acceptable if server doesn't respond to ping)")
-                # Not failing here as some WebSocket implementations don't respond to ping
-            
-            await websocket.close()
-            
-        except Exception as e:
-            # If WebSocket fails, provide detailed debugging info
-            print(f" FAIL:  WebSocket connection failed: {e}")
+                print(" WARNING: [U+FE0F] WebSocket response timeout (may be acceptable if server doesn't respond to ping)"" FAIL:  WebSocket connection failed: {e}")
             print(f" SEARCH:  WebSocket URL: {self.staging_config.websocket_url}")
             print(f"[U+1F511] Auth token provided: {bool(access_token)}")
             print(f"[U+1F4CB] Headers sent: {list(self.auth_helper.get_websocket_headers(access_token).keys())}")
@@ -303,10 +296,7 @@ class OAuthEndToEndAuthenticationStagingTests(SSotAsyncTestCase):
             ws_successes = sum(1 for r in ws_results if not isinstance(r, Exception) and r.get("websocket_success", False))
             ws_success_rate = ws_successes / len(ws_tasks) if ws_tasks else 0
             
-            print(f"[U+1F50C] WebSocket concurrent connections: {ws_success_rate:.1%} success rate ({ws_successes}/{len(ws_tasks)})")
-            
-            # WebSocket success rate requirement is lower due to staging environment limitations
-            assert ws_success_rate >= 0.5, f"WebSocket concurrent connection success rate too low: {ws_success_rate:.1%}"
+            print(f"[U+1F50C] WebSocket concurrent connections: {ws_success_rate:.1%} success rate ({ws_successes}/{len(ws_tasks)})""WebSocket concurrent connection success rate too low: {ws_success_rate:.1%}"
     
     @pytest.mark.e2e
     @pytest.mark.staging

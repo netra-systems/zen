@@ -2,7 +2,7 @@
 """
 Golden Path Phase 2 Regression Prevention Test
 
-MISSION CRITICAL: Protect $500K+ ARR during MessageRouter proxy removal.
+MISSION CRITICAL: Protect 500K+ ARR during MessageRouter proxy removal.
 This E2E test validates the complete Golden Path user flow to prevent regression
 during SSOT MessageRouter Phase 2 migration.
 
@@ -18,7 +18,7 @@ TEST STRATEGY:
 - After Phase 2: Test passes without proxy pattern
 - Failure indicates regression requiring immediate fix
 
-Business Value: $500K+ ARR - Core chat functionality protection
+Business Value: 500K+ ARR - Core chat functionality protection
 Environment: Staging (real services, no Docker dependency)
 Authentication: Real JWT/OAuth (no mocks per CLAUDE.md)
 """
@@ -163,7 +163,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
     """
     E2E test suite for Golden Path Phase 2 regression prevention.
     
-    CRITICAL: This test protects $500K+ ARR during MessageRouter proxy removal.
+    CRITICAL: This test protects 500K+ ARR during MessageRouter proxy removal.
     """
     
     def setup_method(self, method):
@@ -341,7 +341,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
         """
         Test complete Golden Path user flow: Login -> Send Message -> Agent Response -> User Receives Result.
         
-        CRITICAL: This validates the core $500K+ ARR user journey.
+        CRITICAL: This validates the core 500K+ ARR user journey.
         Must pass both before and after MessageRouter proxy removal.
         """
         # Arrange - Create unique test user
@@ -398,10 +398,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
             assert len(missing_events) == 0, f"Missing critical WebSocket events: {missing_events}"
             assert len(events) >= 5, f"Expected at least 5 events, got {len(events)}"
             
-            print(f"CHECK All critical WebSocket events received ({len(events)} total)")
-            
-            # Step 4: Validate agent response quality
-            print("[STEP 4] Validating agent response quality...")
+            print(f"CHECK All critical WebSocket events received ({len(events)} total)""[STEP 4] Validating agent response quality...")
             agent_response = None
             
             # Find the final agent response

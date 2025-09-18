@@ -4,14 +4,14 @@ E2E Staging Tests for Issue #1181 Business Value Protection
 
 Business Value Justification:
 - Segment: All Segments (Free, Early, Mid, Enterprise)
-- Business Goal: $500K+ ARR Protection & Revenue Continuity
+- Business Goal: 500K+ ARR Protection & Revenue Continuity
 - Value Impact: Ensures MessageRouter consolidation doesn't break revenue-generating features
 - Strategic Impact: Validates that all business-critical workflows continue to work
 
 CRITICAL BUSINESS VALUE PROTECTION:
 Issue #1181 MessageRouter consolidation must not impact the revenue-generating
 capabilities of the platform. These E2E tests validate that all business-critical
-workflows continue to function, protecting the $500K+ ARR.
+workflows continue to function, protecting the 500K+ ARR.
 
 Tests verify user onboarding, chat functionality, agent interactions, tool executions,
 and subscription workflows that directly impact customer satisfaction and retention.

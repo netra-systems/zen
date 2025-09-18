@@ -4,7 +4,7 @@ Test WebSocket Manager Setup Integration Gaps - Issue #991 Phase 1
 This test module creates FAILING integration tests to prove WebSocket manager
 setup gaps exist in real service integration scenarios.
 
-Business Value: Protects $500K+ ARR by identifying WebSocket integration gaps
+Business Value: Protects 500K+ ARR by identifying WebSocket integration gaps
 that prevent real-time agent events in the Golden Path user flow.
 
 Test Category: Integration (requires real services)
@@ -153,7 +153,7 @@ class WebSocketManagerSetupGapsTests(SSotAsyncTestCase):
                 self.fail(
                     f"CRITICAL WEBSOCKET INTEGRATION FAILURE CONFIRMED: WebSocket manager integration "
                     f"with agent registry has critical gaps that prevent Golden Path real-time events. "
-                    f"Integration failures: {integration_failures}. This blocks the $500K+ ARR chat "
+                    f"Integration failures: {integration_failures}. This blocks the 500K+ ARR chat "
                     f"functionality that depends on real-time agent progress updates."
                 )
                 
@@ -293,7 +293,7 @@ class WebSocketManagerSetupGapsTests(SSotAsyncTestCase):
                     f"CRITICAL USER ISOLATION FAILURE CONFIRMED: WebSocket event isolation per user "
                     f"has critical gaps that allow cross-user event contamination. This creates "
                     f"security vulnerabilities and privacy violations. Isolation failures: {isolation_failures}. "
-                    f"This blocks enterprise deployment of the $500K+ ARR platform."
+                    f"This blocks enterprise deployment of the 500K+ ARR platform."
                 )
                 
         except ImportError as e:
@@ -436,7 +436,7 @@ class WebSocketManagerSetupGapsTests(SSotAsyncTestCase):
                     f"registry integration is incomplete. Required Golden Path events are not being "
                     f"delivered, which prevents users from seeing real-time agent progress. "
                     f"Event delivery failures: {event_delivery_failures}. This blocks the core "
-                    f"real-time chat experience that drives $500K+ ARR business value."
+                    f"real-time chat experience that drives 500K+ ARR business value."
                 )
                 
         except ImportError as e:

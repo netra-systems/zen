@@ -2,7 +2,7 @@
 Mission Critical User Isolation Violation Tests for Issue #885
 
 These tests are designed to FAIL and prove user isolation violations exist.
-They validate the $500K+ ARR dependency on secure multi-user WebSocket execution.
+They validate the 500K+ ARR dependency on secure multi-user WebSocket execution.
 
 Business Value: Proves security vulnerabilities in user isolation
 Expected Result: ALL TESTS SHOULD FAIL proving violations exist
@@ -421,7 +421,7 @@ class TestUserIsolationViolations(SSotAsyncTestCase):
                 logger.error(f"{i:2d}. {violation}")
             logger.error("="*80)
             logger.error(f"TOTAL SECURITY VIOLATIONS: {len(self.security_violations)}")
-            logger.error("THIS REPRESENTS A CRITICAL SECURITY RISK FOR $500K+ ARR")
+            logger.error("THIS REPRESENTS A CRITICAL SECURITY RISK FOR 500K+ ARR")
             logger.error("="*80)
 
         # Clean up test contexts

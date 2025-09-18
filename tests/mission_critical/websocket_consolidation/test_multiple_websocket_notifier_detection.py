@@ -2,13 +2,13 @@
 Mission Critical Test: Multiple WebSocketNotifier Implementation Detection
 
 This test is designed to FAIL initially, proving that 148+ duplicate WebSocket
-implementations exist across the codebase, causing conflicts and blocking $500K+ ARR.
+implementations exist across the codebase, causing conflicts and blocking 500K+ ARR.
 
 Business Impact:
 - 148+ duplicate WebSocket implementations causing race conditions
 - 97 WebSocketConnection duplicates across 89 files
 - SSOT violations preventing reliable event delivery
-- $500K+ ARR blocked by WebSocket infrastructure fragmentation
+- 500K+ ARR blocked by WebSocket infrastructure fragmentation
 
 SSOT Violations Detected:
 - Multiple WebSocketNotifier implementations
@@ -30,7 +30,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
     CRITICAL: This test detects duplicate WebSocket implementations.
 
     EXPECTED RESULT: FAIL - 148+ duplicate implementations found
-    BUSINESS IMPACT: $500K+ ARR blocked by WebSocket infrastructure conflicts
+    BUSINESS IMPACT: 500K+ ARR blocked by WebSocket infrastructure conflicts
     """
 
     def setup_method(self):
@@ -46,7 +46,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         CRITICAL BUSINESS TEST: Detect multiple WebSocketNotifier implementations
 
         Expected Result: FAIL - 148+ duplicate implementations causing conflicts
-        Business Impact: $500K+ ARR - WebSocket infrastructure fragmentation blocks chat
+        Business Impact: 500K+ ARR - WebSocket infrastructure fragmentation blocks chat
         """
         # Define SSOT canonical implementations (should be only ones that exist)
         canonical_websocket_implementations = {
@@ -63,7 +63,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
 
         assert total_duplicates == 0, (
             f"SSOT VIOLATION: Found {total_duplicates} duplicate WebSocket implementations. "
-            f"$500K+ ARR at risk. Duplicates: {duplicate_classes}"
+            f"500K+ ARR at risk. Duplicates: {duplicate_classes}"
         )
 
     def test_websocket_connection_duplication_detection(self):
@@ -79,7 +79,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         assert len(websocket_connection_duplicates) <= 1, (
             f"SSOT VIOLATION: Found {len(websocket_connection_duplicates)} WebSocketConnection duplicates "
             f"across {len(set(loc['file'] for loc in websocket_connection_duplicates))} files. "
-            f"This causes race conditions blocking $500K+ ARR. "
+            f"This causes race conditions blocking 500K+ ARR. "
             f"Duplicates: {websocket_connection_duplicates}"
         )
 
@@ -111,7 +111,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         # CRITICAL ASSERTION: Should have single emitter implementation
         assert len(emitter_duplicates) <= 1, (
             f"SSOT VIOLATION: Found {len(emitter_duplicates)} duplicate WebSocket emitter implementations. "
-            f"This causes unreliable event delivery for $500K+ ARR chat functionality. "
+            f"This causes unreliable event delivery for 500K+ ARR chat functionality. "
             f"Emitter duplicates: {emitter_duplicates}"
         )
 
@@ -304,7 +304,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         CRITICAL: Calculate total SSOT violation count for business impact assessment
 
         Expected Result: FAIL - 148+ total violations requiring immediate remediation
-        Business Impact: Quantify exact technical debt blocking $500K+ ARR
+        Business Impact: Quantify exact technical debt blocking 500K+ ARR
         """
         # Aggregate all WebSocket duplications
         websocket_duplicates = self._scan_for_websocket_duplicates()
@@ -338,7 +338,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         # CRITICAL ASSERTION: Should be ZERO violations
         assert self.total_violations == 0, (
             f"SSOT CRITICAL FAILURE: {self.total_violations} total WebSocket SSOT violations detected "
-            f"across {self.critical_files_affected} files. $500K+ ARR immediately at risk. "
+            f"across {self.critical_files_affected} files. 500K+ ARR immediately at risk. "
             f"Breakdown: {total_class_duplicates} class duplicates, "
             f"{total_connection_duplicates} connection duplicates, "
             f"{total_factory_duplicates} factory duplicates, "

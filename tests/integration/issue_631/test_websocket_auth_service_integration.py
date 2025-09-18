@@ -2,7 +2,7 @@
 Integration Tests for Issue #631: WebSocket Auth Service Communication
 
 Business Value:
-- Validates $500K+ ARR chat functionality auth integration
+- Validates 500K+ ARR chat functionality auth integration
 - Tests backend-to-auth service communication without Docker
 - Ensures WebSocket middleware can validate JWT tokens
 

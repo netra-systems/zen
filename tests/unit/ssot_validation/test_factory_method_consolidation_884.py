@@ -7,7 +7,7 @@ This test is DESIGNED TO FAIL initially to detect scattered `create_execution_en
 across 15+ modules that fragment execution engine creation and cause inconsistent behavior.
 
 BUSINESS IMPACT:
-- $500K+ ARR at risk due to scattered factory methods preventing consistent AI responses
+- 500K+ ARR at risk due to scattered factory methods preventing consistent AI responses
 - Multiple create_execution_engine methods cause different initialization patterns
 - Method proliferation blocks standardized user execution contexts
 - Inconsistent factory methods lead to unpredictable WebSocket event delivery
@@ -43,7 +43,7 @@ class FactoryMethodConsolidation884Tests(SSotBaseTestCase):
         """Set up test with factory method proliferation analysis"""
         super().setup_method(method)
         self.record_metric("expected_failure_documented", True)
-        self.record_metric("business_impact", "$500K+ ARR at risk due to method proliferation")
+        self.record_metric("business_impact", "500K+ ARR at risk due to method proliferation")
         self.record_metric("issue_number", "884")
         
     def test_factory_methods_should_fail_before_consolidation(self):
@@ -203,7 +203,7 @@ class FactoryMethodConsolidation884Tests(SSotBaseTestCase):
             f"Methods: {factory_methods}. "
             f"Expected: ≤2 files (primary factory + legacy compatibility). "
             f"This method scattering prevents consistent execution engine creation "
-            f"and blocks reliable AI response delivery for $500K+ ARR Golden Path."
+            f"and blocks reliable AI response delivery for 500K+ ARR Golden Path."
         )
         
         # Validate method count is reasonable after consolidation

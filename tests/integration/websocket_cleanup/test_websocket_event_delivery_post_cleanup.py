@@ -11,7 +11,7 @@ This test suite validates:
 4. WebSocket connection stability during factory transitions
 
 Business Justification:
-- Segment: Enterprise ($500K+ ARR dependency)
+- Segment: Enterprise (500K+ ARR dependency)
 - Business Goal: Maintain chat functionality reliability
 - Value Impact: Ensure zero disruption to Golden Path user flow
 - Strategic Impact: Validate WebSocket infrastructure before legacy removal

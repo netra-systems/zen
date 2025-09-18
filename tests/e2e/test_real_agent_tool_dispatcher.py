@@ -4,7 +4,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure tool execution delivers value through agents
 - Value Impact: Tool execution is the primary way agents deliver actionable insights to users
-- Strategic Impact: Core platform functionality enabling $500K+ ARR through agent capabilities
+- Strategic Impact: Core platform functionality enabling 500K+ ARR through agent capabilities
 
 CRITICAL VALIDATIONS:
 - All 5 required WebSocket events sent (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)

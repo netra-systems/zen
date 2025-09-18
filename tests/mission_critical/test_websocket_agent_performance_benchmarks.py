@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise/Platform 
 - Business Goal: Validate performance benchmarks for Golden Path completion
 - Value Impact: Ensures agents meet enterprise SLA requirements for response time
-- Revenue Impact: Protects enterprise accounts ($100K+ ARR) requiring guaranteed performance
+- Revenue Impact: Protects enterprise accounts (100K+ ARR) requiring guaranteed performance
 
 Performance Targets:
 - Golden Path completion: <120s (2 minutes)

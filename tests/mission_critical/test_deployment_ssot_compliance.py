@@ -10,7 +10,7 @@ Created for GitHub Issue #245: Deploy script canonical source conflicts
 Part of: 20% new SSOT deployment tests requirement (Test File 4 of 8)
 
 Business Value: Platform/Internal - System Stability & SSOT Compliance
-CRITICAL: Protects $500K+ plus ARR-dependent deployment functionality during SSOT migration.
+CRITICAL: Protects 500K+  ARR-dependent deployment functionality during SSOT migration.
 
 DESIGN CRITERIA:
     - Mission critical tests MUST pass before deployment
@@ -139,7 +139,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
                 fPreserved: {preserved_functionality}\n\n"
                 fPreserved: {preserved_functionality}\n\n""
 
-                fBUSINESS IMPACT: $500K+ plus ARR at risk\n
+                fBUSINESS IMPACT: 500K+  ARR at risk\n
                 fACTION REQUIRED: Restore missing deployment functionality in UnifiedTestRunner\n"
                 fACTION REQUIRED: Restore missing deployment functionality in UnifiedTestRunner\n"
                 f"DEPLOYMENT BLOCKED until all functions preserved"
@@ -305,7 +305,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
                 fPreservation rate: {preservation_rate:.1%} < {minimum_preservation_rate:.1%}\n""
                 fFailed components ({len(failed_components)}:\n
                 f{failure_details}\n\n
-                f"BUSINESS IMPACT: $500K+ plus ARR Golden Path at risk\n"
+                f"BUSINESS IMPACT: 500K+  ARR Golden Path at risk\n"
                 fACTION REQUIRED: Restore Golden Path functionality in SSOT implementation\n"
                 fACTION REQUIRED: Restore Golden Path functionality in SSOT implementation\n""
 

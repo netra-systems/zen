@@ -3,7 +3,7 @@ E2E GCP Staging Tests for UnifiedStateManager - FINAL PHASE
 Real GCP Cloud Run, Redis Cloud, and production-scale testing
 
 Business Value Protection:
-- $500K+ ARR: State consistency prevents chat failures and agent execution errors
+- 500K+ ARR: State consistency prevents chat failures and agent execution errors
 - $15K+ MRR per Enterprise customer: Multi-user state isolation prevents data leakage
 - Platform stability: Prevents cascading failures from state inconsistencies
 - User experience: Real-time state synchronization for WebSocket events
@@ -49,7 +49,7 @@ class UnifiedStateManagerGCPStagingTests(SSotAsyncTestCase):
         """
         HIGH DIFFICULTY: Test state persistence under GCP Cloud Run production load.
         
-        Business Value: $500K+ ARR protection - prevents state loss during scaling.
+        Business Value: 500K+ ARR protection - prevents state loss during scaling.
         Validates: Production-scale state operations, Cloud Run memory constraints.
         """
         user_id = self.id_manager.generate_user_id()

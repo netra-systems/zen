@@ -10,7 +10,7 @@ Expected Behavior: These tests SHOULD FAIL to demonstrate:
 4. Fragmented authentication validation logic
 
 Business Impact: These violations block proper WebSocket authentication SSOT
-consolidation and create security vulnerabilities affecting $500K+ ARR Golden Path.
+consolidation and create security vulnerabilities affecting 500K+ ARR Golden Path.
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
@@ -411,13 +411,7 @@ class TestWebSocketAuthSSOTMetrics(unittest.TestCase):
                 violation_count += len(token_inconsistencies) - 1
 
         except Exception as e:
-            print(f"Warning: Error counting violations: {e}")
-            violation_count = -1  # Indicate measurement error
-
-        return violation_count
-
-    def _measure_auth_consolidation_progress(self) -> Dict[str, int]:
-        """Measure authentication consolidation progress"""
+            print(f"Warning: Error counting violations: {e}""""Measure authentication consolidation progress"""
         metrics = {}
 
         test_instance = TestWebSocketAuthenticationSSOTViolations()
@@ -441,14 +435,7 @@ class TestWebSocketAuthSSOTMetrics(unittest.TestCase):
             metrics['permissiveness_violations'] = len(permissive_violations)
 
         except Exception as e:
-            print(f"Warning: Error measuring consolidation progress: {e}")
-            metrics = {'error': -1}
-
-        return metrics
-
-
-if __name__ == '__main__':
-    print("🚨 Issue #1186 WebSocket Authentication SSOT Violations - Detection Tests")
+            print(f"Warning: Error measuring consolidation progress: {e}""🚨 Issue #1186 WebSocket Authentication SSOT Violations - Detection Tests")
     print("=" * 80)
     print("WARNING️  WARNING: These tests are DESIGNED TO FAIL to demonstrate current violations")
     print("📊 Expected: Test failures exposing 58 WebSocket auth violations from Issue #1186")

@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,19 +23,14 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 WebSocket Agent Events Critical Integration Tests
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - Core chat functionality
 - Business Goal: Enable real-time agent communication for substantive AI interactions
 - Value Impact: CRITICAL - These 5 events deliver 90% of platform value through live AI problem-solving visibility
-- Strategic/Revenue Impact: $500K+ ARR directly depends on users seeing agent progress in real-time
+- Strategic/Revenue Impact: 500K+ ARR directly depends on users seeing agent progress in real-time
 
 MISSION CRITICAL WEBSOCKET EVENTS (all must be tested):
 1. agent_started - User sees agent began processing their problem
@@ -486,7 +473,7 @@ class WebSocketAgentEventsCriticalTests(BaseIntegrationTest):
         BVJ: Complete user experience - Users see the full AI problem-solving journey.
         This validates the end-to-end event flow that delivers maximum business value.
         
-        CRITICAL: Tests the complete sequence that generates $500K+ ARR through substantive AI interactions.
+        CRITICAL: Tests the complete sequence that generates 500K+ ARR through substantive AI interactions.
         """
         token = self.auth_helper.create_test_jwt_token(user_id=self.test_user_id)
         headers = self.auth_helper.get_websocket_headers(token)

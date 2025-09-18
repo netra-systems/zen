@@ -9,10 +9,7 @@ class TestWebSocketConnection:
         self._closed = False
 """
         """Send JSON message."""Send JSON message."""
-        raise RuntimeError("WebSocket is closed)"
-        self.messages_sent.append(message)
-
-    async def close(self, code: int = 1000, reason: str = "Normal closure):"
+        raise RuntimeError("WebSocket is closed)""Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -200,10 +197,7 @@ from netra_backend.app.core.serialization.unified_json_handler import LLMRespons
         pass
     # Check if agent has WebSocketBridgeAdapter
         self.assertTrue(hasattr(self.agent, '_websocket_adapter') or )"""
-        "FAIL: No WebSocketBridgeAdapter found)"
-
-    async def test_violation_websocket_event_emission(self):
-        """
+        "FAIL: No WebSocketBridgeAdapter found)""""
         VIOLATION: Custom WebSocket event emission instead of using adapter methods"""
 
         pass
@@ -368,10 +362,7 @@ import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
 
                             # Check that events were emitted (this will fail until properly integrated)
         self.assertTrue(mock_adapter.emit_thinking.called or )"""
-        "No WebSocket events emitted)"
-
-    def test_all_violations_summary(self):
-        """
+        "No WebSocket events emitted)""""
         This test always FAILS to show the complete violation report."""
         pass"""
         "1. Custom hash generation in cache_utils.py (using hashlib.md5),"

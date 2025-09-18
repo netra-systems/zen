@@ -4,7 +4,7 @@ WebSocket Integration Failure Tests for Issue #914 AgentRegistry SSOT Consolidat
 CRITICAL P0 TESTS: These tests are DESIGNED TO FAIL initially to prove WebSocket
 integration failures caused by registry SSOT violations that block Golden Path.
 
-Business Value: $500K+ ARR Golden Path protection - ensures WebSocket bridge
+Business Value: 500K+ ARR Golden Path protection - ensures WebSocket bridge
 integration works reliably for real-time agent progress updates.
 
 Test Focus:

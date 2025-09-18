@@ -5,7 +5,7 @@ Business Value Justification:
 - Segment: Platform/Internal - Authentication Security & Reliability
 - Business Goal: System Stability & Security - Protect against authentication attack vectors
 - Value Impact: Prevents authentication failures from cascading into system outages
-- Revenue Impact: Protects $500K+ ARR by ensuring authentication edge cases don't break Golden Path
+- Revenue Impact: Protects 500K+ ARR by ensuring authentication edge cases don't break Golden Path
 
 CRITICAL REQUIREMENTS:
 - NO MOCKS allowed - use real services and real system behavior

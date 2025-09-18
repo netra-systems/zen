@@ -4,7 +4,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - Multi-user isolation is critical for security and scalability
 - Business Goal: Ensure secure, isolated agent execution for concurrent users
 - Value Impact: Users receive private, secure AI responses without data leakage
-- Strategic Impact: $500K+ ARR security and scalability foundation for multi-tenant platform
+- Strategic Impact: 500K+ ARR security and scalability foundation for multi-tenant platform
 
 These E2E tests validate multi-user isolation with complete system stack:
 - Real authentication (JWT/OAuth) for multiple concurrent users

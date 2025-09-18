@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Segment: All customer tiers
 - Business Goal: Chat functionality reliability 
 - Value Impact: Validates core revenue-generating WebSocket communication
-- Revenue Impact: Protects $500K+ ARR chat functionality
+- Revenue Impact: Protects 500K+ ARR chat functionality
 
 PLACEHOLDER IMPLEMENTATION:
 Currently provides minimal interface for test collection.

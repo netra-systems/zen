@@ -469,8 +469,7 @@ class MockResponseEliminationTestSuite:
                 assert event.get(reason) is not None, "Service unavailable reason is None"
                 assert len(event.get("reason, )) > 0, Service unavailable reason is empty"
         
-        print(f   PASS:  WebSocket transparency test passed: {len(event_types)} events verified)"
-        print(f   PASS:  WebSocket transparency test passed: {len(event_types)} events verified)"
+        print(f   PASS:  WebSocket transparency test passed: {len(event_types)} events verified)""
         return {"events_captured: len(self.websocket_events_captured), event_types: event_types}"
     
     async def test_enterprise_vs_free_tier_handling(self):

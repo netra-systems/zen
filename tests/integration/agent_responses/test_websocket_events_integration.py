@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: User Experience & Platform Engagement - Real-time agent progress visibility
 - Value Impact: Enables substantive chat interactions with real-time feedback (90% of platform value)
-- Strategic Impact: $500K+ ARR protection - WebSocket events are critical for chat functionality
+- Strategic Impact: 500K+ ARR protection - WebSocket events are critical for chat functionality
 
 This module tests WebSocket event emission during agent execution, focusing on:
 1. All 5 critical WebSocket events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)

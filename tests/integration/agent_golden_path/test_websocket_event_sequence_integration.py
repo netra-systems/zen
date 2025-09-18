@@ -57,14 +57,7 @@ try:
     from shared.types.core_types import UserID, ThreadID, RunID
     REAL_WEBSOCKET_COMPONENTS_AVAILABLE = True
 except ImportError as e:
-    print(f"Warning: Some real WebSocket components not available: {e}")
-    REAL_WEBSOCKET_COMPONENTS_AVAILABLE = False
-    WebSocketManager = MagicMock
-    get_websocket_manager = MagicMock
-
-@dataclass
-class WebSocketEvent:
-    """WebSocket event data structure for testing."""
+    print(f"Warning: Some real WebSocket components not available: {e}""""WebSocket event data structure for testing."""
     event_type: str
     timestamp: float
     user_id: str

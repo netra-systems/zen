@@ -28,7 +28,7 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-"Golden Path Integration Test with Real UserExecutionContext (Issue #346)\n\nThis test validates the complete Golden Path user journey with proper UserExecutionContext\nusage, ensuring that the security migration doesn't break the core business value flow\nthat protects $500K+ ARR.\n\nGolden Path: User Login  ->  Agent Execution  ->  AI Response  ->  WebSocket Events\n\nBusiness Value Justification (BVJ):\n- Segment: ALL (Core platform functionality)\n- Business Goal: Revenue Protection ($500K+ ARR)\n- Value Impact: Validates end-to-end user journey with secure context management\n- Revenue Impact: Prevents regression in primary revenue-generating user flow\n\nTest Strategy:\n1. Complete user authentication flow with real context\n2. Agent execution with proper user isolation\n3. WebSocket event delivery for real-time updates\n4. End-to-end validation of chat functionality (90% of platform value)\n\nSSOT Compliance:\n- Inherits from SSotAsyncTestCase\n- Uses real UserExecutionContext throughout\n- Tests actual business value delivery\n- No Mock objects in critical security paths\n"
+"Golden Path Integration Test with Real UserExecutionContext (Issue #346)\n\nThis test validates the complete Golden Path user journey with proper UserExecutionContext\nusage, ensuring that the security migration doesn't break the core business value flow\nthat protects 500K+ ARR.\n\nGolden Path: User Login  ->  Agent Execution  ->  AI Response  ->  WebSocket Events\n\nBusiness Value Justification (BVJ):\n- Segment: ALL (Core platform functionality)\n- Business Goal: Revenue Protection (500K+ ARR)\n- Value Impact: Validates end-to-end user journey with secure context management\n- Revenue Impact: Prevents regression in primary revenue-generating user flow\n\nTest Strategy:\n1. Complete user authentication flow with real context\n2. Agent execution with proper user isolation\n3. WebSocket event delivery for real-time updates\n4. End-to-end validation of chat functionality (90% of platform value)\n\nSSOT Compliance:\n- Inherits from SSotAsyncTestCase\n- Uses real UserExecutionContext throughout\n- Tests actual business value delivery\n- No Mock objects in critical security paths\n"
 import pytest
 import asyncio
 from unittest.mock import patch, AsyncMock, MagicMock
@@ -112,7 +112,7 @@ class UserContextGoldenPathValidationTests(SSotAsyncTestCase):
         using real UserExecutionContext objects throughout, ensuring no security
         regression impacts the primary business value flow.
         
-        Business Impact: Protects $500K+ ARR functionality
+        Business Impact: Protects 500K+ ARR functionality
         Test Coverage: End-to-end user experience with secure context management
         """
         auth_context = GoldenPathUserContextFactory.create_authenticated_user_context(user_id='golden_path_integration_user_001', session_id='gp_session_integration_001')

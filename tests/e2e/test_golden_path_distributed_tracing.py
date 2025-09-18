@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,16 +23,11 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 Golden Path Distributed Tracing End-to-End Tests
 
 Business Value Justification (BVJ):
-- Segment: All - Critical for $500K+ ARR functionality
+- Segment: All - Critical for 500K+ ARR functionality
 - Business Goal: Ensure complete user journey is traceable
 - Value Impact: Enable debugging of complex multi-service user flows
 - Strategic Impact: Foundation for production SLOs and user experience optimization
@@ -52,7 +39,7 @@ Following CLAUDE.md requirements:
 - Uses SsotBaseTestCase for consistent test foundation
 - Tests complete user workflows with real services
 - No mocks in E2E tests - everything must be real
-- Focuses on $500K+ ARR chat functionality tracing
+- Focuses on 500K+ ARR chat functionality tracing
 """
 
 import pytest

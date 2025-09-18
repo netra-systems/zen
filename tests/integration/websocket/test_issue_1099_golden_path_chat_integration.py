@@ -1,7 +1,7 @@
 """
 Issue #1099 Golden Path Chat Integration Tests
 
-BUSINESS IMPACT: $500K+ ARR Golden Path protection
+BUSINESS IMPACT: 500K+ ARR Golden Path protection
 PURPOSE: Validate end-to-end chat functionality with handler migration
 
 These tests validate the complete Golden Path user journey:
@@ -49,7 +49,7 @@ class TestGoldenPathChatIntegration:
     """
     Golden Path Chat Integration Tests
     
-    These tests validate the complete $500K+ ARR chat functionality
+    These tests validate the complete 500K+ ARR chat functionality
     end-to-end with both legacy and SSOT handlers.
     """
     
@@ -661,7 +661,7 @@ if __name__ == "__main__":
     # Run Golden Path integration tests
     print("🔍 Running Golden Path Chat Integration Tests for Issue #1099")
     print("=" * 70)
-    print("💼 BUSINESS CRITICAL: $500K+ ARR Golden Path validation")
+    print("💼 BUSINESS CRITICAL: 500K+ ARR Golden Path validation")
     print("=" * 70)
     
     exit_code = pytest.main([
@@ -674,11 +674,11 @@ if __name__ == "__main__":
     
     if exit_code == 0:
         print("\nCHECK GOLDEN PATH INTEGRATION TESTS PASSED")
-        print("$500K+ ARR chat functionality validated for both legacy and SSOT")
+        print("500K+ ARR chat functionality validated for both legacy and SSOT")
         print("System ready for migration with Golden Path protection")
     else:
         print("\nX GOLDEN PATH INTEGRATION TESTS FAILED")
-        print("CRITICAL: $500K+ ARR functionality at risk")
+        print("CRITICAL: 500K+ ARR functionality at risk")
         print("Fix issues before proceeding with migration")
     
     exit(exit_code)

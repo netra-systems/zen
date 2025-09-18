@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise Users (Performance SLA Requirements)
 - Business Goal: Platform Reliability & Performance through SLA Compliance
 - Value Impact: Validates performance standards critical for enterprise contracts and user satisfaction
-- Strategic Impact: Poor performance = SLA violations = enterprise churn = $500K+ ARR loss
+- Strategic Impact: Poor performance = SLA violations = enterprise churn = 500K+ ARR loss
 
 Test Strategy:
 - REAL SERVICES: Staging GCP Cloud Run environment only (NO Docker)

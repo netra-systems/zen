@@ -7,7 +7,7 @@ that causes 1011 WebSocket errors during service initialization.
 Business Value Justification (BVJ):
 - Segment: Platform/All Users
 - Business Goal: Platform Stability & Revenue Protection  
-- Value Impact: Ensures $500K+ ARR dependent on reliable WebSocket connections
+- Value Impact: Ensures 500K+ ARR dependent on reliable WebSocket connections
 - Strategic Impact: Validates Golden Path works during GCP cold start scenarios
 
 Test Strategy:

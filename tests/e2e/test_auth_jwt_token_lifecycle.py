@@ -3,7 +3,7 @@ CRITICAL E2E JWT Token Lifecycle Tests
 
 Business Value Justification (BVJ):
 1. Segment: All customer segments (Free  ->  Enterprise) - Core security foundation
-2. Business Goal: Protect $500K+ ARR through secure authentication flows 
+2. Business Goal: Protect 500K+ ARR through secure authentication flows 
 3. Value Impact: Prevents authentication failures that cost user trust and conversions
 4. Strategic Impact: JWT token security is foundation for all user interactions
 

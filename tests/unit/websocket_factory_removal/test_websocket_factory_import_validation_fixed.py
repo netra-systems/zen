@@ -15,11 +15,11 @@ TESTING CONSTRAINTS:
 - NO Docker required - Unit test only
 - Uses standard unittest framework
 - Validates import paths and circular dependency prevention
-- Tests Golden Path WebSocket functionality ($500K+ ARR protection)
+- Tests Golden Path WebSocket functionality (500K+ ARR protection)
 
 BUSINESS VALUE:
 - Segment: ALL (Free -> Enterprise) - Golden Path Infrastructure
-- Goal: Eliminate SSOT violations threatening $500K+ ARR
+- Goal: Eliminate SSOT violations threatening 500K+ ARR
 - Impact: Ensures reliable WebSocket operations after factory removal
 - Revenue Impact: Prevents WebSocket initialization failures affecting chat
 """

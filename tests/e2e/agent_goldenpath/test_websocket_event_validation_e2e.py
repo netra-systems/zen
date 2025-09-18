@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Segment: All Users (Free/Early/Mid/Enterprise)
 - Business Goal: User Engagement & Real-Time Experience Quality
 - Value Impact: Real-time events create engaging chat experience driving retention
-- Strategic Impact: $500K+ ARR depends on users seeing agent progress in real-time
+- Strategic Impact: 500K+ ARR depends on users seeing agent progress in real-time
 
 Critical Events (ALL MUST BE DELIVERED):
 1. agent_started - User sees agent began processing

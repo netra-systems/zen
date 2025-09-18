@@ -2,7 +2,7 @@
 "MISSION CRITICAL: SSOT WebSocket Validation Suite Runner"
 
 THIS SUITE ORCHESTRATES ALL SSOT WEBSOCKET FACTORY PATTERN VALIDATION TESTS.
-Business Value: $500K+ plus ARR - Comprehensive WebSocket SSOT migration validation
+Business Value: 500K+  ARR - Comprehensive WebSocket SSOT migration validation
 
 PURPOSE:
     - Orchestrate all SSOT WebSocket factory pattern validation tests
@@ -200,8 +200,7 @@ class SsotWebSocketValidationSuite:
 
     async def run_all_tests(self) -> Dict[str, Any]:
         "Run all SSOT WebSocket validation tests."
-        logger.info(f[SUITE START] Starting SSOT WebSocket validation suite: {self.suite_id})"
-        logger.info(f[SUITE START] Starting SSOT WebSocket validation suite: {self.suite_id})""
+        logger.info(f[SUITE START] Starting SSOT WebSocket validation suite: {self.suite_id})"""
 
         
         migration_phase = self.detect_migration_phase()
@@ -288,7 +287,7 @@ class SsotWebSocketValidationSuite:
             critical_failures: len(critical_failures),
             migration_related_issues: len(migration_failures),"
             migration_related_issues: len(migration_failures),"
-            arr_at_risk": $500K+ plus ARR if impact_level == HIGH else No immediate risk"
+            arr_at_risk": 500K+  ARR if impact_level == HIGH else No immediate risk"
         }
 
     def assess_migration_readiness(self) -> Dict[str, Any]:
@@ -322,7 +321,7 @@ class SsotWebSocketValidationSuite:
         recommendations = {
             READY": Proceed with SSOT migration. All validation tests confirm system stability.,"
             READY_WITH_CAUTION: Proceed with migration but monitor closely. Address minor issues post-migration.,
-            NOT_READY: "Do not proceed with migration. Resolve system issues first to protect $500K+ plus ARR."
+            NOT_READY: "Do not proceed with migration. Resolve system issues first to protect 500K+  ARR."
         }
         return recommendations.get(readiness, Unknown readiness status")"
 

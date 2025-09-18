@@ -13,7 +13,7 @@ Purpose:
 
 Business Impact:
 - Prevents WebSocket resource leaks in long-running sessions
-- Ensures proper cleanup correlation for $500K+ ARR protection
+- Ensures proper cleanup correlation for 500K+ ARR protection
 - Validates debugging capabilities through proper ID tracking
 """
 import asyncio

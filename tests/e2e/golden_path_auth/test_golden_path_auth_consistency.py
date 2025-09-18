@@ -5,7 +5,7 @@ PURPOSE: E2E test validating complete Golden Path authentication flow using SSOT
 EXPECTED: PASS after SSOT remediation - validates end-to-end auth service integration
 TARGET: Complete user journey (login -> WebSocket -> send message -> get AI response) with SSOT auth
 
-BUSINESS VALUE: Protects $500K+ ARR Golden Path user experience with consistent authentication
+BUSINESS VALUE: Protects 500K+ ARR Golden Path user experience with consistent authentication
 EXECUTION: Staging GCP environment - NO Docker dependency
 """
 import logging

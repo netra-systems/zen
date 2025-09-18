@@ -7,7 +7,7 @@ per user context and ensures proper multi-user isolation.
 Business Value Justification:
     - Segment: Platform/Infrastructure
 - Business Goal: Security & User Isolation
-- Value Impact: Protects $500K+ plus ARR by ensuring secure multi-user chat isolation
+- Value Impact: Protects 500K+  ARR by ensuring secure multi-user chat isolation
 - Strategic Impact: Critical for enterprise compliance (HIPAA, SOC2, SEC requirements)
 
 EXPECTED BEHAVIOR:
@@ -163,7 +163,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             len(self.isolation_violations), 0,
             fEXPECTED FAILURE (Issue #1123): Factory instance isolation compromised. 
             fFound {len(self.isolation_violations)} isolation violations: {self.isolation_violations}. 
-            fThis threatens $500K+ plus ARR multi-user chat security.""
+            fThis threatens 500K+  ARR multi-user chat security.""
         )
     
     async def test_concurrent_user_execution_isolation(self):
@@ -506,7 +506,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
         if violation_count > 5:
             return {
                 'level': 'CRITICAL',
-                'description': 'Isolation failures threaten $500K+ plus ARR enterprise customer trust and retention'
+                'description': 'Isolation failures threaten 500K+  ARR enterprise customer trust and retention'
             }
         elif violation_count > 2:
             return {

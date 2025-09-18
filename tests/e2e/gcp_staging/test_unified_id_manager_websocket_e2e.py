@@ -9,7 +9,7 @@ Business Value Justification:
 - Segment: All (Complete user journey validation)
 - Business Goal: Business Continuity & System Reliability
 - Value Impact: Ensures migration maintains full chat functionality
-- Strategic Impact: $500K+ ARR depends on reliable end-to-end WebSocket workflows
+- Strategic Impact: 500K+ ARR depends on reliable end-to-end WebSocket workflows
 """
 
 import pytest

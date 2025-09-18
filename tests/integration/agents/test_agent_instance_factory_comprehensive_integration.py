@@ -3,7 +3,7 @@ Agent Instance Factory Comprehensive Integration Tests - Phase 1 Factory Pattern
 
 Business Value Justification (BVJ):
 - Segment: Platform/Core Infrastructure (ALL user tiers)
-- Business Goal: Agent Factory Patterns - User isolation and resource management supporting $500K+ ARR
+- Business Goal: Agent Factory Patterns - User isolation and resource management supporting 500K+ ARR
 - Value Impact: Validates reliable agent factory patterns, user isolation, and scalable instance management
 - Revenue Impact: Foundation for scalable multi-user agent creation - failure blocks platform scalability
 
@@ -86,7 +86,7 @@ class AgentInstanceFactoryComprehensiveIntegrationTests(SSotAsyncTestCase):
     Tests the critical factory patterns that enable scalable, isolated agent creation
     for multi-user environments. Foundation for Golden Path scalability.
     
-    Business Impact: $500K+ ARR Golden Path depends on reliable agent factory patterns.
+    Business Impact: 500K+ ARR Golden Path depends on reliable agent factory patterns.
     """
     
     def setup_method(self, method):

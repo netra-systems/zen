@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise Users (Multi-User Organizations)
 - Business Goal: Platform Scalability & Enterprise Trust through Proper User Isolation
 - Value Impact: Validates concurrent user support critical for enterprise adoption
-- Strategic Impact: Poor concurrent handling = enterprise churn = $500K+ ARR loss
+- Strategic Impact: Poor concurrent handling = enterprise churn = 500K+ ARR loss
 
 Test Strategy:
 - REAL SERVICES: Staging GCP Cloud Run environment only (NO Docker)

@@ -4,14 +4,14 @@ Golden Path Complete User Journey Tests (Staging GCP)
 These tests validate the complete user journey on staging environment.
 They will FAIL if the golden path is not actually operational.
 
-This is the ultimate test of $500K+ ARR functionality - the complete
+This is the ultimate test of 500K+ ARR functionality - the complete
 business value delivery from user login to AI response.
 
 Business Value Justification:
 - Segment: ALL (Free/Early/Mid/Enterprise) 
 - Business Goal: Complete User Value Delivery
 - Value Impact: Validates end-to-end customer experience and business value
-- Strategic Impact: Protects $500K+ ARR by proving golden path operational
+- Strategic Impact: Protects 500K+ ARR by proving golden path operational
 """
 
 import pytest
@@ -80,11 +80,11 @@ class TestGoldenPathCompleteUserJourney:
         """Test complete flow: user login -> send message -> receive AI response.
         
         This test WILL FAIL if the golden path is not actually operational.
-        This is the ultimate test of $500K+ ARR functionality.
+        This is the ultimate test of 500K+ ARR functionality.
         
         Expected to FAIL initially - proves golden path claims are false.
         """
-        self.logger.info("Starting CRITICAL golden path validation - $500K+ ARR test")
+        self.logger.info("Starting CRITICAL golden path validation - 500K+ ARR test")
         
         # Execute golden path stages sequentially
         stages = [
@@ -137,7 +137,7 @@ class TestGoldenPathCompleteUserJourney:
             # EXPECTED FAILURE - proves golden path is not operational
             pytest.fail(
                 f"GOLDEN PATH NOT OPERATIONAL: {len(failed_stages)} stage(s) failed. "
-                f"This proves '$500K+ ARR golden path operational' claims are FALSE. "
+                f"This proves '500K+ ARR golden path operational' claims are FALSE. "
                 f"Failed stages: {[stage.value for stage, _ in failed_stages]}. "
                 f"First failure: {failed_stages[0][1]}. "
                 f"Complete analysis in test results."
@@ -609,7 +609,7 @@ class TestGoldenPathCompleteUserJourney:
         self.logger.error("GOLDEN PATH FAILURE ANALYSIS REPORT")
         self.logger.error("=" * 80)
         
-        self.logger.error(f"BUSINESS IMPACT: $500K+ ARR at risk due to golden path failures")
+        self.logger.error(f"BUSINESS IMPACT: 500K+ ARR at risk due to golden path failures")
         self.logger.error(f"FAILED STAGES: {len(failed_stages)} out of {len(GoldenPathStage)}")
         
         for i, (stage, error) in enumerate(failed_stages, 1):

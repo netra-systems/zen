@@ -9,7 +9,7 @@ cause inconsistent delivery of the 5 critical WebSocket events that enable
 chat business value. When different emitters send different events, chat
 functionality becomes unreliable.
 
-Business Impact: $500K+ ARR at risk from unreliable chat functionality when
+Business Impact: 500K+ ARR at risk from unreliable chat functionality when
 users don't receive all 5 critical events (agent_started, agent_thinking, 
 tool_executing, tool_completed, agent_completed).
 

@@ -3,7 +3,7 @@
 Mission Critical Tests for Issue #1101 MessageRouter Business Protection
 
 These tests protect critical business functionality during SSOT consolidation:
-    1. Protect $500K+ plus ARR Golden Path user flow
+    1. Protect 500K+  ARR Golden Path user flow
 2. Validate critical WebSocket events are preserved
 3. Ensure agent execution continues working
 4. Prevent revenue-impacting regressions
@@ -13,7 +13,7 @@ Business Value Justification:
 - Business Goal: Revenue Protection and System Stability
 """
 
-- Value Impact: Protects $500K+ plus ARR from MessageRouter failures
+- Value Impact: Protects 500K+  ARR from MessageRouter failures
 - Strategic Impact: Ensures business continuity during SSOT transition
 "
 ""
@@ -52,7 +52,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
         self.business_thread_id = f"revenue_thread_{int(time.time())}"
         self.business_run_id = frevenue_run_{int(time.time())}
         
-        # Create user context representing $500K+ plus ARR user
+        # Create user context representing 500K+  ARR user
         self.user_context = UserExecutionContext.from_request(
             user_id=self.business_user_id,
             thread_id=self.business_thread_id,
@@ -72,7 +72,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
         }
     
     async def test_critical_user_message_routing_protection(self):
-        "MISSION CRITICAL: Protect user message routing that drives $500K+ plus ARR."
+        "MISSION CRITICAL: Protect user message routing that drives 500K+  ARR."
         try:
             # Test with all MessageRouter implementations to ensure business protection
             routers = [
@@ -167,7 +167,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             raise
     
     async def test_critical_websocket_events_business_protection(self):
-        MISSION CRITICAL: Protect WebSocket events that enable $500K+ plus ARR user experience.""
+        MISSION CRITICAL: Protect WebSocket events that enable 500K+  ARR user experience.""
         try:
             router = get_message_router()
             
@@ -179,8 +179,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                     self.client_state = connected
                 
                 async def send_json(self, data):
-                    self.sent_messages.append((json, data))"
-                    self.sent_messages.append((json, data))""
+                    self.sent_messages.append((json, data))"""
 
                     
                     # Track critical business events
@@ -253,8 +252,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             self.business_protection_metrics[critical_functionality_preserved"] += 1"
             
             logger.info(fBUSINESS PROTECTION: Critical WebSocket events delivered {delivered_critical_events}/{len(expected_critical_events)} 
-                       fin {execution_time:.2f}s)"
-                       fin {execution_time:."2f"}s)""
+                       fin {execution_time:.2f}s)""2f"}s)""
 
             
         except Exception as e:
@@ -429,7 +427,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
         try:
             router = get_message_router()
             
-            # Simulate concurrent business users (representing $500K+ plus ARR load)
+            # Simulate concurrent business users (representing 500K+  ARR load)
             async def business_user_scenario(user_id_suffix):
                 user_id = fbusiness_user_{user_id_suffix}"
                 user_id = fbusiness_user_{user_id_suffix}""
@@ -548,7 +546,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             self.assertGreaterEqual(business_continuity_score, 80.0,
                                    fMISSION CRITICAL FAILURE: Business continuity score {business_continuity_score:.""1f""}%""
 
-                                   fbelow 80% threshold - $500K+ plus ARR AT RISK!)
+                                   fbelow 80% threshold - 500K+  ARR AT RISK!)
             
             # MISSION CRITICAL: Zero tolerance for revenue-impacting failures
             self.assertLessEqual(revenue_failures, 2,
@@ -559,7 +557,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             protection_criteria = business_summary[revenue_protection_analysis]
             
             self.assertTrue(protection_criteria[500k_arr_protected"),"
-                           MISSION CRITICAL: $500K+ plus ARR not adequately protected!)
+                           MISSION CRITICAL: 500K+  ARR not adequately protected!)
             
             self.assertTrue(protection_criteria[user_experience_maintained),"
             self.assertTrue(protection_criteria[user_experience_maintained),"

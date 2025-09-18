@@ -4,7 +4,7 @@
 GitHub Issue: #960 WebSocket Manager SSOT fragmentation crisis
 
 THIS TEST VALIDATES FACTORY PATTERN SSOT COMPLIANCE.
-Business Value: $500K+ ARR - Validates factory patterns delegate to SSOT properly
+Business Value: 500K+ ARR - Validates factory patterns delegate to SSOT properly
 
 PURPOSE:
 - Test validates that all factory patterns delegate to SSOT implementation

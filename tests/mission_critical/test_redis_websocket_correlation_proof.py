@@ -4,7 +4,7 @@ This test suite proves the direct correlation between Redis SSOT violations
 and WebSocket 1011 errors that are blocking the Golden Path chat functionality.
 
 Business Value:
-    - Proves $500K+ plus ARR chat functionality is blocked by Redis violations
+    - Proves 500K+  ARR chat functionality is blocked by Redis violations
 - Documents the 85% WebSocket error probability correlation
 - Validates that SSOT remediation fixes the Golden Path
 
@@ -97,8 +97,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
         error_1011_rate = (error_1011_count / self.test_iterations) * 100
 
         self.logger.error(fWebSocket Success Rate: {success_rate:.""1f""}%)
-        self.logger.error(fWebSocket 1011 Error Rate: {error_1011_rate:.1f}%)"
-        self.logger.error(fWebSocket 1011 Error Rate: {error_1011_rate:.1f}%)"
+        self.logger.error(fWebSocket 1011 Error Rate: {error_1011_rate:.1f}%)""
         self.logger.error(f"Total Failures: {failure_count}/{self.test_iterations})"
 
         # Document the correlation for evidence
@@ -110,7 +109,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
             total_tests: self.test_iterations,
             "failures: failure_count,"
             expected_pattern: 85% error probability due to Redis violations,
-            business_impact: "Blocks $500K+ plus ARR chat functionality"
+            business_impact: "Blocks 500K+  ARR chat functionality"
         }
 
         # Save evidence
@@ -215,8 +214,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
         increase the probability of 1011 errors due to connection conflicts.
 "
 "
-        self.logger.info(Testing WebSocket-Redis error correlation - EXPECTING CORRELATION)"
-        self.logger.info(Testing WebSocket-Redis error correlation - EXPECTING CORRELATION)""
+        self.logger.info(Testing WebSocket-Redis error correlation - EXPECTING CORRELATION)"""
 
 
         # Test WebSocket connection during Redis operations

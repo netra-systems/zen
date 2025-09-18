@@ -8,7 +8,7 @@ Business Impact:
 - Complete Golden Path user flow broken
 - Users cannot login and get AI responses
 - End-to-end chat functionality non-functional
-- $500K+ ARR completely blocked by system failures
+- 500K+ ARR completely blocked by system failures
 
 SSOT Violations Blocking Golden Path:
 - WebSocket SSOT violations prevent real-time communication
@@ -47,7 +47,7 @@ class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
     CRITICAL E2E: This test proves Golden Path is completely broken.
 
     EXPECTED RESULT: FAIL - Complete user flow broken by SSOT violations
-    BUSINESS IMPACT: $500K+ ARR blocked - users cannot use core platform functionality
+    BUSINESS IMPACT: 500K+ ARR blocked - users cannot use core platform functionality
     """
 
     def setup_method(self):
@@ -65,7 +65,7 @@ class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
         CRITICAL BUSINESS TEST: Prove complete Golden Path user flow fails
 
         Expected Result: FAIL - Users cannot complete login -> AI response flow
-        Business Impact: $500K+ ARR - Core platform functionality completely broken
+        Business Impact: 500K+ ARR - Core platform functionality completely broken
         """
         if not self._staging_available():
             pytest.skip('Staging environment not available for E2E testing')
@@ -95,7 +95,7 @@ class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
         except Exception as e:
             self.failure_points.append(f'UNEXPECTED_ERROR: {str(e)}')
             golden_path_steps.append({'step': 'unexpected_error', 'success': False, 'details': {'error': str(e)}})
-        assert self.golden_path_success, f"SSOT VIOLATION: Golden Path user flow COMPLETELY BROKEN. Failure points: {self.failure_points}. Steps completed: {[s['step'] for s in golden_path_steps if s['success']]}. Steps failed: {[s['step'] for s in golden_path_steps if not s['success']]}. BUSINESS IMPACT: $500K+ ARR blocked - users cannot use core platform functionality."
+        assert self.golden_path_success, f"SSOT VIOLATION: Golden Path user flow COMPLETELY BROKEN. Failure points: {self.failure_points}. Steps completed: {[s['step'] for s in golden_path_steps if s['success']]}. Steps failed: {[s['step'] for s in golden_path_steps if not s['success']]}. BUSINESS IMPACT: 500K+ ARR blocked - users cannot use core platform functionality."
 
     @pytest.mark.asyncio
     async def test_concurrent_user_golden_path_failure(self):

@@ -4,7 +4,7 @@ Agent Golden Path Auth Integration E2E Tests - Issue #1081 Phase 1
 Business Value Justification:
 - Segment: All tiers - Critical authentication and authorization
 - Business Goal: Ensure secure and reliable authentication for agent interactions
-- Value Impact: Protects $500K+ ARR from auth failures and security breaches
+- Value Impact: Protects 500K+ ARR from auth failures and security breaches
 - Revenue Impact: Prevents customer lockout and security incidents that damage trust
 
 PURPOSE:

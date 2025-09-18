@@ -28,7 +28,7 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-'Integration test to validate Golden Path API compatibility after fix.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: System Reliability\n- Value Impact: Validates $500K+ ARR Golden Path tests can execute after API fix\n- Strategic Impact: Ensures business value validation is restored and deployment can proceed\n\nThis test suite validates that Golden Path integration tests will work correctly\nafter the ExecutionResult API fix is implemented for Issue #261.\n'
+'Integration test to validate Golden Path API compatibility after fix.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: System Reliability\n- Value Impact: Validates 500K+ ARR Golden Path tests can execute after API fix\n- Strategic Impact: Ensures business value validation is restored and deployment can proceed\n\nThis test suite validates that Golden Path integration tests will work correctly\nafter the ExecutionResult API fix is implemented for Issue #261.\n'
 import pytest
 import uuid
 from unittest.mock import MagicMock, AsyncMock, patch

@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise Users (Regulatory Compliance & Security Requirements)
 - Business Goal: Security Compliance & Trust through Robust Authorization Controls
 - Value Impact: Validates security controls critical for enterprise contracts (SOC2, HIPAA, etc.)
-- Strategic Impact: Security vulnerabilities = enterprise churn = compliance violations = $500K+ ARR loss
+- Strategic Impact: Security vulnerabilities = enterprise churn = compliance violations = 500K+ ARR loss
 
 Test Strategy:
 - REAL SERVICES: Staging GCP Cloud Run environment only (NO Docker)

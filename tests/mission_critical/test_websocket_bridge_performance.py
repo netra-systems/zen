@@ -10,8 +10,7 @@ class WebSocketTestHelper:
         ""Send JSON message.""
 
         if self._closed:
-            raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)""
+            raise RuntimeError(WebSocket is closed)"""
 
         self.messages_sent.append(message)
         
@@ -228,19 +227,7 @@ class MockWebSocket:
     async def send_json(self, data: Dict[str, Any) -> None:
         "Mock send_json with configurable latency."
         if self.closed:
-            raise ConnectionError("WebSocket is closed)"
-        
-        # Simulate network latency
-        if self.latency_ms > 0:
-            await asyncio.sleep(self.latency_ms / 1000)
-        
-        send_time = time.time()
-        self._send_times.append(send_time)
-        self.sent_messages.append(data)
-        self.last_activity = send_time
-    
-    async def send(self, data: str) -> None:
-        Mock send method."
+            raise ConnectionError("WebSocket is closed)""
         Mock send method.""
 
         await self.send_json(json.loads(data) if isinstance(data, str) else data)
@@ -375,8 +362,7 @@ class WebSocketBridgePerformanceTests:
             
             # Log results
             logger.info(fLatency Results (n={num_samples}:)
-            logger.info(f  P50: {p50:.2f}ms)"
-            logger.info(f  P50: {p50:.2f}ms)"
+            logger.info(f  P50: {p50:.2f}ms)""
             logger.info(f"  P90: {p90:.""2f""}ms)"
             logger.info(f  P95: {p95:.""2f""}ms)
             logger.info(f  P99: {p99:.""2f""}ms)

@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure WebSocket infrastructure initializes reliably
 - Value Impact: Prevents FactoryInitializationError that blocks all chat functionality
-- Strategic Impact: Eliminates system startup failures that prevent $500K+ ARR delivery
+- Strategic Impact: Eliminates system startup failures that prevent 500K+ ARR delivery
 
 CRITICAL: This test validates the business logic for factory initialization patterns
 that prevent FactoryInitializationError exceptions which completely block chat functionality.

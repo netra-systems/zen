@@ -5,7 +5,7 @@ CRITICAL MISSION: Create integration tests for WebSocket connection validation
 using real WebSocket connections to staging GCP environment.
 
 PROBLEM: WebSocket URL environment variable duplication causing connection failures
-BUSINESS IMPACT: $500K+ ARR Golden Path chat functionality at risk from connection issues
+BUSINESS IMPACT: 500K+ ARR Golden Path chat functionality at risk from connection issues
 
 TEST DESIGN:
 - Real WebSocket connections to staging GCP environment  

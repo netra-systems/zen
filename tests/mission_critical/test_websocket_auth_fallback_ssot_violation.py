@@ -290,10 +290,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
                     logger.critical(f ALERT:  - {violation})""
 
                     
-                logger.critical(" ALERT:  WebSocket should ONLY use UnifiedAuthInterface)"
-                logger.critical( ALERT:  NO DIRECT auth_client_core access allowed)
-                
-                assert len(violations) > 0, f"AUTH_CLIENT_CORE DUPLICATION: {violations}"
+                logger.critical(" ALERT:  WebSocket should ONLY use UnifiedAuthInterface)""AUTH_CLIENT_CORE DUPLICATION: {violations}"
                 return True
             else:
                 pytest.fail(VIOLATION NOT REPRODUCED: No auth_client_core duplication detected")"
@@ -361,22 +358,14 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
                         # Analyze resilience pattern duplication
                         if len(retry_attempts) > 0:
                             resilience_patterns_detected.append(retry_logic_duplication)
-                            logger.error(" ALERT:  RESILIENCE VIOLATION: WebSocket implements retry logic)"
-                        
-                        if len(env_accesses) > 0:
-                            resilience_patterns_detected.append(environment_resilience_config)
-                            logger.error( ALERT:  RESILIENCE VIOLATION: WebSocket accesses resilience config)"
+                            logger.error(" ALERT:  RESILIENCE VIOLATION: WebSocket implements retry logic)""
                             logger.error( ALERT:  RESILIENCE VIOLATION: WebSocket accesses resilience config)""
 
                         
                         # Check for error handling patterns
                         if user_context and user_context.get(user_id") == resilient_user:"
                             resilience_patterns_detected.append(error_recovery_patterns)
-                            logger.error(" ALERT:  RESILIENCE VIOLATION: WebSocket implements error recovery)"
-                        
-                        # Check for JWT payload construction after failure (resilience duplication)
-                        if user_context and sub in user_context:
-                            resilience_patterns_detected.append(jwt_construction_after_failure)"
+                            logger.error(" ALERT:  RESILIENCE VIOLATION: WebSocket implements error recovery)""
                             resilience_patterns_detected.append(jwt_construction_after_failure)"
                             logger.error( ALERT:  RESILIENCE VIOLATION: WebSocket constructs JWT after auth failure")"
                         
@@ -391,8 +380,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
                 logger.critical(f" ALERT:  - {pattern})"
                 
             logger.critical( ALERT:  ALL RESILIENCE PATTERNS SHOULD BE IN UnifiedAuthInterface)
-            logger.critical( ALERT:  WebSocket should delegate resilience, not implement it)"
-            logger.critical( ALERT:  WebSocket should delegate resilience, not implement it)""
+            logger.critical( ALERT:  WebSocket should delegate resilience, not implement it)"""
 
             
             assert len(resilience_patterns_detected) > 0, fRESILIENCE DUPLICATION: {resilience_patterns_detected}"
@@ -455,13 +443,8 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
                         
                         # Check if WebSocket added its own auth metadata
                         if permissions in user_context:
-                            state_construction_violations.append(Permissions processed locally)"
-                            state_construction_violations.append(Permissions processed locally)"
-                            logger.error(" ALERT:  VIOLATION: WebSocket processed permissions locally)"
-                        
-                        # Check for timestamp creation (iat, exp)
-                        if iat in user_context or exp in user_context:
-                            state_construction_violations.append(Timestamp creation")"
+                            state_construction_violations.append(Permissions processed locally)""
+                            logger.error(" ALERT:  VIOLATION: WebSocket processed permissions locally)"")"
                             logger.error( ALERT:  VIOLATION: WebSocket created auth timestamps)
                         
                         # Check for issuer/audience setting
@@ -479,10 +462,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
                 logger.critical(f ALERT:  - {violation})""
 
                 
-            logger.critical(" ALERT:  WebSocket should receive complete auth state from UnifiedAuthInterface)"
-            logger.critical( ALERT:  NO LOCAL auth state construction allowed)
-            
-            assert len(state_construction_violations) > 0, f"AUTH STATE VIOLATIONS: {state_construction_violations}"
+            logger.critical(" ALERT:  WebSocket should receive complete auth state from UnifiedAuthInterface)""AUTH STATE VIOLATIONS: {state_construction_violations}"
             return True
         else:
             pytest.fail(VIOLATION NOT REPRODUCED: No independent auth state construction detected")"

@@ -4,7 +4,7 @@
 MISSION CRITICAL TEST SUITE: Enhanced Staging WebSocket Agent Events - COMPREHENSIVE AUTH & USER JOURNEYS
 =====================================================================================================
 
-Business Value: $500K+ plus ARR - Core chat functionality must work in production-like environment
+Business Value: 500K+  ARR - Core chat functionality must work in production-like environment
 
 COMPREHENSIVE COVERAGE:
     - 25+ Authentication Flow Tests with WebSocket Integration
@@ -325,14 +325,7 @@ class EnhancedStagingWebSocketEventValidator:
         Mock WebSocket connection for testing when websockets package not available.""
 
         if not websockets:
-            logger.info("[U+1F50C] Mocking WebSocket connection (websockets package not available))"
-            if not auth_result.success or not auth_result.access_token:
-                logger.error(Cannot establish WebSocket connection without valid authentication)
-                return None
-            
-            # Simulate connection establishment
-            await asyncio.sleep(0.1)
-            self.authentication_metrics["websocket_connections] += 1"
+            logger.info("[U+1F50C] Mocking WebSocket connection (websockets package not available))""websocket_connections] += 1"
             
             return {
                 mock_connection: True,
@@ -344,8 +337,7 @@ class EnhancedStagingWebSocketEventValidator:
         logger.info(f[U+1F50C] Establishing WebSocket connection to {self.staging_websocket_url})
         
         if not auth_result.success or not auth_result.access_token:
-            logger.error(Cannot establish WebSocket connection without valid authentication)"
-            logger.error(Cannot establish WebSocket connection without valid authentication)""
+            logger.error(Cannot establish WebSocket connection without valid authentication)"""
 
             return None
         
@@ -365,17 +357,10 @@ class EnhancedStagingWebSocketEventValidator:
                 close_timeout=10
             )
             
-            logger.info(" PASS:  WebSocket connection established successfully)"
-            self.authentication_metrics[websocket_connections] += 1
-            return {connection: websocket, connected": True}"
+            logger.info(" PASS:  WebSocket connection established successfully)"": True}"
             
         except Exception as e:
-            logger.error(f" FAIL:  WebSocket connection failed: {e})"
-            self.authentication_metrics[websocket_failures] += 1
-            return None
-    
-    async def validate_mock_websocket_event_flow(self, connection: Dict[str, Any], timeout_seconds: int = 30) -> List[WebSocketEventValidation]:
-        Mock WebSocket event flow validation when real WebSocket not available.""
+            logger.error(f" FAIL:  WebSocket connection failed: {e})"""
         logger.info( TARGET:  Validating mock WebSocket event flow...)
         
         if not connection or not connection.get("connected):"
@@ -406,8 +391,7 @@ class EnhancedStagingWebSocketEventValidator:
                 break
         
         total_time = time.time() - start_time
-        logger.info(f TARGET:  Mock WebSocket event validation completed in {total_time:.2f}s - {len(received_events)} events received)"
-        logger.info(f TARGET:  Mock WebSocket event validation completed in {total_time:."2f"}s - {len(received_events)} events received)""
+        logger.info(f TARGET:  Mock WebSocket event validation completed in {total_time:.2f}s - {len(received_events)} events received)""2f"}s - {len(received_events)} events received)""
 
         
         return received_events
@@ -504,8 +488,7 @@ class EnhancedStagingWebSocketEventValidator:
             metrics.first_websocket_connection_time = time.time() - ws_start
             
             if not websocket:
-                logger.error( FAIL:  WebSocket connection failed in user journey)"
-                logger.error( FAIL:  WebSocket connection failed in user journey)""
+                logger.error( FAIL:  WebSocket connection failed in user journey)"""
 
                 return metrics
             
@@ -739,7 +722,7 @@ if __name__ == __main__:
     print(ENHANCED STAGING WEBSOCKET AGENT EVENTS TEST SUITE)
     print("Environment: Staging (api-staging.netrasystems.ai))"
     print(Purpose: Production-readiness validation)
-    print(Business Impact: $500K+ plus ARR revenue protection")"
+    print(Business Impact: 500K+  ARR revenue protection")"
     print("= * 80)"
 
     import pytest

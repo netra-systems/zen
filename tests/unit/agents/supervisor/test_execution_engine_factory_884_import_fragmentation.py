@@ -2,7 +2,7 @@
 
 CRITICAL BUSINESS VALUE: These tests reproduce import path fragmentation issues in
 execution engine factory patterns that cause race conditions, initialization failures,
-and WebSocket 1011 errors, protecting $500K+ ARR functionality.
+and WebSocket 1011 errors, protecting 500K+ ARR functionality.
 
 EXPECTED BEHAVIOR: All tests in this file should INITIALLY FAIL to demonstrate
 import fragmentation violations. They will pass after SSOT consolidation.
@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 - Segment: Platform/Internal
 - Business Goal: Ensure reliable factory import patterns and initialization
 - Value Impact: Prevents WebSocket 1011 errors, factory initialization race conditions
-- Strategic Impact: Foundation for $500K+ ARR Golden Path reliability
+- Strategic Impact: Foundation for 500K+ ARR Golden Path reliability
 
 Test Philosophy:
 - FAILING TESTS FIRST: These tests reproduce real import fragmentation issues
@@ -285,7 +285,7 @@ class ExecutionEngineFactoryImportFragmentation884Tests(SSotAsyncTestCase):
         """Log detailed test failure information for analysis."""
         print(f'\n=== EXECUTION ENGINE FACTORY IMPORT FRAGMENTATION: {test_name} ===')
         print(f'Timestamp: {datetime.now().isoformat()}')
-        print(f'Business Impact: WebSocket 1011 errors, Golden Path blocked - $500K+ ARR at risk')
+        print(f'Business Impact: WebSocket 1011 errors, Golden Path blocked - 500K+ ARR at risk')
         print(f'Issue: #884 Execution Engine Factory Import Fragmentation')
         print('\nFailure Details:')
         for key, value in failure_details.items():

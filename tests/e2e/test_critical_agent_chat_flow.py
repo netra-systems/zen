@@ -28,7 +28,7 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-'\nMISSION CRITICAL E2E TEST: Agent Chat WebSocket Flow - REAL SERVICES ONLY\n\nTHIS IS THE PRIMARY VALIDATION FOR CHAT FUNCTIONALITY.\nBusiness Value: $500K+ ARR - Core product functionality depends on this.\n\nTests the complete Golden Path user flow:\n1. User authentication with real auth service\n2. WebSocket connection establishment \n3. User sends message via WebSocket\n4. Supervisor agent processes message with real LLM\n5. All 5 business-critical WebSocket events are sent\n6. User receives meaningful agent response\n7. Complete cleanup and validation\n\nCRITICAL REQUIREMENTS per CLAUDE.md:\n- NO MOCKS - Use real services only\n- REAL WEBSOCKET CONNECTIONS - Test actual WebSocket events\n- REAL AGENT EXECUTION - Full agent workflow with real LLM calls\n- PROPER ERROR HANDLING - Tests must fail hard when things go wrong\n- VALIDATE ALL 5 WEBSOCKET EVENTS - Complete event sequence validation\n- END-TO-END USER FLOW - Complete chat experience validation\n\nIf this test fails, the chat UI is completely broken and deployment is BLOCKED.\n'
+'\nMISSION CRITICAL E2E TEST: Agent Chat WebSocket Flow - REAL SERVICES ONLY\n\nTHIS IS THE PRIMARY VALIDATION FOR CHAT FUNCTIONALITY.\nBusiness Value: 500K+ ARR - Core product functionality depends on this.\n\nTests the complete Golden Path user flow:\n1. User authentication with real auth service\n2. WebSocket connection establishment \n3. User sends message via WebSocket\n4. Supervisor agent processes message with real LLM\n5. All 5 business-critical WebSocket events are sent\n6. User receives meaningful agent response\n7. Complete cleanup and validation\n\nCRITICAL REQUIREMENTS per CLAUDE.md:\n- NO MOCKS - Use real services only\n- REAL WEBSOCKET CONNECTIONS - Test actual WebSocket events\n- REAL AGENT EXECUTION - Full agent workflow with real LLM calls\n- PROPER ERROR HANDLING - Tests must fail hard when things go wrong\n- VALIDATE ALL 5 WEBSOCKET EVENTS - Complete event sequence validation\n- END-TO-END USER FLOW - Complete chat experience validation\n\nIf this test fails, the chat UI is completely broken and deployment is BLOCKED.\n'
 import asyncio
 import json
 import os
@@ -220,7 +220,7 @@ class CriticalAgentChatFlowTests(SSotBaseTestCase):
         5. All WebSocket events received
         6. Meaningful response returned
         
-        CRITICAL: This test protects $500K+ ARR by ensuring chat works.
+        CRITICAL: This test protects 500K+ ARR by ensuring chat works.
         """
         logger.info(' TARGET:  STARTING MISSION CRITICAL GOLDEN PATH CHAT FLOW TEST')
         logger.info('=' * 80)

@@ -4,7 +4,7 @@
 MISSION CRITICAL TEST SUITE: Comprehensive WebSocket Event Validation
 =====================================================================
 
-Business Value: $500K+ plus ARR - CRITICAL validation of WebSocket events that deliver AI value
+Business Value: 500K+  ARR - CRITICAL validation of WebSocket events that deliver AI value
 
 COMPREHENSIVE COVERAGE:
     - Event Sequence Validation (5 critical events in correct order)

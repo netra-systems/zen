@@ -6,7 +6,7 @@ Business Value Justification:
 - Segment: Platform/Infrastructure
 - Business Goal: System Stability & SSOT Compliance
 - Value Impact: Validates successful SSOT migration maintains system integrity
-- Strategic Impact: CRITICAL - Post-remediation validation ensures $500K+ ARR protection
+- Strategic Impact: CRITICAL - Post-remediation validation ensures 500K+ ARR protection
 
 PURPOSE:
 These are post-refactor validation tests that demonstrate:

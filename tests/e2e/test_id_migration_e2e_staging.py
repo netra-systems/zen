@@ -2,7 +2,7 @@
 E2E Tests for Issue #89 UnifiedIDManager Migration - Staging Environment Validation
 ==================================================================================
 
-Business Value Protection: $500K+ ARR (End-to-end ID consistency in production-like environment)
+Business Value Protection: 500K+ ARR (End-to-end ID consistency in production-like environment)
 Purpose: FAIL to expose end-to-end ID migration gaps in GCP staging environment
 
 This test suite is designed to FAIL during Issue #89 migration to detect:

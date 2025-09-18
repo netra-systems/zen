@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,22 +23,17 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 Complete Golden Path: Business Value Delivery E2E Test
 
-CRITICAL BUSINESS MISSION: This test validates the COMPLETE user journey that generates $500K+ ARR.
+CRITICAL BUSINESS MISSION: This test validates the COMPLETE user journey that generates 500K+ ARR.
 It tests the PRIMARY revenue-generating flow from user connection through AI-powered cost optimization results.
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Validate complete revenue-generating user journey + system stability
 - Value Impact: Ensures users receive cost optimization insights (core value proposition)
-- Strategic Impact: Protects $500K+ ARR through reliable chat experience
+- Strategic Impact: Protects 500K+ ARR through reliable chat experience
 
 This test validates the COMPLETE golden path from user connection to business value delivery.
 Failure indicates fundamental revenue-threatening system breakdown.
@@ -393,7 +380,7 @@ class CompleteGoldenPathBusinessValueTests(SSotAsyncTestCase):
         print(f"   [U+1F4E1] WebSocket events received: {len(collected_events)}")
         print(f"   [U+1F916] Agents executed: {len(agent_started_events)}")
         print(f"   [U+1F4B0] Business value delivered: Cost optimization insights")
-        print(f"    TARGET:  $500K+ ARR protection: VALIDATED")
+        print(f"    TARGET:  500K+ ARR protection: VALIDATED")
 
     @pytest.mark.e2e
     @pytest.mark.real_services

@@ -6,12 +6,12 @@ throughout the AgentRegistry SSOT consolidation process, protecting the
 Golden Path user flow and business value.
 
 EXPECTED BEHAVIOR: These tests MUST ALWAYS PASS - they protect business continuity.
-Any failures indicate breaking changes that affect $500K+ ARR functionality.
+Any failures indicate breaking changes that affect 500K+ ARR functionality.
 
 Business Impact:
 - Protects Golden Path: Users login -> get AI responses
 - Ensures WebSocket event delivery for real-time chat experience
-- Maintains $500K+ ARR chat functionality reliability
+- Maintains 500K+ ARR chat functionality reliability
 - Validates enterprise customer real-time communication
 
 Test Strategy:
@@ -124,7 +124,7 @@ class WebSocketBridgeRegistryInterfaceTests(SSotAsyncTestCase):
         Validates that WebSocket bridge interfaces work consistently
         regardless of which registry implementation is used.
 
-        CRITICAL: This protects $500K+ ARR chat functionality
+        CRITICAL: This protects 500K+ ARR chat functionality
         """
         if not websocket_infra_available:
             pytest.skip("WebSocket infrastructure required for business value protection")
@@ -220,7 +220,7 @@ class WebSocketBridgeRegistryInterfaceTests(SSotAsyncTestCase):
         # MUST PASS - All critical events must be deliverable
         self.assertEqual(event_delivery_rate, 1.0,
                         f"ALL critical WebSocket events must be deliverable for Golden Path - "
-                        f"only {event_delivery_rate:.1%} working, affecting $500K+ ARR functionality")
+                        f"only {event_delivery_rate:.1%} working, affecting 500K+ ARR functionality")
 
         # Record critical metrics
         self.record_metric('critical_events_delivery_rate', event_delivery_rate)
@@ -401,7 +401,7 @@ class WebSocketBridgeRegistryInterfaceTests(SSotAsyncTestCase):
         Validates that the complete WebSocket flow for Golden Path
         (login -> agent events -> AI response) remains functional.
 
-        CRITICAL: This is the core $500K+ ARR user experience
+        CRITICAL: This is the core 500K+ ARR user experience
         """
         if not websocket_infra_available:
             pytest.skip("WebSocket infrastructure required for Golden Path testing")
@@ -491,7 +491,7 @@ class WebSocketBridgeRegistryInterfaceTests(SSotAsyncTestCase):
         # MUST PASS - Golden Path success rate must be very high
         self.assertGreaterEqual(golden_path_success_rate, 0.9,
                                f"Golden Path WebSocket flow must be at least 90% successful - "
-                               f"got {golden_path_success_rate:.1%}, risking $500K+ ARR functionality")
+                               f"got {golden_path_success_rate:.1%}, risking 500K+ ARR functionality")
 
         # Record Golden Path metrics
         self.record_metric('golden_path_websocket_success_rate', golden_path_success_rate)

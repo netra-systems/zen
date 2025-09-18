@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 - Segment: Platform/Internal - SSOT Compliance & User Security
 - Business Goal: Eliminate user isolation failures causing cross-user data leakage
 - Value Impact: Detect factory pattern violations that create security vulnerabilities
-- Strategic Impact: Foundation for $500K+ ARR protection through proper user isolation
+- Strategic Impact: Foundation for 500K+ ARR protection through proper user isolation
 
 EXPECTED RESULT: These tests SHOULD FAIL, proving SSOT violations exist
 SUCCESS CRITERIA: Tests fail demonstrating factory pattern violations and user isolation issues

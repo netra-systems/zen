@@ -8,7 +8,7 @@ user login -> chat request -> agent execution -> AI response delivery.
 Tests on GCP staging environment (no Docker required).
 
 BUSINESS IMPACT:
-- $500K+ ARR Golden Path directly validated with consolidated factory
+- 500K+ ARR Golden Path directly validated with consolidated factory
 - Complete user journey from authentication to AI response delivery
 - Real-world validation of factory consolidation protecting business value
 - End-to-end validation ensures customer-facing functionality works

@@ -4,7 +4,7 @@ E2E Tests for GCP Staging Complete User Journey
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Validate complete golden path "users login -> get AI responses" flow
-- Value Impact: Protects $500K+ ARR by ensuring end-to-end chat functionality in staging
+- Value Impact: Protects 500K+ ARR by ensuring end-to-end chat functionality in staging
 - Strategic Impact: Validates 90% of platform value through complete user journey
 
 This test suite validates the complete golden path user journey in GCP staging:
@@ -60,7 +60,7 @@ class GCPStagingCompleteUserJourneyTests(BaseE2ETest):
     """
     Test complete user journey from login to AI response in GCP staging.
     
-    BUSINESS IMPACT: Protects $500K+ ARR by validating end-to-end chat functionality
+    BUSINESS IMPACT: Protects 500K+ ARR by validating end-to-end chat functionality
     """
 
     @pytest.fixture(autouse=True)

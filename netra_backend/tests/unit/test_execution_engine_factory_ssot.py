@@ -284,10 +284,7 @@ class UnifiedExecutionEngineFactorySSotComplianceTests(SSotAsyncTestCase):
                 
             # Should inject WebSocket bridge for user isolation
             assert mock_websocket_bridge in call_args[0] or mock_websocket_bridge in call_args[1].values(), \
-                "WebSocket bridge not injected (user isolation violation)"
-                
-    def test_factory_prevents_shared_state_creation(self):
-        """Test that factory prevents creation of engines with shared state.
+                "WebSocket bridge not injected (user isolation violation)""""Test that factory prevents creation of engines with shared state.
         
         EXPECTED: This test should FAIL before remediation (shared state not prevented).
         AFTER REMEDIATION: Should PASS when shared state prevention is added.

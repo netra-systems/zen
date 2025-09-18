@@ -9,10 +9,7 @@ class TestWebSocketConnection:
 """
         """Send JSON message.""""""
         """Send JSON message.""""""
-        raise RuntimeError("WebSocket is closed)"
-        self.messages_sent.append(message)
-
-    async def close(self, code: int = 1000, reason: str = "Normal closure):"
+        raise RuntimeError("WebSocket is closed)""Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True"""
@@ -350,11 +347,7 @@ session_data = {"client": ws_client,, "user_data": user_data,, "start_time": tim
         try:"""
 """
 """
-        raise RuntimeError("Failed to establish WebSocket connection)"
-
-        return client
-        except Exception as e:
-        logger.warning("formatted_string)"
+        raise RuntimeError("Failed to establish WebSocket connection)""formatted_string)"
                 # For testing purposes, create a mock client that simulates events
         return await self._create_mock_websocket_client()
 

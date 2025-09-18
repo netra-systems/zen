@@ -3,7 +3,7 @@ Production SSOT Logging E2E Validation Tests (Issue #368)
 
 PURPOSE: E2E validation on GCP staging that SSOT logging works in production.
 EXPECTATION: These tests will validate production logging against staging environment.
-BUSINESS IMPACT: Protects Golden Path ($500K+ ARR) in production deployment.
+BUSINESS IMPACT: Protects Golden Path (500K+ ARR) in production deployment.
 
 This test suite validates the complete SSOT logging infrastructure in a
 production-like environment (GCP staging). It focuses on enterprise-grade

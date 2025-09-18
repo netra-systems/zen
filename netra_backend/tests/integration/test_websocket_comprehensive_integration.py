@@ -3,7 +3,7 @@ Comprehensive WebSocket Integration Tests - 25+ Business-Critical Real Service T
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - WebSocket events serve all user tiers
-- Business Goal: Ensure reliable real-time communication infrastructure protecting $500K+ ARR
+- Business Goal: Ensure reliable real-time communication infrastructure protecting 500K+ ARR
 - Value Impact: WebSocket events enable chat functionality, which delivers 90% of platform value
 - Strategic Impact: Critical for Golden Path user flow - users login and get AI responses
 - Revenue Impact: WebSocket failures = complete loss of chat-based AI value delivery
@@ -13,7 +13,7 @@ MISSION CRITICAL REQUIREMENTS:
 - Uses REAL WebSocket components without requiring fully running services
 - NO MOCKS except for external APIs - validates actual business workflows
 - Validates Golden Path: user login → WebSocket connection → agent events → AI responses
-- Tests multi-user isolation preventing cross-contamination of $500K+ ARR customer data
+- Tests multi-user isolation preventing cross-contamination of 500K+ ARR customer data
 - Validates performance under concurrent load to support enterprise customers
 
 CRITICAL UNDERSTANDING - "Chat" Business Value:
@@ -28,7 +28,7 @@ Test Categories Covered:
 5. Error Handling & Recovery - Ensures graceful degradation
 6. Performance & Concurrency - Validates enterprise-scale capabilities
 7. Message Validation - Ensures data integrity
-8. Golden Path Critical Scenarios - Protects $500K+ ARR functionality
+8. Golden Path Critical Scenarios - Protects 500K+ ARR functionality
 9. Business Value Demonstration - Proves measurable ROI delivery
 
 Each test validates specific WebSocket functionality critical to the Golden Path user experience
@@ -425,7 +425,7 @@ class WebSocketComprehensiveIntegrationTests(BaseIntegrationTest):
         BVJ: All tiers - Silent WebSocket failures must be detected to prevent revenue loss
         Business Goal: Prevent silent chat failures that break core platform value
         Value Impact: Users always know when WebSocket issues occur
-        Revenue Impact: Silent failures = complete loss of chat functionality = $500K+ ARR at risk
+        Revenue Impact: Silent failures = complete loss of chat functionality = 500K+ ARR at risk
         """
         bridge = create_agent_websocket_bridge()
         connection = self._create_test_connection()
@@ -471,7 +471,7 @@ class WebSocketComprehensiveIntegrationTests(BaseIntegrationTest):
         BVJ: All tiers - Golden Path validation ensures core business value delivery
         Business Goal: Validate the primary user journey that delivers 90% of platform value
         Value Impact: Complete user journey from request to valuable AI response
-        Revenue Impact: Golden Path functionality protects $500K+ ARR customer experience
+        Revenue Impact: Golden Path functionality protects 500K+ ARR customer experience
         """
         bridge = create_agent_websocket_bridge()
         connection = self._create_test_connection()

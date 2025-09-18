@@ -247,13 +247,7 @@ class StagingDeploymentErrorsTests:
                         missing.append(f"{service}.{config}")
             
             if missing:
-                print(f"Warning: Deployment script may be missing configs: {missing}")
-
-    # Test 7: Health Check Database Initialization
-    @pytest.mark.asyncio
-    @pytest.mark.e2e
-    async def test_health_check_database_initialization(self):
-        """
+                print(f"Warning: Deployment script may be missing configs: {missing}""""
         Test that health check endpoints properly handle database initialization.
         Health checks must not crash even if database isn't available.
         """

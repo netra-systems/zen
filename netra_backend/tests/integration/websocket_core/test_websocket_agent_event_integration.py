@@ -5,7 +5,7 @@ Integration Tests for WebSocket Agent Event Delivery
 MISSION CRITICAL: Real WebSocket integration tests for chat functionality.
 Tests real WebSocket connections with agent event delivery for business value.
 
-Business Value: $500K+ ARR - Real-time chat integration validation
+Business Value: 500K+ ARR - Real-time chat integration validation
 - Tests real WebSocket connections (no mocks) with agent events
 - Validates end-to-end event delivery from agents to WebSocket clients
 - Ensures all 5 REQUIRED events work with real WebSocket infrastructure

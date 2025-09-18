@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure factory patterns work consistently for Golden Path
 - Value Impact: Factory pattern mismatches break user isolation and cause failures
-- Strategic Impact: Core platform functionality ($500K+ ARR at risk)
+- Strategic Impact: Core platform functionality (500K+ ARR at risk)
 
 This suite tests integration-level factory pattern mismatches that occur when
 different components use incompatible factory patterns, causing Golden Path

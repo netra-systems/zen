@@ -8,7 +8,7 @@ This validates that ExecutionEngineFactory and related factories route to UserEx
 Expected to FAIL before SSOT consolidation (proves multiple factory patterns exist)
 Expected to PASS after SSOT consolidation (proves all factories use UserExecutionEngine)
 
-Business Impact: $500K+ ARR Golden Path protection - consistent factory patterns prevent execution failures
+Business Impact: 500K+ ARR Golden Path protection - consistent factory patterns prevent execution failures
 """
 
 import pytest

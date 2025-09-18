@@ -6,7 +6,7 @@ MISSION: Mission-critical validation of SSOT compliance in production code.
 
 This test suite provides comprehensive validation of SSOT compliance across
 the entire production codebase. It's designed to catch any regressions that'
-could impact the $500K+ plus ARR Golden Path user flow.
+could impact the 500K+  ARR Golden Path user flow.
 
 Business Value: Platform/Internal - Mission Critical System Stability
 Protects against SSOT violations that could cause:
@@ -158,7 +158,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
             violation_count,
             self.MAX_PRODUCTION_VIOLATIONS,
             f🚨 CRITICAL FAILURE: Production violations ({violation_count) exceed Phase 2 limit 
-            f({self.MAX_PRODUCTION_VIOLATIONS). This BLOCKS deployment to protect $500K+ plus ARR. 
+            f({self.MAX_PRODUCTION_VIOLATIONS). This BLOCKS deployment to protect 500K+  ARR. 
             f"Violations: {[f'{v.file_path}:{v.line_number}' for v in production_violations[:5]]}"
         )
 
@@ -237,8 +237,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
             fViolations: {[f'{v.file_path}:{v.line_number}' for v in production_factory_violations]}
         )
 
-        self.assertLog(CHECK MISSION CRITICAL: WebSocket factory elimination PASSED)"
-        self.assertLog(CHECK MISSION CRITICAL: WebSocket factory elimination PASSED)""
+        self.assertLog(CHECK MISSION CRITICAL: WebSocket factory elimination PASSED)"""
 
 
     def test_golden_path_import_compliance(self):

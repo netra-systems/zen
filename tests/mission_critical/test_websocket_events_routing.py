@@ -7,7 +7,7 @@ event delivery and prevents cross-user event leakage.
 Business Value Justification:
     - Segment: Platform/Internal  
 - Business Goal: User Experience & Security
-- Value Impact: Ensures real-time chat events reach correct users for $500K+ plus ARR operations
+- Value Impact: Ensures real-time chat events reach correct users for 500K+  ARR operations
 - Strategic Impact: Validates WebSocket integration in SSOT ExecutionEngine consolidation
 
 Key Validation Areas:
@@ -128,7 +128,7 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                     user_id = user['user_id']
                     
                     # Send different types of events
-                    await emitter.notify_agent_started(fagent_{i)", {"
+                    await emitter.notify_agent_started(fagent_{i)""
                         user_specific_data: fdata_for_user_{i},
                         agent_id: fagent_{i}"
                         agent_id: fagent_{i}""
@@ -227,8 +227,7 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
                 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
                 
-                user_id = UnifiedIdGenerator.generate_base_id(fconcurrent_event_user_{user_index}, True, 8)"
-                user_id = UnifiedIdGenerator.generate_base_id(fconcurrent_event_user_{user_index}, True, 8)"
+                user_id = UnifiedIdGenerator.generate_base_id(fconcurrent_event_user_{user_index}, True, 8)""
                 thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, f"concurrent_event_{user_index})"
                 
                 user_context = UserExecutionContext(
@@ -355,8 +354,7 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
     
     def test_websocket_event_data_integrity(self):
         "Test that WebSocket event data maintains integrity through ExecutionEngine."
-        logger.info(🔒 INTEGRITY TEST: Validating WebSocket event data integrity)"
-        logger.info(🔒 INTEGRITY TEST: Validating WebSocket event data integrity)""
+        logger.info(🔒 INTEGRITY TEST: Validating WebSocket event data integrity)"""
 
         
         async def test_data_integrity():

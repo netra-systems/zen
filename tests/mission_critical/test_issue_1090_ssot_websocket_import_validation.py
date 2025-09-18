@@ -4,7 +4,7 @@ Mission Critical Tests for Issue #1090 - SSOT WebSocket Manager Import Fragmenta
 Business Value Justification (BVJ):
 - Segment: Platform/All Customer Tiers
 - Goal: Prevent WebSocket manager fragmentation regressions
-- Value Impact: Protects $500K+ ARR Golden Path WebSocket functionality
+- Value Impact: Protects 500K+ ARR Golden Path WebSocket functionality
 - Strategic Impact: Ensures SSOT compliance and prevents import-related race conditions
 
 This test suite validates that Issue #1090 Phase 2 SSOT tests correctly identify
@@ -38,7 +38,7 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
         self.test_context.test_category = "mission_critical"
         self.test_context.record_custom('issue_number', '1090')
         self.test_context.record_custom('component', 'websocket_import_fragmentation')
-        self.test_context.record_custom('business_impact', '$500K+ ARR protection')
+        self.test_context.record_custom('business_impact', '500K+ ARR protection')
         
         # Track metrics for validation
         self.import_violations_detected = 0
@@ -435,7 +435,7 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
         """MISSION CRITICAL: Ensure Golden Path WebSocket functionality is protected.
         
         This test validates that Issue #1090 deprecation warning cleanup does not
-        impact the core WebSocket functionality that supports $500K+ ARR.
+        impact the core WebSocket functionality that supports 500K+ ARR.
         
         Business Impact: Direct protection of revenue-critical functionality.
         """

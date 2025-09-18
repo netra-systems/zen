@@ -5,7 +5,7 @@ Simple Issue #601 Validation Test - Strategic Validation Mocking
 This test validates the core fix for Issue #601 without complex infrastructure dependencies.
 It demonstrates that strategic mocking of _run_comprehensive_validation prevents deadlocks.
 
-Business Value: $500K+ plus ARR platform reliability protection
+Business Value: 500K+  ARR platform reliability protection
 """
 
 

@@ -4,7 +4,7 @@
 GitHub Issue: #844 SSOT-incomplete-migration-multiple-websocket-managers
 
 THIS TEST VALIDATES UNIFIED WEBSOCKET BEHAVIOR AFTER SSOT CONSOLIDATION.
-Business Value: $500K+ ARR - Ensures single WebSocket manager provides all required functionality
+Business Value: 500K+ ARR - Ensures single WebSocket manager provides all required functionality
 
 PURPOSE:
 - Validate that unified WebSocket manager handles all 5 critical events

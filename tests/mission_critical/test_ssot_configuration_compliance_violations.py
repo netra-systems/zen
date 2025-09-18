@@ -4,7 +4,7 @@
 Mission Critical Test Suite: Configuration Manager SSOT Compliance Violations Detection
 
 Business Value: Platform/Internal - System Reliability & Configuration Management
-Critical for $500K+ plus ARR protection through consistent configuration access patterns.
+Critical for 500K+  ARR protection through consistent configuration access patterns.
 
 PURPOSE: This test MUST FAIL with current SSOT violations and PASS after remediation.
 Detects direct environment variable access that bypasses SSOT configuration patterns.
@@ -213,7 +213,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
     def determine_business_impact(self, env_var: str, file_path: str) -> str:
         Determine business impact of SSOT violation.
         if 'auth' in file_path.lower() and env_var == 'ENVIRONMENT':
-            return 'Authentication system inconsistency - affects $500K+ plus ARR Golden Path user auth'
+            return 'Authentication system inconsistency - affects 500K+  ARR Golden Path user auth'
         elif 'middleware' in file_path.lower() and env_var == 'ENVIRONMENT':
             return 'Error handling inconsistency - affects system stability and user experience'
         elif 'corpus' in file_path.lower() and env_var == 'CORPUS_BASE_PATH':

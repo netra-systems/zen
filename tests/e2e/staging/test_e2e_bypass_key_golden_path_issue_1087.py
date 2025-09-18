@@ -4,7 +4,7 @@ E2E Staging Tests for Issue #1087: E2E OAuth Bypass Key Golden Path Validation
 Tests complete Golden Path authentication flow in real staging GCP environment.
 Validates end-to-end user authentication flow with E2E bypass key configuration.
 
-Business Value: Restores $500K+ ARR Golden Path authentication functionality.
+Business Value: Restores 500K+ ARR Golden Path authentication functionality.
 """
 
 import pytest
@@ -38,7 +38,7 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
     async def test_golden_path_authentication_with_bypass_key(self):
         """Test complete Golden Path authentication flow with E2E bypass key.
 
-        CRITICAL BUSINESS VALUE: Validates $500K+ ARR Golden Path restoration.
+        CRITICAL BUSINESS VALUE: Validates 500K+ ARR Golden Path restoration.
         Tests complete auth flow: bypass key -> JWT token -> WebSocket connection.
 
         Expected: FAIL initially -> PASS after configuration fix
@@ -97,7 +97,7 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
                                     f"ISSUE #1087 GOLDEN PATH BLOCKED: "
                                     f"E2E bypass key authentication failed in staging. "
                                     f"Status: {response.status}, Response: {response_text}. "
-                                    f"This completely blocks $500K+ ARR Golden Path functionality. "
+                                    f"This completely blocks 500K+ ARR Golden Path functionality. "
                                     f"Configuration fix required for E2E_OAUTH_SIMULATION_KEY."
                                 )
 
@@ -177,8 +177,7 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
                     print("   CHECK GOLDEN PATH WEBSOCKET: Authenticated connection working")
 
                 except asyncio.TimeoutError:
-                    print("   WARNING️  WebSocket response timeout (may be normal for test message)")
-                    print("   CHECK GOLDEN PATH WEBSOCKET: Connection established successfully")
+                    print("   WARNING️  WebSocket response timeout (may be normal for test message)""   CHECK GOLDEN PATH WEBSOCKET: Connection established successfully")
 
         except websockets.ConnectionClosed as e:
             pytest.fail(f"WebSocket connection closed unexpectedly: {e}")

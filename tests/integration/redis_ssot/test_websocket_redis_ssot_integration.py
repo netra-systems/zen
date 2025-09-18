@@ -2,10 +2,10 @@
 WebSocket-Redis SSOT Integration Test - CRITICAL for GitHub Issue #190
 
 This test is CRITICAL for the Golden Path user flow - prevents 1011 WebSocket errors
-that break the $500K+ ARR chat functionality by validating Redis SSOT integration
+that break the 500K+ ARR chat functionality by validating Redis SSOT integration
 with WebSocket event delivery and agent state persistence.
 
-BUSINESS IMPACT: MISSION CRITICAL - $500K+ ARR Golden Path Protection
+BUSINESS IMPACT: MISSION CRITICAL - 500K+ ARR Golden Path Protection
 - Prevents 1011 WebSocket handshake failures from Redis race conditions
 - Validates agent state persistence using single SSOT Redis manager
 - Ensures WebSocket events use consolidated Redis operations
@@ -47,7 +47,7 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
     consolidated Redis SSOT, preventing 1011 WebSocket errors and ensuring
     reliable chat functionality.
     
-    DEPLOYMENT BLOCKER: This test protects $500K+ ARR chat functionality.
+    DEPLOYMENT BLOCKER: This test protects 500K+ ARR chat functionality.
     """
 
     def setUp(self):

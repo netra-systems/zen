@@ -11,7 +11,7 @@ PURPOSE:
 - Ensures staging parity with production expectations
 
 BUSINESS VALUE:
-- Protects $500K+ ARR staging environment reliability
+- Protects 500K+ ARR staging environment reliability
 - Validates production deployment readiness
 - Tests real infrastructure components (GCP, OAuth, SSL)
 - Ensures staging matches production behavior

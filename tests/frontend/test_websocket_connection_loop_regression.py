@@ -10,10 +10,7 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed)"
-        self.messages_sent.append(message)
-
-    async def close(self, code: int = 1000, reason: str = "Normal closure):"
+        raise RuntimeError("WebSocket is closed)""Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -70,10 +67,7 @@ class MockWebSocket:
     def send(self, data: str):
         pass
         if self.readyState != self.OPEN:
-        raise Exception("WebSocket is not open)"
-        self._messages_sent.append(data)
-
-    def close(self, code: int = 1000, reason: str = ""):
+        raise Exception("WebSocket is not open)"""):
         pass
         self.readyState = self.CLOSED
         self._close_code = code
@@ -388,8 +382,7 @@ if __name__ == "__main__:"
                     # Run the tests - these should PASS after the SSOT fix
 import sys
 
-print("Running WebSocket Connection Loop Bug Tests...)"
-print("= * 60)"
+print("Running WebSocket Connection Loop Bug Tests...)""= * 60)"
 print("These tests verify the SSOT fix is working correctly.)"
 print("= * 60)"
 

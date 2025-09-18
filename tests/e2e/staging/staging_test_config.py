@@ -9,7 +9,7 @@ Business Value Justification:
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Staging environment validates Golden Path reliability
 - Value Impact: Staging coordination prevents production deployment failures
-- Strategic Impact: Reliable staging protects $500K+ ARR from coordination bugs
+- Strategic Impact: Reliable staging protects 500K+ ARR from coordination bugs
 """
 
 import os

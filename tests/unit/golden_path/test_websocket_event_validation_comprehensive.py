@@ -3,7 +3,7 @@ Comprehensive Unit Tests for WebSocket Event Validation in Golden Path
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
-- Business Goal: Ensure reliable WebSocket event delivery protecting $500K+ ARR
+- Business Goal: Ensure reliable WebSocket event delivery protecting 500K+ ARR
 - Value Impact: Validates all 5 critical WebSocket events that deliver user experience transparency
 - Strategic Impact: Prevents silent failures that break user trust and engagement
 

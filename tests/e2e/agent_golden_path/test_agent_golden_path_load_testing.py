@@ -4,7 +4,7 @@ Agent Golden Path Load Testing E2E Tests - Issue #1081 Phase 1
 Business Value Justification:
 - Segment: Mid-Market, Enterprise - Multi-user scalability validation
 - Business Goal: Validate platform can handle concurrent users without degradation
-- Value Impact: Ensures $500K+ ARR scalability for growing customer base
+- Value Impact: Ensures 500K+ ARR scalability for growing customer base
 - Revenue Impact: Prevents performance bottlenecks that cause customer churn
 
 PURPOSE:

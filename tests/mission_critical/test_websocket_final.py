@@ -25,10 +25,10 @@
     # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
 
     #!/usr/bin/env python
-    # REMOVED_SYNTAX_ERROR: '''FINAL MISSION CRITICAL TEST: WebSocket Agent Events
+    # REMOVED_SYNTAX_ERROR: """FINAL MISSION CRITICAL TEST: WebSocket Agent Events
 
     # REMOVED_SYNTAX_ERROR: THIS TEST MUST PASS OR THE PRODUCT IS BROKEN.
-    # REMOVED_SYNTAX_ERROR: Business Value: $500K+ ARR - Core chat functionality
+    # REMOVED_SYNTAX_ERROR: Business Value: 500K+ ARR - Core chat functionality
 
     # REMOVED_SYNTAX_ERROR: This test validates the exact requirements from the task:
         # REMOVED_SYNTAX_ERROR: 1. AgentRegistry.set_websocket_manager() MUST enhance tool dispatcher
@@ -38,7 +38,7 @@
 
         # REMOVED_SYNTAX_ERROR: Uses mocked WebSocket connections to avoid infrastructure dependencies
         # REMOVED_SYNTAX_ERROR: while still validating the critical integration points.
-        # REMOVED_SYNTAX_ERROR: '''
+        # REMOVED_SYNTAX_ERROR: """'''
 
         # REMOVED_SYNTAX_ERROR: import os
         # REMOVED_SYNTAX_ERROR: import sys

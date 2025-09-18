@@ -12,7 +12,7 @@ Business Value:
     """
 """
 
-- Protects $500K+ plus ARR from JWT secret cascade failures
+- Protects 500K+  ARR from JWT secret cascade failures
 - Documents SSOT compliance baseline (current 40/100 score)
 - Validates that backend JWT decoding violations are removed during refactor
 - Ensures auth service becomes the exclusive JWT source
@@ -30,7 +30,7 @@ CRITICAL REQUIREMENTS:
     - NO Docker dependencies (unit-style tests only)
 - Tests prove violations exist by successfully using them
 - Clear documentation of why these are SSOT violations
-- Business impact quantification ($500K+ plus ARR protection)
+- Business impact quantification (500K+  ARR protection)
 "
 ""
 
@@ -131,7 +131,7 @@ class BackendJWTViolationDetector:
                         # Document business impact
                         self.business_impact_notes.append(
                             fBackend JWT secret access enables mismatches with auth service, ""
-                            frisking $500K+ plus ARR from cascade authentication failures
+                            frisking 500K+  ARR from cascade authentication failures
                         )
                         
                     else:
@@ -322,8 +322,7 @@ class BackendJWTViolationDetector:
         except ImportError as e:
             logger.info(fWebSocket routes not available: {e})
         except Exception as e:
-            logger.error(fError testing WebSocket auth fallbacks: {e})"
-            logger.error(fError testing WebSocket auth fallbacks: {e})""
+            logger.error(fError testing WebSocket auth fallbacks: {e})"""
 
             
         return violation_found
@@ -393,7 +392,7 @@ class BackendJWTViolationDetector:
                 'Achieve 95/100 SSOT compliance score'
             ],
             'validation_approach': 'These tests MUST FAIL after refactor (proving violations removed)',
-            'business_protection': '$500K+ plus ARR protected from JWT cascade failures'
+            'business_protection': '500K+  ARR protected from JWT cascade failures'
         }
 
 
@@ -437,7 +436,7 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
             logger.critical( ALERT:  CONFIRMED: Backend JWT secret access violation EXISTS)
             logger.critical( PIN:  Location: netra_backend/app/core/configuration/unified_secrets.py:75-90)"
             logger.critical( PIN:  Location: netra_backend/app/core/configuration/unified_secrets.py:75-90)"
-            logger.critical(" WARNING: [U+FE0F] Business Impact: $500K+ plus ARR at risk from JWT secret mismatches)"
+            logger.critical(" WARNING: [U+FE0F] Business Impact: 500K+  ARR at risk from JWT secret mismatches)"
             logger.critical( TARGET:  REFACTOR TARGET: Remove backend JWT secret access)
         else:
             logger.error(" FAIL:  UNEXPECTED: Backend JWT secret access violation NOT FOUND)"
@@ -499,20 +498,11 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         # Document the violation for refactor validation
         if violation_exists:
             logger.critical( ALERT:  CONFIRMED: WebSocket auth fallback violation EXISTS)
-            logger.critical( PIN:  Location: netra_backend/app/routes/websocket.py)"
-            logger.critical( PIN:  Location: netra_backend/app/routes/websocket.py)"
+            logger.critical( PIN:  Location: netra_backend/app/routes/websocket.py)""
             logger.critical(" WARNING: [U+FE0F] Business Impact: Auth inconsistencies, potential security bypass)"
             logger.critical( TARGET:  REFACTOR TARGET: Use auth service exclusively, remove fallbacks)
         else:
-            logger.warning(" PASS:  WebSocket auth fallback violation NOT FOUND)"
-            logger.warning( SEARCH:  This may indicate good SSOT compliance or refactor already done)
-            
-        # PHASE A: Test is PERMISSIVE (violation may not exist in current architecture)
-        # This test documents current state without strict assertion
-        logger.info(fWebSocket auth fallback test result: {'VIOLATION EXISTS' if violation_exists else 'NO VIOLATION'})
-    
-    def test_ssot_compliance_baseline(self):
-        """
+            logger.warning(" PASS:  WebSocket auth fallback violation NOT FOUND)""""
 
         CRITICAL: Document SSOT compliance baseline for refactor validation.
         
@@ -626,7 +616,7 @@ if __name__ == __main__:"
     print(= * 80")"
     print(PHASE A: Documenting violations that exist (tests must PASS))
     print(REFACTOR VALIDATION: Tests must FAIL after violations removed)
-    print("BUSINESS PROTECTION: $500K+ plus ARR from JWT cascade failures)"
+    print("BUSINESS PROTECTION: 500K+  ARR from JWT cascade failures)"
     print(= * 80)
     
     # Initialize detector

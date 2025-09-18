@@ -149,8 +149,7 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
 
             # Step 4: Test agent execution with authenticated context
             agent_response_success = await self._test_agent_execution_with_auth()
-            self.assertTrue(agent_response_success, Agent execution failed - Golden Path broken)"
-            self.assertTrue(agent_response_success, Agent execution failed - Golden Path broken)""
+            self.assertTrue(agent_response_success, Agent execution failed - Golden Path broken)"""
 
 
             # Step 5: Verify complete flow timing (Golden Path performance)

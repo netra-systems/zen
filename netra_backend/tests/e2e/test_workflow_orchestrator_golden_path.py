@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,12 +23,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""Test WorkflowOrchestrator Golden Path - P0 Failing E2E Tests.
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Test WorkflowOrchestrator Golden Path - P0 Failing E2E Tests.
 
 This test module validates the complete golden path user flow: 
 login  ->  agent execution  ->  AI response delivery with SSOT compliance.
@@ -47,7 +34,7 @@ EXPECTED BEHAVIOR (BEFORE REMEDIATION):
 
 TEST PURPOSE: Prove golden path failures and validate SSOT remediation effectiveness.
 
-Business Value: Validates $500K+ ARR chat functionality works end-to-end.
+Business Value: Validates 500K+ ARR chat functionality works end-to-end.
 """
 
 import pytest
@@ -344,7 +331,7 @@ class WorkflowOrchestratorGoldenPathTests(SSotAsyncTestCase):
         await orchestrator.execute_standard_workflow(context)
         
         # BUSINESS CRITICAL: All 5 WebSocket events must be sent
-        # These events enable real-time chat experience worth $500K+ ARR
+        # These events enable real-time chat experience worth 500K+ ARR
         required_events = [
             'agent_started',     # User sees agent began processing
             'agent_thinking',    # Real-time reasoning visibility (if supported)

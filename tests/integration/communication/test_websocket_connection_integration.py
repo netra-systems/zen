@@ -4,7 +4,7 @@ WebSocket Connection Lifecycle Integration Tests
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) 
 - Business Goal: Ensure reliable WebSocket connections enable real-time AI chat interactions
-- Value Impact: Connection stability is prerequisite for $500K+ ARR chat functionality
+- Value Impact: Connection stability is prerequisite for 500K+ ARR chat functionality
 - Strategic Impact: Core platform communication foundation for user engagement
 
 CRITICAL: WebSocket connections enable real-time AI chat value delivery per CLAUDE.md

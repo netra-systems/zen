@@ -2,7 +2,7 @@
 """MISSION CRITICAL TEST SUITE: WebSocket Agent Events - REAL SERVICES ONLY
 
 THIS SUITE MUST PASS OR THE PRODUCT IS BROKEN.
-Business Value: $500K+ ARR - Core chat functionality
+Business Value: 500K+ ARR - Core chat functionality
 
 This test suite uses ONLY real WebSocket connections per CLAUDE.md "MOCKS = Abomination":
 1. Real WebSocket connections to actual backend services
@@ -2787,7 +2787,7 @@ class TestAgentWebSocketIntegrationEnhanced:
     """Enhanced agent integration tests for WebSocket agent events.
     
     Business Value: Validates the complete agent execution lifecycle through WebSocket events.
-    These tests ensure that the 5 critical agent events that enable $500K+ ARR chat functionality
+    These tests ensure that the 5 critical agent events that enable 500K+ ARR chat functionality
     are properly delivered during real agent execution scenarios.
     """
 
@@ -3045,7 +3045,7 @@ if __name__ == "__main__":
     print("COMPREHENSIVE VALIDATION OF ALL 5 REQUIRED EVENTS + ISOLATION")
     print("=" * 80)
     print()
-    print("Business Value: $500K+ ARR - Core chat functionality")
+    print("Business Value: 500K+ ARR - Core chat functionality")
     print("Testing: Individual events, sequences, timing, chaos, concurrency, isolation")
     print("Requirements: Latency < 100ms, Reconnection < 3s, 10+ concurrent users")
     print("Enhanced Coverage: 250+ concurrent users, extreme isolation tests")

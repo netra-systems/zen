@@ -129,13 +129,7 @@ class SessionSyncValidator:
                 if response_data.get("type") == "pong":
                     return True, "WebSocket connectivity confirmed"
                 else:
-                    return True, f"WebSocket connected (response: {response_data.get('type', 'unknown')})"
-            except asyncio.TimeoutError:
-                await websocket.close()
-                return True, "WebSocket connected (no response to ping)"
-            
-        except Exception as e:
-            return False, f"WebSocket connection failed: {e}"
+                    return True, f"WebSocket connected (response: {response_data.get('type', 'unknown')})""WebSocket connected (no response to ping)""WebSocket connection failed: {e}"
     
     @pytest.mark.e2e
     async def test_jwt_token_creation(self) -> Tuple[bool, str]:
@@ -216,11 +210,7 @@ class SessionSyncValidator:
             
             # Evaluate overall integration
             if redis_success and websocket_success:
-                return True, "Session component integration working (Redis + WebSocket + JWT)"
-            elif websocket_success:
-                return True, "Partial integration working (WebSocket + JWT, Redis unavailable)"
-            else:
-                return False, "Session component integration failed"
+                return True, "Session component integration working (Redis + WebSocket + JWT)""Partial integration working (WebSocket + JWT, Redis unavailable)""Session component integration failed"
                 
         except Exception as e:
             return False, f"Session integration test error: {e}"

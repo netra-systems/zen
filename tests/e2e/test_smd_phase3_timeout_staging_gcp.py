@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: Platform/Internal - Production Environment Reliability
 - Business Goal: Validate complete startup failure scenario in staging GCP environment
 - Value Impact: Prevent production deployment of timeout-susceptible configurations
-- Strategic Impact: End-to-end validation of Cloud SQL VPC connector behavior worth $500K+ ARR impact
+- Strategic Impact: End-to-end validation of Cloud SQL VPC connector behavior worth 500K+ ARR impact
 
 Testing Strategy:
 - Test on staging GCP environment with real Cloud SQL

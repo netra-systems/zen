@@ -129,8 +129,7 @@ class WebSocketBridgeMinimalTests(unittest.IsolatedAsyncioTestCase):
     async def test_bridge_propagation_to_agent(self):
         "CRITICAL: Bridge must be set on agents and provide context."
         bridge = MockWebSocketBridge()
-        agent = MinimalTestAgent(TestAgent)"
-        agent = MinimalTestAgent(TestAgent)""
+        agent = MinimalTestAgent(TestAgent)"""
 
         
         # Initially no bridge

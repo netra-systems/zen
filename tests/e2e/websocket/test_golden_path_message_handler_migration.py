@@ -11,7 +11,7 @@ Business Value Justification:
 - Segment: Platform/Enterprise (Customer-facing functionality)
 - Business Goal: Ensure Golden Path chat functionality works end-to-end
 - Value Impact: Validate complete user journey from login to agent completion
-- Revenue Impact: Protect $500K+ ARR by ensuring customer-facing features work
+- Revenue Impact: Protect 500K+ ARR by ensuring customer-facing features work
 
 🔍 These tests are designed to INITIALLY FAIL to demonstrate Golden Path breaking
 """

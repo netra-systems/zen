@@ -4,7 +4,7 @@ Interface Validation Tests for Issue #669 - WebSocketNotifier Interface Mismatch
 This test suite validates that WebSocketNotifier implementations provide consistent interfaces
 and identifies specific interface mismatches that prevent reliable WebSocket event delivery.
 
-Business Impact: $500K+ ARR Golden Path functionality depends on consistent WebSocket interfaces.
+Business Impact: 500K+ ARR Golden Path functionality depends on consistent WebSocket interfaces.
 
 Test Strategy: Create failing tests that reproduce interface mismatches, then validate fixes.
 """

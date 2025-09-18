@@ -4,7 +4,7 @@ INTEGRATION TEST: Docker Manager Golden Path Integration
 BUSINESS VALUE JUSTIFICATION (BVJ):
 1. Segment: Platform/Infrastructure - Golden Path Validation
 2. Business Goal: Ensure Docker services support critical user workflows
-3. Value Impact: Validates Docker infrastructure supports $500K+ ARR chat functionality
+3. Value Impact: Validates Docker infrastructure supports 500K+ ARR chat functionality
 4. Revenue Impact: Protects Golden Path reliability for customer success
 
 PURPOSE:
@@ -63,11 +63,7 @@ class DockerManagerGoldenPathIntegrationTests(SSotAsyncTestCase):
             try:
                 await self.docker_manager.cleanup()
             except Exception as e:
-                print(f"Warning: Cleanup failed: {e}")
-        await super().tearDown()
-
-    async def test_docker_manager_supports_backend_services(self):
-        """
+                print(f"Warning: Cleanup failed: {e}""""
         GOLDEN PATH CRITICAL: Validates Docker Manager can start backend services.
 
         BUSINESS IMPORTANCE:

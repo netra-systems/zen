@@ -3,7 +3,7 @@
 MISSION CRITICAL TEST SUITE: WebSocket Agent Events - GCP STAGING ONLY
 
 THIS SUITE MUST PASS OR THE GOLDEN PATH IS BROKEN.
-Business Value: $500K+ ARR - Core chat functionality validation
+Business Value: 500K+ ARR - Core chat functionality validation
 
 This test suite validates WebSocket agent event integration using GCP STAGING services:
 1. Real WebSocket connections to staging (NO MOCKS)
@@ -253,7 +253,7 @@ class WebSocketAgentEventsStagingTests:
         """
         MISSION CRITICAL: Test Golden Path WebSocket validation with REAL staging services.
 
-        This test validates the core chat functionality that generates $500K+ ARR.
+        This test validates the core chat functionality that generates 500K+ ARR.
         Uses real staging WebSocket connections and agent execution validation.
         
         Golden Path: User login  ->  Send chat message  ->  Receive agent response
@@ -331,7 +331,7 @@ class WebSocketAgentEventsStagingTests:
             assert len(validator.events) >= 3, f"Insufficient events for Golden Path: {len(validator.events)} < 3"
             assert validator.event_counts.get("agent_started", 0) >= 1, "No agent_started events - agent not triggered"
 
-            logger.info("CHECK PASS: Golden Path WebSocket validation PASSED - $500K+ ARR protected")
+            logger.info("CHECK PASS: Golden Path WebSocket validation PASSED - 500K+ ARR protected")
 
         finally:
             await websocket.close()

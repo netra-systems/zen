@@ -812,8 +812,7 @@ class WebSocketBridgeLifecycleTests:
             pytest.skip(Real WebSocket infrastructure not available - using mocks only)
         except Exception as e:
             # Real WebSocket infrastructure failed - test should still pass with mocks
-            print(f"Real WebSocket test failed (expected in isolated environment): {e})"
-            assert True, "Mock-based testing is sufficient for isolated environments"
+            print(f"Real WebSocket test failed (expected in isolated environment): {e})""Mock-based testing is sufficient for isolated environments"
 
 
 # Additional edge case and regression tests

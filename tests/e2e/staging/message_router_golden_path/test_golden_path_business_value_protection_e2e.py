@@ -6,7 +6,7 @@ Uses staging GCP deployment with real LLM.
 
 Business Value Justification:
 - Segment: Platform Infrastructure
-- Business Goal: Revenue Protection ($500K+ ARR)
+- Business Goal: Revenue Protection (500K+ ARR)
 - Value Impact: Validate complete end-to-end chat experience delivers business value
 - Strategic Impact: Protect mission-critical user workflows and revenue streams
 
@@ -182,13 +182,13 @@ class GoldenPathBusinessValueProtectionE2ETests(SSotAsyncTestCase):
         business_value_score = successful_metrics / 4.0
         minimum_acceptable_score = 1.0  # 100% - business critical
 
-        # This assertion protects $500K+ ARR functionality
+        # This assertion protects 500K+ ARR functionality
         assert business_value_score >= minimum_acceptable_score, (
             f"BUSINESS VALUE FAILURE: Golden Path score {business_value_score:.2%} "
             f"below minimum {minimum_acceptable_score:.2%}. "
             f"Metrics: {business_value_metrics}. "
             f"Errors: {test_errors}. "
-            f"This failure impacts $500K+ ARR chat functionality and demonstrates "
+            f"This failure impacts 500K+ ARR chat functionality and demonstrates "
             f"SSOT violations that break revenue-generating user workflows."
         )
 

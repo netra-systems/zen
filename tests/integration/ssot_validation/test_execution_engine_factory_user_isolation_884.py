@@ -7,7 +7,7 @@ This integration test validates that the consolidated factory maintains proper u
 when creating execution engines for concurrent users, preventing shared state issues.
 
 BUSINESS IMPACT:
-- $500K+ ARR protected by ensuring proper user isolation in multi-user execution
+- 500K+ ARR protected by ensuring proper user isolation in multi-user execution
 - Factory user isolation prevents cross-user data leakage
 - Memory isolation ensures bounded growth per user (not global accumulation)
 - Concurrent user handling prevents execution engine state corruption

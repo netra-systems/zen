@@ -6,7 +6,7 @@ This E2E test validates the end-to-end golden path from user authentication to a
 
 Business Value Justification (BVJ):
 - Segment: Enterprise/Platform - Complete Chat Infrastructure  
-- Business Goal: Revenue Protection - Ensure golden path delivers $500K+ ARR
+- Business Goal: Revenue Protection - Ensure golden path delivers 500K+ ARR
 - Value Impact: Validates complete authenticated chat workflow customers depend on
 - Strategic Impact: Tests the PRIMARY VALUE-GENERATING FLOW of the entire platform
 
@@ -62,7 +62,7 @@ class CompleteAuthenticatedChatWorkflowE2ETests(SSotBaseTestCase):
         self.business_value_delivered = False
         print(f'\n[U+1F680] MISSION CRITICAL E2E TEST STARTING - Environment: {self.environment}')
         print(f' CHART:  Target: Complete authenticated chat workflow with real services')
-        print(f'[U+1F4B0] Business Impact: Validates $500K+ ARR revenue-generating flow')
+        print(f'[U+1F4B0] Business Impact: Validates 500K+ ARR revenue-generating flow')
 
     def teardown_method(self):
         """Clean up E2E test resources."""

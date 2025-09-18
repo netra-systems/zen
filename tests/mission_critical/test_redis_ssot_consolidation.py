@@ -1,7 +1,7 @@
 "Mission Critical: Redis SSOT Consolidation Tests"
 
 Validates that Redis SSOT consolidation resolves WebSocket 1011 errors and
-restores chat functionality worth $500K+ plus ARR.
+restores chat functionality worth 500K+  ARR.
 
 Business Impact:
     - Eliminates 12+ competing Redis connection pools
@@ -169,7 +169,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
     async def test_websocket_redis_race_condition_elimination(self):
         MISSION CRITICAL: Test WebSocket operations don't cause 1011 errors.""'
         
-        BUSINESS IMPACT: Prevents $500K+ plus ARR loss from broken chat functionality.
+        BUSINESS IMPACT: Prevents 500K+  ARR loss from broken chat functionality.
         SUCCESS CRITERIA: Concurrent WebSocket Redis operations succeed reliably.
         
         # Simulate WebSocket Redis operations under load
@@ -188,8 +188,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         
         # Verify storage
         stored_data = await redis_manager.get(connection_key)
-        self.assertIsNotNone(stored_data, WebSocket data should be retrievable)"
-        self.assertIsNotNone(stored_data, WebSocket data should be retrievable)""
+        self.assertIsNotNone(stored_data, WebSocket data should be retrievable)"""
 
         
         # Test concurrent operations (race condition simulation)
@@ -409,10 +408,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         # 3. Verify Redis connection remains stable
         final_status = redis_manager.get_status()
         self.assertTrue(final_status[connected), 
-                       "Redis connection should remain stable after WebSocket stress test)"
-        
-    async def _simulate_websocket_handshake(self, user_id: str) -> bool:
-        Simulate WebSocket handshake with Redis operations."
+                       "Redis connection should remain stable after WebSocket stress test)""
         Simulate WebSocket handshake with Redis operations.""
 
         try:

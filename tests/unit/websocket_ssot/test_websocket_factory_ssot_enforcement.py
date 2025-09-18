@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise) 
 - Business Goal: Ensure WebSocket SSOT compliance prevents user isolation failures
 - Value Impact: Critical infrastructure for AI chat interactions (90% of platform value)
-- Revenue Impact: Foundation for $500K+ ARR user interactions with proper SSOT patterns
+- Revenue Impact: Foundation for 500K+ ARR user interactions with proper SSOT patterns
 
 CRITICAL: This test validates the WebSocket factory dual pattern fragmentation issue.
 These tests MUST FAIL before SSOT remediation and PASS after remediation.

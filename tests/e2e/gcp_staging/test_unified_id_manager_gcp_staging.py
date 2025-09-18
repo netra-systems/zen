@@ -3,7 +3,7 @@ E2E GCP Staging Tests for UnifiedIDManager - FINAL PHASE
 Real GCP Cloud SQL, performance at scale, and production ID generation
 
 Business Value Protection:
-- $500K+ ARR: Unique ID consistency prevents data corruption and system failures
+- 500K+ ARR: Unique ID consistency prevents data corruption and system failures
 - $15K+ MRR per Enterprise: High-performance ID generation for concurrent users
 - Platform scalability: Distributed ID generation across GCP regions
 - Data integrity: Prevents duplicate keys and referential integrity violations
@@ -132,7 +132,7 @@ class UnifiedIDManagerGCPStagingTests(SSotAsyncTestCase):
         """
         HIGH DIFFICULTY: Test Cloud SQL sequence performance under production load.
         
-        Business Value: $500K+ ARR - database performance directly impacts user experience.
+        Business Value: 500K+ ARR - database performance directly impacts user experience.
         Validates: Sequence generation, connection pooling, transaction isolation.
         """
         sequence_types = [{'name': 'user_sequence', 'start': 1000000, 'increment': 1, 'cache': 100}, {'name': 'thread_sequence', 'start': 2000000, 'increment': 1, 'cache': 500}, {'name': 'run_sequence', 'start': 3000000, 'increment': 1, 'cache': 1000}, {'name': 'execution_sequence', 'start': 4000000, 'increment': 1, 'cache': 2000}, {'name': 'message_sequence', 'start': 5000000, 'increment': 1, 'cache': 5000}]

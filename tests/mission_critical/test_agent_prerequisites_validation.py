@@ -12,7 +12,7 @@ This test demonstrates the current gap where agent execution can start without v
 
 These tests should FAIL initially, proving the need for comprehensive prerequisite validation.
 
-Business Value: $500K+ plus ARR protection by preventing failed executions and ensuring reliable user experience.
+Business Value: 500K+  ARR protection by preventing failed executions and ensuring reliable user experience.
 ""
 
 import asyncio
@@ -98,8 +98,7 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
         # Mock broken WebSocket manager
         mock_websocket_manager = Mock()
         mock_websocket_manager.is_connected = Mock(return_value=False)
-        mock_websocket_manager.send_event = Mock(side_effect=ConnectionError(WebSocket not connected))"
-        mock_websocket_manager.send_event = Mock(side_effect=ConnectionError(WebSocket not connected))""
+        mock_websocket_manager.send_event = Mock(side_effect=ConnectionError(WebSocket not connected))"""
 
         
         # Try to execute agent with broken WebSocket - should detect prerequisite failure

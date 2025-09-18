@@ -5,7 +5,7 @@ Business Value Justification:
 - Segment: Platform/Internal
 - Business Goal: Stability & SSOT Compliance  
 - Value Impact: Validate SSOT route can handle all 4 previous route patterns
-- Strategic Impact: CRITICAL - Prevents $500K+ ARR loss from WebSocket routing failures
+- Strategic Impact: CRITICAL - Prevents 500K+ ARR loss from WebSocket routing failures
 
 This test validates that the consolidated SSOT WebSocket route can handle all
 the patterns from the 4 competing route implementations:

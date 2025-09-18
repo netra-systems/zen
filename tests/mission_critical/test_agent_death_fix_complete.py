@@ -8,10 +8,7 @@ class TestWebSocketConnection:
         self._closed = False
 """
         """Send JSON message."""Send JSON message."""
-        raise RuntimeError("WebSocket is closed)"
-        self.messages_sent.append(message)
-
-    async def close(self, code: int = 1000, reason: str = "Normal closure):"
+        raise RuntimeError("WebSocket is closed)""Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -221,8 +218,7 @@ print(" PASS:  Circuit breaker triggered after repeated failures)"
     """Test that WebSocket properly notifies on agent death."""Test that WebSocket properly notifies on agent death."""
 print(" )"
 " + "="*80)"
-print("TEST: WebSocket Death Notification)"
-print("=*80)"
+print("TEST: WebSocket Death Notification)""=*80)"
 
                                 # Setup execution tracker with WebSocket integration
 tracker = ExecutionTracker()
@@ -534,11 +530,7 @@ class WebSocketDeathAgent(BaseAgent):
         await asyncio.sleep(0)
         return {"status": "completed}"
 
-        agent = WebSocketDeathAgent(name="WebSocketDeathTest)"
-
-        # Test successful execution notifications
-        success_context = ExecutionContext( )
-        run_id="websocket_success,"
+        agent = WebSocketDeathAgent(name="WebSocketDeathTest)""websocket_success,"
         agent_name=agent.name,
         state=DeepAgentState()
         
@@ -564,11 +556,7 @@ class WebSocketDeathAgent(BaseAgent):
         assert "agent_started in websocket_notifications"
         assert "thinking in websocket_notifications"
         assert "agent_completed not in websocket_notifications"
-        print(" PASS:  BaseAgent WebSocket notifications work during death scenarios)"
-
-
-class TestExecuteCorePatternDeathScenarios:
-        """Test _execute_core pattern in death/failure scenarios"""
+        print(" PASS:  BaseAgent WebSocket notifications work during death scenarios)""""Test _execute_core pattern in death/failure scenarios"""
 
 @pytest.mark.asyncio"""
 """Test _execute_core pattern handles death detection properly"""
@@ -1307,10 +1295,7 @@ class ResourceExhaustionAgent(BaseAgent):
                                                 # Verify WebSocket was cleaned up
         if hasattr(mock_websocket, 'close'):
         mock_websocket.close.assert_called()
-        print(" PASS:  WebSocket connections cleaned up after agent death)"
-
-    async def test_agent_death_thread_cleanup(self):
-        """Test 20: Verify threads are properly terminated after agent death."""
+        print(" PASS:  WebSocket connections cleaned up after agent death)""""Test 20: Verify threads are properly terminated after agent death."""
 import threading
         initial_threads = threading.active_count()
 

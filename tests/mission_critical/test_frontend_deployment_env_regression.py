@@ -433,8 +433,7 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         '''
         pass
         print()
-        ALERT:  CRITICAL: Testing discovery endpoint configuration for chat value...)"
-        ALERT:  CRITICAL: Testing discovery endpoint configuration for chat value...)""
+        ALERT:  CRITICAL: Testing discovery endpoint configuration for chat value...)"""
 
 
         deployer = GCPDeployer(project_id="netra-staging)"

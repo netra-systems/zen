@@ -2,7 +2,7 @@
 Chat Functionality Business Value Protection Test
 
 GitHub Issue: #1056 - Message router fragmentation blocking Golden Path
-Business Impact: $500K+ ARR - Users cannot receive AI responses reliably
+Business Impact: 500K+ ARR - Users cannot receive AI responses reliably
 
 PURPOSE: End-to-end chat functionality must work throughout SSOT migration
 STATUS: MUST PASS before, during, and after SSOT consolidation
@@ -63,7 +63,7 @@ class ChatFunctionalityBusinessValueTests(SSotAsyncTestCase):
         Test chat functionality business value protection during MessageRouter changes.
 
         CRITICAL: This test MUST PASS always to protect Golden Path.
-        BUSINESS: This represents the core $500K+ ARR functionality.
+        BUSINESS: This represents the core 500K+ ARR functionality.
         """
         # Ensure async setup is called
         await self.asyncSetUp()
@@ -99,7 +99,7 @@ class ChatFunctionalityBusinessValueTests(SSotAsyncTestCase):
                 error_details.append(f"Revenue protection {revenue_protected['score'] * 100:.1f}% below required {min_revenue_protection * 100:.1f}%")
             if user_experience_score < min_user_experience:
                 error_details.append(f'User experience {user_experience_score * 100:.1f}% below required {min_user_experience * 100:.1f}%')
-            self.fail(f"GOLDEN PATH VIOLATION: Chat functionality business value compromised. Failed scenarios: {failed_scenarios}. Issues: {' | '.join(error_details)}. This indicates MessageRouter SSOT changes are breaking core business functionality, directly threatening $500K+ ARR and customer satisfaction.")
+            self.fail(f"GOLDEN PATH VIOLATION: Chat functionality business value compromised. Failed scenarios: {failed_scenarios}. Issues: {' | '.join(error_details)}. This indicates MessageRouter SSOT changes are breaking core business functionality, directly threatening 500K+ ARR and customer satisfaction.")
 
     async def _test_business_value_scenario(self, scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Test a specific business value scenario."""

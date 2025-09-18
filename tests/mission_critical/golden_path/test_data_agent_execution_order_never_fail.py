@@ -670,14 +670,7 @@ class DataAgentExecutionOrderNeverFailTests(SSotBaseTestCase):
         Failure Mode: WebSocket events show wrong execution order
         Business Impact: User confusion  ->  reduced trust  ->  lower conversion rates
         """
-        logger.critical(" TARGET:  TESTING: WebSocket event execution order (USER VISIBILITY CRITICAL)")
-        
-        # Setup real services
-        await self.test_harness.setup_real_services()
-        
-        # Create authenticated user
-        user_context = await self.test_harness.create_authenticated_test_user(
-            "websocket_events_test@example.com"
+        logger.critical(" TARGET:  TESTING: WebSocket event execution order (USER VISIBILITY CRITICAL)""websocket_events_test@example.com"
         )
         
         # Execute workflow with WebSocket event tracking

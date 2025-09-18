@@ -8,7 +8,7 @@ using GCP staging environment with real LLM integration.
 
 Business Value Justification (BVJ):
 - Segment: All Users (Free, Early, Mid, Enterprise)
-- Business Goal: Protect $500K+ ARR chat functionality with secure multi-user operation
+- Business Goal: Protect 500K+ ARR chat functionality with secure multi-user operation
 - Value Impact: Ensures users never see each other's private conversations or agent responses
 - Strategic Impact: Enables production-scale concurrent user support without data contamination
 
@@ -122,7 +122,7 @@ class MultiUserConcurrentChatIsolation565Tests(SSotAsyncTestCase):
         """
         MISSION CRITICAL E2E TEST: Complete user isolation in concurrent chat scenarios.
         
-        Business Impact: Protects $500K+ ARR by ensuring users never see each other's private chats
+        Business Impact: Protects 500K+ ARR by ensuring users never see each other's private chats
         Expected: PASS - perfect isolation with full business value delivery
         """
         print("\n" + "="*90)
@@ -577,7 +577,7 @@ class MultiUserConcurrentChatIsolation565Tests(SSotAsyncTestCase):
         if success_rate >= 100:
             print(f"\n🎉 SUCCESS: Issue #565 UserExecutionEngine migration delivers:")
             print(f"   CHECK Perfect user isolation in concurrent scenarios")
-            print(f"   CHECK $500K+ ARR chat functionality preserved")
+            print(f"   CHECK 500K+ ARR chat functionality preserved")
             print(f"   CHECK Production-ready multi-user support")
             print(f"   CHECK Zero cross-user data contamination")
         elif success_rate >= 80:
@@ -607,7 +607,7 @@ if __name__ == "__main__":
     if result.wasSuccessful():
         print("\n🎉 SUCCESS: Multi-user concurrent chat E2E validation PASSED")
         print("CHECK UserExecutionEngine ready for production deployment")
-        print("💰 $500K+ ARR chat functionality protected with perfect user isolation")
+        print("💰 500K+ ARR chat functionality protected with perfect user isolation")
     else:
         print("\nX FAILURE: E2E validation failed")
         print(f"   - Tests run: {result.testsRun}")

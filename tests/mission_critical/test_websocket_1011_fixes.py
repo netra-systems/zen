@@ -1,7 +1,7 @@
 "Mission Critical: WebSocket 1011 Error Resolution Tests"
 
 Specifically validates that Redis SSOT consolidation prevents WebSocket 1011 errors
-that were blocking $500K+ plus ARR chat functionality.
+that were blocking 500K+  ARR chat functionality.
 
 Background:
     - WebSocket 1011 errors occurred due to competing Redis connection pools
@@ -100,8 +100,7 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
         
         # Log results for monitoring
         self.logger.info(fWebSocket race condition test results:)
-        self.logger.info(f  Success rate: {success_rate:.1f}%)"
-        self.logger.info(f  Success rate: {success_rate:.1f}%)"
+        self.logger.info(f  Success rate: {success_rate:.1f}%)""
         self.logger.info(f"  Successful: {successful_connections}/{len(results)})"
         self.logger.info(f  Performance: {connections_per_second:.""2f""} connections/sec)""
 
@@ -147,11 +146,7 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
         
         # MISSION CRITICAL VALIDATION
         self.assertGreaterEqual(success_rate, 90.0,
-                               f"WebSocket session success rate should be >=90% under load, got {success_rate}%)"
-        
-        # Redis connection should remain stable
-        final_status = redis_manager.get_status()
-        self.assertTrue(final_status[connected"),"
+                               f"WebSocket session success rate should be >=90% under load, got {success_rate}%)""),"
                        Redis connection should remain stable under WebSocket load)
         
         # Failure count should not increase dramatically

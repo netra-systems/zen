@@ -11,7 +11,7 @@ Phase 1 Objective: Authentication Compliance Validation
 - PROOF that tests fail without authentication
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise) - $500K+ ARR protection
+- Segment: All (Free, Early, Mid, Enterprise) - 500K+ ARR protection
 - Business Goal: Validate complete authenticated golden path user journey
 - Value Impact: Ensures authenticated users receive AI cost optimization insights
 - Strategic Impact: Protects primary revenue flow through authenticated business journey
@@ -396,7 +396,7 @@ class AuthenticatedCompleteUserJourneyBusinessValueTests(SSotAsyncTestCase):
         print(f"   [U+1F4B0] Authenticated business value: DELIVERED")
         print(f"   [U+23F1][U+FE0F]  Total authenticated time: {total_execution_time:.2f}s")
         print(f"   [U+1F6E1][U+FE0F]  Authentication bypass prevention: CONFIRMED")
-        print(f"   [U+1F4C8] $500K+ ARR protection: VALIDATED")
+        print(f"   [U+1F4C8] 500K+ ARR protection: VALIDATED")
 
     @pytest.mark.asyncio
     async def test_authentication_failure_prevention(self):

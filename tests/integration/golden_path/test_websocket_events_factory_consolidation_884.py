@@ -8,7 +8,7 @@ correctly after factory consolidation, ensuring real-time user experience remain
 Tests multi-user concurrent execution with proper event isolation.
 
 BUSINESS IMPACT:
-- $500K+ ARR depends on real-time WebSocket event delivery for user experience
+- 500K+ ARR depends on real-time WebSocket event delivery for user experience
 - All 5 critical events must work: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
 - Multi-user concurrent execution must maintain event isolation
 - Factory consolidation must not break real-time communication
@@ -178,7 +178,7 @@ class WebSocketEventsFactoryConsolidation884Tests(SSotAsyncTestCase):
                 f"CRITICAL: Missing WebSocket events after factory consolidation: {missing_events}. "
                 f"Captured events: {[e['type'] for e in captured_events]}. "
                 f"This indicates factory consolidation broke real-time event delivery "
-                f"that's essential for $500K+ ARR user experience.")
+                f"that's essential for 500K+ ARR user experience.")
             
             # Validate event timing and ordering
             self._validate_event_timing_and_order(captured_events)

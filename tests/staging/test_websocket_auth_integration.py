@@ -222,10 +222,7 @@ class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
                         failure_type="connection_error",
                         error_message=str(websocket_error),
                         expected_failure=True,
-                        infrastructure_gap="WebSocket connection failure (non-serialization)",
-                        staging_specific=True,
-                        technical_details={
-                            "error_type": type(websocket_error).__name__,
+                        infrastructure_gap="WebSocket connection failure (non-serialization)""error_type": type(websocket_error).__name__,
                             "error_category": "connection_failure"
                         }
                     )

@@ -4,7 +4,7 @@ Golden Path WebSocket Connection Failure Logging Validation
 This test suite validates that all WebSocket connection failure points
 have comprehensive logging coverage for immediate diagnosis and resolution.
 
-Business Impact: Protects $500K+ ARR by ensuring WebSocket failures are immediately diagnosable.
+Business Impact: Protects 500K+ ARR by ensuring WebSocket failures are immediately diagnosable.
 Critical: WebSocket failures block the primary user experience (chat functionality).
 """
 import pytest
@@ -97,17 +97,7 @@ class WebSocketConnectionFailureLoggingTests(SSotAsyncTestCase):
             connection_id = self.connection_id
             attempt_number = 2
             delay_applied = 0.5
-            self.mock_logger.warning(f" CYCLE:  CLOUD RUN RACE CONDITION: WebSocket handshake race detected for connection {connection_id} (attempt: {attempt_number}, delay_applied: {delay_applied}s, resolution: 'Progressive delay strategy')")
-        level, message, kwargs = self.log_capture[0]
-        assert level == 'WARNING'
-        assert 'CLOUD RUN RACE CONDITION' in message
-        assert 'handshake race detected' in message
-        assert connection_id in message
-        assert f'attempt: {attempt_number}' in message
-        assert f'delay_applied: {delay_applied}s' in message
-
-    def test_websocket_mode_failure_logging(self):
-        """
+            self.mock_logger.warning(f" CYCLE:  CLOUD RUN RACE CONDITION: WebSocket handshake race detected for connection {connection_id} (attempt: {attempt_number}, delay_applied: {delay_applied}s, resolution: 'Progressive delay strategy')""""
         Test Scenario: Unsupported WebSocket mode causes connection rejection
         Expected: CRITICAL level log with mode context
         """

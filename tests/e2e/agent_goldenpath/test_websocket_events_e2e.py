@@ -23,7 +23,7 @@ Test Strategy:
 - REAL WEBSOCKETS: wss:// connections with actual event streams
 - REAL TIMING: Measure actual event delivery timing and sequence
 - EVENT VALIDATION: Ensure ALL 5 events are sent for EVERY agent request
-- BUSINESS IMPACT: Events enable $500K+ ARR chat functionality
+- BUSINESS IMPACT: Events enable 500K+ ARR chat functionality
 
 CRITICAL: These tests protect the real-time user experience that differentiates
 the platform. Events must be reliable, fast, and complete.
@@ -153,7 +153,7 @@ class WebSocketEventsE2ETests(SSotAsyncTestCase):
             missing_critical_events = set(self.CRITICAL_EVENTS) - received_critical_events
             if missing_critical_events:
                 event_metrics['missing_events'] = list(missing_critical_events)
-            assert len(missing_critical_events) == 0, f"CRITICAL FAILURE: Missing {len(missing_critical_events)} critical events: {missing_critical_events}. Received events: {list(received_critical_events)}. Complete event sequence: {event_metrics['sequence_order']}. This breaks real-time user experience ($500K+ ARR impact)."
+            assert len(missing_critical_events) == 0, f"CRITICAL FAILURE: Missing {len(missing_critical_events)} critical events: {missing_critical_events}. Received events: {list(received_critical_events)}. Complete event sequence: {event_metrics['sequence_order']}. This breaks real-time user experience (500K+ ARR impact)."
             sequence = event_metrics['sequence_order']
             first_critical_event_idx = next((i for i, event in enumerate(sequence) if event in self.CRITICAL_EVENTS), None)
             if first_critical_event_idx is not None:
@@ -557,7 +557,7 @@ class WebSocketEventsE2ETests(SSotAsyncTestCase):
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f"   Tool events collected: {len(tool_pipeline_metrics.get('tool_events_received', []))}")
             self.logger.error(f"   Tool transparency score: {tool_pipeline_metrics.get('tool_transparency_score', 0.0):.2f}")
-            raise AssertionError(f'Tool integration WebSocket pipeline failed after {total_time:.1f}s: {e}. Tool transparency is critical for user trust and value perception ($500K+ ARR impact). Tool pipeline metrics: {tool_pipeline_metrics}')
+            raise AssertionError(f'Tool integration WebSocket pipeline failed after {total_time:.1f}s: {e}. Tool transparency is critical for user trust and value perception (500K+ ARR impact). Tool pipeline metrics: {tool_pipeline_metrics}')
 
     def _analyze_tool_event(self, event: Dict[str, Any], timestamp: float) -> Dict[str, Any]:
         """Analyze tool event for transparency and business value indicators."""

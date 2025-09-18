@@ -2,7 +2,7 @@
 "MISSION CRITICAL: WebSocket Health Check SSOT Integration Tests"
 
 THIS SUITE FOCUSES ON THE CRITICAL VIOLATIONS IN WEBSOCKET HEALTH ENDPOINTS.
-Business Value: $500K+ plus ARR - Validates health check functionality during SSOT migration
+Business Value: 500K+  ARR - Validates health check functionality during SSOT migration
 
 PURPOSE:
     - Focus on critical violations in websocket_ssot.py lines 1439, 1470, 1496
@@ -102,25 +102,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
         - SLA compliance reporting
 "
 "
-        logger.info("[HEALTH ENDPOINT] Testing WebSocket health check endpoint integrity...)"
-        
-        try:
-            # Import the WebSocket route class
-            from netra_backend.app.routes.websocket_ssot import WebSocketSSOTRouter
-            
-            # Create instance for health check testing
-            websocket_route = WebSocketSSOTRouter()
-            
-            # Execute health check with timeout protection
-            start_time = time.time()
-            health_result = await asyncio.wait_for(
-                websocket_route.websocket_health_check(),
-                timeout=self.health_check_timeout
-            )
-            execution_time = time.time() - start_time
-            
-            # CRITICAL: Health check must return structured data
-            assert isinstance(health_result, "dict), Health check must return dictionary"
+        logger.info("[HEALTH ENDPOINT] Testing WebSocket health check endpoint integrity...)""dict), Health check must return dictionary"
             assert "status in health_result, Health check missing required 'status' field"
             assert timestamp in health_result, "Health check missing required 'timestamp' field"
             
@@ -183,8 +165,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             pytest.fail(CRITICAL: Health check endpoint timeout - system may be unhealthy)
             
         except ImportError as e:
-            logger.error(f[HEALTH ENDPOINT IMPORT ERROR] Cannot import WebSocketSSotRoute: {e})"
-            logger.error(f[HEALTH ENDPOINT IMPORT ERROR] Cannot import WebSocketSSotRoute: {e})"
+            logger.error(f[HEALTH ENDPOINT IMPORT ERROR] Cannot import WebSocketSSotRoute: {e})""
             pytest.fail(f"CRITICAL: Health check endpoint not accessible - {e})"
             
         except Exception as e:

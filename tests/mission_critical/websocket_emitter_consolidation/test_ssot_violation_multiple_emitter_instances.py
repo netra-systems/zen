@@ -7,7 +7,7 @@ EXPECTED: FAIL before consolidation (shows SSOT violation exists)
 This test demonstrates the current state where multiple UserWebSocketEmitter classes
 exist across different modules, violating the Single Source of Truth principle.
 
-Business Impact: $500K+ ARR at risk due to fragmented WebSocket implementations
+Business Impact: 500K+ ARR at risk due to fragmented WebSocket implementations
 causing unreliable real-time notifications in chat functionality.
 
 CRITICAL: This test MUST FAIL before consolidation to prove SSOT violations exist.

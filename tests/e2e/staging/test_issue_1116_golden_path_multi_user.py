@@ -4,7 +4,7 @@ E2E Staging Test Suite: Issue #1116 Golden Path Multi-User - Production Environm
 
 PURPOSE: Create FAILING E2E staging tests that prove singleton vulnerabilities in production environment
 ISSUE: #1116 - AgentInstanceFactory singleton pattern enables cross-user contamination in Golden Path
-CRITICALITY: $500K+ ARR protection through production-grade multi-user Golden Path testing
+CRITICALITY: 500K+ ARR protection through production-grade multi-user Golden Path testing
 
 MISSION: These tests MUST FAIL initially on GCP staging to prove vulnerabilities in production.
 After factory pattern migration, these tests should PASS proving enterprise production readiness.
@@ -529,7 +529,7 @@ class Issue1116GoldenPathMultiUserTests(SSotAsyncTestCase):
         This comprehensive E2E test validates:
         1. Complete Golden Path flow isolation across ALL GCP staging services
         2. Enterprise-grade security under realistic production load conditions
-        3. Business-critical user isolation for $500K+ ARR enterprise customers
+        3. Business-critical user isolation for 500K+ ARR enterprise customers
         4. Production readiness validation for multi-tenant Golden Path deployment
         
         EXPECTED: FAIL (before remediation) - Multiple Golden Path contamination points
@@ -597,7 +597,7 @@ class Issue1116GoldenPathMultiUserTests(SSotAsyncTestCase):
             'golden_path_enterprise_impact': golden_path_enterprise_impact,
             'enterprise_customers_affected': enterprise_customers_affected,
             'compliance_frameworks_violated': list(compliance_frameworks_violated),
-            'revenue_at_risk': "$500K+ ARR" if total_golden_path_contamination > 0 else "$0",
+            'revenue_at_risk': "500K+ ARR" if total_golden_path_contamination > 0 else "$0",
             'golden_path_status': 'CONTAMINATED' if total_golden_path_contamination > 0 else 'ISOLATED',
             'staging_environment': self.staging_config.environment,
             'production_readiness': 'FAILED' if total_golden_path_contamination > 0 else 'PASSED',
@@ -625,7 +625,7 @@ class Issue1116GoldenPathMultiUserTests(SSotAsyncTestCase):
             f"Enterprise Impact: {golden_path_enterprise_impact}. " \
             f"Customers Affected: {len(enterprise_customers_affected)}. " \
             f"Compliance Violated: {list(compliance_frameworks_violated)}. " \
-            f"Revenue at Risk: $500K+ ARR. " \
+            f"Revenue at Risk: 500K+ ARR. " \
             f"PRODUCTION DEPLOYMENT BLOCKED: Golden Path contamination prevents enterprise deployment!"
         
         print("CHECK PASS: Perfect Golden Path multi-user isolation achieved on GCP staging")

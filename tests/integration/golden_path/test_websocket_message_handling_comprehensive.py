@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)  
 - Business Goal: Ensure reliable real-time AI chat interactions
 - Value Impact: WebSocket events enable substantive AI value delivery to users
-- Strategic Impact: Core platform capability - $500K+ ARR dependency
+- Strategic Impact: Core platform capability - 500K+ ARR dependency
 
 CRITICAL: This tests the WebSocket infrastructure that enables AI chat business value.
 Without reliable WebSocket message handling, the platform cannot deliver:

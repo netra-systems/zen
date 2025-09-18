@@ -9,7 +9,7 @@ def lazy_import(module_path: str, component: str = None):
     "Lazy import pattern for performance optimization"
     if module_path not in _lazy_imports:
         try:
-            module = __import__(module_path, fromlist=[component) if component else [)
+            module = __import__(module_path, fromlist=[component] if component else [])
             if component:
                 _lazy_imports[module_path] = getattr(module, component)
             else:
@@ -26,7 +26,7 @@ def lazy_import(module_path: str, component: str = None):
     Lazy import pattern for performance optimization""
     if module_path not in _lazy_imports:
         try:
-            module = __import__(module_path, fromlist=[component) if component else [)
+            module = __import__(module_path, fromlist=[component] if component else [])
             if component:
                 _lazy_imports[module_path] = getattr(module, component)
             else:

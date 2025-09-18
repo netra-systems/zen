@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 1. Segment: Mid, Enterprise
 2. Business Goal: Comprehensive supply chain intelligence and market analysis
 3. Value Impact: Advanced supply research capabilities for competitive advantage
-4. Revenue Impact: $350K+ ARR from enhanced supply chain consulting features
+4. Revenue Impact: 350K+ ARR from enhanced supply chain consulting features
 
 CLAUDE.md COMPLIANCE:
 - Uses real services ONLY (NO MOCKS)

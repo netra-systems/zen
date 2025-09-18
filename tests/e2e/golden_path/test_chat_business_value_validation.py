@@ -10,7 +10,7 @@ This test validates that chat functionality delivers the core business value aft
 5. Chat system maintains 90% of platform business value delivery
 
 Business Value: All Segments - Core Value Delivery & Customer Experience
-Protects the primary revenue driver: AI-powered chat that delivers $500K+ ARR
+Protects the primary revenue driver: AI-powered chat that delivers 500K+ ARR
 through substantive problem-solving and optimization recommendations.
 
 CRITICAL: These tests validate actual business value delivery, not just
@@ -98,13 +98,7 @@ class ChatBusinessValueValidationTests(SSotAsyncTestCase):
                 if engine.is_active():
                     await engine.cleanup()
             except Exception as e:
-                print(f"Warning: Engine cleanup failed: {e}")
-
-        self.created_engines.clear()
-        await super().teardown_method(method)
-
-    def create_business_value_user_context(self, tier: str, use_case: str) -> UserExecutionContext:
-        """Create UserExecutionContext for business value testing."""
+                print(f"Warning: Engine cleanup failed: {e}""""Create UserExecutionContext for business value testing."""
         return UserExecutionContext(
             user_id=f"business_value_{tier.lower()}_{use_case}",
             thread_id=f"thread_{tier.lower()}_{use_case}",

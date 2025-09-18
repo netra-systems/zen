@@ -110,8 +110,7 @@ def generate_summary(test_files: List[str], exit_code: int):
     print("[U+2713] Authentication & Login (Tests 1-20)")
     print("[U+2713] First-Time User Experience (Tests 21-30)")
     print("[U+2713] Chat Interface Interactions (Tests 31-45)")
-    print("[U+2713] WebSocket Reliability (Tests 46-60)")
-    print("[U+2713] Performance & Load Testing (Tests 61-70)")
+    print("[U+2713] WebSocket Reliability (Tests 46-60)""[U+2713] Performance & Load Testing (Tests 61-70)")
     print("[U+2713] Error Handling & Security (Tests 71-90)")
     
     # Exit code interpretation
@@ -123,9 +122,7 @@ def generate_summary(test_files: List[str], exit_code: int):
         print("- Frontend server (http://localhost:3000)")
         print("- API server (http://localhost:8001)")
         print("- Auth service (http://localhost:8002)")
-        print("- WebSocket endpoint (ws://localhost:8001)")
-    
-    print("="*60)
+        print("- WebSocket endpoint (ws://localhost:8001)""="*60)
 
 
 def main():

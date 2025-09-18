@@ -672,23 +672,8 @@ class HighSecurityTests:
         # Test WebSocket connection security
         # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
         # Test 1: Verify WSS (secure WebSocket) is enforced
-        assert config.websocket_url.startswith("wss://"), "WebSocket must use secure protocol (wss://)"
-        websocket_results["secure_protocol"] = True
-        safe_print("[OK] WebSocket uses secure protocol (wss://)")
-        
-        # Test 2: Try connection without authentication (expect 403 error)
-        # TESTS MUST RAISE ERRORS - but here we catch expected authentication errors
-        auth_enforced = False
-        
-        try:
-            async with asyncio.timeout(10):
-                async with websockets.connect(
-                    config.websocket_url,
-                    close_timeout=5
-                ) as ws:
-                    # Try to send unauthorized message
-                    test_message = {
-                        "type": "test_message",
+        assert config.websocket_url.startswith("wss://"), "WebSocket must use secure protocol (wss://)""secure_protocol"] = True
+        safe_print("[OK] WebSocket uses secure protocol (wss://)""type": "test_message",
                         "content": "unauthorized_test",
                         "timestamp": datetime.now().isoformat()
                     }

@@ -3,7 +3,7 @@ COMPREHENSIVE E2E TEST: First-Time User Experience Journey with REAL Services
 
 Business Value Justification (BVJ):
 1. Segment: ALL customer segments (Free  ->  Enterprise) - direct revenue impact
-2. Business Goal: Protect $500K+ ARR pipeline by validating THE critical user onboarding journey
+2. Business Goal: Protect 500K+ ARR pipeline by validating THE critical user onboarding journey
 3. Value Impact: Ensures seamless first-time user experience from signup to AI-powered value delivery
 4. Strategic Impact: This IS the conversion pipeline - 95%+ journey completion required for paying customers
    - Failed onboarding = 100% customer churn = $0 revenue

@@ -6,7 +6,7 @@ Tests production-scale database operations with real Cloud SQL and VPC connector
 Business Value Justification (BVJ):
 - Segment: Platform/Enterprise - Production infrastructure validation
 - Business Goal: Ensure DatabaseManager performs reliably in GCP production environment
-- Value Impact: Prevents production outages and data loss worth $500K+ ARR
+- Value Impact: Prevents production outages and data loss worth 500K+ ARR
 - Strategic Impact: Validates entire database infrastructure stack under real production conditions
 
 TEST PHILOSOPHY: Production-Like Environment Validation
@@ -50,7 +50,7 @@ logger = logging.getLogger(__name__)
 class DatabaseManagerGCPCloudSQLTests(BaseIntegrationTest):
     """E2E tests for DatabaseManager with GCP Cloud SQL.
     
-    Business Value: Validates production database connectivity preventing $500K+ ARR outages
+    Business Value: Validates production database connectivity preventing 500K+ ARR outages
     """
 
     def setup_method(self):
@@ -88,7 +88,7 @@ class DatabaseManagerGCPCloudSQLTests(BaseIntegrationTest):
         """Test DatabaseManager connects to GCP Cloud SQL via Unix socket.
         
         Business Value: Validates production database connectivity architecture.
-        Protects: $500K+ ARR from total platform failure due to database connectivity
+        Protects: 500K+ ARR from total platform failure due to database connectivity
         """
         for key, value in self.gcp_staging_env.items():
             isolated_env.set(key, value, source='e2e_staging_test')
@@ -172,7 +172,7 @@ class DatabaseManagerGCPCloudSQLTests(BaseIntegrationTest):
         """Test Cloud SQL transaction integrity under production-like load.
         
         Business Value: Validates data integrity under concurrent production load.
-        Protects: Customer data consistency worth $500K+ ARR
+        Protects: Customer data consistency worth 500K+ ARR
         """
         for key, value in self.gcp_staging_env.items():
             isolated_env.set(key, value, source='e2e_staging_test')
@@ -505,7 +505,7 @@ class DatabaseManagerMonitoringIntegrationTests(BaseIntegrationTest):
         """Test DatabaseManager integration with GCP monitoring systems.
         
         Business Value: Ensures production monitoring and alerting works correctly.
-        Protects: Incident response and system observability for $500K+ ARR platform
+        Protects: Incident response and system observability for 500K+ ARR platform
         """
         monitoring_env = {'ENVIRONMENT': 'staging', 'POSTGRES_HOST': '/cloudsql/netra-staging:us-central1:netra-staging-db', 'POSTGRES_USER': 'netra-staging-user', 'POSTGRES_PASSWORD': os.environ.get('GCP_STAGING_DB_PASSWORD', ''), 'POSTGRES_DB': 'netra_staging', 'ENABLE_DB_LOGGING': 'true', 'ENABLE_PERFORMANCE_MONITORING': 'true'}
         if not os.environ.get('GCP_STAGING_DB_PASSWORD'):

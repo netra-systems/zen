@@ -8,10 +8,7 @@ class TestWebSocketConnection:
         self._closed = False
 """
         """Send JSON message."""Send JSON message."""
-        raise RuntimeError("WebSocket is closed)"
-        self.messages_sent.append(message)
-
-    async def close(self, code: int = 1000, reason: str = "Normal closure):"
+        raise RuntimeError("WebSocket is closed)""Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -319,15 +316,10 @@ bridge2 = AgentWebSocketBridge()
 bridge2_id = id(bridge2)
 
                                                             # Check if they're the same (singleton pattern)"""
-logger.error(" FAIL:  CRITICAL: AgentWebSocketBridge is a singleton - all users share the same instance)"
-assert bridge1 is bridge2, "Singleton pattern confirmed"
+logger.error(" FAIL:  CRITICAL: AgentWebSocketBridge is a singleton - all users share the same instance)""Singleton pattern confirmed"
 else:
     pass
-logger.info("[U+2713] AgentWebSocketBridge creates separate instances)"
-
-@pytest.mark.asyncio
-    async def test_tool_dispatcher_shared_executor(self):
-    """
+logger.info("[U+2713] AgentWebSocketBridge creates separate instances)""""
 This test should PASS to prove proper isolation is implemented."""
 
 pass

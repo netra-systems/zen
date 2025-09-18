@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise/Multi-tenant 
 - Business Goal: Test multi-user scalability and isolation
 - Value Impact: Validates enterprise multi-tenant security requirements
-- Strategic Impact: Enables testing of concurrent user scenarios for $500K+ ARR
+- Strategic Impact: Enables testing of concurrent user scenarios for 500K+ ARR
 """
 
 import asyncio

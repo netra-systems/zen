@@ -6,7 +6,7 @@ E2E TEST 9: Real Performance Validation for UserExecutionEngine SSOT
 PURPOSE: Validate UserExecutionEngine performance meets business-critical SLAs for production deployment.
 Tests REAL system performance under load with REAL WebSocket connections and database operations.
 
-Business Impact: $500K+ ARR Golden Path protection - performance directly affects user experience
+Business Impact: 500K+ ARR Golden Path protection - performance directly affects user experience
 - Agent response time affects customer satisfaction and retention
 - WebSocket event delivery affects real-time chat experience  
 - Memory usage affects system stability and concurrent user capacity
@@ -429,7 +429,7 @@ class PerformanceValidationTests(SSotAsyncTestCase):
         
         # BUSINESS-CRITICAL: Engine creation performance directly affects user experience and revenue
         if performance_violations:
-            logger.error(f"BUSINESS-CRITICAL PERFORMANCE FAILURES affect $500K+ ARR: {len(performance_violations)} violations")
+            logger.error(f"BUSINESS-CRITICAL PERFORMANCE FAILURES affect 500K+ ARR: {len(performance_violations)} violations")
             for violation in performance_violations:
                 logger.error(f"  - {violation}")
             self.fail(f"BUSINESS-CRITICAL: Engine creation performance violations affect user experience and revenue: {performance_violations}")
@@ -960,12 +960,12 @@ class PerformanceValidationTests(SSotAsyncTestCase):
         print(f"   PASS:  All performance baselines met - system ready for production")
     
     async def test_comprehensive_performance_validation(self):
-        """Comprehensive performance validation protecting $500K+ ARR"""
+        """Comprehensive performance validation protecting 500K+ ARR"""
         print("\n[U+1F680] Running comprehensive performance validation for production readiness...")
         
         performance_summary = {
             'test_start_time': time.time(),
-            'business_impact': '$500K+ ARR protection',
+            'business_impact': '500K+ ARR protection',
             'validation_results': {},
             'critical_violations': [],
             'performance_score': 100  # Start with perfect score
@@ -1067,7 +1067,7 @@ class PerformanceValidationTests(SSotAsyncTestCase):
             # BUSINESS-CRITICAL: Fail if performance is unacceptable for production
             if performance_summary['performance_score'] < 75:
                 logger.error(f"BUSINESS-CRITICAL: System performance unacceptable for production deployment")
-                logger.error(f"Performance violations affect $500K+ ARR:")
+                logger.error(f"Performance violations affect 500K+ ARR:")
                 for violation in all_violations:
                     logger.error(f"  - {violation}")
                 

@@ -2,7 +2,7 @@
 "MISSION CRITICAL: DatabaseManager SSOT Function Violations Test Suite"
 
 THIS SUITE REPRODUCES GITHUB ISSUE #204 - WEBSOCKET FACTORY SESSION FACTORY FAILURES
-Business Value: $500K+ plus ARR - WebSocket connections depend on database session creation
+Business Value: 500K+  ARR - WebSocket connections depend on database session creation
 
 CRITICAL VIOLATIONS TO DETECT:
     1. Missing `get_db_session_factory` function blocking WebSocket connections (GitHub Issue #204)
@@ -112,8 +112,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             if len(available_methods) >= 2:  # Both get_session and initialize
                 session_methods_available = True
                 self.record_metric(ssot_session_methods_available, available_methods)
-                logger.info(f PASS:  DatabaseManager has SSOT session methods: {available_methods})"
-                logger.info(f PASS:  DatabaseManager has SSOT session methods: {available_methods})""
+                logger.info(f PASS:  DatabaseManager has SSOT session methods: {available_methods})"""
 
             else:
                 self.record_metric("ssot_session_methods_missing, required_methods)"
@@ -308,13 +307,13 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             
             # Pattern 1: Direct DatabaseManager usage
             if hasattr(db_manager, 'initialize'):
-                logger.info(WebSocket factory can use DatabaseManager.initialize()")"
+                logger.info(WebSocket factory can use DatabaseManager.initialize()""
                 websocket_database_access_success = True
                 self.record_metric(websocket_database_pattern1, True)
             
             # Pattern 2: Session creation
             if hasattr(db_manager, 'get_async_session'):
-                logger.info(WebSocket factory can use DatabaseManager.get_async_session()")"
+                logger.info(WebSocket factory can use DatabaseManager.get_async_session()""
                 websocket_database_access_success = True
                 self.record_metric(websocket_database_pattern2, True)
             
@@ -326,8 +325,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             )
             
             self.record_metric(websocket_database_integration_success, True)
-            logger.info(WebSocket factory database integration validation passed)"
-            logger.info(WebSocket factory database integration validation passed)""
+            logger.info(WebSocket factory database integration validation passed)"""
 
             
         except ImportError as e:
@@ -343,8 +341,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
         "Enhanced teardown with database SSOT metrics."
         # Log final metrics
         logger.info(fDatabase imports attempted: {self._database_imports_attempted})
-        logger.info(fWebSocket imports attempted: {self._websocket_imports_attempted})"
-        logger.info(fWebSocket imports attempted: {self._websocket_imports_attempted})"
+        logger.info(fWebSocket imports attempted: {self._websocket_imports_attempted})""
         logger.info(f"Function calls attempted: {self._function_calls_attempted})"
         
         super().teardown_method(method)

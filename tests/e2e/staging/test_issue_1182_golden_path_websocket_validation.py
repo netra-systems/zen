@@ -82,7 +82,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
         TARGET STATE: SHOULD PASS - Full user journey working with SSOT manager
         
         Business Impact: Validates complete user experience with consolidated WebSocket manager
-        Critical: $500K+ ARR depends on this user journey working reliably
+        Critical: 500K+ ARR depends on this user journey working reliably
         """
         logger.info("🚀 Testing complete Golden Path user journey (Issue #1182)")
         
@@ -220,11 +220,11 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
         self.validation_results.append(validation)
         
         # CRITICAL: Golden Path must work for business continuity
-        # This should PASS to protect $500K+ ARR functionality
+        # This should PASS to protect 500K+ ARR functionality
         self.assertTrue(
             validation.user_journey_success,
             f"Golden Path user journey failed after Issue #1182 WebSocket SSOT migration. "
-            f"Critical business impact: $500K+ ARR at risk. "
+            f"Critical business impact: 500K+ ARR at risk. "
             f"Connection: {validation.websocket_connection_success}, "
             f"Events: {validation.event_delivery_complete}, "
             f"AI Response: {validation.ai_response_received}. "
@@ -247,9 +247,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
         Business Impact: Real-time user experience depends on these events
         Events: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
         """
-        logger.info("📡 Testing WebSocket five critical events delivery (Issue #1182)")
-        
-        validation = GoldenPathValidation(test_scenario="five_critical_events")
+        logger.info("📡 Testing WebSocket five critical events delivery (Issue #1182)""five_critical_events")
         
         try:
             logger.info("📡 Connecting to staging WebSocket for event validation...")
@@ -529,7 +527,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
             
             # Business impact summary
             if successful_journeys == total_validations:
-                logger.info("🎯 GOLDEN PATH FULLY PROTECTED: $500K+ ARR functionality validated")
+                logger.info("🎯 GOLDEN PATH FULLY PROTECTED: 500K+ ARR functionality validated")
             else:
                 logger.error(f"🚨 GOLDEN PATH AT RISK: {total_validations - successful_journeys} failures detected")
             

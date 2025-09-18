@@ -13,7 +13,7 @@ These tests are designed to FAIL when problems exist, avoiding false success pat
 Business Value Justification:
 - Segment: Platform/Internal
 - Business Goal: Infrastructure Integrity & Golden Path Protection
-- Value Impact: Ensures factory patterns work correctly for $500K+ ARR chat functionality
+- Value Impact: Ensures factory patterns work correctly for 500K+ ARR chat functionality
 - Strategic Impact: Prevents infrastructure failures from masking real system problems
 """
 

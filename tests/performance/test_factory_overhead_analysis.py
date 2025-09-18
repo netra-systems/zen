@@ -12,7 +12,7 @@ Test Design:
 - Analyzes GC impact of factory object creation
 - Validates performance benefits of cleanup
 
-Business Impact: $500K+ ARR protection through performance optimization
+Business Impact: 500K+ ARR protection through performance optimization
 Performance Goal: Demonstrate measurable performance gains from factory cleanup
 
 These tests establish baseline metrics and validate performance improvements.

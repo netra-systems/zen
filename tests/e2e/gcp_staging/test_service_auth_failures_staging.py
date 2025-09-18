@@ -4,7 +4,7 @@ E2E GCP Staging Tests for Service Authentication Failures - Issue #1037
 Business Value Justification (BVJ):
 - Segment: Platform/Infrastructure (affects all customer tiers)
 - Business Goal: System Stability - Prevent service communication breakdown
-- Value Impact: Protects $500K+ ARR by ensuring core platform functionality
+- Value Impact: Protects 500K+ ARR by ensuring core platform functionality
 - Revenue Impact: Prevents complete service outage affecting all customers
 
 These tests validate service-to-service authentication in the REAL GCP staging

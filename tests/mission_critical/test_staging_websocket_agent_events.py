@@ -381,11 +381,7 @@ class StagingWebSocketFlowTests:
     @pytest.mark.timeout(120)
     async def test_staging_websocket_performance(self):
         "Test WebSocket performance in staging environment."
-        logger.info("Testing staging WebSocket performance)"
-
-        # Connect to staging
-        connected = await self.helper.connect_with_auth()
-        assert connected, "Failed to connect for performance test"
+        logger.info("Testing staging WebSocket performance)""Failed to connect for performance test"
 
         # Send multiple messages to test throughput
         message_count = 50
@@ -499,17 +495,7 @@ class StagingRegressionPreventionTests:
         )
         assert valid_success, "Should be able to send valid messages after error"
 
-        logger.info("PASS: Staging WebSocket error handling working)"
-
-
-# ============================================================================
-# TEST SUITE RUNNER
-# ============================================================================
-
-@pytest.mark.staging
-@pytest.mark.mission_critical
-class StagingMissionCriticalSuiteTests:
-    """Main test suite for staging WebSocket validation."""
+        logger.info("PASS: Staging WebSocket error handling working)""""Main test suite for staging WebSocket validation."""
 
     @pytest.mark.asyncio
     async def test_run_staging_websocket_suite(self):
@@ -524,8 +510,7 @@ class StagingMissionCriticalSuiteTests:
             pytest.fail(Staging configuration validation failed - cannot run WebSocket tests")"
 
         logger.info(fPASS: Staging configuration validated:)
-        logger.info(f  - WebSocket URL: {config.urls.websocket_url})"
-        logger.info(f  - WebSocket URL: {config.urls.websocket_url})"
+        logger.info(f  - WebSocket URL: {config.urls.websocket_url})""
         logger.info(f"  - Backend URL: {config.urls.backend_url})"
         logger.info(f  - Auth URL: {config.urls.auth_url})
 

@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise/Platform - Mission-critical production scenarios
 - Business Goal: Production Reliability - Validate real-world timeout constraints  
 - Value Impact: Ensures enterprise customers can complete complex analytical workflows
-- Revenue Impact: Protects $500K+ ARR from enterprise timeout-related churn
+- Revenue Impact: Protects 500K+ ARR from enterprise timeout-related churn
 
 CRITICAL ISSUE #341:
 Current problem: 60s timeout constraints cause failures in production for complex workflows

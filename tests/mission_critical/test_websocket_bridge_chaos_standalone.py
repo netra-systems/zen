@@ -62,8 +62,7 @@ class MockWebSocketClient:
         ""Send message with simulated network conditions.""
 
         if self.closed:
-        raise ConnectionError(WebSocket is closed)"
-        raise ConnectionError(WebSocket is closed)""
+        raise ConnectionError(WebSocket is closed)"""
 
 
         await asyncio.sleep(self.latency_simulation)
@@ -77,8 +76,7 @@ class MockWebSocketClient:
 
         pass
         if self.closed:
-        raise ConnectionError(WebSocket is closed)"
-        raise ConnectionError(WebSocket is closed)""
+        raise ConnectionError(WebSocket is closed)"""
 
 
         await asyncio.sleep(self.latency_simulation)
@@ -169,8 +167,7 @@ class ChaosWebSocketClient:
         self.is_connected = True
         duration_ms = (time.time() - start_time) * 1000
 
-        print()"
-        print()""
+        print()"""
 
         return True
 
@@ -432,8 +429,7 @@ jitter_ms=100
 clients = []
 for i in range(4):
     client = ChaosWebSocketClient(formatted_string, conditions)
-success = await client.connect(ws://mock-server/ws)"
-success = await client.connect(ws://mock-server/ws)""
+success = await client.connect(ws://mock-server/ws)"""
 
 if success:
     clients.append(client)
@@ -497,8 +493,7 @@ jitter_ms=200
 clients = []
 for i in range(3):
     client = ChaosWebSocketClient(formatted_string, conditions)
-success = await client.connect(ws://mock-server/ws)"
-success = await client.connect(ws://mock-server/ws)""
+success = await client.connect(ws://mock-server/ws)"""
 
 if success:
     clients.append(client)

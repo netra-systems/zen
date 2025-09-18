@@ -9,7 +9,7 @@ EXPECTED BEHAVIOR:
 - BEFORE REMEDIATION: All tests should FAIL (proving SSOT violations exist)
 - AFTER REMEDIATION: All tests should PASS (proving SSOT compliance achieved)
 
-Business Value: Enterprise/Platform - $500K+ ARR protection through proper user isolation
+Business Value: Enterprise/Platform - 500K+ ARR protection through proper user isolation
 SSOT Remediation Target: Line 1128 - /netra_backend/app/agents/supervisor/agent_instance_factory.py
 
 This test suite specifically targets the global singleton pattern violations that prevent

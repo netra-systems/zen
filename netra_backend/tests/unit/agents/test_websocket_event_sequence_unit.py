@@ -1,6 +1,6 @@
 """Unit tests for WebSocket event sequence validation in agent golden path messages.
 
-These tests validate the critical 5-event sequence that delivers $500K+ ARR business value
+These tests validate the critical 5-event sequence that delivers 500K+ ARR business value
 through the Golden Path user flow: users login → get meaningful AI responses.
 
 Business Value: Free/Early/Mid/Enterprise - Real-time User Experience
@@ -262,12 +262,12 @@ class WebSocketEventSequenceValidationTests(SSotAsyncTestCase):
         assert 'agent_started_to_agent_thinking' in timings, "Should have started to thinking timing"
 
     async def test_business_value_protection_validation(self):
-        """Test that event sequence validation protects $500K+ ARR business value."""
+        """Test that event sequence validation protects 500K+ ARR business value."""
         # Simulate high-value user interaction requiring complete event sequence
         high_value_context = {
             'user_tier': 'enterprise',
             'request_value': 'high',
-            'business_impact': '$500K+ ARR'
+            'business_impact': '500K+ ARR'
         }
 
         # Ensure complete sequence is required for high-value interactions

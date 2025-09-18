@@ -15,7 +15,7 @@ in production. They are designed to FAIL until proper coordination mechanisms ar
 
 Business Value:
 - Segment: Platform Infrastructure
-- Goal: $500K+ ARR Chat Functionality Reliability
+- Goal: 500K+ ARR Chat Functionality Reliability
 - Value Impact: Prevents WebSocket 1011 errors in Cloud Run deployment
 - Strategic Impact: Validates infrastructure-specific race condition fixes
 """

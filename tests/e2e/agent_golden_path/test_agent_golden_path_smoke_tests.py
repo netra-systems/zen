@@ -4,7 +4,7 @@ Agent Golden Path Smoke Tests - Fast E2E Validation for Issue #1081
 Business Value Justification:
 - Segment: All tiers - Core platform functionality 
 - Business Goal: Rapid validation of critical user paths
-- Value Impact: Ensures $500K+ ARR golden path functionality works
+- Value Impact: Ensures 500K+ ARR golden path functionality works
 - Revenue Impact: Prevents complete business value delivery failure
 
 PURPOSE:

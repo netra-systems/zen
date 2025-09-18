@@ -3,7 +3,7 @@
 MISSION CRITICAL: Configuration Manager SSOT Violation Tests - Issue #757
 
 **BUSINESS VALUE JUSTIFICATION (BVJ):**
-- **Segment:** Platform/Internal - $500K+ plus ARR Protection
+- **Segment:** Platform/Internal - 500K+  ARR Protection
 """
 
 - **Business Goal:** Protect Golden Path user flow from configuration race conditions
@@ -91,7 +91,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
 
         **SSOT VIOLATION:** Multiple configuration managers exist and cause import conflicts
         **BUSINESS IMPACT:** Prevents system startup, blocks user authentication
-        **REVENUE RISK:** $500K+ plus ARR at risk from system unavailability
+        **REVENUE RISK:** 500K+  ARR at risk from system unavailability
 
         **FAILURE SCENARIO:**
         - Deprecated manager in netra_backend.app.core.configuration.base
@@ -183,7 +183,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
 
         **SSOT VIOLATION:** Multiple configuration managers create race conditions during startup
         **BUSINESS IMPACT:** System fails to start reliably, users cannot access chat functionality
-        **REVENUE RISK:** $500K+ plus ARR at risk from unreliable system startup
+        **REVENUE RISK:** 500K+  ARR at risk from unreliable system startup
 
         **FAILURE SCENARIO:**
         - Multiple threads access different configuration managers simultaneously
@@ -465,7 +465,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
 
         **SSOT VIOLATION:** Configuration duplication causes JWT authentication failures
         **BUSINESS IMPACT:** Users cannot login, blocking access to chat functionality
-        **REVENUE RISK:** $500K+ plus ARR directly at risk from auth system failures
+        **REVENUE RISK:** 500K+  ARR directly at risk from auth system failures
 
         **FAILURE SCENARIO:**
         - Multiple configuration managers provide different JWT secrets
@@ -596,7 +596,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
             fGolden Path blocked: {golden_path_blocked}. "
             fGolden Path blocked: {golden_path_blocked}. ""
 
-            BUSINESS IMPACT: JWT configuration inconsistencies prevent user login, blocking $500K+ plus ARR revenue.
+            BUSINESS IMPACT: JWT configuration inconsistencies prevent user login, blocking 500K+  ARR revenue.
         )
 
         # Log critical auth failures
@@ -609,7 +609,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
         if golden_path_blocked:
             self.logger.critical(
                 GOLDEN PATH BLOCKED: Configuration Manager SSOT violations prevent user authentication, 
-                "directly impacting $500K+ plus ARR from chat functionality"
+                "directly impacting 500K+  ARR from chat functionality"
             )
 
 

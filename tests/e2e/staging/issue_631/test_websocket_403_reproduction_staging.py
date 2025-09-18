@@ -2,7 +2,7 @@
 E2E Staging Tests for Issue #631: HTTP 403 WebSocket Authentication Reproduction
 
 Business Value:
-- Reproduces $500K+ ARR blocking issue in live staging environment
+- Reproduces 500K+ ARR blocking issue in live staging environment
 - Validates HTTP 403 WebSocket authentication failures
 - Provides real-world validation of auth service integration
 

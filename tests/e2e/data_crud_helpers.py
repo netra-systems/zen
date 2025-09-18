@@ -79,13 +79,7 @@ class DataCRUDManager:
             try:
                 self._db_connections['auth'] = await asyncpg.connect(self.auth_db_url)
             except Exception as e:
-                print(f"Warning: Could not connect to auth database: {e}")
-                
-        if self.main_db_url:
-            try:
-                self._db_connections['main'] = await asyncpg.connect(self.main_db_url)
-            except Exception as e:
-                print(f"Warning: Could not connect to main database: {e}")
+                print(f"Warning: Could not connect to auth database: {e}""Warning: Could not connect to main database: {e}")
         
     async def cleanup_test_environment(self):
         """Cleanup test environment and close connections."""

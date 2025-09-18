@@ -2,13 +2,13 @@
 Mission Critical Test: WebSocket Event Delivery Failure Detection
 
 This test is designed to FAIL initially, proving that the 5 critical WebSocket
-events are not delivered reliably due to SSOT violations, blocking $500K+ ARR.
+events are not delivered reliably due to SSOT violations, blocking 500K+ ARR.
 
 Business Impact:
 - 5 critical WebSocket events required for chat functionality
 - Unreliable event delivery breaks real-time user experience
 - Missing events cause incomplete agent responses
-- $500K+ ARR blocked by event delivery system failures
+- 500K+ ARR blocked by event delivery system failures
 
 Critical Events Required:
 1. agent_started - User sees agent began processing
@@ -54,7 +54,7 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
     CRITICAL: This test proves WebSocket event delivery failures.
 
     EXPECTED RESULT: FAIL - Critical events not delivered reliably
-    BUSINESS IMPACT: $500K+ ARR blocked by incomplete agent interactions
+    BUSINESS IMPACT: 500K+ ARR blocked by incomplete agent interactions
     """
 
     def setup_method(self):
@@ -79,7 +79,7 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
         CRITICAL BUSINESS TEST: Prove 5 critical events are not delivered reliably
 
         Expected Result: FAIL - Missing critical events break chat experience
-        Business Impact: $500K+ ARR - incomplete agent responses frustrate users
+        Business Impact: 500K+ ARR - incomplete agent responses frustrate users
         """
         if not all([UnifiedWebSocketManager, ExecutionEngine, UserExecutionContext]):
             pytest.skip("SSOT imports not available - expected during migration")
@@ -102,7 +102,7 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
             f"Delivery rate: {delivery_analysis['delivery_rate']:.2%} "
             f"({delivery_analysis['delivered_count']}/{delivery_analysis['total_expected']}). "
             f"Missing events: {delivery_analysis['missing_events']}. "
-            f"BUSINESS IMPACT: Incomplete agent responses block $500K+ ARR chat functionality."
+            f"BUSINESS IMPACT: Incomplete agent responses block 500K+ ARR chat functionality."
         )
 
         # Check event ordering

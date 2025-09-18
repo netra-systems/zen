@@ -13,7 +13,7 @@ Key Issues to Reproduce:
 
 Business Value: Platform/All - Production Readiness Validation
 Ensures startup sequence works reliably in actual GCP deployment conditions,
-protecting $500K+ ARR from WebSocket connection failures during service initialization.
+protecting 500K+ ARR from WebSocket connection failures during service initialization.
 
 EXPECTED FAILURE MODES:
 - WebSocket 1011 connection timeouts during real GCP cold starts
@@ -143,7 +143,7 @@ class GCPStartupRaceConditionE2ETests(SSotAsyncTestCase):
         websocket_step_failures = [f for f in golden_path_failures if 'websocket' in f['failed_at_step'].lower()]
         assert len(websocket_step_failures) <= 1, f'Expected minimal WebSocket connection failures in Golden Path but got {len(websocket_step_failures)}. Conservative timeouts should prevent most WebSocket connection issues. WebSocket failures: {websocket_step_failures}'
         revenue_impact_scenarios = [f for f in golden_path_failures if f['business_impact'] == 'revenue_loss_potential']
-        assert len(revenue_impact_scenarios) <= 1, f'Expected minimal Golden Path failures with revenue impact but got {len(revenue_impact_scenarios)} scenarios. Conservative timeouts should protect $500K+ ARR by preventing most user interaction failures. Revenue impact failures: {revenue_impact_scenarios}'
+        assert len(revenue_impact_scenarios) <= 1, f'Expected minimal Golden Path failures with revenue impact but got {len(revenue_impact_scenarios)} scenarios. Conservative timeouts should protect 500K+ ARR by preventing most user interaction failures. Revenue impact failures: {revenue_impact_scenarios}'
         self.test_metrics.record_custom('golden_path_scenarios', len(golden_path_scenarios))
         self.test_metrics.record_custom('golden_path_failures', len(golden_path_failures))
         self.test_metrics.record_custom('websocket_golden_path_failures', len(websocket_step_failures))

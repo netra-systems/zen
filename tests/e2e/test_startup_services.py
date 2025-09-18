@@ -251,16 +251,10 @@ class ServiceStartupTests:
                                 result = await response.text()
                                 assert '1' in result, f"Unexpected query result: {result}"
                             else:
-                                print(f"Warning: ClickHouse query auth failed: {response.status} - continuing")
-                    else:
-                        print(f"Warning: ClickHouse ping failed: {response.status} - continuing")
+                                print(f"Warning: ClickHouse query auth failed: {response.status} - continuing""Warning: ClickHouse ping failed: {response.status} - continuing")
                     
             except Exception as e:
-                print(f"Warning: ClickHouse connection failed: {str(e)} - continuing")
-
-    @pytest.mark.asyncio
-    async def test_redis_connection_pool_healthy(self):
-        """
+                print(f"Warning: ClickHouse connection failed: {str(e)} - continuing""""
         Test that Redis connection pool is healthy and operational.
         
         Critical Assertions:

@@ -7,7 +7,7 @@ and prevents SSOT violations in context creation patterns.
 This test is DESIGNED TO FAIL initially to prove inconsistent factory patterns exist.
 Once SSOT consolidation is complete, this test should PASS.
 
-Business Impact: $500K+ ARR at risk from inconsistent UserExecutionContext factory
+Business Impact: 500K+ ARR at risk from inconsistent UserExecutionContext factory
 patterns causing user isolation failures and golden path disruption.
 
 CRITICAL REQUIREMENTS:

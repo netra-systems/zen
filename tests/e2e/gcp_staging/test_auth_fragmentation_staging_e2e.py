@@ -4,7 +4,7 @@ Authentication Fragmentation GCP Staging E2E Tests - Issue #1060
 CRITICAL E2E TESTS: These tests demonstrate authentication fragmentation in the
 actual GCP staging environment, proving the issue exists in real deployment conditions.
 
-Business Impact: $500K+ ARR - Staging environment auth failures block production deployment
+Business Impact: 500K+ ARR - Staging environment auth failures block production deployment
 Technical Impact: Real-world authentication fragmentation evidence in cloud environment
 
 TEST STRATEGY: E2E tests against GCP staging environment to validate authentication

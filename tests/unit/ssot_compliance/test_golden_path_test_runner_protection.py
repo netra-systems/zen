@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,22 +23,17 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 SSOT Golden Path Test Runner Protection Test Suite
 
-**CRITICAL BUSINESS IMPACT**: This test suite protects the $500K+ ARR Golden Path
+**CRITICAL BUSINESS IMPACT**: This test suite protects the 500K+ ARR Golden Path
 user flow from SSOT violations in test runner infrastructure that could cause
 silent failures and compromise business-critical chat functionality validation.
 
 **PURPOSE**: Protect Golden Path tests from SSOT violations
 - Validate Golden Path tests use canonical UnifiedTestRunner
 - Detect silent failures from inconsistent test execution
-- Ensure $500K+ ARR chat functionality protection
+- Ensure 500K+ ARR chat functionality protection
 - Test real Golden Path execution consistency
 
 **GOLDEN PATH DEFINITION**: The complete user journey from login  ->  AI chat response
@@ -88,7 +75,7 @@ class GoldenPathTestRunnerProtectionTests(SSotBaseTestCase):
     """
     Test class protecting Golden Path tests from SSOT violations.
     
-    This test validates that business-critical Golden Path tests (protecting $500K+ ARR)
+    This test validates that business-critical Golden Path tests (protecting 500K+ ARR)
     use canonical SSOT patterns and prevents duplicate UnifiedTestRunner implementations
     from causing silent failures in revenue-protecting test execution.
     """
@@ -126,7 +113,7 @@ class GoldenPathTestRunnerProtectionTests(SSotBaseTestCase):
         """
         Test that Golden Path tests use canonical SSOT UnifiedTestRunner.
         
-        **BUSINESS IMPACT**: Ensures $500K+ ARR Golden Path tests execute through
+        **BUSINESS IMPACT**: Ensures 500K+ ARR Golden Path tests execute through
         consistent, SSOT-compliant infrastructure preventing silent failures.
         
         **FAILURE CONDITIONS**:
@@ -224,7 +211,7 @@ class GoldenPathTestRunnerProtectionTests(SSotBaseTestCase):
                 len(duplicate_usage),
                 0,
                 f"CRITICAL BUSINESS IMPACT: {len(duplicate_usage)} Golden Path tests use duplicate UnifiedTestRunner.\n"
-                f"Revenue at risk: $500K+ ARR from compromised chat functionality testing.\n"
+                f"Revenue at risk: 500K+ ARR from compromised chat functionality testing.\n"
                 f"SSOT compliance: {compliance_percentage:.1f}%\n"
                 f"Violations:\n{violation_details}\n"
                 f"Fix required: Migrate Golden Path tests to canonical SSOT test runner."
@@ -323,7 +310,7 @@ class GoldenPathTestRunnerProtectionTests(SSotBaseTestCase):
                 "risk_level": "HIGH",
                 "scenarios_at_risk": len(silent_failure_risks),
                 "protection_rate": f"{protection_rate:.1%}",
-                "revenue_impact": "Silent failures could compromise $500K+ ARR validation"
+                "revenue_impact": "Silent failures could compromise 500K+ ARR validation"
             })
             
     def test_golden_path_execution_consistency(self):
@@ -415,7 +402,7 @@ class GoldenPathTestRunnerProtectionTests(SSotBaseTestCase):
                 "failures": len(consistency_failures),
                 "consistency_rating": f"{consistency_rating:.1%}",
                 "business_impact": "Golden Path execution inconsistency detected",
-                "revenue_risk": "$500K+ ARR validation compromised"
+                "revenue_risk": "500K+ ARR validation compromised"
             })
             
             # **VALIDATION REQUIREMENT**: Golden Path must be consistent
@@ -423,7 +410,7 @@ class GoldenPathTestRunnerProtectionTests(SSotBaseTestCase):
                 consistency_rating,
                 0.8,
                 f"Golden Path execution consistency too low: {consistency_rating:.1%}\n"
-                f"Business Impact: $500K+ ARR at risk from inconsistent test execution.\n"
+                f"Business Impact: 500K+ ARR at risk from inconsistent test execution.\n"
                 f"Failed patterns:\n{failure_details}\n"
                 f"Fix required: Ensure SSOT test runner compliance for Golden Path tests."
             )
@@ -439,7 +426,7 @@ class GoldenPathTestRunnerProtectionTests(SSotBaseTestCase):
         Test comprehensive revenue protection through SSOT compliance.
         
         **PURPOSE**: Validate that SSOT test runner compliance provides
-        comprehensive protection for the $500K+ ARR Golden Path functionality
+        comprehensive protection for the 500K+ ARR Golden Path functionality
         and prevents business-critical testing gaps.
         """
         self.record_metric("revenue_protection_validation", True)

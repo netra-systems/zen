@@ -7,7 +7,7 @@ to validate consolidation works in production-like conditions.
 This test is DESIGNED TO FAIL initially to prove SSOT violations cause
 staging environment failures with real GCP infrastructure.
 
-Business Impact: $500K+ ARR at risk from staging deployment failures
+Business Impact: 500K+ ARR at risk from staging deployment failures
 that prevent customer validation and production deployment confidence.
 
 CRITICAL REQUIREMENTS:

@@ -6,7 +6,7 @@ MISSION CRITICAL: Validate all staging services are healthy and authentication
 works properly as prerequisites for Golden Path functionality.
 
 BUSINESS IMPACT: Authentication failures block all users from accessing 
-$500K+ ARR chat functionality. Service health issues cause instability.
+500K+ ARR chat functionality. Service health issues cause instability.
 
 TARGET: Complete staging environment health validation
 - Auth Service: https://auth.staging.netrasystems.ai

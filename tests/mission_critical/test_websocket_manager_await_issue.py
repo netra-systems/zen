@@ -1,7 +1,7 @@
 """
 Mission Critical Test Suite: WebSocket Manager Await Issue Fix
 
-CRITICAL BUSINESS VALUE: This test suite protects the $500K+ ARR chat functionality
+CRITICAL BUSINESS VALUE: This test suite protects the 500K+ ARR chat functionality
 by ensuring WebSocket manager creation works correctly in quality management handlers.
 
 PURPOSE:

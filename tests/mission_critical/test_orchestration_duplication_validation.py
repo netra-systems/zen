@@ -4,7 +4,7 @@
 Mission Critical Test Suite: Orchestration Duplication Violation Reproduction - Issue #1075
 
 Business Value: Platform/Internal - Test Infrastructure SSOT Compliance
-Critical for $500K+ plus ARR protection through unified orchestration patterns and elimination of competing orchestration systems.
+Critical for 500K+  ARR protection through unified orchestration patterns and elimination of competing orchestration systems.
 
 This test reproduces the critical violation where 129+ files contain duplicate orchestration 
 """
@@ -139,12 +139,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
                     
         except Exception as e:
             # Log but don't fail on individual file errors'
-            print(f"Warning: Could not scan {file_path}: {e})"
-            
-        return violations
-
-    def analyze_ast_for_violations(self, file_path: Path, tree: ast.AST, lines: List[str) -> List[OrchestrationViolation):
-        Analyze AST for orchestration violations."
+            print(f"Warning: Could not scan {file_path}: {e})""
         Analyze AST for orchestration violations.""
 
         violations = []

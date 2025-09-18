@@ -1,6 +1,6 @@
 "Golden Path Protection Tests for Issue #821 - SupervisorAgent SSOT Consolidation"
 
-Business Value: Protect $500K+ plus ARR Golden Path during SSOT consolidation
+Business Value: Protect 500K+  ARR Golden Path during SSOT consolidation
 BVJ: ALL segments | Platform Stability | Ensure SSOT fixes don't break core functionality'
 
 MISSION: Ensure Golden Path (users login -> get AI responses) remains functional during/after SSOT consolidation
@@ -148,18 +148,12 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
                 fAll {len(required_events)} WebSocket events should be sendable
             )
 
-            print(f\n=== WEBSOCKET GOLDEN PATH PROTECTION ===)"
-            print(f\n=== WEBSOCKET GOLDEN PATH PROTECTION ===)"
-            print(f"CHECK WebSocket bridge integration: Compatible))"
-            print(fCHECK Critical events supported: {len(required_events)})
-            print(f"CHECK Golden Path real-time updates: Functional)"
+            print(f\n=== WEBSOCKET GOLDEN PATH PROTECTION ===)""
+            print(f"CHECK WebSocket bridge integration: Compatible))""CHECK Golden Path real-time updates: Functional)"
             print(=*50)
 
         except ImportError as e:
-            self.fail(f"GOLDEN PATH FAILURE: Cannot import SSOT SupervisorAgent for WebSocket events: {e})"
-
-    async def test_agent_workflow_orchestration_continues_working(self):
-        "GOLDEN PATH: Validate agent workflow orchestration works with SSOT consolidation."
+            self.fail(f"GOLDEN PATH FAILURE: Cannot import SSOT SupervisorAgent for WebSocket events: {e})""GOLDEN PATH: Validate agent workflow orchestration works with SSOT consolidation."
 
         Agent orchestration is core to delivering AI value to users.
         Must continue working after SSOT consolidation.

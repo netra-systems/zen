@@ -7,7 +7,7 @@ This test suite ensures compliance with CLAUDE.md policy: "MOCKS = Abomination",
 Tests will FAIL if any mock usage is detected in test files, enforcing real service testing.
 
 Business Value: Platform/Internal - Test Reliability
-$500K+ plus ARR at risk from false test confidence and hidden integration failures
+500K+  ARR at risk from false test confidence and hidden integration failures
 
 Author: Principal Engineer AI
 Date: 2025-8-30"""
@@ -257,10 +257,7 @@ class TestWebSocketConnection:
         self._closed = False
 """
         """Send JSON message."""Send JSON message."""
-        raise RuntimeError("WebSocket is closed)"
-        self.messages_sent.append(message)
-
-    async def close(self, code: int = 1000, reason: str = "Normal closure):"
+        raise RuntimeError("WebSocket is closed)""Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -745,8 +742,7 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
         f.write("- Use docker-compose for ClickHouse setup )"
         ")"
         elif service == 'netra_backend':
-        f.write("- Replace WebSocket mocks with real connections )"
-        ")"
+        f.write("- Replace WebSocket mocks with real connections )"")"
         f.write("- Use real agent execution )"
         ")"
         f.write("- Implement real database connections )"
@@ -762,8 +758,7 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
         ")"
         f.write("1. **Phase 1**: auth_service (highest risk) )"
         ")"
-        f.write("2. **Phase 2**: netra_backend (WebSocket critical) )"
-        ")"
+        f.write("2. **Phase 2**: netra_backend (WebSocket critical) )"")"
         f.write("3. **Phase 3**: analytics_service )"
         ")"
         f.write("4. **Phase 4**: Integration tests )"

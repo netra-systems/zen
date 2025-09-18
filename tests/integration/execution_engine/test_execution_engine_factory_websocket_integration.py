@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Segment: ALL (Free  ->  Enterprise) - affects every user interaction
 - Business Goal: Revenue/Retention - ensures chat functionality works correctly
 - Value Impact: Delivers 90% of platform value through reliable real-time chat
-- Revenue Impact: Prevents $500K+ ARR loss from broken WebSocket communications
+- Revenue Impact: Prevents 500K+ ARR loss from broken WebSocket communications
 - Strategic Impact: CRITICAL - chat is the primary value delivery mechanism
 
 Key Validation Points:
@@ -937,7 +937,7 @@ BUSINESS VALUE JUSTIFICATION for ExecutionEngine Factory WebSocket Integration T
 Segment: ALL (Free  ->  Enterprise) - affects every user interaction with chat
 Business Goal: Revenue/Retention - ensures primary value delivery mechanism works correctly
 Value Impact: Delivers 90% of platform value through reliable real-time chat communication
-Revenue Impact: Prevents $500K+ ARR loss from broken WebSocket communications that break chat
+Revenue Impact: Prevents 500K+ ARR loss from broken WebSocket communications that break chat
 Strategic Impact: CRITICAL - WebSocket events enable chat which is the primary business value delivery
 
 Specific Business Impacts:
@@ -952,13 +952,13 @@ Revenue Calculation:
 - Platform has 1000+ active users heavily dependent on chat
 - Single WebSocket isolation bug could affect multiple users simultaneously
 - Bug causing cross-user data leakage could result in:
-  - Immediate user churn: $50K+ ARR loss per month
+  - Immediate user churn: 50K+ ARR loss per month
   - Legal liability: $1M+ in data privacy violations
   - Platform reputation damage: Unmeasurable but potentially catastrophic
 
 Test Investment ROI:
 - Test Development Cost: ~6 hours senior developer time  
-- Prevented Revenue Loss: $500K+ ARR protection
+- Prevented Revenue Loss: 500K+ ARR protection
 - ROI: 83,300%+ (massive protection vs minimal development cost)
 
 This test directly protects the core revenue-generating functionality of the platform.

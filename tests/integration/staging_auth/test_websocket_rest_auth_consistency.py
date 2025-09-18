@@ -5,7 +5,7 @@ PURPOSE: Integration test validating authentication consistency between WebSocke
 EXPECTED: PASS after SSOT remediation - validates cross-protocol auth consistency
 TARGET: WebSocket and REST API use same auth service delegation patterns
 
-BUSINESS VALUE: Ensures consistent authentication experience for $500K+ ARR across protocols
+BUSINESS VALUE: Ensures consistent authentication experience for 500K+ ARR across protocols
 EXECUTION: Staging environment integration - NO Docker dependency
 """
 import logging

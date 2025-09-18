@@ -1,6 +1,6 @@
 """E2E Agent Resilience and Error Recovery Comprehensive Test - GCP Staging Environment
 
-Business Value: $500K+ ARR protection through failure recovery validation
+Business Value: 500K+ ARR protection through failure recovery validation
 Critical Coverage for Issue #872: Agent resilience and error recovery scenarios
 
 REQUIREMENTS:

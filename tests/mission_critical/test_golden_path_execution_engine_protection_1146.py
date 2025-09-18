@@ -2,7 +2,7 @@
 
 Business Value Justification:
     - Segment: Platform/Business Critical
-- Business Goal: Protect $500K+ plus ARR Golden Path functionality  
+- Business Goal: Protect 500K+  ARR Golden Path functionality  
 - Value Impact: Ensures execution engine consolidation doesn't break end-to-end user flow'
 - Strategic Impact: Critical protection for login -> AI response flow that delivers 90% platform value
 
@@ -136,7 +136,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                 'step': 'apex_optimizer_agent',
                 'description': 'Generate AI optimization recommendations', 
                 'expected_output': 'Actionable recommendations produced',
-                'business_impact': 'User receives valuable AI insights ($500K+ plus ARR value)'
+                'business_impact': 'User receives valuable AI insights (500K+  ARR value)'
             }
         ]
         
@@ -236,7 +236,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
         print(f"CHECK GOLDEN PATH PROTECTED: Complete user flow successful through UserExecutionEngine)"
         print(f   Total duration: {total_duration:.""2f""}s)
         print(f"   Steps completed: {len(golden_path_results)})"
-        print(f   Business value: $500K+ plus ARR flow maintained)
+        print(f   Business value: 500K+  ARR flow maintained)
 
     async def test_golden_path_websocket_events_all_five_critical_events(self):
         "CRITICAL: Validate all 5 critical WebSocket events for Golden Path user experience."
@@ -474,14 +474,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
             for i, engine_info in enumerate(user_engines):
                 user_events = engine_info['events']
                 self.assertGreater(len(user_events), 0, 
-                    f"User {i} received no WebSocket events)"
-                
-                # Validate events are for this user only (no cross-contamination)
-                for event_name, event_time in user_events:
-                    self.assertIn(event_name, ['agent_started', 'agent_thinking', 'agent_completed')
-            
-            print(fCHECK MULTI-USER GOLDEN PATH PROTECTED:)
-            print(f"   Concurrent users: {concurrent_users})"
+                    f"User {i} received no WebSocket events)""   Concurrent users: {concurrent_users})"
             print(f   Total duration: {total_duration:.""2f""}s)
             print(f"   All users successful: {len(successful_users)}/{concurrent_users})"
             print(f   User isolation: MAINTAINED)

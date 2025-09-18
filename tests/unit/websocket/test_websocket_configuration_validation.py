@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: Platform Infrastructure (affects all customer segments)
 - Business Goal: Stability + Configuration Validation
 - Value Impact: Ensures WebSocket service can be properly configured
-- Revenue Impact: Protects $500K+ ARR by validating configuration integrity
+- Revenue Impact: Protects 500K+ ARR by validating configuration integrity
 
 Expected Result: PASSING (no infrastructure dependencies)
 Difficulty: LOW - Unit testing without external dependencies
@@ -44,12 +44,7 @@ class WebSocketConfigurationValidationTests(unittest.TestCase):
         """
         # Test default port configuration
         default_port = 8000
-        self.assertEqual(default_port, 8000, "Default WebSocket port should be 8000 (backend)")
-
-        # Test port validation logic
-        valid_ports = [8000, 8001, 8080, 3000]
-        for port in valid_ports:
-            self.assertTrue(1024 <= port <= 65535, f"Port {port} should be in valid range")
+        self.assertEqual(default_port, 8000, "Default WebSocket port should be 8000 (backend)""Port {port} should be in valid range")
 
         # Test invalid ports
         invalid_ports = [0, 80, 443, 1023, 65536]
@@ -288,7 +283,7 @@ class WebSocketConfigurationValidationTests(unittest.TestCase):
         # Test business value metrics
         business_metrics = {
             "chat_functionality_percentage": 90,  # 90% of platform value
-            "arr_at_risk": 500000,               # $500K+ ARR
+            "arr_at_risk": 500000,               # 500K+ ARR
             "critical_events_count": 5,          # 5 critical WebSocket events
             "user_experience_impact": "HIGH"     # High impact on user experience
         }

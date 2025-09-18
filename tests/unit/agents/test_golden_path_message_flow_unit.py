@@ -3,7 +3,7 @@ Unit Tests for Golden Path Message Flow - End-to-End Message Processing
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
 - Segment: All (Free/Early/Mid/Enterprise/Platform) - Golden Path Core Flow
-- Business Goal: Ensure complete message flow works end-to-end for $500K+ ARR Golden Path
+- Business Goal: Ensure complete message flow works end-to-end for 500K+ ARR Golden Path
 - Value Impact: Message flow validation protects entire AI interaction value chain
 - Strategic Impact: End-to-end validation ensures no gaps in Golden Path user experience
 - Revenue Protection: Without complete flow validation, users get broken experiences -> churn
@@ -25,7 +25,7 @@ KEY COVERAGE:
 GOLDEN PATH PROTECTION:
 Tests ensure the complete message flow from user request ("Help me optimize costs")
 through agent processing and tool execution to final response delivery works
-seamlessly, protecting the entire $500K+ ARR AI interaction value chain.
+seamlessly, protecting the entire 500K+ ARR AI interaction value chain.
 """
 
 import pytest
@@ -398,7 +398,7 @@ class GoldenPathMessageFlowUnitTests(SSotAsyncTestCase):
     This test class validates the complete end-to-end message flow that
     enables the Golden Path user experience. These tests ensure all message
     processing components work together seamlessly to deliver the AI
-    interaction value chain that generates $500K+ ARR.
+    interaction value chain that generates 500K+ ARR.
     
     Tests MUST ensure the complete flow:
     1. Processes user requests through complete agent pipeline
@@ -432,7 +432,7 @@ class GoldenPathMessageFlowUnitTests(SSotAsyncTestCase):
     async def test_complete_golden_path_flow_success(self):
         """Test successful completion of entire Golden Path message flow
         
-        Business Impact: Validates the complete $500K+ ARR value delivery
+        Business Impact: Validates the complete 500K+ ARR value delivery
         chain from user request to AI response works end-to-end.
         """
         # Create Golden Path user request
@@ -825,7 +825,7 @@ class GoldenPathMessageFlowUnitTests(SSotAsyncTestCase):
         """Test Golden Path flow delivers expected business value
         
         Business Impact: Validates the flow produces AI recommendations
-        that justify the $500K+ ARR value proposition.
+        that justify the 500K+ ARR value proposition.
         """
         high_value_request = {
             "id": "business_value_001",

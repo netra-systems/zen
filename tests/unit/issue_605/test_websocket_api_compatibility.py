@@ -11,7 +11,7 @@ These unit tests validate WebSocket API compatibility issues identified in Issue
 Business Value Justification (BVJ):
 - Segment: Platform (ALL tiers depend on WebSocket infrastructure)
 - Business Goal: Ensure WebSocket E2E test infrastructure reliability
-- Value Impact: Critical for $500K+ ARR Golden Path user flow validation
+- Value Impact: Critical for 500K+ ARR Golden Path user flow validation
 - Revenue Impact: Prevents WebSocket infrastructure failures that block chat functionality
 
 Expected Results: These tests should FAIL initially, proving the API incompatibility issues.

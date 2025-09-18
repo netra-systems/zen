@@ -4,7 +4,7 @@ Agent Golden Path Error Recovery E2E Tests - Issue #1081 Phase 1
 Business Value Justification:
 - Segment: All tiers - System reliability and resilience
 - Business Goal: Ensure business continuity during network/service interruptions
-- Value Impact: Protects $500K+ ARR from service disruptions and connection issues
+- Value Impact: Protects 500K+ ARR from service disruptions and connection issues
 - Revenue Impact: Prevents customer churn due to poor reliability and error handling
 
 PURPOSE:

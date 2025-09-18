@@ -8,7 +8,7 @@ user flow in the staging GCP environment.
 Business Value Justification (BVJ):
 - Segment: Platform/Internal
 - Business Goal: Prevent configuration cascade failures in production  
-- Value Impact: $500K+ ARR Golden Path configuration protection
+- Value Impact: 500K+ ARR Golden Path configuration protection
 - Strategic Impact: Mission critical infrastructure validation
 
 This test uses the staging GCP environment to validate that configuration
@@ -92,7 +92,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
         if missing_secrets:
             self.fail(
                 f"GOLDEN PATH BLOCKED: Missing secrets in staging mappings: {', '.join(missing_secrets)}. "
-                f"This would prevent $500K+ ARR user flow from working in staging deployment."
+                f"This would prevent 500K+ ARR user flow from working in staging deployment."
             )
         
         # Validate mappings are not empty
@@ -105,7 +105,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
         if empty_mappings:
             self.fail(
                 f"GOLDEN PATH BLOCKED: Empty GSM mappings in staging: {', '.join(empty_mappings)}. "
-                f"This would prevent $500K+ ARR functionality from working."
+                f"This would prevent 500K+ ARR functionality from working."
             )
         
         print(f"CHECK All {len(self.golden_path_secrets)} Golden Path secrets properly mapped in staging")
@@ -142,7 +142,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
         if critical_errors:
             self.fail(
                 f"CRITICAL STAGING ERRORS: {len(critical_errors)} critical validation errors found. "
-                f"This blocks $500K+ ARR Golden Path protection: {'; '.join(critical_errors)}"
+                f"This blocks 500K+ ARR Golden Path protection: {'; '.join(critical_errors)}"
             )
         
         print(f"CHECK Staging configuration validation acceptable for Golden Path protection")
@@ -173,7 +173,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
         if missing_backend_oauth:
             self.fail(
                 f"OAUTH BLOCKED: Backend OAuth configuration incomplete in staging: "
-                f"{', '.join(missing_backend_oauth)}. This blocks user authentication for $500K+ ARR."
+                f"{', '.join(missing_backend_oauth)}. This blocks user authentication for 500K+ ARR."
             )
         
         # Auth service OAuth pattern (environment-specific names)
@@ -194,7 +194,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
         if missing_auth_oauth:
             self.fail(
                 f"OAUTH BLOCKED: Auth service OAuth configuration incomplete in staging: "
-                f"{', '.join(missing_auth_oauth)}. This blocks user authentication for $500K+ ARR."
+                f"{', '.join(missing_auth_oauth)}. This blocks user authentication for 500K+ ARR."
             )
         
         print(f"CHECK OAuth configuration complete for both backend and auth service in staging")
@@ -237,7 +237,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
                 f"JWT BLOCKED: No JWT secrets properly configured in staging. "
                 f"Missing: {', '.join(missing_jwt_secrets)}. "
                 f"Empty: {', '.join(empty_jwt_secrets)}. "
-                f"This blocks user authentication for $500K+ ARR."
+                f"This blocks user authentication for 500K+ ARR."
             )
         
         # Check for consistency - all found JWT secrets should map to same GSM secret
@@ -290,7 +290,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
         if critical_missing:
             self.fail(
                 f"DATABASE BLOCKED: Critical database secrets missing/empty in staging: "
-                f"{', '.join(critical_missing)}. This blocks database access for $500K+ ARR."
+                f"{', '.join(critical_missing)}. This blocks database access for 500K+ ARR."
             )
         
         if missing_db_secrets:
@@ -381,7 +381,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
         if failed_secrets:
             self.fail(
                 f"GOLDEN PATH VALIDATION FAILED: {len(failed_secrets)} secrets failed validation. "
-                f"This blocks $500K+ ARR functionality: {'; '.join(failed_secrets)}"
+                f"This blocks 500K+ ARR functionality: {'; '.join(failed_secrets)}"
             )
         
         print(f"CHECK Step 3: All {len(self.golden_path_secrets)} Golden Path secrets validated")
@@ -392,7 +392,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
         print(f"   - {len(mappings)} secret mappings validated")
         print(f"   - {len(self.golden_path_secrets)} Golden Path secrets confirmed")  
         print(f"   - {total_errors} critical errors found")
-        print(f"   - $500K+ ARR Golden Path configuration PROTECTED")
+        print(f"   - 500K+ ARR Golden Path configuration PROTECTED")
 
 
 if __name__ == '__main__':
@@ -401,7 +401,7 @@ if __name__ == '__main__':
     print("="*90)
     print("PURPOSE: Validate end-to-end configuration protection in staging GCP environment")
     print("SCOPE: Staging deployment configuration validation without Docker dependencies")
-    print("BUSINESS IMPACT: $500K+ ARR Golden Path configuration protection")
+    print("BUSINESS IMPACT: 500K+ ARR Golden Path configuration protection")
     print("="*90)
     print()
     

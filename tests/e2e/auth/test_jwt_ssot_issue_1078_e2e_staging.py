@@ -6,7 +6,7 @@ These tests should FAIL initially with JWT inconsistencies, then PASS after reme
 Business Value Justification (BVJ):
 - Segment: Platform/Enterprise (Production readiness)
 - Business Goal: Ensure JWT SSOT works reliably in production-like environment
-- Value Impact: Validates $500K+ ARR authentication system reliability  
+- Value Impact: Validates 500K+ ARR authentication system reliability  
 - Revenue Impact: Prevents staging deployment failures that block customer onboarding
 """
 import asyncio

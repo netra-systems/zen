@@ -3,7 +3,7 @@
 These tests MUST PASS throughout the entire SSOT migration process.
 They protect the core business value: login -> get AI responses (90% platform value).
 
-Business Impact: Protects $500K+ ARR by ensuring core chat functionality works.
+Business Impact: Protects 500K+ ARR by ensuring core chat functionality works.
 """
 import asyncio
 import time
@@ -27,7 +27,7 @@ class GoldenPathProtectionTests(SSotAsyncTestCase, unittest.TestCase):
         continues to work throughout the SSOT migration process.
         
         Expected Behavior: MUST ALWAYS PASS (before, during, after migration)
-        Business Impact: Protects $500K+ ARR core functionality
+        Business Impact: Protects 500K+ ARR core functionality
         """
         logger.info('🌟 GOLDEN PATH TEST: Complete user flow - login to AI response')
         user_context = self._create_authenticated_user_context('golden_path_user')

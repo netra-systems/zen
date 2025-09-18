@@ -247,7 +247,7 @@ class RealServiceDegradationTests:
     async def test_backend_service_unavailable_real_detection(self, service_detector):
         """Test backend service unavailability using REAL service detection
         
-        BUSINESS IMPACT: Validates $500K+ ARR chat functionality protection
+        BUSINESS IMPACT: Validates 500K+ ARR chat functionality protection
         CRITICAL: Tests REAL service availability - fails if services are actually running
         """
         # Check real service availability
@@ -551,7 +551,7 @@ class BusinessCriticalScenariosTests:
     async def test_chat_functionality_protection_real_service_failures(self, service_detector):
         """Test chat functionality protection (90% of platform value) under REAL failures
         
-        BUSINESS IMPACT: CRITICAL - Protects $500K+ ARR core chat functionality
+        BUSINESS IMPACT: CRITICAL - Protects 500K+ ARR core chat functionality
         Chat is the primary value delivery mechanism - must never completely fail
         """
         # Check real service status
@@ -571,7 +571,7 @@ class BusinessCriticalScenariosTests:
             pytest.skip(
                 f"CHAT PROTECTION TEST: All services available - cannot test real failure recovery. "
                 f"Backend: {backend_status}, WebSocket: {websocket_status}. "
-                f"BUSINESS IMPACT: Cannot validate $500K+ ARR chat protection without real service failures."
+                f"BUSINESS IMPACT: Cannot validate 500K+ ARR chat protection without real service failures."
             )
         
         # Test chat fallback chain with real failure conditions
@@ -624,7 +624,7 @@ class BusinessCriticalScenariosTests:
         recovery_time = (time.time() - start_time) * 1000
         
         # Validate chat business value protection
-        assert result is not None, "CRITICAL FAILURE: Chat completely unavailable - $500K+ ARR at risk"
+        assert result is not None, "CRITICAL FAILURE: Chat completely unavailable - 500K+ ARR at risk"
         assert result.get("business_value_maintained"), "Chat business value not maintained"
         assert result.get("chat_continuity"), "Chat continuity broken"
         assert recovery_time < 5000, f"Chat recovery time {recovery_time}ms affects user experience"

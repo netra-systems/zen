@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,12 +23,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 Complete Golden Path User Journey E2E Test
 
 CRITICAL: This test validates the COMPLETE end-to-end user journey that generates business value.
@@ -44,7 +31,7 @@ This is the PRIMARY revenue-protection test validating the full user experience 
 authentication through WebSocket connection to actionable cost optimization delivery.
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise) - $500K+ ARR protection
+- Segment: All (Free, Early, Mid, Enterprise) - 500K+ ARR protection
 - Business Goal: Validate complete golden path user journey with real business value delivery
 - Value Impact: Ensures users receive actionable AI cost optimization insights (core value prop)
 - Strategic Impact: Protects primary revenue flow through comprehensive journey validation
@@ -106,7 +93,7 @@ class CompleteGoldenPathUserJourneyE2ETests(SSotAsyncTestCase):
     This test validates the complete user journey that generates business value:
     Authentication  ->  WebSocket  ->  Message  ->  Agent Execution  ->  Business Value
     
-    BUSINESS IMPACT: $500K+ ARR protection through complete journey validation.
+    BUSINESS IMPACT: 500K+ ARR protection through complete journey validation.
     """
     
     def setup_method(self, method):

@@ -3,7 +3,7 @@ Mission Critical Test: Issue #1094 Golden Path Protection
 
 Business Value Justification (BVJ):
 - Segment: Platform/Infrastructure
-- Business Goal: Protect $500K+ ARR Golden Path from async/await interface failures
+- Business Goal: Protect 500K+ ARR Golden Path from async/await interface failures
 - Value Impact: Ensure agent lifecycle operations don't break user chat experience
 - Revenue Impact: Prevent production outages affecting customer AI optimization workflows
 
@@ -39,7 +39,7 @@ class Issue1094GoldenPathProtectionTests(BaseIntegrationTest):
 
         This test validates that the async/await interface error in agent_service_core.py
         prevents critical agent stop operations that are essential for Golden Path
-        user experience and $500K+ ARR business functionality.
+        user experience and 500K+ ARR business functionality.
         """
         from netra_backend.app.services.agent_service_core import AgentService
         from netra_backend.app.agents.supervisor_ssot import SupervisorAgent

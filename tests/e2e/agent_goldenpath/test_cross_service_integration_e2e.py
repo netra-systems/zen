@@ -11,7 +11,7 @@ MISSION CRITICAL: Tests complete cross-service integration during agent message 
 Business Value Justification (BVJ):
 - Segment: All Users (Free/Early/Mid/Enterprise)
 - Business Goal: System Reliability & Service Integration Validation
-- Value Impact: Ensures $500K+ ARR chat functionality works across all service boundaries
+- Value Impact: Ensures 500K+ ARR chat functionality works across all service boundaries
 - Strategic Impact: Validates production-ready multi-service architecture
 
 Test Strategy:

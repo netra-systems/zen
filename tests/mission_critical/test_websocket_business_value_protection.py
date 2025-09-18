@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
     - Segment: Platform Revenue Protection (all customer segments)
 - Business Goal: Revenue protection + business continuity
 - Value Impact: Validates core platform value delivery (90% chat functionality)
-- Revenue Impact: Directly protects $500K+ plus ARR through functional validation
+- Revenue Impact: Directly protects 500K+  ARR through functional validation
 
 Expected Result: PASSING (business value validated)
 Difficulty: CRITICAL - Must validate revenue-protecting functionality
@@ -37,7 +37,7 @@ class WebSocketBusinessValueMetrics:
     "Business value metrics for WebSocket functionality."
 
     # Revenue protection metrics
-    ARR_AT_RISK = 500000  # $500K+ plus ARR at risk
+    ARR_AT_RISK = 500000  # 500K+  ARR at risk
     CHAT_VALUE_PERCENTAGE = 90  # 90% of platform value from chat
 
     # Critical WebSocket events for user experience
@@ -79,12 +79,12 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
         Test that WebSocket functionality protects defined revenue levels.
 
         CRITICAL: This test MUST PASS for deployment approval
-        Business Impact: Validates $500K+ plus ARR protection mechanisms
+        Business Impact: Validates 500K+  ARR protection mechanisms
 ""
         # Test revenue protection calculations
         protected_arr = self.metrics.ARR_AT_RISK
         self.assertGreaterEqual(protected_arr, 500000,
-                               fMust protect at least $500K+ ARR, currently protecting ${protected_arr})
+                               fMust protect at least 500K+ ARR, currently protecting ${protected_arr})
 
         # Test chat value percentage
         chat_percentage = self.metrics.CHAT_VALUE_PERCENTAGE
@@ -96,13 +96,7 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
         # Calculate revenue at risk from WebSocket failure
         revenue_from_chat = protected_arr * (chat_percentage / 100)
         self.assertGreaterEqual(revenue_from_chat, 450000,
-                               f"WebSocket failure risks ${revenue_from_chat}, must be at least $450K+)"
-
-        # Test business value validation metrics exist
-        self.assertTrue(hasattr(self.metrics, 'CRITICAL_EVENTS'),
-                       Must define critical WebSocket events for business value)
-        self.assertTrue(hasattr(self.metrics, 'MAX_CONNECTION_TIME_SECONDS'),
-                       Must define maximum connection time for user experience)"
+                               f"WebSocket failure risks ${revenue_from_chat}, must be at least $450K+)""
                        Must define maximum connection time for user experience)""
 
 
@@ -122,12 +116,7 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
 
         # Test critical events count
         self.assertEqual(len(critical_events), 5,
-                        f"Must have exactly 5 critical WebSocket events, found {len(critical_events)})"
-
-        # Test each critical event
-        expected_events = [
-            agent_started,    # User sees AI engagement begins
-            agent_thinking,   # User sees real-time AI reasoning"
+                        f"Must have exactly 5 critical WebSocket events, found {len(critical_events)})""
             agent_thinking,   # User sees real-time AI reasoning"
             tool_executing",   # User sees AI tool usage transparency"
             tool_completed,   # User sees AI tool results
@@ -169,22 +158,7 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
         # Test connection time requirement
         max_connection_time = self.metrics.MAX_CONNECTION_TIME_SECONDS
         self.assertLessEqual(max_connection_time, 5,
-                            f"WebSocket connection must complete within 5 seconds, configured for {max_connection_time}s)"
-
-        # Test first event time requirement
-        max_first_event_time = self.metrics.MAX_FIRST_EVENT_TIME_SECONDS
-        self.assertLessEqual(max_first_event_time, 10,
-                            fFirst WebSocket event must occur within 10 seconds, configured for {max_first_event_time}s)
-
-        # Test total response time requirement
-        max_total_time = self.metrics.MAX_TOTAL_RESPONSE_TIME_SECONDS
-        self.assertLessEqual(max_total_time, 60,
-                            fTotal WebSocket response must complete within 60 seconds, configured for {max_total_time}s)
-
-        # Test user experience flow timing
-        total_user_journey_time = max_connection_time + max_first_event_time + max_total_time
-        self.assertLessEqual(total_user_journey_time, 75,
-                            fTotal user journey time should not exceed 75 seconds, currently {total_user_journey_time}s")"
+                            f"WebSocket connection must complete within 5 seconds, configured for {max_connection_time}s)"")"
 
     @pytest.mark.no_skip
     def test_websocket_business_continuity_requirements(self):
@@ -322,9 +296,7 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
         # Issue #666 breaks the first step (WebSocket Connection)
         connection_step = business_value_chain[0]
         self.assertEqual(connection_step[step), WebSocket Connection","
-                        "First step must be WebSocket Connection)"
-        self.assertEqual(connection_step[failure_consequence), Complete service unavailability,
-                        Issue #666 (connection failure) must result in complete service unavailability")"
+                        "First step must be WebSocket Connection)"")"
 
     @pytest.mark.no_skip
     def test_websocket_alternative_validation_business_justification(self):
@@ -339,21 +311,21 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
             Staging Environment Testing: {
                 business_value_coverage: 95,  # 95% business value coverage"
                 business_value_coverage: 95,  # 95% business value coverage"
-                arr_protection": 475000,      # $475K+ ARR protection"
+                arr_protection": 475000,      # 475K+ ARR protection"
                 user_experience_validation: True,
                 acceptable_for_deployment": True"
             },
             Unit Configuration Testing: {
                 business_value_coverage: 70,  # 70% business value coverage"
                 business_value_coverage: 70,  # 70% business value coverage"
-                "arr_protection: 350000,      # $350K+ ARR protection"
+                "arr_protection: 350000,      # 350K+ ARR protection"
                 user_experience_validation: False,
                 "acceptable_for_deployment: False  # Not sufficient alone"
             },
             Mock Service Testing: {
                 business_value_coverage: 40,  # 40% business value coverage"
                 business_value_coverage: 40,  # 40% business value coverage"
-                arr_protection": 200000,      # $200K+ ARR protection"
+                arr_protection": 200000,      # 200K+ ARR protection"
                 user_experience_validation: False,
                 acceptable_for_deployment": False  # Not sufficient alone"
             }
@@ -375,7 +347,7 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
             if metrics[acceptable_for_deployment]:""
 
                 self.assertGreaterEqual(protection, 400000,
-                                       f{strategy_name} must protect at least $400K+ ARR for deployment acceptance")"
+                                       f{strategy_name} must protect at least 400K+ ARR for deployment acceptance")"
 
             # Test deployment acceptance criteria
             if strategy_name == Staging Environment Testing:
@@ -388,7 +360,7 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
 
         combined_protection = staging_protection + (unit_protection * 0.1)  # Unit provides additional coverage
         self.assertGreaterEqual(combined_protection, 480000,
-                               Combined staging + unit testing must protect at least $480K+ ARR)
+                               Combined staging + unit testing must protect at least 480K+ ARR)
 
     @pytest.mark.no_skip
     def test_websocket_business_value_regression_prevention(self):

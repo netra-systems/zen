@@ -4,7 +4,7 @@
 GitHub Issue: #844 SSOT-incomplete-migration-multiple-websocket-managers
 
 THIS TEST VALIDATES WEBSOCKET SSOT INTEGRATION WITH AGENT WORKFLOWS.
-Business Value: $500K+ ARR - Ensures agent WebSocket integration works after SSOT consolidation
+Business Value: 500K+ ARR - Ensures agent WebSocket integration works after SSOT consolidation
 
 PURPOSE:
 - Validate WebSocket SSOT integration with supervisor agents

@@ -7,7 +7,7 @@ This test ensures business continuity during Phase 2 SSOT cleanup by validating
 that the Golden Path user flow remains functional. Tests the complete WebSocket
 event delivery pipeline that delivers 90% of platform business value.
 
-Business Value: $500K+ ARR Protection - Golden Path Chat Functionality
+Business Value: 500K+ ARR Protection - Golden Path Chat Functionality
 Validates that SSOT compliance changes don't break the critical user journey:
 User login -> Send message -> Get AI response -> See progress updates
 
@@ -129,9 +129,7 @@ class TestGoldenPathWebSocketPreservation(SSotAsyncTestCase):
                 self.assertLog("CHECK All 5 business-critical events delivered successfully")
 
         except Exception as e:
-            self.assertLog(f"Warning: Golden Path events test failed: {e}")
-            # Don't fail test if this is infrastructure-related during migration
-            if "connection" in str(e).lower() or "timeout" in str(e).lower():
+            self.assertLog(f"Warning: Golden Path events test failed: {e}""connection" in str(e).lower() or "timeout" in str(e).lower():
                 self.skipTest(f"Infrastructure issue during test: {e}")
             else:
                 raise
@@ -180,10 +178,7 @@ class TestGoldenPathWebSocketPreservation(SSotAsyncTestCase):
             self.assertLog("CHECK User isolation validated in WebSocket events")
 
         except Exception as e:
-            self.assertLog(f"Warning: User isolation test failed: {e}")
-
-    async def test_websocket_connection_creation_through_ssot(self):
-        """
+            self.assertLog(f"Warning: User isolation test failed: {e}""""
         Test WebSocket connection creation through SSOT patterns.
 
         Validates that connections can be established using canonical patterns.
@@ -214,10 +209,7 @@ class TestGoldenPathWebSocketPreservation(SSotAsyncTestCase):
                 self.assertLog("CHECK Connection state verified")
 
         except Exception as e:
-            self.assertLog(f"Warning: SSOT connection test failed: {e}")
-
-    async def test_websocket_manager_integration_with_ssot(self):
-        """
+            self.assertLog(f"Warning: SSOT connection test failed: {e}""""
         Test WebSocket manager integration with SSOT patterns.
 
         Validates that WebSocket managers created through SSOT work correctly.
@@ -259,10 +251,7 @@ class TestGoldenPathWebSocketPreservation(SSotAsyncTestCase):
                     self.assertLog(f"Event sending not available (expected during migration): {e}")
 
         except Exception as e:
-            self.assertLog(f"Warning: Manager integration test failed: {e}")
-
-    async def test_golden_path_end_to_end_flow(self):
-        """
+            self.assertLog(f"Warning: Manager integration test failed: {e}""""
         Test complete Golden Path flow from connection to agent completion.
 
         Simulates the complete user journey to validate no regressions.
@@ -317,10 +306,7 @@ class TestGoldenPathWebSocketPreservation(SSotAsyncTestCase):
                 self.assertLog("WARNING️ No events received - may indicate issue")
 
         except Exception as e:
-            self.assertLog(f"Warning: End-to-end flow test failed: {e}")
-
-    async def test_websocket_event_schema_compliance(self):
-        """
+            self.assertLog(f"Warning: End-to-end flow test failed: {e}""""
         Test that WebSocket events comply with expected schemas.
 
         Validates event structure for business requirements.
@@ -365,12 +351,7 @@ class TestGoldenPathWebSocketPreservation(SSotAsyncTestCase):
                 self.assertLog("No events received for schema validation")
 
         except Exception as e:
-            self.assertLog(f"Warning: Schema compliance test failed: {e}")
-
-    # Helper methods
-
-    async def _create_golden_path_connection(self, user_id: str) -> Optional[Any]:
-        """
+            self.assertLog(f"Warning: Schema compliance test failed: {e}""""
         Create a WebSocket connection using Golden Path patterns.
 
         Args:

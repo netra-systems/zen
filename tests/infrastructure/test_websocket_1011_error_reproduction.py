@@ -7,7 +7,7 @@ of WebSocket 1011 errors that break the Golden Path user experience.
 Business Value Justification (BVJ):  
 - Segment: Platform/Internal - WebSocket Infrastructure Stability
 - Business Goal: Eliminate WebSocket 1011 errors that break user chat experience
-- Value Impact: Ensures reliable WebSocket connections for $500K+ ARR chat functionality
+- Value Impact: Ensures reliable WebSocket connections for 500K+ ARR chat functionality
 - Strategic Impact: Prevents connection failures that drive user churn
 
 CRITICAL REQUIREMENTS (per CLAUDE.md):
@@ -382,11 +382,7 @@ class WebSocket1011ErrorReproductionTests(BaseE2ETest):
                 if e.code == 1011:
                     self.logger.info("WebSocket 1011 error reproduced due to factory failure")
                     return True
-                self.logger.info(f"WebSocket connection failed with code {e.code} (expected behavior)")
-                return False
-            except (ConnectionRefusedError, OSError) as e:
-                # Expected failure when service is unavailable (simulates factory failure)
-                self.logger.info(f"Factory failure scenario reproduced: {e}")
+                self.logger.info(f"WebSocket connection failed with code {e.code} (expected behavior)""Factory failure scenario reproduced: {e}")
                 return True
             except Exception as e:
                 self.logger.info(f"Factory failure scenario detected: {e}")

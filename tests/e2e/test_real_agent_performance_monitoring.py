@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 1. Segment: All (Free, Early, Mid, Enterprise)
 2. Business Goal: Ensure system performance and reliability monitoring
 3. Value Impact: Performance monitoring enables proactive optimization
-4. Revenue Impact: $450K+ ARR protection from performance-related customer churn
+4. Revenue Impact: 450K+ ARR protection from performance-related customer churn
 
 CLAUDE.md COMPLIANCE:
 - Uses real services ONLY (NO MOCKS)

@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
 - Segment: Platform/All tiers (affects all users)
 - Business Goal: User Experience & Platform Reliability 
 - Value Impact: Ensures real-time agent progress updates and responsive user interface
-- Revenue Impact: Protects $500K+ ARR by providing transparent agent execution visibility
+- Revenue Impact: Protects 500K+ ARR by providing transparent agent execution visibility
 
 These tests validate the WebSocket coordination between agents and the frontend,
 ensuring that all 5 critical WebSocket events are properly emitted during agent

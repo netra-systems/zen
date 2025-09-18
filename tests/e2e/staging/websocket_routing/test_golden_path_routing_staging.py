@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise/Platform
 - Goal: Golden Path reliability restoration to 99.5%
 - Value Impact: Validates complete user journey routing through staging environment
-- Revenue Impact: Protects $500K+ ARR by ensuring Golden Path works end-to-end
+- Revenue Impact: Protects 500K+ ARR by ensuring Golden Path works end-to-end
 
 This E2E test validates the complete Golden Path user journey through staging
 environment to detect routing fragmentation effects on actual user experience.

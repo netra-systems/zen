@@ -8,7 +8,7 @@ This test demonstrates how multiple UserWebSocketEmitter implementations
 cause events to be delivered to the wrong users, violating critical user
 isolation security and creating chat cross-contamination.
 
-Business Impact: $500K+ ARR at risk from user data leaks and privacy violations
+Business Impact: 500K+ ARR at risk from user data leaks and privacy violations
 when chat messages or agent responses are sent to wrong users.
 
 CRITICAL: This test MUST FAIL before consolidation to prove isolation failures exist.

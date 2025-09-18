@@ -22,7 +22,7 @@ Issue: #426 - E2E golden path tests failing due to service dependencies
 Approach: Real staging GCP services, complete end-to-end validation
 
 MISSION CRITICAL: This test validates the complete Golden Path that delivers
-$500K+ ARR through chat functionality. Must work in staging environment.
+500K+ ARR through chat functionality. Must work in staging environment.
 
 Golden Path Flow: Login -> WebSocket Connection -> Agent Execution -> AI Response
 Business Impact: 90% of platform value delivered through this workflow
@@ -106,7 +106,7 @@ class GoldenPathCompleteStagingTests(SSotAsyncTestCase):
         Issue: #426 - E2E golden path tests failing due to service dependencies
         Difficulty: Very High (60 minutes)
         Expected: PASS after Docker infrastructure issues are resolved
-        Business Impact: $500K+ ARR depends on this workflow
+        Business Impact: 500K+ ARR depends on this workflow
         
         PHASE 1 REMEDIATION: Removed try/except block that hid failures.
         All assertions now fail loudly with detailed error messages.
@@ -192,7 +192,7 @@ class GoldenPathCompleteStagingTests(SSotAsyncTestCase):
         
         # Success - Close connection
         total_golden_path_duration = time.time() - golden_path_start
-        self.logger.info(f'🎉 GOLDEN PATH SUCCESS IN STAGING! Complete workflow took {total_golden_path_duration:.1f}s. Steps completed: {len(golden_path_steps)}. WebSocket events: {len(websocket_events)}. This validates $500K+ ARR functionality.')
+        self.logger.info(f'🎉 GOLDEN PATH SUCCESS IN STAGING! Complete workflow took {total_golden_path_duration:.1f}s. Steps completed: {len(golden_path_steps)}. WebSocket events: {len(websocket_events)}. This validates 500K+ ARR functionality.')
         await websocket_connection.close()
 
     @pytest.mark.e2e

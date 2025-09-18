@@ -9,8 +9,7 @@ class TestWebSocketConnection:
         ""Send JSON message.""
 
         if self._closed:
-            raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)""
+            raise RuntimeError(WebSocket is closed)"""
 
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):"
@@ -388,8 +387,7 @@ bridge = await get_agent_websocket_bridge()
 websocket = TestWebSocketConnection()
 bridge.websocket_manager = mock_manager
 agent = BaseAgent(agent_id=test, name=Test)
-agent.set_websocket_bridge(bridge, error-run)"
-agent.set_websocket_bridge(bridge, error-run)"
+agent.set_websocket_bridge(bridge, error-run)""
             # Emit error
 await agent.emit_error(Test error", {code: TEST_001)"
             # Verify error was sent

@@ -4,7 +4,7 @@ E2E Tests for WebSocket Event SLA Compliance
 Business Value Justification (BVJ):
 - Segment: Platform/All Users  
 - Business Goal: Ensure WebSocket event delivery meets business SLA requirements
-- Value Impact: Protects $500K+ ARR by guaranteeing real-time chat experience quality
+- Value Impact: Protects 500K+ ARR by guaranteeing real-time chat experience quality
 - Strategic Impact: Validates critical infrastructure supporting 90% of platform value
 
 This test suite validates WebSocket event SLA compliance in GCP staging:
@@ -57,7 +57,7 @@ class WebSocketEventSLAComplianceTests(BaseE2ETest):
     """
     Test WebSocket event delivery SLA compliance in GCP staging.
     
-    BUSINESS IMPACT: Protects $500K+ ARR by ensuring real-time chat quality
+    BUSINESS IMPACT: Protects 500K+ ARR by ensuring real-time chat quality
     SLA REQUIREMENTS: 
     - Connection: < 2s
     - First Event: < 5s

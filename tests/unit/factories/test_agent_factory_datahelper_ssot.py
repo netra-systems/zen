@@ -8,7 +8,7 @@ EXPECTED BEHAVIOR:
 - FAIL before fix: Import violations prevent proper factory creation
 - PASS after fix: Factory can create DataHelper with SSOT dependencies
 
-Business Value: Ensures $500K+ ARR Golden Path can create DataHelper agents reliably
+Business Value: Ensures 500K+ ARR Golden Path can create DataHelper agents reliably
 """
 
 import pytest

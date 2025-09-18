@@ -9,7 +9,7 @@ EXPECTED BEHAVIOR:
 - BEFORE REMEDIATION: All tests should FAIL (proving user isolation violations)
 - AFTER REMEDIATION: All tests should PASS (proving SSOT compliance achieved)
 
-Business Value: Enterprise/Platform - $500K+ ARR protection through proper user isolation
+Business Value: Enterprise/Platform - 500K+ ARR protection through proper user isolation
 SSOT Remediation Target: Complete user isolation in multi-user concurrent scenarios
 
 This test suite validates real-world user isolation failures that affect:

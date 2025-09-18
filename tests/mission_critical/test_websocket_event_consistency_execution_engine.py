@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise, Platform)
 - Business Goal: Chat functionality delivers 90% of platform value
 - Value Impact: WebSocket events enable users to see real-time agent progress and results
-- Strategic Impact: $500K+ plus ARR depends on reliable, consistent WebSocket event delivery
+- Strategic Impact: 500K+  ARR depends on reliable, consistent WebSocket event delivery
 
 PURPOSE: Validate that ExecutionEngine implementations consistently deliver all 5 critical WebSocket events
 in the correct order with proper content for every agent execution.
@@ -584,16 +584,11 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
             
             # It's good (but not required) if error is indicated in events'
             if error_indicated:
-                print("INFO: Error properly indicated in WebSocket events)"
-            else:
-                print(WARNING: Error not explicitly indicated in events - consider improving error reporting)"
+                print("INFO: Error properly indicated in WebSocket events)""
                 print(WARNING: Error not explicitly indicated in events - consider improving error reporting)""
 
             
-            print("INFO: WebSocket events error scenarios test PASSED)"
-            
-        except Exception as e:
-            self.fail(fWebSocket events error scenarios test FAILED: {e})"
+            print("INFO: WebSocket events error scenarios test PASSED)""
             self.fail(fWebSocket events error scenarios test FAILED: {e})""
 
 

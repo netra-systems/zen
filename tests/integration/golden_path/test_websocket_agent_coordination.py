@@ -4,7 +4,7 @@ Test WebSocket Agent Coordination Integration
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure WebSocket and agent coordination maintains Golden Path chat functionality
-- Value Impact: Validates real-time chat coordination preserves AI response delivery for $500K+ ARR
+- Value Impact: Validates real-time chat coordination preserves AI response delivery for 500K+ ARR
 - Strategic Impact: Core platform real-time coordination enabling substantive chat interactions
 
 Issue #1176: Master Plan Golden Path validation - WebSocket agent coordination

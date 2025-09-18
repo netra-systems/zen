@@ -23,11 +23,7 @@ class WebSocketTestHelper:
     async def send_json(self, message: dict):
         "Send JSON message."
         if self._closed:
-            raise RuntimeError("WebSocket is closed)"
-        self.messages_sent.append(message)
-        
-    async def close(self, code: int = 1000, reason: str = Normal closure):
-        Close WebSocket connection.""
+            raise RuntimeError("WebSocket is closed)"""
         self._closed = True
         self.is_connected = False
         
@@ -39,7 +35,7 @@ class WebSocketTestHelper:
 
 MISSION CRITICAL: Circuit Breaker Cascade Failure Stress Tests
 
-Business Value: Prevents $100K+ ARR loss from cascading service failures
+Business Value: Prevents 100K+ ARR loss from cascading service failures
 Critical Requirements:
     - Circuit breakers must prevent cascade failures across all services
 - Recovery must be automatic and coordinated 
@@ -970,12 +966,7 @@ async def test_circuit_breaker_websocket_notifications():
     # Verify WebSocket notifications were sent
     assert websocket_manager.send_to_thread.call_count > 0, "WebSocket notifications should be sent for circuit state changes"
     
-    logger.info("PASS:  Circuit breaker WebSocket notifications validated))"
-    logger.info("PASS:  Circuit breaker WebSocket notifications validated))"
-
-@pytest.mark.asyncio
-async def test_circuit_breaker_websocket_event_sequence():
-    "Test proper sequence of WebSocket events during circuit breaker lifecycle."
+    logger.info("PASS:  Circuit breaker WebSocket notifications validated))""PASS:  Circuit breaker WebSocket notifications validated))""Test proper sequence of WebSocket events during circuit breaker lifecycle."
     try:
         from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
@@ -1127,8 +1118,7 @@ async def test_circuit_breaker_websocket_concurrent_notifications():
         from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
-        pytest.skip(Required components not available)"
-        pytest.skip(Required components not available)""
+        pytest.skip(Required components not available)"""
 
     
     websocket_manager = AsyncMock(spec=WebSocketManager)
@@ -1202,16 +1192,7 @@ async def test_circuit_breaker_websocket_concurrent_notifications():
     assert timing_errors < len(timestamps) * 0.1, \
         fToo many timing errors in concurrent notifications: {timing_errors}/{len(timestamps)}
     
-    logger.info(f" PASS:  Circuit breaker concurrent WebSocket notifications validated: {len(concurrent_notifications)} notifications)"
-
-
-# ============================================================================
-# EXECUTE CORE PATTERN TESTS
-# ============================================================================
-
-@pytest.mark.asyncio
-async def test_circuit_breaker_execute_core_integration():
-    "Test circuit breaker integration with _execute_core pattern."
+    logger.info(f" PASS:  Circuit breaker concurrent WebSocket notifications validated: {len(concurrent_notifications)} notifications)""Test circuit breaker integration with _execute_core pattern."
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext

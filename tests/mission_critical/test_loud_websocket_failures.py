@@ -74,8 +74,7 @@ class TestWebSocketConnection:
 
         if self.should_fail:
             if self.failure_type == connection_error:
-                raise WebSocketConnectionError(Connection lost)"
-                raise WebSocketConnectionError(Connection lost)"
+                raise WebSocketConnectionError(Connection lost)""
             elif self.failure_type == "send_error:"
                 raise WebSocketSendError(Failed to send message)
             elif self.failure_type == "timeout:"

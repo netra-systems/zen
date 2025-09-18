@@ -4,7 +4,7 @@ Agent Factory + Real Database Integration Test - Golden Path Factory Patterns
 Business Value Justification (BVJ):
 - Segment: Enterprise/Platform - Agent Execution Infrastructure  
 - Business Goal: Validate factory patterns with real PostgreSQL dependencies
-- Value Impact: Ensures $500K+ ARR agent execution pipeline works reliably with database
+- Value Impact: Ensures 500K+ ARR agent execution pipeline works reliably with database
 - Strategic Impact: Critical for multi-user agent isolation and resource management
 
 CRITICAL: This test validates REAL service interactions:

@@ -10,7 +10,7 @@ Target Violations:
 - Connection ID format inconsistency causing WebSocket routing failures
 - Manual connection ID generation bypassing SSOT patterns
 
-Business Value Protection: $500K+ ARR Golden Path WebSocket event delivery
+Business Value Protection: 500K+ ARR Golden Path WebSocket event delivery
 """
 import pytest
 import uuid

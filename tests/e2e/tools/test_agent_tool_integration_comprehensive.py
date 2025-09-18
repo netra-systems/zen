@@ -1,6 +1,6 @@
 """E2E Agent Tool Integration Comprehensive Test - GCP Staging Environment
 
-Business Value: $500K+ ARR protection through comprehensive tool validation
+Business Value: 500K+ ARR protection through comprehensive tool validation
 Critical Coverage for Issue #872: Agent tool integration and chaining
 
 REQUIREMENTS:

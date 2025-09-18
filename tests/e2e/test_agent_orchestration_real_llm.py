@@ -6,10 +6,10 @@ Validates complete agent lifecycle, multi-agent coordination, real-time processi
 and CRITICAL WebSocket event validation.
 
 Business Value Justification (BVJ):
-1. Segment: Enterprise and Mid-tier ($500K+ ARR protection)
+1. Segment: Enterprise and Mid-tier (500K+ ARR protection)
 2. Business Goal: Ensure reliable agent orchestration with actual LLM responses
 3. Value Impact: Validates core chat functionality and WebSocket events
-4. Revenue Impact: Protects $500K+ ARR from agent failures causing enterprise churn
+4. Revenue Impact: Protects 500K+ ARR from agent failures causing enterprise churn
 
 CLAUDE.MD COMPLIANCE:
 - Uses IsolatedEnvironment for ALL environment access (no os.getenv)
@@ -69,10 +69,7 @@ class MissionCriticalWebSocketValidator:
             "received_at: time.time() - self.start_time"
         })
         self.event_counts[event_type] = self.event_counts.get(event_type, 0) + 1
-        logger.info(f"WebSocket event recorded: {event_type})"
-
-    def validate_mission_critical_events(self) -> tuple[bool, List[str]]:
-        """Validate all mission critical events were received."""
+        logger.info(f"WebSocket event recorded: {event_type})""""Validate all mission critical events were received."""
         failures = []
 
         # Check for missing required events
@@ -775,11 +772,7 @@ if len(websocket_validator.received_events) > 0:
 logger.info("")
 else:
     pass
-logger.warning("No WebSocket events captured - may indicate connection issue)"
-
-def _validate_multi_agent_results(self, results: Dict[str, Any),
-agents: List[str], use_real_llm: bool):
-"""Validate multi-agent results."""
+logger.warning("No WebSocket events captured - may indicate connection issue)""""Validate multi-agent results."""
 pass
 for agent in agents:
 assert agent in results, ""

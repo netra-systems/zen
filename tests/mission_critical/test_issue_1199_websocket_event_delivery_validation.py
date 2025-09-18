@@ -16,7 +16,7 @@ FAILURE EXPECTATIONS:
 - Deployment tests should initially FAIL (staging backend down)
 - E2E tests should FAIL until deployment resolved
 
-Business Value: $500K+ ARR chat functionality relies on these 5 WebSocket events
+Business Value: 500K+ ARR chat functionality relies on these 5 WebSocket events
 """
 
 import asyncio

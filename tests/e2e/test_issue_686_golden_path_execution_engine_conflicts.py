@@ -2,7 +2,7 @@
 Issue #686: Golden Path ExecutionEngine Conflicts - E2E Tests
 
 Purpose: Demonstrate how ExecutionEngine SSOT violations break the Golden Path user flow
-Business Value: Protects core business flow worth $500K+ ARR (users login -> receive AI responses)
+Business Value: Protects core business flow worth 500K+ ARR (users login -> receive AI responses)
 Test Environment: E2E tests with staging environment integration (no Docker required)
 
 Golden Path Flow:
@@ -244,7 +244,7 @@ class Issue686GoldenPathExecutionEngineConflictsTests(SSotAsyncTestCase):
             golden_path_execution_test['overall_success'],
             f"BUSINESS FAILURE: Golden Path broken due to ExecutionEngine SSOT violations. "
             f"Success rate: {golden_path_execution_test['success_rate']:.1%}. "
-            f"$500K+ ARR at risk - users login but don't receive AI responses. "
+            f"500K+ ARR at risk - users login but don't receive AI responses. "
             f"Failed criteria: {golden_path_success_criteria}. "
             f"Test details: {golden_path_execution_test}. "
             f"ExecutionEngine SSOT consolidation required to restore Golden Path."
@@ -424,7 +424,7 @@ class Issue686GoldenPathExecutionEngineConflictsTests(SSotAsyncTestCase):
             f"BUSINESS FAILURE: User isolation violated in Golden Path concurrent execution. "
             f"Cross-contamination detected: {concurrent_user_test.get('contamination_type', 'unknown')}. "
             f"Business impact: {concurrent_user_test['business_impact']}. "
-            f"$500K+ ARR at risk - concurrent users cannot use the platform safely. "
+            f"500K+ ARR at risk - concurrent users cannot use the platform safely. "
             f"Test results: {concurrent_user_test}. "
             f"ExecutionEngine SSOT consolidation required for proper user isolation."
         )

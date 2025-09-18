@@ -6,7 +6,7 @@ with real agent event delivery through broadcast function implementations.
 
 Business Value Justification:
 - Segment: Platform/Golden Path
-- Business Goal: $500K+ ARR Protection through Golden Path reliability
+- Business Goal: 500K+ ARR Protection through Golden Path reliability
 - Value Impact: Ensure end-to-end agent event delivery works in staging
 - Strategic Impact: Validate complete user journey with real WebSocket events
 
@@ -356,7 +356,7 @@ class GoldenPathBroadcastStagingTests(SSotAsyncTestCase):
             self.fail(f"GOLDEN PATH BROADCAST VIOLATION: {total_failures} issues detected in staging. "
                      f"Failed tests: {len(failed_tests)}, Consistency issues: {len(consistency_issues)}. "
                      f"Details: {error_details}. "
-                     f"Golden Path agent event delivery is inconsistent, blocking $500K+ ARR user experience. "
+                     f"Golden Path agent event delivery is inconsistent, blocking 500K+ ARR user experience. "
                      f"SSOT remediation required for reliable broadcast functionality.")
         else:
             logger.info("CHECK Golden Path agent event delivery consistency validated")

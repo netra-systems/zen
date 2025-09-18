@@ -4,7 +4,7 @@
 GitHub Issue: #844 SSOT-incomplete-migration-multiple-websocket-managers
 
 THIS TEST DETECTS SSOT IMPORT VIOLATIONS ACROSS THE CODEBASE.
-Business Value: $500K+ plus ARR - Detects import patterns that violate WebSocket SSOT principles
+Business Value: 500K+  ARR - Detects import patterns that violate WebSocket SSOT principles
 
 PURPOSE:
     - Detect files importing from multiple WebSocket managers (SSOT violation)
@@ -93,8 +93,7 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
         self.violation_details = defaultdict(list)
     
     def test_detect_dual_websocket_manager_imports_violation(self):
-        CRITICAL: Detect files importing from multiple WebSocket managers (SHOULD FAIL initially)"
-        CRITICAL: Detect files importing from multiple WebSocket managers (SHOULD FAIL initially)""
+        CRITICAL: Detect files importing from multiple WebSocket managers (SHOULD FAIL initially)"""
 
         
         This test finds files that import from both websocket_manager.py and unified_manager.py,
@@ -271,8 +270,7 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
                                 'patterns': list(unique_categories)
                             }
                             
-                            logger.error(f🚨 INCONSISTENT PATTERNS: {py_file.relative_to(project_root)})"
-                            logger.error(f🚨 INCONSISTENT PATTERNS: {py_file.relative_to(project_root)})"
+                            logger.error(f🚨 INCONSISTENT PATTERNS: {py_file.relative_to(project_root)})""
                             logger.error(f"  Uses {len(unique_categories)} different patterns: {list(unique_categories)})"
                             
                     except (UnicodeDecodeError, PermissionError):
@@ -431,8 +429,7 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
         if ssot_compliance_issues:
             logger.warning(fWARNING️ {len(ssot_compliance_issues)} files need SSOT import migration)
         else:
-            logger.info(CHECK All WebSocket imports are SSOT compliant)"
-            logger.info(CHECK All WebSocket imports are SSOT compliant)""
+            logger.info(CHECK All WebSocket imports are SSOT compliant)"""
 
     
     def _categorize_websocket_import(self, import_line: str) -> Optional[str]:

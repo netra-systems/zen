@@ -4,7 +4,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - Agent orchestration is core business functionality
 - Business Goal: Ensure reliable multi-agent workflows that deliver comprehensive AI solutions
 - Value Impact: Users receive sophisticated AI responses through coordinated agent execution
-- Strategic Impact: $500K+ ARR dependency on agent coordination working correctly
+- Strategic Impact: 500K+ ARR dependency on agent coordination working correctly
 
 These E2E tests validate supervisor agent orchestration with complete system stack:
 - Real authentication (JWT/OAuth)

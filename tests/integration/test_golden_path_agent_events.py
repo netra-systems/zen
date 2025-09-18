@@ -6,7 +6,7 @@ to WebSocket event delivery, validating all 5 critical events that enable substa
 
 Business Value Justification (BVJ):
 - Segment: Platform/All - Core Chat Infrastructure
-- Business Goal: Revenue Protection - Protects $500K+ ARR through complete event validation
+- Business Goal: Revenue Protection - Protects 500K+ ARR through complete event validation
 - Value Impact: Validates the complete agent event sequence that delivers AI value to users
 - Strategic Impact: Tests the end-to-end event system that powers 90% of platform business value
 

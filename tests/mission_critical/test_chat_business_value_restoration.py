@@ -414,14 +414,7 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
         
         # 1. Check for registry errors blocking events
         if analysis['registry_errors']:
-            pytest.fail(f"REPRODUCED: Registry errors block WebSocket events: {analysis['errors']})"
-        
-        # 2. Validate all 5 critical events received
-        missing_events = required_events - received_events
-        if missing_events:
-            logger.error(f FAIL:  BUSINESS VALUE BROKEN: Missing WebSocket events: {missing_events})
-            logger.error(f   Received events: {list(received_events)})
-            pytest.fail(fCRITICAL WebSocket events missing - chat experience broken: {missing_events}")"
+            pytest.fail(f"REPRODUCED: Registry errors block WebSocket events: {analysis['errors']})"")"
         
         # 3. Validate event sequence makes sense
         event_sequence = [e['type'] for e in self.event_capture.agent_events]
@@ -433,11 +426,7 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
             logger.warning( WARNING: [U+FE0F] agent_completed not at end of sequence - may indicate issues)""
 
         
-        logger.info(f" PASS:  All 5 critical WebSocket events delivered successfully)"
-        logger.info(f[U+1F4C8] Event sequence: {event_sequence})
-    
-    async def test_concurrent_users_chat_without_registry_conflicts(self):
-    """
+        logger.info(f" PASS:  All 5 critical WebSocket events delivered successfully)""""
 
         FAILING TEST: Multi-user business value validation.
         

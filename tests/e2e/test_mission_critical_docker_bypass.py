@@ -8,7 +8,7 @@ Approach: Staging environment validation and fallback testing, no container oper
 MISSION CRITICAL: These tests must validate the staging bypass strategy
 WITHOUT requiring Docker to be running or functional.
 
-Business Impact: $500K+ ARR Golden Path depends on reliable fallback mechanisms
+Business Impact: 500K+ ARR Golden Path depends on reliable fallback mechanisms
 Critical Context: Issue #420 strategic resolution - staging validation as Docker fallback
 
 Test Strategy: These tests are designed to FAIL initially to prove staging bypass needs work
@@ -114,7 +114,7 @@ class MissionCriticalDockerBypassTests(SSotBaseTestCase):
         Test that staging WebSocket functionality works without Docker
 
         Issue: #1082 - Mission-critical WebSocket tests blocked by Docker failures
-        Business Impact: $500K+ ARR WebSocket functionality validation
+        Business Impact: 500K+ ARR WebSocket functionality validation
         Difficulty: High (20 minutes)
         Expected: FAIL initially - WebSocket fallback mechanism not properly implemented
         """
@@ -199,7 +199,7 @@ class MissionCriticalDockerBypassTests(SSotBaseTestCase):
         Test that mission-critical tests can execute without Docker infrastructure
 
         Issue: #1082 - Mission-critical tests timeout due to Docker failures
-        Business Impact: $500K+ ARR Golden Path validation blocked
+        Business Impact: 500K+ ARR Golden Path validation blocked
         Difficulty: High (25 minutes)
         Expected: FAIL initially - Mission-critical tests not designed for Docker-independent execution
         """

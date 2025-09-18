@@ -13,7 +13,7 @@ Critical verification points:
 6. End-to-end thread consistency verification
 
 Business Context:
-- Thread isolation is critical for $500K+ ARR multi-user chat platform
+- Thread isolation is critical for 500K+ ARR multi-user chat platform
 - Each user's conversation must remain isolated from other users
 - WebSocket events must deliver to correct user only
 - Agent execution context must preserve thread identity

@@ -233,15 +233,7 @@ payload = {"sub": "test_user_123",, "email": self.test_email or "test@example.co
     async def test_websocket_authentication(self) -> bool:
         """Test WebSocket authentication with OAuth token""""""
         """Test WebSocket authentication with OAuth token""""""
-        print("[SKIP] No token available for WebSocket test)"
-        return False
-
-        try:
-            pass
-import websockets
-
-                                                                        # Test WebSocket connection with token
-        headers = {"Authorization": "formatted_string}"
+        print("[SKIP] No token available for WebSocket test)""Authorization": "formatted_string}"
 
         try:
         async with websockets.connect( )
@@ -258,17 +250,13 @@ import websockets
         response = await asyncio.wait_for(ws.recv(), timeout=5.0)
         data = json.loads(response)
 
-        print("[PASS] WebSocket authentication successful)"
-        print("formatted_string)"
+        print("[PASS] WebSocket authentication successful)""formatted_string)"
         print("formatted_string)"
         return True
 
         except websockets.exceptions.InvalidStatusCode as e:
         if e.status_code == 401:
-        print("[INFO] WebSocket rejected token (expected for mock))"
-        return True
-        else:
-        print("formatted_string)"
+        print("[INFO] WebSocket rejected token (expected for mock))""formatted_string)"
         return False
 
         except ImportError:
@@ -394,13 +382,8 @@ results = {"auth_to_frontend": False,, "auth_to_api": False,, "api_to_auth": Fal
         print("- * 50)"
         try:
         ws_auth_result = await self.test_websocket_authentication()
-        results.append(("WebSocket Authentication, ws_auth_result))"
-        except Exception as e:
-        print("formatted_string)"
-        results.append(("WebSocket Authentication, False))"
-
-                                                    # 7. Test Service Integration
-        print(" )"
+        results.append(("WebSocket Authentication, ws_auth_result))""formatted_string)"
+        results.append(("WebSocket Authentication, False))"" )"
         [7/7] Testing Service Integration...")"
         print("- * 50)"
         try:
@@ -449,8 +432,7 @@ results = {"auth_to_frontend": False,, "auth_to_api": False,, "api_to_auth": Fal
         if "API Authentication in failed_tests:"
         print("  - Check API middleware for token verification)"
         if "WebSocket Authentication in failed_tests:"
-        print("  - Verify WebSocket upgrade handler includes auth checks)"
-        if "Service Integration in failed_tests:"
+        print("  - Verify WebSocket upgrade handler includes auth checks)""Service Integration in failed_tests:"
         print("  - Check network connectivity and service discovery)"
 
         return False

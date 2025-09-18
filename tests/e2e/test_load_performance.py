@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 1. Segment: Growth & Enterprise (scaling-enabled customer growth)
 2. Business Goal: Validate system handles growth without performance degradation
 3. Value Impact: Scalability enables 10x customer growth without infrastructure failure
-4. Revenue Impact: Poor scalability blocks $100K+ ARR growth opportunities
+4. Revenue Impact: Poor scalability blocks 100K+ ARR growth opportunities
 
 ARCHITECTURAL COMPLIANCE:
 - File size: <300 lines (enforced through modular design with utilities)

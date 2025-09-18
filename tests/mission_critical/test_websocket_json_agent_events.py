@@ -11,8 +11,7 @@ class TestWebSocketConnection:
         ""Send JSON message.""
 
         if self._closed:
-        raise RuntimeError(WebSocket is closed)"
-        raise RuntimeError(WebSocket is closed)""
+        raise RuntimeError(WebSocket is closed)"""
 
         self.messages_sent.append(message)
 
@@ -112,8 +111,7 @@ class MockWebSocketConnection:
 
     async def send_json(self, data: Dict[str, Any) -> None:
         if not self.is_connected:
-        raise ConnectionError(WebSocket disconnected)"
-        raise ConnectionError(WebSocket disconnected)""
+        raise ConnectionError(WebSocket disconnected)"""
 
         self.sent_events.append(data)
 

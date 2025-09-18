@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,16 +23,11 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 E2E Tests for Issue #358: Complete Golden Path Failure on GCP Staging
 
 CRITICAL ISSUE: Complete system lockout preventing users from accessing AI responses
-BUSINESS IMPACT: $500K+ ARR at risk due to complete Golden Path failure in production environment
+BUSINESS IMPACT: 500K+ ARR at risk due to complete Golden Path failure in production environment
 
 These tests are DESIGNED TO FAIL when run against GCP staging environment to prove
 that the complete Golden Path user journey is broken, validating the business impact
@@ -55,7 +42,7 @@ Test Categories:
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise, Platform)
 - Business Goal: Production System Stability & Revenue Protection
-- Value Impact: Validate $500K+ ARR functionality works in production-like environment
+- Value Impact: Validate 500K+ ARR functionality works in production-like environment
 - Strategic Impact: Prove staging deployment readiness and user journey reliability
 
 REQUIREMENTS per CLAUDE.md:
@@ -328,7 +315,7 @@ class Issue358CompleteGoldenPathFailureTests(SSotAsyncTestCase):
                 f"Failures: {websocket_failures}. "
                 f"Business Impact: 90% of platform value (chat) inaccessible in staging, "
                 f"primary user interaction path broken, real-time AI communication non-functional, "
-                f"production deployment blocked, $500K+ ARR WebSocket functionality broken. "
+                f"production deployment blocked, 500K+ ARR WebSocket functionality broken. "
                 f"RESOLUTION REQUIRED: Fix WebSocket 1011 errors in staging environment, "
                 f"ensure proper authentication flow, validate staging deployment configuration."
             )
@@ -516,7 +503,7 @@ class Issue358CompleteGoldenPathFailureTests(SSotAsyncTestCase):
                 f"Failures: {http_api_failures}. "
                 f"Business Impact: HTTP API fallback path broken, no alternative when WebSocket "
                 f"fails, agent execution blocked via HTTP API, users locked out of AI responses "
-                f"via HTTP, production HTTP functionality non-functional, $500K+ ARR HTTP API "
+                f"via HTTP, production HTTP functionality non-functional, 500K+ ARR HTTP API "
                 f"portion completely broken. "
                 f"RESOLUTION REQUIRED: Fix Issue #358 AttributeError in staging, implement "
                 f"proper HTTP API agent execution path, ensure HTTP API independence from WebSocket."
@@ -536,7 +523,7 @@ class Issue358CompleteGoldenPathFailureTests(SSotAsyncTestCase):
         Validates that ALL paths fail, proving complete system lockout.
         
         CRITICAL BUSINESS IMPACT:
-        - $500K+ ARR completely inaccessible 
+        - 500K+ ARR completely inaccessible 
         - No working path for users to access AI responses
         - Complete business continuity failure in staging
         - Production deployment completely blocked
@@ -623,7 +610,7 @@ class Issue358CompleteGoldenPathFailureTests(SSotAsyncTestCase):
             pytest.fail(
                 f"CRITICAL COMPLETE SYSTEM LOCKOUT: All user access paths broken in staging. "
                 f"Analysis: {system_analysis}. Evidence: {system_lockout_evidence}. "
-                f"Business Impact: $500K+ ARR completely inaccessible, no working path for "
+                f"Business Impact: 500K+ ARR completely inaccessible, no working path for "
                 f"users to access AI responses, complete business continuity failure, production "
                 f"deployment blocked, customer demonstrations impossible. "
                 f"RESOLUTION REQUIRED: Fix all execution path failures, restore at least one "
@@ -635,7 +622,7 @@ class Issue358CompleteGoldenPathFailureTests(SSotAsyncTestCase):
                 f"user access paths broken in staging. Analysis: {system_analysis}. "
                 f"Evidence: {system_lockout_evidence}. "
                 f"Business Impact: Reduced system reliability, no fallback when primary paths "
-                f"fail, potential user lockout scenarios, $500K+ ARR partially at risk. "
+                f"fail, potential user lockout scenarios, 500K+ ARR partially at risk. "
                 f"RESOLUTION REQUIRED: Fix broken execution paths to ensure full redundancy."
             )
 

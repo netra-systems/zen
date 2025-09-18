@@ -821,8 +821,7 @@ class RealConcurrentUserIsolationTests:
             avg_operation_time = total_duration / len(connected_contexts) if connected_contexts else 0
             
             assert len(violations) == 0, "fWEBSOCKET CONCURRENT ISOLATION VIOLATIONS: {violations}"
-            assert success_rate >= 90.0, fWebSocket success rate too low: {success_rate}% (expected >= 90%)"
-            assert success_rate >= 90.0, fWebSocket success rate too low: {success_rate}% (expected >= 90%)""
+            assert success_rate >= 90.0, fWebSocket success rate too low: {success_rate}% (expected >= 90%)"""
 
             
         finally:

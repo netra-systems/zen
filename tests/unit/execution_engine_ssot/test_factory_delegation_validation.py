@@ -13,7 +13,7 @@ Purpose:
 5. Test factory error handling and edge cases
 
 Business Impact: Protects factory-based user isolation which is critical for
-multi-user AI chat functionality ($500K+ ARR dependency).
+multi-user AI chat functionality (500K+ ARR dependency).
 """
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase

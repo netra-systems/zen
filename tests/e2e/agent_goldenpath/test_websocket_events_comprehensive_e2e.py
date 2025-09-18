@@ -12,7 +12,7 @@ MISSION CRITICAL: Tests comprehensive WebSocket event delivery during agent work
 Business Value Justification (BVJ):
 - Segment: All Users requiring real-time chat experience
 - Business Goal: Real-time User Experience & System Transparency 
-- Value Impact: Ensures $500K+ ARR chat functionality provides excellent UX
+- Value Impact: Ensures 500K+ ARR chat functionality provides excellent UX
 - Strategic Impact: Real-time events are critical for user engagement and platform stickiness
 
 Test Strategy:

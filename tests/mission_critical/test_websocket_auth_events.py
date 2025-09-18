@@ -8,7 +8,7 @@ This validates that authenticated users receive proper WebSocket events during a
 Business Value Justification (BVJ):
     - Segment: ALL users (Free, Early, Mid, Enterprise) - 100% of chat users
 - Business Goal: Seamless Real-time Chat Experience - Core value delivery
-- Value Impact: $500K+ plus ARR - Chat is 90% of our customer value delivery
+- Value Impact: 500K+  ARR - Chat is 90% of our customer value delivery
 - Strategic Impact: Platform Foundation - WebSocket + Auth enables all AI interactions
 
 CRITICAL SUCCESS CRITERIA:
@@ -157,8 +157,7 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
         
         # Ensure backend service is available for WebSocket connections
         if not self.services.get(services_available, {}.get(backend, False):
-            pytest.skip(Backend service required for WebSocket auth testing)"
-            pytest.skip(Backend service required for WebSocket auth testing)""
+            pytest.skip(Backend service required for WebSocket auth testing)"""
 
             
         # Configure WebSocket URL
@@ -226,9 +225,7 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
         except asyncio.TimeoutError:
             pytest.fail(MISSION CRITICAL: WebSocket authentication timeout - connection failed)
         except Exception as e:
-            pytest.fail(f"MISSION CRITICAL: WebSocket authentication failed - {str(e)})"
-        
-        logger.info( PASS:  MISSION CRITICAL: WebSocket authentication validated")"
+            pytest.fail(f"MISSION CRITICAL: WebSocket authentication failed - {str(e)})"")"
     
     async def test_agent_events_with_websocket_auth(self):
         """
@@ -325,22 +322,7 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
         
         BUSINESS IMPACT: Event crossover = Users see each other's data = Privacy breach'
 
-        logger.info("[U+1F534] MISSION CRITICAL: Testing multi-user WebSocket isolation)"
-        
-        user_count = 3
-        websocket_connections = []
-        user_data = []
-        
-        try:
-            # Create multiple authenticated users
-            for i in range(user_count):
-                user_id = fmulti-user-{i}-{uuid.uuid4().hex[:6]}
-                email = fmultiuser{i}-{int(time.time())}@netra.test
-                
-                token = self.auth_helper.create_test_jwt_token(
-                    user_id=user_id,
-                    email=email,
-                    permissions=[chat", agent:execute]"
+        logger.info("[U+1F534] MISSION CRITICAL: Testing multi-user WebSocket isolation)"", agent:execute]"
                 
                 websocket_url = f{self.auth_helper.config.websocket_url}?token={token}
                 
@@ -490,18 +472,10 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
                     pytest.fail(MISSION CRITICAL: WebSocket connection failed after token refresh)
                 
         except Exception as e:
-            pytest.fail(fMISSION CRITICAL: WebSocket token refresh failed - {str(e)})"
-            pytest.fail(fMISSION CRITICAL: WebSocket token refresh failed - {str(e)})""
+            pytest.fail(fMISSION CRITICAL: WebSocket token refresh failed - {str(e)})"""
 
         
-        logger.info(" PASS:  MISSION CRITICAL: WebSocket token refresh validated)"
-    
-    async def test_websocket_connection_recovery(self):
-        
-        MISSION CRITICAL: WebSocket connections recover from temporary disconnections.
-        
-        BUSINESS IMPACT: Connection drops without recovery = Chat stops working
-""
+        logger.info(" PASS:  MISSION CRITICAL: WebSocket token refresh validated)"""
         logger.info([U+1F534] MISSION CRITICAL: Testing WebSocket connection recovery)
         
         user_id = frecovery-test-{uuid.uuid4().hex[:8]}""
@@ -564,19 +538,9 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
             recovery_successful = True
             
         except Exception as e:
-            pytest.fail(f"MISSION CRITICAL: WebSocket connection recovery failed - {str(e)})"
+            pytest.fail(f"MISSION CRITICAL: WebSocket connection recovery failed - {str(e)})""MISSION CRITICAL: WebSocket recovery not completed"
         
-        assert recovery_successful, "MISSION CRITICAL: WebSocket recovery not completed"
-        
-        logger.info("PASS:  MISSION CRITICAL: WebSocket connection recovery validated))"
-        logger.info("PASS:  MISSION CRITICAL: WebSocket connection recovery validated))"
-
-
-@pytest.mark.mission_critical
-@pytest.mark.real_services
-@pytest.mark.websocket
-class WebSocketAuthPerformanceTests(SSotAsyncTestCase):
-    "Mission Critical: WebSocket authentication performance under load."
+        logger.info("PASS:  MISSION CRITICAL: WebSocket connection recovery validated))""PASS:  MISSION CRITICAL: WebSocket connection recovery validated))""Mission Critical: WebSocket authentication performance under load."
     
     async def test_websocket_auth_concurrent_connections(self):
     """
@@ -674,8 +638,7 @@ class WebSocketAuthPerformanceTests(SSotAsyncTestCase):
             assert avg_duration < 1.0, fBUSINESS CRITICAL: Average WebSocket auth {avg_duration:.3f}s too slow"
             assert max_duration < 3.0, "fBUSINESS CRITICAL: Max WebSocket auth {max_duration:.""3f""}s unacceptable"
             
-            logger.info(f PASS:  MISSION CRITICAL: {len(successful_connections)} concurrent WebSocket auths, avg {avg_duration:.3f}s)"
-            logger.info(f PASS:  MISSION CRITICAL: {len(successful_connections)} concurrent WebSocket auths, avg {avg_duration:."3f"}s)""
+            logger.info(f PASS:  MISSION CRITICAL: {len(successful_connections)} concurrent WebSocket auths, avg {avg_duration:.3f}s)""3f"}s)""
 
             
         finally:

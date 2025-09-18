@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Segment: Platform/Production
 - Business Goal: Service Reliability/Golden Path Recovery
 - Value Impact: Ensure complete user flow works end-to-end without Docker dependency
-- Strategic Impact: Validate $500K+ ARR Golden Path infrastructure readiness
+- Strategic Impact: Validate 500K+ ARR Golden Path infrastructure readiness
 
 CRITICAL: These tests are designed to FAIL when GCP staging infrastructure
 issues exist, reproducing the complete system failures seen in Issue #1278
@@ -616,4 +616,3 @@ class TestIssue1278GoldenPathValidationNonDocker(SSotAsyncTestCase):
                 f"Golden Path completely matches Issue #1278 failure pattern: "
                 f"Frontend accessible (Node.js working), "
                 f"Backend/Auth/WebSocket failed (Python services with database dependencies)"
-            )

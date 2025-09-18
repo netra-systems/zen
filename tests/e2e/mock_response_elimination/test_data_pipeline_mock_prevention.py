@@ -2,7 +2,7 @@
 Data Pipeline Mock Response Prevention Tests
 
 Business Value Justification (BVJ):
-- Segment: All segments, especially Enterprise ($100K+ ARR)
+- Segment: All segments, especially Enterprise (100K+ ARR)
 - Business Goal: Ensure data integrity - no fabricated analytics reach users  
 - Value Impact: Prevent business decisions based on fake data
 - Strategic Impact: Platform credibility depends on authentic data delivery
@@ -45,7 +45,7 @@ class DataPipelineMockPreventionTests(BaseE2ETest):
         """
         FAILING TEST: Proves data agent returns fabricated metrics.
         
-        Business Value: Analytics queries for Enterprise customers ($100K+ ARR)
+        Business Value: Analytics queries for Enterprise customers (100K+ ARR)
         must NEVER return fake data that could impact business decisions.
         
         Expected Failure: Currently calls _generate_fallback_data() 
@@ -208,7 +208,7 @@ class DataPipelineMockPreventionTests(BaseE2ETest):
         """
         FAILING TEST: Enterprise dashboard analytics may include fabricated data.
         
-        Business Value: Enterprise customers ($200K+ ARR) rely on dashboard
+        Business Value: Enterprise customers (200K+ ARR) rely on dashboard
         analytics for strategic decisions. Fabricated data could cause 
         significant business harm.
         """

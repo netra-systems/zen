@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
     - Segment: Platform/Internal - System Stability & Development Velocity
 - Business Goal: Ensure 100% SSOT compliance for test infrastructure
 - Value Impact: Prevents test infrastructure duplication and ensures consistent testing foundation
-- Strategic Impact: Protects $500K+ plus ARR by maintaining reliable test infrastructure
+- Strategic Impact: Protects 500K+  ARR by maintaining reliable test infrastructure
 
 CRITICAL: This test protects the Golden Path user flow by ensuring all E2E tests
 use consistent SSOT patterns, preventing race conditions and test reliability issues.
@@ -133,7 +133,7 @@ class TestSsotBaseE2ETestLegacyDetection(SSotAsyncTestCase):
                 f"   With SSOT inheritance: class TestClass({self.required_ssot_patterns['inheritance_pattern'])\n\n"
                 f3. Verify setup_method/teardown_method usage (not setUp/tearDown)\n
                 f4. Run compliance check: python scripts/check_architecture_compliance.py\n\n
-                fBUSINESS IMPACT: Legacy patterns threaten $500K+ plus ARR Golden Path reliability.\n""
+                fBUSINESS IMPACT: Legacy patterns threaten 500K+  ARR Golden Path reliability.\n""
                 fComplete SSOT migration is required for system stability.
             )
 

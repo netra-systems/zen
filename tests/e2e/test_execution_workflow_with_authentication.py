@@ -3,7 +3,7 @@
 Business Value Justification:
 - Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Complete Authenticated Execution Workflow Validation
-- Value Impact: Ensures $500K+ ARR execution workflows work end-to-end with real auth
+- Value Impact: Ensures 500K+ ARR execution workflows work end-to-end with real auth
 - Strategic Impact: Validates production-ready authenticated multi-user execution patterns
 
 CRITICAL REQUIREMENTS per CLAUDE.md:

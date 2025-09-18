@@ -6,7 +6,7 @@ Mission Critical Server Message Validator Integration Tests
 Integration tests that validate the MissionCriticalEventValidator works 
 with actual WebSocket messages in both flat and ServerMessage formats.
 
-BUSINESS IMPACT: $500K+ plus ARR depends on proper WebSocket event validation
+BUSINESS IMPACT: 500K+  ARR depends on proper WebSocket event validation
 to ensure Golden Path chat functionality works correctly.
 
 Issue #892: Integration validation that the validator fix works with

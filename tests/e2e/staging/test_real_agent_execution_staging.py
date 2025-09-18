@@ -2,7 +2,7 @@
 MISSION CRITICAL: Real Agent Execution Test Suite for Staging
 =============================================================
 
-BUSINESS IMPACT: $500K+ ARR - Core agent execution pipeline validation
+BUSINESS IMPACT: 500K+ ARR - Core agent execution pipeline validation
 This test suite validates the complete agent execution flow with real WebSocket events,
 ensuring substantive chat value delivery to users.
 
@@ -927,7 +927,7 @@ if __name__ == "__main__":
     print("REAL AGENT EXECUTION TEST SUITE - STAGING")
     print("=" * 70)
     print("This suite validates complete agent execution with real WebSocket events.")
-    print("Tests ensure substantive chat value delivery for $500K+ ARR impact.")
+    print("Tests ensure substantive chat value delivery for 500K+ ARR impact.")
     print("=" * 70)
     
     if verify_staging_connectivity(config):

@@ -2,7 +2,7 @@
 "MISSION CRITICAL: DatabaseManager SSOT Consolidation Test Suite"
 
 THIS SUITE DETECTS DUPLICATE DATABASEMANAGER IMPLEMENTATIONS
-Business Value: $500K+ plus ARR - Prevents cascade failures from inconsistent database access
+Business Value: 500K+  ARR - Prevents cascade failures from inconsistent database access
 
 CRITICAL VIOLATIONS TO DETECT:
     1. Multiple DatabaseManager classes across different modules (SSOT violation)
@@ -222,8 +222,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
             websocket_import_success = True
             self.record_metric(websocket_import_test_success, True)
         except ImportError as e:
-            consolidation_issues.append(f"WebSocket factory import failed: {e})"
-            self.record_metric(websocket_import_test_error", str(e))"
+            consolidation_issues.append(f"WebSocket factory import failed: {e})"", str(e))"
         
         # Record consolidation status
         self.record_metric(consolidation_success, consolidation_success)

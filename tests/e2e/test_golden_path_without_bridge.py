@@ -6,7 +6,7 @@ This test suite validates the complete Golden Path user flow works without
 the SingletonToFactoryBridge, ensuring safe removal of legacy code.
 
 Golden Path: Users login -> get AI responses
-Critical for: $500K+ ARR protection
+Critical for: 500K+ ARR protection
 
 Test Scope:
 1. Complete user authentication flow
@@ -116,7 +116,7 @@ class TestGoldenPathWithoutBridge(SSotAsyncTestCase):
         """
         CRITICAL: Test multi-user Golden Path scenarios without bridge.
 
-        This validates user isolation (protecting $500K+ ARR) works without bridge.
+        This validates user isolation (protecting 500K+ ARR) works without bridge.
         """
         try:
             from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory

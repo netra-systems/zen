@@ -12,7 +12,7 @@ CRITICAL EXECUTION REQUIREMENTS:
 - Clear violation detection in failure messages
 
 BUSINESS PROTECTION:
-- Protects $500K+ ARR Golden Path functionality
+- Protects 500K+ ARR Golden Path functionality
 - Ensures chat reliability (90% of platform value)
 - Validates WebSocket event delivery consistency
 
@@ -103,9 +103,7 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
             # Issue #712 Fix: This should actually verify that they ARE the same (proper SSOT aliasing)
             if WebSocketManager is not UnifiedWebSocketManager:
                 violation_detected = True
-                violation_details.append(f"WebSocketManager ({WebSocketManager}) is not the SSOT UnifiedWebSocketManager ({UnifiedWebSocketManager})")
-            else:
-                logger.info("SSOT COMPLIANT: WebSocketManager is properly aliased to UnifiedWebSocketManager")
+                violation_details.append(f"WebSocketManager ({WebSocketManager}) is not the SSOT UnifiedWebSocketManager ({UnifiedWebSocketManager})""SSOT COMPLIANT: WebSocketManager is properly aliased to UnifiedWebSocketManager")
                 
             # Check for multiple manager classes (SSOT violation)
             # Issue #712 Fix: Enhanced validation that understands SSOT compatibility patterns
@@ -186,10 +184,7 @@ class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
                 # This should not work if SSOT is properly implemented
                 direct_instance = WebSocketManager()
                 violation_detected = True
-                violation_details.append("Direct WebSocketManager instantiation succeeded (should be prevented)")
-            except (TypeError, AttributeError, RuntimeError) as e:
-                # Good - direct instantiation is prevented
-                logger.debug(f"Direct instantiation properly prevented: {e}")
+                violation_details.append("Direct WebSocketManager instantiation succeeded (should be prevented)""Direct instantiation properly prevented: {e}")
             
             # Check for non-SSOT manager creation methods
             manager_creation_methods = []

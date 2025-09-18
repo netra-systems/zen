@@ -3,7 +3,7 @@
 GitHub Issue: #989 WebSocket factory deprecation SSOT violation - get_websocket_manager_factory()
 GitHub Stage: Step 2 - EXECUTE THE TEST PLAN
 
-BUSINESS VALUE: $500K+ ARR - Detects deprecated factory patterns that threaten Golden Path
+BUSINESS VALUE: 500K+ ARR - Detects deprecated factory patterns that threaten Golden Path
 WHERE users login -> receive AI responses through proper WebSocket initialization.
 
 PURPOSE:
@@ -127,7 +127,7 @@ class Issue989WebSocketFactoryDeprecationSSoTTests(SSotBaseTestCase):
             logger.error(f'canonical_imports.py not found at {self.canonical_imports_path}')
             violations.append(FactoryViolationDetails(file_path=str(self.canonical_imports_path), deprecated_exports=['file_not_found'], line_numbers=[0], violation_type='missing_file', severity='CRITICAL'))
         self.violation_details['deprecated_export_violations'] = violations
-        assert len(violations) == 0, f'ISSUE #989 SSOT VIOLATION: Found {len(violations)} deprecated factory export violations. canonical_imports.py MUST NOT export deprecated get_websocket_manager_factory(). Violations: {[(v.file_path, v.deprecated_exports) for v in violations]}. GOLDEN PATH RISK: Dual initialization patterns threaten $500K+ ARR user flow.'
+        assert len(violations) == 0, f'ISSUE #989 SSOT VIOLATION: Found {len(violations)} deprecated factory export violations. canonical_imports.py MUST NOT export deprecated get_websocket_manager_factory(). Violations: {[(v.file_path, v.deprecated_exports) for v in violations]}. GOLDEN PATH RISK: Dual initialization patterns threaten 500K+ ARR user flow.'
 
     def test_detect_websocket_factory_deprecation_warnings_violation(self):
         """CRITICAL: Validate factory deprecation warnings are properly implemented (SHOULD FAIL initially)

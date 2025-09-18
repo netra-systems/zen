@@ -10,7 +10,7 @@ CRITICAL: These tests prove SSOT violations exist by demonstrating:
 3. Event delivery may be inconsistent across import paths
 4. WebSocket factory patterns create fragmentation
 
-Business Value: $500K+ ARR depends on consistent WebSocket event delivery
+Business Value: 500K+ ARR depends on consistent WebSocket event delivery
 """
 import asyncio
 import pytest

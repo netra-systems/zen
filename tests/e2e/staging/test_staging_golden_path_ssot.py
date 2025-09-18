@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Segment: ALL (Free/Early/Mid/Enterprise/Platform)
 - Business Goal: Validate complete Golden Path on staging with SSOT compliance
 - Value Impact: Ensures end-to-end chat functionality reliability
-- Revenue Impact: Protects $500K+ ARR Golden Path with comprehensive E2E validation
+- Revenue Impact: Protects 500K+ ARR Golden Path with comprehensive E2E validation
 
 ENVIRONMENT REQUIREMENTS:
 - GCP Staging Environment (https://staging.netrasystems.ai)

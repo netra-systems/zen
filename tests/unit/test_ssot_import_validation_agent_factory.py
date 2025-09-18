@@ -9,7 +9,7 @@ EXPECTED BEHAVIOR:
 - BEFORE REMEDIATION: Tests should FAIL (proving incorrect import patterns exist)
 - AFTER REMEDIATION: Tests should PASS (proving SSOT import compliance)
 
-Business Value: Platform/Internal - $500K+ ARR protection through proper module architecture
+Business Value: Platform/Internal - 500K+ ARR protection through proper module architecture
 """
 import ast
 import importlib

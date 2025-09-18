@@ -371,8 +371,7 @@ class BaseAgentInheritanceViolationsTests:
         
         # Create multiple agents with inheritance
         agents = [
-            InheritanceViolationAgentTests(name=fWebSocketTest{i})"
-            InheritanceViolationAgentTests(name=fWebSocketTest{i})""
+            InheritanceViolationAgentTests(name=fWebSocketTest{i})"""
 
             for i in range(5)
         ]
@@ -384,25 +383,7 @@ class BaseAgentInheritanceViolationsTests:
         for agent in agents:
             # Check WebSocket adapter exists and is correct type
             if not hasattr(agent, '_websocket_adapter'):
-                pytest.fail(f"INHERITANCE VIOLATION: Agent {agent.name} missing WebSocket adapter)"
-            
-            websocket_adapters.append(type(agent._websocket_adapter))
-            
-            # Check WebSocket methods are consistent
-            ws_methods = [method for method in dir(agent) if method.startswith('emit_')]
-            websocket_methods.append(sorted(ws_methods))
-        
-        # CRITICAL CHECK: All agents should have same WebSocket adapter type
-        unique_adapter_types = set(websocket_adapters)
-        if len(unique_adapter_types) > 1:
-            pytest.fail(fINHERITANCE VIOLATION: Inconsistent WebSocket adapter types 
-                       facross inheritance hierarchy: {unique_adapter_types})
-        
-        # CRITICAL CHECK: All agents should have same WebSocket methods
-        first_methods = websocket_methods[0]
-        for i, methods in enumerate(websocket_methods[1:], 1):
-            if methods != first_methods:
-                pytest.fail(fINHERITANCE VIOLATION: Agent {i) has different WebSocket methods. ""
+                pytest.fail(f"INHERITANCE VIOLATION: Agent {agent.name} missing WebSocket adapter)"""
                            fExpected: {first_methods}, Got: {methods})
         
         # CRITICAL CHECK: Required WebSocket events must be available

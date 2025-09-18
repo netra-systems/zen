@@ -13,7 +13,7 @@ STAGING VALIDATION:
 TEST STRATEGY: Use real staging environment to prove/disprove Issue #1037
 affects actual deployed services, not just local development.
 
-Business Impact: $500K+ ARR validation in production-like environment.
+Business Impact: 500K+ ARR validation in production-like environment.
 """
 import pytest
 import asyncio
@@ -113,7 +113,7 @@ class ServiceSecretStagingValidationTests(SSotAsyncTestCase):
                             authentication_failures.append({'test': 'token_parsing', 'error': str(e)[:200], 'details': 'Failed to parse service token response'})
                 if authentication_failures:
                     failure_summary = '\n'.join([f"  {f['test']}: {f.get('status', 'Error')} - {f['details']}\n    Response: {f.get('response', f.get('error', 'No details'))}" for f in authentication_failures])
-                    raise AssertionError(f'Issue #1037 CONFIRMED IN STAGING ENVIRONMENT:\nSERVICE_SECRET authentication failures detected in real deployment:\n{failure_summary}\n\nThis proves Issue #1037 affects actual production-like environment. Business Impact: $500K+ ARR at risk from authentication breakdown.')
+                    raise AssertionError(f'Issue #1037 CONFIRMED IN STAGING ENVIRONMENT:\nSERVICE_SECRET authentication failures detected in real deployment:\n{failure_summary}\n\nThis proves Issue #1037 affects actual production-like environment. Business Impact: 500K+ ARR at risk from authentication breakdown.')
                 else:
                     logger.info('Staging authentication consistency verified - Issue #1037 may not affect this environment or is already fixed.')
             except httpx.RequestError as e:

@@ -28,7 +28,7 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-'\nGOLDEN PATH COMPLETE E2E COMPREHENSIVE TEST SUITE - CRITICAL P0 BUSINESS VALUE VALIDATION\n=========================================================================================\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal - System Stability & Development Velocity  \n- Business Goal: Platform Reliability & Revenue Protection ($500K+ ARR)\n- Value Impact: Validates complete golden path user journey from authentication to business insights delivery\n- Strategic/Revenue Impact: Prevents critical failures affecting 90% of user-delivered value through chat functionality\n\nCOMPLETE GOLDEN PATH FLOW VALIDATION:\n1. User opens chat interface  ->  Connection established\n2. JWT authentication  ->  UserExecutionContext created  \n3. WebSocket ready  ->  Welcome message sent\n4. User sends optimization request  ->  Message routed to AgentHandler\n5. ExecutionEngineFactory creates isolated engine  ->  SupervisorAgent orchestrates\n6. Agent Triage  ->  Data Helper Agent  ->  Optimization Agent  ->  UVS/Reporting Agent\n7. All 5 WebSocket events sent  ->  Tools executed  ->  Results compiled\n8. Final response with business value  ->  Conversation persisted to database\n9. User session maintained  ->  Redis cache updated  ->  Complete cleanup\n\nCRITICAL REQUIREMENTS:\n- All tests MUST use real services (PostgreSQL, Redis, WebSocket, Auth, Backend)\n- All tests MUST use SSOT authentication patterns from test_framework/ssot/e2e_auth_helper.py\n- All tests MUST validate complete end-to-end business value delivery\n- All tests MUST include proper Business Value Justification comments\n- All tests MUST validate the complete 5 mission-critical WebSocket events\n- All tests MUST test realistic enterprise scenarios with production-level data\n\nDEPLOYMENT BLOCKER: ANY FAILURE IN THIS SUITE BLOCKS PRODUCTION DEPLOYMENT\n'
+'\nGOLDEN PATH COMPLETE E2E COMPREHENSIVE TEST SUITE - CRITICAL P0 BUSINESS VALUE VALIDATION\n=========================================================================================\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal - System Stability & Development Velocity  \n- Business Goal: Platform Reliability & Revenue Protection (500K+ ARR)\n- Value Impact: Validates complete golden path user journey from authentication to business insights delivery\n- Strategic/Revenue Impact: Prevents critical failures affecting 90% of user-delivered value through chat functionality\n\nCOMPLETE GOLDEN PATH FLOW VALIDATION:\n1. User opens chat interface  ->  Connection established\n2. JWT authentication  ->  UserExecutionContext created  \n3. WebSocket ready  ->  Welcome message sent\n4. User sends optimization request  ->  Message routed to AgentHandler\n5. ExecutionEngineFactory creates isolated engine  ->  SupervisorAgent orchestrates\n6. Agent Triage  ->  Data Helper Agent  ->  Optimization Agent  ->  UVS/Reporting Agent\n7. All 5 WebSocket events sent  ->  Tools executed  ->  Results compiled\n8. Final response with business value  ->  Conversation persisted to database\n9. User session maintained  ->  Redis cache updated  ->  Complete cleanup\n\nCRITICAL REQUIREMENTS:\n- All tests MUST use real services (PostgreSQL, Redis, WebSocket, Auth, Backend)\n- All tests MUST use SSOT authentication patterns from test_framework/ssot/e2e_auth_helper.py\n- All tests MUST validate complete end-to-end business value delivery\n- All tests MUST include proper Business Value Justification comments\n- All tests MUST validate the complete 5 mission-critical WebSocket events\n- All tests MUST test realistic enterprise scenarios with production-level data\n\nDEPLOYMENT BLOCKER: ANY FAILURE IN THIS SUITE BLOCKS PRODUCTION DEPLOYMENT\n'
 import asyncio
 import json
 import os
@@ -163,7 +163,7 @@ class GoldenPathCompleteE2EComprehensiveTests(SSotAsyncTestCase):
     This test suite validates the COMPLETE golden path user journey with 
     real services, authentication, and business value measurement.
     
-    CRITICAL: These tests protect $500K+ ARR by ensuring core chat functionality works end-to-end.
+    CRITICAL: These tests protect 500K+ ARR by ensuring core chat functionality works end-to-end.
     """
 
     @pytest.fixture(autouse=True)
@@ -531,7 +531,7 @@ class GoldenPathCompleteE2EComprehensiveTests(SSotAsyncTestCase):
         - Segment: Enterprise - AI Cost Optimization
         - Business Goal: Revenue Generation & Customer Satisfaction  
         - Value Impact: Validates complete user journey delivering $15K+ cost savings insights
-        - Revenue Impact: Protects $100K+ ARR from enterprise AI optimization customers
+        - Revenue Impact: Protects 100K+ ARR from enterprise AI optimization customers
         
         This test validates the COMPLETE golden path user journey from initial connection
         through AI-powered cost optimization analysis to actionable business insights delivery.
@@ -579,7 +579,7 @@ class GoldenPathCompleteE2EComprehensiveTests(SSotAsyncTestCase):
         - Segment: Platform/Internal - System Scalability
         - Business Goal: Platform Reliability & Concurrent User Support
         - Value Impact: Validates system can handle enterprise-scale concurrent usage (10+ users)
-        - Revenue Impact: Enables $500K+ ARR by supporting multiple concurrent enterprise customers
+        - Revenue Impact: Enables 500K+ ARR by supporting multiple concurrent enterprise customers
         
         This test validates that the Golden Path works correctly with multiple concurrent users,
         ensuring proper user isolation and resource management at enterprise scale.
@@ -860,7 +860,7 @@ class GoldenPathCompleteE2EComprehensiveTests(SSotAsyncTestCase):
         - Segment: Enterprise - AI Cost Optimization
         - Business Goal: Revenue Generation & Customer Success
         - Value Impact: Validates delivery of measurable ROI ($25K+ cost savings identification)
-        - Revenue Impact: Demonstrates platform value driving $200K+ ARR from enterprise customers
+        - Revenue Impact: Demonstrates platform value driving 200K+ ARR from enterprise customers
         
         This test validates that Golden Path execution delivers measurable business value
         in the form of cost optimizations, actionable insights, and quantifiable ROI.
@@ -1267,7 +1267,7 @@ class GoldenPathCompleteE2EComprehensiveTests(SSotAsyncTestCase):
         - Segment: Enterprise - Compliance & Data Governance
         - Business Goal: Risk Reduction & Regulatory Compliance
         - Value Impact: Ensures complete audit trail for enterprise compliance requirements
-        - Revenue Impact: Enables enterprise contracts requiring SOC2/GDPR compliance ($500K+ ARR)
+        - Revenue Impact: Enables enterprise contracts requiring SOC2/GDPR compliance (500K+ ARR)
         
         This test validates that Golden Path execution creates comprehensive audit trails
         for all user interactions, data processing, and business decisions.

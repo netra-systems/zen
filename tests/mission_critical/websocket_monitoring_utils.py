@@ -3,7 +3,7 @@
 
 Business Value Justification:
     - Segment: Platform/Internal (Mission Critical Infrastructure)
-- Business Goal: Provide real-time monitoring and analysis of $500K+ plus ARR chat functionality
+- Business Goal: Provide real-time monitoring and analysis of 500K+  ARR chat functionality
 - Value Impact: Enables proactive detection of WebSocket issues before they impact users
 - Strategic Impact: Maintains chat quality that drives customer retention and conversions
 
@@ -159,8 +159,7 @@ class RealTimeEventMonitor:
         with self._lock:
             self.is_active = True
             self.start_time = time.time()
-            logger.info(Real-time WebSocket event monitoring started)"
-            logger.info(Real-time WebSocket event monitoring started)""
+            logger.info(Real-time WebSocket event monitoring started)"""
 
     
     def stop_monitoring(self):
@@ -1062,8 +1061,7 @@ if __name__ == __main__:
     
     # Example of how to use the monitoring session
     with orchestrator.monitor_session(example_monitoring):
-        logger.info(Monitoring session active - ready to record WebSocket events)"
-        logger.info(Monitoring session active - ready to record WebSocket events)"
+        logger.info(Monitoring session active - ready to record WebSocket events)""
         logger.info("Use orchestrator.record_event(validated_event) to record events)"
         
         # In a real scenario, events would be recorded here

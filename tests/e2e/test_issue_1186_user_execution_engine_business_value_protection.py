@@ -4,7 +4,7 @@ E2E Staging tests for Issue #1186 - UserExecutionEngine Business Value Protectio
 Business Value Justification:
 - Segment: Enterprise/Platform
 - Business Goal: Revenue Protection & System Stability
-- Value Impact: Validates $500K+ ARR chat functionality remains operational after consolidation
+- Value Impact: Validates 500K+ ARR chat functionality remains operational after consolidation
 - Strategic Impact: Ensures zero business disruption during import pattern consolidation
 
 Tests validate:
@@ -66,7 +66,7 @@ class Issue1186UserExecutionEngineBusinessValueProtectionTests(unittest.TestCase
     def test_consolidated_user_execution_engine_chat_functionality_e2e(self):
         """Test end-to-end chat functionality with consolidated UserExecutionEngine.
 
-        Business Impact: Validates $500K+ ARR chat functionality continues to work
+        Business Impact: Validates 500K+ ARR chat functionality continues to work
         after import consolidation in staging environment.
         """
         e2e_test_results = []
@@ -522,7 +522,7 @@ class Issue1186UserExecutionEngineBusinessValueProtectionTests(unittest.TestCase
     def test_revenue_protection_comprehensive_e2e_validation(self):
         """Test comprehensive revenue protection across all business scenarios.
 
-        Business Impact: Validates $500K+ ARR protection across all user tiers
+        Business Impact: Validates 500K+ ARR protection across all user tiers
         and business scenarios after import consolidation.
         """
         revenue_protection_results = []
@@ -632,7 +632,7 @@ class Issue1186UserExecutionEngineBusinessValueProtectionTests(unittest.TestCase
 if __name__ == '__main__':
     print("🚀 Issue #1186 UserExecutionEngine Business Value Protection E2E Tests")
     print("=" * 80)
-    print("Business Impact: Validates $500K+ ARR protection after import consolidation")
+    print("Business Impact: Validates 500K+ ARR protection after import consolidation")
     print("Focus: Chat functionality, WebSocket events, Multi-user concurrency, Revenue protection")
     print("Execution: E2E staging environment tests")
     print("=" * 80)

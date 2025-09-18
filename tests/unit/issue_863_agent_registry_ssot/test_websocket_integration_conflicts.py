@@ -2,7 +2,7 @@
 Test WebSocket Integration Conflicts (Issue #863)
 
 Tests the critical WebSocket integration failures caused by AgentRegistry
-duplication that blocks the Golden Path user flow and prevents $500K+ ARR
+duplication that blocks the Golden Path user flow and prevents 500K+ ARR
 from chat functionality.
 
 Business Value: Validates that WebSocket events are delivered consistently

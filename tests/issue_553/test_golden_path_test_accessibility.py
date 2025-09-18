@@ -14,7 +14,7 @@ METHODOLOGY:
 - Ensure golden path tests work without Docker infrastructure
 
 BUSINESS VALUE:
-- Protects $500K+ ARR by ensuring golden path validation is accessible
+- Protects 500K+ ARR by ensuring golden path validation is accessible
 - Validates core user flow testing remains functional
 - Ensures golden path tests can run in CI/CD without Docker
 - Confirms staging environment accessibility for business critical validation
@@ -261,7 +261,7 @@ class GoldenPathTestAccessibilityTests:
         BUSINESS VALUE TEST: Validate golden path tests protect business value
         
         This test ensures that the golden path testing capability protects the
-        $500K+ ARR by validating core user flows remain testable.
+        500K+ ARR by validating core user flows remain testable.
         """
         business_metrics = {'user_login_flow': {'weight': 0.3, 'accessible': False}, 'ai_response_generation': {'weight': 0.4, 'accessible': False}, 'websocket_communication': {'weight': 0.2, 'accessible': False}, 'agent_execution': {'weight': 0.1, 'accessible': False}}
         test_patterns = {'user_login_flow': ['*auth*', '*login*', '*user*flow*'], 'ai_response_generation': ['*agent*', '*llm*', '*response*', '*ai*'], 'websocket_communication': ['*websocket*', '*realtime*', '*communication*'], 'agent_execution': ['*agent*execution*', '*supervisor*', '*workflow*']}

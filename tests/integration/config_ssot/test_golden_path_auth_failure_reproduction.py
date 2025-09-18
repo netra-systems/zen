@@ -3,7 +3,7 @@ Golden Path Auth Failure Reproduction Test - Issue #757
 
 **BUSINESS VALUE JUSTIFICATION (BVJ):**
 - **Segment:** Enterprise - Direct Revenue Impact
-- **Business Goal:** Protect $500K+ ARR Golden Path user authentication flow
+- **Business Goal:** Protect 500K+ ARR Golden Path user authentication flow
 - **Value Impact:** Ensures users can login and access AI chat functionality
 - **Revenue Impact:** Authentication failures directly block revenue-generating chat sessions
 
@@ -24,7 +24,7 @@ occurs when configuration manager duplication causes JWT configuration inconsist
 5. User cannot access chat functionality - revenue stream blocked
 
 **CRITICAL BUSINESS IMPACT:**
-- Direct revenue loss: Users cannot access $500K+ ARR chat functionality
+- Direct revenue loss: Users cannot access 500K+ ARR chat functionality
 - Customer churn risk: Authentication failures create poor user experience
 - Operational overhead: Support tickets for login issues increase
 - System reliability: Inconsistent auth behavior affects platform credibility
@@ -143,7 +143,7 @@ class GoldenPathAuthFailureReproductionTests(SSotAsyncTestCase):
 
         **SSOT VIOLATION:** Different configuration managers provide different JWT secrets
         **BUSINESS IMPACT:** JWT tokens created by one service cannot be validated by another
-        **REVENUE RISK:** $500K+ ARR directly at risk - users cannot authenticate
+        **REVENUE RISK:** 500K+ ARR directly at risk - users cannot authenticate
 
         **FAILURE SCENARIO:**
         1. User login service uses JWT secret from one configuration manager
@@ -292,7 +292,7 @@ class GoldenPathAuthFailureReproductionTests(SSotAsyncTestCase):
             f"until Issue #667 is resolved. JWT inconsistencies: {len(jwt_secret_inconsistencies)}, "
             f"Auth failures: {len(auth_failures)}, Golden Path blocked: {golden_path_blocked}. "
             f"BUSINESS IMPACT: JWT configuration inconsistencies prevent user authentication, "
-            f"directly blocking $500K+ ARR from chat functionality. "
+            f"directly blocking 500K+ ARR from chat functionality. "
             f"Full JWT configurations: {jwt_configurations}"
         )
 
@@ -312,7 +312,7 @@ class GoldenPathAuthFailureReproductionTests(SSotAsyncTestCase):
         if golden_path_blocked:
             print(
                 "🚨 GOLDEN PATH BLOCKED: Configuration Manager SSOT violations prevent user authentication! "
-                "This directly impacts $500K+ ARR revenue from chat functionality."
+                "This directly impacts 500K+ ARR revenue from chat functionality."
             )
 
     async def test_golden_path_service_secret_mismatch_failure(self):
@@ -463,7 +463,7 @@ class GoldenPathAuthFailureReproductionTests(SSotAsyncTestCase):
             f"until Issue #667 is resolved. Service secret mismatches: {len(service_secret_mismatches)}, "
             f"Service auth failures: {len(service_auth_failures)}, Service communication blocked: {service_communication_blocked}. "
             f"BUSINESS IMPACT: Service secret inconsistencies prevent service-to-service authentication, "
-            f"breaking chat functionality and affecting $500K+ ARR. "
+            f"breaking chat functionality and affecting 500K+ ARR. "
             f"Service configurations: {service_configurations}"
         )
 
@@ -632,7 +632,7 @@ class GoldenPathAuthFailureReproductionTests(SSotAsyncTestCase):
             f"until Issue #667 is resolved. OAuth inconsistencies: {len(oauth_inconsistencies)}, "
             f"OAuth failures: {len(oauth_failures)}, OAuth login blocked: {oauth_login_blocked}. "
             f"BUSINESS IMPACT: OAuth configuration inconsistencies prevent user login via OAuth providers, "
-            f"blocking user acquisition and retention affecting $500K+ ARR. "
+            f"blocking user acquisition and retention affecting 500K+ ARR. "
             f"OAuth configurations: {oauth_configurations}"
         )
 
@@ -652,7 +652,7 @@ class GoldenPathAuthFailureReproductionTests(SSotAsyncTestCase):
         if oauth_login_blocked:
             self.logger.critical(
                 "🚨 OAUTH LOGIN BLOCKED: Configuration Manager SSOT violations prevent OAuth authentication! "
-                "This blocks primary user login method affecting $500K+ ARR."
+                "This blocks primary user login method affecting 500K+ ARR."
             )
 
     async def test_golden_path_end_to_end_auth_flow_failure(self):
@@ -862,7 +862,7 @@ class GoldenPathAuthFailureReproductionTests(SSotAsyncTestCase):
             f"Failed auth steps: {len(auth_flow_steps_failed)}, Complete flow blocked: {complete_auth_flow_blocked}. "
             f"Auth flow success rate: {auth_flow_success_rate:.1%}. "
             f"BUSINESS IMPACT: Complete authentication flow failure prevents any user access to chat functionality, "
-            f"resulting in total loss of $500K+ ARR. Critical failures: {critical_failures}"
+            f"resulting in total loss of 500K+ ARR. Critical failures: {critical_failures}"
         )
 
         # Log comprehensive auth flow failure analysis

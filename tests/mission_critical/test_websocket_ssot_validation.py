@@ -25,7 +25,7 @@
     # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
 
     #!/usr/bin/env python
-    # REMOVED_SYNTAX_ERROR: '''
+    # REMOVED_SYNTAX_ERROR: """
     # REMOVED_SYNTAX_ERROR: MISSION CRITICAL: WebSocket SSOT Validation Test Suite
 
     # REMOVED_SYNTAX_ERROR: This test suite validates that the WebSocket Manager consolidation maintains:
@@ -38,7 +38,7 @@
 
         # REMOVED_SYNTAX_ERROR: Business Value: $1M+ ARR - Core chat functionality depends on these features
         # REMOVED_SYNTAX_ERROR: ANY FAILURE HERE MEANS PRODUCTION IS BROKEN.
-        # REMOVED_SYNTAX_ERROR: '''
+        # REMOVED_SYNTAX_ERROR: """'''
 
         # REMOVED_SYNTAX_ERROR: import asyncio
         # REMOVED_SYNTAX_ERROR: import json

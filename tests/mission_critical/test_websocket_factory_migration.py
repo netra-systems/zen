@@ -1,8 +1,10 @@
 #!/usr/bin/env python
-"MISSION CRITICAL: WebSocket Factory Migration Validation Tests"
+"""
+MISSION CRITICAL: WebSocket Factory Migration Validation Tests
 
 THIS SUITE VALIDATES THE WEBSOCKET FACTORY MIGRATION PROCESS ITSELF.
-Business Value: $500K+ plus ARR - Ensures migration doesn't break Golden Path'
+Business Value: 500K+ ARR - Ensures migration doesn't break Golden Path
+"""
 
 PURPOSE:
     - Test that reproduces the current violations (expected to fail during migration)
@@ -66,13 +68,12 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
 
     
     def setup_method(self, method):
-        "Set up test environment for migration validation."
+        """Set up test environment for migration validation."""
         super().setup_method(method)
         
-        self.test_user_id = fmigration_user_{uuid.uuid4().hex[:8]}"
-        self.test_user_id = fmigration_user_{uuid.uuid4().hex[:8]}"
+        self.test_user_id = f"migration_user_{uuid.uuid4().hex[:8]}"
         self.test_thread_id = f"migration_thread_{uuid.uuid4().hex[:8]}"
-        self.test_run_id = fmigration_run_{uuid.uuid4().hex[:8]}
+        self.test_run_id = f"migration_run_{uuid.uuid4().hex[:8]}"
         
         self.user_context = UserExecutionContext(
             user_id=self.test_user_id,
@@ -82,12 +83,10 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
         
         # Track critical files that need migration
         self.critical_violation_files = [
-            netra_backend/app/routes/websocket_ssot.py"
-            netra_backend/app/routes/websocket_ssot.py""
-
+            "netra_backend/app/routes/websocket_ssot.py"
         ]
         
-        logger.info(f[MIGRATION TEST] Setup complete for user: {self.test_user_id}")"
+        logger.info(f"[MIGRATION TEST] Setup complete for user: {self.test_user_id}")
 
     def teardown_method(self, method):
         Clean up migration test environment.""
@@ -261,8 +260,7 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             # Check for expected configuration structure
             if websocket_config" in config_result:"
                 config = config_result[websocket_config]
-                logger.info([CONFIG SUCCESS] WebSocket configuration retrieved)"
-                logger.info([CONFIG SUCCESS] WebSocket configuration retrieved)""
+                logger.info([CONFIG SUCCESS] WebSocket configuration retrieved)"""
 
                 
                 # Validate expected config keys exist

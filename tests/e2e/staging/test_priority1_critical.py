@@ -262,11 +262,7 @@ class CriticalWebSocketTests:
                                     if (welcome_data.get("type") == "system_message" and 
                                         welcome_data.get("data", {}).get("event") == "connection_established" and
                                         welcome_data.get("data", {}).get("connection_ready")):
-                                        print(" PASS:  WebSocket connection confirmed ready for messages (SSOT format)")
-                                        connection_ready = True
-                                        break
-                                    else:
-                                        print(f" PASS:  SSOT message received, format variation acceptable: {welcome_data.get('type')}")
+                                        print(" PASS:  WebSocket connection confirmed ready for messages (SSOT format)"" PASS:  SSOT message received, format variation acceptable: {welcome_data.get('type')}")
                                         # Message received successfully, continue
                                         break
                                 except json.JSONDecodeError:
@@ -349,14 +345,7 @@ class CriticalWebSocketTests:
         # Check auth enforcement based on staging environment configuration
         # Staging may have auth relaxed for E2E testing - this is acceptable
         if got_auth_error:
-            print(" PASS:  WebSocket enforces authentication (production-ready)")
-        else:
-            print(" WARNING: [U+FE0F] WebSocket auth bypassed (acceptable for staging E2E tests)")
-            # In staging, auth may be disabled for testing - validate connection works instead
-        
-        # Connection with auth should succeed or we should handle staging limitations
-        if not connection_successful and not config.skip_websocket_auth:
-            print("Note: WebSocket with auth failed - staging may require real auth tokens")
+            print(" PASS:  WebSocket enforces authentication (production-ready)"" WARNING: [U+FE0F] WebSocket auth bypassed (acceptable for staging E2E tests)""Note: WebSocket with auth failed - staging may require real auth tokens")
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)  # Reduced timeout to prevent Windows asyncio blocking
@@ -420,11 +409,7 @@ class CriticalWebSocketTests:
                                     if (welcome_data.get("type") == "system_message" and 
                                         welcome_data.get("data", {}).get("event") == "connection_established" and
                                         welcome_data.get("data", {}).get("connection_ready")):
-                                        print(" PASS:  WebSocket connection confirmed ready for messages (SSOT format)")
-                                        auth_accepted = True  # If we get welcome message, auth was accepted
-                                        break
-                                    else:
-                                        print(f" PASS:  SSOT message received, format variation acceptable: {welcome_data.get('type')}")
+                                        print(" PASS:  WebSocket connection confirmed ready for messages (SSOT format)"" PASS:  SSOT message received, format variation acceptable: {welcome_data.get('type')}")
                                         # Message received successfully, auth was accepted
                                         auth_accepted = True
                                         break
@@ -436,8 +421,7 @@ class CriticalWebSocketTests:
                             
                             except (asyncio.TimeoutError, websockets.ConnectionClosedError) as welcome_error:
                                 if "1011" in str(welcome_error) or "internal error" in str(welcome_error).lower():
-                                    print(f" WARNING: [U+FE0F] WebSocket 1011 internal error during welcome message (staging infrastructure)")
-                                    print(f" PASS:  Connection was established, auth succeeded before infrastructure error")
+                                    print(f" WARNING: [U+FE0F] WebSocket 1011 internal error during welcome message (staging infrastructure)"" PASS:  Connection was established, auth succeeded before infrastructure error")
                                     auth_accepted = True  # Mark as successful - auth worked
                                     break
                                 else:
@@ -486,8 +470,7 @@ class CriticalWebSocketTests:
                     
                     # SSOT FIX: Handle 1011 internal error as staging infrastructure limitation
                     if "1011" in str(e) or "internal error" in str(e).lower():
-                        print(f" WARNING: [U+FE0F] WebSocket 1011 internal error detected (staging infrastructure limitation)")
-                        print(f" PASS:  Auth was processed (connection established before error)")
+                        print(f" WARNING: [U+FE0F] WebSocket 1011 internal error detected (staging infrastructure limitation)"" PASS:  Auth was processed (connection established before error)")
                         auth_accepted = True  # Auth worked, infrastructure failed after
                         break
                         
@@ -496,15 +479,7 @@ class CriticalWebSocketTests:
                         if "403" in str(e) or "401" in str(e):
                             print("Auth token rejected by staging (this proves auth enforcement works)")
                         elif "1011" in str(e) or "internal error" in str(e).lower():
-                            print(" PASS:  Auth successful but WebSocket infrastructure error (staging limitation)")
-                            auth_accepted = True  # Mark as successful since auth worked
-                        else:
-                            raise  # Re-raise non-auth errors
-                    else:
-                        await asyncio.sleep(1)  # Brief delay before retry
-        
-        duration = time.time() - start_time
-        print(f"Test duration: {duration:.3f}s")
+                            print(" PASS:  Auth successful but WebSocket infrastructure error (staging limitation)""Test duration: {duration:.3f}s")
         
         # Real test verification
         assert duration > 0.1, f"Test too fast ({duration:.3f}s) - likely fake!"
@@ -2184,11 +2159,7 @@ class CriticalUserExperienceTests:
                     elif len(chunks_received) == 1:
                         print(f"[U+2713] WebSocket response received (single chunk): {chunks_received[0]} bytes")
                     else:
-                        print("[U+2022] No WebSocket chunks received (streaming may not be implemented)")
-                    
-            except Exception as e:
-                error_msg = str(e)[:100]
-                print(f"WebSocket streaming test error: {error_msg}")
+                        print("[U+2022] No WebSocket chunks received (streaming may not be implemented)""WebSocket streaming test error: {error_msg}")
                 streaming_results["websocket_streaming"] = {"error": error_msg}
         
         duration = time.time() - start_time
@@ -2568,11 +2539,7 @@ class CriticalUserExperienceTests:
         websocket_events_received = event_results["websocket_events"].get("events_received", 0)
         
         assert (event_endpoints_working > 0 or websocket_events_received > 0), \
-            "Should have some event delivery capability (HTTP endpoints or WebSocket)"
-        
-        # Note: We don't require all critical events to be present in staging,
-        # but we verify the event delivery infrastructure exists
-        print(f"Event delivery infrastructure verified: {event_endpoints_working} HTTP endpoints, {websocket_events_received} WebSocket events")
+            "Should have some event delivery capability (HTTP endpoints or WebSocket)""Event delivery infrastructure verified: {event_endpoints_working} HTTP endpoints, {websocket_events_received} WebSocket events")
 
 
 # Verification helper to ensure tests are real

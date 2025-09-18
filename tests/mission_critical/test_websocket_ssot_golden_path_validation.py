@@ -1,11 +1,11 @@
 "Mission Critical Test: WebSocket SSOT Golden Path Validation for Issue #1104"
 
 This test suite validates that WebSocket Manager SSOT consolidation protects the 
-Golden Path user flow that generates $500K+ plus ARR from AI chat functionality.
+Golden Path user flow that generates 500K+  ARR from AI chat functionality.
 
 MISSION CRITICAL SCOPE:
     - Golden Path: User login -> AI chat -> Real responses
-- Revenue Protection: $500K+ plus ARR chat functionality
+- Revenue Protection: 500K+  ARR chat functionality
 - User Experience: Real-time AI interactions via WebSocket events
 - Business Continuity: Enterprise-grade WebSocket reliability
 
@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
     - Segment: ALL (Free -> Enterprise)
 - Business Goal: Protect Golden Path revenue and user experience
 - Value Impact: Ensure reliable WebSocket communication for AI chat
-- Revenue Impact: Mission-critical infrastructure for $500K+ plus ARR
+- Revenue Impact: Mission-critical infrastructure for 500K+  ARR
 
 CRITICAL: These tests will FAIL until Issue #1104 SSOT consolidation is complete.
 This proves that import fragmentation blocks business-critical functionality.
@@ -61,7 +61,7 @@ class WebSocketSSOTGoldenPathValidationTests(SSotBaseTestCase, unittest.TestCase
         
         # Business metrics tracking
         self.business_metrics = {
-            'revenue_at_risk': 500000,  # $500K+ plus ARR
+            'revenue_at_risk': 500000,  # 500K+  ARR
             'affected_user_segments': ['Free', 'Early', 'Mid', 'Enterprise'],
             'critical_events': ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
         }
@@ -79,37 +79,7 @@ class WebSocketSSOTGoldenPathValidationTests(SSotBaseTestCase, unittest.TestCase
         EXPECTED TO FAIL: Import fragmentation should block Golden Path.
         This proves business impact of Issue #1104.
 
-        logger.info("Testing Golden Path WebSocket import dependency)"
-        
-        # Test SSOT import for Golden Path
-        try:
-            import importlib
-            ssot_module = importlib.import_module(self.import_paths['ssot')
-            websocket_manager = getattr(ssot_module, 'UnifiedWebSocketManager', None)
-            
-            if websocket_manager is not None:
-                self.golden_path_status['websocket_import_working'] = True
-                logger.info(SSOT WebSocket import successful for Golden Path)
-                
-                # Validate class supports Golden Path operations
-                required_golden_path_methods = [
-                    'send_message',      # AI response delivery
-                    'emit_agent_event',  # Real-time progress updates
-                    'connect',           # User connection establishment
-                    'disconnect'         # Clean connection termination
-                ]
-                
-                missing_methods = []
-                for method in required_golden_path_methods:
-                    if not hasattr(websocket_manager, method):
-                        missing_methods.append(method)
-                
-                if missing_methods:
-                    logger.error(fGolden Path blocked: Missing methods {missing_methods})
-                    self.golden_path_status['websocket_import_working'] = False
-                    
-            else:
-                logger.error(Golden Path blocked: SSOT WebSocket Manager class not found")"
+        logger.info("Testing Golden Path WebSocket import dependency)"")"
                 
         except Exception as e:
             logger.error(fGolden Path blocked: SSOT import failed - {e})
@@ -371,8 +341,7 @@ class WebSocketSSOTGoldenPathValidationTests(SSotBaseTestCase, unittest.TestCase
                     score = 80.0
                 
                 enterprise_scores[requirement] = score
-                logger.info(fEnterprise requirement '{requirement}': {score:.1f}%)"
-                logger.info(fEnterprise requirement '{requirement}': {score:."1f"}%)""
+                logger.info(fEnterprise requirement '{requirement}': {score:.1f}%)""1f"}%)""
 
                 
             except Exception as e:

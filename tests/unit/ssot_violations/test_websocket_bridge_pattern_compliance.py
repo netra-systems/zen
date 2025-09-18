@@ -11,7 +11,7 @@ TARGET AREAS:
 - WebSocket event delivery through proper bridge
 - State contamination prevention
 
-Business Value: Platform Infrastructure - Ensures $500K+ ARR Golden Path reliability
+Business Value: Platform Infrastructure - Ensures 500K+ ARR Golden Path reliability
 through proper SSOT patterns that prevent multi-user contamination and ensure 
 reliable real-time communication.
 

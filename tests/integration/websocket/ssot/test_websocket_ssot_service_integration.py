@@ -5,7 +5,7 @@ CRITICAL MISSION: Create integration tests for WebSocket SSOT service integratio
 using real services (staging GCP environment).
 
 PROBLEM: WebSocket URL environment variable duplication causing service integration issues
-BUSINESS IMPACT: $500K+ ARR Golden Path chat functionality at risk
+BUSINESS IMPACT: 500K+ ARR Golden Path chat functionality at risk
 
 TEST DESIGN:
 - Integration tests with real services (staging GCP)

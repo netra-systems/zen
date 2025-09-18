@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,12 +23,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 Golden Path Test Suite Validation and Execution Summary
 
 CRITICAL VALIDATION SUITE: This validates that the complete golden path test suite
@@ -47,7 +34,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - Test infrastructure protects all revenue
 - Business Goal: Ensure test suite comprehensively protects business value and prevents regressions
 - Value Impact: Comprehensive testing = reliable service = customer retention = revenue protection
-- Strategic Impact: Test suite quality directly impacts $500K+ ARR protection and growth
+- Strategic Impact: Test suite quality directly impacts 500K+ ARR protection and growth
 
 VALIDATION AREAS:
 1. Test suite completeness and coverage analysis
@@ -529,17 +516,8 @@ class GoldenPathSuiteValidationTests(BaseIntegrationTest):
         
         # WebSocket event coverage should be reasonable but not required in all tests
         assert websocket_coverage_rate >= 0.4, \
-            f"WebSocket event coverage too low: {websocket_coverage_rate:.1%} (expected  >= 40%)"
-        
-        test_duration = time.time() - test_start
-        self.logger.info(f" PASS:  WebSocket event validation coverage completed in {test_duration:.3f}s")
-        self.logger.info(f"   WebSocket coverage: {websocket_coverage_rate:.1%} ({websocket_event_tests}/{total_analyzed})")
-    
-    @pytest.mark.integration
-    @pytest.mark.validation
-    @pytest.mark.asyncio
-    async def test_comprehensive_golden_path_suite_validation_summary(self, golden_path_services):
-        """
+            f"WebSocket event coverage too low: {websocket_coverage_rate:.1%} (expected  >= 40%)"" PASS:  WebSocket event validation coverage completed in {test_duration:.3f}s")
+        self.logger.info(f"   WebSocket coverage: {websocket_coverage_rate:.1%} ({websocket_event_tests}/{total_analyzed})""""
         Comprehensive golden path suite validation summary and business impact analysis.
         
         CRITICAL BUSINESS VALIDATION: This provides the final validation that the golden path

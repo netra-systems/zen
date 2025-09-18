@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 # Import the test module
 try:
-    from tests.mission_critical.test_docker_stability_comprehensive import ()
+    from tests.mission_critical.test_docker_stability_comprehensive import (
         DockerStabilityMetrics,
         check_docker_daemon_health,
         create_stress_container,
@@ -26,17 +26,17 @@ try:
         TestSafeContainerLifecycle,
     )
 
-    from test_framework.docker_force_flag_guardian import ()
+    from test_framework.docker_force_flag_guardian import (
         DockerForceFlagGuardian,
         DockerForceFlagViolation
     )
 
     from test_framework.docker_rate_limiter import get_docker_rate_limiter
 
-    print("CHECK PASS:  All imports successful!)"
+    print("CHECK PASS:  All imports successful!")
 
     # Test basic functionality
-    print(🔒 Testing Force Flag Guardian...")"
+    print("🔒 Testing Force Flag Guardian...")"
     guardian = DockerForceFlagGuardian()
 
     try:

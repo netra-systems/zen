@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Segment: Platform/Production
 - Business Goal: Service Reliability/Golden Path Recovery
 - Value Impact: Ensure complete user flow works end-to-end in staging
-- Strategic Impact: Validate $500K+ ARR infrastructure for production readiness
+- Strategic Impact: Validate 500K+ ARR infrastructure for production readiness
 
 CRITICAL: These tests are designed to FAIL when GCP staging infrastructure
 issues exist, reproducing the complete system failures seen in Issue #1278.
@@ -259,11 +259,7 @@ class TestGCPStagingInfrastructureHealth(SSotAsyncTestCase):
                         # This is unexpected for Issue #1278
                         self.fail(
                             f"WebSocket connection and message exchange succeeded unexpectedly "
-                            f"(Issue #1278 should cause WebSocket failures)"
-                        )
-
-                    except asyncio.TimeoutError:
-                        self.record_metric("websocket_message_exchange", False)
+                            f"(Issue #1278 should cause WebSocket failures)""websocket_message_exchange", False)
                         self.record_metric("websocket_test", "PARTIAL_SUCCESS_NO_RESPONSE")
 
                         # Connection worked but no response - might indicate backend issues

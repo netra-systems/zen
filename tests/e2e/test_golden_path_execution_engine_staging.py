@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise, Platform)
 - Business Goal: Protect 90% of platform business value through chat functionality  
 - Value Impact: Ensure zero regression in core user experience during SSOT migration
-- Strategic Impact: $500K+ ARR protected through validated Golden Path functionality
+- Strategic Impact: 500K+ ARR protected through validated Golden Path functionality
 
 Test Focus:
 - Real staging GCP environment (no Docker)
@@ -192,7 +192,7 @@ class GoldenPathExecutionEngineStagingE2ETests(BaseE2ETest):
         deprecated ExecutionEngine shared state between users. This test validates that
         UserExecutionEngine prevents data contamination in concurrent Golden Path scenarios.
         
-        BUSINESS CRITICAL: Multi-user isolation prevents security breaches worth $500K+ ARR.
+        BUSINESS CRITICAL: Multi-user isolation prevents security breaches worth 500K+ ARR.
         """
         if not USER_EXECUTION_ENGINE_AVAILABLE:
             pytest.skip(f'UserExecutionEngine not available for concurrent testing: {USER_EXECUTION_ENGINE_ERROR}')

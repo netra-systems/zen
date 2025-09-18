@@ -16,7 +16,7 @@ CRITICAL BUSINESS VALIDATION:
 - Overall system delivers substantive value
 
 Environment: Staging GCP (https://auth.staging.netrasystems.ai)
-Business Impact: $500K+ ARR validation
+Business Impact: 500K+ ARR validation
 """
 
 import pytest

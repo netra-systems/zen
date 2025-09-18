@@ -4,7 +4,7 @@ Business Value Justification (BVJ):
 - Segment: All (Infrastructure supporting all user tiers)  
 - Business Goal: End-to-end Golden Path functionality protection
 - Value Impact: Validates complete user journey with SSOT ID generation
-- Strategic Impact: CRITICAL - Protects $500K+ ARR Golden Path user flow
+- Strategic Impact: CRITICAL - Protects 500K+ ARR Golden Path user flow
 
 ISSUE #841 E2E TEST IMPLEMENTATION:
 This test suite validates end-to-end Golden Path user flow in GCP staging environment
@@ -18,7 +18,7 @@ TEST STRATEGY:
 - Demonstrate actual business impact and user experience degradation
 
 GOLDEN PATH E2E VALIDATION:
-These tests protect the complete $500K+ ARR Golden Path by ensuring:
+These tests protect the complete 500K+ ARR Golden Path by ensuring:
 - User authentication creates properly correlated session IDs
 - WebSocket connections maintain user isolation across GCP deployment  
 - Agent execution context preserves user identity through SSOT patterns
@@ -675,7 +675,7 @@ class GoldenPathSsotIdIntegrationTests(SSotAsyncTestCase):
         self.assertLess(
             user_isolation_capable_rate, 0.3,  # Expect < 30% isolation capability
             f"EXPECTED FAILURE: Only {user_isolation_capable_rate:.1%} of Golden Path flows have adequate user isolation. "
-            f"This creates data leakage risks affecting $500K+ ARR user experience."
+            f"This creates data leakage risks affecting 500K+ ARR user experience."
         )
         
         self.assertGreater(

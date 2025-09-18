@@ -20,7 +20,7 @@ Business Value Justification (BVJ):
     - Segment: Enterprise/Platform - Auth consistency critical for security
 - Business Goal: Security/Compliance - Consistent auth across all services  
 - Value Impact: Prevents auth tokens working in one service but not another
-- Revenue Impact: Auth inconsistencies could lose enterprise customers ($200K+ ARR)
+- Revenue Impact: Auth inconsistencies could lose enterprise customers (200K+ ARR)
 
 CRITICAL JWT CONSISTENCY REQUIREMENT:
     ALL services MUST use identical JWT validation logic through UnifiedAuthInterface.
@@ -154,30 +154,13 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
         websocket_accepts_secret = bool(websocket_results.get(secret_token))
         
         if websocket_accepts_secret_key != websocket_accepts_secret:
-            violations_detected.append(WebSocket inconsistent validation for different secrets)"
-            violations_detected.append(WebSocket inconsistent validation for different secrets)"
-            logger.error(" ALERT:  VIOLATION: WebSocket validates different secrets differently)"
-        
-        # If we have auth service results, compare consistency
-        if error not in auth_service_results and error not in websocket_results:
-            auth_accepts_secret_key = bool(auth_service_results.get(secret_key_token"))"
+            violations_detected.append(WebSocket inconsistent validation for different secrets)""
+            logger.error(" ALERT:  VIOLATION: WebSocket validates different secrets differently)""))"
             auth_accepts_secret = bool(auth_service_results.get(secret_token))
             
             if websocket_accepts_secret_key != auth_accepts_secret_key:
-                violations_detected.append(WebSocket/Auth service inconsistent for JWT_SECRET_KEY tokens)"
-                violations_detected.append(WebSocket/Auth service inconsistent for JWT_SECRET_KEY tokens)"
-                logger.error(" ALERT:  VIOLATION: WebSocket/Auth service JWT_SECRET_KEY inconsistency)"
-                
-            if websocket_accepts_secret != auth_accepts_secret:
-                violations_detected.append(WebSocket/Auth service inconsistent for JWT_SECRET tokens) 
-                logger.error(" ALERT:  VIOLATION: WebSocket/Auth service JWT_SECRET inconsistency)"
-        
-        if violations_detected:
-            logger.critical( ALERT:  JWT CONSISTENCY VIOLATIONS DETECTED:)
-            for violation in violations_detected:
-                logger.critical(f ALERT:  - {violation})
-            
-            logger.critical( ALERT:  THIS TEST PASSES = VIOLATIONS EXIST")"
+                violations_detected.append(WebSocket/Auth service inconsistent for JWT_SECRET_KEY tokens)""
+                logger.error(" ALERT:  VIOLATION: WebSocket/Auth service JWT_SECRET_KEY inconsistency)"" ALERT:  VIOLATION: WebSocket/Auth service JWT_SECRET inconsistency)"")"
             logger.critical( ALERT:  AFTER SSOT FIX: All services should use identical JWT logic)
             
             assert len(violations_detected) > 0, fJWT CONSISTENCY VIOLATIONS: {violations_detected}"
@@ -331,7 +314,7 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
                 
             logger.critical( ALERT:  VALIDATION OPTIONS VIOLATION)"
             logger.critical( ALERT:  VALIDATION OPTIONS VIOLATION)"
-            logger.critical( ALERT:  WebSocket uses lenient validation (verify_signature=False)")"
+            logger.critical( ALERT:  WebSocket uses lenient validation (verify_signature=False)""
             logger.critical( ALERT:  THIS TEST PASSES = VIOLATION EXISTS)
             
             assert len(validation_inconsistencies) > 0, fJWT validation inconsistencies: {validation_inconsistencies}""
@@ -403,12 +386,11 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
         # Check for cross-service inconsistency (VIOLATION)
         if websocket_valid != auth_service_valid:
             logger.error( ALERT:  CRITICAL BUSINESS VIOLATION: Cross-service JWT inconsistency!)
-            logger.error(f" ALERT:  WebSocket accepts token: {websocket_valid})"
-            logger.error(f ALERT:  Auth service accepts token: {auth_service_valid}")"
+            logger.error(f" ALERT:  WebSocket accepts token: {websocket_valid})"")"
             
             # This creates terrible UX - user might connect to WebSocket but REST calls fail
             logger.critical( ALERT:  CUSTOMER IMPACT: User gets inconsistent auth behavior)
-            logger.critical( ALERT:  Chat might work but API calls fail (or vice versa)")"
+            logger.critical( ALERT:  Chat might work but API calls fail (or vice versa)""
             
             assert websocket_valid != auth_service_valid, "CRITICAL VIOLATION: Cross-service JWT inconsistency affects customer experience"
             return True

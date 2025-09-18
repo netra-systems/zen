@@ -7,7 +7,7 @@ Validate Single Source of Truth patterns in essential factory classes while
 identifying SSOT violations that need consolidation. These tests ensure that
 preserved factories follow proper SSOT principles.
 
-Business Impact: $500K+ ARR protection through SSOT compliance
+Business Impact: 500K+ ARR protection through SSOT compliance
 SSOT Advancement: Eliminates factory pattern fragmentation
 
 Essential factories should PASS these tests, over-engineered factories should FAIL.
@@ -230,7 +230,7 @@ class FactorySSotCompliancePhase2Tests(SSotBaseTestCase):
             0,
             f"CHECK USER ISOLATION SSOT COMPLIANCE: All {len(essential_user_factories)} essential user isolation factories "
             f"must pass SSOT compliance. Found {len(failing_essential)} failing SSOT compliance tests. "
-            f"This is CRITICAL for $500K+ ARR multi-user security."
+            f"This is CRITICAL for 500K+ ARR multi-user security."
         )
 
     def test_02_websocket_factory_ssot_consolidation(self):

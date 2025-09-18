@@ -2,7 +2,7 @@
 """MISSION CRITICAL TEST SUITE: WebSocket Agent Events - FIXED VERSION
 
 THIS SUITE MUST PASS OR THE PRODUCT IS BROKEN.
-Business Value: $500K+ ARR - Core chat functionality
+Business Value: 500K+ ARR - Core chat functionality
 
 This test validates WebSocket agent event integration using mocked services
 instead of real services to avoid infrastructure dependencies while still

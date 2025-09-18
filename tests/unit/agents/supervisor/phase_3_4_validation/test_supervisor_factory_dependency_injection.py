@@ -5,7 +5,7 @@ GOLDEN PATH PHASE 3.4: Issue #1188 - SupervisorAgent Integration Validation
 Test Plan: Validate supervisor factory dependency injection patterns and user isolation.
 
 Business Value:
-- Segment: Platform/Internal - $500K+ ARR Protection
+- Segment: Platform/Internal - 500K+ ARR Protection
 - Goal: Validate SSOT supervisor factory patterns prevent user context leakage
 - Impact: Ensures enterprise-grade multi-user isolation for production deployment
 - Revenue Impact: Prevents security vulnerabilities that could block enterprise adoption

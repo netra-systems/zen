@@ -5,7 +5,7 @@ DESIGNED TO FAIL: These tests prove the 51 LLMManager factory pattern violations
 They will PASS after proper factory pattern remediation is implemented.
 
 Business Value: Platform/Internal - System Stability & User Isolation
-Protects $500K+ ARR chat functionality from user conversation mixing.
+Protects 500K+ ARR chat functionality from user conversation mixing.
 
 Target Violations:
 - data_helper_agent.py:74 - Direct LLMManager() creation
@@ -52,7 +52,7 @@ class LLMManagerFactoryViolationsIssue224Tests(SSotBaseTestCase):
         Required pattern: llm_manager = create_llm_manager(user_context) (COMPLIANT)
         
         Business Impact: Direct instantiation bypasses user isolation, 
-        causing conversation mixing between users in $500K+ ARR chat system.
+        causing conversation mixing between users in 500K+ ARR chat system.
         """
         logger.info("Starting detection of direct LLMManager() instantiation violations...")
         

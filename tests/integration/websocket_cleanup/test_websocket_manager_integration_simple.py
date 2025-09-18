@@ -7,7 +7,7 @@ and can replace legacy factory functionality with no breaking changes.
 Business Justification:
 - Segment: Platform/Infrastructure
 - Business Goal: Validate SSOT compliance before legacy removal
-- Value Impact: Maintain $500K+ ARR Golden Path functionality
+- Value Impact: Maintain 500K+ ARR Golden Path functionality
 - Strategic Impact: Safe legacy factory cleanup
 
 CRITICAL: These tests MUST pass before legacy factory removal is safe.

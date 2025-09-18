@@ -8,7 +8,7 @@ that Phase 2 production remediation (53 -> 16 violations, 69% reduction) is comp
 
 Business Value: Platform/Internal - System Stability & SSOT Compliance
 Ensures clean architecture and prevents factory pattern violations from causing
-the 1011 WebSocket errors that impact $500K+ ARR Golden Path.
+the 1011 WebSocket errors that impact 500K+ ARR Golden Path.
 
 Test Strategy:
 - Unit tests scan netra_backend/app production code (no external dependencies)
@@ -223,12 +223,7 @@ class TestWebSocketFactoryElimination(SSotBaseTestCase):
                 violations.extend(file_violations)
 
             except (UnicodeDecodeError, IOError) as e:
-                self.assertLog(f"Warning: Could not read {file_path}: {e}")
-
-        return violations
-
-    def _scan_file_for_violations(self, file_path: str, content: str) -> List[FactoryViolation]:
-        """
+                self.assertLog(f"Warning: Could not read {file_path}: {e}""""
         Scan a single file for factory violations.
 
         Args:

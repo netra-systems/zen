@@ -7,7 +7,7 @@ with no shared state contamination.
 Business Value Justification (BVJ):
 - Segment: All (Free  ->  Enterprise) - Critical platform foundation
 - Business Goal: Enable safe concurrent multi-user operations without data leakage
-- Value Impact: Validates $500K+ ARR foundation by ensuring chat UX works for 10+ users
+- Value Impact: Validates 500K+ ARR foundation by ensuring chat UX works for 10+ users
 - Strategic Impact: Core architecture validation for production multi-tenant deployment
 
 Key Factory Patterns Tested:

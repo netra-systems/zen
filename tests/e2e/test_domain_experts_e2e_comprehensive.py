@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 1. Segment: Mid, Enterprise
 2. Business Goal: Enable specialized AI consultation and domain expertise
 3. Value Impact: Domain experts provide expert-level advice in specific industries
-4. Revenue Impact: $400K+ ARR from specialized consulting and domain expertise features
+4. Revenue Impact: 400K+ ARR from specialized consulting and domain expertise features
 
 CLAUDE.md COMPLIANCE:
 - Uses real services ONLY (NO MOCKS)

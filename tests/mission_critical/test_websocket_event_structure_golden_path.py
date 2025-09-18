@@ -1,7 +1,7 @@
 """MISSION CRITICAL: WebSocket Event Structure Golden Path - Issue #1021
 
 CRITICAL BUSINESS REQUIREMENT: This test MUST pass 100% after unified_manager.py fix.
-Business Value: $500K+ ARR - WebSocket events enable 90% of platform chat value.
+Business Value: 500K+ ARR - WebSocket events enable 90% of platform chat value.
 
 PURPOSE: Validate that all 5 critical WebSocket events (agent_started, agent_thinking,
 tool_executing, tool_completed, agent_completed) contain business data at the correct
@@ -186,7 +186,7 @@ class WebSocketEventStructureGoldenPathTests(RealWebSocketTestBase):
             pytest.fail(
                 f"MISSION CRITICAL FAILURE - Issue #1021 WebSocket Event Structure (Golden Path):\n\n"
                 f"{failure_report}\n\n"
-                f"BUSINESS IMPACT: $500K+ ARR at risk - Users cannot see agent progress in real-time chat.\n"
+                f"BUSINESS IMPACT: 500K+ ARR at risk - Users cannot see agent progress in real-time chat.\n"
                 f"ROOT CAUSE: unified_manager.py incorrectly wraps business data preventing frontend access.\n"
                 f"REQUIRED FIX: Preserve business fields at top level during WebSocket transmission."
             )

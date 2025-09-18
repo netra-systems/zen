@@ -4,7 +4,7 @@ Agent Startup Integration E2E Test Suite - Real Services Only
 
 CRITICAL BUSINESS CONTEXT:
 - Business Impact: CRITICAL - Agent startup affects ALL customer segments  
-- Revenue Risk: $500K+ ARR depends on working agent initialization
+- Revenue Risk: 500K+ ARR depends on working agent initialization
 - Platform Value: Core agent functionality enables 90% of platform value
 
 Business Value Justification (BVJ):
@@ -604,7 +604,7 @@ def get_startup_test_info() -> Dict[str, Any]:
         "supports_real_llm": True,
         "supports_parallel": True,
         "estimated_duration": 120,  # seconds
-        "business_value": "Protects $500K+ ARR by ensuring reliable agent startup"
+        "business_value": "Protects 500K+ ARR by ensuring reliable agent startup"
     }
 
 

@@ -5,7 +5,7 @@ PURPOSE: E2E test validating session management consistency across auth service 
 EXPECTED: PASS after SSOT remediation - validates cross-service session consistency
 TARGET: Session lifecycle managed by auth service, consistent across all backend services
 
-BUSINESS VALUE: Ensures session reliability for $500K+ ARR user authentication experience
+BUSINESS VALUE: Ensures session reliability for 500K+ ARR user authentication experience
 EXECUTION: Staging GCP environment - NO Docker dependency
 """
 import logging

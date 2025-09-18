@@ -8,7 +8,7 @@ def lazy_import(module_path: str, component: str = None):
     "Lazy import pattern for performance optimization"
     if module_path not in _lazy_imports:
         try:
-            module = __import__(module_path, fromlist=[component) if component else [)
+            module = __import__(module_path, fromlist=[component] if component else [])
             if component:
                 _lazy_imports[module_path] = getattr(module, component)
             else:
@@ -25,7 +25,7 @@ def lazy_import(module_path: str, component: str = None):
     Lazy import pattern for performance optimization""
     if module_path not in _lazy_imports:
         try:
-            module = __import__(module_path, fromlist=[component) if component else [)
+            module = __import__(module_path, fromlist=[component] if component else [])
             if component:
                 _lazy_imports[module_path] = getattr(module, component)
             else:
@@ -40,7 +40,7 @@ def lazy_import(module_path: str, component: str = None):
 
 Business Value Justification (BVJ):
     - Segment: Enterprise - Mission Critical Production Reliability
-- Business Goal: Ensure zero production debugging blind spots for $500K+ plus ARR platform
+- Business Goal: Ensure zero production debugging blind spots for 500K+  ARR platform
 - Value Impact: Prevents complete production incident response failures 
 - Strategic Impact: Foundation for enterprise SLA compliance and 24/7 support commitments
 
@@ -498,14 +498,7 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
         def websocket_message_handler():
             def agent_execution_pipeline():
                 def tool_execution():
-                    raise WebSocketAgentError(f"WebSocket agent {agent_id} failed in session {session_id})"
-                tool_execution()
-            agent_execution_pipeline()
-        
-        websocket_message_handler()
-    
-    def _simulate_critical_database_transaction_error(self, transaction_id: str):
-        Simulate critical database transaction error."
+                    raise WebSocketAgentError(f"WebSocket agent {agent_id} failed in session {session_id})""
         Simulate critical database transaction error.""
 
         def database_transaction():

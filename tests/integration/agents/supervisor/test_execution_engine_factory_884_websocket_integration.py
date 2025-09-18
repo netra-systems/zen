@@ -2,7 +2,7 @@
 
 CRITICAL BUSINESS VALUE: These tests reproduce WebSocket coordination failures in
 execution engine factory patterns that cause 1011 errors and Golden Path failures,
-protecting $500K+ ARR functionality.
+protecting 500K+ ARR functionality.
 
 EXPECTED BEHAVIOR: All tests in this file should INITIALLY FAIL to demonstrate
 WebSocket integration issues. They will pass after SSOT consolidation.
@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 - Segment: All Segments (Chat functionality is 90% of platform value)
 - Business Goal: Ensure reliable WebSocket events for chat functionality
 - Value Impact: Prevents WebSocket 1011 errors, chat flow interruptions
-- Strategic Impact: Foundation for $500K+ ARR real-time user interactions
+- Strategic Impact: Foundation for 500K+ ARR real-time user interactions
 
 Test Philosophy:
 - FAILING TESTS FIRST: These tests reproduce real WebSocket coordination issues
@@ -313,7 +313,7 @@ class ExecutionEngineFactoryWebSocketIntegration884Tests(SSotAsyncTestCase):
         """Log detailed test failure information for analysis."""
         print(f'\n=== EXECUTION ENGINE FACTORY WEBSOCKET INTEGRATION FAILURE: {test_name} ===')
         print(f'Timestamp: {datetime.now().isoformat()}')
-        print(f'Business Impact: WebSocket 1011 errors, Chat interruptions - $500K+ ARR at risk')
+        print(f'Business Impact: WebSocket 1011 errors, Chat interruptions - 500K+ ARR at risk')
         print(f'Issue: #884 Execution Engine Factory WebSocket Integration Failures')
         print('\nFailure Details:')
         for key, value in failure_details.items():

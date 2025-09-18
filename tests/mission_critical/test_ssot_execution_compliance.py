@@ -6,7 +6,7 @@ MISSION CRITICAL: SSOT Test Execution Compliance Validation
 CRITICAL MISSION: Detect and prevent fragmented test execution patterns that bypass
 the unified test runner and violate SSOT testing infrastructure.
 
-BUSINESS VALUE: Protects $500K+ plus ARR Golden Path functionality by ensuring all tests
+BUSINESS VALUE: Protects 500K+  ARR Golden Path functionality by ensuring all tests
 follow SSOT patterns and preventing test infrastructure fragmentation.
 
 TARGET VIOLATIONS:
@@ -58,7 +58,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
     MISSION CRITICAL: Test SSOT execution compliance across all test files.
     
     This test suite MUST detect violations where test files bypass the unified
-    test runner or use non-SSOT patterns, protecting the $500K+ plus ARR Golden Path.
+    test runner or use non-SSOT patterns, protecting the 500K+  ARR Golden Path.
 ""
     
     def setup_method(self, method):
@@ -110,7 +110,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
                 f1. Remove direct test execution calls from test files\n""
                 f2. Execute tests through: python tests/unified_test_runner.py\n
                 f3. Use SSOT test execution patterns only\n\n
-                f"BUSINESS IMPACT: Fragmented test execution threatens $500K+ plus ARR Golden Path stability"
+                f"BUSINESS IMPACT: Fragmented test execution threatens 500K+  ARR Golden Path stability"
             )
     
     def test_all_test_classes_inherit_from_ssot_base_test_case(self):
@@ -258,11 +258,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
                         )) 
             except Exception as e:
                 # Log but don't fail on file reading errors'
-                print(f"Warning: Could not analyze {test_file}: {e}))"
-        
-        return violations
-    
-    def _scan_for_non_ssot_test_inheritance(self") -> List[SSOTViolation]:"
+                print(f"Warning: Could not analyze {test_file}: {e}))"") -> List[SSOTViolation]:"
         Scan for test classes that don't inherit from SSOT BaseTestCase."
         Scan for test classes that don't inherit from SSOT BaseTestCase.""
 
@@ -272,12 +268,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
             try:
                 violations.extend(self._analyze_single_file_for_violations(test_file))
             except Exception as e:
-                print(f"Warning: Could not analyze {test_file}: {e}))"
-        
-        return violations
-    
-    def _analyze_single_file_for_violations(self, test_file: Path) -> List[SSOTViolation]:
-        Analyze a single file for SSOT violations.""
+                print(f"Warning: Could not analyze {test_file}: {e}))"""
         violations = []
         
         try:
@@ -402,11 +393,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
                         ))
                         
             except Exception as e:
-                print(f"Warning: Could not analyze {py_file}: {e}))"
-        
-        return violations
-    
-    def _find_test_files(self") -> List[Path]:"
+                print(f"Warning: Could not analyze {py_file}: {e}))"") -> List[Path]:"
         Find all test files in the project."
         Find all test files in the project.""
 

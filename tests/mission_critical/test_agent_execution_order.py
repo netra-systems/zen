@@ -19,13 +19,7 @@ try:
     from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
     from netra_backend.app.agents.supervisor.execution_context import PipelineStepConfig
 except ImportError as e:
-    print(f"Warning: Could not import workflow components: {e}))"
-    WorkflowOrchestrator = None
-    PipelineStepConfig = None
-
-
-class TestAgentExecutionOrder:
-    Verify agent execution follows logical dependency chain.""
+    print(f"Warning: Could not import workflow components: {e}))"""
 
     def test_sufficient_data_workflow_order(self):
         Test that data collection happens BEFORE optimization in sufficient data workflow."

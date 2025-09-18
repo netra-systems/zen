@@ -4,7 +4,7 @@ Agent Golden Path Comprehensive Message Flow E2E Tests
 Business Value Justification (BVJ):
 - Segment: All segments (Free, Early, Mid, Enterprise) - Core chat functionality
 - Business Goal: Validate complete Golden Path user message processing flow
-- Value Impact: Ensures $500K+ ARR chat functionality delivers reliable AI responses
+- Value Impact: Ensures 500K+ ARR chat functionality delivers reliable AI responses
 - Revenue Impact: Protects core business value through comprehensive message flow testing
 
 PURPOSE:
@@ -666,7 +666,7 @@ class AgentGoldenPathComprehensiveMessagesTests(SSotAsyncTestCase):
         3. Multi-step workflows with tool usage
         4. Error recovery with graceful handling
         
-        BVJ: This test protects $500K+ ARR by ensuring core chat functionality
+        BVJ: This test protects 500K+ ARR by ensuring core chat functionality
         delivers reliable, valuable AI responses across all user scenarios.
         """
         test_start_time = time.time()

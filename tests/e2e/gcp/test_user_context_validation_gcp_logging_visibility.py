@@ -5,7 +5,7 @@ visible in GCP Cloud Logging with structured data for effective monitoring and d
 
 ROOT CAUSE: UserExecutionContext validation incorrectly flags "default_user" due to "default_" pattern
 GCP VISIBILITY: Ensure error appears in Cloud Logging with proper structure for debugging
-BUSINESS IMPACT: $500K+ ARR blocked by validation error that must be visible for rapid resolution
+BUSINESS IMPACT: 500K+ ARR blocked by validation error that must be visible for rapid resolution
 
 This test focuses specifically on GCP Cloud Logging integration to ensure production
 errors are properly captured, structured, and visible for operations teams.
@@ -13,7 +13,7 @@ errors are properly captured, structured, and visible for operations teams.
 Business Value Justification (BVJ):
 - Segment: Platform/Operations (Infrastructure monitoring)
 - Business Goal: System Reliability (rapid error detection and resolution)
-- Value Impact: Enable rapid diagnosis of $500K+ ARR blocking issues
+- Value Impact: Enable rapid diagnosis of 500K+ ARR blocking issues
 - Revenue Impact: Reduce MTTR for critical validation failures
 
 GCP Logging Test Strategy:
@@ -432,11 +432,11 @@ class UserContextValidationGCPLoggingVisibilityTests(SSotAsyncTestCase):
         assert 'source_location' in production_log, "Production logs need source tracking"
         assert 'labels' in production_log, "Production logs need classification labels"
         
-        # Verify the exact error that blocks $500K+ ARR in production
+        # Verify the exact error that blocks 500K+ ARR in production
         message = production_log['message']
         assert "VALIDATION FAILURE" in message, "Production error should be clearly marked"
         assert "default_user" in message, "Production error should contain exact problematic value"
         assert "request isolation" in message, "Production error should explain business impact"
         
         # This log entry would be visible in GCP Cloud Logging with full context
-        # for operations teams to diagnose and resolve the $500K+ ARR blocking issue
+        # for operations teams to diagnose and resolve the 500K+ ARR blocking issue

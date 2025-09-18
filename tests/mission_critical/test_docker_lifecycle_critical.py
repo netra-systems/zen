@@ -4,7 +4,7 @@ Service Lifecycle Critical Tests - Issue #976 Restoration (Non-Docker Focus)
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free/Early/Mid/Enterprise/Platform)
-- Business Goal: Validate $500K+ ARR service lifecycle management and startup reliability
+- Business Goal: Validate 500K+ ARR service lifecycle management and startup reliability
 - Value Impact: Ensures core services maintain proper lifecycle management for system stability
 - Revenue Impact: Protects platform reliability that drives customer trust and retention
 
@@ -50,19 +50,7 @@ try:
     from netra_backend.app.agents.registry import AgentRegistry
     REAL_SERVICES_AVAILABLE = True
 except ImportError as e:
-    print(f"Warning: Real services not available for testing: {e}")
-    REAL_SERVICES_AVAILABLE = False
-
-# Environment isolation following SSOT patterns
-from shared.isolated_environment import IsolatedEnvironment
-
-# Logging using SSOT patterns
-from shared.logging.unified_logging_ssot import get_logger
-logger = get_logger(__name__)
-
-
-class ServiceLifecycleCriticalTests(SSotAsyncTestCase):
-    """
+    print(f"Warning: Real services not available for testing: {e}""""
     Comprehensive tests for service lifecycle management without Docker dependencies.
 
     Validates that core services properly initialize, run, and shutdown with

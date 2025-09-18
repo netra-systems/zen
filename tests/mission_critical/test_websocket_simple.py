@@ -9,8 +9,7 @@ class TestWebSocketConnection:
         ""Send JSON message.""
 
         if self._closed:
-            raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)""
+            raise RuntimeError(WebSocket is closed)"""
 
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):"
@@ -98,9 +97,7 @@ class MockWebSocketConnection:
         Mock ping method.""
 
         if not self.is_connected:
-        raise ConnectionError("WebSocket disconnected)"
-    async def close(self) -> None:
-        Mock close method.""
+        raise ConnectionError("WebSocket disconnected)"""
         self.is_connected = False
         @property
     def application_state(self):
@@ -329,12 +326,10 @@ class MockConnectionPool:
         print("")
         [TEST 1] Factory WebSocket Emitter Creation)
         result1 = await test_factory_websocket_emitter_creation()
-        test_results.append((Factory Creation, result1))"
-        test_results.append((Factory Creation, result1))"
+        test_results.append((Factory Creation, result1))""
         # Test 2: All required events
         print("")
-        [TEST 2] All 5 Required WebSocket Events)"
-        [TEST 2] All 5 Required WebSocket Events)""
+        [TEST 2] All 5 Required WebSocket Events)"""
 
         result2 = await test_all_required_websocket_events()
         test_results.append((Required Events, result2))
@@ -342,8 +337,7 @@ class MockConnectionPool:
         print("")
         [TEST 3] WebSocket Event JSON Serialization)
         result3 = await test_websocket_event_json_serialization()
-        test_results.append((JSON Serialization, result3))"
-        test_results.append((JSON Serialization, result3))"
+        test_results.append((JSON Serialization, result3))""
         # Summary
         print("")
          + =" * 60)"
@@ -362,13 +356,11 @@ class MockConnectionPool:
          + = * 60)""
 
         if all_passed:
-        print("[SUCCESS] All WebSocket event tests passed!)"
-        print([SUCCESS] Factory pattern working correctly")"
+        print("[SUCCESS] All WebSocket event tests passed!)"")"
         print([SUCCESS] All 5 required events validated)
         print([SUCCESS] JSON serialization working"")
         else:
-        print([FAILURE] Some WebSocket event tests failed!)"
-        print([FAILURE] Some WebSocket event tests failed!)"
+        print([FAILURE] Some WebSocket event tests failed!)""
         print([CRITICAL] Critical issues detected in WebSocket events")"
         print(= * 60")"
         await asyncio.sleep(0)

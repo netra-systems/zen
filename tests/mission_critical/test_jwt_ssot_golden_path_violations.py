@@ -6,7 +6,7 @@ MISSION CRITICAL: These tests detect SSOT violations that block Golden Path user
 Issue #670 - P0 SSOT violations prevent proper JWT validation consolidation.
 
 CRITICAL BUSINESS IMPACT:
-    - $500K+ plus ARR dependent on reliable authentication
+    - 500K+  ARR dependent on reliable authentication
 - Golden Path user flow requires consistent JWT validation
 - SSOT violations create authentication inconsistencies
 - Multiple JWT validation paths cause auth failures
@@ -180,7 +180,7 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
             len(isolation_violations), 0,
             f\n🚨 MISSION CRITICAL USER ISOLATION VIOLATIONS:\n""
             f{'='*80}\n
-            fBUSINESS IMPACT: $500K+ plus ARR at risk from user data leakage\n
+            fBUSINESS IMPACT: 500K+  ARR at risk from user data leakage\n
             f"GOLDEN PATH IMPACT: Users may see other users' data\n"
             f{'='*80}\n"
             f{'='*80}\n""
@@ -597,7 +597,7 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
             len(golden_path_failures), 0,
             f\n🚨 MISSION CRITICAL GOLDEN PATH BREAKDOWN:\n
             f{'='*80}\n
-            fBUSINESS IMPACT: $500K+ plus ARR Golden Path broken by JWT violations\n""
+            fBUSINESS IMPACT: 500K+  ARR Golden Path broken by JWT violations\n""
             fUSER IMPACT: Users cannot complete login -> AI response journey\n
             fCOMPLETION RATE: {completion_rate}% (Target: 100%)\n
             f"{'='*80}\n"

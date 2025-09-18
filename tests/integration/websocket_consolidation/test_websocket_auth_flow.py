@@ -44,7 +44,7 @@ class WebSocketAuthFlowTests(SSotAsyncTestCase):
     CRITICAL: This test proves WebSocket authentication race conditions.
 
     EXPECTED RESULT: FAIL - Auth race conditions cause connection failures
-    BUSINESS IMPACT: $500K+ ARR blocked by authentication failures
+    BUSINESS IMPACT: 500K+ ARR blocked by authentication failures
     """
 
     def setup_method(self):
@@ -109,7 +109,7 @@ class WebSocketAuthFlowTests(SSotAsyncTestCase):
                 connection_attempts.append({'attempt': attempt + 1, 'success': False, 'error': str(e), 'status_code': 500})
         successful_connections = [a for a in connection_attempts if a.get('success', False)]
         failed_connections = [a for a in connection_attempts if not a.get('success', False)]
-        assert len(successful_connections) == len(connection_attempts), f'SSOT VIOLATION: WebSocket auth integration failures detected. {len(failed_connections)} out of {len(connection_attempts)} connection attempts failed. Failed connections: {failed_connections}. BUSINESS IMPACT: HTTP 403 errors block chat functionality for $500K+ ARR.'
+        assert len(successful_connections) == len(connection_attempts), f'SSOT VIOLATION: WebSocket auth integration failures detected. {len(failed_connections)} out of {len(connection_attempts)} connection attempts failed. Failed connections: {failed_connections}. BUSINESS IMPACT: HTTP 403 errors block chat functionality for 500K+ ARR.'
 
     @pytest.mark.asyncio
     async def test_scattered_jwt_validation_logic_detection(self):
