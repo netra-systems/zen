@@ -183,10 +183,7 @@ class GoldenPathTester:
             # Check if it's a websocket-specific error
             if "status" in str(e).lower() or "401" in str(e) or "403" in str(e):
                 # Expected auth error - endpoint is available
-                print(f"  ✅ WebSocket endpoint is available (auth required: {e})")
-                self.results['websocket_connection'] = True
-            else:
-                self.results['errors'].append(f"WebSocket test failed: {e}")
+                print(f"  ✅ WebSocket endpoint is available (auth required: {e})""WebSocket test failed: {e}")
                 print(f"  ❌ WebSocket test failed: {e}")
     
     async def run_golden_path_test(self):
@@ -274,13 +271,13 @@ class GoldenPathTester:
         # Business value assessment
         print(f"\n💰 Business Value Assessment:")
         if golden_path_success:
-            print("  ✅ $500K+ ARR functionality is operational")
+            print("  ✅ 500K+ ARR functionality is operational")
             print("  ✅ Users can complete login → AI response flow")
             print("  ✅ Chat functionality delivers business value")
         else:
             print("  ❌ Critical business functionality is impaired")
             print("  ❌ Users cannot complete core workflows")
-            print("  ❌ $500K+ ARR at risk due to system failures")
+            print("  ❌ 500K+ ARR at risk due to system failures")
         
         # Return exit code based on success
         return 0 if golden_path_success else 1

@@ -9,7 +9,7 @@ This test validates the critical Golden Path user flow without Docker dependenci
 3. API access authorization
 4. Service-to-service communication patterns
 
-Business Value: Protects $500K+ ARR Golden Path functionality
+Business Value: Protects 500K+ ARR Golden Path functionality
 
 EXECUTION: python3 test_golden_path_integration.py
 DEPENDENCIES: Only standard Python libraries (no Docker, no external services)
@@ -314,7 +314,7 @@ class TestBusinessContinuity(SSotBaseTestCase):
         self.backend_api = MockBackendAPI(self.auth_service)
     
     def test_revenue_protection_golden_path(self):
-        """Test that Golden Path protects $500K+ ARR functionality"""
+        """Test that Golden Path protects 500K+ ARR functionality"""
         # Simulate high-value customer workflow
         enterprise_user = {
             'user_id': 'enterprise-123',
@@ -392,7 +392,7 @@ if __name__ == '__main__':
     print("Running Golden Path Integration Tests - Issue #925 Phase 2")
     print("=" * 70)
     print("Testing complete user flow: login → JWT → API access → AI responses")
-    print("Validating $500K+ ARR business continuity and revenue protection")
+    print("Validating 500K+ ARR business continuity and revenue protection")
     print("=" * 70)
     
     # Run all integration tests
