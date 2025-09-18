@@ -2044,6 +2044,11 @@ def get_auth_resilience_service():
     return auth_client
 
 
+def get_auth_client():
+    """Get the auth client instance - alias for get_auth_resilience_service()."""
+    return auth_client
+
+
 # Global function for getting auth resilience health - simplified version
 async def get_auth_resilience_health() -> Dict[str, Any]:
     """Get authentication resilience health status."""

@@ -122,10 +122,11 @@ class TestWebSocketConnection:
         })
             
 
-        return }
-        connection_errors: self.connection_errors,
-        error_logs: self.error_logs,""
-        "ws_url: self.ws_url"""
+        return {
+            "connection_errors": self.connection_errors,
+            "error_logs": self.error_logs,
+            "ws_url": self.ws_url
+        }
             
 
         @pytest.mark.websocket
@@ -140,9 +141,10 @@ class TestWebSocketConnection:
         # Test with various connection methods
         # Note: We avoid setting explicit Origin headers to prevent conflicts with
         # the websocket-client library's automatic Origin header generation'
-        test_cases = ]
-        ("Default connection, {),  # Let client set origin automatically"
-        (Test endpoint, {endpoint: /ws/test),  # Try test endpoint
+        test_cases = [
+            ("Default connection", {}),  # Let client set origin automatically
+            ("Test endpoint", {"endpoint": "/ws/test"}),  # Try test endpoint
+        ]
         
 
         for description, options in test_cases:
