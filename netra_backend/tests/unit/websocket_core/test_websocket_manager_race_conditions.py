@@ -136,8 +136,11 @@ class WebSocketManagerRaceConditionsTests(BaseTestCase):
             """Simulate user connection with realistic timing."""
             await self.log_operation("connection_start", user_id)
             
-            # Simulate connection establishment delay
-            await asyncio.sleep(random.uniform(0.001, 0.01))  # 1-10ms realistic delay
+            # Deterministic connection simulation - no random timing
+            # Use user ID hash for deterministic but varied execution order
+            connection_delay = (hash(str(user_id)) % 5) * 0.002  # 0-8ms deterministic delay
+            if connection_delay > 0:
+                await asyncio.sleep(connection_delay)
             
             # Check if manager is in valid state during connection
             if not self.mock_websocket_manager.is_connection_active.called:
@@ -428,7 +431,10 @@ class WebSocketManagerRaceConditionsTests(BaseTestCase):
             if random.random() < failure_rate:
                 raise ConnectionError(f"Simulated delivery failure for {event_type}")
             
-            await asyncio.sleep(random.uniform(0.001, 0.005))  # Realistic network delay
+            # Deterministic network simulation - no random timing
+            network_delay = (hash(event_type) % 3) * 0.002  # 0-4ms deterministic delay based on event type
+            if network_delay > 0:
+                await asyncio.sleep(network_delay)
         
         self.mock_websocket_manager.emit_critical_event.side_effect = failing_emit_critical_event
         
@@ -1320,8 +1326,11 @@ class WebSocketManagerRaceConditionsTests(BaseTestCase):
         
         async def cleanup_connection(conn_id: ConnectionID):
             """Clean up a connection."""
-            # Simulate cleanup work
-            await asyncio.sleep(random.uniform(0.001, 0.005))
+            # Deterministic cleanup simulation - no random timing
+            # Use connection ID hash for deterministic but varied execution order
+            cleanup_delay = (hash(str(conn_id)) % 3) * 0.001  # 0, 1, or 2ms deterministic delay
+            if cleanup_delay > 0:
+                await asyncio.sleep(cleanup_delay)
             
             # Mock remove connection
             await self.mock_websocket_manager.remove_connection(conn_id)
@@ -1450,7 +1459,10 @@ class WebSocketManagerRaceConditionsTests(BaseTestCase):
         
         async def send_ping(ping_id: int):
             """Send WebSocket ping."""
-            await asyncio.sleep(random.uniform(0.001, 0.003))
+            # Deterministic ping timing - no random delays
+            ping_delay = (ping_id % 2) * 0.002  # 0 or 2ms deterministic delay
+            if ping_delay > 0:
+                await asyncio.sleep(ping_delay)
             
             async with heartbeat_lock:
                 heartbeat_log.append({
@@ -1461,7 +1473,10 @@ class WebSocketManagerRaceConditionsTests(BaseTestCase):
         
         async def send_pong(pong_id: int):
             """Send WebSocket pong response."""
-            await asyncio.sleep(random.uniform(0.001, 0.003))
+            # Deterministic pong timing - no random delays
+            pong_delay = (pong_id % 3) * 0.001  # 0, 1, or 2ms deterministic delay
+            if pong_delay > 0:
+                await asyncio.sleep(pong_delay)
             
             async with heartbeat_lock:
                 heartbeat_log.append({
@@ -1802,9 +1817,12 @@ class WebSocketManagerRaceConditionsTests(BaseTestCase):
         # Emit messages in specific order with delays
         sequences = [1, 2, 3, 4, 5]
         
-        # Add random delays to create potential reordering
+        # Add deterministic delays to create potential reordering without randomness
         async def emit_with_delay(sequence: int):
-            await asyncio.sleep(random.uniform(0.001, 0.005))
+            # Deterministic delay based on sequence number for predictable reordering test
+            delay = (sequence % 5) * 0.001  # 0-4ms deterministic delay
+            if delay > 0:
+                await asyncio.sleep(delay)
             await emit_sequenced_message(sequence)
         
         await asyncio.gather(*[
@@ -2494,7 +2512,10 @@ class WebSocketManagerRaceConditionsTests(BaseTestCase):
         
         async def send_keepalive(keepalive_id: int):
             """Send keepalive message."""
-            await asyncio.sleep(random.uniform(0.001, 0.003))
+            # Deterministic keepalive timing - no random delays
+            keepalive_delay = (keepalive_id % 2) * 0.002  # 0 or 2ms deterministic delay
+            if keepalive_delay > 0:
+                await asyncio.sleep(keepalive_delay)
             
             async with keepalive_lock:
                 keepalive_operations.append({
@@ -2505,7 +2526,9 @@ class WebSocketManagerRaceConditionsTests(BaseTestCase):
         
         async def respond_to_keepalive(keepalive_id: int):
             """Respond to keepalive message."""
-            await asyncio.sleep(random.uniform(0.002, 0.004))
+            # Deterministic response timing - no random delays
+            response_delay = (keepalive_id % 3) * 0.001 + 0.002  # 2-4ms deterministic delay
+            await asyncio.sleep(response_delay)
             
             async with keepalive_lock:
                 keepalive_operations.append({
@@ -2836,8 +2859,10 @@ class WebSocketManagerRaceConditionsTests(BaseTestCase):
                         'agent_completed'
                     ])
                     
-                    # Add random delay to create timing variations
-                    await asyncio.sleep(random.uniform(0.001, 0.005))
+                    # Add deterministic delay to create timing variations without randomness
+                    delay = (hash(operation_type) % 5) * 0.001  # 0-4ms deterministic delay based on operation type
+                    if delay > 0:
+                        await asyncio.sleep(delay)
                     
                     # Execute operation based on type
                     if operation_type == 'agent_started':
