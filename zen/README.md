@@ -380,7 +380,35 @@ pip install -e .
 
 ## Basic Usage
 
-### 1. Quick Test
+### 1. Direct Command Execution (NEW)
+Execute commands directly without config files:
+```bash
+# Execute a single command directly
+zen "/help"
+
+# Execute with custom workspace
+zen "/analyze-code" --workspace ~/my-project
+
+# Execute with custom instance name
+zen "/debug-issue" --instance-name "debug-session"
+
+# Execute with session continuity
+zen "/optimize-performance" --session-id "perf-session-1"
+
+# Execute with history management
+zen "/generate-docs" --clear-history --compact-history
+
+# Execute with token budget
+zen "/complex-analysis" --overall-token-budget 5000
+```
+
+**Direct Command Features:**
+- **No Config Required**: Skip JSON file creation for simple tasks
+- **Custom Options**: Set instance name, description, session ID
+- **History Control**: Clear or compact history before execution
+- **Budget Integration**: Works with all existing budget features
+
+### 2. Quick Test
 ```bash
 # List available commands
 zen --list-commands
@@ -392,7 +420,7 @@ zen --dry-run
 zen
 ```
 
-### 2. Custom Configuration
+### 3. Custom Configuration
 Create a `config.json` file:
 ```json
 {
@@ -414,7 +442,7 @@ Run with configuration:
 zen --config config.json
 ```
 
-### 3. Workspace Management
+### 4. Workspace Management
 ```bash
 # Use specific workspace
 zen --workspace ~/projects/myapp
@@ -423,7 +451,7 @@ zen --workspace ~/projects/myapp
 zen --timeout 300 --workspace ~/projects/myapp
 ```
 
-### 4. Token Budget Control
+### 5. Token Budget Control
 ```bash
 # Set overall budget
 zen --overall-token-budget 100000
@@ -436,7 +464,7 @@ zen --budget-enforcement-mode block  # Stop when exceeded
 zen --budget-enforcement-mode warn   # Warn but continue
 ```
 
-### 5. Scheduled Execution
+### 6. Scheduled Execution
 ```bash
 # Start in 2 hours
 zen --start-at "2h"
@@ -444,6 +472,33 @@ zen --start-at "2h"
 # Start at specific time
 zen --start-at "14:30"  # 2:30 PM today
 zen --start-at "1am"    # 1 AM tomorrow
+```
+
+### 7. Execution Mode Precedence
+Zen supports three execution modes with clear precedence rules:
+
+1. **Direct Command** (Highest Priority)
+   ```bash
+   zen "/analyze-code"  # Executes direct command
+   ```
+
+2. **Config File** (Medium Priority)
+   ```bash
+   zen --config my-config.json  # Uses config file
+   ```
+
+3. **Default Instances** (Lowest Priority)
+   ```bash
+   zen  # Uses built-in default commands
+   ```
+
+**Mixed Usage:**
+```bash
+# Direct command overrides config file
+zen "/direct-cmd" --config my-config.json  # Executes /direct-cmd, ignores config
+
+# Config file overrides defaults
+zen --config my-config.json  # Uses config, ignores defaults
 ```
 
 ## Advanced Features
