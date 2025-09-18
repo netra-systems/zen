@@ -5,7 +5,7 @@ MISSION CRITICAL TEST: WebSocket 1011 Error Dual SSOT Fix Validation
 
 ISSUE #301: Validates the fix for WebSocket 1011 errors caused by dual SSOT ID systems.
 
-BUSINESS IMPACT: $500K+ plus ARR protection - ensures WebSocket connections don't fail due to'
+BUSINESS IMPACT: 500K+  ARR protection - ensures WebSocket connections don't fail due to'
 resource cleanup issues when UnifiedIDManager and UnifiedIdGenerator create different
 ID patterns for the same user session.
 
@@ -101,7 +101,7 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
                         'error': result['error']
                     }
         
-        # CRITICAL: All scenarios must succeed to prevent $500K+ plus ARR loss
+        # CRITICAL: All scenarios must succeed to prevent 500K+  ARR loss
         success_rate = (success_count / total_scenarios) * 100
         self.assertEqual(success_count, total_scenarios, 
                         fWebSocket 1011 fix failed in {total_scenarios - success_count} scenarios. "
@@ -389,8 +389,7 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
         
         try:
             # Create initial WebSocket connection
-            connection_ids = self._create_websocket_connection(user_id, manager)"
-            connection_ids = self._create_websocket_connection(user_id, manager)""
+            connection_ids = self._create_websocket_connection(user_id, manager)"""
 
             
             # Simulate agent switches during session

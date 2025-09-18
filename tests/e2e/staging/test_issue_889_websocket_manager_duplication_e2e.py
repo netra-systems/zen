@@ -6,7 +6,7 @@ MUST FAIL INITIALLY: These tests are designed to reproduce exact SSOT violations
 in the staging environment that match the GCP log patterns from Issue #889.
 
 Business Value: Validates fixes work in production-like GCP staging environment
-protecting $500K+ ARR Golden Path functionality and regulatory compliance.
+protecting 500K+ ARR Golden Path functionality and regulatory compliance.
 
 Expected Behavior:
 - All tests MUST FAIL initially, reproducing exact staging log patterns
@@ -229,7 +229,7 @@ class Issue889WebSocketManagerDuplicationE2ETests(SSotAsyncTestCase):
         """
         MUST FAIL INITIALLY: Detect isolation failures in complete Golden Path user flow
         
-        Business Value: Protects $500K+ ARR Golden Path functionality in staging
+        Business Value: Protects 500K+ ARR Golden Path functionality in staging
         Expected Failure: User isolation violation in complete chat flow with multiple users
         
         This test executes the complete Golden Path user flow for multiple users
@@ -413,7 +413,7 @@ class Issue889WebSocketManagerDuplicationE2ETests(SSotAsyncTestCase):
             len(golden_path_violations),
             0,
             f"CRITICAL GOLDEN PATH VIOLATION: User isolation failures detected during concurrent Golden Path execution. "
-            f"This threatens the $500K+ ARR core business functionality and regulatory compliance. "
+            f"This threatens the 500K+ ARR core business functionality and regulatory compliance. "
             f"Violations: {golden_path_violations}. "
             f"Successful sessions: {len(successful_sessions)}, Failed sessions: {len(failed_sessions)}"
         )

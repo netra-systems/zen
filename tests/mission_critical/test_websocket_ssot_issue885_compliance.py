@@ -6,7 +6,7 @@ SSOT violations affecting the WebSocket subsystem that threaten platform stabili
 
 Business Value Justification:
 - Segment: Platform/Mission Critical
-- Business Goal: Prevent cascade failures affecting $500K+ ARR
+- Business Goal: Prevent cascade failures affecting 500K+ ARR
 - Value Impact: Exposes critical architectural debt threatening system reliability
 - Revenue Impact: Prevents WebSocket failures that break Golden Path user flow
 
@@ -439,7 +439,7 @@ if __name__ == '__main__':
     print("🚨 CRITICAL: This test MUST FAIL to expose SSOT violations.")
     print("WARNING️  If this test PASSES, verify Issue #885 remediation is complete.")
     print("📋 This test validates WebSocket subsystem SSOT compliance.")
-    print("💰 Business Impact: Prevents cascade failures affecting $500K+ ARR")
+    print("💰 Business Impact: Prevents cascade failures affecting 500K+ ARR")
     print("=" * 80)
 
     # Run with maximum verbosity for critical assessment

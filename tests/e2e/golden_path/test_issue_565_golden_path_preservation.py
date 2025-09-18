@@ -10,7 +10,7 @@ This test validates that Issue #565 ExecutionEngine migration preserves the Gold
 5. Chat business value delivery (90% of platform value) is maintained
 
 Business Value: Free/Early/Mid/Enterprise - User Experience & Revenue Protection
-Protects the $500K+ ARR Golden Path user flow that delivers substantive AI-powered
+Protects the 500K+ ARR Golden Path user flow that delivers substantive AI-powered
 chat functionality serving as 90% of the platform's business value.
 
 CRITICAL: These are end-to-end tests that validate the complete user experience
@@ -83,13 +83,7 @@ class Issue565GoldenPathPreservationTests(SSotAsyncTestCase):
                 if engine.is_active():
                     await engine.cleanup()
             except Exception as e:
-                print(f"Warning: Engine cleanup failed: {e}")
-
-        self.created_engines.clear()
-        await super().teardown_method(method)
-
-    def create_golden_path_user_context(self, user_profile: Dict[str, Any]) -> UserExecutionContext:
-        """Create UserExecutionContext for Golden Path user persona."""
+                print(f"Warning: Engine cleanup failed: {e}""""Create UserExecutionContext for Golden Path user persona."""
         return UserExecutionContext(
             user_id=user_profile['user_id'],
             thread_id=f"thread_{user_profile['user_id']}",

@@ -5,7 +5,7 @@ MISSION-CRITICAL TEST SUITE: Complete validation of WebSocket-Agent integration 
 Business Value Justification (BVJ):
 - Segment: ALL (Free, Early, Mid, Enterprise)
 - Business Goal: Real-time Chat Experience (90% of platform value)
-- Value Impact: WebSocket-Agent integration = Real-time user experience = $500K+ ARR protection
+- Value Impact: WebSocket-Agent integration = Real-time user experience = 500K+ ARR protection
 - Strategic Impact: WebSocket failures directly break real-time chat functionality
 
 COVERAGE TARGET: 45 unit tests covering critical WebSocket-Agent integration:

@@ -3,7 +3,7 @@ E2E Staging Tests for Basic Triage & Response (UVS) Validation - Issue #135
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
 - Segment: All tiers (Free/Early/Mid/Enterprise) - Core revenue protection
-- Business Goal: Validate complete Golden Path on GCP staging for $500K+ ARR protection
+- Business Goal: Validate complete Golden Path on GCP staging for 500K+ ARR protection
 - Value Impact: End-to-end validation of triage processing in production-like environment
 - Revenue Protection: Ensure complete user journey works in real GCP staging environment
 
@@ -244,7 +244,7 @@ class BasicTriageResponseStagingE2ETests(SSotAsyncTestCase):
     and agent execution.
     
     CRITICAL: These tests should initially FAIL to demonstrate current
-    staging environment issues that block the $500K+ ARR user journey.
+    staging environment issues that block the 500K+ ARR user journey.
     """
 
     async def async_setup_method(self, method=None):
@@ -473,7 +473,7 @@ class BasicTriageResponseStagingE2ETests(SSotAsyncTestCase):
         """
         Test complete Golden Path user journey on staging environment.
         
-        Business Impact: Validates the complete $500K+ ARR user journey
+        Business Impact: Validates the complete 500K+ ARR user journey
         that must work flawlessly in production-like staging environment.
         
         Flow: User Creation  ->  Authentication  ->  WebSocket  ->  Message  ->  AI Response

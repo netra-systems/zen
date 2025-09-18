@@ -3,7 +3,7 @@ Test Multiple WebSocket Emitter Race Condition Reproduction - PHASE 1: PRE-CONSO
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - Critical Infrastructure
-- Business Goal: Revenue Protection - Prove $500K+ ARR is at risk from race conditions  
+- Business Goal: Revenue Protection - Prove 500K+ ARR is at risk from race conditions  
 - Value Impact: Demonstrates that multiple emitters cause event delivery failures
 - Strategic Impact: Validates the need for SSOT emitter consolidation
 

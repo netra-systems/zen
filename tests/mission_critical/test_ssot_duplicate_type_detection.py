@@ -11,7 +11,7 @@ CRITICAL BUSINESS IMPACT: Duplicate type definitions lead to:
     - Runtime errors from incorrect imports
 - Development confusion and slower velocity
 - Maintenance overhead and technical debt
-- Risk to $500K+ plus ARR from system instability
+- Risk to 500K+  ARR from system instability
 
 This test is designed to FAIL initially to prove the specific violations exist.
 "
@@ -67,13 +67,7 @@ class DuplicateTypeAnalyzer:
 
             except Exception as e:
                 # Log parsing errors but continue
-                print(f"Warning: Could not parse {file_path}: {e}))"
-                continue
-
-        return type_definitions
-
-    def _extract_type_definitions(self, tree: ast.AST, file_path: Path, type_definitions: Dict) -> None:
-        Extract type definitions from AST""
+                print(f"Warning: Could not parse {file_path}: {e}))"""
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
                 type_definitions[node.name).append({

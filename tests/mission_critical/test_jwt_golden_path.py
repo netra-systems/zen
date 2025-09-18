@@ -2,10 +2,10 @@
 
 JWT Golden Path Protection Tests
 
-PURPOSE: These tests FAIL when JWT changes break the $500K+ plus ARR Golden Path
+PURPOSE: These tests FAIL when JWT changes break the 500K+  ARR Golden Path
 user flow (Login -> JWT -> Chat). Tests will PASS after SSOT refactor.
 
-MISSION CRITICAL: Protects $500K+ plus ARR Golden Path by ensuring JWT integration
+MISSION CRITICAL: Protects 500K+  ARR Golden Path by ensuring JWT integration
 maintains end-to-end user authentication and chat functionality.
 
 BUSINESS VALUE: Enterprise/Platform - Revenue Protection & Customer Experience
@@ -54,7 +54,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
     These tests FAIL when JWT changes break the Golden Path user flow.
     After SSOT refactor, all tests should PASS.
     
-    CRITICAL: These tests protect $500K+ plus ARR by ensuring JWT authentication
+    CRITICAL: These tests protect 500K+  ARR by ensuring JWT authentication
     works end-to-end in the Golden Path (Login -> Chat -> AI Response).
 "
 ""
@@ -170,14 +170,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     )
                     
                     websocket_success = True
-                    logger.info("CHECK Golden Path: WebSocket connection successful)"
-                    
-                    # STEP 4: Chat Functionality Test (Golden Path Business Value)
-                    try:
-                        # Send test chat message
-                        chat_message = {
-                            type: chat_message,
-                            content: "Hello, this is a Golden Path test,"
+                    logger.info("CHECK Golden Path: WebSocket connection successful)""Hello, this is a Golden Path test,"
                             timestamp": time.time()"
                         }
                         
@@ -238,7 +231,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
         except Exception as e:
             pytest.fail(
                 fGOLDEN PATH CRITICAL FAILURE: JWT Golden Path completely broken. 
-                fThis affects $500K+ plus ARR customer experience. Error: {e}
+                fThis affects 500K+  ARR customer experience. Error: {e}
             )
 
     @pytest.mark.asyncio
@@ -374,8 +367,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     # Run concurrent WebSocket tests
                     ws_tasks = [
                         test_websocket_isolation(user1_token, golden_path_user1),
-                        test_websocket_isolation(user2_token, golden_path_user2)"
-                        test_websocket_isolation(user2_token, golden_path_user2)""
+                        test_websocket_isolation(user2_token, golden_path_user2)"""
 
                     ]
                     
@@ -388,18 +380,14 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                         )
                     
                 except Exception as e:
-                    isolation_violations.append(f"WebSocket isolation testing failed: {e})"
-            
-            # CRITICAL ASSESSMENT: JWT Isolation Success
-            if isolation_violations:
-                violation_summary = \n".join([f  - {v) for v in isolation_violations]"
+                    isolation_violations.append(f"WebSocket isolation testing failed: {e})"".join([f  - {v) for v in isolation_violations]"
                 logger.error(JWT ISOLATION VIOLATION: Multi-user Golden Path broken)
                 logger.error(fViolations:\n{violation_summary})
                 
                 # This test SHOULD FAIL before SSOT refactor
                 assert not isolation_violations, (
                     fJWT ISOLATION VIOLATION: Multi-user chat isolation is broken, ""
-                    faffecting enterprise customers ($500K+ plus ARR). 
+                    faffecting enterprise customers (500K+  ARR). 
                     fFound {len(isolation_violations)} isolation violations. 
                     f"Violations:\n{violation_summary}"
                 )
@@ -561,7 +549,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
             assert not error_handling_violations, (
                 fJWT ERROR HANDLING VIOLATION: Poor JWT error handling disrupts Golden Path UX 
                 fand creates security risks. Found {len(error_handling_violations)} violations 
-                faffecting $500K+ plus ARR customer experience. Violations:\n{violation_summary}""
+                faffecting 500K+  ARR customer experience. Violations:\n{violation_summary}""
             )
         else:
             logger.info(CHECK JWT ERROR HANDLING SUCCESS: Graceful error handling preserves Golden Path)
@@ -668,8 +656,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     
                 except asyncio.TimeoutError:
                     performance_violations.append(
-                        fWebSocket connect timeout during performance test (attempt {attempt + 1)"
-                        fWebSocket connect timeout during performance test (attempt {attempt + 1)""
+                        fWebSocket connect timeout during performance test (attempt {attempt + 1)"""
 
                     )
                 except Exception as e:
@@ -715,8 +702,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
             # Log performance metrics
             logger.info(fJWT Performance Metrics:")"
             logger.info(f  - Backend Auth: {avg_backend_auth:.""2f""}s avg)
-            logger.info(f  - WebSocket Connect: {avg_websocket_connect:.2f}s avg)"
-            logger.info(f  - WebSocket Connect: {avg_websocket_connect:.2f}s avg)"
+            logger.info(f  - WebSocket Connect: {avg_websocket_connect:.2f}s avg)""
             logger.info(f"  - JWT Validation: {avg_jwt_validation:.""3f""}s avg)"
             
             # Check if performance is acceptable for Golden Path
@@ -742,7 +728,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
             assert not performance_violations, (
                 fJWT PERFORMANCE VIOLATION: Slow JWT operations degrade Golden Path user experience, "
                 fJWT PERFORMANCE VIOLATION: Slow JWT operations degrade Golden Path user experience, "
-                f"affecting $500K+ plus ARR customer satisfaction."
+                f"affecting 500K+  ARR customer satisfaction."
                 fFound {len(performance_violations)} performance issues. 
                 fViolations:\n{violation_summary}
             )

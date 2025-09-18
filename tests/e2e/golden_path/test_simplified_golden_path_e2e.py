@@ -5,7 +5,7 @@ This test validates the core Golden Path requirements from Issue #1197
 using a simplified approach that doesn't rely on complex fixture dependencies.
 
 Business Value Justification:
-- Validates $500K+ ARR Golden Path functionality  
+- Validates 500K+ ARR Golden Path functionality  
 - Ensures end-to-end user journey works correctly
 - Provides Issue #1197 requirement validation
 

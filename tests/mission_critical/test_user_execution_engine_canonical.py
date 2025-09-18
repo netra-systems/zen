@@ -7,7 +7,7 @@ canonical implementation's completeness and proper integration patterns.'
 Business Value Justification:
     - Segment: Platform/Internal  
 - Business Goal: System Reliability & Performance
-- Value Impact: Ensures UserExecutionEngine provides complete execution capabilities for $500K+ plus ARR chat
+- Value Impact: Ensures UserExecutionEngine provides complete execution capabilities for 500K+  ARR chat
 - Strategic Impact: Validates SSOT consolidation delivers secure multi-user isolation and performance
 
 Key Validation Areas:
@@ -280,17 +280,7 @@ class UserExecutionEngineCanonicalTests(SSotBaseTestCase):
     
     def test_user_execution_engine_websocket_integration(self):
         "Test UserExecutionEngine WebSocket integration works."
-        logger.info("🔍 INTEGRATION TEST: Validating UserExecutionEngine WebSocket integration)"
-        
-        try:
-            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-            from netra_backend.app.services.user_execution_context import UserExecutionContext
-            from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-            from shared.id_generation.unified_id_generator import UnifiedIdGenerator
-            
-            # Create test user context
-            test_user_id = UnifiedIdGenerator.generate_base_id(test_user, True, 8)
-            thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(test_user_id, websocket_test)"
+        logger.info("🔍 INTEGRATION TEST: Validating UserExecutionEngine WebSocket integration)""
             thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(test_user_id, websocket_test)""
 
             
@@ -337,12 +327,8 @@ class UserExecutionEngineCanonicalTests(SSotBaseTestCase):
             logger.info(CHECK PASS: UserExecutionEngine WebSocket integration works)
             
         except Exception as e:
-            self.integration_issues.append(fWebSocket integration failed: {e})"
-            self.integration_issues.append(fWebSocket integration failed: {e})"
-            self.fail(f"INTEGRATION VIOLATION: WebSocket integration not working - {e})"
-    
-    def test_user_execution_engine_resource_management(self):
-        Test UserExecutionEngine resource management and cleanup."
+            self.integration_issues.append(fWebSocket integration failed: {e})""
+            self.fail(f"INTEGRATION VIOLATION: WebSocket integration not working - {e})""
         Test UserExecutionEngine resource management and cleanup."
         logger.info("🔍 RESOURCE TEST: Validating UserExecutionEngine resource management)"
         
@@ -383,8 +369,7 @@ class UserExecutionEngineCanonicalTests(SSotBaseTestCase):
                 
                 # Test engine has resource tracking
                 stats = engine.get_user_execution_stats()
-                self.assertIsInstance(stats, dict, Engine should provide execution stats)"
-                self.assertIsInstance(stats, dict, Engine should provide execution stats)"
+                self.assertIsInstance(stats, dict, Engine should provide execution stats)""
                 self.assertIn('user_id', stats, Stats should include user_id")"
                 self.assertEqual(stats['user_id'], test_user_id, Stats should have correct user_id)
                 

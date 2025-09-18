@@ -4,7 +4,7 @@ Test Issue #1181 Business Value Protection E2E
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Revenue Protection During Infrastructure Changes
-- Value Impact: Ensure $500K+ ARR chat functionality remains fully operational
+- Value Impact: Ensure 500K+ ARR chat functionality remains fully operational
 - Strategic Impact: Protect core platform value delivery during MessageRouter consolidation
 
 This E2E test validates that MessageRouter consolidation maintains the business-critical
@@ -32,7 +32,7 @@ class Issue1181BusinessValueProtectionE2ETests(BaseE2ETest):
     @pytest.mark.mission_critical
     async def test_500k_arr_chat_functionality_preservation(self):
         """
-        Test that $500K+ ARR chat functionality is preserved during consolidation.
+        Test that 500K+ ARR chat functionality is preserved during consolidation.
         
         This is the MISSION CRITICAL test that validates the core business value
         delivery mechanism remains intact through infrastructure changes.

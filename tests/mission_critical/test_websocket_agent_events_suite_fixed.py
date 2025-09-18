@@ -4,7 +4,7 @@ Mission Critical WebSocket Agent Events Test Suite - SSOT Implementation with Un
 Business Value Justification (BVJ):
 - Segment: ALL (Free/Early/Mid/Enterprise/Platform)
 - Business Goal: Agent Golden Path Protection - Ensures reliable WebSocket event delivery
-- Value Impact: Validates the 5 critical events that enable $500K+ ARR chat functionality
+- Value Impact: Validates the 5 critical events that enable 500K+ ARR chat functionality
 - Revenue Impact: Protects high-value ARR by ensuring reliable WebSocket agent integration
 
 This test suite validates the 5 required WebSocket events using the unified event schema
@@ -146,7 +146,7 @@ class WebSocketAgentEventsUnifiedTests(SSotAsyncTestCase):
     """
     MISSION CRITICAL: WebSocket Agent Events Tests with Unified Schema
     
-    Business Value: $500K+ ARR Golden Path Protection using unified event schema
+    Business Value: 500K+ ARR Golden Path Protection using unified event schema
     Critical Path: WebSocket Events -> Agent Integration -> Chat Functionality
     
     Issue #984 Fix: Uses unified event schema to prevent test/production mismatches
@@ -252,7 +252,7 @@ class WebSocketAgentEventsUnifiedTests(SSotAsyncTestCase):
         """
         MISSION CRITICAL: Test unified WebSocket event schema prevents Issue #984.
         
-        BVJ: $500K+ ARR protection - validates schema compliance for core chat functionality
+        BVJ: 500K+ ARR protection - validates schema compliance for core chat functionality
         Critical Path: Unified Schema -> Event Validation -> Test/Production Consistency
         
         Issue #984 Fix: This test ensures tool_name and results fields are present
@@ -407,10 +407,9 @@ class WebSocketAgentEventsUnifiedTests(SSotAsyncTestCase):
 if __name__ == "__main__":
     print("\\n" + "=" * 80)
     print("MISSION CRITICAL WEBSOCKET AGENT EVENTS TEST SUITE - UNIFIED SCHEMA")
-    print("Issue #984 Fix: WebSocket events missing critical fields (tool_name, results)")
-    print("=" * 80)
+    print("Issue #984 Fix: WebSocket events missing critical fields (tool_name, results)""=" * 80)
     print()
-    print("Business Value: $500K+ ARR - Core chat functionality")
+    print("Business Value: 500K+ ARR - Core chat functionality")
     print("Testing: Unified event schema prevents test/production mismatches")
     print("Architecture: Single Source of Truth for event structures")
     print("\\nRunning unified schema validation tests...")

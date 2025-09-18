@@ -3,13 +3,13 @@ Factory Pattern Migration Deprecation Test - Priority 1 Golden Path Critical
 
 This test reproduces and validates deprecation warnings related to factory pattern
 migrations, specifically SupervisorExecutionEngineFactory -> UnifiedExecutionEngineFactory
-transitions that impact the Golden Path user flow ($500K+ ARR).
+transitions that impact the Golden Path user flow (500K+ ARR).
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise, Platform)
 - Business Goal: System Stability & Agent Execution Reliability
 - Value Impact: Prevents agent execution failures in chat functionality
-- Strategic Impact: Protects $500K+ ARR by ensuring stable agent workflows and factory patterns
+- Strategic Impact: Protects 500K+ ARR by ensuring stable agent workflows and factory patterns
 
 Test Purpose:
 1. Reproduce specific factory pattern deprecation warnings

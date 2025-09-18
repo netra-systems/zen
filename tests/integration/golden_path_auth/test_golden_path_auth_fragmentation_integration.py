@@ -2,7 +2,7 @@
 Golden Path Authentication Fragmentation Integration Tests - Issue #1060
 
 MISSION CRITICAL: These tests demonstrate authentication fragmentation specifically
-within the Golden Path user flow - the $500K+ ARR critical business flow.
+within the Golden Path user flow - the 500K+ ARR critical business flow.
 
 Business Impact: CRITICAL - Golden Path auth failures directly block revenue
 Technical Impact: End-to-end authentication fragmentation evidence in user workflow

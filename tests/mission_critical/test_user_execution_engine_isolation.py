@@ -106,8 +106,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 engine2 = UserExecutionEngine(user2_context, agent_factory2, websocket_emitter2)
                 
                 # Test 1: Basic isolation
-                self.assertNotEqual(engine1.engine_id, engine2.engine_id, Engines should have different IDs)"
-                self.assertNotEqual(engine1.engine_id, engine2.engine_id, Engines should have different IDs)"
+                self.assertNotEqual(engine1.engine_id, engine2.engine_id, Engines should have different IDs)""
                 self.assertEqual(engine1.get_user_context().user_id, user1_id, Engine1 should have user1 context")"
                 self.assertEqual(engine2.get_user_context().user_id, user2_id, Engine2 should have user2 context)
                 
@@ -170,8 +169,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 
                 # Create unique user context
                 user_id = UnifiedIdGenerator.generate_base_id(fconcurrent_user_{user_index}, True, 8)
-                thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, fconcurrent_test_{user_index})"
-                thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, fconcurrent_test_{user_index})""
+                thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, fconcurrent_test_{user_index})"""
 
                 
                 user_context = UserExecutionContext(
@@ -291,8 +289,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
     
     def test_websocket_event_routing_isolation(self):
         ""Test that WebSocket events are routed only to the correct users."
-        logger.info(📡 WEBSOCKET TEST: Validating WebSocket event routing isolation)"
-        logger.info(📡 WEBSOCKET TEST: Validating WebSocket event routing isolation)""
+        logger.info(📡 WEBSOCKET TEST: Validating WebSocket event routing isolation)"""
 
         
         async def test_websocket_isolation():
@@ -391,10 +388,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 return False
         
         result = asyncio.run(test_websocket_isolation())
-        self.assertTrue(result, "WebSocket event routing should be properly isolated)"
-    
-    def test_resource_limits_isolation(self):
-        Test that resource limits are enforced per user."
+        self.assertTrue(result, "WebSocket event routing should be properly isolated)""
         Test that resource limits are enforced per user."
         logger.info("⚡ RESOURCE TEST: Validating resource limits isolation)"
         
@@ -499,8 +493,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 
                 # Create and cleanup multiple users to test memory isolation
                 for i in range(3):
-                    user_id = UnifiedIdGenerator.generate_base_id(fmemory_user_{i}, True, 8)"
-                    user_id = UnifiedIdGenerator.generate_base_id(fmemory_user_{i}, True, 8)"
+                    user_id = UnifiedIdGenerator.generate_base_id(fmemory_user_{i}, True, 8)""
                     thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, f"memory_test_{i})"
                     
                     user_context = UserExecutionContext(

@@ -10,7 +10,7 @@ complete infrastructure failure affecting the golden path user flow.
 Business Value Justification (BVJ):
 - Segment: Platform/Critical
 - Business Goal: Stability
-- Value Impact: Reproduce complete system failure affecting $500K+ ARR
+- Value Impact: Reproduce complete system failure affecting 500K+ ARR
 - Strategic Impact: Validate E2E test effectiveness at catching infrastructure crises
 
 CRITICAL: These tests MUST FAIL initially to reproduce Issue #1278 crisis.
@@ -164,7 +164,7 @@ class TestIssue1278GoldenPathReproduction(SSotAsyncTestCase):
         """
         FAILING TEST: Reproduce complete chat functionality breakdown.
 
-        From Issue #1278: "$500K+ ARR Chat Functionality: COMPLETELY NON-FUNCTIONAL"
+        From Issue #1278: "500K+ ARR Chat Functionality: COMPLETELY NON-FUNCTIONAL"
         This test SHOULD FAIL demonstrating zero chat capability.
         """
         chat_functionality_steps = []
@@ -269,7 +269,7 @@ class TestIssue1278GoldenPathReproduction(SSotAsyncTestCase):
                 f"CHECK ISSUE #1278 REPRODUCED: {len(chat_failures)} chat features failed:\n"
                 f"{chat_failure_details}\n"
                 f"Working features: {chat_functionality_steps}\n"
-                "This confirms $500K+ ARR chat functionality breakdown from Issue #1278."
+                "This confirms 500K+ ARR chat functionality breakdown from Issue #1278."
             )
         else:
             self.fail(
@@ -511,7 +511,7 @@ class TestIssue1278GoldenPathReproduction(SSotAsyncTestCase):
                 f"CHECK ISSUE #1278 REPRODUCED: {len(platform_outages)}/{total_functions} customer functions down ({outage_percentage:.1f}% outage):\n"
                 f"{outage_details}\n"
                 f"Working functions: {customer_functions}\n"
-                "This confirms complete platform outage affecting $500K+ ARR from Issue #1278."
+                "This confirms complete platform outage affecting 500K+ ARR from Issue #1278."
             )
         else:
             self.fail(

@@ -1,6 +1,6 @@
 """MISSION CRITICAL E2E TEST: Frontend Initialization and First-Time Page Load
 
-Business Value: $500K+ ARR - Core user experience and chat functionality
+Business Value: 500K+ ARR - Core user experience and chat functionality
 THIS TEST MUST PASS OR THE PRODUCT IS BROKEN.
 
 Tests the complete frontend initialization flow with:

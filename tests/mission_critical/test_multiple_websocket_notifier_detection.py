@@ -7,7 +7,7 @@ This test DETECTS duplicate WebSocketNotifier implementations across the codebas
 """
 """
 
-Business Impact: $500K+ plus ARR at risk from conflicting WebSocket implementations
+Business Impact: 500K+  ARR at risk from conflicting WebSocket implementations
 
 Test Strategy:
     - Scan codebase for multiple WebSocketNotifier class definitions
@@ -463,8 +463,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
             )
         
         # The test PASSES by proving violations exist (confirming the issue)
-        logger.info(TEST PASSES: WebSocket implementation duplicates confirmed)"
-        logger.info(TEST PASSES: WebSocket implementation duplicates confirmed)"
+        logger.info(TEST PASSES: WebSocket implementation duplicates confirmed)""
         logger.info(Next step: Consolidate WebSocket implementations to single SSOT")"
         
         return {

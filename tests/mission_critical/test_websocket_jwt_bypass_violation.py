@@ -17,7 +17,7 @@ EXPECTED BEHAVIOR:
 Business Value Justification (BVJ):
     - Segment: Enterprise/Security-conscious customers
 - Business Goal: Security compliance and customer trust
-- Value Impact: Prevents unauthorized access to $500K+ plus ARR chat functionality
+- Value Impact: Prevents unauthorized access to 500K+  ARR chat functionality
 - Revenue Impact: Security breach could cost entire customer base
 
 AUTH SSOT REQUIREMENT:
@@ -106,8 +106,7 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
             
             # If we get here, the violation exists (token was accepted)
             if user_context:
-                logger.error( ALERT:  SSOT VIOLATION CONFIRMED: Invalid JWT token was accepted!)"
-                logger.error( ALERT:  SSOT VIOLATION CONFIRMED: Invalid JWT token was accepted!)"
+                logger.error( ALERT:  SSOT VIOLATION CONFIRMED: Invalid JWT token was accepted!)""
                 logger.error(f ALERT:  Extracted user context: {user_context}")"
                 
                 # Assertion that proves violation exists
@@ -116,8 +115,7 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
                     
                 # Log the violation for tracking
                 logger.critical( ALERT:  SECURITY VIOLATION: WebSocket bypassed JWT signature verification)
-                logger.critical( ALERT:  THIS TEST PASSES = VIOLATION EXISTS)"
-                logger.critical( ALERT:  THIS TEST PASSES = VIOLATION EXISTS)"
+                logger.critical( ALERT:  THIS TEST PASSES = VIOLATION EXISTS)""
                 logger.critical( ALERT:  AFTER SSOT FIX: This test should FAIL")"
                 
                 # Test passes = violation confirmed
@@ -177,8 +175,7 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
                 assert user_context.get(sub") == expired_user_456, \"
                     SSOT VIOLATION: WebSocket accepted expired JWT token
                     
-                logger.critical( ALERT:  SECURITY VIOLATION: WebSocket accepted expired JWT token)"
-                logger.critical( ALERT:  SECURITY VIOLATION: WebSocket accepted expired JWT token)"
+                logger.critical( ALERT:  SECURITY VIOLATION: WebSocket accepted expired JWT token)""
                 logger.critical( ALERT:  THIS TEST PASSES = VIOLATION EXISTS")"
                 
                 return True
@@ -252,8 +249,7 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
         if NoDockerModeDetector.is_no_docker_mode():
             pytest.skip(Integration test requires services)
             
-        logger.info( ALERT:  TESTING BUSINESS IMPACT: Unauthorized WebSocket access via JWT bypass)"
-        logger.info( ALERT:  TESTING BUSINESS IMPACT: Unauthorized WebSocket access via JWT bypass)""
+        logger.info( ALERT:  TESTING BUSINESS IMPACT: Unauthorized WebSocket access via JWT bypass)"""
 
         
         # Create fake user token that would normally be unauthorized
@@ -292,7 +288,7 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
                     logger.critical( ALERT:  FAKE ADMIN PERMISSIONS ACCEPTED - MASSIVE SECURITY BREACH")"
                 
                 # Business impact assertion
-                assert True, "CRITICAL VIOLATION: JWT bypass enables unauthorized access to $500K+ plus ARR platform"
+                assert True, "CRITICAL VIOLATION: JWT bypass enables unauthorized access to 500K+  ARR platform"
                 return True
                 
         except Exception as e:

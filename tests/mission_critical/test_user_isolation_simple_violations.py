@@ -157,7 +157,7 @@ class TestUserIsolationSimpleViolations(SSotBaseTestCase):
                 print(f"{i:2d}. {violation}")
             print("="*60)
             print(f"TOTAL VIOLATIONS: {len(self.violations_found)}")
-            print("SECURITY RISK FOR $500K+ ARR")
+            print("SECURITY RISK FOR 500K+ ARR")
             print("="*60)
 
 

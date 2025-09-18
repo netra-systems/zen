@@ -2,7 +2,7 @@
 
 Mission Critical WebSocket Error Messaging Reliability Tests
 
-BUSINESS CRITICAL: These tests protect $500K+ plus ARR by ensuring WebSocket error messaging
+BUSINESS CRITICAL: These tests protect 500K+  ARR by ensuring WebSocket error messaging
 functions correctly in all scenarios. WebSocket errors breaking chat functionality
 directly impacts 90% of platform value delivery.
 
@@ -325,14 +325,7 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
             self.fail(fMISSION CRITICAL FAILURE: Found {len(signature_violations)} function signature violations:\n +
                      \n.join(signature_violations) +"
                      \n.join(signature_violations) +"
-                     "\n\nThese MUST be fixed before deployment to prevent WebSocket failures.)"
-    
-    async def test_mission_critical_error_message_delivery_reliability(self):
-        
-        MISSION CRITICAL: Test error message delivery reliability under various conditions.
-        
-        Validates that error messages are delivered even under stress conditions.
-""
+                     "\n\nThese MUST be fixed before deployment to prevent WebSocket failures.)"""
         from netra_backend.app.websocket_core.types import create_error_message
         
         # Test rapid error message creation (stress test)

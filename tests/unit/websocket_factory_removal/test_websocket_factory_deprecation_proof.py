@@ -171,7 +171,7 @@ class WebSocketFactoryDeprecationProofTests(SSotAsyncTestCase):
         """
         TEST 3F: Ensure Golden Path functionality preserved without factory
         
-        Tests that critical Golden Path WebSocket functionality ($500K+ ARR)
+        Tests that critical Golden Path WebSocket functionality (500K+ ARR)
         continues to work correctly after factory removal.
         """
         logger.info('Testing Golden Path functionality preservation...')

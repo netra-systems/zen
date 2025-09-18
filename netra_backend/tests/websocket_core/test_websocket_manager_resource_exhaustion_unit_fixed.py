@@ -4,7 +4,7 @@ Unit Tests for WebSocket Manager Resource Exhaustion Emergency Cleanup Failure
 CRITICAL TEST PLAN: These tests are designed to FAIL initially to prove the bug exists.
 Test focus: Reproduce the emergency cleanup failure when hitting MAX_CONNECTIONS_PER_USER limit.
 
-Business Impact: $500K+ ARR dependent on WebSocket reliability for Golden Path user flow.
+Business Impact: 500K+ ARR dependent on WebSocket reliability for Golden Path user flow.
 
 Test Cases:
 1. Test that creates 20 WebSocket managers and hits the limit (MAX_CONNECTIONS_PER_USER = 10)

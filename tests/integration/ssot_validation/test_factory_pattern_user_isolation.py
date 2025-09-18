@@ -4,7 +4,7 @@ Factory Pattern User Isolation Validation
 Business Value Justification:
 - Segment: Enterprise/Platform
 - Business Goal: User Data Security & Multi-Tenant Isolation
-- Value Impact: Validates user isolation for $500K+ ARR enterprise customers
+- Value Impact: Validates user isolation for 500K+ ARR enterprise customers
 - Strategic Impact: Ensures no cross-user data contamination in agent execution
 
 Tests validate Issue #1116 completion - singleton elimination and user isolation.

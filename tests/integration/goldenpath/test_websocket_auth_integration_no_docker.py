@@ -3,14 +3,14 @@ Golden Path WebSocket Authentication Integration Tests - NO DOCKER
 Issue #843 - [test-coverage] 75% coverage | goldenpath e2e
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise) - $500K+ ARR Protection
+- Segment: All (Free, Early, Mid, Enterprise) - 500K+ ARR Protection
 - Business Goal: Secure WebSocket authentication enables AI chat golden path
 - Value Impact: Users can securely connect and maintain sessions for AI interactions
 - Strategic Impact: Core authentication infrastructure protecting revenue-generating functionality
 
 CRITICAL: These tests validate golden path WebSocket authentication using REAL services.
 NO DOCKER DEPENDENCIES - Tests run on GCP staging environment with real services.
-Tests focus on core business-critical authentication flows that protect $500K+ ARR.
+Tests focus on core business-critical authentication flows that protect 500K+ ARR.
 
 Test Coverage Focus:
 - WebSocket connection with real JWT authentication
@@ -59,7 +59,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
     """
     Golden Path WebSocket Authentication Integration Tests - NO DOCKER
     
-    These tests validate the core authentication flows that enable the $500K+ ARR
+    These tests validate the core authentication flows that enable the 500K+ ARR
     golden path user experience. All tests use real services and avoid Docker 
     dependencies to ensure compatibility with GCP staging environments.
     """
@@ -154,7 +154,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
         """
         Test JWT authentication for golden path users with real services.
         
-        Business Value: Core authentication enables $500K+ ARR AI chat functionality.
+        Business Value: Core authentication enables 500K+ ARR AI chat functionality.
         This test protects the primary revenue-generating user flow.
         """
         # Create user ID for golden path testing
@@ -233,7 +233,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
         """
         Test security boundaries when authentication fails.
         
-        Business Value: Protects $500K+ ARR platform from unauthorized access
+        Business Value: Protects 500K+ ARR platform from unauthorized access
         and ensures security compliance for enterprise customers.
         """
         malicious_user_id = f"malicious_{self.test_user_id_base}"

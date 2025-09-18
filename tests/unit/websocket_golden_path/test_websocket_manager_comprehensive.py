@@ -4,7 +4,7 @@ Comprehensive Unit Tests for WebSocket Manager (Golden Path SSOT)
 Business Value Justification (BVJ):
 - Segment: All (Free  ->  Enterprise) - Core infrastructure for all tiers
 - Business Goal: Reliability & Stability - Ensure WebSocket communication foundation
-- Value Impact: Critical for $500K+ ARR chat functionality - connection success rates
+- Value Impact: Critical for 500K+ ARR chat functionality - connection success rates
 - Revenue Impact: Foundation for all AI-powered user interactions
 
 CRITICAL: These tests validate the most business-critical WebSocket Manager functionality
@@ -80,7 +80,7 @@ class WebSocketManagerComprehensiveTests(SSotAsyncTestCase):
         """
         Test WebSocket connection registration for Golden Path user flow.
         
-        BVJ: Connection success is critical for $500K+ ARR chat functionality.
+        BVJ: Connection success is critical for 500K+ ARR chat functionality.
         This validates the foundational operation that enables all user interactions.
         """
         self.connection_attempts += 1

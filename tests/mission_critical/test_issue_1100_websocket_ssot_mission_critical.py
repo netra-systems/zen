@@ -3,7 +3,7 @@ Mission Critical WebSocket SSOT Validation - Issue #1100
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise) - Mission Critical Infrastructure  
-- Business Goal: Ensure $500K+ ARR WebSocket infrastructure remains functional
+- Business Goal: Ensure 500K+ ARR WebSocket infrastructure remains functional
 - Value Impact: Validates mission-critical WebSocket functionality during SSOT migration
 - Strategic Impact: Prevents business disruption during technical debt elimination
 
@@ -104,7 +104,7 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
         for event_type in required_events:
             assert event_delivery_results.get(event_type, {}).get('delivered', False), (
                 f"MISSION CRITICAL: WebSocket event '{event_type}' not delivered. "
-                f"This blocks deployment as it indicates $500K+ ARR functionality is broken. "
+                f"This blocks deployment as it indicates 500K+ ARR functionality is broken. "
                 f"Event counts: {event_delivery_results}"
             )
         
@@ -155,21 +155,7 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
             
         except ImportError:
             implementation_analysis['factory_available'] = False
-            logger.info("Deprecated WebSocketManagerFactory not available (correct)")
-        
-        # Test WebSocket manager instantiation consistency
-        if implementation_analysis.get('canonical_available'):
-            try:
-                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerMode
-                from netra_backend.app.services.user_execution_context import UserExecutionContext
-                from shared.types.core_types import ensure_user_id
-                import uuid
-                
-                # Create test context with proper UUID format
-                test_user_id = ensure_user_id(str(uuid.uuid4()))
-                test_context = UserExecutionContext(
-                    user_id=test_user_id,
-                    thread_id="mission_critical_thread",
+            logger.info("Deprecated WebSocketManagerFactory not available (correct)""mission_critical_thread",
                     run_id="mission_critical_run",
                     request_id="ssot_validation_test"
                 )
@@ -248,7 +234,7 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
         MUST PASS: Business value protected during import migration.
         
         This test validates that chat functionality continues operating
-        during the SSOT migration process, protecting $500K+ ARR.
+        during the SSOT migration process, protecting 500K+ ARR.
         """
         logger.info("MISSION CRITICAL: Validating business value protection during migration")
         
@@ -304,10 +290,10 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
         
         logger.info(f"Business value indicators: {business_value_indicators}")
         
-        # These assertions protect $500K+ ARR functionality
+        # These assertions protect 500K+ ARR functionality
         assert business_value_indicators['chat_functionality_working'], (
             "MISSION CRITICAL: Chat functionality not working. "
-            "$500K+ ARR is at risk if users cannot interact with AI agents."
+            "500K+ ARR is at risk if users cannot interact with AI agents."
         )
         
         assert business_value_indicators['agent_responses_delivered'], (
@@ -322,7 +308,7 @@ class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
         
         assert len(business_critical_failures) == 0, (
             f"MISSION CRITICAL: {len(business_critical_failures)} business value failures. "
-            f"$500K+ ARR functionality compromised: {business_critical_failures}"
+            f"500K+ ARR functionality compromised: {business_critical_failures}"
         )
     
     @pytest.mark.mission_critical

@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,17 +23,12 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 GOLDEN PATH BUSINESS VALUE PROTECTION TEST
 ==========================================
 
 PURPOSE: Validates that unified logging patterns protect Golden Path business value
-by ensuring correlation tracking works for $500K+ ARR debugging capabilities.
+by ensuring correlation tracking works for 500K+ ARR debugging capabilities.
 
 BUSINESS CONTEXT:
 - Golden Path represents the primary user flow: Login  ->  Chat  ->  AI Response
@@ -78,7 +65,7 @@ from shared.logging.unified_logging_ssot import get_logger, request_context
 @pytest.mark.unit
 class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCase):
     """
-    Validates unified logging protects $500K+ ARR debugging capabilities.
+    Validates unified logging protects 500K+ ARR debugging capabilities.
     
     Proves business value after SSOT logging remediation by ensuring
     correlation tracking works for customer support scenarios.
@@ -146,7 +133,7 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
         BUSINESS SCENARIO: Enterprise customer reports agent not responding.
         Support needs to trace execution flow across all components.
         
-        BUSINESS IMPACT: $500K+ ARR customer retention depends on quick issue resolution.
+        BUSINESS IMPACT: 500K+ ARR customer retention depends on quick issue resolution.
         """
         correlation_id = self.golden_path_context['correlation_id']
         
@@ -597,4 +584,4 @@ if __name__ == '__main__':
         print("Customer support capability compromised without unified correlation tracking")
     else:
         print("\n PASS:  BUSINESS VALUE PROTECTED: Unified logging enables effective customer support")
-        print("$500K+ ARR debugging capabilities maintained through proper correlation tracking")
+        print("500K+ ARR debugging capabilities maintained through proper correlation tracking")

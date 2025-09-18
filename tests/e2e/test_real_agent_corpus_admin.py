@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 1. Segment: Mid, Enterprise
 2. Business Goal: Enable advanced data management workflows  
 3. Value Impact: Corpus admin capabilities for document processing
-4. Revenue Impact: $200K+ ARR from enterprise document management features
+4. Revenue Impact: 200K+ ARR from enterprise document management features
 
 CLAUDE.md COMPLIANCE:
 - Uses real services ONLY (NO MOCKS)

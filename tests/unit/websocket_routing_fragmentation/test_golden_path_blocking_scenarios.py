@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise/Platform
 - Goal: Golden Path reliability restoration to 99.5%
 - Value Impact: Eliminates specific routing conflicts that block AI response delivery
-- Revenue Impact: Protects $500K+ ARR by ensuring users receive AI responses reliably
+- Revenue Impact: Protects 500K+ ARR by ensuring users receive AI responses reliably
 
 This test reproduces the critical Golden Path blocking scenarios where routing
 fragmentation prevents users from receiving AI responses, specifically:

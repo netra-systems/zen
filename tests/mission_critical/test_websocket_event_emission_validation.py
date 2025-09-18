@@ -165,11 +165,7 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         mock_bridge.notify_agent_thinking.assert_called_once() 
         mock_bridge.notify_agent_completed.assert_called_once()
         
-        print(" PASS:  UserWebSocketEmitter working correctly)"
-        
-    @pytest.mark.mission_critical
-    async def test_complete_event_flow_integration(self):
-        "Test complete integration of all components for WebSocket event emission."
+        print(" PASS:  UserWebSocketEmitter working correctly)""Test complete integration of all components for WebSocket event emission."
         # This test validates that the entire chain is connected:
         # UserExecutionEngine -> tool_dispatcher -> WebSocket events
         # UserExecutionEngine -> agent_core -> WebSocket events

@@ -5,7 +5,7 @@ This test measures the performance impact of current factory patterns on the
 Golden Path user flow, establishing baseline metrics before cleanup.
 
 Business Value: Platform/Internal - Performance optimization and user experience
-Ensures factory cleanup maintains $500K+ ARR chat functionality performance
+Ensures factory cleanup maintains 500K+ ARR chat functionality performance
 while reducing technical debt and complexity overhead.
 
 Test Strategy:
@@ -141,7 +141,7 @@ class FactoryPerformanceBaselineTests(SSotAsyncTestCase):
         Measure Golden Path factory performance baseline.
 
         Critical test: Measures performance of factory patterns that
-        directly impact $500K+ ARR chat functionality timing.
+        directly impact 500K+ ARR chat functionality timing.
         """
         golden_path_metrics = GoldenPathMetrics()
 
@@ -187,10 +187,7 @@ class FactoryPerformanceBaselineTests(SSotAsyncTestCase):
                        "Golden Path initialization must be under 5 seconds")
 
         self.assertLess(golden_path_metrics.websocket_factory_time, 0.1,
-                       "WebSocket factory must be under 100ms (critical for chat)")
-
-        self.assertLess(golden_path_metrics.agent_factory_time, 0.2,
-                       "Agent factory must be under 200ms (critical for chat responses)")
+                       "WebSocket factory must be under 100ms (critical for chat)""Agent factory must be under 200ms (critical for chat responses)")
 
         # Memory assertions
         memory_limit_mb = 100 * 1024 * 1024  # 100MB

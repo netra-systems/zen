@@ -2,7 +2,7 @@
 Test WebSocket Event Validation Logic for Golden Path
 
 CRITICAL UNIT TEST: This validates the 5 mission-critical WebSocket events that
-enable the $500K+ ARR chat experience and business value delivery.
+enable the 500K+ ARR chat experience and business value delivery.
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) 

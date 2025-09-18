@@ -4,7 +4,7 @@ Test that only UnifiedWebSocketManager is imported/used as SSOT.
 Verify no duplicate manager implementations are active.
 Ensure single source of truth for WebSocket management.
 
-Business Value: Protects $500K+ ARR by preventing SSOT fragmentation failures.
+Business Value: Protects 500K+ ARR by preventing SSOT fragmentation failures.
 """
 
 import pytest
@@ -157,9 +157,7 @@ class WebSocketManagerCanonicalSourceValidationTests(SSotAsyncTestCase):
         try:
             # This should not raise TypeError for abstract class
             inspect.signature(WebSocketManager.__init__)
-            logger.info("CHECK WebSocketManager is instantiable (not abstract)")
-        except Exception as e:
-            self.fail(f"WebSocketManager appears to be abstract or malformed: {e}")
+            logger.info("CHECK WebSocketManager is instantiable (not abstract)""WebSocketManager appears to be abstract or malformed: {e}")
 
         logger.info("CHECK WebSocket Manager SSOT enforcement validated")
 

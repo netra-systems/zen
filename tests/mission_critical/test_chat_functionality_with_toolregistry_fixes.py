@@ -320,8 +320,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
             raise
             
         except Exception as e:
-            logger.error(f FAIL:  Chat flow failed: {e})"
-            logger.error(f FAIL:  Chat flow failed: {e})""
+            logger.error(f FAIL:  Chat flow failed: {e})"""
 
             if any(keyword in str(e).lower() for keyword in ['already registered', 'modelmetaclass']:
                 pytest.fail(f"BUSINESS CRITICAL FAILURE: Chat flow broken by registry error: {e})"
@@ -336,8 +335,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
         WebSocket events are sent without tool registry issues.
 ""
         logger.info( ALERT:  MISSION CRITICAL: Testing WebSocket agent events with fixed registry)
-        logger.info( TARGET:  Business Value: WebSocket events enable real-time chat interactions)"
-        logger.info( TARGET:  Business Value: WebSocket events enable real-time chat interactions)""
+        logger.info( TARGET:  Business Value: WebSocket events enable real-time chat interactions)"""
 
         
         # Connect to WebSocket
@@ -444,13 +442,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
             pytest.fail(fMISSION CRITICAL FAILURE: Tool registry errors during agent execution: {registry_errors})""
 
             
-        logger.info(" CELEBRATION:  MISSION CRITICAL SUCCESS: WebSocket agent events working correctly!)"
-        logger.info([U+1F4BC] BUSINESS VALUE CONFIRMED: Real-time chat interactions fully functional)
-        
-        await websocket.close()
-        
-    async def test_concurrent_users_chat_without_registry_conflicts(self):
-    """
+        logger.info(" CELEBRATION:  MISSION CRITICAL SUCCESS: WebSocket agent events working correctly!)""""
 
         Test that multiple users can chat simultaneously without registry conflicts.
         
@@ -622,8 +614,7 @@ class ToolRegistryBusinessValueValidationTests(SSotBaseTestCase):
         # This test would typically run multiple registration cycles
         # and validate that the system remains stable
         
-        ws_auth_helper = E2EWebSocketAuthHelper(environment=staging)"
-        ws_auth_helper = E2EWebSocketAuthHelper(environment=staging)""
+        ws_auth_helper = E2EWebSocketAuthHelper(environment=staging)"""
 
         
         # Test multiple connection cycles (simulating real usage patterns)

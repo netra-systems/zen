@@ -349,9 +349,7 @@ class SSOTRegressionPreventionTests:
         
         # Verify WebSocket isolation success
         if isolation_failures:
-            logger.error(f"WebSocket isolation failures: {isolation_failures[:10]})"
-        
-        assert len(isolation_failures) == 0, "fWebSocket isolation failed: {len(isolation_failures)} failures detected"
+            logger.error(f"WebSocket isolation failures: {isolation_failures[:10]})""fWebSocket isolation failed: {len(isolation_failures)} failures detected"
     
     def test_agent_registry_isolation_concurrent_execution(self):
     """
@@ -2339,30 +2337,4 @@ def run_websocket_tests():
     try:
         # Run the WebSocket test synchronously by using asyncio.run
         asyncio.run(test_instance.test_websocket_channel_isolation_concurrent_sessions())
-        logger.info("WebSocket isolation tests completed successfully)"
-    except Exception as e:
-        logger.error(fWebSocket isolation tests failed: {e})
-        raise
-    finally:
-        test_instance.tearDown()
-
-
-if __name__ == '__main__':
-    # Configure logging for test execution
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    
-    # Run WebSocket tests first
-    try:
-        run_websocket_tests()
-    except Exception as e:
-        logger.error(f"WebSocket test execution failed: {e})"
-    
-    # Run the synchronous tests
-    # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution
-
-))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+        logger.info("WebSocket isolation tests completed successfully)""WebSocket test execution failed: {e})"

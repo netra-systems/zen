@@ -1,7 +1,7 @@
 """Phase 2 Integration Tests: Execution Engine Factory WebSocket Coordination (Issue #1123)
 
 CRITICAL BUSINESS VALUE: These tests reproduce WebSocket coordination issues that
-cause WebSocket 1011 errors, blocking the Golden Path user flow and $500K+ ARR.
+cause WebSocket 1011 errors, blocking the Golden Path user flow and 500K+ ARR.
 
 EXPECTED BEHAVIOR: All tests in this file should INITIALLY FAIL to demonstrate
 the WebSocket coordination problems. They will pass after fixes are implemented.
@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free -> Enterprise)
 - Business Goal: Ensure reliable service coordination for chat functionality
 - Value Impact: Prevents Golden Path initialization failures and WebSocket 1011 errors
-- Strategic Impact: Essential for $500K+ ARR chat reliability and real-time communication
+- Strategic Impact: Essential for 500K+ ARR chat reliability and real-time communication
 
 Infrastructure Requirements:
 - Local PostgreSQL (port 5434) - NO DOCKER

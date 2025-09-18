@@ -322,9 +322,7 @@ class ServiceDependencyFailuresE2ETests(BaseE2ETest):
             has_degradation_notice = any(indicator in response_content for indicator in degradation_indicators)
             
             if not has_degradation_notice:
-                print(f" WARNING: [U+FE0F] Warning: Degraded response may not indicate limitations: {response_content[:100]}...")
-            
-            print(" PASS:  Database failure graceful degradation validated")
+                print(f" WARNING: [U+FE0F] Warning: Degraded response may not indicate limitations: {response_content[:100]}..."" PASS:  Database failure graceful degradation validated")
             print(f" PASS:  Baseline events: {len(baseline_events)}, Degraded events: {len(degraded_events)}")
             
         finally:
@@ -680,10 +678,7 @@ class ServiceDependencyFailuresE2ETests(BaseE2ETest):
             
             # May indicate limitations but should still try to help
             if not provides_value:
-                print(f" WARNING: [U+FE0F] Warning: Degraded response may lack business value: {response_content[:100]}...")
-            
-            # Should indicate degraded capabilities honestly
-            degradation_notices = ["limited", "degraded", "reduced", "offline", "unavailable"]
+                print(f" WARNING: [U+FE0F] Warning: Degraded response may lack business value: {response_content[:100]}...""limited", "degraded", "reduced", "offline", "unavailable"]
             acknowledges_degradation = any(notice in response_content for notice in degradation_notices)
             
             if acknowledges_degradation:
@@ -782,10 +777,7 @@ class ServiceDependencyFailuresE2ETests(BaseE2ETest):
                 is_helpful = any(term in message for term in helpful_terms)
                 
                 if not is_helpful:
-                    print(f" WARNING: [U+FE0F] Warning: Error message may not be user-helpful: {message}")
-            
-            # Should still attempt to provide value despite errors
-            completion_events = [e for e in error_events if e.get("type") == "agent_completed"]
+                    print(f" WARNING: [U+FE0F] Warning: Error message may not be user-helpful: {message}""type") == "agent_completed"]
             
             if completion_events:
                 final_event = completion_events[-1]

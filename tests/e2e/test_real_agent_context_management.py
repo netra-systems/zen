@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 1. Segment: All (Free, Early, Mid, Enterprise)
 2. Business Goal: Enable secure multi-user agent execution
 3. Value Impact: Context isolation prevents data leakage between users
-4. Revenue Impact: $600K+ ARR protection from multi-user system reliability
+4. Revenue Impact: 600K+ ARR protection from multi-user system reliability
 
 CLAUDE.md COMPLIANCE:
 - Uses real services ONLY (NO MOCKS)

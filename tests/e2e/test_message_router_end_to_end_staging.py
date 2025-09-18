@@ -5,7 +5,7 @@ Business Value Justification:
 - Segment: Platform/Production (Enterprise reliability)
 - Business Goal: Production-grade chat reliability
 - Value Impact: Validate complete user message routing end-to-end
-- Strategic Impact: Ensure $500K+ ARR chat works in production-like environment
+- Strategic Impact: Ensure 500K+ ARR chat works in production-like environment
 
 These tests are designed to FAIL initially to reproduce real-world routing issues.
 Tests run against staging GCP environment with real services (no Docker required).

@@ -6,7 +6,7 @@ Uses real services but no Docker required.
 
 Business Value Justification:
 - Segment: Platform Infrastructure
-- Business Goal: Golden Path Reliability ($500K+ ARR protection)
+- Business Goal: Golden Path Reliability (500K+ ARR protection)
 - Value Impact: Validate complete user->agent->response flow works reliably
 - Strategic Impact: Ensure business-critical chat functionality operates correctly
 
@@ -132,7 +132,7 @@ class GoldenPathMessageRoutingFailuresTests(SSotAsyncTestCase):
         assert message_routing_success and len(routing_errors) == 0, (
             f"GOLDEN PATH FAILURE: Message routing failed. "
             f"Success: {message_routing_success}, Errors: {routing_errors}. "
-            f"This demonstrates SSOT violations that break $500K+ ARR chat functionality."
+            f"This demonstrates SSOT violations that break 500K+ ARR chat functionality."
         )
 
     @pytest.mark.integration
@@ -289,7 +289,7 @@ class GoldenPathMessageRoutingFailuresTests(SSotAsyncTestCase):
         assert len(event_delivery_violations) == 0, (
             f"WEBSOCKET EVENT DELIVERY FAILURES: {len(event_delivery_violations)} violations. "
             f"Details: {event_delivery_violations}. "
-            f"This breaks the Golden Path user experience for $500K+ ARR chat functionality."
+            f"This breaks the Golden Path user experience for 500K+ ARR chat functionality."
         )
 
     # Helper methods

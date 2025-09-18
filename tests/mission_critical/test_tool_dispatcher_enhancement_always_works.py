@@ -3,7 +3,7 @@
 Mission Critical Test Suite: Tool Dispatcher Enhancement Always Works
 
 Business Value: Platform/Internal - Tool Dispatcher SSOT Factory Pattern Compliance
-Critical for $500K+ ARR protection through proper tool dispatcher factory patterns.
+Critical for 500K+ ARR protection through proper tool dispatcher factory patterns.
 
 This test suite validates that the tool dispatcher ALWAYS uses the proper factory pattern
 with user_context for WebSocket manager integration, eliminating the "enhancement" anti-pattern.

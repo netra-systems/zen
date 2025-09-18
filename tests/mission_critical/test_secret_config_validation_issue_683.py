@@ -8,7 +8,7 @@ This test reproduces the configuration validation failures identified in staging
 configuration validation tests. Focus on SecretConfig class validation and secret injection
 bridge gaps between SecretConfig and GCP deployment.
 
-Business Impact: Protects $500K+ plus ARR staging validation pipeline
+Business Impact: Protects 500K+  ARR staging validation pipeline
 Priority: P0 - Mission Critical
 
 Issue #683: Staging environment configuration validation failures

@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,17 +23,12 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""Unit Tests for Triage Golden Path - Core Logic Validation
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Unit Tests for Triage Golden Path - Core Logic Validation
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
 - Segment: All (Free/Early/Mid/Enterprise/Platform) - System Foundation
 - Business Goal: Ensure triage agent correctly routes requests to deliver AI value
-- Value Impact: Triage is the entry point that determines how $500K+ ARR user requests are handled
+- Value Impact: Triage is the entry point that determines how 500K+ ARR user requests are handled
 - Strategic Impact: Critical infrastructure that enables all downstream AI optimization value delivery
 - Revenue Protection: Without proper triage, users get wrong agents  ->  poor experiences  ->  churn
 
@@ -59,7 +46,7 @@ KEY COVERAGE:
 
 GOLDEN PATH PROTECTION:
 Tests ensure triage correctly identifies what users need and routes them to appropriate
-agents. This is the foundation that enables the entire $500K+ ARR golden path user flow.
+agents. This is the foundation that enables the entire 500K+ ARR golden path user flow.
 """
 
 import pytest

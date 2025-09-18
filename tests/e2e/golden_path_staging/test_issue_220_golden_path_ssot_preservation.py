@@ -4,7 +4,7 @@ Golden Path SSOT Preservation E2E Validation
 Business Value Justification:
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Revenue Protection & User Experience
-- Value Impact: Validates $500K+ ARR Golden Path preserved during SSOT work
+- Value Impact: Validates 500K+ ARR Golden Path preserved during SSOT work
 - Strategic Impact: Ensures 90% of platform value (chat) works with SSOT patterns
 
 Tests validate Golden Path functionality preserved during SSOT consolidation.

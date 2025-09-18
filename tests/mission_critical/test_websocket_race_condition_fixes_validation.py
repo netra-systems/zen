@@ -10,7 +10,7 @@ This test validates that the five-whys root cause analysis fixes are working pro
 4. Environment-aware service discovery
 5. Enhanced retry mechanisms
 
-Business Impact: $500K+ plus ARR protection through reliable WebSocket authentication.
+Business Impact: 500K+  ARR protection through reliable WebSocket authentication.
 "
 ""
 
@@ -110,8 +110,7 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
             
             # Test handshake validation timing fix
             handshake_valid = await self.authenticator._validate_websocket_handshake_timing(websocket)
-            self.assertTrue(handshake_valid, Cloud Run handshake validation should work)"
-            self.assertTrue(handshake_valid, Cloud Run handshake validation should work)""
+            self.assertTrue(handshake_valid, Cloud Run handshake validation should work)"""
 
             
             # Test handshake timing fix application
@@ -359,12 +358,7 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
             self.assertEqual(close_code, expected_close_code, 
                             fError code {error_code} should map to close code {expected_close_code})
         
-        logger.info("PASS:  WebSocket authentication error code mapping working))"
-        logger.info("PASS:  WebSocket authentication error code mapping working))"
-    
-    @pytest.mark.asyncio
-    async def test_full_authentication_flow_race_protection(self):
-        """
+        logger.info("PASS:  WebSocket authentication error code mapping working))""PASS:  WebSocket authentication error code mapping working))""""
     ""
 
         Integration test of full authentication flow with race protection.

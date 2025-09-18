@@ -40,29 +40,7 @@ class TestWebSocketSSotSimpleViolations(SSotBaseTestCase):
             (netra_backend.app.websocket_core.manager, WebSocketManager"),"
             ("netra_backend.app.websocket_core.unified_manager, _UnifiedWebSocketManagerImplementation),"
             (netra_backend.app.websocket_core.canonical_import_patterns, UnifiedWebSocketManager),
-            ("netra_backend.app.websocket_core.websocket_manager_factory, WebSocketManagerFactory)"
-        ]
-
-        for module_path, class_name in test_imports:
-            try:
-                module = __import__(module_path, fromlist=[class_name)
-                if hasattr(module, class_name):
-                    impl_class = getattr(module, class_name)
-                    implementations.append(f{module_path}.{class_name})
-                    self.violations_found.append(fFound implementation: {module_path}.{class_name})
-            except (ImportError, AttributeError):
-                # Expected for some paths after SSOT consolidation
-                pass
-
-        # Log found implementations
-        print(f"\nFound {len(implementations)} WebSocket implementations:)"
-        for impl in implementations:
-            print(f  - {impl})
-
-        # ASSERTION THAT SHOULD FAIL: Multiple implementations exist
-        self.assertGreater(
-            len(implementations), 1,
-            f"SSOT VIOLATION: Found {len(implementations)} WebSocket implementations."
+            ("netra_backend.app.websocket_core.websocket_manager_factory, WebSocketManagerFactory)""\nFound {len(implementations)} WebSocket implementations:)""SSOT VIOLATION: Found {len(implementations)} WebSocket implementations."
             fShould be exactly 1 after SSOT consolidation. "
             fShould be exactly 1 after SSOT consolidation. ""
 

@@ -5,7 +5,7 @@ Business Value Justification:
 - Segment: Platform/Core Business Logic
 - Business Goal: Complete Golden Path Validation & User Experience
 - Value Impact: End-to-end validation of agent golden path message workflow
-- Strategic Impact: Ensures complete user journey for $500K+ ARR chat functionality
+- Strategic Impact: Ensures complete user journey for 500K+ ARR chat functionality
 
 Test Coverage Focus:
 - Complete end-to-end golden path workflow

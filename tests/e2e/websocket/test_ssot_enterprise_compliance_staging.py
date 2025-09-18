@@ -3,7 +3,7 @@
 Business Value Justification (BVJ):
 - Segment: Enterprise/Government (HIPAA, SOC2, SEC compliance)
 - Business Goal: Regulatory compliance validation for enterprise sales
-- Value Impact: Enables $500K+ ARR enterprise deals requiring compliance
+- Value Impact: Enables 500K+ ARR enterprise deals requiring compliance
 - Strategic Impact: Validates SSOT meets enterprise regulatory requirements
 
 E2E staging tests for SSOT enterprise compliance:

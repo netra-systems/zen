@@ -3,7 +3,7 @@
 Golden Path Phase 2 Test Runner
 
 Quick execution script for running the critical Golden Path Phase 2 regression prevention test.
-This script validates $500K+ ARR protection during MessageRouter proxy removal.
+This script validates 500K+ ARR protection during MessageRouter proxy removal.
 
 Usage:
     python tests/e2e/staging/run_golden_path_phase2_test.py [--quick | --full | --baseline]
@@ -160,7 +160,7 @@ def run_full_test_suite():
     
     if passed == total:
         print(f"\n🎉 ALL GOLDEN PATH PHASE 2 TESTS PASSED!")
-        print("CHECK $500K+ ARR Golden Path is protected and ready for MessageRouter proxy removal")
+        print("CHECK 500K+ ARR Golden Path is protected and ready for MessageRouter proxy removal")
         return True
     else:
         print(f"\n🚨 GOLDEN PATH PHASE 2 TESTS FAILED!")
@@ -186,7 +186,7 @@ def main():
         args.full = True
     
     print("🔒 GOLDEN PATH PHASE 2 REGRESSION PREVENTION")
-    print("🎯 Mission: Protect $500K+ ARR during MessageRouter proxy removal")
+    print("🎯 Mission: Protect 500K+ ARR during MessageRouter proxy removal")
     print("🌐 Environment: Staging (real services, no mocks)")
     print("=" * 80)
     

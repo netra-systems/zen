@@ -149,14 +149,7 @@ class WebSocketReliabilityTester:
                 await conn.close()
             except Exception as e:
                 # Connection already closed or error during cleanup - acceptable
-                print(f"Warning: Error closing connection: {e}")
-
-
-@pytest.mark.e2e
-@pytest.mark.frontend
-@pytest.mark.websocket
-class FrontendWebSocketReliabilityTests:
-    """Test WebSocket connection reliability and recovery"""
+                print(f"Warning: Error closing connection: {e}""""Test WebSocket connection reliability and recovery"""
     
     @pytest.fixture(autouse=True)
     async def setup_tester(self):
@@ -198,11 +191,7 @@ class FrontendWebSocketReliabilityTests:
             assert response is not None
         except asyncio.TimeoutError:
             # Some servers might not echo pings - this is acceptable behavior
-            print("No response to ping message (acceptable for some WebSocket implementations)")
-            
-    @pytest.mark.asyncio
-    async def test_47_websocket_auto_reconnect(self):
-        """Test 47: WebSocket automatically reconnects after disconnection"""
+            print("No response to ping message (acceptable for some WebSocket implementations)""""Test 47: WebSocket automatically reconnects after disconnection"""
         self._check_service_availability()
         
         connection_id = "test-47"

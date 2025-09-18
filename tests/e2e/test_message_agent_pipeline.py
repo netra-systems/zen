@@ -301,11 +301,7 @@ test_message = {"type": "user_message",, "payload": { ), "content": "Test comple
         logger.error(event_validator.generate_report())
         assert False, "formatted_string"
 
-        logger.info("WebSocket agent events validation PASSED)"
-        logger.info(event_validator.generate_report())
-
-        pipeline_tester.record_response(message_id, { ))
-        "success: True,"
+        logger.info("WebSocket agent events validation PASSED)""success: True,"
         "duration: duration,"
         "response: response,"
         "events_count: len(event_validator.events),"
@@ -594,9 +590,7 @@ valid_recovery_message = {"type": "user_message",, "payload": { ), "content": "R
                                 # Validate recovery WebSocket events
         events_valid, failures = recovery_validator.validate_required_events()
         if events_valid:
-        logger.info("Recovery WebSocket events validation PASSED)"
-        else:
-        logger.warning("formatted_string)"
+        logger.info("Recovery WebSocket events validation PASSED)""formatted_string)"
 
         finally:
         await websocket.close()

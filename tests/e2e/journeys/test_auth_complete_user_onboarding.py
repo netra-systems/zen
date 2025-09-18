@@ -7,7 +7,7 @@ This validates the ENTIRE authentication flow that new users experience.
 Business Value Justification (BVJ):
 - Segment: Free tier + Paid conversions - New user acquisition funnel
 - Business Goal: Maximize User Onboarding Success - Reduce friction to first value
-- Value Impact: $200K+ ARR - 30% improvement in onboarding = 30% more revenue
+- Value Impact: 200K+ ARR - 30% improvement in onboarding = 30% more revenue
 - Strategic Impact: Growth Engine - Onboarding success drives organic expansion
 
 COMPLETE USER JOURNEY:

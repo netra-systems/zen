@@ -4,7 +4,7 @@ E2E tests for SessionMiddleware log spam validation in GCP staging - Issue #169.
 These tests validate log behavior in the actual staging GCP environment to ensure
 the fix works in production-like conditions.
 
-Business Impact: P1 - Production monitoring effectiveness for $500K+ ARR
+Business Impact: P1 - Production monitoring effectiveness for 500K+ ARR
 """
 import asyncio
 import logging

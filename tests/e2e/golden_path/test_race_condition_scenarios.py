@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure reliable WebSocket connections in production environments
 - Value Impact: Race condition failures = lost users = revenue loss
-- Strategic Impact: Production reliability for $500K+ ARR chat platform
+- Strategic Impact: Production reliability for 500K+ ARR chat platform
 
 GOLDEN PATH CRITICAL ISSUE #1: Race Conditions in WebSocket Handshake
 E2E test scenarios:

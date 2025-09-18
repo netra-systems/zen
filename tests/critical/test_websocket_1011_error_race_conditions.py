@@ -2,7 +2,7 @@
 WebSocket 1011 Error Race Condition Reproduction Tests
 
 Purpose: Reproduce the exact race conditions that cause WebSocket 1011 internal server errors
-that are blocking $500K+ ARR chat functionality in production.
+that are blocking 500K+ ARR chat functionality in production.
 
 Based on:
 - WEBSOCKET_1011_FIVE_WHYS_ROOT_CAUSE_ANALYSIS.md: SessionMiddleware dependency ordering
@@ -14,7 +14,7 @@ They MUST FAIL until the root causes are fixed with proper coordination mechanis
 
 Business Value:
 - Segment: Platform Core
-- Goal: $500K+ ARR Chat Functionality Recovery
+- Goal: 500K+ ARR Chat Functionality Recovery
 - Value Impact: Eliminates WebSocket 1011 errors breaking chat interactions
 - Strategic Impact: Validates specific 1011 error root cause fixes
 """

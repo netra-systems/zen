@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free/Early/Mid/Enterprise)
 - Business Goal: Validate Golden Path user flow works end-to-end
 - Value Impact: Ensures core platform value delivery (90% of business value)
-- Revenue Impact: Protects $500K+ ARR from complete service failures
+- Revenue Impact: Protects 500K+ ARR from complete service failures
 
 These tests validate the complete Golden Path user flow (login -> AI responses)
 in the real staging environment to detect and monitor Issue #1278 patterns.
@@ -398,8 +398,7 @@ class TestIssue1278GoldenPathValidation(SSotAsyncTestCase):
             # Return failure pattern for Issue #1278 (cascading from database)
             return {
                 "healthy": False,
-                "error": "WebSocket service startup failure due to database initialization timeout (Issue #1278)",
-                "startup_phase": "database_initialization",
+                "error": "WebSocket service startup failure due to database initialization timeout (Issue #1278)""startup_phase": "database_initialization",
                 "dependency_status": "failed"
             }
 

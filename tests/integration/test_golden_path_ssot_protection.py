@@ -2,7 +2,7 @@
 MISSION CRITICAL: Golden Path SSOT Protection Validation
 
 CRITICAL MISSION: Ensure SSOT test execution patterns don't break the Golden Path
-user flow that delivers 90% of platform value ($500K+ ARR).
+user flow that delivers 90% of platform value (500K+ ARR).
 
 BUSINESS VALUE: Protects the primary revenue-generating user flow while ensuring
 SSOT compliance doesn't introduce regressions in core business functionality.
@@ -53,7 +53,7 @@ class GoldenPathSSOTProtectionTests(SSotAsyncTestCase):
     MISSION CRITICAL: Test that SSOT compliance protects rather than breaks Golden Path.
     
     This test suite ensures SSOT testing infrastructure maintains the core business
-    flow that generates $500K+ ARR, proving SSOT enhances rather than hinders value.
+    flow that generates 500K+ ARR, proving SSOT enhances rather than hinders value.
     """
 
     def setup_method(self, method):
@@ -74,7 +74,7 @@ class GoldenPathSSOTProtectionTests(SSotAsyncTestCase):
             self.fail(f"BASELINE FAILURE: Golden Path not functional before SSOT testing:\nFailed components: {baseline_validation['failed_components']}\nSSOT testing cannot proceed until Golden Path is operational.")
         ssot_test_results = self._run_ssot_tests_with_golden_path_monitoring()
         post_test_validation = self._validate_golden_path_components()
-        assert post_test_validation['overall_success'], f"CRITICAL: Golden Path broken after SSOT test execution:\nFailed components: {post_test_validation['failed_components']}\nSSOT tests interfered with $500K+ ARR business functionality."
+        assert post_test_validation['overall_success'], f"CRITICAL: Golden Path broken after SSOT test execution:\nFailed components: {post_test_validation['failed_components']}\nSSOT tests interfered with 500K+ ARR business functionality."
         print(f'CHECK GOLDEN PATH PROTECTED: SSOT testing maintained business functionality')
         print(f"   Baseline success: {baseline_validation['success_rate']:.1%}")
         print(f"   Post-test success: {post_test_validation['success_rate']:.1%}")

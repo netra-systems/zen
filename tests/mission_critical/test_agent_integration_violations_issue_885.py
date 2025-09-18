@@ -4,7 +4,7 @@ Mission Critical Agent Integration Violation Tests for Issue #885
 These tests are designed to FAIL and prove agent integration violations exist.
 They validate proper agent-WebSocket integration for the Golden Path user flow.
 
-Business Value: Proves agent system integration failures affecting $500K+ ARR chat functionality
+Business Value: Proves agent system integration failures affecting 500K+ ARR chat functionality
 Expected Result: ALL TESTS SHOULD FAIL proving violations exist
 """
 
@@ -193,12 +193,7 @@ class TestAgentIntegrationViolations(SSotAsyncTestCase):
                         logger.debug(f"Event sending failed with {method_name}: {e}")
 
             if not event_sent_successfully and event_methods_tried:
-                violation = f"CRITICAL: WebSocket manager cannot send events (tried: {event_methods_tried})"
-                event_integration_violations.append(violation)
-                self.integration_violations.append(violation)
-
-        except Exception as e:
-            violation = f"Event integration test failed: {e}"
+                violation = f"CRITICAL: WebSocket manager cannot send events (tried: {event_methods_tried})""Event integration test failed: {e}"
             event_integration_violations.append(violation)
             self.integration_violations.append(violation)
 
@@ -558,7 +553,7 @@ class TestAgentIntegrationViolations(SSotAsyncTestCase):
                 logger.error(f"{i:2d}. {violation}")
             logger.error("="*80)
             logger.error(f"TOTAL INTEGRATION VIOLATIONS: {len(self.integration_violations)}")
-            logger.error("THESE VIOLATIONS AFFECT GOLDEN PATH USER FLOW ($500K+ ARR)")
+            logger.error("THESE VIOLATIONS AFFECT GOLDEN PATH USER FLOW (500K+ ARR)")
             logger.error("="*80)
 
         if self.tested_components:

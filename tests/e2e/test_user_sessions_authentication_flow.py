@@ -137,11 +137,7 @@ class UserSessionsAuthenticationE2ETests(BaseE2ETest):
                     response = await asyncio.wait_for(websocket.receive_json(), timeout=5.0)
                     logger.info(f" PASS:  Step 3: Received WebSocket response: {response.get('type', 'unknown')}")
                 except asyncio.TimeoutError:
-                    logger.warning(" WARNING: [U+FE0F] Step 3: WebSocket response timeout (may be normal for auth test)")
-            
-        except Exception as e:
-            pytest.fail(
-                f" FAIL:  CRITICAL FAILURE Step 3: WebSocket authentication failed: {e}. "
+                    logger.warning(" WARNING: [U+FE0F] Step 3: WebSocket response timeout (may be normal for auth test)"" FAIL:  CRITICAL FAILURE Step 3: WebSocket authentication failed: {e}. "
                 f"This indicates end-to-end authentication pipeline failure, "
                 f"possibly due to missing user_sessions table affecting session validation."
             )

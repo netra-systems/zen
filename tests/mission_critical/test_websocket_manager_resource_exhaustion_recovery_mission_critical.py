@@ -3,10 +3,10 @@ Mission Critical Tests for WebSocket Manager Resource Exhaustion Recovery
 
 This test file contains business-critical tests that validate the system's ability
 to recover from resource exhaustion scenarios that could affect the Golden Path
-user flow and threaten the $500K+ ARR dependency on chat functionality.
+user flow and threaten the 500K+ ARR dependency on chat functionality.
 
 Business Value:
-- Protects $500K+ ARR dependent on reliable WebSocket chat functionality
+- Protects 500K+ ARR dependent on reliable WebSocket chat functionality
 - Validates system stability under resource pressure conditions
 - Ensures Golden Path user flow continues during resource recovery
 - Tests end-to-end recovery scenarios that impact business operations
@@ -123,7 +123,7 @@ class TestWebSocketManagerResourceExhaustionRecoveryMissionCritical(SSotAsyncTes
             except (AttributeError, NotImplementedError):
                 self.fail(
                     "Golden Path protection during resource exhaustion not implemented! "
-                    "This is MISSION CRITICAL for $500K+ ARR protection. "
+                    "This is MISSION CRITICAL for 500K+ ARR protection. "
                     "System must protect revenue-generating user flows during resource pressure."
                 )
 

@@ -3,13 +3,13 @@ E2E Tests for Agent Message Pipeline - Golden Path Core Flow
 
 MISSION CRITICAL: Tests the complete user message -> agent response pipeline
 in staging GCP environment. This is the core of the Golden Path user journey
-representing 90% of platform business value ($500K+ ARR).
+representing 90% of platform business value (500K+ ARR).
 
 Business Value Justification (BVJ):
 - Segment: All Users (Free/Early/Mid/Enterprise) 
 - Business Goal: Platform Revenue Protection & User Retention
 - Value Impact: Validates complete AI chat functionality works end-to-end
-- Strategic Impact: $500K+ ARR depends on reliable agent message processing
+- Strategic Impact: 500K+ ARR depends on reliable agent message processing
 
 Test Strategy:
 - REAL SERVICES: Staging GCP Cloud Run environment only (NO Docker)
@@ -233,7 +233,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f'   Events collected: {len(pipeline_events)}')
-            raise AssertionError(f'PHASE 1 ENHANCED: Golden Path message pipeline with business value validation failed after {total_time:.1f}s: {e}. Events: {pipeline_events}. This breaks core user functionality and business value delivery ($500K+ ARR impact).')
+            raise AssertionError(f'PHASE 1 ENHANCED: Golden Path message pipeline with business value validation failed after {total_time:.1f}s: {e}. Events: {pipeline_events}. This breaks core user functionality and business value delivery (500K+ ARR impact).')
 
     async def test_agent_error_handling_and_recovery(self):
         """
@@ -1036,7 +1036,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f"   Events collected: {len(orchestration_metrics.get('coordination_events', []))}")
             self.logger.error(f"   Agents detected: {orchestration_metrics.get('agents_invoked', [])}")
-            raise AssertionError(f'Multi-agent orchestration validation failed after {total_time:.1f}s: {e}. This breaks advanced platform capabilities and enterprise value proposition ($500K+ ARR impact). Orchestration metrics: {orchestration_metrics}')
+            raise AssertionError(f'Multi-agent orchestration validation failed after {total_time:.1f}s: {e}. This breaks advanced platform capabilities and enterprise value proposition (500K+ ARR impact). Orchestration metrics: {orchestration_metrics}')
 
     def _extract_agent_info(self, event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Extract agent information from WebSocket events."""

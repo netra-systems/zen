@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Segment: ALL (Free/Early/Mid/Enterprise/Platform)
 - Business Goal: Ensure 5 critical WebSocket events use SSOT delivery patterns
 - Value Impact: Protects 90% of platform value (chat functionality)
-- Revenue Impact: Ensures $500K+ ARR chat reliability through proper event delivery
+- Revenue Impact: Ensures 500K+ ARR chat reliability through proper event delivery
 
 FAILING TEST STRATEGY:
 1. Test initially FAILS proving event delivery uses factory patterns

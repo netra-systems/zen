@@ -554,12 +554,7 @@ class RealAgentOrchestrationTests(SSotBaseTestCase):
         for event in websocket_events:
             event_payload = event.get("payload", {})
             if "user_id" in event_payload:
-                assert event_payload["user_id"] == user_id, "WebSocket event sent to wrong user (authentication breach)"
-    
-    @pytest.mark.asyncio
-    @pytest.mark.e2e
-    async def test_multi_agent_business_value_accumulation(self, orchestration_tester):
-        """Test business value accumulation across multiple real agents with MANDATORY authentication."""
+                assert event_payload["user_id"] == user_id, "WebSocket event sent to wrong user (authentication breach)""""Test business value accumulation across multiple real agents with MANDATORY authentication."""
         #  ALERT:  MANDATORY: Create authenticated user for business value test
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,

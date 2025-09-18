@@ -5,7 +5,7 @@ CRITICAL WEBSOCKET TESTS: These tests demonstrate WebSocket-specific authenticat
 fragmentation by showing inconsistent protocol handling across different
 WebSocket authentication implementations.
 
-Business Impact: $500K+ ARR - WebSocket auth failures directly block chat functionality
+Business Impact: 500K+ ARR - WebSocket auth failures directly block chat functionality
 Technical Impact: Shows fragmented WebSocket authentication protocols and handshakes
 
 TEST STRATEGY: Non-docker integration tests focusing on WebSocket protocol-level

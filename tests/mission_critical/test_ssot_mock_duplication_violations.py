@@ -285,8 +285,7 @@ BUSINESS IMPACT:
         
         # This test SHOULD FAIL to provide actionable violation report
         if total_violations > 0:
-            pytest.fail(fSSOT Mock Violation Report:\n{report})"
-            pytest.fail(fSSOT Mock Violation Report:\n{report})""
+            pytest.fail(fSSOT Mock Violation Report:\n{report})"""
 
             
     def _scan_for_mock_violations(self, mock_type: str) -> List[MockDuplicationViolation]:

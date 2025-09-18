@@ -274,8 +274,7 @@ class WebSocketEventGuaranteesTests:
         ""
         # Create agent that emits all events
         agent = CompleteWebSocketTestAgent(name=CompleteEventAgent)
-        agent.set_websocket_bridge(mock_bridge, test_run_complete)"
-        agent.set_websocket_bridge(mock_bridge, test_run_complete)""
+        agent.set_websocket_bridge(mock_bridge, test_run_complete)"""
 
         
         # Execute agent
@@ -602,8 +601,7 @@ class WebSocketEventGuaranteesTests:
         
         async def failing_notify_thinking(*args, **kwargs):
             if mock_bridge.connection_failures > 2:
-                raise ConnectionError(WebSocket bridge connection failed)"
-                raise ConnectionError(WebSocket bridge connection failed)""
+                raise ConnectionError(WebSocket bridge connection failed)"""
 
             return await original_notify_thinking(*args, **kwargs)
         
@@ -654,8 +652,7 @@ class WebSocketEventGuaranteesTests:
         events lack meaningful information for users.
 "
 "
-        agent = CompleteWebSocketTestAgent(name=ContentValidationAgent)"
-        agent = CompleteWebSocketTestAgent(name=ContentValidationAgent)"
+        agent = CompleteWebSocketTestAgent(name=ContentValidationAgent)""
         agent.set_websocket_bridge(mock_bridge, content_test_run")"
         
         context = ExecutionContext(

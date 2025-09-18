@@ -28,7 +28,7 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-'\nE2E tests for complete Golden Path workflow in staging GCP environment\n\nPurpose: Validate complete user workflow from login to AI response in staging\nIssue: #426 - E2E golden path tests failing due to service dependencies\nApproach: Real staging GCP services, complete end-to-end validation\n\nMISSION CRITICAL: This test validates the complete Golden Path that delivers\n$500K+ ARR through chat functionality. Must work in staging environment.\n\nGolden Path Flow: Login -> WebSocket Connection -> Agent Execution -> AI Response\nBusiness Impact: 90% of platform value delivered through this workflow\n'
+'\nE2E tests for complete Golden Path workflow in staging GCP environment\n\nPurpose: Validate complete user workflow from login to AI response in staging\nIssue: #426 - E2E golden path tests failing due to service dependencies\nApproach: Real staging GCP services, complete end-to-end validation\n\nMISSION CRITICAL: This test validates the complete Golden Path that delivers\n500K+ ARR through chat functionality. Must work in staging environment.\n\nGolden Path Flow: Login -> WebSocket Connection -> Agent Execution -> AI Response\nBusiness Impact: 90% of platform value delivered through this workflow\n'
 import pytest
 import asyncio
 import json
@@ -110,7 +110,7 @@ class GoldenPathCompleteStagingTests(SSotAsyncTestCase):
         Issue: #426 - E2E golden path tests failing due to service dependencies
         Difficulty: Very High (60 minutes)
         Expected: PASS after Docker infrastructure issues are resolved
-        Business Impact: $500K+ ARR depends on this workflow
+        Business Impact: 500K+ ARR depends on this workflow
         """
         golden_path_start = time.time()
         golden_path_steps = []
@@ -178,12 +178,12 @@ class GoldenPathCompleteStagingTests(SSotAsyncTestCase):
             golden_path_steps[-1]['status'] = 'completed'
             golden_path_steps[-1]['duration'] = time.time() - golden_path_steps[-1]['start_time']
             total_golden_path_duration = time.time() - golden_path_start
-            self.logger.info(f'🎉 GOLDEN PATH SUCCESS IN STAGING! Complete workflow took {total_golden_path_duration:.1f}s. Steps completed: {len(golden_path_steps)}. WebSocket events: {len(websocket_events)}. This validates $500K+ ARR functionality.')
+            self.logger.info(f'🎉 GOLDEN PATH SUCCESS IN STAGING! Complete workflow took {total_golden_path_duration:.1f}s. Steps completed: {len(golden_path_steps)}. WebSocket events: {len(websocket_events)}. This validates 500K+ ARR functionality.')
             await websocket_connection.close()
         except Exception as e:
             total_duration = time.time() - golden_path_start
             completed_steps = [step['step'] for step in golden_path_steps if step.get('status') == 'completed']
-            pytest.fail(f"🚨 GOLDEN PATH FAILURE IN STAGING: {str(e)} Duration: {total_duration:.1f}s. Completed steps: {completed_steps}. Failed at: {(golden_path_steps[-1]['step'] if golden_path_steps else 'initialization')}. BUSINESS IMPACT: $500K+ ARR chat functionality broken in staging. This must be fixed before production deployment.")
+            pytest.fail(f"🚨 GOLDEN PATH FAILURE IN STAGING: {str(e)} Duration: {total_duration:.1f}s. Completed steps: {completed_steps}. Failed at: {(golden_path_steps[-1]['step'] if golden_path_steps else 'initialization')}. BUSINESS IMPACT: 500K+ ARR chat functionality broken in staging. This must be fixed before production deployment.")
 
     @pytest.mark.e2e
     @pytest.mark.staging

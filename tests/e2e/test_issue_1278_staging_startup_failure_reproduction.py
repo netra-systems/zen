@@ -8,7 +8,7 @@ initialization failures, FastAPI lifespan context breakdown, and container exit 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - Critical Infrastructure Reliability
 - Business Goal: Staging Environment Availability
-- Value Impact: Protects $500K+ ARR validation pipeline from startup failures
+- Value Impact: Protects 500K+ ARR validation pipeline from startup failures
 - Strategic Impact: Ensures staging environment can reliably run the complete 7-phase SMD sequence
 
 Test Strategy:

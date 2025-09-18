@@ -9,7 +9,7 @@ EXPECTED BEHAVIOR:
 - BEFORE REMEDIATION: Tests should FAIL (proving user isolation violations exist)
 - AFTER REMEDIATION: Tests should PASS (proving proper user isolation)
 
-Business Value: Platform/Internal - $500K+ ARR protection through secure multi-user isolation
+Business Value: Platform/Internal - 500K+ ARR protection through secure multi-user isolation
 """
 import asyncio
 import gc

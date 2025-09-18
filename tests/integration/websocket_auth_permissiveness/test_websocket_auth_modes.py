@@ -5,7 +5,7 @@ PURPOSE: Test WebSocket connections with different authentication validation lev
 to resolve 1011 errors blocking the golden path user flow.
 
 BUSINESS JUSTIFICATION:
-- Problem: 1011 WebSocket errors block $500K+ ARR chat functionality
+- Problem: 1011 WebSocket errors block 500K+ ARR chat functionality
 - Root Cause: GCP Load Balancer strips auth headers, strict validation fails
 - Solution: Multiple auth modes (STRICT, RELAXED, DEMO, EMERGENCY)
 - Test Strategy: Integration tests with real WebSocket connections

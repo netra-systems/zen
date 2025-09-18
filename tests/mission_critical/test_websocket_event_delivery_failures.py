@@ -3,7 +3,7 @@
 FAILING TEST: 5 Critical Events Delivery Reliability - Issue #680
 
 This test PROVES unreliable delivery of 5 critical WebSocket events due to SSOT violations.
-Business Impact: $500K+ ARR at risk from broken chat experience
+Business Impact: 500K+ ARR at risk from broken chat experience
 
 Test Strategy:
 - Start agent execution with WebSocket monitoring

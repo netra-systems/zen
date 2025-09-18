@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure complete Golden Path: login -> get AI responses works end-to-end
 - Value Impact: Complete user journey validation covers entire business value chain
-- Strategic Impact: Core platform functionality ($500K+ ARR at risk)
+- Strategic Impact: Core platform functionality (500K+ ARR at risk)
 
 This suite tests the complete end-to-end Golden Path user journey in staging
 environment to reproduce real-world integration failures that occur when

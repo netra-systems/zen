@@ -5,7 +5,7 @@ Mission Critical Tests for Issue #358: Business Impact Validation
 """
 
 CRITICAL ISSUE: Complete system lockout preventing users from accessing AI responses
-BUSINESS IMPACT: $500K+ plus ARR at risk due to complete Golden Path failure
+BUSINESS IMPACT: 500K+  ARR at risk due to complete Golden Path failure
 
 These tests are MISSION CRITICAL and DESIGNED TO FAIL to prove that business-critical
 functionality is completely broken, validating the revenue and customer impact of
@@ -20,7 +20,7 @@ Test Categories:
 Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise, Platform)
 - Business Goal: Revenue Protection & Business Continuity
-- Value Impact: Validate $500K+ plus ARR functionality and customer experience
+- Value Impact: Validate 500K+  ARR functionality and customer experience
 - Strategic Impact: Prove business-critical systems are operational
 
 REQUIREMENTS per CLAUDE.md:
@@ -106,7 +106,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
     These tests validate that business-critical functionality is completely broken,
     proving the revenue and customer impact through concrete business scenarios.
     
-    CRITICAL: These tests MUST NEVER be skipped - they protect $500K+ plus ARR.
+    CRITICAL: These tests MUST NEVER be skipped - they protect 500K+  ARR.
     "
     ""
 
@@ -145,7 +145,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         (user sends message -> gets AI response) is completely broken.
         
         CRITICAL BUSINESS IMPACT:
-        - $500K+ plus ARR functionality completely inaccessible
+        - 500K+  ARR functionality completely inaccessible
         - Primary value delivery mechanism broken
         - Revenue-generating user interactions fail 100% 
         - No working path for users to receive AI value
@@ -789,7 +789,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         
         logger.critical(f"COMPLETE BUSINESS IMPACT ASSESSMENT: {business_impact_summary})"
         logger.critical(fEXECUTIVE SUMMARY: Issue #358 causes complete business emergency with 
-                       f$500K+ plus ARR at risk, all customer segments affected, revenue generation 
+                       f500K+  ARR at risk, all customer segments affected, revenue generation 
                        fcompletely blocked, customer experience failed, business continuity ""
                        fcompromised. IMMEDIATE C-LEVEL ESCALATION REQUIRED.)
         

@@ -2,7 +2,7 @@
 Issue #1116: Agent Instance Factory Singleton Pattern Violations - Unit Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Enterprise - Multi-user production deployment critical for $500K+ ARR
+- Segment: Platform/Enterprise - Multi-user production deployment critical for 500K+ ARR
 - Business Goal: Security & Compliance - Prevent data leakage and context contamination
 - Value Impact: Ensures agent factories create isolated instances with no shared state
 - Strategic Impact: Foundation for enterprise-grade multi-tenant deployment
@@ -24,7 +24,7 @@ ARCHITECTURE ALIGNMENT:
 - Tests prove USER_CONTEXT_ARCHITECTURE.md factory isolation violations
 - Validates that singleton patterns break multi-user execution
 - Demonstrates enterprise security requirements failures
-- Shows $500K+ ARR customer isolation requirement violations
+- Shows 500K+ ARR customer isolation requirement violations
 """
 
 import asyncio

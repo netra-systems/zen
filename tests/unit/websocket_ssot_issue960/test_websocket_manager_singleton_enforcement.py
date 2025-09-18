@@ -10,7 +10,7 @@ CRITICAL: These tests prove SSOT violations exist by demonstrating:
 3. Different import paths resolve to different manager instances
 4. Events may be delivered through different manager instances
 
-Business Value: $500K+ ARR depends on reliable WebSocket event delivery
+Business Value: 500K+ ARR depends on reliable WebSocket event delivery
 """
 import asyncio
 import pytest

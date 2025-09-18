@@ -9,7 +9,7 @@ PURPOSE:
 - Use real services (no docker dependency)
 
 CRITICAL FLOW: User login -> Chat -> Agent execution -> AI response
-Business Impact: $500K+ ARR depends on this flow working consistently
+Business Impact: 500K+ ARR depends on this flow working consistently
 """
 
 import pytest

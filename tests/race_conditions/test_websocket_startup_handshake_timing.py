@@ -4,7 +4,7 @@ WebSocket Startup Handshake Timing Race Condition Tests - Issue #1176
 Business Value Justification:
 - Segment: ALL (Free -> Enterprise)
 - Business Goal: Eliminate WebSocket handshake race conditions causing Golden Path failures
-- Value Impact: Protects $500K+ ARR chat functionality from startup timing failures
+- Value Impact: Protects 500K+ ARR chat functionality from startup timing failures
 - Strategic Impact: CRITICAL - Ensures reliable WebSocket handshake coordination in all environments
 
 SPECIFIC RACE CONDITION PATTERNS TESTED:

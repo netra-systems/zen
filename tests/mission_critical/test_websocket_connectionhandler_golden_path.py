@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(fWarning: Failed to lazy load {module_path}: {e}"")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    Lazy import pattern for performance optimization""
+            print(f"Warning: Failed to lazy load {module_path}: {e}"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -103,16 +95,15 @@ GOLDEN_PATH_CONFIG = {
 class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
     pass
     def create_user_context(self) -> UserExecutionContext:
-        ""Create isolated user execution context for golden path tests""
+        """Create isolated user execution context for golden path tests"""
 
         return UserExecutionContext.from_request(
-            user_id=test_user,"
-            user_id=test_user,"
-            thread_id=test_thread","
-            run_id=test_run
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
         )
 
-    ""
+    """
     MISSION CRITICAL: Tests for the complete authenticated chat golden path.
     
     This test suite validates that authenticated users can successfully:
@@ -189,8 +180,7 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
             
         Raises:
             Exception: If authentication or connection fails
-"
-""
+        """
 
         auth_start = time.time()
         
@@ -287,8 +277,7 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
                     if not first_response_received:
                         self.golden_path_metrics['first_response_time'] = time.time() - start_time
                         first_response_received = True
-                        logger.info(f[U+23F1][U+FE0F] First response received in {self.golden_path_metrics['first_response_time']:.2f}s)"
-                        logger.info(f[U+23F1][U+FE0F] First response received in {self.golden_path_metrics['first_response_time']:."2f"}s)""
+                        logger.info(f[U+23F1][U+FE0F] First response received in {self.golden_path_metrics['first_response_time']:.2f}s)""2f"}s)""
 
                     
                     # Parse response
@@ -328,8 +317,7 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
                     continue
                     
         except Exception as e:
-            logger.error(fError collecting WebSocket responses: {e})"
-            logger.error(fError collecting WebSocket responses: {e})""
+            logger.error(fError collecting WebSocket responses: {e})"""
 
             
         # Record final timing
@@ -378,12 +366,7 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
 
         
         # Step 1: Create authenticated WebSocket connection
-        logger.info("Step 1: Creating authenticated WebSocket connection)"
-        websocket = await self._create_authenticated_connection()
-        
-        # Step 2: Send agent execution request  
-        logger.info(Step 2: Sending agent execution request)
-        request_id = await self._send_agent_request(websocket, "data_analysis_agent)"
+        logger.info("Step 1: Creating authenticated WebSocket connection)""data_analysis_agent)"
         
         # Step 3: Collect responses and WebSocket events
         logger.info(Step 3: Collecting WebSocket responses and events)
@@ -393,22 +376,18 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
             GOLDEN_PATH_CONFIG['agent_response_timeout']
         
         # Step 4: Analyze and validate results
-        logger.info(Step 4: Validating golden path results)"
-        logger.info(Step 4: Validating golden path results)""
+        logger.info(Step 4: Validating golden path results)"""
 
         self._log_golden_path_metrics()
         
         # CRITICAL ASSERTION 1: Must receive some responses (not silent failure)
-        assert results['total_responses') > 0, (
-            f FAIL:  GOLDEN PATH FAILURE: No WebSocket responses received from agent execution. "
-            f FAIL:  GOLDEN PATH FAILURE: No WebSocket responses received from agent execution. ""
-
-            fThis indicates ConnectionHandler silent failure where the request is processed 
-            fbut no responses are sent back to the authenticated user. "
-            fbut no responses are sent back to the authenticated user. "
-            f"Customer experience is completely broken - users authenticate successfully"
-            fbut receive no responses from AI agents. 
-            fRequest ID: {request_id}, User ID: {GOLDEN_PATH_CONFIG['problematic_user_id']}
+        assert results['total_responses'] > 0, (
+            f"FAIL: GOLDEN PATH FAILURE: No WebSocket responses received from agent execution. "
+            f"This indicates ConnectionHandler silent failure where the request is processed "
+            f"but no responses are sent back to the authenticated user. "
+            f"Customer experience is completely broken - users authenticate successfully "
+            f"but receive no responses from AI agents. "
+            f"Request ID: {request_id}, User ID: {GOLDEN_PATH_CONFIG['problematic_user_id']}"
         )
         
         # CRITICAL ASSERTION 2: Must receive first response within reasonable time

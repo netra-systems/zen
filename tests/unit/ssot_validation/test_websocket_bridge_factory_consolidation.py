@@ -7,7 +7,7 @@ This test is DESIGNED TO FAIL initially to expose WebSocket bridge factory
 fragmentation that causes inconsistent agent-to-WebSocket communication.
 
 BUSINESS IMPACT:
-- $500K+ ARR at risk due to WebSocket bridge factory fragmentation
+- 500K+ ARR at risk due to WebSocket bridge factory fragmentation
 - Multiple bridge factories cause inconsistent agent event delivery
 - Bridge fragmentation breaks Golden Path real-time user experience
 
@@ -38,7 +38,7 @@ class WebSocketBridgeFactoryConsolidationTests(unittest.TestCase):
         """Set up test with bridge factory fragmentation analysis"""
         super().setUp()
         self.expected_failure_documented = True
-        self.business_impact = '$500K+ ARR at risk due to bridge fragmentation'
+        self.business_impact = '500K+ ARR at risk due to bridge fragmentation'
 
     def test_websocket_bridge_factory_ssot_consolidation(self):
         """

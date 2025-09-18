@@ -7,10 +7,7 @@ class TestWebSocketConnection:
         self.is_connected = True"""
 """
         """Send JSON message."""Send JSON message."""
-        raise RuntimeError("WebSocket is closed)"
-        self.messages_sent.append(message)
-
-    async def close(self, code: int = 1000, reason: str = "Normal closure):"
+        raise RuntimeError("WebSocket is closed)""Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True"""

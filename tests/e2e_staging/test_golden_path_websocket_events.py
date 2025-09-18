@@ -1,7 +1,7 @@
 """Golden Path WebSocket Events E2E Staging Test Suite
 
 PURPOSE: Verify all 5 critical WebSocket events work reliably for Issue #1182 WebSocket Manager SSOT Migration
-BUSINESS VALUE: Protects $500K+ ARR Golden Path functionality through comprehensive event validation
+BUSINESS VALUE: Protects 500K+ ARR Golden Path functionality through comprehensive event validation
 
 This test suite MUST FAIL with current race conditions and PASS after SSOT consolidation.
 

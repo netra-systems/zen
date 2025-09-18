@@ -690,7 +690,7 @@ if __name__ == __main__:
     
     print(\n + =" * 80)"
     print(CRITICAL WEBSOCKET EVENT TIMING VALIDATION TESTS - Issue #1199)
-    print(MISSION CRITICAL: Sub-2-Second Response Times for $500K+ plus ARR Chat"")
+    print(MISSION CRITICAL: Sub-2-Second Response Times for 500K+  ARR Chat"")
     print(= * 80)"
     print(= * 80)""
 

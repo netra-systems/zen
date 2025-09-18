@@ -374,9 +374,7 @@ class SSOTMigrationEndToEndTests(SSotBaseTestCase):
                     "user_id": user_data["id"]
                 })
             except Exception as e:
-                print(f"Warning: Could not create secondary user {i}: {e}")
-                
-        self.record_metric("isolation_users_created", len(secondary_users))
+                print(f"Warning: Could not create secondary user {i}: {e}""isolation_users_created", len(secondary_users))
         
         try:
             # Initialize migration contexts for each user

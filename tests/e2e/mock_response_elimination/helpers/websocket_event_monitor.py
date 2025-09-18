@@ -315,7 +315,7 @@ class WebSocketEventMonitor:
             arr_value = business_context.get("arr_value", 0)
             subscription = business_context.get("user_subscription", "")
             
-            if arr_value >= 500000:  # $500K+ ARR
+            if arr_value >= 500000:  # 500K+ ARR
                 high_value_customer = True
             
             if subscription == "enterprise":

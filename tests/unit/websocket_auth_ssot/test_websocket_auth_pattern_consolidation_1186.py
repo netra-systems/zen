@@ -11,7 +11,7 @@ Expected Behavior: These tests SHOULD FAIL to demonstrate:
 4. Cross-service auth pattern inconsistencies
 
 Business Impact: Auth pattern fragmentation creates security vulnerabilities
-and prevents enterprise-grade multi-user isolation for $500K+ ARR functionality.
+and prevents enterprise-grade multi-user isolation for 500K+ ARR functionality.
 """
 
 import ast
@@ -421,7 +421,7 @@ if __name__ == '__main__':
     print("WARNING️  WARNING: These tests are DESIGNED TO FAIL to establish baseline metrics")
     print("📊 Expected: 5 test failures showing WebSocket auth pattern violations")
     print("🎯 Goal: Baseline measurement for 4->1 auth pattern consolidation")
-    print("💰 Impact: Secures $500K+ ARR functionality with enterprise auth")
+    print("💰 Impact: Secures 500K+ ARR functionality with enterprise auth")
     print("=" * 80)
     
     unittest.main(verbosity=2)

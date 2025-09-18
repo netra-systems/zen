@@ -7,7 +7,7 @@ SSOT violation in AgentInstanceFactory where both WebSocketManager and
 AgentWebSocketBridge patterns coexist, then PASS after remediation.
 
 CRITICAL BUSINESS IMPACT:
-- Revenue Protection: $500K+ ARR Golden Path WebSocket functionality  
+- Revenue Protection: 500K+ ARR Golden Path WebSocket functionality  
 - User Experience: Dual patterns cause race conditions and event delivery failures
 - System Stability: Factory fragmentation undermines user isolation
 - SSOT Compliance: Dual patterns violate Single Source of Truth architecture
@@ -160,7 +160,7 @@ class WebSocketFactoryDualPatternDetectionTests(SSotBaseTestCase):
         Single Source of Truth principle and create race condition risks.
 
         BUSINESS IMPACT: Factory fragmentation causes WebSocket event delivery failures,
-        directly threatening $500K+ ARR Golden Path user experience reliability.
+        directly threatening 500K+ ARR Golden Path user experience reliability.
 
         EXPECTED FAILURE: Both direct WebSocketManager and AgentWebSocketBridge patterns found.
         PASSES AFTER: Only AgentWebSocketBridge SSOT pattern remains.
@@ -201,7 +201,7 @@ VIOLATION Imports ({len(violation_imports)}):
 BUSINESS IMPACT:
 - WebSocket event delivery inconsistency
 - User isolation race conditions  
-- Golden Path reliability threatened ($500K+ ARR)
+- Golden Path reliability threatened (500K+ ARR)
 
 REMEDIATION REQUIRED:
 1. Remove direct WebSocketManager imports (lines with violations)
@@ -241,7 +241,7 @@ This test will PASS after dual pattern elimination.
         TEST FAILS: Factory methods use inconsistent WebSocket access patterns.
 
         BUSINESS IMPACT: Inconsistent patterns cause WebSocket event delivery failures,
-        directly impacting $500K+ ARR Golden Path user experience.
+        directly impacting 500K+ ARR Golden Path user experience.
 
         EXPECTED FAILURE: Factory contains mixed WebSocket access patterns.
         PASSES AFTER: All methods use AgentWebSocketBridge exclusively.
@@ -313,7 +313,7 @@ BUSINESS IMPACT:
 - Inconsistent event delivery behavior
 - Race conditions between different access patterns
 - User isolation failures
-- Golden Path reliability issues ($500K+ ARR)
+- Golden Path reliability issues (500K+ ARR)
 
 REMEDIATION:
 - Eliminate all direct WebSocketManager usage
@@ -542,7 +542,7 @@ COMPLETE REMEDIATION REQUIRES:
 BUSINESS IMPACT: Incomplete remediation leaves system vulnerable to:
 - WebSocket event delivery inconsistencies  
 - User isolation race conditions
-- Golden Path reliability issues ($500K+ ARR)
+- Golden Path reliability issues (500K+ ARR)
 
 This test will PASS when Issue #1103 is fully resolved.
 """
@@ -564,7 +564,7 @@ This test will PASS when Issue #1103 is fully resolved.
             self.assertEqual(len(violation_imports), 0, "No violation imports should remain")
             
             print(f"\n🏆 BUSINESS VALUE PROTECTED:")
-            print(f"  - $500K+ ARR Golden Path WebSocket functionality secured")
+            print(f"  - 500K+ ARR Golden Path WebSocket functionality secured")
             print(f"  - User isolation race conditions eliminated") 
             print(f"  - Event delivery consistency ensured")
             print(f"  - SSOT architecture compliance maintained")
@@ -638,8 +638,7 @@ This test will PASS when Issue #1103 is fully resolved.
 
         print(f"\nCHECK STATIC ANALYSIS PASSED:")
         print(f"  - No direct WebSocketManager imports detected")  
-        print(f"  - SSOT AgentWebSocketBridge imports present ({len(ssot_bridge_imports)})")
-        print(f"  - Import pattern SSOT compliance achieved")
+        print(f"  - SSOT AgentWebSocketBridge imports present ({len(ssot_bridge_imports)})""  - Import pattern SSOT compliance achieved")
 
 
 if __name__ == '__main__':

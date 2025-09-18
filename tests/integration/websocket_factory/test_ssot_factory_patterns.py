@@ -4,7 +4,7 @@ Integration Tests for WebSocket SSOT Factory Patterns (Issue #1128)
 PURPOSE: Test WebSocket manager initialization via canonical SSOT imports only,
 validate multi-user isolation, and test WebSocket event emission with real services.
 
-Business Impact: $500K+ ARR chat functionality requires proper SSOT patterns.
+Business Impact: 500K+ ARR chat functionality requires proper SSOT patterns.
 Test Environment: Uses real services (PostgreSQL, Redis) but no Docker.
 """
 
@@ -78,7 +78,7 @@ class WebSocketSSOTFactoryPatternsTests(SSotAsyncTestCase):
             pytest.fail(
                 f"X Canonical SSOT import failed: {e}\n"
                 f"🔧 WebSocket SSOT patterns not properly implemented\n"
-                f"💰 Business Impact: $500K+ ARR chat functionality compromised"
+                f"💰 Business Impact: 500K+ ARR chat functionality compromised"
             )
 
         # Test factory method initialization

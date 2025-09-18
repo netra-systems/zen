@@ -294,13 +294,7 @@ class AgentPipelineExecutioner:
                     
                     # Validate message structure
                     if not isinstance(message, dict):
-                        print(f"Warning: Non-dict message received: {type(message)}: {message}")
-                        continue
-                        
-                    received_messages.append(message)
-                    
-                    # Track pipeline progression with safe attribute access
-                    message_type = message.get("type", "unknown") if isinstance(message, dict) else "invalid"
+                        print(f"Warning: Non-dict message received: {type(message)}: {message}""type", "unknown") if isinstance(message, dict) else "invalid"
                     
                     if message_type == "supervisor_started":
                         supervisor_started = True
@@ -318,13 +312,7 @@ class AgentPipelineExecutioner:
                     # Timeout on individual receive is normal, continue waiting
                     continue
                 except Exception as recv_error:
-                    print(f"Warning: Error receiving message: {type(recv_error).__name__}: {recv_error}")
-                    continue
-            
-            response_time = time.time() - start_time
-            
-            return {
-                "response_received": agent_response is not None,
+                    print(f"Warning: Error receiving message: {type(recv_error).__name__}: {recv_error}""response_received": agent_response is not None,
                 "agent_response": agent_response,
                 "supervisor_started": supervisor_started,
                 "agent_selected": agent_selected,
@@ -493,9 +481,7 @@ async def test_complete_agent_pipeline_execution(pipeline_tester):
         # Allow test to continue with meaningful error message
         pytest.fail(f"Failed to setup WebSocket connection: {error_msg}")
     
-    assert ws_setup["setup_time"] < 5.0, f"WebSocket setup took {ws_setup['setup_time']:.3f}s, should be <5s (relaxed for debugging)"
-    
-    websocket = ws_setup["websocket"]
+    assert ws_setup["setup_time"] < 5.0, f"WebSocket setup took {ws_setup['setup_time']:.3f}s, should be <5s (relaxed for debugging)""websocket"]
     
     try:
         # Phase 2: Send message requiring agent processing
@@ -510,10 +496,7 @@ async def test_complete_agent_pipeline_execution(pipeline_tester):
             
         # Relaxed timing for debugging
         if send_result["send_time"] > 1.0:
-            print(f"Warning: Message send took {send_result['send_time']:.3f}s (longer than expected)")
-        
-        # Phase 3: Wait for agent response and validate pipeline execution
-        print("Phase 3: Waiting for agent response...")
+            print(f"Warning: Message send took {send_result['send_time']:.3f}s (longer than expected)""Phase 3: Waiting for agent response...")
         response_result = await pipeline_tester.wait_for_agent_response(websocket, timeout=10.0)
         
         # Enhanced debugging for response handling
@@ -537,9 +520,7 @@ async def test_complete_agent_pipeline_execution(pipeline_tester):
         
         # Relaxed timing constraint for real LLM responses
         if response_result["response_time"] > 15.0:
-            print(f"Warning: Agent pipeline took {response_result['response_time']:.3f}s (longer than ideal)")
-        
-        agent_response = response_result["agent_response"]
+            print(f"Warning: Agent pipeline took {response_result['response_time']:.3f}s (longer than ideal)""agent_response"]
         
         # Phase 4: Validate response quality
         print("Phase 4: Validating response quality...")
@@ -559,9 +540,7 @@ async def test_complete_agent_pipeline_execution(pipeline_tester):
         # More lenient quality check for real LLM responses
         if not quality_result["passed_quality"]:
             # Print detailed failure info but don't fail test immediately
-            print(f"Warning: Quality checks failed: {quality_result['quality_checks']}")
-            # Only fail if quality is extremely poor (< 0.4)
-            if quality_result["quality_score"] < 0.4:
+            print(f"Warning: Quality checks failed: {quality_result['quality_checks']}""quality_score"] < 0.4:
                 pytest.fail(f"Agent response quality too poor: {quality_result['quality_checks']}")
         
         assert quality_result["validation_time"] < 1.0, \
@@ -581,10 +560,7 @@ async def test_complete_agent_pipeline_execution(pipeline_tester):
         
         # More lenient content check
         if len(content) < 10:
-            print(f"Warning: Agent response very short ({len(content)} chars)")
-            # Only fail if completely empty
-            if len(content) == 0:
-                pytest.fail(f"Agent response has no content: {agent_response}")
+            print(f"Warning: Agent response very short ({len(content)} chars)""Agent response has no content: {agent_response}")
         
         # Log successful pipeline metrics
         print(f"[U+2713] Agent pipeline completed:")
@@ -599,13 +575,7 @@ async def test_complete_agent_pipeline_execution(pipeline_tester):
             try:
                 await websocket.disconnect()
             except Exception as e:
-                print(f"Warning: Error disconnecting WebSocket: {e}")
-
-
-@pytest.mark.asyncio
-@pytest.mark.e2e
-async def test_agent_pipeline_performance_requirements(performance_tester):
-    """Test that agent pipeline meets performance requirements for different request types."""
+                print(f"Warning: Error disconnecting WebSocket: {e}""""Test that agent pipeline meets performance requirements for different request types."""
     # Use the fixture parameters directly
     pipeline_tester = performance_tester.pipeline_tester
     
@@ -701,13 +671,7 @@ async def test_concurrent_agent_pipeline_execution(pipeline_tester):
             try:
                 await ws.disconnect()
             except Exception as e:
-                print(f"Warning: Error disconnecting WebSocket: {e}")
-
-
-@pytest.mark.asyncio 
-@pytest.mark.e2e
-async def test_agent_pipeline_error_handling(pipeline_tester):
-    """Test agent pipeline error handling and recovery."""
+                print(f"Warning: Error disconnecting WebSocket: {e}""""Test agent pipeline error handling and recovery."""
     # Use the fixture parameter directly
     
     # Setup WebSocket

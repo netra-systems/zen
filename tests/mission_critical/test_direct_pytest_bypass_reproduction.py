@@ -6,7 +6,7 @@ Mission Critical Test Suite: Direct # MIGRATED: Use SSOT unified test runner
     pass  # TODO: Replace with appropriate SSOT test execution Bypass Violation Reproduction - Issue #1075
 
 Business Value: Platform/Internal - Test Infrastructure SSOT Compliance
-Critical for $500K+ plus ARR protection through proper test execution patterns and SSOT compliance.
+Critical for 500K+  ARR protection through proper test execution patterns and SSOT compliance.
 
 This test reproduces the critical violation where 20+ files directly execute # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

@@ -9,7 +9,7 @@ in staging regardless of registry implementation challenges.
 
 Business Impact:
 - Validates Golden Path: Users login -> get AI responses
-- Protects $500K+ ARR functionality in production-like environment
+- Protects 500K+ ARR functionality in production-like environment
 - Ensures staging environment reflects production readiness
 - Validates real WebSocket event delivery in cloud environment
 
@@ -86,7 +86,7 @@ class GoldenPathRegistryConsolidationStagingTests(SSotAsyncTestCase):
     E2E test suite for Golden Path validation in GCP staging environment.
 
     Tests the complete user journey during registry SSOT consolidation
-    to ensure business continuity and $500K+ ARR protection.
+    to ensure business continuity and 500K+ ARR protection.
     """
 
     def setup_method(self, method):

@@ -8,7 +8,7 @@ Business Value Justification:
 - Segment: Platform/Enterprise (All customer tiers)
 - Business Goal: Ensure proper user isolation and thread safety
 - Value Impact: Prevent data leakage and race conditions in handler creation
-- Revenue Impact: Protect $500K+ ARR by ensuring secure handler operations
+- Revenue Impact: Protect 500K+ ARR by ensuring secure handler operations
 
 🔍 These tests are designed to INITIALLY FAIL to demonstrate factory pattern issues
 """

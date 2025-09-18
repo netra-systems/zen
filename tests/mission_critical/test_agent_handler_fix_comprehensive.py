@@ -10,8 +10,7 @@ class WebSocketTestHelper:
         ""Send JSON message.""
 
         if self._closed:
-            raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)""
+            raise RuntimeError(WebSocket is closed)"""
 
         self.messages_sent.append(message)
         
@@ -209,8 +208,7 @@ class AgentHandlerComprehensiveFixTests:
                 # Make the service raise an error
                 websocket = WebSocketTestHelper()
                 mock_service.handle_start_agent = AsyncMock(
-                    side_effect=Exception(Service error)"
-                    side_effect=Exception(Service error)""
+                    side_effect=Exception(Service error)"""
 
                 )
                 mock_service_class.return_value = mock_service

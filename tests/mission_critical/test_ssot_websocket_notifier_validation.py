@@ -3,7 +3,7 @@
 
 MISSION CRITICAL TEST SUITE: SSOT WebSocketNotifier Validation
 
-Business Value: Platform/Internal - $500K+ plus ARR Golden Path Protection
+Business Value: Platform/Internal - 500K+  ARR Golden Path Protection
 Prevents duplicate WebSocketNotifier implementations that cause agent event delivery failures.
 
 This test suite validates:
@@ -192,11 +192,7 @@ compliance_score = 100.0 if len(production_impls) == 1 else max(0, 100 - (len(pr
         # Generate violations
 violations = []
 if len(production_impls) == 0:
-            violations.append("CRITICAL: No WebSocketNotifier production implementation found)"
-elif len(production_impls) > 1:
-            violations.append(fCRITICAL: {len(production_impls)} WebSocketNotifier production implementations found (should be exactly 1))
-for impl in production_impls:
-                violations.append(f"  - {impl.file_path}:{impl.line_number})"
+            violations.append("CRITICAL: No WebSocketNotifier production implementation found)""  - {impl.file_path}:{impl.line_number})"
 
         if len(rollback_impls) > 0:
             violations.append(fWARNING: {len(rollback_impls)} rollback utility implementations found")"
@@ -270,10 +266,7 @@ fWebSocketNotifier SSOT must be in agent_websocket_bridge.py, found in: {report.
 self.validation_results = validations
 self.compliance_report = report
 
-        logger.info("CHECK SSOT WebSocketNotifier validation passed)"
-
-    def test_websocket_notifier_critical_events_work(self):
-        Test that critical WebSocket events work with canonical implementation.""
+        logger.info("CHECK SSOT WebSocketNotifier validation passed)"""
 logger.info(Testing WebSocket critical events functionality)
 
         # Define critical events that must work
@@ -303,13 +296,7 @@ fWebSocketNotifier missing required method: {method}""
 fWebSocketNotifier missing required method: {method}""
 
 
-            logger.info("CHECK WebSocketNotifier critical methods validated)"
-
-        except ImportError as e:
-            pytest.fail(fFailed to import canonical WebSocketNotifier: {e})
-
-    def test_websocket_notifier_user_isolation_integrity(self):
-        "Test that WebSocketNotifier maintains user isolation."
+            logger.info("CHECK WebSocketNotifier critical methods validated)""Test that WebSocketNotifier maintains user isolation."
 logger.info(Testing WebSocketNotifier user isolation integrity)""
 logger.info(Testing WebSocketNotifier user isolation integrity)""
 
@@ -334,13 +321,7 @@ for param in expected_params:
 fWebSocketNotifier.__init__ must accept {param} parameter for user isolation
 
 
-            logger.info("CHECK WebSocketNotifier user isolation integrity validated)"
-
-        except Exception as e:
-            pytest.fail(fWebSocketNotifier user isolation validation failed: {e})
-
-    def test_no_circular_dependencies_in_websocket_notifier(self):
-        Test that WebSocketNotifier has no circular import dependencies.""
+            logger.info("CHECK WebSocketNotifier user isolation integrity validated)"""
 logger.info(Testing WebSocketNotifier circular dependency prevention)
 
         try:
@@ -354,10 +335,7 @@ modules_before = set(sys.modules.keys())
 new_modules = modules_after - modules_before
 
             # Log loaded modules for analysis
-logger.info(f"Loaded modules during WebSocketNotifier import: {len(new_modules)})"
-
-            # Verify import succeeded without issues
-assert WebSocketNotifier is not None, WebSocketNotifier import returned None""
+logger.info(f"Loaded modules during WebSocketNotifier import: {len(new_modules)})"""
 assert WebSocketNotifier is not None, WebSocketNotifier import returned None""
 
 

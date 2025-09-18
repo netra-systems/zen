@@ -124,14 +124,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         
         # WebSocket violations are high-impact for Golden Path
         self.assertEqual(len(filtered_violations), 0,
-                        f"New WebSocket mock violations detected: {filtered_violations})"
-
-    def test_no_new_agent_mock_violations(self):
-        pass
-        Test that no new agent mock violations have been introduced.
-        
-        CRITICAL: Agent mock violations impact AI response testing.
-""
+                        f"New WebSocket mock violations detected: {filtered_violations})"""
         violations = self._scan_for_violations('agent_mock_violations')
         filtered_violations = self._filter_allowed_violations(violations)
         

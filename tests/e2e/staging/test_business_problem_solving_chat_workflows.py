@@ -2,14 +2,14 @@
 E2E STAGING TESTS: Business Problem Solving Chat Workflows - Revenue-Generating Value Delivery
 
 CRITICAL BUSINESS MISSION: These tests validate COMPLETE business problem solving workflows
-that generate ACTUAL VALUE for customers. This is the CORE of our $500K+ ARR - customers
+that generate ACTUAL VALUE for customers. This is the CORE of our 500K+ ARR - customers
 pay us to solve real business problems through AI-powered chat interactions.
 
 Business Value Justification (BVJ):  
 - Segment: All (Free, Early, Mid, Enterprise) - core value proposition for all segments
 - Business Goal: Validate complete business problem  ->  AI analysis  ->  actionable solutions workflow
 - Value Impact: Ensures customers receive substantive ROI through AI-powered business insights  
-- Strategic Impact: Protects $500K+ ARR by validating core value delivery mechanism
+- Strategic Impact: Protects 500K+ ARR by validating core value delivery mechanism
 
 CRITICAL REQUIREMENTS per CLAUDE.md:
 1. MUST test REAL business problem solving workflows (cost optimization, performance analysis)

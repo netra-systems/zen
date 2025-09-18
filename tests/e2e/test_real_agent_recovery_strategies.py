@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 1. Segment: All (Free, Early, Mid, Enterprise)
 2. Business Goal: Ensure system reliability and error resilience
 3. Value Impact: Recovery strategies prevent system failures and maintain user trust
-4. Revenue Impact: $500K+ ARR protection from system downtime prevention
+4. Revenue Impact: 500K+ ARR protection from system downtime prevention
 
 CLAUDE.md COMPLIANCE:
 - Uses real services ONLY (NO MOCKS)

@@ -11,7 +11,7 @@ BVJ (Business Value Justification):
     - Segment: Platform/Internal
 - Business Goal: System Reliability
 - Value Impact: Prevents chat functionality outages in staging
-- Strategic Impact: Protects $500K+ plus ARR by ensuring reliable staging deployments
+- Strategic Impact: Protects 500K+  ARR by ensuring reliable staging deployments
 
 EXPECTED TO FAIL: These tests demonstrate the exact Phase 7 health validation
 issues observed in staging deployment logs, specifically:

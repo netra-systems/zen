@@ -9,7 +9,7 @@ EXPECTED BEHAVIOR:
 - BEFORE REMEDIATION: Tests should FAIL (proving SSOT violations exist)
 - AFTER REMEDIATION: Tests should PASS (proving SSOT compliance)
 
-Business Value: Platform/Internal - $500K+ ARR protection through proper user isolation
+Business Value: Platform/Internal - 500K+ ARR protection through proper user isolation
 """
 import asyncio
 import gc

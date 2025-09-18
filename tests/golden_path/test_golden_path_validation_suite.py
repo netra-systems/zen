@@ -7,7 +7,7 @@ This test suite validates the complete end-to-end user journey for Issue #1278 r
 3. Business value verification (90% platform value through chat)
 4. Emergency mode compatibility testing
 
-Business Value: $500K+ ARR - Chat functionality represents 90% of platform value
+Business Value: 500K+ ARR - Chat functionality represents 90% of platform value
 Testing Strategy: Real services, no mocks, validate actual user experience
 
 REQUIREMENTS:

@@ -2,7 +2,7 @@
 SSOT Golden Path Registry Consolidation Protection Tests
 
 Issue #845: Critical P0 test suite ensuring Golden Path (login -> AI responses) remains intact
-Business Impact: $500K+ ARR depends on complete user flow working after registry consolidation
+Business Impact: 500K+ ARR depends on complete user flow working after registry consolidation
 
 Golden Path Flow Protected:
 1. User Login -> Authentication validation CHECK

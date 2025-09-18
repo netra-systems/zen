@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,19 +23,14 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 CRITICAL TEST: Golden Path Logging Disconnection Reproduction (MUST FAIL INITIALLY)
 ============================================================================
 
 PURPOSE: This test MUST FAIL initially to prove logging correlation breaks between 
 agent_execution_core.py (central_logger) and agent_execution_tracker.py (logging.getLogger())
 
-BUSINESS IMPACT: $500K+ ARR - customers can't debug agent failures due to disconnected correlation chains
+BUSINESS IMPACT: 500K+ ARR - customers can't debug agent failures due to disconnected correlation chains
 
 VIOLATION: GitHub Issue #309 - Mixed logging patterns blocking Golden Path debugging
 
@@ -77,7 +64,7 @@ class GoldenPathLoggingDisconnectionReproductionTests(SSotBaseTestCase):
     agent_execution_tracker.py (logging.getLogger()) produce 
     disconnected correlation chains that break Golden Path debugging.
     
-    BUSINESS IMPACT: $500K+ ARR - customers can't debug agent failures
+    BUSINESS IMPACT: 500K+ ARR - customers can't debug agent failures
     """
     
     def setUp(self):
@@ -216,7 +203,7 @@ class GoldenPathLoggingDisconnectionReproductionTests(SSotBaseTestCase):
             f"agent_execution_core.py (central_logger) correlation: {core_has_correlation}, "
             f"agent_execution_tracker.py (logging.getLogger()) correlation: {tracker_has_correlation}. "
             f"This proves the SSOT logging violation exists and breaks Golden Path debugging. "
-            f"Both systems should share the same correlation context for $500K+ ARR protection."
+            f"Both systems should share the same correlation context for 500K+ ARR protection."
         )
         
         print("CRITICAL: If this test PASSES initially, the logging patterns are already unified!")
@@ -279,7 +266,7 @@ class GoldenPathLoggingDisconnectionReproductionTests(SSotBaseTestCase):
         Demonstrates business impact of logging disconnection on Golden Path debugging.
         
         MUST FAIL: Shows how mixed logging patterns break debugging correlation
-        affecting $500K+ ARR customer support capability.
+        affecting 500K+ ARR customer support capability.
         """
         from netra_backend.app.logging_config import central_logger
         import logging
@@ -348,7 +335,7 @@ class GoldenPathLoggingDisconnectionReproductionTests(SSotBaseTestCase):
             f"Central logger correlation: {central_correlation_perfect}, "
             f"Standard logger correlation: {standard_correlation_perfect}. "
             f"Mixed logging patterns break correlation chains needed for debugging "
-            f"$500K+ ARR customer issues. SSOT logging remediation required."
+            f"500K+ ARR customer issues. SSOT logging remediation required."
         )
         
         print("BUSINESS IMPACT: If this test FAILS, customer support cannot correlate")

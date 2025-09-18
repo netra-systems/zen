@@ -2,7 +2,7 @@
 "MISSION CRITICAL TEST SUITE: SSOT Metadata Compliance - Issue #700"
 
 THIS SUITE MUST PASS OR THE PRODUCT IS BROKEN.
-Business Value: $500K+ plus ARR - Prevents SSOT regression blocking Golden Path
+Business Value: 500K+  ARR - Prevents SSOT regression blocking Golden Path
 
 PURPOSE: Detect and prevent agents bypassing store_metadata_result() SSOT method
 
@@ -391,8 +391,7 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
         assert websocket_data["status] == completed"
         assert websocket_data[data] == websocket_test
 
-        logger.info(CHECK WebSocket events can access SSOT-stored metadata)"
-        logger.info(CHECK WebSocket events can access SSOT-stored metadata)""
+        logger.info(CHECK WebSocket events can access SSOT-stored metadata)"""
 
 
     # ========================================================================

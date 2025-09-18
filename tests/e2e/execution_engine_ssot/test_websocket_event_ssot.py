@@ -4,7 +4,7 @@ PURPOSE: Validate WebSocket events delivered through UserExecutionEngine only
 SHOULD FAIL NOW: Events delivered through multiple paths
 SHOULD PASS AFTER: Events delivered through UserExecutionEngine only
 
-Business Value: Prevents $500K+ ARR WebSocket event delivery corruption
+Business Value: Prevents 500K+ ARR WebSocket event delivery corruption
 """
 
 import pytest

@@ -148,8 +148,7 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
             pytest.skip(Real database required for mission critical WebSocket testing)
         
         # Setup complete LLM outage scenario
-        outage_simulator = CriticalLLMFailureSimulator(complete_outage)"
-        outage_simulator = CriticalLLMFailureSimulator(complete_outage)""
+        outage_simulator = CriticalLLMFailureSimulator(complete_outage)"""
 
         
         # Create real user context

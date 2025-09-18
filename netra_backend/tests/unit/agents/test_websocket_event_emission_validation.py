@@ -5,7 +5,7 @@ Business Value Justification:
 - Segment: All tiers - WebSocket events critical for chat experience
 - Business Goal: Ensure all 5 critical WebSocket events are properly emitted
 - Value Impact: Protects 90% of platform value (chat functionality)
-- Revenue Impact: Prevents user experience degradation that could lose $500K+ ARR
+- Revenue Impact: Prevents user experience degradation that could lose 500K+ ARR
 
 PURPOSE:
 This test suite validates that agents properly emit all 5 critical WebSocket events

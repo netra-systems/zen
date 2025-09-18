@@ -10,7 +10,7 @@ These tests validate:
 3. Multi-user enterprise scenarios in production-like environment
 4. Real-time vulnerability impact on customer experience
 
-BUSINESS IMPACT: Validates $500K+ ARR protection in production-like environment.
+BUSINESS IMPACT: Validates 500K+ ARR protection in production-like environment.
 NO DOCKER DEPENDENCY: These tests run against GCP staging environment.
 """
 import asyncio

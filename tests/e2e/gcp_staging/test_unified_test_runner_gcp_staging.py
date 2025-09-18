@@ -3,7 +3,7 @@ E2E GCP Staging Tests for UnifiedTestRunner - FINAL PHASE
 Real GCP Cloud Build, CI/CD pipeline integration, and production testing workflows
 
 Business Value Protection:
-- $500K+ ARR: Reliable testing prevents production failures and system outages
+- 500K+ ARR: Reliable testing prevents production failures and system outages
 - $15K+ MRR per Enterprise: Comprehensive test coverage ensures feature quality
 - Development velocity: Fast, reliable test execution enables rapid deployment
 - Quality assurance: Full test suite validation before production releases
@@ -52,7 +52,7 @@ class UnifiedTestRunnerGCPStagingTests(SSotAsyncTestCase):
         """
         HIGH DIFFICULTY: Test GCP Cloud Build integration with production CI/CD pipeline.
         
-        Business Value: $500K+ ARR - automated testing prevents production deployment failures.
+        Business Value: 500K+ ARR - automated testing prevents production deployment failures.
         Validates: Cloud Build triggers, test execution, build status reporting.
         """
         cloud_build_test_suite = {'suite_name': 'production_validation_suite', 'categories': [ExecutionCategory.UNIT, ExecutionCategory.INTEGRATION, ExecutionCategory.E2E, ExecutionCategory.PERFORMANCE], 'test_files': ['tests/unit/test_core_business_logic.py', 'tests/integration/test_websocket_agent_flow.py', 'tests/e2e/test_golden_path_complete.py', 'tests/performance/test_scalability_validation.py'], 'execution_requirements': {'real_services': True, 'docker_services': ['postgres', 'redis', 'clickhouse'], 'external_apis': ['openai', 'anthropic'], 'gcp_services': ['cloud_sql', 'cloud_run', 'cloud_storage']}, 'success_criteria': {'min_test_pass_rate': 0.95, 'max_execution_time_minutes': 45, 'coverage_threshold': 0.8, 'performance_regression_threshold': 0.1}}

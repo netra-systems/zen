@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: Early/Mid/Enterprise - All paid tiers
 - Business Goal: Validate end-to-end AI agent value delivery in staging
 - Value Impact: Ensures customers receive complete AI-powered cost optimization 
-- Strategic/Revenue Impact: $500K+ ARR protected - Prevents staging deployment failures
+- Strategic/Revenue Impact: 500K+ ARR protected - Prevents staging deployment failures
 
 This test suite validates complete agent workflows with REAL authentication and services:
 1. Real WebSocket connections with JWT authentication
@@ -292,7 +292,7 @@ class CompleteAgentWorkflowsStagingTests(BaseE2ETest):
         """
         Test that agent execution delivers measurable business value metrics.
         
-        BVJ: Validates $500K+ ARR value proposition - Quantifiable business impact
+        BVJ: Validates 500K+ ARR value proposition - Quantifiable business impact
         Ensures agents deliver concrete, measurable business outcomes
         """
         user_context = self.test_users[0]

@@ -2,7 +2,7 @@
 Business Value Protection Tests
 
 Business Value Justification (BVJ):
-- Segment: Enterprise ($500K+ ARR) - Maximum business impact scenarios
+- Segment: Enterprise (500K+ ARR) - Maximum business impact scenarios
 - Business Goal: Protect high-value customers from inauthentic AI responses
 - Value Impact: Prevent customer churn and reputation damage from mock responses
 - Strategic Impact: Platform credibility for highest-paying customers

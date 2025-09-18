@@ -4,7 +4,7 @@ Golden Path Resilience E2E Tests - Issue #1192
 Business Value Justification (BVJ):
 - Segment: Platform (All Segments)
 - Business Goal: Revenue Protection & Service Reliability
-- Value Impact: Ensures $500K+ ARR chat functionality resilient to service failures
+- Value Impact: Ensures 500K+ ARR chat functionality resilient to service failures
 - Strategic Impact: Validates business continuity on staging GCP environment
 
 This E2E test suite validates Golden Path resilience on staging GCP deployment.

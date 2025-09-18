@@ -9,7 +9,7 @@ EXPECTED BEHAVIOR:
 - BEFORE REMEDIATION: Tests should FAIL (proving incorrect patterns exist)
 - AFTER REMEDIATION: Tests should PASS (proving SSOT compliance)
 
-Business Value: Platform/Internal - $500K+ ARR protection through proper dependency injection
+Business Value: Platform/Internal - 500K+ ARR protection through proper dependency injection
 """
 import asyncio
 import inspect

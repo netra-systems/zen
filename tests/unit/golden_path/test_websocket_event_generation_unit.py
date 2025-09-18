@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: ALL (Free/Early/Mid/Enterprise/Platform)
 - Business Goal: Enable core chat functionality that delivers 90% of platform value
 - Value Impact: Validates critical WebSocket events that power AI agent interactions
-- Strategic Impact: Protects $500K+ ARR by ensuring foundational event delivery works
+- Strategic Impact: Protects 500K+ ARR by ensuring foundational event delivery works
 
 CRITICAL MISSION: These unit tests validate WebSocket event generation without Docker,
 providing fast feedback on Golden Path components while the full mission-critical
@@ -623,7 +623,7 @@ if __name__ == "__main__":
     print("PURPOSE: Validate event generation without Docker dependencies")
     print("=" * 80)
     print()
-    print("Business Value: Fast feedback on $500K+ ARR Golden Path components")
+    print("Business Value: Fast feedback on 500K+ ARR Golden Path components")
     print("Expected Behavior: Tests should INITIALLY FAIL to demonstrate validation gaps")
     print("Success Criteria: Identifies specific gaps in event generation pipeline")
     print()

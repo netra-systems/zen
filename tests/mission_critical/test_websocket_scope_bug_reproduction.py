@@ -2,7 +2,7 @@
 "MISSION CRITICAL TEST SUITE: WebSocket Scope Bug Reproduction - Issue #165"
 
 THIS TEST SUITE REPRODUCES THE EXACT WEBSOCKET SCOPE BUG CAUSING 100% CONNECTION FAILURES.
-Business Impact: $500K+ plus ARR - Complete WebSocket connection failure
+Business Impact: 500K+  ARR - Complete WebSocket connection failure
 
 Scope Bug Details:
     - Location: /netra_backend/app/routes/websocket.py lines 1433, 1452
@@ -17,7 +17,7 @@ Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise) 
 - Business Goal: Restore WebSocket connection reliability
 - Value Impact: Fix 100% connection failure blocking all chat functionality
-- Strategic Impact: Core platform infrastructure required for $500K+ plus ARR
+- Strategic Impact: Core platform infrastructure required for 500K+  ARR
 
 REQUIREMENTS:
     - Unit tests only - No Docker required
@@ -149,23 +149,7 @@ class WebSocketScopeBugReproductionTests:
         
         Expected Behavior: FAIL - All connection attempts result in NameError
 
-        logger.info(" ALERT:  MEASURING: WebSocket connection failure rate due to scope bug)"
-        
-        connection_attempts = 10
-        failures = 0
-        name_errors = 0
-        
-        for i in range(connection_attempts):
-            mock_websocket = AsyncMock(spec=WebSocket)
-            mock_websocket.headers = {authorization: Bearer test_token}
-            mock_websocket.accept = AsyncMock()
-            mock_websocket.close = AsyncMock()
-            
-            try:
-                with patch('shared.isolated_environment.get_env') as mock_get_env:
-                    mock_env = Mock()
-                    mock_env.get.side_effect = lambda key, default=None: {
-                        ENVIRONMENT: "staging,"
+        logger.info(" ALERT:  MEASURING: WebSocket connection failure rate due to scope bug)""staging,"
                         TESTING": 0"
                     }.get(key, default)
                     mock_get_env.return_value = mock_env
@@ -208,7 +192,7 @@ class WebSocketScopeBugReproductionTests:
         logger.error(f   [U+2022] Scope bug failures: {scope_bug_rate}%)
         logger.error(f   [U+2022] Successful connections: {connection_attempts - failures})"
         logger.error(f   [U+2022] Successful connections: {connection_attempts - failures})"
-        logger.error(f"   [U+2022] Revenue at risk: $500K+ plus ARR (100% chat functionality blocked))"
+        logger.error(f"   [U+2022] Revenue at risk: 500K+  ARR (100% chat functionality blocked))"
         
         # This test should FAIL because we expect 100% failure rate
         assert failure_rate == 100.0, "fExpected 100% failure rate due to scope bug, got {failure_rate}%"
@@ -402,7 +386,7 @@ class WebSocketScopeBugReproductionTests:
         # Document the business impact
         logger.error([U+1F4B0] BUSINESS IMPACT OF SCOPE BUG:")"
         logger.error(   [U+2022] 100% WebSocket connection failure rate)
-        logger.error(   [U+2022] $500K+ plus ARR at risk due to chat functionality blocked")"
+        logger.error(   [U+2022] 500K+  ARR at risk due to chat functionality blocked")"
         logger.error(   [U+2022] No fallback mechanism - complete service failure)
         logger.error(   [U+2022] Critical infrastructure bug affecting all user tiers)"
         logger.error(   [U+2022] Critical infrastructure bug affecting all user tiers)""
@@ -412,7 +396,7 @@ class WebSocketScopeBugReproductionTests:
         pytest.fail(
             f"CRITICAL SCOPE BUG DETECTED: state_registry defined in function scope"
             fbut accessed in {len(state_registry_references)} nested locations. 
-            fThis causes 100% WebSocket connection failures affecting $500K+ plus ARR.
+            fThis causes 100% WebSocket connection failures affecting 500K+  ARR.
         )
 
 
@@ -422,8 +406,7 @@ if __name__ == __main__":"
     Run: python tests/mission_critical/test_websocket_scope_bug_reproduction.py
     ""
     logger.info( ALERT:  DIRECT EXECUTION: WebSocket Scope Bug Reproduction Tests)
-    logger.info([U+1F4B0] BUSINESS IMPACT: $500K plus ARR - 100% WebSocket connection failure)"
-    logger.info([U+1F4B0] BUSINESS IMPACT: $500K plus ARR - 100% WebSocket connection failure)"
+    logger.info([U+1F4B0] BUSINESS IMPACT: $500K plus ARR - 100% WebSocket connection failure)""
     logger.info([U+1F527] PURPOSE: Reproduce exact NameError from variable scope isolation")"
     
     # MIGRATED: Use SSOT unified test runner

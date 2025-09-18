@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 1. Segment: All segments (system stability affects all users)
 2. Business Goal: System reliability and seamless service integration
 3. Value Impact: Cross-service integration ensures consistent user experience
-4. Revenue Impact: $500K+ ARR protected by ensuring service integration stability
+4. Revenue Impact: 500K+ ARR protected by ensuring service integration stability
 
 CLAUDE.md COMPLIANCE:
 - Uses real services ONLY (NO MOCKS)

@@ -2,14 +2,14 @@
 E2E Tests for Agent Business Value Validation - Golden Path Core Quality
 
 MISSION CRITICAL: Tests that agents deliver substantive business value through
-quality AI responses that justify $500K+ ARR platform usage. These tests validate
+quality AI responses that justify 500K+ ARR platform usage. These tests validate
 the QUALITY and SUBSTANCE of agent responses, not just technical delivery.
 
 Business Value Justification (BVJ):
 - Segment: Enterprise/Mid/Early (All paying segments)
 - Business Goal: Customer Retention & Platform Value Demonstration
 - Value Impact: Validates AI responses provide real business value, not just chat
-- Strategic Impact: $500K+ ARR depends on agents delivering actionable insights
+- Strategic Impact: 500K+ ARR depends on agents delivering actionable insights
 
 Test Strategy:
 - REAL SERVICES: Staging GCP Cloud Run environment only (NO Docker)
@@ -211,7 +211,7 @@ class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f'   Business metrics collected: {len(business_metrics)}')
-            raise AssertionError(f'Business value delivery failed after {total_time:.1f}s: {e}. This breaks core platform value proposition and threatens $500K+ ARR. Business metrics: {business_metrics}')
+            raise AssertionError(f'Business value delivery failed after {total_time:.1f}s: {e}. This breaks core platform value proposition and threatens 500K+ ARR. Business metrics: {business_metrics}')
 
     async def test_agent_response_quality_meets_enterprise_standards(self):
         """
@@ -380,7 +380,7 @@ class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
             self.logger.error(f'X AGENT TOOL INTEGRATION FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
-            raise AssertionError(f'Tool integration validation failed after {total_time:.1f}s: {e}. Tool integration is a core platform differentiator for $500K+ ARR. Tool metrics: {tool_metrics}')
+            raise AssertionError(f'Tool integration validation failed after {total_time:.1f}s: {e}. Tool integration is a core platform differentiator for 500K+ ARR. Tool metrics: {tool_metrics}')
 
     async def test_end_to_end_business_value_pipeline_validation(self):
         """
@@ -529,7 +529,7 @@ class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f"   Phases Completed: {len(pipeline_validation.get('phases_completed', []))}/8")
             self.logger.error(f'   Pipeline State: {pipeline_validation}')
-            raise AssertionError(f'End-to-end business value pipeline validation failed after {total_time:.1f}s: {e}. This represents catastrophic failure of core platform value proposition ($500K+ ARR impact). Pipeline validation state: {pipeline_validation}')
+            raise AssertionError(f'End-to-end business value pipeline validation failed after {total_time:.1f}s: {e}. This represents catastrophic failure of core platform value proposition (500K+ ARR impact). Pipeline validation state: {pipeline_validation}')
 
     def _extract_agent_name_from_event(self, event: Dict[str, Any]) -> Optional[str]:
         """Extract agent name from WebSocket event."""

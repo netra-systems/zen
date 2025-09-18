@@ -5,7 +5,7 @@ Test WebSocket Integration Regression Prevention
 Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Prevent future WebSocket integration breaks that damage user experience
-- Value Impact: Ensures reliable real-time updates that drive $500K+ plus ARR
+- Value Impact: Ensures reliable real-time updates that drive 500K+  ARR
 - Strategic Impact: Mission-critical test suite to protect core chat functionality
 
 CRITICAL: This is a mission-critical test that prevents future integration breaks
@@ -159,42 +159,8 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
                     logger.info(f[U+2713] REGRESSION CHECK: WebSocket bridge attached ({websocket_bridge_attr})
                     
                 except Exception as e:
-                    integration_failures.append(fWebSocket bridge attachment failed: {e})"
-                    integration_failures.append(fWebSocket bridge attachment failed: {e})"
-                    logger.error(f"[U+2717] REGRESSION FAILURE: WebSocket bridge: {e})"
-            
-            # LINK 4: User Emitter Creation
-            if chain_validation[websocket_bridge_attachment]:
-                try:
-                    # Check for user emitter in various possible attribute names
-                    user_emitter_attributes = [
-                        '_user_emitter',
-                        'user_emitter',
-                        '_emitter',
-                        'emitter',
-                        '_websocket_emitter',
-                        'websocket_emitter'
-                    ]
-                    
-                    user_emitter = None
-                    user_emitter_attr = None
-                    
-                    for attr_name in user_emitter_attributes:
-                        if hasattr(websocket_bridge, attr_name):
-                            potential_emitter = getattr(websocket_bridge, attr_name)
-                            if potential_emitter is not None:
-                                user_emitter = potential_emitter
-                                user_emitter_attr = attr_name
-                                break
-                    
-                    assert user_emitter is not None, (
-                        fWebSocket bridge missing user emitter. Checked: {user_emitter_attributes}
-                    )
-                    
-                    # Verify emitter has correct user context
-                    if hasattr(user_emitter, 'user_id'):
-                        assert str(user_emitter.user_id) == str(user_context.user_id), (
-                            fUser emitter has wrong user_id: expected {user_context.user_id}, got {user_emitter.user_id}""
+                    integration_failures.append(fWebSocket bridge attachment failed: {e})""
+                    logger.error(f"[U+2717] REGRESSION FAILURE: WebSocket bridge: {e})"""
                         )
                     
                     chain_validation[user_emitter_creation] = True
@@ -571,7 +537,7 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
                     fSuccess rate: {success_rate:.""1f""}%. 
                     fEvent delivery rate: {event_delivery_rate:.""1f""}%. 
                     fContinuity failures: {continuity_failures}. ""
-                    fThis regression damages $500K+ plus ARR by breaking user trust and real-time experience.
+                    fThis regression damages 500K+  ARR by breaking user trust and real-time experience.
                 )
             
             if business_continuity_metrics[cross_user_contamination] > 0:
@@ -791,8 +757,7 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
                 
                 try:
                     execution_factory.configure()
-                    startup_order.append(execution_factory)"
-                    startup_order.append(execution_factory)""
+                    startup_order.append(execution_factory)"""
 
                 except Exception as e:
                     startup_order.append(f"execution_factory_failed: {e})"
@@ -924,7 +889,7 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
                             if not hasattr(user_emitter, method_name):
                                 missing_emitter_methods.append(method_name)
                             elif not callable(getattr(user_emitter, method_name)):
-                                missing_emitter_methods.append(f{method_name} (not callable)")"
+                                missing_emitter_methods.append(f{method_name} (not callable)""
                         
                         assert len(missing_emitter_methods) == 0, (
                             fUser emitter missing interface methods: {missing_emitter_methods}

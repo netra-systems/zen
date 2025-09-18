@@ -4,7 +4,7 @@ CRITICAL E2E TEST SUITE: Agent WebSocket Thread Events Routing
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)  
 - Business Goal: Ensure all 5 critical agent events are delivered to correct threads
-- Value Impact: Agent events enable Chat business value ($500K+ ARR) - users must see real-time progress
+- Value Impact: Agent events enable Chat business value (500K+ ARR) - users must see real-time progress
 - Strategic Impact: Core WebSocket event delivery pipeline for AI interactions
 
 CRITICAL REQUIREMENTS:

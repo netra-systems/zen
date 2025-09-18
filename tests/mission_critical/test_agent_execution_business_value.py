@@ -392,8 +392,7 @@ class AgentExecutionBusinessValueTests(BaseIntegrationTest):
         # Log success metrics for monitoring
         logger.info(f[U+1F4C8] SUCCESS METRICS:")"
         logger.info(f   - Execution Time: {execution_time:."2f"}s)
-        logger.info(f   - WebSocket Events: {len(collected_events)} received)"
-        logger.info(f   - WebSocket Events: {len(collected_events)} received)"
+        logger.info(f   - WebSocket Events: {len(collected_events)} received)""
         logger.info(f"   - Critical Events: {len(event_validator.critical_events_received)}/5)"
         logger.info(f   - Business Value Score: {validation_result.business_value_score}%)
         logger.info(f   - Revenue Impact: {validation_result.revenue_impact})

@@ -9,7 +9,7 @@ EXPECTED BEHAVIOR:
 - BEFORE REMEDIATION: Tests should FAIL (proving memory leaks/poor cleanup exist)
 - AFTER REMEDIATION: Tests should PASS (proving proper memory management)
 
-Business Value: Platform/Internal - $500K+ ARR protection through scalable memory management
+Business Value: Platform/Internal - 500K+ ARR protection through scalable memory management
 """
 import asyncio
 import gc

@@ -5,7 +5,7 @@ Golden Path user flow WebSocket event delivery patterns.
 
 Business Value Justification (BVJ):
 - Segment: Platform/Mission-Critical - Golden Path Protection
-- Business Goal: $500K+ ARR Protection & User Experience Reliability
+- Business Goal: 500K+ ARR Protection & User Experience Reliability
 - Value Impact: Golden Path WebSocket consistency = Reliable chat UX = Business success
 - Strategic Impact: Mission-critical tests protect core revenue-generating user flow
 
@@ -24,7 +24,7 @@ CRITICAL GOLDEN PATH WEBSOCKET REQUIREMENTS:
    - User isolation failures in multi-user Golden Path scenarios
 
 MISSION-CRITICAL TEST STRATEGY:
-- Focus on Golden Path user flow ($500K+ ARR protection)
+- Focus on Golden Path user flow (500K+ ARR protection)
 - Test real WebSocket event sequences in chat scenarios
 - Validate SSOT compliance for all 5 critical events
 - Ensure consistent behavior for multi-user scenarios
@@ -78,7 +78,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
         self.pattern_violations: List[Dict] = []
         self.user_isolation_failures: List[Dict] = []
 
-        # Golden Path event sequence (CRITICAL for $500K+ ARR)
+        # Golden Path event sequence (CRITICAL for 500K+ ARR)
         self.expected_golden_path_sequence = [
             'agent_started',    # Stage 1: User sees AI processing
             'agent_thinking',   # Stage 2: Real-time reasoning
@@ -195,7 +195,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
         """TEST MUST FAIL: Validate SSOT pattern consistency across all Golden Path events.
 
         Mission-critical test ensuring all 5 Golden Path WebSocket events use the same
-        SSOT pattern. Failures here directly impact $500K+ ARR user experience.
+        SSOT pattern. Failures here directly impact 500K+ ARR user experience.
         """
         async def run_golden_path_ssot_test():
             ssot_violations = []
@@ -267,7 +267,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
         assert len(violations) == 0, (
             f"GOLDEN PATH WEBSOCKET SSOT VIOLATIONS DETECTED: Found {len(violations)} "
             f"SSOT compliance violations in Golden Path WebSocket events. "
-            f"This directly impacts $500K+ ARR user experience. "
+            f"This directly impacts 500K+ ARR user experience. "
             f"Violations: {violations}. "
             f"Events captured: {len(self.golden_path_events)}. "
             f"CRITICAL REMEDIATION REQUIRED: Standardize all Golden Path events to single SSOT pattern."
@@ -363,7 +363,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
         assert len(violations) == 0, (
             f"MULTI-USER GOLDEN PATH WEBSOCKET ISOLATION VIOLATIONS DETECTED: "
             f"Found {len(violations)} user isolation violations in Golden Path WebSocket events. "
-            f"This compromises $500K+ ARR multi-user reliability. "
+            f"This compromises 500K+ ARR multi-user reliability. "
             f"Violations: {violations}. "
             f"Total events: {len(self.golden_path_events)}. "
             f"CRITICAL REMEDIATION REQUIRED: Fix user isolation in Golden Path WebSocket patterns."
@@ -473,7 +473,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
         assert len(failures) == 0, (
             f"GOLDEN PATH WEBSOCKET RELIABILITY FAILURES DETECTED: "
             f"Found {len(failures)} reliability failures in Golden Path WebSocket event delivery. "
-            f"This breaks $500K+ ARR chat experience reliability. "
+            f"This breaks 500K+ ARR chat experience reliability. "
             f"Failures: {failures}. "
             f"Total events analyzed: {len(self.golden_path_events)}. "
             f"CRITICAL REMEDIATION REQUIRED: Fix WebSocket reliability issues in Golden Path."
@@ -563,7 +563,7 @@ class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
         assert len(issues) == 0, (
             f"GOLDEN PATH WEBSOCKET PERFORMANCE ISSUES DETECTED: "
             f"Found {len(issues)} performance consistency issues in Golden Path WebSocket events. "
-            f"This impacts $500K+ ARR user experience performance. "
+            f"This impacts 500K+ ARR user experience performance. "
             f"Issues: {issues}. "
             f"CRITICAL REMEDIATION REQUIRED: Optimize WebSocket performance consistency in Golden Path."
         )

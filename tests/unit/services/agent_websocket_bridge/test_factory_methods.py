@@ -3,7 +3,7 @@ AgentWebSocketBridge Factory Methods Unit Tests
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal (Mission Critical Infrastructure)
-- Business Goal: Protect $500K+ ARR by ensuring reliable factory pattern implementations
+- Business Goal: Protect 500K+ ARR by ensuring reliable factory pattern implementations
 - Value Impact: Validates factory methods preventing WebSocket emitter creation failures
 - Strategic Impact: Core factory testing for Golden Path user emitter isolation
 

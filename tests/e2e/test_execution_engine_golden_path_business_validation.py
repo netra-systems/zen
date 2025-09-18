@@ -8,7 +8,7 @@ business functionality for the Golden Path user flow (login -> get AI responses)
 Business Value Justification (BVJ):
 - Segment: Platform/Business Critical
 - Business Goal: Revenue Protection & User Experience
-- Value Impact: Protect $500K+ ARR by ensuring chat functionality works end-to-end
+- Value Impact: Protect 500K+ ARR by ensuring chat functionality works end-to-end
 - Strategic Impact: Validate production readiness with zero business functionality loss
 
 Test Strategy: End-to-End validation of Golden Path business value delivery
@@ -204,7 +204,7 @@ class ExecutionEngineGoldenPathBusinessValidationTests(SSotAsyncTestCase):
         """
         Test 3+ users execute agents concurrently without interference.
         
-        CRITICAL: Multi-user isolation protects $500K+ ARR business functionality.
+        CRITICAL: Multi-user isolation protects 500K+ ARR business functionality.
         
         Expected: FAIL if users interfere with each other  
         Expected: PASS if complete user isolation maintained
@@ -390,13 +390,13 @@ class ExecutionEngineGoldenPathBusinessValidationTests(SSotAsyncTestCase):
             print(f'\nCHECK GOLDEN PATH FULLY PRESERVED:')
             print(f'   CHECK UserExecutionEngine SSOT migration successful')
             print(f'   CHECK Complete business functionality restored')
-            print(f'   CHECK $500K+ ARR functionality protected')
+            print(f'   CHECK 500K+ ARR functionality protected')
             print(f'   CHECK Ready for production deployment')
         else:
             print(f'\n🚨 GOLDEN PATH BUSINESS VALUE LOSS:')
             print(f'   X {validations_total - validations_passed}/{validations_total} critical validations failed')
             print(f'   X Business functionality degraded or broken')
-            print(f'   X $500K+ ARR at risk')
+            print(f'   X 500K+ ARR at risk')
             print(f'   X UserExecutionEngine SSOT migration incomplete or faulty')
             self.fail(f'Golden Path BUSINESS VALUE LOSS: {validations_total - validations_passed} critical validations failed. UserExecutionEngine SSOT migration must preserve complete business functionality.')
 if __name__ == '__main__':

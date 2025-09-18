@@ -394,7 +394,7 @@ Value Impact:
 - Supports tiered access control for freemium model conversion
 
 Revenue Impact:
-- Enterprise deals requiring security audits: $50K+ ARR per customer
+- Enterprise deals requiring security audits: 50K+ ARR per customer
 - Compliance certifications unlock 40% larger enterprise segment
 - Security breach prevention: Protects $millions in potential damages
 - Freemium conversion: Secure paid feature access drives 15% conversion rate

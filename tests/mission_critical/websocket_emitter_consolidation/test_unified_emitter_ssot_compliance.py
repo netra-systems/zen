@@ -3,7 +3,7 @@ Test Unified Emitter SSOT Compliance - PHASE 2: CONSOLIDATION VALIDATION
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - Core Infrastructure Validation
-- Business Goal: Revenue Protection - Ensure SSOT consolidation maintains $500K+ ARR
+- Business Goal: Revenue Protection - Ensure SSOT consolidation maintains 500K+ ARR
 - Value Impact: Validates that single emitter delivers all critical events reliably
 - Strategic Impact: Proves SSOT consolidation works without business value loss
 

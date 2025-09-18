@@ -3,7 +3,7 @@
 
 Business Value Justification:
     - Segment: Platform/Internal (Core Infrastructure)
-- Business Goal: Ensure 100% reliability of $500K+ plus ARR chat functionality
+- Business Goal: Ensure 100% reliability of 500K+  ARR chat functionality
 - Value Impact: Validates all 5 critical WebSocket events that enable substantive AI interactions
 - Strategic Impact: Prevents chat failures that cause user abandonment and revenue loss
 
@@ -372,8 +372,7 @@ class WebSocketConnectionManager:
                         logger.debug(fReceived event: {validated_event.event_type} for thread {validated_event.thread_id})
                         
                     except json.JSONDecodeError as e:
-                        logger.error(fFailed to parse WebSocket message: {message}, error: {e})"
-                        logger.error(fFailed to parse WebSocket message: {message}, error: {e})""
+                        logger.error(fFailed to parse WebSocket message: {message}, error: {e})"""
 
                         
                 except asyncio.TimeoutError:
@@ -381,18 +380,7 @@ class WebSocketConnectionManager:
                     continue
                     
         except Exception as e:
-            logger.error(f"Error receiving WebSocket events: {e})"
-        
-        return events
-
-
-# ============================================================================
-# TEST CONFIGURATION AND UTILITIES
-# ============================================================================
-
-@dataclass
-class ValidationTestConfig:
-    Configuration for WebSocket validation tests."
+            logger.error(f"Error receiving WebSocket events: {e})""
     Configuration for WebSocket validation tests."
     websocket_url: str = "
     websocket_url: str = ""
@@ -816,17 +804,7 @@ class WebSocketEventValidationSuiteTests:
     async def test_websocket_event_latency_performance(self, websocket_manager, test_config):
         Test WebSocket event latency meets performance requirements (<100ms)."
         Test WebSocket event latency meets performance requirements (<100ms)."
-        logger.info("Testing WebSocket event latency performance)"
-        
-        user_id = ftest_user_{uuid.uuid4().hex[:8]}
-        auth_token = create_mock_auth_token(user_id)
-        
-        latencies = []
-        
-        async with websocket_manager.connect(user_id, auth_token) as websocket:
-            # Send multiple requests to gather latency statistics
-            for i in range(10):
-                thread_id = f"perf_thread_{i}_{uuid.uuid4().hex[:8]}"
+        logger.info("Testing WebSocket event latency performance)""perf_thread_{i}_{uuid.uuid4().hex[:8]}"
                 
                 # Measure request latency
                 start_time = time.time()
@@ -991,15 +969,7 @@ class WebSocketEventValidationSuiteTests:
     async def test_comprehensive_validation_report_generation(self, websocket_manager, test_config):
         Generate comprehensive validation report for all WebSocket events."
         Generate comprehensive validation report for all WebSocket events."
-        logger.info("Generating comprehensive WebSocket validation report)"
-        
-        user_id = freport_user_{uuid.uuid4().hex[:8]}
-        auth_token = create_mock_auth_token(user_id)
-        
-        async with websocket_manager.connect(user_id, auth_token) as websocket:
-            # Execute multiple agent requests to gather comprehensive data
-            for i in range(5):
-                thread_id = f"report_thread_{i}_{uuid.uuid4().hex[:8]}"
+        logger.info("Generating comprehensive WebSocket validation report)""report_thread_{i}_{uuid.uuid4().hex[:8]}"
                 
                 websocket_manager.event_capture.start_sequence(
                     thread_id, user_id, test_config.required_events

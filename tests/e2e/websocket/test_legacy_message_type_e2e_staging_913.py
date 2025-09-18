@@ -4,7 +4,7 @@ E2E Staging Tests for Issue #913 - WebSocket Legacy Message Types
 This module tests complete user journey with legacy message types in staging
 environment to validate business impact of Issue #913.
 
-BUSINESS IMPACT: $500K+ ARR depends on WebSocket communication working
+BUSINESS IMPACT: 500K+ ARR depends on WebSocket communication working
 without legacy message type errors in production environments.
 
 Issue #913: WebSocket Legacy Message Type 'legacy_response' Not Recognized

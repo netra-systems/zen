@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Segment: All Users (Error recovery affects all customer tiers)
 - Business Goal: Platform Reliability & User Confidence
 - Value Impact: Graceful error handling prevents user frustration and churn
-- Strategic Impact: $500K+ ARR depends on reliable platform experience
+- Strategic Impact: 500K+ ARR depends on reliable platform experience
 
 Error Recovery Requirements:
 1. Graceful handling of agent processing failures

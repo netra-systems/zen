@@ -11,7 +11,7 @@ Business Value Justification:
 - Segment: Platform/Enterprise (Migration success validation)
 - Business Goal: Ensure migration to SSOT patterns is complete and successful
 - Value Impact: Validate Golden Path functionality restored and improved
-- Revenue Impact: Protect $500K+ ARR by ensuring migration success
+- Revenue Impact: Protect 500K+ ARR by ensuring migration success
 
 🔍 These tests validate migration completion and should PASS after migration
 """

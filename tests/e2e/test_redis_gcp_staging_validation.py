@@ -5,7 +5,7 @@ BUSINESS VALUE JUSTIFICATION:
 - Segment: Platform/Production
 - Business Goal: Production Chat Reliability (90% of platform value)
 - Value Impact: Validates complete golden path: users login -> get AI responses
-- Strategic Impact: Protects $500K+ ARR by ensuring staging matches production behavior
+- Strategic Impact: Protects 500K+ ARR by ensuring staging matches production behavior
 
 This test suite validates the complete Redis integration in GCP staging environment:
 1. Redis connectivity through VPC connector

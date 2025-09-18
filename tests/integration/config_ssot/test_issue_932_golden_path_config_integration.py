@@ -3,7 +3,7 @@ INTEGRATION TEST: Golden Path Configuration Integration - Issue #932
 
 Business Value Justification (BVJ):
 - Segment: Enterprise/Mid-Market - Core User Journey
-- Business Goal: Protect $500K+ ARR by ensuring Golden Path user flow works reliably
+- Business Goal: Protect 500K+ ARR by ensuring Golden Path user flow works reliably
 - Value Impact: Critical configuration management for user login -> AI response flow
 - Strategic Impact: Validates SSOT configuration supports end-to-end business functionality
 

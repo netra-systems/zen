@@ -3,7 +3,7 @@ Test Plan for Issue #639: Golden Path E2E Staging Test Configuration Failures
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
-- Business Goal: Validate $500K+ ARR golden path functionality restoration
+- Business Goal: Validate 500K+ ARR golden path functionality restoration
 - Value Impact: Ensure end-to-end chat functionality works in staging environment
 - Strategic Impact: Critical for production deployment confidence
 

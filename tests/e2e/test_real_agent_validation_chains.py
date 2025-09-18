@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 1. Segment: Mid, Enterprise
 2. Business Goal: Ensure data quality and validation integrity
 3. Value Impact: Validation chains prevent data corruption and ensure accuracy
-4. Revenue Impact: $275K+ ARR from enterprise data quality requirements
+4. Revenue Impact: 275K+ ARR from enterprise data quality requirements
 
 CLAUDE.md COMPLIANCE:
 - Uses real services ONLY (NO MOCKS)

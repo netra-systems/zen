@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise)
 - Business Goal: Ensure consistent WebSocket import paths prevent dual pattern fragmentation
 - Value Impact: Developer experience and system reliability for AI chat infrastructure
-- Revenue Impact: Prevents race conditions that could disrupt $500K+ ARR user interactions
+- Revenue Impact: Prevents race conditions that could disrupt 500K+ ARR user interactions
 
 CRITICAL: This test validates import path consistency for WebSocket SSOT compliance.
 These tests MUST FAIL before SSOT remediation and PASS after remediation.

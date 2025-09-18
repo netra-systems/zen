@@ -100,7 +100,7 @@ class WebSocketSSOTAgentIntegrationTests(SSotAsyncBaseTestCase):
             
             print(" PASS:  GOLDEN PATH SUCCESS: Agent execution pipeline functional")
             print(" PASS:  USER BENEFIT: /api/agent/v2/execute can process requests")
-            print(" PASS:  BUSINESS IMPACT: $500K+ ARR protected - AI responses restored")
+            print(" PASS:  BUSINESS IMPACT: 500K+ ARR protected - AI responses restored")
             
         except ImportError as e:
             pytest.fail(f"Agent message routing should work with SSOT imports but failed: {e}")
@@ -203,7 +203,7 @@ class WebSocketSSOTBusinessImpactValidationTests(SSotAsyncBaseTestCase):
             
             print(" PASS:  BUSINESS SUCCESS: Golden Path fully functional")
             print(" PASS:  CHAT VALUE: 90% of platform value restored")
-            print(" PASS:  REVENUE PROTECTED: $500K+ ARR secured")
+            print(" PASS:  REVENUE PROTECTED: 500K+ ARR secured")
             print(f" PASS:  SUCCESS POINT: Step 4 - {chat_flow_steps[3]}")
             
         except ImportError as e:

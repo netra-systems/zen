@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,16 +23,11 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""E2E Tests for Complete Triage Golden Path - Production Scenarios
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""E2E Tests for Complete Triage Golden Path - Production Scenarios
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
 - Segment: All (Free/Early/Mid/Enterprise/Platform) - Revenue Critical
-- Business Goal: Validate complete $500K+ ARR golden path user journey from authentication to AI insights
+- Business Goal: Validate complete 500K+ ARR golden path user journey from authentication to AI insights
 - Value Impact: Tests the complete triage  ->  agent execution flow that delivers core business value
 - Strategic Impact: Mission-critical validation of revenue-generating user workflows
 - Revenue Protection: E2E failures directly translate to lost revenue and customer churn
@@ -59,7 +46,7 @@ KEY COVERAGE:
 7. Complete agent pipeline execution after triage
 
 GOLDEN PATH PROTECTION:
-This is the ultimate validation that the $500K+ ARR user journey works end-to-end:
+This is the ultimate validation that the 500K+ ARR user journey works end-to-end:
 User Login  ->  WebSocket Connection  ->  Message Send  ->  Triage  ->  Agent Execution  ->  AI Insights
 
 These tests MUST pass for production deployment.
@@ -424,7 +411,7 @@ class TriageGoldenPathE2ETests(SSotAsyncTestCase):
     async def test_complete_golden_path_single_user(self):
         """Test complete golden path for single user end-to-end
         
-        Business Impact: Validates the core $500K+ ARR user journey that
+        Business Impact: Validates the core 500K+ ARR user journey that
         must work for every customer interaction.
         
         Steps:

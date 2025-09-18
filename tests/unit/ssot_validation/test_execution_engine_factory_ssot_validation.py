@@ -7,7 +7,7 @@ This test is DESIGNED TO FAIL initially to expose factory pattern proliferation
 that causes execution engine fragmentation and WebSocket event delivery inconsistency.
 
 BUSINESS IMPACT:
-- $500K+ ARR at risk due to execution engine factory proliferation
+- 500K+ ARR at risk due to execution engine factory proliferation
 - Multiple execution engine factories cause inconsistent agent behavior
 - Factory pattern fragmentation blocks Golden Path user flow reliability
 
@@ -38,7 +38,7 @@ class ExecutionEngineFactorySSotValidationTests(unittest.TestCase):
         """Set up test with factory proliferation analysis"""
         super().setUp()
         self.expected_failure_documented = True
-        self.business_impact = '$500K+ ARR at risk due to factory proliferation'
+        self.business_impact = '500K+ ARR at risk due to factory proliferation'
 
     def test_execution_engine_factory_ssot_consolidation(self):
         """

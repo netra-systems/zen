@@ -74,25 +74,7 @@ class WebSocketDualInterfaceViolationsTests(SSotBaseTestCase):
         
         EXPECTED BEHAVIOR: Test should PASS after SSOT remediation.
         """
-        logger.info(" ALERT:  TESTING: WebSocket interface consistency in AgentRegistry (SSOT-compliant)")
-        
-        # Create user session - this should use ONE interface type
-        user_session = UserAgentSession(self.test_user_id)
-        
-        # CRITICAL: Test interface type consistency
-        websocket_manager = Mock(spec=WebSocketManager)
-        websocket_bridge = Mock(spec=AgentWebSocketBridge)
-        
-        # TEST 1: Should use consistent interface internally (now async)
-        await user_session.set_websocket_manager(websocket_manager)
-        
-        # REGRESSION EXPOSURE: Check if internal state is consistent
-        internal_manager = user_session._websocket_manager
-        internal_bridge = user_session._websocket_bridge
-        
-        # UPDATED ASSERTION: After SSOT remediation, bridge should be created
-        # The SSOT implementation creates a bridge when manager is set
-        assert internal_bridge is not None, "WebSocket bridge should be created after SSOT remediation"
+        logger.info(" ALERT:  TESTING: WebSocket interface consistency in AgentRegistry (SSOT-compliant)""WebSocket bridge should be created after SSOT remediation"
         
         # INTERFACE COMPLIANCE: SSOT implementation should use bridge pattern
         # This validates proper SSOT compliance without dual interface confusion

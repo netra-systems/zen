@@ -4,7 +4,7 @@ E2E Tests: Golden Path Auth Delegation
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)  
 - Business Goal: Ensure complete auth flow works with delegation
-- Value Impact: $500K+ ARR Golden Path functionality protected
+- Value Impact: 500K+ ARR Golden Path functionality protected
 - Strategic Impact: Core user authentication experience
 
 This test suite validates the complete Golden Path user flow with auth service

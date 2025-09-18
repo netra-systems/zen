@@ -19,7 +19,7 @@ Test Coverage:
 3. Environment access pattern violations
 4. Auth configuration conflicts affecting login flow
 
-CRITICAL: This test protects $500K+ plus ARR by detecting configuration management
+CRITICAL: This test protects 500K+  ARR by detecting configuration management
 failures that prevent user login and AI chat functionality.
 "
 ""
@@ -282,7 +282,7 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
         assert len(config_conflicts) == 0, (
             fSSOT VIOLATION: Auth configuration conflicts detected: {config_conflicts}. 
             fDifferent config managers return different auth settings, 
-            f"causing Golden Path login failures worth $500K+ plus ARR protection."
+            f"causing Golden Path login failures worth 500K+  ARR protection."
         )
 
     def test_config_manager_singleton_vs_factory_pattern_conflicts(self):

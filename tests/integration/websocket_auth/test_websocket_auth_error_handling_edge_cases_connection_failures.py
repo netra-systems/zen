@@ -5,7 +5,7 @@ Business Value Justification:
 - Segment: Platform/Internal - WebSocket Connection Resilience
 - Business Goal: System Stability & Reliability - Ensure robust connection handling
 - Value Impact: Prevents connection failures from cascading into chat system outages
-- Revenue Impact: Protects $500K+ ARR by ensuring connection edge cases don't break Golden Path
+- Revenue Impact: Protects 500K+ ARR by ensuring connection edge cases don't break Golden Path
 
 CRITICAL REQUIREMENTS:
 - NO MOCKS allowed - use real services and real system behavior

@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
 - Segment: Platform/All tiers (affects all users)
 - Business Goal: Platform Stability & User Experience 
 - Value Impact: Ensures reliable agent workflow progression and prevents broken user interactions
-- Revenue Impact: Protects $500K+ ARR by preventing agent execution failures in production
+- Revenue Impact: Protects 500K+ ARR by preventing agent execution failures in production
 
 These tests validate the complete agent handoff chain in the Supervisor Agent orchestration:
 Triage -> Data Helper -> APEX Optimizer -> Actions -> Reporting

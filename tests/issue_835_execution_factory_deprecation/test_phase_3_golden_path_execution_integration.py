@@ -2,7 +2,7 @@
 Issue #835 - Phase 3: Golden Path Execution Integration Tests
 
 These tests validate that the golden path user flow works correctly
-with modern SSOT execution factory patterns, ensuring the $500K+ ARR
+with modern SSOT execution factory patterns, ensuring the 500K+ ARR
 business functionality is protected.
 
 Test Strategy:
@@ -39,12 +39,12 @@ class Phase3GoldenPathExecutionIntegrationTests(SSotAsyncTestCase):
             execution_engine = unified_factory.create_execution_engine()
             self.assertIsNotNone(execution_engine)
             mock_agent = AsyncMock()
-            mock_agent.execute = AsyncMock(return_value={'status': 'completed', 'result': 'AI cost analysis completed with optimization recommendations', 'business_value': '$500K+ ARR protected', 'agent': 'supervisor'})
+            mock_agent.execute = AsyncMock(return_value={'status': 'completed', 'result': 'AI cost analysis completed with optimization recommendations', 'business_value': '500K+ ARR protected', 'agent': 'supervisor'})
             golden_path_result = await mock_agent.execute(context=user_context, message='Analyze my AI costs and suggest optimizations')
             self.assertIsNotNone(golden_path_result)
             self.assertEqual(golden_path_result['status'], 'completed')
             self.assertIn('AI cost analysis', golden_path_result['result'])
-            self.assertIn('$500K+ ARR', golden_path_result['business_value'])
+            self.assertIn('500K+ ARR', golden_path_result['business_value'])
             mock_websocket_manager.send_agent_event.assert_called()
         except Exception as e:
             self.fail(f'Golden path execution with modern factory failed: {e}')

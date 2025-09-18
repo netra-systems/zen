@@ -152,7 +152,7 @@ These E2E staging tests validate:
    - Production endpoints apply proper restrictions for demo tokens
 
 BUSINESS IMPACT:
-- Protects $500K+ ARR Golden Path from auth cross-contamination  
+- Protects 500K+ ARR Golden Path from auth cross-contamination  
 - Ensures enterprise security isolation requirements
 - Prevents development auth tokens from working in staging
 - Validates environment boundary security

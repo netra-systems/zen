@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Business Goal: Performance Optimization & Platform Reliability
 - Value Impact: Validates environment detection works correctly in production-like
   environment and delivers promised performance optimizations while maintaining
-  $500K+ ARR protection through reliable WebSocket connections
+  500K+ ARR protection through reliable WebSocket connections
 - Strategic Impact: Real GCP validation ensures environment-aware system delivers
   optimal performance in actual deployment context
 

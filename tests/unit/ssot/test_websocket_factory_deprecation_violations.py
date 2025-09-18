@@ -240,8 +240,7 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
                 f"   CHECK manager = get_websocket_manager()  # Direct SSOT usage",
                 f"",
                 f"3. Update instantiation patterns:",
-                f"   X WebSocketManagerFactory().create_manager()",  
-                f"   CHECK WebSocketManager()  # Direct instantiation when needed",
+                f"   X WebSocketManagerFactory().create_manager()""   CHECK WebSocketManager()  # Direct instantiation when needed",
                 f"",
                 f"4. Verify canonical imports in SSOT_IMPORT_REGISTRY.md",
                 f"",
@@ -564,11 +563,7 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
                 f"X DEPRECATED FACTORY FILE EXISTS WITHOUT PROPER WARNINGS\n"
                 f"File: {factory_file.relative_to(self.project_root)}\n"
                 f"Required: Deprecation warnings for get_websocket_manager_factory()\n"
-                f"Add: logger.warning('get_websocket_manager_factory is deprecated. Use WebSocketManager directly.')"
-            )
-        
-        # Success - deprecation warnings present
-        self.record_metric("deprecation_warnings_compliant", True)
+                f"Add: logger.warning('get_websocket_manager_factory is deprecated. Use WebSocketManager directly.')""deprecation_warnings_compliant", True)
         print("CHECK DEPRECATED FACTORY FUNCTIONS HAVE PROPER WARNINGS")
         for line_num, warning_text in factory_warnings:
             print(f"   Line {line_num}: {warning_text[:80]}...")

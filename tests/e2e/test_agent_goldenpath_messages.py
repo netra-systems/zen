@@ -3,7 +3,7 @@ MISSION CRITICAL E2E TEST: Agent Golden Path Message Flow - REAL GCP STAGING ONL
 
 Business Value Justification:
 - Segment: All (Free/Early/Mid/Enterprise/Platform) 
-- Business Goal: Validate complete $500K+ ARR golden path user flow
+- Business Goal: Validate complete 500K+ ARR golden path user flow
 - Value Impact: Ensures core AI chat functionality works end-to-end
 - Strategic Impact: Protects 90% of platform business value
 
@@ -409,7 +409,7 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
     90% of the platform's business value. Tests run against real GCP staging
     environment with no mocks.
     
-    Business Impact: $500K+ ARR depends on this functionality.
+    Business Impact: 500K+ ARR depends on this functionality.
     """
     
     @classmethod

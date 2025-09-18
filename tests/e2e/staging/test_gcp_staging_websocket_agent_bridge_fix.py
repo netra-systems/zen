@@ -49,7 +49,7 @@ class GCPStagingWebSocketAgentBridgeSuccessTests(SSotAsyncBaseTestCase):
             assert golden_path_steps["5_agent_execution"], "Agent execution should succeed"
             assert golden_path_steps["6_agent_response_delivered"], "Agent response should succeed"
             
-            print(" PASS:  BUSINESS IMPACT: $500K+ ARR Golden Path fully functional in staging")
+            print(" PASS:  BUSINESS IMPACT: 500K+ ARR Golden Path fully functional in staging")
             
         except ImportError as e:
             pytest.fail(f"Staging Golden Path should work with SSOT imports but failed: {e}")

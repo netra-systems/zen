@@ -16,7 +16,7 @@ Business Value Justification:
 - Segment: ALL (Free -> Enterprise)
 - Business Goal: Ensure reliable WebSocket communication under stress
 - Value Impact: Prevents Golden Path disruptions during connection issues
-- Revenue Impact: Protects $500K+ ARR chat functionality reliability
+- Revenue Impact: Protects 500K+ ARR chat functionality reliability
 
 Integration Level: Uses real WebSocket managers, mock WebSocket connections,
 real user context factories, and actual message serialization.

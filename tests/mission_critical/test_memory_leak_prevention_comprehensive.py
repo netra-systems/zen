@@ -25,7 +25,7 @@ class WebSocketTestHelper:
 """
 MISSION CRITICAL: Memory Leak Detection and Prevention Tests
 
-Business Value: Prevents $300K+ ARR loss from memory-related service outages  
+Business Value: Prevents 300K+ ARR loss from memory-related service outages  
 Critical Requirements:
 - Memory usage must remain stable over extended operations (24+ hours)
 - Memory leaks must be detected before reaching 1GB increase

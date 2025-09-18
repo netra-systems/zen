@@ -2,7 +2,7 @@
 WebSocket Logging Operational Impact Tests - Issue #885
 
 Purpose: Demonstrate how logging SSOT violations specifically affect
-WebSocket operational visibility and $500K+ ARR chat functionality.
+WebSocket operational visibility and 500K+ ARR chat functionality.
 
 These tests SHOULD FAIL to prove operational issues exist.
 """
@@ -31,7 +31,7 @@ class TestWebSocketLoggingOperationalImpact(SSotBaseTestCase):
         """
         BASELINE TEST: Should FAIL - WebSocket manager uses inconsistent logging
 
-        Critical for $500K+ ARR chat functionality debugging
+        Critical for 500K+ ARR chat functionality debugging
         Expected: FAILURE showing inconsistent logging in core WebSocket files
         """
         if not self.websocket_core_path.exists():
@@ -64,7 +64,7 @@ class TestWebSocketLoggingOperationalImpact(SSotBaseTestCase):
         assert coverage_percentage >= 95, (
             f"OPERATIONAL IMPACT (EXPECTED FAILURE): Only {coverage_percentage:.1f}% "
             f"of WebSocket files have proper event logging. This reduces chat debugging "
-            f"visibility for $500K+ ARR functionality. "
+            f"visibility for 500K+ ARR functionality. "
             f"Missing coverage in: {event_logging_coverage['missing_files']}"
         )
 

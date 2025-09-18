@@ -6,7 +6,7 @@ SSOT principles and create security vulnerabilities in the Golden Path.
 
 Business Value: Platform/Internal - System Security & Development Velocity
 Prevents authentication bypass vulnerabilities and ensures secure WebSocket
-connections for the $500K+ ARR Golden Path user flow.
+connections for the 500K+ ARR Golden Path user flow.
 
 Expected: FAIL initially (detects 5+ violations, 4 patterns)
 Target: 100% SSOT compliance with canonical authentication patterns
@@ -56,7 +56,7 @@ class TestWebSocketAuthPatternViolations(SSotBaseTestCase):
     and create security risks in WebSocket connections.
     
     CRITICAL BUSINESS IMPACT:
-    - Prevents authentication bypass in Golden Path ($500K+ ARR protection)
+    - Prevents authentication bypass in Golden Path (500K+ ARR protection)
     - Ensures secure WebSocket connections for customer chat functionality
     - Maintains enterprise-grade security standards for user authentication
     """
@@ -319,7 +319,7 @@ class TestWebSocketAuthPatternViolations(SSotBaseTestCase):
         - 4+ distinct violation patterns
         
         Business Impact:
-        - Prevents authentication bypass in Golden Path ($500K+ ARR protection)
+        - Prevents authentication bypass in Golden Path (500K+ ARR protection)
         - Ensures secure WebSocket connections for customer chat
         - Maintains enterprise-grade security standards
         """

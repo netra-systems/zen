@@ -380,14 +380,7 @@ class WebSocketThreadAssociationRedisTests(BaseIntegrationTest):
         switching_start = time.time()
         
         for i, target_thread in enumerate(thread_ids):
-            self.logger.info(f"Switching authenticated WebSocket {websocket_id} to thread {target_thread} (switch {i+1}/{len(thread_ids)})")
-            
-            switch_start_time = time.time()
-            connection_info = await setup_authenticated_websocket_thread_association(target_thread, i)
-            switch_duration = time.time() - switch_start_time
-            
-            switch_record = {
-                "switch_index": i,
+            self.logger.info(f"Switching authenticated WebSocket {websocket_id} to thread {target_thread} (switch {i+1}/{len(thread_ids)})""switch_index": i,
                 "from_thread": str(current_thread) if i > 0 else None,
                 "to_thread": str(target_thread),
                 "duration_ms": switch_duration * 1000,

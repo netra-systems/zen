@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
 - Segment: Platform Infrastructure - Critical for all tiers
 - Business Goal: Golden Path Protection - Ensure execution engine migration works on staging GCP
 - Value Impact: Validates execution engine migration maintains complete Golden Path user flow
-- Strategic Impact: $500K+ ARR depends on staging GCP environment validating user login -> agent response
+- Strategic Impact: 500K+ ARR depends on staging GCP environment validating user login -> agent response
 
 This E2E staging test validates that execution engine migration components work correctly
 on the REAL staging GCP environment including:

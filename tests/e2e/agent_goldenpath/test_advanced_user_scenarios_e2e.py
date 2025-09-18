@@ -12,7 +12,7 @@ MISSION CRITICAL: Tests advanced user scenarios and edge cases in agent processi
 Business Value Justification (BVJ):
 - Segment: Mid/Enterprise Users with complex business needs
 - Business Goal: Premium Feature Validation & Enterprise Readiness
-- Value Impact: Validates $500K+ ARR advanced features and enterprise capabilities
+- Value Impact: Validates 500K+ ARR advanced features and enterprise capabilities
 - Strategic Impact: Demonstrates platform sophistication for high-value customer segments
 
 Test Strategy:

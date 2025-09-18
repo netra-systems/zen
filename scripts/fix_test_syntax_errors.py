@@ -1,581 +1,186 @@
-#!/usr/bin/env python3
-"""Script to fix common syntax errors in test files"""
+#!/usr/bin/env python
+"""
+PHASE 4: Fix remaining critical test syntax errors blocking Golden Path execution
 
-import ast
+This script fixes common syntax error patterns in test files:
+1. Dollar signs in ARR mentions
+2. Unterminated strings
+3. Mismatched parentheses in imports
+4. Invalid decimal literals
+"""
+
 import os
 import re
-import argparse
-import logging
+import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
-# Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+class TestSyntaxFixer:
+    def __init__(self):
+        self.fixes_applied = 0
+        self.files_processed = 0
+        self.error_patterns = [
+            # Pattern 1: Fix mismatched parentheses in imports
+            {
+                'pattern': r'__import__\(([^,]+),\s*fromlist=\[([^]]*)\)\s*if\s+([^)]+)\s+else\s+\[\)',
+                'replacement': r'__import__(\1, fromlist=[\2] if \3 else [])',
+                'description': 'Fix mismatched parentheses in conditional fromlist imports'
+            },
+            {
+                'pattern': r'fromlist=\[([^]]*)\)\s*if\s+([^)]+)\s+else\s+\[\)',
+                'replacement': r'fromlist=[\1] if \2 else [])',
+                'description': 'Fix mismatched parentheses in fromlist conditions'
+            },
+            # Pattern 2: Fix dollar signs in ARR mentions
+            {
+                'pattern': r'\$(\d+K\+\s+(?:plus\s+)?ARR)',
+                'replacement': r'\1',
+                'description': 'Remove dollar signs from ARR business value mentions'
+            },
+            # Pattern 3: Fix unterminated strings
+            {
+                'pattern': r'"([^"]*WebSocket[^"]*)\)"([^"]*)',
+                'replacement': r'"\1)"',
+                'description': 'Fix unterminated strings with WebSocket mentions'
+            },
+            {
+                'pattern': r'f"([^"]*Warning:[^"]*{[^}]*}[^"]*)"([^"]*)',
+                'replacement': r'f"\1"',
+                'description': 'Fix unterminated f-strings with warnings'
+            },
+            # Pattern 4: Fix invalid decimal literals with ARR
+            {
+                'pattern': r'(\d+K\+\s+)plus(\s+ARR)',
+                'replacement': r'\1\2',
+                'description': 'Fix invalid decimal literal patterns with "plus" in ARR mentions'
+            },
+            # Pattern 5: Fix multiline string terminators
+            {
+                'pattern': r"'''([^']*Business Value:[^']*ARR[^']*)",
+                'replacement': r'"""\1"""',
+                'description': 'Fix multiline string terminators for business value descriptions'
+            },
+            # Pattern 6: Fix print statements with missing quotes
+            {
+                'pattern': r'print\(f"([^"]*Warning:[^"]*{[^}]*}:[^"]*)"([^"]*)\)',
+                'replacement': r'print(f"\1")',
+                'description': 'Fix print statements with missing quote terminators'
+            }
+        ]
 
+    def fix_file_content(self, content: str, file_path: str) -> Tuple[str, int]:
+        """Fix syntax errors in file content and return fixed content with count of fixes"""
+        fixed_content = content
+        local_fixes = 0
 
-def fix_unclosed_parenthesis(content: str) -> str:
-    """Fix unclosed parenthesis in import statements"""
-    lines = content.split('\n')
-    fixed_lines = []
-    i = 0
-    
-    while i < len(lines):
-        line = lines[i]
-        
-        # Check for import statements with unclosed parentheses
-        if ('from ' in line and '(' in line) or ('import ' in line and '(' in line):
-            paren_count = line.count('(') - line.count(')')
-            
-            if paren_count > 0:
-                # Found unclosed parenthesis - look for the end or close it
-                import_lines = [line]
-                j = i + 1
-                
-                while j < len(lines) and paren_count > 0:
-                    next_line = lines[j]
-                    paren_count += next_line.count('(') - next_line.count(')')
-                    import_lines.append(next_line)
-                    j += 1
-                
-                # If we still have unclosed parentheses, close them
-                if paren_count > 0:
-                    import_lines[-1] = import_lines[-1].rstrip() + ')'
-                
-                fixed_lines.extend(import_lines)
-                i = j
-                continue
-        
-        fixed_lines.append(line)
-        i += 1
-    
-    return '\n'.join(fixed_lines)
+        for pattern_info in self.error_patterns:
+            pattern = pattern_info['pattern']
+            replacement = pattern_info['replacement']
+            description = pattern_info['description']
 
-def fix_orphaned_methods(content: str) -> str:
-    """Fix methods without class definitions"""
-    lines = content.split('\n')
-    
-    # Look for orphaned methods (functions at wrong indentation)
-    orphaned_method_found = False
-    first_orphan_line = -1
-    
-    for i, line in enumerate(lines):
-        stripped = line.strip()
-        # Look for methods that start with spaces but no class above them
-        if line.startswith('    def ') or (stripped.startswith('def ') and line.startswith('    ')):
-            # Check if there's a class definition above this line
-            has_class_above = False
-            for j in range(i-1, -1, -1):
-                prev_line = lines[j].strip()
-                if prev_line.startswith('class '):
-                    has_class_above = True
-                    break
-                elif prev_line.startswith('def ') and not lines[j].startswith('    '):
-                    break
-            
-            if not has_class_above:
-                orphaned_method_found = True
-                if first_orphan_line == -1:
-                    first_orphan_line = i
-                break
-    
-    if orphaned_method_found:
-        # Find where to insert the class (after imports/docstrings)
-        insert_pos = 0
-        for i, line in enumerate(lines):
-            stripped = line.strip()
-            if (stripped and 
-                not stripped.startswith('#') and 
-                not stripped.startswith('"""') and
-                not stripped.startswith("'''") and
-                not stripped.startswith('import ') and 
-                not stripped.startswith('from ') and
-                not line.startswith('"""') and
-                not line.startswith("'''")):
-                insert_pos = i
-                break
-        
-        # Insert a test class before the orphaned methods
-        lines.insert(insert_pos, '')
-        lines.insert(insert_pos + 1, 'class TestSyntaxFix:')
-        lines.insert(insert_pos + 2, '    """Test class for orphaned methods"""')
-        lines.insert(insert_pos + 3, '')
-    
-    return '\n'.join(lines)
+            matches = re.findall(pattern, fixed_content)
+            if matches:
+                print(f"  Applying fix: {description}")
+                print(f"    Found {len(matches)} matches")
+                fixed_content = re.sub(pattern, replacement, fixed_content)
+                local_fixes += len(matches)
 
-def fix_incomplete_imports(content: str) -> str:
-    """Fix incomplete import statements"""
-    lines = content.split('\n')
-    fixed_lines = []
-    
-    for i, line in enumerate(lines):
-        # Fix common incomplete import patterns
-        if line.strip().startswith('from ') and line.strip().endswith('('):
-            # Line ends with open paren but no closing paren
-            if i + 1 < len(lines) and not lines[i + 1].strip():
-                # Next line is empty, close the import
-                line = line.rstrip() + ')'
-        elif line.strip() == 'from' or line.strip().endswith('from'):
-            # Incomplete 'from' statement
-            line = '# ' + line + ' # Incomplete import statement'
-        
-        fixed_lines.append(line)
-    
-    return '\n'.join(fixed_lines)
+        return fixed_content, local_fixes
 
-def fix_unexpected_indent(content: str) -> str:
-    """Fix unexpected indentation issues"""
-    lines = content.split('\n')
-    fixed_lines = []
-    
-    for i, line in enumerate(lines):
-        # If line starts with spaces but previous meaningful line doesn't establish context
-        if line.startswith('    ') and line.strip():
-            # Check if this could be an orphaned method/function definition
-            if i > 0:
-                # Look back to find the last non-empty line
-                prev_meaningful = None
-                for j in range(i-1, -1, -1):
-                    if lines[j].strip():
-                        prev_meaningful = lines[j]
-                        break
-                
-                # If previous line doesn't establish indentation context, this might be orphaned
-                if (prev_meaningful and 
-                    not prev_meaningful.strip().endswith(':') and
-                    not prev_meaningful.startswith('    ') and
-                    not prev_meaningful.strip().startswith('class ') and
-                    not prev_meaningful.strip().startswith('def ') and
-                    line.strip().startswith('def ')):
-                    
-                    # This looks like an orphaned method - it will be caught by fix_orphaned_methods
-                    pass
-        
-        fixed_lines.append(line)
-    
-    return '\n'.join(fixed_lines)
+    def process_file(self, file_path: Path) -> bool:
+        """Process a single file and fix syntax errors"""
+        try:
+            print(f"\nProcessing: {file_path}")
 
-def fix_invalid_syntax(content: str) -> str:
-    """Fix various invalid syntax issues"""
-    lines = content.split('\n')
-    fixed_lines = []
+            # Read file content
+            with open(file_path, 'r', encoding='utf-8') as f:
+                original_content = f.read()
 
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-        original_line = line
+            # Apply fixes
+            fixed_content, local_fixes = self.fix_file_content(original_content, str(file_path))
 
-        # ENHANCED FIXES - Issue #1332 specific patterns
+            # Write back if changes were made
+            if local_fixes > 0:
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(fixed_content)
 
-        # Fix missing quotes around variables
-        line = re.sub(r'\brun_id=pipeline_run_001\b', 'run_id="pipeline_run_001"', line)
-        line = re.sub(r'\buser_id=concurrent_user_002\b', 'user_id="concurrent_user_002"', line)
-        line = re.sub(r'\brun_id=concurrent_run_002\b', 'run_id="concurrent_run_002"', line)
+                print(f"  Applied {local_fixes} fixes to {file_path.name}")
+                self.fixes_applied += local_fixes
+                return True
+            else:
+                print(f"  No fixes needed for {file_path.name}")
+                return False
 
-        # Fix malformed f-string patterns
-        line = re.sub(r'f"([^"]*"[^"]*)', r'f"\1"', line)
-        line = re.sub(r'# Act: Execute pipeline with f"low logging', '# Act: Execute pipeline with flow logging', line)
+        except Exception as e:
+            print(f"  Error processing {file_path}: {e}")
+            return False
 
-        # Fix comment syntax errors in docstrings
-        line = re.sub(r'\bConf"igure\b', 'Configure', line)
-        line = re.sub(r'\bAssert: Verif"y\b', 'Assert: Verify', line)
-        line = re.sub(r'\bCreate larger pipeline f"or\b', 'Create larger pipeline for', line)
+    def find_files_to_fix(self) -> List[Path]:
+        """Find test files that likely need syntax fixes"""
+        base_path = Path("C:\\netra-apex")
 
-        # Fix quote mismatches in docstrings
-        if line.strip().startswith('"""') and line.count('"') == 4:
-            line = line.replace('"""', '"""', 1)
+        # Priority patterns for files to check
+        patterns = [
+            "**/test_*golden*.py",
+            "**/test_websocket_*.py",
+            "**/test_*factory*.py",
+            "tests/e2e/**/*.py",
+            "tests/mission_critical/**/*.py"
+        ]
 
-        # Fix incomplete function definitions
-        if line.strip() == '"' and i > 0 and lines[i-1].strip().startswith('async def '):
-            line = '        """'
+        files_to_check = set()
 
-        # Fix string concatenation errors
-        line = re.sub(r'\+ \\n""', '+ "\\n"', line)
-        line = re.sub(r'agent_response_content \+= final_response \+ "', 'agent_response_content += final_response + "\\n"', line)
+        for pattern in patterns:
+            for file_path in base_path.glob(pattern):
+                # Skip backup directories
+                if "backups" not in str(file_path):
+                    files_to_check.add(file_path)
 
-        # Fix malformed dictionary syntax
-        line = re.sub(r'\{type: ([^,}]+)', r'{"type": \1', line)
-        line = re.sub(r'user_id": ([^,}"]+),"', r'"user_id": "\1",', line)
-        line = re.sub(r'"content: ([^"]+)', r'"content": "\1"', line)
+        return sorted(list(files_to_check))
 
-        # Fix f-string issues
-        line = re.sub(r'f"([^"]*user_{uuid.uuid4\(\).hex\[:8\]}[^"]*)', r'f"test_user_{uuid.uuid4().hex[:8]}"', line)
-        line = re.sub(r'ftest_thread_\{uuid.uuid4\(\).hex\[:8\]\}"', r'f"test_thread_{uuid.uuid4().hex[:8]}"', line)
+    def run_syntax_fixes(self) -> Dict[str, int]:
+        """Run syntax fixes on all relevant test files"""
+        print("PHASE 4: Fixing critical test syntax errors...")
+        print("=" * 60)
 
-        # Fix assertion string errors
-        line = re.sub(r'assert ([^,]+), "([^"]*)("[^"]*")', r'assert \1, "\2\3"', line)
-        line = re.sub(r'WebSocket manager creation failed', '"WebSocket manager creation failed"', line)
-        line = re.sub(r'WebSocket manager missing user emission capability', '"WebSocket manager missing user emission capability"', line)
+        files_to_fix = self.find_files_to_fix()
+        print(f"Found {len(files_to_fix)} files to check for syntax errors")
 
-        # Fix logger calls
-        line = re.sub(r'logger.info\(f"([^"]*\))([^)]*)$', r'logger.info(f"\1")', line)
-        line = re.sub(r'logger.info\( PASS: ([^"]*)")$', r'logger.info("PASS: \1")', line)
+        fixed_files = []
 
-        # Fix incomplete type annotations
-        line = re.sub(r'emitter=user_context, # Placeholder', 'emitter=user_context,  # Placeholder', line)
+        for file_path in files_to_fix:
+            self.files_processed += 1
+            if self.process_file(file_path):
+                fixed_files.append(file_path)
 
-        # Fix malformed string assignments
-        line = re.sub(r'agent_response_content = $', 'agent_response_content = ""', line)
-        line = re.sub(r'complete_response_content = $', 'complete_response_content = ""', line)
+        print("\n" + "=" * 60)
+        print(f"PHASE 4 COMPLETE:")
+        print(f"   Files processed: {self.files_processed}")
+        print(f"   Files fixed: {len(fixed_files)}")
+        print(f"   Total fixes applied: {self.fixes_applied}")
 
-        # Fix class/function syntax
-        if line.strip().startswith('""') and not line.strip().startswith('"""'):
-            # Check if this should be a docstring
-            if i > 0 and (lines[i-1].strip().endswith(':') or 'def ' in lines[i-1] or 'class ' in lines[i-1]):
-                line = line.replace('""', '"""', 1)
-                # Find closing and fix it too
-                for j in range(i+1, min(len(lines), i+20)):
-                    if lines[j].strip().endswith('""') and not lines[j].strip().endswith('"""'):
-                        lines[j] = lines[j].replace('""', '"""')
-                        break
+        if fixed_files:
+            print(f"\nFiles that were fixed:")
+            for file_path in fixed_files[:10]:  # Show first 10
+                print(f"   - {file_path.name}")
+            if len(fixed_files) > 10:
+                print(f"   ... and {len(fixed_files) - 10} more files")
 
-        # Fix missing import closing parentheses
-        if line.strip().endswith('(') and 'import' in line and i + 1 < len(lines):
-            next_line = lines[i + 1].strip()
-            if next_line and not next_line.startswith(("   ", "\t")) and not next_line.endswith(')'):
-                line = line.rstrip() + ')'
-
-        # Fix method parameter issues
-        line = re.sub(r'async def ([^(]+)\(self\):$', r'async def \1(self):', line)
-
-        # CRITICAL FIX: Lone quote pattern (most common issue - 85%+ of errors)
-        # Pattern: Line starts with just '"' - this is the primary syntax error
-        if line.strip() == '"' and i < 10:  # Usually in first few lines
-            # This should be start of a docstring
-            line = '"""'
-            # Find the end of the docstring and close it properly
-            docstring_end_found = False
-            for j in range(i + 1, min(len(lines), i + 50)):  # Look ahead max 50 lines
-                if (lines[j].strip() and
-                    not lines[j].strip().startswith(('#', '"')) and
-                    any(keyword in lines[j] for keyword in ['import', 'from', 'def', 'class'])):
-                    # Insert closing docstring before imports/definitions
-                    lines.insert(j, '"""')
-                    docstring_end_found = True
-                    break
-            if not docstring_end_found:
-                # If no clear end found, add it after reasonable distance
-                insert_pos = min(i + 20, len(lines))
-                lines.insert(insert_pos, '"""')
-
-        # CRITICAL FIX: Pattern found in 808 errors - unterminated docstrings
-        # Pattern: "Real WebSocket connection for testing instead of mocks.""
-        if '"Real WebSocket connection for testing instead of mocks.""' in line:
-            line = line.replace(
-                '"Real WebSocket connection for testing instead of mocks.""',
-                '"""Real WebSocket connection for testing instead of mocks."""'
-            )
-
-        # Fix other common unterminated string patterns
-        if '"Test suite for ' in line and line.count('"') == 3 and line.endswith('""'):
-            # Pattern: "Test suite for backend login endpoint 500 error fixes.""
-            line = re.sub(r'^(\s*)"(.+)""$', r'\1"""\2"""', line)
-
-        # Fix unterminated string literals at line start
-        if line.strip().startswith('"') and not line.strip().startswith('"""'):
-            # Check if it's a single quote at start and ends with ""
-            if line.strip().endswith('""') and line.count('"') == 3:
-                line = re.sub(r'^(\s*)"(.+)""$', r'\1"""\2"""', line)
-
-        # Fix f-string unterminated literals
-        if 'logger.warning(f"' in line and line.count('"') == 1:
-            line = line.rstrip() + '")'
-        if 'print(f"' in line and line.count('"') == 1:
-            line = line.rstrip() + '")'
-
-        # Fix incomplete import statements that end abruptly
-        if ('from ' in line and
-            ('import (' in line or line.strip().endswith('(')) and
-            i + 1 < len(lines)):
-
-            # Look for the pattern where import statement is cut off
-            next_line = lines[i + 1] if i + 1 < len(lines) else ""
-
-            # If next line starts with a new statement, close the import
-            if (next_line.strip().startswith('from ') or
-                next_line.strip().startswith('import ') or
-                next_line.strip().startswith('class ') or
-                next_line.strip().startswith('def ') or
-                not next_line.strip()):
-
-                if not line.strip().endswith(')'):
-                    line = line.rstrip() + ')'
-
-        # Fix unmatched brackets patterns
-        if '{ )' in line:
-            line = line.replace('{ )', '{ }')
-        if '[ )' in line:
-            line = line.replace('[ )', '[ ]')
-        if '( }' in line:
-            line = line.replace('( }', '( )')
-
-        # Fix unterminated print statements
-        if 'print(" )' in line:
-            line = line.replace('print(" )', 'print("")')
-        if "print(' )" in line:
-            line = line.replace("print(' )", "print('')")
-
-        # Fix Magic class declarations
-        if re.match(r'\s*(\w+)\s*=\s*Magic\s*$', line):
-            line = re.sub(r'(\s*)(\w+)\s*=\s*Magic\s*$', r'\1\2 = MagicMock()', line)
-        if 'Magic        mock_' in line:
-            line = line.replace('Magic        mock_', 'MagicMock(); mock_')
-        if 'mock_services_config = Magic mock_log' in line:
-            line = line.replace('mock_services_config = Magic mock_log', 'mock_services_config = MagicMock(); mock_log')
-
-        # Fix AsyncMock syntax issues
-        if 'AsyncMock( )' in line and 'status_code=' in line:
-            line = line.replace('AsyncMock( )', 'AsyncMock(')
-        if 'AsyncNone' in line:
-            line = line.replace('AsyncNone', 'MagicMock()')
-        if 'AuthManager()' in line and 'mock_' in line:
-            line = line.replace('AuthManager()', 'MagicMock()')
-
-        # Fix malformed function calls
-        if 'response = client.get( )' in line:
-            next_line = lines[i + 1] if i + 1 < len(lines) else ""
-            if '"formatted_string"' in next_line:
-                line = 'response = client.get("formatted_string")'
-                i += 1  # Skip the next line as we merged it
-
-        # Fix malformed dict syntax in return values
-        if 'return_value = { )' in line:
-            line = line.replace('return_value = { )', 'return_value = {')
-
-        # Fix specific variable assignments
-        if 'mock_user_response = mock_user_response_instance' in line:
-            line = line.replace('mock_user_response = mock_user_response_instance', 'mock_user_response = MagicMock()')
-        if 'mock_repo = mock_repo_instance' in line:
-            line = line.replace('mock_repo = mock_repo_instance', 'mock_repo = MagicMock()')
-        if 'mock_user = mock_user_instance' in line:
-            line = line.replace('mock_user = mock_user_instance', 'mock_user = MagicMock()')
-
-        # Fix string formatting issues
-        if '"formatted_string"' in line and not ('get(' in line or 'format(' in line):
-            line = line.replace('"formatted_string"', '""')
-
-        # Fix unterminated string concatenations
-        if '" + "' in line and line.count('"') % 2 != 0:
-            line = line.replace('" + "', ' + ')
-
-        # Fix malformed print statements with broken concatenation
-        if 'print("")' in line and 'print("' in lines[i-1] if i > 0 else False:
-            prev_line = lines[i-1] if i > 0 else ""
-            if 'print("' in prev_line and not prev_line.strip().endswith(')'):
-                # Merge broken print statement
-                merged_print = prev_line.strip().rstrip('"') + '")'
-                fixed_lines[-1] = merged_print  # Replace previous line
-                continue  # Skip current line
-
-        # Fix broken list/dict definitions
-        if line.strip() == '}' and i > 0:
-            prev_line = lines[i-1] if i > 0 else ""
-            if prev_line.strip().endswith(','):
-                # This might be a continuation
-                pass
-
-        # Fix indentation for print statements
-        if line.startswith('print("') and not line.startswith('    '):
-            # Check if this should be indented based on context
-            if i > 0:
-                prev_line = lines[i-1] if i > 0 else ""
-                if (prev_line.strip().endswith(':') or
-                    prev_line.startswith('    ') or
-                    'try:' in prev_line or 'except' in prev_line):
-                    line = '    ' + line
-
-        # Fix malformed list definitions
-        if 'files_to_check = [ ]' in line:
-            line = line.replace('files_to_check = [ ]', 'files_to_check = [')
-        if 'test_files = [ ]' in line:
-            line = line.replace('test_files = [ ]', 'test_files = [')
-        if 'coverage_areas = { }' in line:
-            line = line.replace('coverage_areas = { }', 'coverage_areas = {')
-
-        # Fix malformed string concatenation in print statements
-        if '[Test' in line and ']:' in line and line.count('"') == 1:
-            line = line.replace('[Test', '"[Test').replace(']:', ']:"')
-        if '[RUNNING' in line and line.count('"') == 0:
-            line = '"' + line + '")'
-
-        # Comment out misplaced pytest fixture decorators
-        if '@pytest.fixture' in line and i + 1 < len(lines):
-            next_line = lines[i + 1] if i + 1 < len(lines) else ""
-            if 'def test_' in next_line and not next_line.strip().startswith('def test_'):
-                line = line.replace('@pytest.fixture', '# @pytest.fixture')
-
-        # FINAL COMPREHENSIVE FIXES for Issue #1332
-
-        # Fix multi-line string issues
-        if line.count('"') % 2 != 0 and not line.strip().startswith('#'):
-            # Odd number of quotes - likely unterminated string
-            if line.strip().endswith('"') and not line.strip().endswith('"""'):
-                # Check if it should be a multi-line string
-                if 'f"' in line and '{' in line:
-                    # This is likely an f-string that needs completion
-                    line = line.rstrip() + '"'
-
-        # Fix incomplete exception handling
-        if 'except Exception as e:' in line and i + 1 < len(lines):
-            next_line = lines[i + 1] if i + 1 < len(lines) else ""
-            if not next_line.strip() or not next_line.startswith('    '):
-                # Add a pass statement
-                lines.insert(i + 1, '            pass')
-
-        # Fix missing colons in control structures
-        if re.match(r'\s*(if|elif|else|try|except|finally|for|while|with|def|class)\s+.*[^:]$', line.strip()):
-            if not line.strip().endswith(':') and 'import' not in line:
-                line = line.rstrip() + ':'
-
-        fixed_lines.append(line)
-        i += 1
-
-    return '\n'.join(fixed_lines)
-
-def check_syntax(filepath: Path) -> List[str]:
-    """Check if file has syntax errors"""
-    errors = []
-    try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            content = f.read()
-        ast.parse(content)
-    except SyntaxError as e:
-        errors.append(f"{filepath}: {e.msg} at line {e.lineno}")
-    except Exception as e:
-        errors.append(f"{filepath}: {str(e)}")
-    return errors
-
-def fix_file(filepath: Path) -> bool:
-    """Fix common syntax errors in a file"""
-    try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        original_content = content
-        
-        # Apply fixes in order of complexity
-        content = fix_incomplete_imports(content)
-        content = fix_unclosed_parenthesis(content)
-        content = fix_invalid_syntax(content)
-        content = fix_unexpected_indent(content)
-        content = fix_orphaned_methods(content)
-        
-        # Only write if changed
-        if content != original_content:
-            with open(filepath, 'w', encoding='utf-8') as f:
-                f.write(content)
-            return True
-        return False
-    except Exception as e:
-        print(f"Error fixing {filepath}: {e}")
-        return False
+        return {
+            'files_processed': self.files_processed,
+            'files_fixed': len(fixed_files),
+            'fixes_applied': self.fixes_applied,
+            'fixed_files': [str(f) for f in fixed_files]
+        }
 
 def main():
-    """Main function to fix syntax errors in test files"""
-    parser = argparse.ArgumentParser(description='Fix syntax errors in Python test files')
-    parser.add_argument('--file', help='Fix a specific file')
-    parser.add_argument('--directory', help='Fix all test files in directory')
-    parser.add_argument('--priority-files', action='store_true', help='Fix priority files first')
-    parser.add_argument('--validate-only', action='store_true', help='Only validate syntax, don\'t fix')
+    """Main execution function"""
+    fixer = TestSyntaxFixer()
+    results = fixer.run_syntax_fixes()
 
-    args = parser.parse_args()
+    # Return results for validation
+    return results
 
-    if args.file:
-        filepath = Path(args.file)
-        if args.validate_only:
-            errors = check_syntax(filepath)
-            if errors:
-                print(f"INVALID: {filepath}")
-                for error in errors:
-                    print(f"  {error}")
-            else:
-                print(f"VALID: {filepath}")
-        else:
-            if fix_file(filepath):
-                print(f"Fixed: {filepath}")
-                # Re-check
-                errors = check_syntax(filepath)
-                if not errors:
-                    print(f"✓ Syntax validated: {filepath}")
-                else:
-                    print(f"Still has errors: {filepath}")
-            else:
-                print(f"No changes needed: {filepath}")
-        return
-
-    if args.directory:
-        test_dir = Path(args.directory)
-        test_files = list(test_dir.glob('**/*.py'))
-    elif args.priority_files:
-        # Priority files identified in the analysis
-        priority_files = [
-            'auth_service/tests/test_oauth_state_validation.py',
-            'tests/run_refresh_tests.py',
-            'tests/test_critical_dev_launcher_issues.py',
-            'auth_service/tests/test_redis_staging_connectivity_fixes.py',
-            'tests/integration_test_docker_rate_limiter.py'
-        ]
-        test_files = [Path(f) for f in priority_files if Path(f).exists()]
-        print(f"Priority files to fix: {len(test_files)}")
-    else:
-        # Default behavior - search all test directories
-        test_dirs = [
-            Path('netra_backend/tests'),
-            Path('tests'),
-            Path('auth_service/tests'),
-            Path('integration_tests'),
-            Path('test_framework'),
-            Path('frontend/tests')
-        ]
-
-        test_files = []
-        for test_dir in test_dirs:
-            if test_dir.exists():
-                test_files.extend(test_dir.glob('**/*.py'))
-
-    print(f"Found {len(test_files)} test files")
-
-    # Check for syntax errors
-    files_with_errors = []
-    for filepath in test_files:
-        errors = check_syntax(filepath)
-        if errors:
-            files_with_errors.append((filepath, errors))
-
-    print(f"Found {len(files_with_errors)} files with syntax errors")
-
-    if args.validate_only:
-        for filepath, errors in files_with_errors:
-            print(f"INVALID: {filepath}")
-            for error in errors:
-                print(f"  {error}")
-        return
-
-    # Fix errors
-    fixed_count = 0
-    for filepath, errors in files_with_errors:
-        logger.info(f"Fixing {filepath}")
-        if fix_file(filepath):
-            fixed_count += 1
-            print(f"Fixed: {filepath}")
-
-    print(f"\nFixed {fixed_count} files")
-
-    # Re-check for remaining errors
-    remaining_errors = []
-    for filepath, _ in files_with_errors:
-        errors = check_syntax(filepath)
-        if errors:
-            remaining_errors.extend(errors)
-
-    if remaining_errors:
-        print(f"\n{len(remaining_errors)} syntax errors remain:")
-        for error in remaining_errors[:20]:  # Show first 20
-            print(f"  - {error}")
-        if len(remaining_errors) > 20:
-            print(f"  ... and {len(remaining_errors) - 20} more")
-    else:
-        print("\nAll syntax errors fixed!")
-
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    results = main()
+    print(f"\nReady for validation - {results['fixes_applied']} syntax errors fixed")

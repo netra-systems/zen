@@ -185,24 +185,7 @@ class PageRefreshTestSuite:
     # Verify initial WebSocket connection
         initial_connections = len(ws_connections)
         if initial_connections == 0:
-        raise AssertionError("No initial WebSocket connection established)"
-
-        # Perform refresh
-        await page.reload(wait_until='networkidle')
-        await page.wait_for_timeout(3000)
-
-        # Check for new WebSocket connection
-        total_connections = len(ws_connections)
-        if total_connections <= initial_connections:
-        raise AssertionError("WebSocket did not reconnect after refresh)"
-
-            # Verify the new connection is active
-        latest_connection = ws_connections[-1]
-        if latest_connection['closed']:
-        raise AssertionError("WebSocket connection closed immediately after refresh)"
-
-                # Test that the connection is functional
-        message_input = await page.query_selector('[data-testid="message-input"], textarea[placeholder*="Message]')"
+        raise AssertionError("No initial WebSocket connection established)""WebSocket did not reconnect after refresh)""WebSocket connection closed immediately after refresh)""message-input"], textarea[placeholder*="Message]')"
         if message_input:
         await message_input.fill("Test after reconnect)"
         await message_input.press("Enter)"

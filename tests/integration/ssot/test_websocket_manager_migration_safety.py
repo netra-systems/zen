@@ -5,7 +5,7 @@ WebSocket factory deprecation violations. These tests validate that migrating fr
 deprecated factory patterns to direct WebSocketManager usage preserves ALL critical 
 user isolation and security guarantees.
 
-MISSION CRITICAL: Protect $500K+ ARR by ensuring WebSocket migration maintains:
+MISSION CRITICAL: Protect 500K+ ARR by ensuring WebSocket migration maintains:
 1. User isolation (no cross-contamination)
 2. Security guarantees (auth/authorization preserved)
 3. Memory safety (no resource leaks)

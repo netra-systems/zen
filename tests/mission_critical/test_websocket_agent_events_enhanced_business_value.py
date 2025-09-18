@@ -4,7 +4,7 @@ Enhanced Business Value Tests for WebSocket Agent Events - Issue #1059 Phase 2
 Business Value Justification (BVJ):
 - Segment: ALL (Free/Early/Mid/Enterprise/Platform) 
 - Business Goal: Enhanced agent response quality validation with sophisticated scoring
-- Value Impact: Protects $500K+ ARR by ensuring agents deliver substantive business value
+- Value Impact: Protects 500K+ ARR by ensuring agents deliver substantive business value
 - Revenue Impact: Validates cost optimization recommendations, multi-agent efficiency, performance metrics
 
 Enhanced Coverage Goals:

@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Segment: Platform/Internal
 - Business Goal: Production Readiness - Ensure staging mirrors production
 - Value Impact: Validates configuration consistency in real deployment environment
-- Strategic Impact: Protects $500K+ ARR by ensuring staging environment reliability
+- Strategic Impact: Protects 500K+ ARR by ensuring staging environment reliability
 
 PURPOSE: These tests are EXPECTED TO FAIL until Issue #667 is resolved.
 They validate configuration consistency on the actual GCP staging environment,
@@ -195,7 +195,7 @@ class ConfigSSotStagingValidationTests(SSotAsyncTestCase):
             f"This indicates that production deployment may have unpredictable behavior "
             f"depending on which configuration manager is used during deployment. "
             f"Staging auth configurations: {staging_auth_configs}. "
-            f"This threatens production stability and $500K+ ARR protection."
+            f"This threatens production stability and 500K+ ARR protection."
         )
 
     @pytest.mark.staging_only
@@ -473,7 +473,7 @@ class ConfigSSotStagingValidationTests(SSotAsyncTestCase):
             f"The complete Golden Path user flow fails or behaves inconsistently in the "
             f"staging environment depending on which configuration manager is used. "
             f"This indicates that production deployment will have unpredictable behavior "
-            f"and threatens the reliability of the $500K+ ARR user experience. "
+            f"and threatens the reliability of the 500K+ ARR user experience. "
             f"Staging must provide consistent Golden Path functionality across all "
             f"configuration managers to ensure production deployment safety."
         )

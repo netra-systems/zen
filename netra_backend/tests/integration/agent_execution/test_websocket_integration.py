@@ -6,7 +6,7 @@ BUSINESS VALUE JUSTIFICATION (BVJ):
 - Segment: All segments (90% of platform value delivered through chat)
 - Business Goal: Ensure real-time agent progress visibility to users
 - Value Impact: WebSocket events provide transparency during agent execution, critical for user experience
-- Strategic Impact: Prevents user abandonment during long agent operations, protects $500K+ ARR
+- Strategic Impact: Prevents user abandonment during long agent operations, protects 500K+ ARR
 
 CRITICAL REQUIREMENTS:
 - REAL WebSocket server integration (NO MOCKS for WebSocket infrastructure)

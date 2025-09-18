@@ -3,7 +3,7 @@ Unit Tests for WebSocket Agent Events Golden Path - Issue #872 Phase 1
 
 Business Value Justification:
 - Segment: Platform/Core Business Logic
-- Business Goal: User Experience & Golden Path Protection ($500K+ ARR)
+- Business Goal: User Experience & Golden Path Protection (500K+ ARR)
 - Value Impact: Validates complete WebSocket event delivery for agent golden path messages
 - Strategic Impact: Ensures real-time chat functionality that delivers 90% of platform value
 

@@ -2,10 +2,10 @@
 Issue #507 - WebSocket SSOT Golden Path Protection E2E Tests
 
 CRITICAL MISSION: Create E2E tests for WebSocket SSOT Golden Path protection
-to ensure $500K+ ARR chat functionality remains operational.
+to ensure 500K+ ARR chat functionality remains operational.
 
 PROBLEM: WebSocket URL environment variable duplication threatening Golden Path user flow
-BUSINESS IMPACT: $500K+ ARR Golden Path chat functionality at risk from configuration issues
+BUSINESS IMPACT: 500K+ ARR Golden Path chat functionality at risk from configuration issues
 
 TEST DESIGN:
 - End-to-end Golden Path user flow testing
@@ -15,7 +15,7 @@ TEST DESIGN:
 - Validates SSOT compliance protects revenue-generating functionality
 
 Business Value: Platform/Internal - Revenue Protection & User Experience
-Protects $500K+ ARR by ensuring Golden Path user flow works with SSOT configuration.
+Protects 500K+ ARR by ensuring Golden Path user flow works with SSOT configuration.
 """
 import pytest
 import asyncio
@@ -56,7 +56,7 @@ class WebSocketSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
         Test that Golden Path user flow is protected by SSOT WebSocket configuration
         
         CRITICAL: Tests complete Golden Path user flow with SSOT WebSocket configuration
-        REVENUE IMPACT: $500K+ ARR protected by this test
+        REVENUE IMPACT: 500K+ ARR protected by this test
         """
         with patch.dict('os.environ', self.golden_path_config, clear=False):
             env = IsolatedEnvironment()
@@ -69,7 +69,7 @@ class WebSocketSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
             assert auth_url is not None, 'Golden Path requires Auth URL'
             assert environment == 'staging', 'Golden Path test runs in staging'
             deprecated_ws_url = env.get('NEXT_PUBLIC_WEBSOCKET_URL')
-            assert deprecated_ws_url is None, 'SSOT VIOLATION: Golden Path must not use deprecated WebSocket URL variable. This threatens $500K+ ARR chat functionality.'
+            assert deprecated_ws_url is None, 'SSOT VIOLATION: Golden Path must not use deprecated WebSocket URL variable. This threatens 500K+ ARR chat functionality.'
             golden_path_result = await self._test_golden_path_websocket_flow(ws_url=ws_url, api_url=api_url, auth_url=auth_url)
             self.metrics.custom_metrics['golden_path_attempted'] = True
             self.metrics.custom_metrics['golden_path_result'] = golden_path_result['status']
@@ -83,7 +83,7 @@ class WebSocketSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
             else:
                 self.metrics.custom_metrics['golden_path_failure'] = golden_path_result['message']
                 self.metrics.custom_metrics['revenue_at_risk'] = 500000
-                pytest.fail(f"CRITICAL: Golden Path WebSocket flow failed - $500K+ ARR at risk. Failure: {golden_path_result['message']}")
+                pytest.fail(f"CRITICAL: Golden Path WebSocket flow failed - 500K+ ARR at risk. Failure: {golden_path_result['message']}")
 
     @pytest.mark.asyncio
     async def test_golden_path_chat_functionality_ssot_protection(self):
@@ -131,9 +131,9 @@ class WebSocketSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
                 self.metrics.custom_metrics['migration_golden_path_result'] = migration_result['status']
                 if migration_result['status'] in ['success', 'auth_required']:
                     self.metrics.custom_metrics['migration_golden_path_resilient'] = True
-                    pytest.fail(f'SSOT VIOLATION: Golden Path works but dual WebSocket URL variables exist. $500K+ ARR protected but Issue #507 SSOT migration required. Canonical: {canonical_url}, Deprecated: {deprecated_url}')
+                    pytest.fail(f'SSOT VIOLATION: Golden Path works but dual WebSocket URL variables exist. 500K+ ARR protected but Issue #507 SSOT migration required. Canonical: {canonical_url}, Deprecated: {deprecated_url}')
                 else:
-                    pytest.fail(f"CRITICAL: Golden Path fails during SSOT migration - $500K+ ARR at risk. Migration failure: {migration_result['message']}")
+                    pytest.fail(f"CRITICAL: Golden Path fails during SSOT migration - 500K+ ARR at risk. Migration failure: {migration_result['message']}")
         with patch.dict('os.environ', self.golden_path_config, clear=False):
             env = IsolatedEnvironment()
             canonical_url = env.get('NEXT_PUBLIC_WS_URL')
@@ -162,7 +162,7 @@ class WebSocketSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
             assert ws_url.startswith('wss://'), 'Revenue protection requires secure WebSocket protocol'
             assert 'staging.netrasystems.ai' in ws_url, 'Revenue protection requires correct domain'
             deprecated_url = env.get('NEXT_PUBLIC_WEBSOCKET_URL')
-            assert deprecated_url is None, 'REVENUE RISK: Deprecated WebSocket URL variable could cause configuration confusion affecting $500K+ ARR user flows'
+            assert deprecated_url is None, 'REVENUE RISK: Deprecated WebSocket URL variable could cause configuration confusion affecting 500K+ ARR user flows'
             revenue_protection_result = await self._test_revenue_critical_websocket_flow(ws_url)
             self.metrics.custom_metrics['revenue_protection_tested'] = True
             self.metrics.custom_metrics['revenue_result'] = revenue_protection_result['status']
@@ -170,7 +170,7 @@ class WebSocketSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
                 self.metrics.custom_metrics['revenue_protected'] = 500000
             else:
                 self.metrics.custom_metrics['revenue_at_risk'] = 500000
-                pytest.fail(f"REVENUE RISK: WebSocket flow critical for $500K+ ARR failed. Failure: {revenue_protection_result['message']}")
+                pytest.fail(f"REVENUE RISK: WebSocket flow critical for 500K+ ARR failed. Failure: {revenue_protection_result['message']}")
 
     @pytest.mark.asyncio
     async def test_golden_path_end_to_end_user_flow_ssot(self):

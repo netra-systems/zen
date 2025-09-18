@@ -28,7 +28,7 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-'\nE2E Test for Golden Path State Registry Race Condition\n\nCRITICAL BUG REPRODUCTION: Complete user journey blocked by state_registry scope bug\n\nThis test reproduces the complete Golden Path user flow failure:\n1. User logs in successfully \n2. User connects to WebSocket for AI chat\n3. WebSocket connection fails due to state_registry scope bug\n4. User cannot receive AI responses - complete business value blockage\n5. $500K+ ARR chat functionality is completely broken\n\nThis represents the exact production scenario affecting all users.\nExpected Result: Test must FAIL showing complete Golden Path blockage\n'
+'\nE2E Test for Golden Path State Registry Race Condition\n\nCRITICAL BUG REPRODUCTION: Complete user journey blocked by state_registry scope bug\n\nThis test reproduces the complete Golden Path user flow failure:\n1. User logs in successfully \n2. User connects to WebSocket for AI chat\n3. WebSocket connection fails due to state_registry scope bug\n4. User cannot receive AI responses - complete business value blockage\n5. 500K+ ARR chat functionality is completely broken\n\nThis represents the exact production scenario affecting all users.\nExpected Result: Test must FAIL showing complete Golden Path blockage\n'
 import pytest
 import asyncio
 import json
@@ -50,7 +50,7 @@ class GoldenPathStateRegistryRaceConditionTests(SSotAsyncTestCase):
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
         return UserExecutionContext.from_request(user_id='test_user', thread_id='test_thread', run_id='test_run')
-    '\n    CRITICAL E2E TEST: Golden Path completely blocked by state_registry scope bug\n    \n    This test demonstrates the complete business impact:\n    1. Authentication works fine\n    2. WebSocket connection establishment works\n    3. AI chat initiation fails due to state_registry NameError\n    4. Users receive NO AI responses - complete value delivery failure\n    5. Business loses $500K+ ARR due to non-functional chat\n    \n    Uses real services and simulates actual user behavior.\n    '
+    '\n    CRITICAL E2E TEST: Golden Path completely blocked by state_registry scope bug\n    \n    This test demonstrates the complete business impact:\n    1. Authentication works fine\n    2. WebSocket connection establishment works\n    3. AI chat initiation fails due to state_registry NameError\n    4. Users receive NO AI responses - complete value delivery failure\n    5. Business loses 500K+ ARR due to non-functional chat\n    \n    Uses real services and simulates actual user behavior.\n    '
 
     @classmethod
     def setUpClass(cls):

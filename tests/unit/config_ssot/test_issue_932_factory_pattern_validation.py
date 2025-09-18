@@ -4,7 +4,7 @@ UNIT TEST: Configuration Factory Pattern Validation - Issue #932
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - Multi-User System Stability  
 - Business Goal: Ensure configuration factory patterns support proper user isolation
-- Value Impact: Protects $500K+ ARR by preventing configuration conflicts between users
+- Value Impact: Protects 500K+ ARR by preventing configuration conflicts between users
 - Strategic Impact: Validates SSOT factory patterns prevent shared state issues
 
 CRITICAL MISSION: Issue #932 Configuration Manager Broken Import Crisis (P0 SSOT violation)

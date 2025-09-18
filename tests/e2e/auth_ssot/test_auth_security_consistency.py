@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise/Security  
 - Business Goal: Ensure unified auth delegation maintains security
 - Value Impact: Security consistency prevents vulnerabilities and compliance issues
-- Strategic Impact: Enterprise-grade security foundation ($500K+ ARR protection)
+- Strategic Impact: Enterprise-grade security foundation (500K+ ARR protection)
 
 This test suite validates that unified auth delegation maintains or improves
 security compared to previous implementations.

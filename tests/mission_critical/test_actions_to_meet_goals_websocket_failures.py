@@ -159,8 +159,7 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
                 pytest.fail(MISSION CRITICAL FAILURE: No WebSocket events sent - completely silent failure)
             
             # Record critical failure metrics
-            self.record_metric(agent_failed_with_feedback, True)"
-            self.record_metric(agent_failed_with_feedback, True)"
+            self.record_metric(agent_failed_with_feedback, True)""
             self.record_metric("events_before_failure, len(captured_events))"
             self.record_metric(critical_user_feedback_sent, agent_started in event_types)
 
@@ -192,8 +191,7 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
         agent = ActionsToMeetGoalsSubAgent(llm_manager=None, tool_dispatcher=None)
         
         # Replace all WebSocket methods with event tracking
-        agent.emit_agent_started = AsyncMock(side_effect=lambda msg: EventTracker.track_event(agent_started, msg))"
-        agent.emit_agent_started = AsyncMock(side_effect=lambda msg: EventTracker.track_event(agent_started, msg))"
+        agent.emit_agent_started = AsyncMock(side_effect=lambda msg: EventTracker.track_event(agent_started, msg))""
         agent.emit_thinking = AsyncMock(side_effect=lambda msg: EventTracker.track_event("agent_thinking, msg))"
         agent.emit_tool_executing = AsyncMock(side_effect=lambda tool, params: EventTracker.track_event(tool_executing, {tool: tool, params": params})"
         agent.emit_tool_completed = AsyncMock(side_effect=lambda tool, result: EventTracker.track_event(tool_completed, {tool: tool, result: result})"
@@ -245,8 +243,7 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
                 
             async def send_json(self, data: dict):
                 if not self.is_connected:
-                    raise RuntimeError(Connection closed)"
-                    raise RuntimeError(Connection closed)""
+                    raise RuntimeError(Connection closed)"""
 
                 self.messages_sent += 1
                 connection_states.append({
@@ -462,11 +459,7 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
         assert metrics.get(business_impact) == golden_path_protection
         
         # Log mission critical test completion
-        print(f"\nMission Critical WebSocket Test Completed: {method.__name__ if method else 'unknown'})"
-        print(fMetrics: {metrics})
-
-
-if __name__ == "__main__:"
+        print(f"\nMission Critical WebSocket Test Completed: {method.__name__ if method else 'unknown'})""__main__:"
     # Run mission critical WebSocket tests
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

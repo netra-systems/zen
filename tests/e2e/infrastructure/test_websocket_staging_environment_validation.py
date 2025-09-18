@@ -233,24 +233,10 @@ class WebSocketStagingEnvironmentValidationTests:
                     # Perfect - WebSocket upgrade successful
                     upgrade_analysis["upgrade_supported"] = True
                     upgrade_analysis["websocket_ready"] = True
-                    logger.info(" PASS:  WebSocket upgrade successful (101 Switching Protocols)")
-                    
-                elif response.status_code == 426:
-                    # Upgrade Required - server supports WebSocket but needs proper handshake
-                    upgrade_analysis["upgrade_supported"] = True
-                    logger.info(" PASS:  WebSocket upgrade supported (426 Upgrade Required)")
-                    
-                elif response.status_code in [400, 404]:
-                    # Bad Request or Not Found - may indicate WebSocket endpoint exists but needs proper handshake
-                    if any(header.lower() in ["upgrade", "websocket"] for header in response.headers):
+                    logger.info(" PASS:  WebSocket upgrade successful (101 Switching Protocols)""upgrade_supported"] = True
+                    logger.info(" PASS:  WebSocket upgrade supported (426 Upgrade Required)""upgrade", "websocket"] for header in response.headers):
                         upgrade_analysis["upgrade_supported"] = True
-                        logger.info(" PASS:  WebSocket upgrade likely supported (upgrade headers present)")
-                    else:
-                        logger.warning(f" WARNING: [U+FE0F] WebSocket upgrade unclear (status {response.status_code})")
-                        
-                elif response.status_code >= 500:
-                    # Server error - may indicate configuration issues
-                    upgrade_analysis["error_details"] = f"Server error: {response.status_code}"
+                        logger.info(" PASS:  WebSocket upgrade likely supported (upgrade headers present)"" WARNING: [U+FE0F] WebSocket upgrade unclear (status {response.status_code})""error_details"] = f"Server error: {response.status_code}"
                     logger.error(f" FAIL:  Server error during upgrade test: {response.status_code}")
                     
                 else:
@@ -400,12 +386,7 @@ class WebSocketStagingEnvironmentValidationTests:
                         logger.info(" PASS:  WebSocket message exchange successful")
                     except asyncio.TimeoutError:
                         cloud_run_tests["websocket_connection"]["message_exchange"] = False
-                        logger.warning(" WARNING: [U+FE0F] WebSocket message exchange timeout (may be expected)")
-                    
-            except websockets.ConnectionClosedError as e:
-                connection_time = time.time() - start_time
-                
-                cloud_run_tests["websocket_connection"] = {
+                        logger.warning(" WARNING: [U+FE0F] WebSocket message exchange timeout (may be expected)""websocket_connection"] = {
                     "success": False,
                     "connection_time": connection_time,
                     "error_code": e.code,

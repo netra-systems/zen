@@ -15,7 +15,7 @@ Expected Behavior:
 - WebSocket events should be receivable from staging environment
 - Performance should be acceptable for validation purposes
 
-Business Impact: Provides $500K+ plus ARR validation coverage when Docker unavailable.
+Business Impact: Provides 500K+  ARR validation coverage when Docker unavailable.
 
 
 import asyncio
@@ -143,10 +143,7 @@ class Issue544StagingEnvironmentConnectivityTests:
                 ping_interval=20,
                 ping_timeout=10
             ) as websocket:
-                logger.info("CHECK WebSocket connection to staging established)"
-                
-                # Test basic ping/pong
-                ping_message = {"type": ping, timestamp": time.time()}"
+                logger.info("CHECK WebSocket connection to staging established)""type": ping, timestamp": time.time()}"
                 await websocket.send(json.dumps(ping_message))
                 
                 try:
@@ -154,23 +151,11 @@ class Issue544StagingEnvironmentConnectivityTests:
                     logger.info(fWebSocket response received: {response[:100]}...)
                     logger.info(CHECK Staging WebSocket is responsive)
                 except asyncio.TimeoutError:
-                    logger.warning("WARNING️ WebSocket connection made but no response to ping)"
-                    # Don't fail - connection itself is the important part'
-                
-        except websockets.exceptions.ConnectionClosed as e:
-            logger.error(fX Staging WebSocket connection closed: {e})
-            pytest.skip(fStaging WebSocket not accessible: {e})
-        except asyncio.TimeoutError:
-            logger.error(X Staging WebSocket connection timed out")"
+                    logger.warning("WARNING️ WebSocket connection made but no response to ping)"")"
             pytest.skip(Staging WebSocket connection timeout)
         except Exception as e:
-            logger.error(fX Staging WebSocket connection failed: {e})"
-            logger.error(fX Staging WebSocket connection failed: {e})"
-            pytest.skip(f"Staging WebSocket error: {e})"
-    
-    @pytest.mark.asyncio
-    async def test_staging_websocket_agent_event_simulation(self):
-        Phase 2.4: Simulate agent event delivery through staging WebSocket."
+            logger.error(fX Staging WebSocket connection failed: {e})""
+            pytest.skip(f"Staging WebSocket error: {e})""
         Phase 2.4: Simulate agent event delivery through staging WebSocket."
         logger.info("=== ISSUE #544 PHASE 2.4: Staging Agent Event Simulation ===)"
         
@@ -183,12 +168,7 @@ class Issue544StagingEnvironmentConnectivityTests:
                 ping_interval=30,
                 ping_timeout=15
             ) as websocket:
-                logger.info("Connected to staging WebSocket for agent event testing)"
-                
-                # Simulate agent request that would trigger events
-                test_message = {
-                    type: agent_request,
-                    user_id: str(uuid.uuid4()),"
+                logger.info("Connected to staging WebSocket for agent event testing)""
                     user_id: str(uuid.uuid4()),"
                     "thread_id: str(uuid.uuid4()),"
                     message: Test agent request for Issue #544 validation,
@@ -237,11 +217,7 @@ class Issue544StagingEnvironmentConnectivityTests:
                 else:
                     logger.info(ℹ️ No events received - staging may require authentication or specific configuration)"
                     logger.info(ℹ️ No events received - staging may require authentication or specific configuration)"
-                    logger.info("CHECK Basic WebSocket connectivity confirmed - staging is accessible)"
-                
-        except Exception as e:
-            logger.error(fX Staging agent event simulation failed: {e})
-            pytest.skip(f"Staging event simulation error: {e})"
+                    logger.info("CHECK Basic WebSocket connectivity confirmed - staging is accessible)""Staging event simulation error: {e})"
     
     def test_staging_fallback_configuration_validation(self):
         "Phase 2.5: Validate staging fallback configuration requirements."
@@ -420,15 +396,8 @@ class Issue544StagingPerformanceValidationTests:
                     logger.warning(WARNING️ No latency measurements - WebSocket may not be responsive)
                 
         except Exception as e:
-            logger.error(fX Staging WebSocket latency test failed: {e})"
-            logger.error(fX Staging WebSocket latency test failed: {e})"
-            pytest.skip(f"Staging WebSocket latency test error: {e})"
-
-
-# Fixture to demonstrate staging environment setup
-@pytest.fixture(scope=session)
-def staging_environment_setup():
-    Session-level staging environment setup for Issue #544 testing.""
+            logger.error(fX Staging WebSocket latency test failed: {e})""
+            pytest.skip(f"Staging WebSocket latency test error: {e})"""
     logger.info(=== ISSUE #544 SESSION: Staging Environment Setup ===)
     
     env = get_env()

@@ -4,7 +4,7 @@ Test Staging Infrastructure Reproduction for Issue #1278
 Business Value Justification (BVJ):
 - Segment: Platform
 - Business Goal: Reproduce exact Issue #1278 in staging environment
-- Value Impact: Validates $500K+ ARR Golden Path pipeline offline due to infrastructure
+- Value Impact: Validates 500K+ ARR Golden Path pipeline offline due to infrastructure
 - Strategic Impact: Provides concrete evidence for infrastructure team remediation priority
 """
 
@@ -113,7 +113,7 @@ class TestStagingInfrastructureReproduction(BaseE2ETest):
         except (aiohttp.ClientError, asyncio.TimeoutError) as e:
             # Expected: Golden Path pipeline should be offline
             self.logger.error(f"Golden Path pipeline offline: {e}")
-            pytest.fail(f"Issue #1278 confirmed: Golden Path pipeline offline - $500K+ ARR impact")
+            pytest.fail(f"Issue #1278 confirmed: Golden Path pipeline offline - 500K+ ARR impact")
             
     @pytest.mark.staging
     @pytest.mark.e2e

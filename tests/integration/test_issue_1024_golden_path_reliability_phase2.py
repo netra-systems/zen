@@ -4,7 +4,7 @@ Phase 2: Integration Tests for Issue #1024 - Golden Path Reliability Testing
 Business Value Justification (BVJ):
 - Segment: Platform (All segments depend on Golden Path reliability)
 - Business Goal: Stability - Validate end-to-end Golden Path reliability
-- Value Impact: Ensures $500K+ ARR chat functionality works consistently
+- Value Impact: Ensures 500K+ ARR chat functionality works consistently
 - Revenue Impact: Prevents customer churn from unreliable AI responses
 
 CRITICAL PURPOSE: Validate SSOT test runner functionality and measure
@@ -109,7 +109,7 @@ class GoldenPathReliabilityBaselineTests(AsyncBaseTestCase):
         total_tests = len(critical_test_scenarios) * reliability_iterations
         successful_tests = sum((sum(result.values()) for result in test_results))
         reliability_percentage = successful_tests / total_tests * 100
-        self.assertGreaterEqual(reliability_percentage, 95.0, f'GOLDEN PATH CRITICAL: Reliability {reliability_percentage:.1f}% below 95% target. Unauthorized test runners causing {95.0 - reliability_percentage:.1f}% reliability loss. $500K+ ARR chat functionality unreliable.')
+        self.assertGreaterEqual(reliability_percentage, 95.0, f'GOLDEN PATH CRITICAL: Reliability {reliability_percentage:.1f}% below 95% target. Unauthorized test runners causing {95.0 - reliability_percentage:.1f}% reliability loss. 500K+ ARR chat functionality unreliable.')
 
     async def test_websocket_events_integration_consistency(self):
         """
@@ -172,7 +172,7 @@ class BusinessCriticalTestScenariosTests(AsyncBaseTestCase):
         successful_chat_tests = sum(chat_test_reliability.values())
         total_chat_tests = len(chat_test_scenarios)
         chat_reliability = successful_chat_tests / total_chat_tests * 100
-        self.assertGreaterEqual(chat_reliability, 99.0, f'BUSINESS CRITICAL: Chat functionality test reliability {chat_reliability:.1f}% below 99% required for 90% platform value. $500K+ ARR at risk. Unauthorized test runners compromising core business value.')
+        self.assertGreaterEqual(chat_reliability, 99.0, f'BUSINESS CRITICAL: Chat functionality test reliability {chat_reliability:.1f}% below 99% required for 90% platform value. 500K+ ARR at risk. Unauthorized test runners compromising core business value.')
 
     async def test_enterprise_multi_user_isolation_testing(self):
         """

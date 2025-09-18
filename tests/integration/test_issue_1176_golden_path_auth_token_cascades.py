@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) 
 - Business Goal: Ensure Golden Path login -> get AI responses works
 - Value Impact: Auth token validation cascades cause Golden Path failures
-- Strategic Impact: Core platform functionality ($500K+ ARR at risk)
+- Strategic Impact: Core platform functionality (500K+ ARR at risk)
 
 This suite tests integration-level coordination failures between auth components
 that cause Golden Path issues despite individual components working correctly.

@@ -4,7 +4,7 @@
 GitHub Issue: #960 WebSocket Manager SSOT fragmentation crisis
 
 THIS TEST VALIDATES CONSISTENT EVENT DELIVERY ACROSS WEBSOCKET IMPLEMENTATIONS.
-Business Value: $500K+ ARR - Validates event delivery consistency for Golden Path
+Business Value: 500K+ ARR - Validates event delivery consistency for Golden Path
 
 PURPOSE:
 - Test validates consistent event delivery across all WebSocket implementations

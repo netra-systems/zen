@@ -7,7 +7,7 @@ This regression test validates that existing agent functionality continues to wo
 correctly after factory consolidation, preventing regressions in core business logic.
 
 BUSINESS IMPACT:
-- $500K+ ARR protected by ensuring no regressions in agent functionality
+- 500K+ ARR protected by ensuring no regressions in agent functionality
 - SupervisorAgent, TriageAgent, DataHelperAgent, ApexOptimizerAgent must work correctly
 - Existing agent workflows must execute through consolidated factory without issues
 - Agent execution patterns must remain consistent after factory changes

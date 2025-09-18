@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """MISSION CRITICAL TEST SUITE: SSOT WebSocket Compliance - Revenue Protection
 
-THIS SUITE PROTECTS $500K+ ARR FROM WEBSOCKET FACTORY PATTERN VIOLATIONS.
+THIS SUITE PROTECTS 500K+ ARR FROM WEBSOCKET FACTORY PATTERN VIOLATIONS.
 Business Value: Core Golden Path user flow (login -> AI responses)
 
 CRITICAL PROTECTION AREAS:
@@ -94,7 +94,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
     """
     Mission Critical Test Suite: SSOT WebSocket Compliance & Revenue Protection
     
-    BUSINESS IMPACT: This test suite protects $500K+ ARR by validating:
+    BUSINESS IMPACT: This test suite protects 500K+ ARR by validating:
     1. Complete Golden Path user flow works end-to-end
     2. SSOT architecture prevents system instabilities
     3. WebSocket events deliver the real-time feedback that powers 90% of platform value
@@ -119,7 +119,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
         
         # Track test as business value protection
         self.record_metric("test_category", "mission_critical")
-        self.record_metric("business_value", "$500K+ ARR Protection")
+        self.record_metric("business_value", "500K+ ARR Protection")
         self.record_metric("priority", "P0_CRITICAL")
         
         logger.info(f"🚨 MISSION CRITICAL TEST: {method.__name__ if method else 'unknown'}")
@@ -129,7 +129,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
         """
         MISSION CRITICAL: Validate complete Golden Path user flow works end-to-end.
         
-        This test protects the primary $500K+ ARR user journey:
+        This test protects the primary 500K+ ARR user journey:
         1. User connects to WebSocket (authentication)
         2. WebSocket connection established 
         3. User sends message (agent execution begins)
@@ -892,7 +892,7 @@ if __name__ == "__main__":
         
         try:
             logger.info("🚨 STARTING MISSION CRITICAL SSOT WEBSOCKET COMPLIANCE TESTS")
-            logger.info("🎯 OBJECTIVE: Protect $500K+ ARR from WebSocket factory pattern violations")
+            logger.info("🎯 OBJECTIVE: Protect 500K+ ARR from WebSocket factory pattern violations")
             
             # Run all mission critical tests
             tests = [
@@ -916,7 +916,7 @@ if __name__ == "__main__":
                     test_suite.teardown_method(None)
             
             logger.info("🎉 ALL MISSION CRITICAL TESTS PASSED")
-            logger.info("CHECK $500K+ ARR PROTECTED: Golden Path and SSOT compliance validated")
+            logger.info("CHECK 500K+ ARR PROTECTED: Golden Path and SSOT compliance validated")
             
         except Exception as e:
             logger.error(f"🚨 MISSION CRITICAL FAILURE: {e}")

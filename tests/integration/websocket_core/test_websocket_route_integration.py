@@ -5,7 +5,7 @@ Business Value Justification:
 - Segment: Platform/Infrastructure
 - Business Goal: SSOT Compliance & Route Integration
 - Value Impact: Validate integrated WebSocket route functionality across all modes
-- Strategic Impact: CRITICAL - Ensure $500K+ ARR WebSocket functionality works after consolidation
+- Strategic Impact: CRITICAL - Ensure 500K+ ARR WebSocket functionality works after consolidation
 
 This test suite validates WebSocket route consolidation through integration testing.
 Tests actual route behavior, not just mocks, to ensure consolidation maintains

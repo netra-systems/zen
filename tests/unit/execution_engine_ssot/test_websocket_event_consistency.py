@@ -10,7 +10,7 @@ Required Events: agent_started, agent_thinking, tool_executing, tool_completed, 
 Expected to FAIL before SSOT consolidation (proves inconsistent event emission)
 Expected to PASS after SSOT consolidation (proves UserExecutionEngine emits all events)
 
-Business Impact: $500K+ ARR Golden Path protection - consistent events enable 90% of chat value
+Business Impact: 500K+ ARR Golden Path protection - consistent events enable 90% of chat value
 """
 
 import pytest

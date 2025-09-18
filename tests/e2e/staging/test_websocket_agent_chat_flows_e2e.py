@@ -6,7 +6,7 @@ E2E Staging Tests for WebSocket Agent Chat Flows
 MISSION CRITICAL: End-to-end chat flows with real WebSocket events for staging validation.
 Tests complete chat workflows with all 5 REQUIRED WebSocket events in staging environment.
 
-Business Value: $500K+ ARR - Full chat experience validation in staging
+Business Value: 500K+ ARR - Full chat experience validation in staging
 - Tests complete user chat experiences with real agent execution
 - Validates all 5 REQUIRED WebSocket events in staging environment  
 - Ensures business value delivery through substantive AI interactions

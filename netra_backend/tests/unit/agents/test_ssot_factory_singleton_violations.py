@@ -1,7 +1,7 @@
 """
 SSOT Violation Test: Factory vs Singleton Pattern Violations
 
-Business Impact: $500K+ ARR at risk - Factory pattern violations break user isolation
+Business Impact: 500K+ ARR at risk - Factory pattern violations break user isolation
 BVJ: Enterprise/Platform | Architecture/Stability | Factory pattern compliance required
 
 This test SHOULD FAIL before SSOT remediation to prove the SSOT violation exists.
@@ -37,7 +37,7 @@ class SSOTFactorySingletonViolationsTests(SSotAsyncTestCase):
     These tests SHOULD FAIL before SSOT remediation because singleton patterns
     violate factory pattern principles, breaking isolation and uniqueness guarantees.
 
-    Business Impact: $500K+ ARR depends on factory patterns providing proper isolation.
+    Business Impact: 500K+ ARR depends on factory patterns providing proper isolation.
     Singleton violations break multi-user execution and create security risks.
     """
 
@@ -122,7 +122,7 @@ class SSOTFactorySingletonViolationsTests(SSotAsyncTestCase):
             f"Created {len(created_instances)} instances but only {len(instance_ids)} unique objects. "
             f"Violations: {singleton_violations}. "
             f"Factory pattern requires unique instances but singleton pattern is breaking isolation, "
-            f"affecting $500K+ ARR multi-user execution safety."
+            f"affecting 500K+ ARR multi-user execution safety."
         )
 
     async def test_factory_state_sharing_violation_SHOULD_FAIL(self):
@@ -197,7 +197,7 @@ class SSOTFactorySingletonViolationsTests(SSotAsyncTestCase):
             f"SSOT VIOLATION DETECTED: Factory-created instances sharing state. "
             f"State contamination: {state_contamination}. "
             f"Factory pattern should provide isolation but singleton pattern is causing "
-            f"cross-user state sharing, affecting $500K+ ARR user data integrity."
+            f"cross-user state sharing, affecting 500K+ ARR user data integrity."
         )
 
     async def test_factory_lifecycle_singleton_violation_SHOULD_FAIL(self):
@@ -280,7 +280,7 @@ class SSOTFactorySingletonViolationsTests(SSotAsyncTestCase):
             f"Factory retention: {factory_retention_violations}. "
             f"Singleton indicators: {global_singleton_indicators}. "
             f"Still alive instances: {still_alive}/{len(instance_refs)}. "
-            f"Singleton patterns prevent proper resource cleanup, affecting $500K+ ARR performance."
+            f"Singleton patterns prevent proper resource cleanup, affecting 500K+ ARR performance."
         )
 
     async def test_factory_method_contract_violation_SHOULD_FAIL(self):
@@ -361,5 +361,5 @@ class SSOTFactorySingletonViolationsTests(SSotAsyncTestCase):
             f"SSOT VIOLATION DETECTED: Factory pattern contract violations. "
             f"Contract violations: {contract_violations}. "
             f"Factory methods are not following factory pattern principles, "
-            f"breaking architectural consistency and affecting $500K+ ARR system reliability."
+            f"breaking architectural consistency and affecting 500K+ ARR system reliability."
         )

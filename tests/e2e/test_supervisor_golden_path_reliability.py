@@ -1,7 +1,7 @@
 """NEW E2E TESTS - SupervisorAgent Golden Path Reliability SSOT Issues  
 
 Business Value: Exposes how Issue #800 supervisor SSOT violations impact the Golden Path user flow
-BVJ: ALL segments | Golden Path Protection | $500K+ ARR user experience reliability
+BVJ: ALL segments | Golden Path Protection | 500K+ ARR user experience reliability
 
 PURPOSE: E2E tests that expose how SupervisorAgent SSOT violations impact real user workflows.
 Tests the complete user login -> supervisor selection -> AI response flow for reliability issues.

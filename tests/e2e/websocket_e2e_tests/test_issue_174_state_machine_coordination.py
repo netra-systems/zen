@@ -5,7 +5,7 @@ This test reproduces the state machine coordination bug where multiple
 connection ID systems create conflicts, causing state synchronization 
 failures and 1011 WebSocket errors.
 
-Business Impact: $500K+ ARR chat functionality blocked
+Business Impact: 500K+ ARR chat functionality blocked
 Issue: Dual connection ID systems causing state machine conflicts
 Root Cause: preliminary_connection_id vs connection_id mismatch in state coordination
 

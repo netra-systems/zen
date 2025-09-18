@@ -394,8 +394,7 @@ class WebSocketEventValidation:
         """Run all WebSocket event validations including factory-based tests."""
         print()
         print("=" * 70)
-        print("🔍 WebSocket Event Validation During Refresh (Browser + Factory)")
-        print("=" * 70)
+        print("🔍 WebSocket Event Validation During Refresh (Browser + Factory)""=" * 70)
 
         # Factory-based tests (run first, don't require browser)
         factory_tests = [

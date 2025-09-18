@@ -19,7 +19,7 @@ FAIL initially to prove the infrastructure capacity constraints are real.
 Business Value Justification (BVJ):
 - Segment: Platform/Production Infrastructure
 - Business Goal: Production Readiness & Reliability
-- Value Impact: Validates real-world infrastructure capacity for $500K+ ARR platform
+- Value Impact: Validates real-world infrastructure capacity for 500K+ ARR platform
 - Strategic Impact: Ensures staging environment accurately represents production constraints
 """
 
@@ -468,7 +468,7 @@ class Issue1263StagingInfrastructureE2ETests(SSotAsyncTestCase):
         Tests the complete user journey from frontend to backend through the
         live staging infrastructure to validate real-world Issue #1263 impact.
 
-        This represents the actual $500K+ ARR user experience impact.
+        This represents the actual 500K+ ARR user experience impact.
         """
         user_journey_steps = []
 
@@ -557,7 +557,7 @@ class Issue1263StagingInfrastructureE2ETests(SSotAsyncTestCase):
         # This should FAIL initially - proving user journey impact from infrastructure
         assert len(successful_steps) == len(user_journey_steps), (
             f"USER JOURNEY INFRASTRUCTURE FAILURE: {len(successful_steps)}/{len(user_journey_steps)} "
-            f"journey steps successful. Failed steps affect $500K+ ARR user experience. "
+            f"journey steps successful. Failed steps affect 500K+ ARR user experience. "
             f"Journey steps: {user_journey_steps}. "
             f"Issue #1263: Infrastructure capacity constraints breaking user journeys. "
             f"Expected 100% journey step success after infrastructure optimization."
@@ -566,7 +566,7 @@ class Issue1263StagingInfrastructureE2ETests(SSotAsyncTestCase):
         assert not user_experience_degraded, (
             f"USER EXPERIENCE DEGRADED: {len(infrastructure_impacted_steps)} steps impacted by infrastructure, "
             f"total journey time: {total_journey_time:.2f}s. Infrastructure impact steps: {infrastructure_impacted_steps}. "
-            f"Issue #1263: Infrastructure constraints directly impacting $500K+ ARR user experience. "
+            f"Issue #1263: Infrastructure constraints directly impacting 500K+ ARR user experience. "
             f"Expected no infrastructure impact on user journey after optimization."
         )
 

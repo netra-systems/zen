@@ -3,7 +3,7 @@
 
 MISSION CRITICAL TEST SUITE: SSOT Import Compliance Validation
 
-Business Value: Platform/Internal - $500K+ plus ARR Golden Path Protection
+Business Value: Platform/Internal - 500K+  ARR Golden Path Protection
 """
 """
 
@@ -307,13 +307,7 @@ logger.error(f  {violation.file_path}:{violation.line_number} - {violation.impor
         # ASSERTION: All WebSocketNotifier imports should use canonical source
 # (Allow some flexibility during migration, but log violations)
 if violations:
-            logger.warning(f"Found {len(violations)} non-canonical WebSocketNotifier imports))"
-logger.warning(These should be migrated to canonical SSOT source during next refactoring)
-
-        # CRITICAL ASSERTION: Must have at least one canonical import
-assert has_canonical, (
-fNo imports from canonical WebSocketNotifier source: {canonical_source}0.0 
-fFound sources: {list(import_sources.keys())}""
+            logger.warning(f"Found {len(violations)} non-canonical WebSocketNotifier imports))"""
 
 
         logger.info(CHECK WebSocketNotifier import consistency validated)
@@ -465,8 +459,7 @@ recommendations=recommendations
 logger.info(Import Compliance Report:")"
 logger.info(f  Files scanned: {report.total_files_scanned})
 logger.info(f  Imports analyzed: {report.total_imports_analyzed})
-logger.info(f"  WebSocketNotifier imports: {len(report.websocket_notifier_imports)})"
-logger.info(f  Rollback violations: {len(report.rollback_import_violations)}")"
+logger.info(f"  WebSocketNotifier imports: {len(report.websocket_notifier_imports)})"")"
 logger.info(f  Duplicate source violations: {len(report.duplicate_source_violations)})
 logger.info(f  Compliance score: {report.compliance_score}%)""
 logger.info(f  Compliance score: {report.compliance_score}%)""

@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise
 - Business Goal: Revenue Retention & SLA Compliance
 - Value Impact: Enterprise customers REQUIRE error visibility for their SLA monitoring
-- Strategic/Revenue Impact: Critical for Enterprise tier ($50K+ ARR) retention
+- Strategic/Revenue Impact: Critical for Enterprise tier (50K+ ARR) retention
 
 This test validates that enterprise-level error monitoring and SLA reporting works correctly.
 Enterprise customers depend on this for their own operational monitoring and compliance.
@@ -94,7 +94,7 @@ class EnterpriseErrorReportingTests(SSotBaseTestCase):
         """
         MISSION CRITICAL: Test enterprise error reporting with real services and SLA validation.
         
-        Business Value: Enterprise customers ($50K+ ARR) REQUIRE error visibility for SLA compliance.
+        Business Value: Enterprise customers (50K+ ARR) REQUIRE error visibility for SLA compliance.
         Expected Result: INITIALLY FAIL - proves service  ->  GCP integration gaps exist.
         
         This test validates:

@@ -6,7 +6,7 @@ This module tests comprehensive agent pipeline collaboration workflows end-to-en
 Tests REAL multi-agent coordination, pipeline orchestration, and collaborative execution.
 
 Business Value:
-- Validates $200K+ ARR from multi-agent workflows driving customer optimization
+- Validates 200K+ ARR from multi-agent workflows driving customer optimization
 - Ensures agent collaboration delivers compound business value
 - Tests complex workflows that generate maximum ROI for enterprise customers
 - Validates agent pipeline efficiency and coordination reduces operational overhead
@@ -87,7 +87,7 @@ class AgentPipelineCollaborationTests:
         """
         Test 1: Multi-Agent Collaborative Optimization Workflow
         
-        Business Value: $150K+ ARR - Tests the complete pipeline where:
+        Business Value: 150K+ ARR - Tests the complete pipeline where:
         1. Data Agent analyzes customer data patterns
         2. Analysis Agent identifies optimization opportunities  
         3. Optimization Agent generates actionable recommendations
@@ -244,7 +244,7 @@ class AgentPipelineCollaborationTests:
         """
         Test 2: Agent Pipeline Coordination with WebSocket Event Orchestration
         
-        Business Value: $100K+ ARR - Tests sophisticated agent coordination where:
+        Business Value: 100K+ ARR - Tests sophisticated agent coordination where:
         1. Pipeline Controller orchestrates agent sequence
         2. Each agent receives context from previous agent via WebSocket events
         3. State preservation ensures continuity across agent handoffs
@@ -390,7 +390,7 @@ class AgentPipelineCollaborationTests:
         """
         Test 3: Complex Agent Handoff Scenarios with State Preservation
         
-        Business Value: $75K+ ARR - Tests sophisticated agent handoff patterns where:
+        Business Value: 75K+ ARR - Tests sophisticated agent handoff patterns where:
         1. Context Agent builds comprehensive customer context
         2. Specialist agents receive full context via handoff
         3. State preservation maintains continuity across complex workflows

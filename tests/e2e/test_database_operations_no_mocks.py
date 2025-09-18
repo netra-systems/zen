@@ -164,7 +164,7 @@ class RealMessageOperations:
             except Exception as e:
                 raise RuntimeError(f'BUSINESS CRITICAL: Message storage failed for {message_id}: {e}')
         validation_results = await self._validate_conversation_analytics(messages[0]['user_id'], messages[0]['thread_id'])
-        return {'messages_stored': stored_count, 'analytics_working': validation_results['query_successful'], 'conversation_value': validation_results['estimated_revenue_impact'], 'business_impact': 'AI conversation storage enables $500K+ ARR'}
+        return {'messages_stored': stored_count, 'analytics_working': validation_results['query_successful'], 'conversation_value': validation_results['estimated_revenue_impact'], 'business_impact': 'AI conversation storage enables 500K+ ARR'}
 
     async def _validate_conversation_analytics(self, user_id: str, thread_id: str) -> Dict[str, Any]:
         """Validate conversation analytics - BUSINESS CRITICAL."""

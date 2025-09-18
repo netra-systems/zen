@@ -5,7 +5,7 @@ CRITICAL MISSION: Create SSOT validation tests for WebSocket configuration consi
 to prevent environment variable duplication issues.
 
 PROBLEM: WebSocket URL configuration inconsistencies across services and environments
-BUSINESS IMPACT: $500K+ ARR Golden Path chat functionality at risk from config drift
+BUSINESS IMPACT: 500K+ ARR Golden Path chat functionality at risk from config drift
 
 TEST DESIGN:
 - Validate configuration consistency across all services

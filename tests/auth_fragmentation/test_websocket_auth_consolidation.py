@@ -6,7 +6,7 @@ Validate that WebSocket authentication follows consolidated patterns and elimina
 
 Business Value Justification (BVJ):
 - Segment: Platform Infrastructure - Real-time Communication Security
-- Goal: Golden Path Protection - $500K+ ARR WebSocket-based chat functionality
+- Goal: Golden Path Protection - 500K+ ARR WebSocket-based chat functionality
 - Value Impact: Ensure WebSocket authentication consistency supports chat reliability
 - Revenue Impact: Chat delivers 90% of platform value - authentication must be bulletproof
 

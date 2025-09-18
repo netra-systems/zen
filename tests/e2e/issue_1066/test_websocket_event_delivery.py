@@ -4,7 +4,7 @@ Test WebSocket Event Delivery End-to-End - Issue #1066
 Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise)
 - Business Goal: Ensure SSOT WebSocket patterns deliver all 5 critical events
-- Value Impact: Protect $500K+ ARR by maintaining chat functionality reliability
+- Value Impact: Protect 500K+ ARR by maintaining chat functionality reliability
 - Revenue Impact: Critical events enable AI value delivery through chat interface
 
 CRITICAL: Tests validate that SSOT WebSocket patterns deliver all business-critical events.

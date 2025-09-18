@@ -4,7 +4,7 @@ Test WebSocket Event Delivery Business Logic
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - Core user experience
 - Business Goal: Ensure real-time AI interaction feedback drives engagement
-- Value Impact: WebSocket events are the primary UX for $500K+ ARR delivery
+- Value Impact: WebSocket events are the primary UX for 500K+ ARR delivery
 - Strategic Impact: Without events, users can't see AI progress = poor experience = churn
 
 This test validates core WebSocket event delivery algorithms that power:

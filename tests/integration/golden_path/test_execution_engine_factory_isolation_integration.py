@@ -3,7 +3,7 @@ Comprehensive Integration Tests for ExecutionEngineFactory Isolation in Golden P
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
-- Business Goal: Ensure complete user execution isolation protecting $500K+ ARR
+- Business Goal: Ensure complete user execution isolation protecting 500K+ ARR
 - Value Impact: Validates factory patterns that enable multi-tenant platform scalability
 - Strategic Impact: Prevents user data leakage and enables concurrent user sessions
 

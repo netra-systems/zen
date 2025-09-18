@@ -3,7 +3,7 @@ Integration Tests for Issue #581: Factory Instantiation with Real Services
 
 BUSINESS VALUE:
 - Enterprise/Platform | System Stability | Critical agent workflow rescue
-- Validates $500K+ ARR data agent factory patterns work with real services
+- Validates 500K+ ARR data agent factory patterns work with real services
 - Protects Golden Path: factory → agent → WebSocket → user response flow
 
 TEST STRATEGY:

@@ -12,7 +12,7 @@ Expected Behavior:
     - WITHOUT Docker: All tests in this file should SKIP with clear error messages
 - WITH Docker: Tests should run normally and validate WebSocket functionality
 
-Business Impact: Blocking $500K+ plus ARR validation when Docker unavailable.
+Business Impact: Blocking 500K+  ARR validation when Docker unavailable.
 
 
 import asyncio
@@ -113,21 +113,16 @@ class Issue544DockerDependencyDemonstrationTests:
     
     def test_websocket_test_base_dependency_demonstration(self):
         "Phase 1.4: Demonstrate RealWebSocketTestBase Docker dependency."
-        logger.info(=== ISSUE #544 PHASE 1.4: WebSocket Test Base Dependency ===)"
-        logger.info(=== ISSUE #544 PHASE 1.4: WebSocket Test Base Dependency ===)""
+        logger.info(=== ISSUE #544 PHASE 1.4: WebSocket Test Base Dependency ===)"""
 
         
         try:
             # Attempt to create WebSocket test base - this requires Docker
             test_base = RealWebSocketTestBase()
-            logger.info("RealWebSocketTestBase created successfully - Docker available)"
-            
-            # If we get here, Docker is available, so we can test basic functionality
-            assert hasattr(test_base, "'capture_events'), WebSocket test base missing event capture"
+            logger.info("RealWebSocketTestBase created successfully - Docker available)""'capture_events'), WebSocket test base missing event capture"
             
         except Exception as e:
-            logger.error(f"ISSUE #544 DEMONSTRATION: RealWebSocketTestBase creation failed: {e})"
-            pytest.skip(fWebSocket test base requires Docker - demonstrating Issue #544: {e}")"
+            logger.error(f"ISSUE #544 DEMONSTRATION: RealWebSocketTestBase creation failed: {e})"")"
     
     def test_mission_critical_test_pattern_simulation(self):
         Phase 1.5: Simulate typical mission critical test pattern that gets blocked.""
@@ -175,8 +170,7 @@ class Issue544DockerDependencyDemonstrationTests:
                     websocket_tests.append(file)
         
         logger.info(fFound {len(websocket_tests)} WebSocket-related mission critical tests)
-        logger.info(These tests are affected by Issue #544 Docker dependency:)"
-        logger.info(These tests are affected by Issue #544 Docker dependency:)""
+        logger.info(These tests are affected by Issue #544 Docker dependency:)"""
 
         for test in websocket_tests[:10]:  # Show first 10
             logger.info(f"  - {test})"

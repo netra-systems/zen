@@ -11,7 +11,7 @@ This test validates that ExecutionEngine factory patterns comply with SSOT princ
 
 Business Value: Platform/Internal - Architecture Compliance & Security
 Ensures factory patterns support secure multi-user execution protecting chat functionality
-and the Golden Path user flow delivering $500K+ ARR value.
+and the Golden Path user flow delivering 500K+ ARR value.
 
 CRITICAL: These tests validate that factory patterns eliminate architectural
 anti-patterns that could compromise user isolation or system stability.
@@ -68,15 +68,7 @@ class ExecutionFactoryComplianceTests(SSotAsyncTestCase):
                 if hasattr(engine, 'is_active') and engine.is_active():
                     await engine.cleanup()
             except Exception as e:
-                print(f"Warning: Engine cleanup failed: {e}")
-
-        # Cleanup any async contexts
-        for context in self.async_contexts:
-            try:
-                if hasattr(context, '__aexit__'):
-                    await context.__aexit__(None, None, None)
-            except Exception as e:
-                print(f"Warning: Context cleanup failed: {e}")
+                print(f"Warning: Engine cleanup failed: {e}""Warning: Context cleanup failed: {e}")
 
         self.created_engines.clear()
         self.async_contexts.clear()

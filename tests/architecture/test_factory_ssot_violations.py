@@ -12,7 +12,7 @@ Test Design:
 - Identifies competing factory implementations
 - Tests SSOT consolidation opportunities
 
-Business Impact: $500K+ ARR protection through SSOT compliance
+Business Impact: 500K+ ARR protection through SSOT compliance
 SSOT Advancement: Eliminates factory pattern fragmentation
 
 These tests are designed to FAIL initially to demonstrate current SSOT violations.

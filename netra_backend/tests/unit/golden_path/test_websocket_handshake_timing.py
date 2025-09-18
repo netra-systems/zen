@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Prevent connection failures that block chat value
 - Value Impact: Ensures reliable WebSocket handshake prevents user abandonment
-- Strategic Impact: Eliminates 1011 errors that cost $500K+ ARR in chat functionality
+- Strategic Impact: Eliminates 1011 errors that cost 500K+ ARR in chat functionality
 
 CRITICAL: This test validates the business logic that prevents race conditions in 
 WebSocket handshakes that have been causing staging failures and user value loss.

@@ -4,7 +4,7 @@ WebSocket Agent Events Comprehensive E2E Tests for Staging
 Business Value Justification (BVJ):
 - Segment: Platform/Internal + All Customer Tiers
 - Business Goal: Ensure mission-critical WebSocket event delivery for real-time AI value
-- Value Impact: Enables $500K+ ARR through transparent AI agent execution visibility
+- Value Impact: Enables 500K+ ARR through transparent AI agent execution visibility
 - Strategic/Revenue Impact: Prevents customer churn from poor real-time experience
 
 This test suite validates ALL 5 required WebSocket events for agent execution:
@@ -102,7 +102,7 @@ class WebSocketAgentEventsComprehensiveTests(BaseE2ETest):
         """
         Test that ALL 5 required WebSocket events are delivered for agent execution.
         
-        BVJ: Validates core $500K+ ARR real-time AI transparency value proposition
+        BVJ: Validates core 500K+ ARR real-time AI transparency value proposition
         MISSION CRITICAL: These events enable substantive chat interactions
         """
         user_context = self.test_users[0]

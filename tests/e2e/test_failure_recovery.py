@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Segment: All tiers (Free, Early, Mid, Enterprise) - system reliability requirement
 - Business Goal: Prevent revenue loss during service failures through resilience
 - Value Impact: Maintains service availability preventing customer churn 
-- Revenue Impact: Protects $500K+ ARR by preventing cascade failure outages
+- Revenue Impact: Protects 500K+ ARR by preventing cascade failure outages
 
 Architecture: 450-line compliance with 25-line function limit enforced
 """

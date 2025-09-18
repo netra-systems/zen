@@ -10,8 +10,7 @@ class WebSocketTestHelper:
         ""Send JSON message.""
 
         if self._closed:
-            raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)""
+            raise RuntimeError(WebSocket is closed)"""
 
         self.messages_sent.append(message)
         
@@ -37,7 +36,7 @@ It validates ALL critical WebSocket events are sent during agent execution under
 every conceivable scenario, including error conditions, concurrent execution,
 and high load scenarios.
 
-Business Value: $500K+ plus ARR - Core chat functionality depends on these events
+Business Value: 500K+  ARR - Core chat functionality depends on these events
 CRITICAL: These events enable substantive chat interactions - they serve the business goal
 
 Required WebSocket Events (MANDATORY):
@@ -642,8 +641,7 @@ class UltraComprehensiveWebSocketValidationTests:
             Factory should have created correct number of emitters
         
         print(" TROPHY:  FINAL COMPREHENSIVE VALIDATION PASSED!)"
-        print( TARGET:  All WebSocket notification requirements validated successfully)"
-        print( TARGET:  All WebSocket notification requirements validated successfully)"
+        print( TARGET:  All WebSocket notification requirements validated successfully)""
         print("[U+1F4BC] Business value preservation: Chat functionality fully operational with factory pattern)"
 
 

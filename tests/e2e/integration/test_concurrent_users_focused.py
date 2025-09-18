@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise (concurrent user support required)
 - Business Goal: Validate concurrent user isolation and performance
 - Value Impact: Prevents enterprise customer churn from concurrency issues  
-- Revenue Impact: Protects $100K+ ARR from enterprise contracts
+- Revenue Impact: Protects 100K+ ARR from enterprise contracts
 
 Test #4: Multi-User Concurrent Chat Sessions
 - 10 simultaneous users
@@ -61,7 +61,7 @@ async def test_multi_user_concurrent_chat_sessions():
     - <10 seconds total execution time
     
 
-    Business Value: $100K+ ARR protection from enterprise contracts
+    Business Value: 100K+ ARR protection from enterprise contracts
 
     """
 
@@ -138,7 +138,7 @@ async def test_multi_user_concurrent_chat_sessions():
 
         print(f"SUCCESS: Avg Response Time: {avg_response:.2f}s")
 
-        print(f"SUCCESS: Enterprise Feature VALIDATED - $100K+ ARR PROTECTED")
+        print(f"SUCCESS: Enterprise Feature VALIDATED - 100K+ ARR PROTECTED")
         
 
     finally:

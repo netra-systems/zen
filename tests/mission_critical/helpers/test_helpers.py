@@ -42,7 +42,7 @@ class MissionCriticalTestHelper:
 
     Business Impact:
     - Enables reliable GitHub integration testing
-    - Validates $500K+ ARR functionality protection
+    - Validates 500K+ ARR functionality protection
     - Ensures mission critical test infrastructure reliability
     """
 

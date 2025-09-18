@@ -15,15 +15,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -32,12 +24,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 E2E TEST 8: Golden Path Execution with UserExecutionEngine SSOT
 
 PURPOSE: Test complete user flow: login  ->  agent execution  ->  AI response using UserExecutionEngine.
@@ -46,7 +33,7 @@ This validates the SSOT requirement that Golden Path works end-to-end with UserE
 Expected to FAIL before SSOT consolidation (proves Golden Path broken with multiple engines)
 Expected to PASS after SSOT consolidation (proves UserExecutionEngine enables Golden Path)
 
-Business Impact: $500K+ ARR Golden Path protection - this IS the core business value flow
+Business Impact: 500K+ ARR Golden Path protection - this IS the core business value flow
 E2E Level: Tests complete user journey on staging environment with real services
 """
 

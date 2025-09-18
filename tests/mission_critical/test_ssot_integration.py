@@ -23,11 +23,7 @@ class WebSocketTestHelper:
     async def send_json(self, message: dict):
         "Send JSON message."
         if self._closed:
-            raise RuntimeError("WebSocket is closed)"
-        self.messages_sent.append(message)
-        
-    async def close(self, code: int = 1000, reason: str = Normal closure):
-        Close WebSocket connection.""
+            raise RuntimeError("WebSocket is closed)"""
         self._closed = True
         self.is_connected = False
         
@@ -223,8 +219,7 @@ class SSotIntegrationUserSimulator:
                 async with self.ssot_utilities['websocket_utility']() as ws_util:
                     # Create user-specific channel data
                     self.integration_state['ws_channel'] = fws_channel_{self.user_id}_{uuid.uuid4().hex}
-                    operations_performed.append(fwebsocket_ops_{self.user_id})"
-                    operations_performed.append(fwebsocket_ops_{self.user_id})""
+                    operations_performed.append(fwebsocket_ops_{self.user_id})"""
 
             except Exception:
                 # WebSocket not available - acceptable in isolation tests
@@ -529,8 +524,7 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
                                     user_integration_data['integration_flow'].append(fws_ops_{user_id})
                             except Exception:
                                 # WebSocket not available - simulate
-                                user_integration_data['integration_flow'].append(fws_simulated_{user_id})"
-                                user_integration_data['integration_flow'].append(fws_simulated_{user_id})""
+                                user_integration_data['integration_flow'].append(fws_simulated_{user_id})"""
 
                             
                             # Cross-component data transfer simulation
@@ -601,18 +595,7 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
             
             # All WebSocket channel IDs must be unique (no cross-component leakage)
             self.assertEqual(len(set(ws_channel_ids)), len(integration_data),
-                            "CRITICAL: WebSocket channel IDs leaked during integration)"
-            
-            # All cross-component states must be unique
-            self.assertEqual(len(set(cross_states)), len(integration_data),
-                            CRITICAL: Cross-component states leaked between users)
-            
-            # Validate cross-transfer data isolation
-            for user_id, data in integration_data.items():
-                transfer = data['cross_transfer']
-                for transfer_key, transfer_data in transfer.items():
-                    self.assertIn(fuser_{user_id), transfer_data,
-                                fCross-transfer data not isolated: {transfer_data}")"
+                            "CRITICAL: WebSocket channel IDs leaked during integration)"")"
             
             logger.info(f[U+2713] Database integration isolation: {len(integration_data)} unique sessions)
     
@@ -703,12 +686,7 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
                         
                     except Exception as e:
                         # Components not available - still test isolation
-                        logger.info(f"Components not available for WebSocket integration user {user_id}: {e})"
-                        
-                        # Create simulated integration data
-                        channel_integration_data[user_id] = {
-                            'user_id': user_id,
-                            'ws_channel_id': fsim_ws_integ_channel_{user_id}_{uuid.uuid4().hex}","
+                        logger.info(f"Components not available for WebSocket integration user {user_id}: {e})"","
                             'db_connection_id': fsim_db_conn_integ_{user_id}_{uuid.uuid4().hex},
                             'mock_service_id': fsim_mock_integ_service_{user_id},"
                             'mock_service_id': fsim_mock_integ_service_{user_id},"

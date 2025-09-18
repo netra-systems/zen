@@ -2,7 +2,7 @@
 
 CRITICAL BUSINESS VALUE: These tests reproduce agent workflow coordination failures
 in execution engine factory patterns that cause incomplete agent executions and
-Golden Path failures, protecting $500K+ ARR functionality.
+Golden Path failures, protecting 500K+ ARR functionality.
 
 EXPECTED BEHAVIOR: All tests in this file should INITIALLY FAIL to demonstrate
 agent workflow integration issues. They will pass after SSOT consolidation.
@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 - Segment: All Segments (Agent workflows are core business value)
 - Business Goal: Ensure reliable agent execution for chat functionality
 - Value Impact: Prevents incomplete agent responses, workflow failures
-- Strategic Impact: Foundation for $500K+ ARR AI-powered user interactions
+- Strategic Impact: Foundation for 500K+ ARR AI-powered user interactions
 
 Test Philosophy:
 - FAILING TESTS FIRST: These tests reproduce real agent workflow coordination issues
@@ -357,7 +357,7 @@ class ExecutionEngineFactoryAgentWorkflow884Tests(SSotAsyncTestCase):
         """Log detailed test failure information for analysis."""
         print(f'\n=== EXECUTION ENGINE FACTORY AGENT WORKFLOW FAILURE: {test_name} ===')
         print(f'Timestamp: {datetime.now().isoformat()}')
-        print(f'Business Impact: Incomplete agent responses, AI workflow failures - $500K+ ARR at risk')
+        print(f'Business Impact: Incomplete agent responses, AI workflow failures - 500K+ ARR at risk')
         print(f'Issue: #884 Execution Engine Factory Agent Workflow Coordination Failures')
         print('\nFailure Details:')
         for key, value in failure_details.items():

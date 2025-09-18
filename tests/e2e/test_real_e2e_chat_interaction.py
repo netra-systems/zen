@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure chat delivers REAL AI-powered insights and value
 - Value Impact: Users receive actionable recommendations and problem-solving assistance
-- Strategic Impact: Core product functionality - $500K+ ARR depends on functional chat
+- Strategic Impact: Core product functionality - 500K+ ARR depends on functional chat
 
 This test validates the complete chat interaction experience:
 1. Real AI-powered conversations with substantive responses

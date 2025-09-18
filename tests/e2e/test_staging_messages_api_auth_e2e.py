@@ -5,7 +5,7 @@ End-to-end tests against staging environment to validate the 403 authentication
 errors that correlate with commit f1c251c9c JWT SSOT changes.
 
 Business Value: Platform/Critical - Chat Functionality Protection
-Validates production-like behavior for $500K+ ARR chat functionality.
+Validates production-like behavior for 500K+ ARR chat functionality.
 
 Following CLAUDE.md guidelines:
 - Tests against staging environment using real URLs

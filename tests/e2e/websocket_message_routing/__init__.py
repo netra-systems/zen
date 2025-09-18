@@ -8,7 +8,7 @@ Critical Tests:
 - test_websocket_message_to_agent_golden_path.py: Main golden path validation
   
 Business Value:
-- Validates the core $500K+ ARR chat functionality  
+- Validates the core 500K+ ARR chat functionality  
 - Ensures all 5 critical WebSocket events are properly sent
 - Proves agent execution pipeline works end-to-end
 

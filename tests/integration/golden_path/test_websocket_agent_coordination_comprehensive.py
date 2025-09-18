@@ -3,7 +3,7 @@ Comprehensive Integration Tests for WebSocket-Agent Coordination in Golden Path
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
-- Business Goal: Ensure seamless WebSocket-Agent integration delivering $500K+ ARR
+- Business Goal: Ensure seamless WebSocket-Agent integration delivering 500K+ ARR
 - Value Impact: Validates complete real-time communication flow that powers chat functionality
 - Strategic Impact: Protects 90% of platform value through reliable WebSocket event delivery
 

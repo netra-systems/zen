@@ -5,7 +5,7 @@ Mission Critical Test: Decorator Import Error Blocking Issue #""268A""
 BUSINESS VALUE JUSTIFICATION:
     - Segment: Platform/Internal
 - Goal: Stability
-- Value Impact: Unlocks 7,474 unit tests for $400K+ ARR validation
+- Value Impact: Unlocks 7,474 unit tests for 400K+ ARR validation
 - Revenue Impact: Prevents regression testing gaps that could impact all customer segments
 
 """

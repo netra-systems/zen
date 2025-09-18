@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 1. Segment: Mid, Enterprise
 2. Business Goal: Enable complex multi-agent workflows
 3. Value Impact: Agent handoffs enable sophisticated problem solving
-4. Revenue Impact: $350K+ ARR from advanced workflow capabilities
+4. Revenue Impact: 350K+ ARR from advanced workflow capabilities
 
 CLAUDE.md COMPLIANCE:
 - Uses real services ONLY (NO MOCKS)

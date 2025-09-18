@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: Platform Infrastructure
 - Business Goal: Validate infrastructure improvements in production-like environment
 - Value Impact: Ensure infrastructure cleanup doesn't break production deployments
-- Strategic Impact: Protect $500K+ ARR through stable production infrastructure
+- Strategic Impact: Protect 500K+ ARR through stable production infrastructure
 
 These tests run against staging GCP environment to validate that Docker
 infrastructure improvements work in production-like conditions.
@@ -140,13 +140,7 @@ class TestInfrastructureImprovementsStaging(BaseE2ETest):
 
                     assert response is not None, "No WebSocket response received"
                     assert response_time < 2.0, (
-                        f"WebSocket response too slow: {response_time:.2f}s (should be <2s)"
-                    )
-
-                    return True
-
-            except Exception as e:
-                assert False, f"WebSocket connection failed: {e}"
+                        f"WebSocket response too slow: {response_time:.2f}s (should be <2s)""WebSocket connection failed: {e}"
 
         # Run async test
         asyncio.run(test_websocket_connection())

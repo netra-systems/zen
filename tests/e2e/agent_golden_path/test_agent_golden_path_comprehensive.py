@@ -4,7 +4,7 @@ Agent Golden Path Comprehensive E2E Tests - Issue #1081 Phase 1 Final
 Business Value Justification:
 - Segment: All tiers - Complete end-to-end validation
 - Business Goal: Comprehensive validation of complete agent golden path
-- Value Impact: Ensures $500K+ ARR complete user journey reliability
+- Value Impact: Ensures 500K+ ARR complete user journey reliability
 - Revenue Impact: Prevents any part of the golden path from breaking customer experience
 
 PURPOSE:
@@ -103,13 +103,7 @@ class AgentGoldenPathComprehensiveTests(SSotAsyncTestCase):
             async with websockets.connect(self.websocket_url, additional_headers=websocket_headers, open_timeout=self.connection_timeout, ping_interval=30, ping_timeout=10) as websocket:
                 journey_metrics['connection_time'] = time.time() - connection_start_time
                 websocket_connection_working = True
-                print(f"[GOLDEN-PATH] Phase 2: WebSocket Connection CHECK ({journey_metrics['connection_time']:.2f}s)")
-                message_start_time = time.time()
-                golden_path_message = {'type': 'golden_path_complete_journey', 'action': 'complete_user_journey_test', 'message': 'This is a comprehensive golden path test. Please provide a detailed analysis of AI infrastructure optimization strategies, including specific recommendations for performance improvements, cost optimization, and scalability enhancements. Include tool usage and comprehensive insights.', 'user_id': golden_user.user_id, 'session_id': f'golden_journey_{int(time.time())}', 'expects_comprehensive_response': True, 'requires_tool_usage': True, 'business_value_test': True, 'comprehensive_test': True, 'timestamp': datetime.now(timezone.utc).isoformat()}
-                await websocket.send(json.dumps(golden_path_message))
-                journey_metrics['message_sent_time'] = time.time() - message_start_time
-                message_pipeline_working = True
-                print(f"[GOLDEN-PATH] Phase 3: Message Sent CHECK ({journey_metrics['message_sent_time']:.2f}s)")
+                print(f"[GOLDEN-PATH] Phase 2: WebSocket Connection CHECK ({journey_metrics['connection_time']:.2f}s)""[GOLDEN-PATH] Phase 3: Message Sent CHECK ({journey_metrics['message_sent_time']:.2f}s)")
                 processing_start_time = time.time()
                 first_response_received = False
                 agent_completion_detected = False

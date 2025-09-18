@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: Growth & Enterprise
 - Business Goal: Validate production-ready analytics infrastructure for $15K+ MRR pricing optimization
 - Value Impact: Ensures GCP staging environment mirrors production analytics capabilities
-- Revenue Impact: Production analytics validation protects $500K+ ARR from analytics-driven decisions
+- Revenue Impact: Production analytics validation protects 500K+ ARR from analytics-driven decisions
 
 E2E TESTING PHILOSOPHY:
 - Tests against REAL GCP staging ClickHouse Cloud services
@@ -449,7 +449,7 @@ class ClickHouseGCPStagingEnterpriseSecurityTests(SSotBaseTestCase):
     """
     E2E tests for enterprise security features in GCP staging
     
-    Business Value: Validates $500K+ ARR enterprise customer data isolation
+    Business Value: Validates 500K+ ARR enterprise customer data isolation
     Critical for enterprise sales and compliance requirements
     """
 
@@ -468,7 +468,7 @@ class ClickHouseGCPStagingEnterpriseSecurityTests(SSotBaseTestCase):
         """
         Test multi-tenant data isolation in GCP staging environment.
         
-        Business Value: Validates enterprise customer data security for $500K+ ARR contracts
+        Business Value: Validates enterprise customer data security for 500K+ ARR contracts
         Failure Scenario: Data leakage between tenants violates compliance and loses contracts
         """
         service = ClickHouseService(force_mock=False)
@@ -796,7 +796,7 @@ class ClickHouseE2EGCPStagingTestsCompleteTests(SSotBaseTestCase):
         self.record_metric("high_difficulty_tests", 2)
         self.record_metric("gcp_staging_requirements", "ClickHouse Cloud connectivity")
         self.record_metric("business_value_coverage", "$15K+ MRR production analytics validation")
-        self.record_metric("enterprise_security_coverage", "$500K+ ARR multi-tenant production security")
+        self.record_metric("enterprise_security_coverage", "500K+ ARR multi-tenant production security")
         self.record_metric("production_readiness_coverage", "Customer demos and deployment validation")
         self.record_metric("test_suite_type", "comprehensive_e2e_gcp_staging")
         

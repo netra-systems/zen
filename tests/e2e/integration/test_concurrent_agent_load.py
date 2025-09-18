@@ -224,8 +224,7 @@ async def _run_load_test_steps(load_tester: ConcurrentAgentLoadTester, test_star
     if connections == 0:
         # If no connections succeed, this is likely an environment configuration issue
         # but we can still validate the test framework handles the load properly
-        print(f"WARNING: No WebSocket connections succeeded ({connections}/{total_attempts})")
-        print("This may indicate authentication configuration issues in test environment")
+        print(f"WARNING: No WebSocket connections succeeded ({connections}/{total_attempts})""This may indicate authentication configuration issues in test environment")
         print("Testing concurrent user creation and load handling without WebSocket validation")
         # Skip WebSocket-dependent tests but validate user creation and concurrency handling
         _validate_test_infrastructure(users, load_tester, test_start)

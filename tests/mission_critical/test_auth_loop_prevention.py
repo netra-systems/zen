@@ -10,8 +10,7 @@ class WebSocketTestHelper:
         ""Send JSON message.""
 
         if self._closed:
-            raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)""
+            raise RuntimeError(WebSocket is closed)"""
 
         self.messages_sent.append(message)
         

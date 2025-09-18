@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Protect Golden Path User Flow During Consolidation
 - Value Impact: Ensure MessageRouter consolidation doesn't break core chat functionality
-- Strategic Impact: $500K+ ARR protection - Golden Path must work flawlessly
+- Strategic Impact: 500K+ ARR protection - Golden Path must work flawlessly
 
 This E2E test validates that MessageRouter consolidation maintains the critical
 Golden Path user flow that delivers 90% of platform business value through chat.

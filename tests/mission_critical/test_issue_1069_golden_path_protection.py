@@ -3,7 +3,7 @@
 Issue #1069: Golden Path Protection During Critical Infrastructure Fixes
 
 Business Value Justification (BVJ):
-    - Segment: Platform/Enterprise - Core business functionality critical for $500K+ plus ARR
+    - Segment: Platform/Enterprise - Core business functionality critical for 500K+  ARR
 - Business Goal: Business Continuity - Ensure Golden Path user flow remains functional during infrastructure fixes
 - Value Impact: Protects customer value delivery during ClickHouse, execution engine, and WebSocket infrastructure fixes
 - Strategic Impact: Foundation for maintaining customer satisfaction and revenue during system improvements
@@ -21,12 +21,12 @@ Test Coverage:
 5. WebSocket event delivery reliability during SSOT infrastructure fixes
 6. Agent execution stability during import path consolidation
 7. Real-time communication stability during WebSocket infrastructure fixes
-8. $500K+ plus ARR protection validation during critical infrastructure changes
+8. 500K+  ARR protection validation during critical infrastructure changes
 
 ARCHITECTURE ALIGNMENT:
     - Tests validate Golden Path user flow protection during infrastructure fixes
 - Ensures customer value delivery continuity during SSOT consolidation
-- Shows $500K+ plus ARR functionality stability during critical infrastructure changes
+- Shows 500K+  ARR functionality stability during critical infrastructure changes
 - Validates business continuity requirements during system improvements
 "
 ""
@@ -84,7 +84,7 @@ class Issue1069GoldenPathProtectionTests(SSotAsyncTestCase):
         Test user flow protection during execution engine import path remediation.
 
         CRITICAL: This validates that user flows remain functional during execution engine
-        import path fixes, protecting $500K+ plus ARR functionality.
+        import path fixes, protecting 500K+  ARR functionality.
         
         golden_path_user_id = f'golden_path_execution_test_{self.test_run_id}'
         try:
@@ -220,9 +220,9 @@ class Issue1069GoldenPathProtectionTests(SSotAsyncTestCase):
     def test_500k_arr_protection_validation_during_infrastructure_changes(self):
     """
 
-        Test $500K+ plus ARR protection validation during critical infrastructure changes.
+        Test 500K+  ARR protection validation during critical infrastructure changes.
 
-        CRITICAL: This validates that $500K+ plus ARR functionality is protected during
+        CRITICAL: This validates that 500K+  ARR functionality is protected during
         all Issue #1069 infrastructure changes.
         
         golden_path_user_id = f'golden_path_500k_test_{self.test_run_id}'
@@ -236,8 +236,8 @@ class Issue1069GoldenPathProtectionTests(SSotAsyncTestCase):
             enterprise_features_available = self._simulate_enterprise_features(golden_path_user_id)
             self.assertTrue(enterprise_features_available, 'Golden Path enterprise features should be available')
         except Exception as e:
-            self.customer_value_blocks.append(f'$500K+ plus ARR protection impact: {e}')
-            pytest.fail(f'CRITICAL: Golden Path $500K+ plus ARR functionality affected by infrastructure changes: {e}')
+            self.customer_value_blocks.append(f'500K+  ARR protection impact: {e}')
+            pytest.fail(f'CRITICAL: Golden Path 500K+  ARR functionality affected by infrastructure changes: {e}')
 
     def _simulate_user_authentication(self, user_id: str) -> bool:
         "Simulate user authentication success."

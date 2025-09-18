@@ -78,7 +78,7 @@ def run_e2e_test_safely(test_file=None, skip_docker_check=False):
         print("     python -m pytest tests/integration/ -k 'not docker' -v")
         print("  4. Mission Critical Staging Tests:")
         print("     python -m pytest tests/mission_critical/test_staging_websocket_agent_events.py -v")
-        print("\n[INFO] These alternatives validate business-critical $500K+ ARR functionality")
+        print("\n[INFO] These alternatives validate business-critical 500K+ ARR functionality")
         print("       including WebSocket chat features, auth flows, and agent execution.")
         print("\n[DOCKER SETUP] To use Docker-based E2E tests:")
         print("     1. Start Docker Desktop")

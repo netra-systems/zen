@@ -1,6 +1,6 @@
 """Test Issue #1186: Golden Path Business Value Preservation - E2E Validation
 
-This test suite validates that the $500K+ ARR Golden Path functionality remains
+This test suite validates that the 500K+ ARR Golden Path functionality remains
 intact during UserExecutionEngine SSOT consolidation from Issue #1186 Phase 4.
 
 These tests run on GCP staging remote with real LLM and real services to ensure
@@ -8,7 +8,7 @@ complete business value preservation during architectural changes.
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
-- Business Goal: Preserve $500K+ ARR Golden Path functionality during SSOT consolidation
+- Business Goal: Preserve 500K+ ARR Golden Path functionality during SSOT consolidation
 - Value Impact: Ensures no business disruption during architectural improvements
 - Strategic Impact: Critical revenue protection during infrastructure modernization
 
@@ -55,7 +55,7 @@ class TestGoldenPathBusinessValuePreservation(BaseE2ETest):
         """
         Test complete user journey delivers business value with SSOT patterns
 
-        This test validates the PRIMARY revenue-generating user flow that protects $500K+ ARR
+        This test validates the PRIMARY revenue-generating user flow that protects 500K+ ARR
         """
         print("\n🚀 GOLDEN PATH E2E TEST 1: Complete user journey business value delivery...")
 
@@ -424,7 +424,7 @@ class TestGoldenPathBusinessValuePreservation(BaseE2ETest):
 if __name__ == '__main__':
     print("🚀 Issue #1186 Golden Path Business Value Preservation - E2E Tests")
     print("=" * 80)
-    print("💰 CRITICAL: These tests protect $500K+ ARR during SSOT consolidation")
+    print("💰 CRITICAL: These tests protect 500K+ ARR during SSOT consolidation")
     print("🎯 Goal: Ensure no business disruption during UserExecutionEngine improvements")
     print("🌐 Environment: GCP staging remote with real LLM and real services")
     print("🔒 Validation: Complete user journeys, multi-user isolation, performance preservation")

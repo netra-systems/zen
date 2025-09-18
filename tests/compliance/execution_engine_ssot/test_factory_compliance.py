@@ -4,7 +4,7 @@ PURPOSE: Validate all factories create UserExecutionEngine instances only
 SHOULD FAIL NOW: Factories create different engine types
 SHOULD PASS AFTER: All factories create UserExecutionEngine
 
-Business Value: Prevents $500K+ ARR factory-based user isolation bypass
+Business Value: Prevents 500K+ ARR factory-based user isolation bypass
 """
 
 import ast

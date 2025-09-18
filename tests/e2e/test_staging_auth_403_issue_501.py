@@ -13,7 +13,7 @@ Test Strategy:
 3. Validate token presence vs API access mismatch
 4. Identify the specific point where authentication breaks down
 
-Business Impact: $500K+ ARR at risk from authentication failures
+Business Impact: 500K+ ARR at risk from authentication failures
 Technical Focus: Real staging environment testing with actual user flows
 """
 

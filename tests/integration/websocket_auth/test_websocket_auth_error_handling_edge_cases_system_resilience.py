@@ -5,7 +5,7 @@ Business Value Justification:
 - Segment: Platform/Internal - System Resilience & Disaster Recovery
 - Business Goal: System Stability & Business Continuity - Ensure system survives failures
 - Value Impact: Prevents system-wide outages from isolated failures during authentication
-- Revenue Impact: Protects $500K+ ARR by ensuring system resilience during component failures
+- Revenue Impact: Protects 500K+ ARR by ensuring system resilience during component failures
 
 CRITICAL REQUIREMENTS:
 - NO MOCKS allowed - use real services and real system behavior

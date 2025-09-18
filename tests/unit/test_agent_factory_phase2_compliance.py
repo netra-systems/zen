@@ -8,7 +8,7 @@ Business Value Justification:
 - Segment: Platform/Internal
 - Business Goal: Stability & Compliance
 - Value Impact: Prevents regulatory violations and data breaches 
-- Strategic Impact: Enables enterprise deployment with $500K+ ARR protection
+- Strategic Impact: Enables enterprise deployment with 500K+ ARR protection
 
 The tests validate:
 1. SSOT factory creation patterns

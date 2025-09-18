@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Value Impact: WebSocket-thread integration is core to 90% of platform value (responsive chat)
 - Strategic Impact: Real-time thread management differentiates from static AI tools
 
-CRITICAL: WebSocket-thread integration enables $500K+ ARR by ensuring:
+CRITICAL: WebSocket-thread integration enables 500K+ ARR by ensuring:
 1. Users see real-time AI thinking and progress within conversation threads
 2. Thread context is immediately available for WebSocket-based agent interactions
 3. All 5 critical WebSocket events are properly associated with thread state

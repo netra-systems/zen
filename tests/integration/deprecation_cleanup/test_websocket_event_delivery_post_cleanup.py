@@ -4,7 +4,7 @@ Integration Tests for WebSocket Event Delivery Post-Cleanup
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Goal: Ensure zero functional regression during deprecation cleanup
-- Value Impact: Protects $500K+ ARR Golden Path functionality
+- Value Impact: Protects 500K+ ARR Golden Path functionality
 - Strategic Impact: Mission critical WebSocket event delivery
 
 This test suite validates that WebSocket functionality remains intact

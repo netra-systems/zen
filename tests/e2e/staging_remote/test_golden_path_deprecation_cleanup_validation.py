@@ -456,11 +456,7 @@ class TestGoldenPathDeprecationCleanupValidation(SSotBaseTestCase):
         
         if 'websocket_connection_latency_ms' in performance_metrics:
             ws_latency = performance_metrics['websocket_connection_latency_ms']  
-            self.assertLess(ws_latency, 10000, "WebSocket connection latency should be reasonable (<10s)")
-
-
-class TestStagingEnvironmentDependencyValidation(SSotBaseTestCase):
-    """Test staging environment dependency validation."""
+            self.assertLess(ws_latency, 10000, "WebSocket connection latency should be reasonable (<10s)""""Test staging environment dependency validation."""
     
     def setUp(self):
         """Setup test environment."""

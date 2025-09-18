@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All tiers - Critical for 90% of platform value (real-time chat experience)
 - Business Goal: Ensure reliable real-time agent event delivery for user engagement
 - Value Impact: Users see live agent progress - core differentiator of AI platform
-- Strategic/Revenue Impact: $500K+ ARR depends on real-time agent transparency
+- Strategic/Revenue Impact: 500K+ ARR depends on real-time agent transparency
 
 This test suite validates comprehensive WebSocket agent event delivery:
 1. All 5 required agent events delivered in sequence
@@ -72,7 +72,7 @@ class WebSocketAgentEventsE2ETests(BaseE2ETest):
         """
         Test complete agent event sequence with precise validation.
 
-        BVJ: Validates $500K+ ARR core value - Users must see all agent progress
+        BVJ: Validates 500K+ ARR core value - Users must see all agent progress
         Ensures: All 5 required events delivered in correct order with valid content
         """
         user_context = self.test_users[0]

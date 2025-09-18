@@ -4,7 +4,7 @@ CRITICAL MISSION: End-to-end validation that Golden Path chat functionality work
 
 PURPOSE: Validate that the complete Golden Path user flow (login -> AI responses)
 continues to work correctly after WebSocket Manager Factory removal. This test
-protects $500K+ ARR by ensuring chat functionality remains operational.
+protects 500K+ ARR by ensuring chat functionality remains operational.
 
 TESTING CONSTRAINTS:
 - NO Docker required - Integration test using staging GCP or mocked services
@@ -15,7 +15,7 @@ TESTING CONSTRAINTS:
 BUSINESS VALUE:
 - Segment: ALL (Free -> Enterprise) - Golden Path Revenue Protection
 - Goal: Ensure factory removal doesn't break core business functionality
-- Impact: Protects $500K+ ARR from WebSocket-related failures
+- Impact: Protects 500K+ ARR from WebSocket-related failures
 - Revenue Impact: Validates chat experience remains reliable for all users
 """
 import pytest

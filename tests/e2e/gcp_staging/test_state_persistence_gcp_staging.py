@@ -3,7 +3,7 @@ E2E GCP Staging Tests for StatePersistence - FINAL PHASE
 Real GCP Cloud SQL, Redis Cloud, ClickHouse Cloud multi-tier architecture
 
 Business Value Protection:
-- $500K+ ARR: 3-tier architecture prevents data loss across hot/warm/cold storage
+- 500K+ ARR: 3-tier architecture prevents data loss across hot/warm/cold storage
 - $15K+ MRR per Enterprise: Analytics and long-term data retention for compliance
 - Platform reliability: Distributed storage prevents single point of failure
 - Cost optimization: Tiered storage reduces cloud infrastructure costs
@@ -163,7 +163,7 @@ class StatePersistenceGCPStagingTests(SSotAsyncTestCase):
         """
         HIGH DIFFICULTY: Test Cloud SQL failover and warm storage recovery.
         
-        Business Value: $500K+ ARR protection - prevents data loss during outages.
+        Business Value: 500K+ ARR protection - prevents data loss during outages.
         Validates: PostgreSQL failover, data recovery, consistency maintenance.
         """
         user_id = self.id_manager.generate_user_id()
@@ -369,7 +369,7 @@ class StatePersistenceGCPStagingTests(SSotAsyncTestCase):
         """
         Test disaster recovery across all storage tiers.
         
-        Business Value: $500K+ ARR protection through comprehensive backup strategy.
+        Business Value: 500K+ ARR protection through comprehensive backup strategy.
         Validates: Multi-tier backup, recovery procedures, data integrity.
         """
         user_id = self.id_manager.generate_user_id()

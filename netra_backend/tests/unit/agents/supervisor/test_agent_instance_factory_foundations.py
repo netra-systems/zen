@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Segment: Platform/Internal (ALL user segments depend on agent instantiation)
 - Business Goal: Stability & Scalability & Multi-User Support
 - Value Impact: AgentInstanceFactory enables 10+ concurrent users with zero context leakage
-  protecting $500K+ ARR through proper user isolation and request-scoped agent instances
+  protecting 500K+ ARR through proper user isolation and request-scoped agent instances
 - Strategic Impact: Critical infrastructure for multi-user production deployment
   ensuring user data never cross-contaminates between requests
 

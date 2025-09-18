@@ -7,7 +7,7 @@ Create failing tests that identify unnecessary factory abstractions and demonstr
 the current over-engineering problems. These tests should FAIL initially to show
 the scope of the problem and guide cleanup efforts.
 
-Business Impact: $500K+ ARR protection through architectural simplification
+Business Impact: 500K+ ARR protection through architectural simplification
 SSOT Compliance: Identify factory patterns that violate Single Source of Truth
 
 These tests are designed to FAIL initially to demonstrate the over-engineering problem.
@@ -132,7 +132,7 @@ class FactoryProliferationPhase2Tests(SSotBaseTestCase):
         # Essential factory patterns (must be preserved)
         self.essential_patterns = {
             'user_execution_engine',  # Critical for multi-user isolation
-            'websocket_event_emitter',  # Critical for $500K+ ARR chat
+            'websocket_event_emitter',  # Critical for 500K+ ARR chat
             'auth_token_validator',  # Critical for security
             'database_connection_pool',  # Critical for data access
             'test_mock_generator'  # Critical for testing infrastructure

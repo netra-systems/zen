@@ -7,7 +7,7 @@ This validates that authenticated users maintain their session state for seamles
 Business Value Justification (BVJ):
 - Segment: ALL authenticated users (Free, Early, Mid, Enterprise) 
 - Business Goal: Reduce Re-authentication Friction - Seamless user experience
-- Value Impact: $150K+ ARR - Poor session UX = 25% user drop-off per session
+- Value Impact: 150K+ ARR - Poor session UX = 25% user drop-off per session
 - Strategic Impact: User Retention - Persistent sessions enable longer engagement
 
 SESSION PERSISTENCE JOURNEY:

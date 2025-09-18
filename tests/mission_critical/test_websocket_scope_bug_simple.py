@@ -2,7 +2,7 @@
 "MISSION CRITICAL TEST: WebSocket Scope Bug Simple Reproduction - Issue #165"
 
 THIS TEST PROVIDES A SIMPLE REPRODUCTION OF THE WEBSOCKET SCOPE BUG.
-Business Impact: $500K+ plus ARR - Complete WebSocket connection failure
+Business Impact: 500K+  ARR - Complete WebSocket connection failure
 
 Simplified Scope Bug Reproduction:
     - Focuses directly on the NameError at lines 1433 and 1452
@@ -15,7 +15,7 @@ Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Document and reproduce critical scope violation
 - Value Impact: Prove exact technical cause of 100% WebSocket connection failures  
-- Strategic Impact: Enable targeted fix for $500K+ plus ARR blocking bug
+- Strategic Impact: Enable targeted fix for 500K+  ARR blocking bug
 
 
 import asyncio
@@ -140,8 +140,7 @@ class WebSocketScopeBugSimpleTests:
         logger.error(f"   [U+2022] Confirmed scope violations: {len(confirmed_violations)})"
         logger.error(f   [U+2022] Variable defined in function scope, accessed in nested scope")"
         logger.error(f   [U+2022] Results in NameError: name 'state_registry' is not defined)
-        logger.error(f   [U+2022] Causes 100% WebSocket connection failure rate)"
-        logger.error(f   [U+2022] Causes 100% WebSocket connection failure rate)"
+        logger.error(f   [U+2022] Causes 100% WebSocket connection failure rate)""
         logger.error(f"   [U+2022] Affects all user tiers: Free, Early, Mid, Enterprise)"
         logger.error(f   [U+2022] Revenue impact: $500,0+ ARR completely blocked)
         logger.error(f   [U+2022] User experience: Complete chat functionality failure)
@@ -161,7 +160,7 @@ class WebSocketScopeBugSimpleTests:
             fCRITICAL SCOPE BUG CONFIRMED: Found {len(confirmed_violations)} confirmed violations ""
             fat lines {[v['line'] for v in confirmed_violations]} and {len(problem_lines)} total 
             fscope violations. This variable scope isolation bug causes 100% WebSocket connection 
-            f"failures, blocking $500K+ plus ARR and affecting all user tiers."
+            f"failures, blocking 500K+  ARR and affecting all user tiers."
         )
         
     @pytest.mark.mission_critical
@@ -178,10 +177,7 @@ class WebSocketScopeBugSimpleTests:
         Expected Behavior: FAIL with NameError demonstrating the scope issue
 "
 "
-        logger.info("[U+1F9EA] SIMULATING: WebSocket scope bug with code pattern)"
-        
-        def simulate_websocket_endpoint():
-            Simulate the websocket endpoint function structure.""
+        logger.info("[U+1F9EA] SIMULATING: WebSocket scope bug with code pattern)"""
             
             # Simulate the function scope where state_registry is defined
             def initialize_state_registry():
@@ -268,7 +264,7 @@ class WebSocketScopeBugSimpleTests:
         REPRODUCER: Document complete business impact of scope bug.
         
         This test quantifies and documents the business impact of the scope bug
-        to justify the urgency of the fix and validate the $500K+ plus ARR claim.
+        to justify the urgency of the fix and validate the 500K+  ARR claim.
         
         Expected Behavior: FAIL - Document severe business impact
 ""

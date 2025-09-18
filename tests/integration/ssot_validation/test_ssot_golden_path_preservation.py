@@ -15,15 +15,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -32,12 +24,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""SSOT Golden Path Preservation Test: UserExecutionContext Golden Path Validation
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""SSOT Golden Path Preservation Test: UserExecutionContext Golden Path Validation
 
 PURPOSE: Ensure golden path works with consolidated UserExecutionContext
 and detect how SSOT violations block the critical user flow.
@@ -45,7 +32,7 @@ and detect how SSOT violations block the critical user flow.
 This test is DESIGNED TO FAIL initially to prove SSOT violations are blocking
 the golden path: user login  ->  chat request  ->  AI response delivery.
 
-Business Impact: $500K+ ARR DIRECTLY AT RISK from golden path failures
+Business Impact: 500K+ ARR DIRECTLY AT RISK from golden path failures
 caused by inconsistent UserExecutionContext implementations.
 
 CRITICAL REQUIREMENTS:
@@ -164,7 +151,7 @@ class SSotGoldenPathPreservationTests(SSotAsyncTestCase):
         - Performance degradation from multiple implementations
         
         Business Impact:
-        - $500K+ ARR at risk from chat functionality failures
+        - 500K+ ARR at risk from chat functionality failures
         - Customer churn from broken core user experience
         - Revenue loss from unusable AI platform
         """
@@ -562,7 +549,7 @@ class SSotGoldenPathPreservationTests(SSotAsyncTestCase):
             if not result.business_value_delivered:
                 business_violations.append(
                     f"BUSINESS VALUE FAILURE: {result.user_id} golden path failed to deliver AI response - "
-                    f"$500K+ ARR at risk from non-functional chat"
+                    f"500K+ ARR at risk from non-functional chat"
                 )
             
             # Check for critical step failures

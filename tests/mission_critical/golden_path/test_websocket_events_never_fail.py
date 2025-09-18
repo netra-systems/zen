@@ -3,7 +3,7 @@ MISSION CRITICAL: WebSocket Events Never Fail Test for Golden Path
 
  ALERT:  MISSION CRITICAL TEST  ALERT: 
 This test MUST NEVER FAIL - it validates the core revenue-generating WebSocket events
-that enable the $500K+ ARR chat experience. Failure blocks deployment.
+that enable the 500K+ ARR chat experience. Failure blocks deployment.
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
@@ -88,15 +88,7 @@ class WebSocketEventsNeverFailTests(SSotAsyncTestCase):
             
         except Exception as e:
             # Mission critical test cleanup failures are logged but don't fail test
-            print(f" WARNING: [U+FE0F]  Mission Critical Cleanup Warning: {e}")
-        
-        await super().async_teardown_method(method)
-    
-    @pytest.mark.mission_critical
-    @pytest.mark.no_skip  # NEVER skip this test
-    @pytest.mark.asyncio
-    async def test_all_five_critical_events_must_be_delivered(self):
-        """
+            print(f" WARNING: [U+FE0F]  Mission Critical Cleanup Warning: {e}""""
          ALERT:  MISSION CRITICAL: All 5 WebSocket events MUST be delivered.
         
         This test CANNOT FAIL without blocking deployment.
@@ -264,7 +256,7 @@ class WebSocketEventsNeverFailTests(SSotAsyncTestCase):
         print(f"   [U+23F1][U+FE0F]  Event Collection Time: {event_collection_time:.2f}s")
         print(f"   [U+1F680] Total Execution Time: {total_mission_critical_time:.2f}s")
         print(f"    CHART:  Total Events Received: {len(events_collected)}")
-        print(f"   [U+1F4B0] $500K+ ARR Revenue Stream: PROTECTED")
+        print(f"   [U+1F4B0] 500K+ ARR Revenue Stream: PROTECTED")
         
     @pytest.mark.mission_critical
     @pytest.mark.no_skip

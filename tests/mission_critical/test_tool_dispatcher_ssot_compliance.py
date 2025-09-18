@@ -4,7 +4,7 @@
 Mission Critical Test Suite: Tool Dispatcher SSOT Compliance
 
 Business Value: Platform/Internal - System Reliability & SSOT Compliance
-Critical for $500K+ plus ARR protection through tool dispatcher SSOT compliance.
+Critical for 500K+  ARR protection through tool dispatcher SSOT compliance.
 
 This test suite validates:
     1. Single tool dispatcher implementation pattern (UnifiedToolDispatcher)

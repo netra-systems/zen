@@ -10,8 +10,7 @@ class TestWebSocketConnection:
         ""Send JSON message.""
 
         if self._closed:
-            raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)""
+            raise RuntimeError(WebSocket is closed)"""
 
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):"
@@ -38,44 +37,7 @@ class TestWebSocketConnection:
         5. ExecutionEngine  ->  Agent (with emitter)
         6. Agent  ->  UserWebSocketEmitter (isolated events)
         7. Emitter  ->  UserWebSocketConnection (per-user)
-        8. Connection  ->  User"s WebSocket (complete isolation)"
-        VALIDATES:
-        - Factory pattern user isolation
-        - All 5 required events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)
-        - JSON event serialization
-        - No cross-user event leakage
-        '''
-        '''
-        import asyncio
-        import unittest
-        import json
-        from typing import Dict, Any, Optional, List
-        import uuid
-        import time
-        from datetime import datetime, timezone
-        from shared.isolated_environment import IsolatedEnvironment
-            # Import factory-based components
-        from netra_backend.app.services.websocket_bridge_factory import ( )
-        WebSocketBridgeFactory,
-        UserWebSocketEmitter,
-        UserWebSocketContext,
-        UserWebSocketConnection,
-        WebSocketEvent,
-        WebSocketConnectionPool
-            
-        from netra_backend.app.agents.supervisor.execution_factory import ( )
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
-        ExecutionEngineFactory,
-        UserExecutionContext,
-        IsolatedExecutionEngine
-            
-class TestWebSocketE2EProof(SSotAsyncTestCase):
-        Prove the WebSocket factory pattern flow works end-to-end.
-    def setUp(self):
-        ""Set up test environment with factory components.""
+        8. Connection  ->  User"s WebSocket (complete isolation)"""Set up test environment with factory components.""
 
         self.captured_events = []
         self.run_id = formatted_string
@@ -181,10 +143,8 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         [U+1F3ED] FACTORY FLOW:)
         print(1. Request  ->  ExecutionEngineFactory (user context created)")"
         print(2. Factory  ->  WebSocketBridgeFactory (per-user emitter"))"
-        print(3. Factory  ->  UserWebSocketEmitter (complete isolation))"
-        print(3. Factory  ->  UserWebSocketEmitter (complete isolation))"
-        print("4. Emitter  ->  UserWebSocketConnection (user-specific))"
-        print(5. Connection  ->  User WebSocket (isolated delivery"))"
+        print(3. Factory  ->  UserWebSocketEmitter (complete isolation))""
+        print("4. Emitter  ->  UserWebSocketConnection (user-specific))""))"
         print()
         [U+1F4E1] CRITICAL EVENTS VALIDATED:")"
         required_events = [agent_started, agent_thinking, tool_executing, tool_completed", agent_completed]"
@@ -431,11 +391,7 @@ class MockWebSocketConnection:
     async def send_text(self, data: str) -> None:
         Mock send_text method for ping.
         if not self.is_connected:
-        raise ConnectionError("WebSocket disconnected)"
-    async def ping(self) -> None:
-        Mock ping method.
-        if not self.is_connected:
-        raise ConnectionError(WebSocket disconnected")"
+        raise ConnectionError("WebSocket disconnected)"")"
     async def close(self) -> None:
         "Mock close method."
         self.is_connected = False

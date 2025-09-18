@@ -4,7 +4,7 @@
 GitHub Issue: #960 WebSocket Manager SSOT fragmentation crisis
 
 THIS TEST VALIDATES INTERFACE CONSISTENCY ACROSS WEBSOCKET MANAGERS.
-Business Value: $500K+ ARR - Validates consistent interfaces across WebSocket managers
+Business Value: 500K+ ARR - Validates consistent interfaces across WebSocket managers
 
 PURPOSE:
 - Test validates consistent interfaces across all WebSocket manager implementations

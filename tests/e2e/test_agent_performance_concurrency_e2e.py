@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 1. Segment: All segments (Free through Enterprise)
 2. Business Goal: System stability and scalability for growing user base
 3. Value Impact: Performance and concurrency ensure customer satisfaction and system reliability
-4. Revenue Impact: $500K+ ARR protected by ensuring system can handle enterprise-scale usage
+4. Revenue Impact: 500K+ ARR protected by ensuring system can handle enterprise-scale usage
 
 CLAUDE.md COMPLIANCE:
 - Uses real services ONLY (NO MOCKS)

@@ -632,8 +632,7 @@ class RealAgentExecutionTests(BaseE2ETest):
         logger.info(f'[U+2713] Comprehensive validation complete: {success_rate:.1%} success, {business_value_rate:.1%} business value')
         compliance_results = agent_tester.validate_business_value_compliance()
         logger.info('BUSINESS VALUE COMPLIANCE REPORT:')
-        logger.info(f"- WebSocket Compliance: {compliance_results['websocket_compliant']}/{compliance_results['total_tests']} ({compliance_results['websocket_compliant'] * 100 / compliance_results['total_tests']:.1f}%)")
-        logger.info(f"- Business Value Delivered: {compliance_results['business_value_delivered']}/{compliance_results['total_tests']} ({compliance_results['business_value_delivered'] * 100 / compliance_results['total_tests']:.1f}%)")
+        logger.info(f"- WebSocket Compliance: {compliance_results['websocket_compliant']}/{compliance_results['total_tests']} ({compliance_results['websocket_compliant'] * 100 / compliance_results['total_tests']:.1f}%)""- Business Value Delivered: {compliance_results['business_value_delivered']}/{compliance_results['total_tests']} ({compliance_results['business_value_delivered'] * 100 / compliance_results['total_tests']:.1f}%)")
         logger.info(f"- Overall Compliance Score: {compliance_results['compliance_score']:.2f}")
         assert compliance_results['compliance_score'] >= 0.7, f"Compliance score {compliance_results['compliance_score']:.2f} below required 0.7"
         if compliance_results['critical_failures']:

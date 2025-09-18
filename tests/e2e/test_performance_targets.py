@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
     1. Segment: Growth & Enterprise (performance-sensitive customers)
     2. Business Goal: Ensure optimal user experience quality for retention
     3. Value Impact: Performance directly affects user satisfaction and subscription renewal
-    4. Revenue Impact: Poor performance causes 15-25% churn - $50K+ ARR protection
+    4. Revenue Impact: Poor performance causes 15-25% churn - 50K+ ARR protection
 
 PERFORMANCE TARGETS:
     - API response time: < 2s (cold start)

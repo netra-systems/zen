@@ -76,30 +76,29 @@ class PerformanceMetrics:
 
     @property
     def avg_connection_time(self) -> float:
-        ""Average connection establishment time.""
+        """Average connection establishment time."""
 
         return statistics.mean(self.connection_times) if self.connection_times else 0
 
     @property
     def avg_cpu_usage(self) -> float:
-        Average CPU usage.""
+        """Average CPU usage."""
         return statistics.mean(self.cpu_usage) if self.cpu_usage else 0
 
     @property
     def avg_memory_usage(self) -> float:
-        Average memory usage.""
+        """Average memory usage."""
         return statistics.mean(self.memory_usage) if self.memory_usage else 0
 
     @property
     def error_rate(self) -> float:
-        Error rate percentage."
-        Error rate percentage.""
+        """Error rate percentage."""
 
         return (self.errors / self.total_events * 100) if self.total_events > 0 else 0
 
 
 class MockWebSocketEmitter:
-    "Mock WebSocket emitter for performance testing."
+    """Mock WebSocket emitter for performance testing."""
 
     async def __init__(self, user_id: str, latency_ms: float = 0.1):
         self.user_id = user_id
@@ -108,73 +107,68 @@ class MockWebSocketEmitter:
         self.last_activity = time.time()
 
     async def notify_agent_started(self, agent_name: str, run_id: str) -> None:
-        "Mock agent started notification."
+        """Mock agent started notification."""
         await asyncio.sleep(self.latency_ms / 1000)  # Simulate processing time
 
         event = {
-            event_type: "agent_started,"
-            user_id": self.user_id,"
-            data: {
-                agent_name": agent_name,"
-                run_id: run_id,
-                timestamp: datetime.now(timezone.utc).isoformat()"
-                timestamp: datetime.now(timezone.utc).isoformat()""
-
+            "event_type": "agent_started",
+            "user_id": self.user_id,
+            "data": {
+                "agent_name": agent_name,
+                "run_id": run_id,
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         }
         self.sent_events.append(event)
         self.last_activity = time.time()
 
     async def notify_agent_thinking(self, agent_name: str, run_id: str, thinking: str) -> None:
-        "Mock agent thinking notification."
+        """Mock agent thinking notification."""
         await asyncio.sleep(self.latency_ms / 1000)
 
         event = {
-            event_type": agent_thinking,"
-            user_id: self.user_id,
-            data: {"
-            data: {"
-                agent_name": agent_name,"
-                run_id: run_id,
-                thinking": thinking,"
-                timestamp: datetime.now(timezone.utc).isoformat()
+            "event_type": "agent_thinking",
+            "user_id": self.user_id,
+            "data": {
+                "agent_name": agent_name,
+                "run_id": run_id,
+                "thinking": thinking,
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         }
         self.sent_events.append(event)
         self.last_activity = time.time()
 
-    async def notify_tool_executing(self, agent_name: str, run_id: str, tool_name: str, tool_input: Dict[str, Any) -> None:
-        "Mock tool execution notification."
+    async def notify_tool_executing(self, agent_name: str, run_id: str, tool_name: str, tool_input: Dict[str, Any]) -> None:
+        """Mock tool execution notification."""
         await asyncio.sleep(self.latency_ms / 1000)
 
         event = {
-            event_type: tool_executing,
-            "user_id: self.user_id,"
-            data: {
-                agent_name: agent_name,"
-                agent_name: agent_name,"
-                run_id": run_id,"
-                tool_name: tool_name,
-                tool_input": tool_input,"
-                timestamp: datetime.now(timezone.utc).isoformat()
+            "event_type": "tool_executing",
+            "user_id": self.user_id,
+            "data": {
+                "agent_name": agent_name,
+                "run_id": run_id,
+                "tool_name": tool_name,
+                "tool_input": tool_input,
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         }
         self.sent_events.append(event)
         self.last_activity = time.time()
 
     async def notify_agent_completed(self, agent_name: str, run_id: str, result: Any) -> None:
-        "Mock agent completion notification."
+        """Mock agent completion notification."""
         await asyncio.sleep(self.latency_ms / 1000)
 
         event = {
-            event_type: agent_completed,
-            "user_id: self.user_id,"
-            data: {
-                agent_name: agent_name,"
-                agent_name: agent_name,"
-                run_id": run_id,"
-                result: result,
-                timestamp": datetime.now(timezone.utc).isoformat()"
+            "event_type": "agent_completed",
+            "user_id": self.user_id,
+            "data": {
+                "agent_name": agent_name,
+                "run_id": run_id,
+                "result": result,
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         }
         self.sent_events.append(event)
@@ -182,8 +176,7 @@ class MockWebSocketEmitter:
 
 
 class PerformanceMonitor:
-    Real-time performance monitoring during tests."
-    Real-time performance monitoring during tests.""
+    """Real-time performance monitoring during tests."""
 
 
     def __init__(self):
@@ -226,24 +219,22 @@ class PerformanceMonitor:
 
                     await asyncio.sleep(interval)
                 except Exception as e:
-                    print(fPerformance monitoring error: {e})
+                    print(f"Performance monitoring error: {e}")
                     break
         except asyncio.CancelledError:
             pass
 
     def get_metrics(self) -> Dict[str, List[float]]:
-        ""Get collected performance metrics.""
+        """Get collected performance metrics."""
 
         return self.metrics.copy()
 
 
 async def test_latency_baseline():
-    Test latency performance baseline.""
-    print(Testing P99 latency baseline...)"
-    print(Testing P99 latency baseline...)""
+    """Test latency performance baseline."""
+    print("Testing P99 latency baseline...")
 
-
-    emitter = MockWebSocketEmitter("latency-test-user, latency_ms=0.5)  # Very low mock latency"
+    emitter = MockWebSocketEmitter("latency-test-user", latency_ms=0.5)  # Very low mock latency
 
     # Measure latency
     num_samples = 1000
@@ -272,15 +263,15 @@ async def test_latency_baseline():
     p99 = statistics.quantiles(latencies, n=100)[98]
     avg = statistics.mean(latencies)
 
-    print(fLatency Results: P50={p50:.""2f""}ms, P90={p90:.""2f""}ms, P95={p95:.""2f""}ms, P99={p99:.""2f""}ms, Avg={avg:.""2f""}ms")"
-    print(fSamples: {num_samples})
-    print(fP99 Requirement (< ""50ms"""): {'PASS' if p99 < 50.0 else 'FAIL'})"
-    print(fP95 Performance (< ""30ms""): {'PASS' if p95 < 30.0 else 'FAIL'})
+    print(f"Latency Results: P50={p50:.2f}ms, P90={p90:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms, Avg={avg:.2f}ms")
+    print(f"Samples: {num_samples}")
+    print(f"P99 Requirement (< 50ms): {'PASS' if p99 < 50.0 else 'FAIL'}")
+    print(f"P95 Performance (< 30ms): {'PASS' if p95 < 30.0 else 'FAIL'}")
     print("")
 
     # Validate requirements
     p99_passed = p99 < 50.0
-    print(f[PASS] P99 latency baseline validated: {p99_passed})
+    print(f"[PASS] P99 latency baseline validated: {p99_passed}")
 
     return latencies
 

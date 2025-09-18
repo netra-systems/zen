@@ -7,7 +7,7 @@ This performance test validates that factory consolidation doesn't degrade perfo
 and should FAIL if consolidation causes significant performance regressions (>20%).
 
 BUSINESS IMPACT:
-- $500K+ ARR depends on fast execution engine creation for responsive AI interactions
+- 500K+ ARR depends on fast execution engine creation for responsive AI interactions
 - Factory consolidation must not slow down user experience
 - Performance degradation affects user satisfaction and retention
 - Execution engine creation speed directly impacts response times

@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,19 +23,14 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 End-to-end tests for service dependency resolution in golden path user flows.
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal
 - Business Goal: Service Dependency Resolution  
 - Value Impact: Validates complete user chat experience depends on service orchestration
-- Strategic Impact: Prevents service dependency failures from blocking $500K+ ARR functionality
+- Strategic Impact: Prevents service dependency failures from blocking 500K+ ARR functionality
 
 These tests validate that service dependency resolution enables the complete golden path
 user experience including authenticated chat sessions, agent execution, and real-time updates.
@@ -95,7 +82,7 @@ class ServiceDependencyGoldenPathTests:
     
     async def test_golden_path_service_dependency_resolution_with_chat(self):
         """Test complete golden path: service resolution -> authenticated chat -> agent execution."""
-        # BVJ: Validates $500K+ ARR chat functionality depends on proper service orchestration
+        # BVJ: Validates 500K+ ARR chat functionality depends on proper service orchestration
         
         # Step 1: Validate service dependency resolution
         golden_path_validator = GoldenPathValidator()

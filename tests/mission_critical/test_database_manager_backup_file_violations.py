@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 "MISSION CRITICAL: DatabaseManager SSOT Backup File Violation Detection"
 
-BUSINESS VALUE: $500K+ plus ARR - Database SSOT compliance is foundation for all operations
+BUSINESS VALUE: 500K+  ARR - Database SSOT compliance is foundation for all operations
 
 DESIGNED TO FAIL when:
     1. Multiple DatabaseManager implementations exist

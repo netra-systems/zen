@@ -5,7 +5,7 @@ MISSION CRITICAL: WebSocket User Isolation Verification Tests
 Business Value Justification:
 - Segment: Platform/Core
 - Business Goal: Revenue Protection & User Security
-- Value Impact: Protects $500K+ ARR by ensuring user data isolation 
+- Value Impact: Protects 500K+ ARR by ensuring user data isolation 
 - Strategic Impact: CRITICAL - User context leaks = security vulnerabilities + revenue loss
 
 PURPOSE:
@@ -192,7 +192,7 @@ class WebSocketUserIsolationValidationTests(SSotAsyncTestCase):
             # CRITICAL: No isolation violations should occur
             assert len(isolation_results['isolation_violations']) == 0, (
                 f"User isolation violations detected: {isolation_results['isolation_violations']}. "
-                f"This indicates serious security and privacy risks affecting $500K+ ARR."
+                f"This indicates serious security and privacy risks affecting 500K+ ARR."
             )
             
             # Validate successful isolations
@@ -426,7 +426,7 @@ class WebSocketUserIsolationValidationTests(SSotAsyncTestCase):
             # CRITICAL: High success rate required for production stability
             assert success_rate >= 90, (
                 f"Race condition success rate {success_rate:.2f}% is below acceptable "
-                f"threshold of 90%. This indicates instability affecting $500K+ ARR."
+                f"threshold of 90%. This indicates instability affecting 500K+ ARR."
             )
             
             # No context corruption should occur

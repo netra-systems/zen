@@ -7,7 +7,7 @@ These tests DELIBERATELY FAIL to demonstrate the 3 critical issues:
 3. Docker file path mismatch (docker/ vs dockerfiles/)
 
 Business Impact: These failures block validation of chat functionality (90% platform value)
-protecting $500K+ ARR. The WebSocket infrastructure is critical for real-time AI interactions.
+protecting 500K+ ARR. The WebSocket infrastructure is critical for real-time AI interactions.
 
 Test Strategy: Unit tests that don't require Docker but validate configuration issues
 """
@@ -67,7 +67,7 @@ class WebSocketDockerConfigurationFailuresTests:
                     f"Line 265 in websocket_real_test_base.py fails with: {e}. "
                     f"Available fields: {list(config_fields)}. "
                     f"This prevents WebSocket test infrastructure from functioning, "
-                    f"blocking validation of chat functionality that protects $500K+ ARR."
+                    f"blocking validation of chat functionality that protects 500K+ ARR."
                 )
         else:
             # If attribute exists, the issue may have been fixed
@@ -217,7 +217,7 @@ class WebSocketDockerConfigurationFailuresTests:
         if missing_attributes:
             pytest.fail(
                 f"RealWebSocketTestConfig missing critical attributes for real WebSocket testing: "
-                f"{missing_attributes}. This blocks chat functionality validation protecting $500K+ ARR."
+                f"{missing_attributes}. This blocks chat functionality validation protecting 500K+ ARR."
             )
 
     def test_docker_compose_service_discovery_simulation(self):
@@ -271,7 +271,7 @@ class WebSocketInfrastructureBusinessImpactTests:
     def test_websocket_failure_impact_on_golden_path(self):
         """
         Test documenting how WebSocket infrastructure failures impact the Golden Path
-        user flow that protects $500K+ ARR.
+        user flow that protects 500K+ ARR.
         
         This test PASSES but documents the critical business dependency.
         """
@@ -281,8 +281,7 @@ class WebSocketInfrastructureBusinessImpactTests:
             "User sends message to AI agent", 
             "WebSocket connection established",  #  <-  BLOCKED BY INFRASTRUCTURE ISSUES
             "Agent execution begins",
-            "Real-time WebSocket events delivered (agent_started, agent_thinking, etc.)",  #  <-  BLOCKED
-            "Agent completes with substantive response",
+            "Real-time WebSocket events delivered (agent_started, agent_thinking, etc.)""Agent completes with substantive response",
             "User receives valuable AI insights"  #  <-  BUSINESS VALUE DELIVERY BLOCKED
         ]
         
@@ -297,7 +296,7 @@ class WebSocketInfrastructureBusinessImpactTests:
         # Document in test output
         assert functionality_blocked_percentage > 0, \
             f"WebSocket infrastructure issues block {functionality_blocked_percentage:.1f}% " \
-            f"of Golden Path functionality. This represents critical risk to $500K+ ARR " \
+            f"of Golden Path functionality. This represents critical risk to 500K+ ARR " \
             f"as chat delivers 90% of platform value. Blocked steps: {blocked_steps}"
             
     def test_websocket_chat_value_delivery_dependency(self):
@@ -334,4 +333,4 @@ class WebSocketInfrastructureBusinessImpactTests:
         assert dependency_percentage == 100, \
             f"WebSocket infrastructure is critical for {dependency_percentage}% of chat value " \
             f"delivery components. Infrastructure failures directly impact business value " \
-            f"delivery that drives customer conversions and protects $500K+ ARR."
+            f"delivery that drives customer conversions and protects 500K+ ARR."

@@ -10,7 +10,7 @@
     # REMOVED_SYNTAX_ERROR: - Segment: All (Free, Early, Mid, Enterprise)
     # REMOVED_SYNTAX_ERROR: - Business Goal: Platform Reliability & User Experience
     # REMOVED_SYNTAX_ERROR: - Value Impact: Ensures chat interface works reliably for AI operations
-    # REMOVED_SYNTAX_ERROR: - Strategic Impact: Prevents user frustration and abandonment ($500K+ ARR protection)
+    # REMOVED_SYNTAX_ERROR: - Strategic Impact: Prevents user frustration and abandonment (500K+ ARR protection)
 
     # REMOVED_SYNTAX_ERROR: CLAUDE.md Compliance:
         # REMOVED_SYNTAX_ERROR: - NO MOCKS: Uses real WebSocket connections and real services only

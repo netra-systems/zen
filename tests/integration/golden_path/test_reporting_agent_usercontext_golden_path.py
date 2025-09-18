@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,23 +23,18 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 Golden Path Tests for ReportingSubAgent UserExecutionContext Migration - Issue #354
 
 CRITICAL BUSINESS VALUE PROTECTION: Golden Path represents the core revenue-generating
-workflow that protects $500K+ ARR. ReportingSubAgent is the final step in the Golden Path
+workflow that protects 500K+ ARR. ReportingSubAgent is the final step in the Golden Path
 that delivers customer value through comprehensive AI-generated reports.
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free  ->  Enterprise) - All customers depend on reporting functionality
 - Business Goal: Ensure core revenue workflow continues working after security migration
 - Value Impact: Protects the primary value delivery mechanism (AI-powered reports)
-- Revenue Impact: Prevents $500K+ ARR loss from broken Golden Path after migration
+- Revenue Impact: Prevents 500K+ ARR loss from broken Golden Path after migration
 
 GOLDEN PATH WORKFLOW:
 1. User submits analysis request
@@ -160,7 +147,7 @@ class ReportingAgentUserContextGoldenPathTests(SSotAsyncTestCase):
                     "roi_projections"
                 ],
                 business_value="High-value enterprise customer retention",
-                revenue_segment="Enterprise ($50K+ ARR)"
+                revenue_segment="Enterprise (50K+ ARR)"
             ),
             
             GoldenPathScenario(
@@ -258,7 +245,7 @@ class ReportingAgentUserContextGoldenPathTests(SSotAsyncTestCase):
         """
         Test complete Golden Path workflow for Enterprise cost optimization scenario.
         
-        BUSINESS CRITICAL: This scenario represents $50K+ ARR enterprise customers
+        BUSINESS CRITICAL: This scenario represents 50K+ ARR enterprise customers
         EXPECTED: Must work after migration - no loss of business value
         """
         scenario = self.golden_path_scenarios[0]  # Enterprise scenario
@@ -268,7 +255,7 @@ class ReportingAgentUserContextGoldenPathTests(SSotAsyncTestCase):
         if not golden_path_result.execution_success:
             assert False, (
                 f" ALERT:  GOLDEN PATH FAILURE: Enterprise cost optimization workflow failed after migration. "
-                f"Errors: {golden_path_result.errors}. This represents $50K+ ARR customer impact. "
+                f"Errors: {golden_path_result.errors}. This represents 50K+ ARR customer impact. "
                 f"ReportingSubAgent UserExecutionContext migration broke core business workflow."
             )
         

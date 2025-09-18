@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise/Mid-Market (Multi-tenant customers)
 - Business Goal: Platform Scalability & Enterprise Trust
 - Value Impact: Proves platform can serve multiple enterprise customers safely
-- Strategic Impact: $500K+ ARR depends on enterprise confidence in isolation
+- Strategic Impact: 500K+ ARR depends on enterprise confidence in isolation
 
 Multi-User Isolation Requirements:
 1. Complete user context isolation (no data leakage between users)

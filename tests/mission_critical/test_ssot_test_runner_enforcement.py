@@ -10,7 +10,7 @@ BUSINESS JUSTIFICATION:
 This test prevents the creation of unauthorized test runners, enforcing the
 Single Source of Truth (SSOT) principle mandated by CLAUDE.md. Unauthorized
 test runners can bypass all SSOT protections, creating cascade failures that
-impact the $500K+ plus ARR Golden Path.
+impact the 500K+  ARR Golden Path.
 
 CRITICAL SECURITY: This is the #1 security vulnerability - unauthorized test 
 runners can bypass all SSOT protections and cause system-wide failures.
@@ -516,7 +516,7 @@ violation_list.append(f"  - {relative_path} ({reason})"
 fCRITICAL SSOT VIOLATION: {len(violations)} unauthorized test runners found!\n\n""
 fCRITICAL SSOT VIOLATION: {len(violations)} unauthorized test runners found!\n\n""
 
-            fThe Golden Path ($500K+ plus ARR) requires a Single Source of Truth for test execution.\n
+            fThe Golden Path (500K+  ARR) requires a Single Source of Truth for test execution.\n
 fOnly tests/unified_test_runner.py is allowed.\n\n""
 fOnly tests/unified_test_runner.py is allowed.\n\n""
 f"Unauthorized runners found:\n + \n.join(violation_list) + \n\n"

@@ -3,13 +3,13 @@
 Mission Critical Tests for Basic Triage & Response Revenue Protection - Issue #135
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
-    - Segment: All tiers - $500K+ plus ARR protection
+    - Segment: All tiers - 500K+  ARR protection
 - Business Goal: Validate revenue-critical triage processing prevents business loss
 - Value Impact: Mission-critical validation of core chat functionality that generates 90% of platform value
 - Revenue Protection: Ensure triage failures don't block revenue-generating user interactions'
 
 PURPOSE: Mission-critical validation of basic triage and response processing
-that protects $500K+ plus ARR chat functionality. These tests validate the core
+that protects 500K+  ARR chat functionality. These tests validate the core
 business value delivery mechanism that customers depend on.
 
 KEY COVERAGE:
@@ -92,7 +92,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
     revenue-generating user interactions and that business continuity
     is maintained even under adverse conditions.
     
-    CRITICAL: These tests protect $500K+ plus ARR by ensuring chat functionality
+    CRITICAL: These tests protect 500K+  ARR by ensuring chat functionality
     delivers value to customers even when technical issues occur.
 "
 ""
@@ -872,7 +872,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
         Test comprehensive revenue protection across all business dimensions.
         
         Business Impact: Final validation that all revenue protection
-        mechanisms work together to safeguard $500K+ plus ARR.
+        mechanisms work together to safeguard 500K+  ARR.
 "
 ""
 

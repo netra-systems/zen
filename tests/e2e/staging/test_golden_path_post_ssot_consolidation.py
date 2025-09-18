@@ -155,7 +155,7 @@ class GoldenPathPostSsotConsolidationTests(SSotAsyncTestCase):
         Validates that the complete golden path user journey from authentication
         through value delivery remains intact after SSOT consolidation.
         
-        CRITICAL: This represents the core $500K+ ARR customer experience.
+        CRITICAL: This represents the core 500K+ ARR customer experience.
         """
         user = GoldenPathUser.create_golden_path_user('enterprise')
         journey = GoldenPathJourney(user=user)

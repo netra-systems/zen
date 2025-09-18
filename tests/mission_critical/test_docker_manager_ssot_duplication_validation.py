@@ -6,7 +6,7 @@ BUSINESS VALUE JUSTIFICATION (BVJ):
     1. Segment: Platform/Infrastructure - SSOT Compliance and Architecture Integrity
 2. Business Goal: Eliminate SSOT violations that cause inconsistent behavior and deployment failures
 3. Value Impact: Prevents developer confusion, reduces debugging time, ensures reliable test execution
-4. Revenue Impact: Protects $500K+ plus ARR by maintaining stable testing infrastructure
+4. Revenue Impact: Protects 500K+  ARR by maintaining stable testing infrastructure
 
 PURPOSE:
     This test suite validates that SSOT violations in Docker Manager implementations are detected

@@ -6,7 +6,7 @@ PURPOSE: Enterprise user isolation validation with SSOT patterns
 SHOULD FAIL: Because user isolation is compromised by dual patterns
 SHOULD PASS: When SSOT factory ensures proper user isolation
 
-Business Impact: $500K+ plus ARR at risk - Enterprise compliance (HIPAA, SOC2, SEC)
+Business Impact: 500K+  ARR at risk - Enterprise compliance (HIPAA, SOC2, SEC)
 GitHub Issue: #1144 - WebSocket Factory Dual Pattern Blocking Golden Path
 
 This test validates that:

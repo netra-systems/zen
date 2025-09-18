@@ -10,7 +10,7 @@ These tests simulate the complete user journey from:
 4. WebSocket event delivery to frontend
 5. Error handling and user feedback
 
-Business Value: Protects $500K+ ARR Golden Path user flow by ensuring reliable
+Business Value: Protects 500K+ ARR Golden Path user flow by ensuring reliable
 action plan generation in production-like end-to-end scenarios.
 
 Test Philosophy:

@@ -2,7 +2,7 @@
 Staging Environment Connectivity Validation Test
 ================================================
 
-BUSINESS IMPACT: $500K+ ARR - Validates staging environment connectivity
+BUSINESS IMPACT: 500K+ ARR - Validates staging environment connectivity
 This test validates that our comprehensive agent execution tests can connect 
 to the real staging environment and receive authentic responses.
 

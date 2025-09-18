@@ -3,14 +3,14 @@ Agent Golden Path Messages Integration Tests
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - Core chat functionality
-- Business Goal: Platform Stability & Revenue Protection - $500K+ ARR protection
+- Business Goal: Platform Stability & Revenue Protection - 500K+ ARR protection
 - Value Impact: Validates complete agent message pipeline works end-to-end
 - Strategic Impact: Critical Golden Path user flow - chat delivers 90% of platform value
 
 CRITICAL REQUIREMENTS per CLAUDE.md:
 - Uses SSOT BaseTestCase patterns from test_framework/ssot/base_test_case.py
 - NO MOCKS for integration tests - uses real agent services and infrastructure
-- Tests must validate $500K+ ARR chat functionality end-to-end
+- Tests must validate 500K+ ARR chat functionality end-to-end
 - WebSocket events must be tested with real WebSocket connections
 - Agent execution must use real agents where possible, controlled mocks where necessary
 - Tests must validate user context isolation (security critical)
@@ -58,21 +58,13 @@ try:
     REAL_COMPONENTS_AVAILABLE = True
 except ImportError as e:
     # Graceful fallback if components not available
-    print(f"Warning: Some real components not available: {e}")
-    REAL_COMPONENTS_AVAILABLE = False
-    UserExecutionContext = MagicMock
-    get_websocket_manager = MagicMock
-    BaseAgent = MagicMock
-    AgentExecutionContext = MagicMock
-
-class AgentGoldenPathMessagesTests(SSotAsyncTestCase):
-    """
+    print(f"Warning: Some real components not available: {e}""""
     P0 Critical Integration Tests for Agent Golden Path Message Processing.
 
     This test class validates the complete Golden Path user flow:
     User Message -> Agent Processing -> AI Response Delivery
 
-    Tests protect $500K+ ARR chat functionality by validating:
+    Tests protect 500K+ ARR chat functionality by validating:
     - Complete message processing pipeline
     - Real-time WebSocket events for user experience
     - Multi-user security isolation (prevents message cross-contamination)
@@ -215,7 +207,7 @@ class AgentGoldenPathMessagesTests(SSotAsyncTestCase):
         """
         Test complete Golden Path: User message -> Agent processing -> AI response delivery.
 
-        Business Value: $500K+ ARR protection - validates core chat functionality that
+        Business Value: 500K+ ARR protection - validates core chat functionality that
         delivers 90% of platform value through AI-powered conversations.
         """
         # Realistic business scenario: User requests AI assistance with cost optimization

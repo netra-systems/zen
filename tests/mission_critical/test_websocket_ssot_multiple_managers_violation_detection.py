@@ -4,7 +4,7 @@
 GitHub Issue: #844 SSOT-incomplete-migration-multiple-websocket-managers
 
 THIS TEST VALIDATES SSOT VIOLATION DETECTION FOR MULTIPLE WEBSOCKET MANAGERS.
-Business Value: $500K+ ARR - Detects WebSocket manager SSOT violations that break user isolation
+Business Value: 500K+ ARR - Detects WebSocket manager SSOT violations that break user isolation
 
 PURPOSE:
 - Detect current SSOT violation: multiple WebSocket managers exist (websocket_manager.py vs unified_manager.py)
@@ -110,7 +110,7 @@ class WebSocketSSotMultipleManagersViolationDetectionTests(SSotBaseTestCase):
         
         Expected to FAIL initially to demonstrate violations, PASS after consolidation.
         
-        Business Impact: $500K+ ARR Golden Path functionality protection
+        Business Impact: 500K+ ARR Golden Path functionality protection
         """
         logger.info("🚨 Testing Issue #1182 WebSocket Manager SSOT consolidation...")
         
@@ -222,7 +222,7 @@ class WebSocketSSotMultipleManagersViolationDetectionTests(SSotBaseTestCase):
         # After Issue #1182 remediation, this should PASS (violations resolved)
         assert len(issue_1182_violations) == 0, (
             f"Issue #1182 WebSocket Manager SSOT violations detected: {len(issue_1182_violations)} violations. "
-            f"Critical business impact: $500K+ ARR Golden Path at risk. "
+            f"Critical business impact: 500K+ ARR Golden Path at risk. "
             f"Violations: {issue_1182_violations}. "
             f"Related Issue #1209 DemoWebSocketBridge compatibility: {demo_bridge_violations}. "
             f"SSOT consolidation required to resolve competing implementations and ensure user isolation."

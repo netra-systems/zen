@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise)
 - Business Goal: Stability - Eliminate fragmented factory patterns causing golden path failures
 - Value Impact: Ensure consistent WebSocket manager creation across all user interactions
-- Revenue Impact: Prevent $500K+ ARR chat functionality disruptions from manager inconsistency
+- Revenue Impact: Prevent 500K+ ARR chat functionality disruptions from manager inconsistency
 
 SSOT Violations This Module Proves:
 1. Multiple factory implementations creating different manager types

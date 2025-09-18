@@ -421,8 +421,7 @@ class CriticalTimestampValidationRegressionPreventionTests:
             WebSocketMessage(**chat_data)
         
         # But valid chat MUST work
-        chat_data[timestamp] = time.time()"
-        chat_data[timestamp] = time.time()""
+        chat_data[timestamp] = time.time()"""
 
         
         try:

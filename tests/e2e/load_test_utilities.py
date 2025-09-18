@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Segment: Growth & Enterprise (infrastructure scalability)
 - Business Goal: Enable systematic load testing for growth validation
 - Value Impact: Modular utilities enable comprehensive scalability testing
-- Revenue Impact: Scalability validation prevents $100K+ ARR loss from outages
+- Revenue Impact: Scalability validation prevents 100K+ ARR loss from outages
 
 ARCHITECTURAL COMPLIANCE:
 - File size: <300 lines (enforced through focused utility design)

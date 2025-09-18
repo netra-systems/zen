@@ -45,7 +45,7 @@ class IdFormatConsistencyE2EStagingTests(SSotAsyncTestCase):
         This test validates the complete authentication flow in staging environment
         produces session IDs that follow SSOT format patterns.
 
-        Business Impact: $500K+ ARR - Authentication is entry point for all user value
+        Business Impact: 500K+ ARR - Authentication is entry point for all user value
         E2E Flow: User Login -> Auth Service -> Session ID -> Backend Integration
         """
         try:
@@ -79,7 +79,7 @@ class IdFormatConsistencyE2EStagingTests(SSotAsyncTestCase):
         This test validates the complete WebSocket connection flow in staging
         environment using SSOT-formatted connection IDs.
 
-        Business Impact: $500K+ ARR - WebSocket connections enable real-time AI chat
+        Business Impact: 500K+ ARR - WebSocket connections enable real-time AI chat
         E2E Flow: Session -> WebSocket Connect -> Connection ID -> Event Routing
         """
         try:
@@ -118,7 +118,7 @@ class IdFormatConsistencyE2EStagingTests(SSotAsyncTestCase):
         This test validates that database factory services in staging environment
         generate and use SSOT-formatted client IDs for data operations.
 
-        Business Impact: $500K+ ARR - Database operations store user data for AI responses
+        Business Impact: 500K+ ARR - Database operations store user data for AI responses
         E2E Flow: User Request -> Database Factories -> Client IDs -> Data Operations
         """
         try:
@@ -162,7 +162,7 @@ class IdFormatConsistencyE2EStagingTests(SSotAsyncTestCase):
         This test validates that audit trail generation in staging environment
         maintains consistency and traceability using SSOT audit ID formats.
 
-        Business Impact: $500K+ ARR - Audit trails required for compliance and debugging
+        Business Impact: 500K+ ARR - Audit trails required for compliance and debugging
         E2E Flow: User Operations -> Audit Generation -> Compliance Reporting -> Regulatory Requirements
         """
         try:

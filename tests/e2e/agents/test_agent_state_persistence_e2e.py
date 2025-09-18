@@ -4,7 +4,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - State persistence enables continuous conversations
 - Business Goal: Ensure reliable agent conversation continuity and recovery capabilities
 - Value Impact: Users experience seamless conversations that persist across sessions and recover from interruptions
-- Strategic Impact: $500K+ ARR conversation continuity and reliability foundation
+- Strategic Impact: 500K+ ARR conversation continuity and reliability foundation
 
 These E2E tests validate agent state persistence with complete system stack:
 - Real authentication (JWT/OAuth) with session continuity

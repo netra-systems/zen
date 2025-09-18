@@ -3,7 +3,7 @@ P0 Critical Integration Tests: Multi-Agent Golden Path Workflows Integration
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - Core multi-agent orchestration
-- Business Goal: Platform Stability & User Experience - $500K+ ARR chat functionality
+- Business Goal: Platform Stability & User Experience - 500K+ ARR chat functionality
 - Value Impact: Validates complex multi-agent workflows that deliver sophisticated AI responses
 - Strategic Impact: Critical Golden Path orchestration - Multi-agent coordination drives premium value
 
@@ -19,7 +19,7 @@ This module tests the COMPLETE Multi-Agent Golden Path workflow integration cove
 CRITICAL REQUIREMENTS per CLAUDE.md:
 - Uses SSOT BaseTestCase patterns for consistent test infrastructure
 - NO MOCKS for agent coordination - uses real agent instances and workflows
-- Tests must validate $500K+ ARR multi-agent chat functionality
+- Tests must validate 500K+ ARR multi-agent chat functionality
 - All agent handoffs must be tested with real WebSocket event coordination
 - Tests must validate user isolation and security across agent workflows
 - Tests must pass or fail meaningfully (no test cheating allowed)

@@ -4,7 +4,7 @@ PURPOSE: Test multi-user isolation failures caused by WebSocket Manager fragment
 
 BUSINESS IMPACT:
 - Priority: P0 CRITICAL
-- Impact: $500K+ ARR regulatory compliance (HIPAA, SOC2, SEC)
+- Impact: 500K+ ARR regulatory compliance (HIPAA, SOC2, SEC)
 - Root Cause: Multiple WebSocket Manager implementations break user context isolation
 - Security Risk: Cross-user data contamination in concurrent sessions
 

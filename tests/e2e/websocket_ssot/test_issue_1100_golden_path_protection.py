@@ -3,7 +3,7 @@ Test Golden Path WebSocket Protection - Issue #1100
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise) - Core Business Value
-- Business Goal: Protect $500K+ ARR WebSocket functionality during SSOT migration
+- Business Goal: Protect 500K+ ARR WebSocket functionality during SSOT migration
 - Value Impact: Ensures chat functionality continues during import pattern updates
 - Strategic Impact: Validates business continuity throughout technical debt elimination
 
@@ -159,7 +159,7 @@ class GoldenPathWebSocketProtectionTests(BaseE2ETest):
             f"Connection: {golden_path_results['connection_established']}, "
             f"Agent response: {golden_path_results['agent_response_received']}, "
             f"Events received: {len(required_events_received)}/5 required events. "
-            f"This indicates $500K+ ARR functionality may be impacted."
+            f"This indicates 500K+ ARR functionality may be impacted."
         )
     
     @pytest.mark.e2e
@@ -473,7 +473,7 @@ class GoldenPathWebSocketProtectionTests(BaseE2ETest):
         assert len(business_value_scenarios) >= len(self.BUSINESS_CRITICAL_SCENARIOS) * 0.8, (
             f"Insufficient business value delivery: "
             f"{len(business_value_scenarios)}/{len(self.BUSINESS_CRITICAL_SCENARIOS)} scenarios delivered value. "
-            f"$500K+ ARR functionality may be impacted."
+            f"500K+ ARR functionality may be impacted."
         )
     
     async def _create_staging_websocket_client(self, websocket_url: str):

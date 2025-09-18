@@ -8,7 +8,7 @@ due to configuration pattern mismatch in Issue #1177.
 Expected Results: FAIL - Golden Path broken due to Redis config mismatch
 Tests actual staging deployment with real GCP services.
 
-Business Value: Platform/Mission Critical - $500K+ ARR Golden Path Protection
+Business Value: Platform/Mission Critical - 500K+ ARR Golden Path Protection
 The Golden Path user flow (login -> chat -> AI response) depends on Redis for
 session management and WebSocket functionality.
 

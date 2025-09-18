@@ -4,7 +4,7 @@ Comprehensive Integration Tests for WebSocket Connection and Event Handling - Go
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure chat functionality delivers 90% of platform value
-- Value Impact: Validates $500K+ ARR chat functionality reliability
+- Value Impact: Validates 500K+ ARR chat functionality reliability
 - Strategic Impact: Critical infrastructure protection for real-time AI interactions
 
 This test suite covers WebSocket connections, the 5 critical events, race conditions,

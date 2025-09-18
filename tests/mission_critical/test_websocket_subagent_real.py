@@ -7,7 +7,7 @@ env = get_env()
 This test bypasses all mock overrides and forces real WebSocket connections.
 The original test was blocked by conftest.py files forcing mock usage.
 
-Business Value: $500K+ ARR - Core chat functionality depends on WebSocket events
+Business Value: 500K+ ARR - Core chat functionality depends on WebSocket events
 """
 
 import asyncio

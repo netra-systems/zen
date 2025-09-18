@@ -2,11 +2,11 @@
 E2E GCP Staging Tests: Golden Path Authentication with SSOT Violations - Issue #596
 
 Purpose: Test complete Golden Path user flow with environment violations
-Expected: Demonstrate authentication failures blocking $500K+ ARR flow
+Expected: Demonstrate authentication failures blocking 500K+ ARR flow
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise, Platform)  
-- Business Goal: Stability - Protect $500K+ ARR Golden Path functionality
+- Business Goal: Stability - Protect 500K+ ARR Golden Path functionality
 - Value Impact: Ensures users can login -> get AI responses (90% of platform value)
 - Strategic Impact: SSOT compliance prevents authentication cascade failures
 """
@@ -52,7 +52,7 @@ class GoldenPathAuthSSOTViolationsTests(BaseE2ETest):
         This test demonstrates how SSOT environment violations prevent
         the core business flow: Users login -> get AI responses.
         
-        BUSINESS IMPACT: $500K+ ARR at risk due to authentication failures
+        BUSINESS IMPACT: 500K+ ARR at risk due to authentication failures
         VIOLATION SOURCE: Direct os.environ access in auth components
         """
         # Skip if not in staging environment
@@ -88,7 +88,7 @@ class GoldenPathAuthSSOTViolationsTests(BaseE2ETest):
                     f"This proves SSOT violations in auth_startup_validator.py, "
                     f"unified_secrets.py, and unified_corpus_admin.py are "
                     f"preventing user authentication. "
-                    f"BUSINESS IMPACT: $500K+ ARR user flow non-functional."
+                    f"BUSINESS IMPACT: 500K+ ARR user flow non-functional."
                 )
             
             # If login succeeds, test the full Golden Path to find where it breaks
@@ -170,7 +170,7 @@ class GoldenPathAuthSSOTViolationsTests(BaseE2ETest):
                 f"🚨 GOLDEN PATH SYSTEM FAILURE: Complete system failure due to "
                 f"SSOT environment violations. Error: '{str(e)}'. "
                 f"This proves the violations have system-wide impact blocking "
-                f"the primary user flow. BUSINESS IMPACT: $500K+ ARR at risk."
+                f"the primary user flow. BUSINESS IMPACT: 500K+ ARR at risk."
             )
         finally:
             env.disable_isolation()

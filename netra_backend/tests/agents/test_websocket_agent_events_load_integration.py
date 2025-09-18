@@ -6,7 +6,7 @@ for WebSocket agent event integration under load scenarios, focusing on
 concurrent user handling, event delivery reliability, and system stability
 during high-throughput agent execution.
 
-Business Value: Platform/Internal - Protects $500K+ ARR real-time chat functionality
+Business Value: Platform/Internal - Protects 500K+ ARR real-time chat functionality
 by ensuring reliable WebSocket event delivery during peak usage, preventing
 silent failures that would degrade user experience.
 

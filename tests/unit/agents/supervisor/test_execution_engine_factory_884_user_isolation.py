@@ -2,7 +2,7 @@
 
 CRITICAL BUSINESS VALUE: These tests reproduce user isolation failures in execution
 engine factory patterns that create HIPAA/SOC2 compliance violations and cross-user
-data contamination, protecting $500K+ ARR functionality.
+data contamination, protecting 500K+ ARR functionality.
 
 EXPECTED BEHAVIOR: All tests in this file should INITIALLY FAIL to demonstrate
 user isolation violations. They will pass after SSOT consolidation.
@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 - Segment: All Segments (Enterprise compliance critical)
 - Business Goal: Ensure user data isolation for regulatory compliance
 - Value Impact: Prevents HIPAA/SOC2 violations, cross-user data leakage
-- Strategic Impact: Enterprise readiness for $500K+ ARR multi-user operations
+- Strategic Impact: Enterprise readiness for 500K+ ARR multi-user operations
 
 Test Philosophy:
 - FAILING TESTS FIRST: These tests reproduce real user isolation violations

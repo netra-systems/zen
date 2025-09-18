@@ -28,7 +28,7 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-'\nIntegration Test for Environment Context Golden Path Fix\n\nThis test validates the complete fix for the critical Golden Path issue\nwhere staging services were connecting to localhost:8081 instead of \nproper staging URLs due to EnvironmentType.DEVELOPMENT defaults.\n\nBUSINESS IMPACT: Protects $500K+ ARR by ensuring Golden Path validation \nworks correctly in staging Cloud Run environments.\n'
+'\nIntegration Test for Environment Context Golden Path Fix\n\nThis test validates the complete fix for the critical Golden Path issue\nwhere staging services were connecting to localhost:8081 instead of \nproper staging URLs due to EnvironmentType.DEVELOPMENT defaults.\n\nBUSINESS IMPACT: Protects 500K+ ARR by ensuring Golden Path validation \nworks correctly in staging Cloud Run environments.\n'
 import pytest
 import asyncio
 from unittest.mock import Mock, patch, AsyncMock
@@ -69,7 +69,7 @@ class EnvironmentContextGoldenPathFixTests:
         Test the complete fix for staging Golden Path validation.
         
         CRITICAL: This test validates the exact scenario that was causing
-        $500K+ ARR Golden Path failures in Cloud Run staging.
+        500K+ ARR Golden Path failures in Cloud Run staging.
         """
         cloud_run_env = {'K_SERVICE': 'netra-backend-staging', 'GOOGLE_CLOUD_PROJECT': 'netra-staging', 'K_REVISION': 'netra-backend-staging-00001-abc'}
         metadata_responses = {'instance/attributes/goog-cloudrun-service-name': 'netra-backend-staging', 'project/project-id': 'netra-staging', 'instance/region': 'projects/123456/regions/us-central1', 'instance/attributes/goog-revision': 'netra-backend-staging-00001-abc'}
@@ -263,7 +263,7 @@ class EnvironmentContextGoldenPathFixTests:
                     print(f'   Service: {context.service_name}')
                     print(f'   Validation Success: {result.overall_success}')
                     print(f'   Requirements Passed: {result.requirements_passed}')
-                    print(f'    PASS:  GOLDEN PATH PROTECTED: $500K+ ARR SECURED!')
+                    print(f'    PASS:  GOLDEN PATH PROTECTED: 500K+ ARR SECURED!')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

@@ -13,7 +13,7 @@ The failures demonstrate the malformed event problems blocking the Golden Path.
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise) - Golden Path Infrastructure  
-- Business Goal: Unblock AI response delivery worth $500K+ ARR
+- Business Goal: Unblock AI response delivery worth 500K+ ARR
 - Value Impact: Ensure WebSocket events properly deliver AI responses to users
 - Revenue Impact: Remove blocking issues that prevent users from getting AI value
 """

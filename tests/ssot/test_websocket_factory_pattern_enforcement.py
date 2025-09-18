@@ -41,18 +41,11 @@ class WebSocketFactoryPatternEnforcementTests(SSotBaseTestCase):
         self.deprecated_factory_patterns = [
             # Deprecated factory function calls
             r"get_websocket_manager_factory\s*\(\s*\)",
-            r"WebSocketManagerFactory\s*\(\s*\)",
-            
-            # Deprecated import patterns
-            r"from\s+.*websocket_manager_factory\s+import\s+get_websocket_manager_factory",
+            r"WebSocketManagerFactory\s*\(\s*\)""from\s+.*websocket_manager_factory\s+import\s+get_websocket_manager_factory",
             r"from\s+.*websocket_manager_factory\s+import\s+WebSocketManagerFactory",
             
             # Direct instantiation patterns that bypass SSOT
-            r"UnifiedWebSocketManager\s*\(\s*\)",
-            r"new\s+WebSocketManager\s*\(\s*\)",
-            
-            # Legacy factory method calls
-            r"create_websocket_manager_factory\s*\(\s*\)",
+            r"UnifiedWebSocketManager\s*\(\s*\)""new\s+WebSocketManager\s*\(\s*\)""create_websocket_manager_factory\s*\(\s*\)",
             r"get_manager_factory\s*\(\s*\)",
         ]
         
@@ -207,12 +200,7 @@ class WebSocketFactoryPatternEnforcementTests(SSotBaseTestCase):
                     violations[str(py_file)] = file_violations
                     
             except Exception as e:
-                print(f"Warning: Could not scan {py_file}: {e}")
-        
-        return violations
-
-    def _validate_ssot_factory_patterns(self) -> Dict[str, List[str]]:
-        """Validate SSOT factory patterns are properly implemented."""
+                print(f"Warning: Could not scan {py_file}: {e}""""Validate SSOT factory patterns are properly implemented."""
         ssot_coverage = {}
         
         for py_file in self._get_python_files():
@@ -230,12 +218,7 @@ class WebSocketFactoryPatternEnforcementTests(SSotBaseTestCase):
                     ssot_coverage[str(py_file)] = file_patterns
                     
             except Exception as e:
-                print(f"Warning: Could not scan {py_file}: {e}")
-        
-        return ssot_coverage
-
-    def _identify_factory_method_sources(self) -> Dict[str, List[str]]:
-        """Identify all sources that define factory methods."""
+                print(f"Warning: Could not scan {py_file}: {e}""""Identify all sources that define factory methods."""
         factory_sources = {}
         
         factory_method_names = [
@@ -272,12 +255,7 @@ class WebSocketFactoryPatternEnforcementTests(SSotBaseTestCase):
                     pass
                     
             except Exception as e:
-                print(f"Warning: Could not analyze {py_file}: {e}")
-        
-        return factory_sources
-
-    def _scan_for_compatibility_layers(self) -> Dict[str, List[str]]:
-        """Scan for compatibility layers that should be eliminated."""
+                print(f"Warning: Could not analyze {py_file}: {e}""""Scan for compatibility layers that should be eliminated."""
         compatibility_patterns = [
             r"# COMPATIBILITY",
             r"# Legacy compatibility",
@@ -305,12 +283,7 @@ class WebSocketFactoryPatternEnforcementTests(SSotBaseTestCase):
                     violations[str(py_file)] = file_violations
                     
             except Exception as e:
-                print(f"Warning: Could not scan {py_file}: {e}")
-        
-        return violations
-
-    def _get_python_files(self) -> List[Path]:
-        """Get all Python files in the netra_backend directory."""
+                print(f"Warning: Could not scan {py_file}: {e}""""Get all Python files in the netra_backend directory."""
         python_files = []
         
         # Focus on WebSocket-related files for factory pattern validation

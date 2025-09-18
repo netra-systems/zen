@@ -28,7 +28,7 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-'\nIssue #358 Golden Path Validation Suite\nCRITICAL: Post-deployment validation for complete Golden Path failure remediation\n\nThis test suite validates that the massive deployment gap has been resolved\nand the Golden Path (login  ->  AI response) flow is fully functional.\n\nBUSINESS IMPACT: $500K+ ARR protection\nSUCCESS CRITERIA: All tests must pass for remediation to be considered successful\n'
+'\nIssue #358 Golden Path Validation Suite\nCRITICAL: Post-deployment validation for complete Golden Path failure remediation\n\nThis test suite validates that the massive deployment gap has been resolved\nand the Golden Path (login  ->  AI response) flow is fully functional.\n\nBUSINESS IMPACT: 500K+ ARR protection\nSUCCESS CRITERIA: All tests must pass for remediation to be considered successful\n'
 import asyncio
 import pytest
 import requests
@@ -274,7 +274,7 @@ class BusinessValueValidationTests(SSotAsyncTestCase):
     async def test_enterprise_features_endpoints_accessible(self):
         """
         BUSINESS VALIDATION: Enterprise features are accessible (even if authentication required)
-        REVENUE IMPACT: $500K+ ARR depends on these features working
+        REVENUE IMPACT: 500K+ ARR depends on these features working
         """
         enterprise_endpoints = ['/agent/execute', '/auth/validate']
         for endpoint in enterprise_endpoints:

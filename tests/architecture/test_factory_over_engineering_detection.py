@@ -12,7 +12,7 @@ Test Design:
 - Identifies over-engineering candidates for removal
 - Validates business value justification for each factory
 
-Business Impact: $500K+ ARR protection through architectural simplification
+Business Impact: 500K+ ARR protection through architectural simplification
 SSOT Compliance: Identifies duplicate factory patterns and consolidation opportunities
 
 These tests are designed to FAIL initially to demonstrate the current over-engineering problem.
@@ -106,7 +106,7 @@ class FactoryOverEngineeringDetectionTests(SSotBaseTestCase):
         # Essential factory patterns that provide business value
         self.essential_patterns = {
             'user_isolation_factories',  # Critical for multi-user security
-            'websocket_event_factories',  # Critical for $500K+ ARR chat functionality
+            'websocket_event_factories',  # Critical for 500K+ ARR chat functionality
             'database_connection_factories',  # Critical for data access patterns
             'auth_token_factories',  # Critical for security
             'test_mock_factories'  # Critical for testing infrastructure

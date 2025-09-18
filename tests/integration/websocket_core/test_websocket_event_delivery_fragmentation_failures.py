@@ -4,7 +4,7 @@ PURPOSE: Test WebSocket event delivery consistency failures caused by manager fr
 
 BUSINESS IMPACT:
 - Priority: P0 CRITICAL
-- Impact: $500K+ ARR Golden Path chat functionality
+- Impact: 500K+ ARR Golden Path chat functionality
 - Root Cause: Multiple WebSocket Manager implementations cause inconsistent event delivery
 - User Experience: Chat users experience missing/delayed agent progress events
 
@@ -479,7 +479,7 @@ class WebSocketManagerGoldenPathFragmentationTests(SSotAsyncTestCase, unittest.T
                 f"GOLDEN PATH DEGRADATION: Incomplete event sequence. "
                 f"Expected {len(expected_event_types)} events: {expected_event_types}, "
                 f"but only {len(event_types_sent)} delivered: {event_types_sent}. "
-                f"WebSocket Manager fragmentation breaks $500K+ ARR chat functionality."
+                f"WebSocket Manager fragmentation breaks 500K+ ARR chat functionality."
             )
 
             # Verify event sequence order is preserved

@@ -4,7 +4,7 @@ Mission Critical Test: Infrastructure Remediation Comprehensive Validation
 ==========================================================================
 
 BUSINESS CRITICAL: Tests complete infrastructure remediation solution
-Protects $500K+ plus ARR Golden Path functionality (login  ->  AI response)
+Protects 500K+  ARR Golden Path functionality (login  ->  AI response)
 
 This test validates the unified remediation implementation addressing:
     - Issue #395: Auth service connectivity problems
@@ -78,7 +78,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         self.db_utilities = DatabaseTestUtilities()
         
         logger.info([U+1F680] INFRASTRUCTURE REMEDIATION TEST SUITE INITIALIZED")"
-        logger.info( TARGET:  MISSION: Validate $500K+ plus ARR Golden Path protection)
+        logger.info( TARGET:  MISSION: Validate 500K+  ARR Golden Path protection)
 
     async def async_teardown_method(self, method=None):
         "Clean up test infrastructure"
@@ -205,14 +205,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
     async def test_websocket_auth_integration_functionality(self):
         Test WebSocket authentication integration works correctly"
         Test WebSocket authentication integration works correctly"
-        logger.info("[U+1F517] Testing WebSocket authentication integration)"
-        
-        websocket_auth_integration = WebSocketAuthIntegration()
-        
-        # Test authentication integration
-        auth_result = await websocket_auth_integration.authenticate_websocket_connection(
-            token=integration_test_token,
-            connection_id="integration_test_001"
+        logger.info("[U+1F517] Testing WebSocket authentication integration)""integration_test_001"
         )
         
         # Validate integration result
@@ -397,7 +390,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         
         self.assertGreater(
             len(business_impact_results), 0,
-            Should have tests that understand business impact ($500K+ plus ARR)""
+            Should have tests that understand business impact (500K+  ARR)""
         )
         
         # Golden Path status should reference business impact
@@ -445,12 +438,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
 
     async def test_critical_websocket_events_supported(self):
         "Test that critical WebSocket events are supported in remediation"
-        logger.info("[U+1F4E1] Testing critical WebSocket events support)"
-        
-        # Critical events that must be supported for Golden Path
-        critical_events = [
-            agent_started,
-            agent_thinking, "
+        logger.info("[U+1F4E1] Testing critical WebSocket events support)""
             agent_thinking, "
             tool_executing","
             tool_completed,
@@ -470,10 +458,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         
         # Should have WebSocket event testing
         if websocket_event_results:
-            logger.info("PASS:  WebSocket event testing found in validation))"
-            logger.info("PASS:  WebSocket event testing found in validation))"
-        else:
-            logger.warning( WARNING: [U+FE0F] No specific WebSocket event delivery tests found")"
+            logger.info("PASS:  WebSocket event testing found in validation))""PASS:  WebSocket event testing found in validation))"")"
         
         # At minimum, should have WebSocket authentication tests
         websocket_auth_results = [

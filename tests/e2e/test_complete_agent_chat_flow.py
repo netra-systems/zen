@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Validate complete chat flow delivers core AI optimization value to users
 - Value Impact: Ensures agents execute correctly and provide actionable insights to users
-- Strategic Impact: Core platform functionality that drives $500K+ ARR - Complete chat workflow
+- Strategic Impact: Core platform functionality that drives 500K+ ARR - Complete chat workflow
 
 This test validates the complete user journey for agent-powered chat:
 1. User authenticates via real JWT/OAuth flow

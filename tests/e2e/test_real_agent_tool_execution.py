@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 1. Segment: All (Free, Early, Mid, Enterprise)
 2. Business Goal: Enable reliable tool-based agent capabilities
 3. Value Impact: Tool execution is core to agent value delivery
-4. Revenue Impact: $400K+ ARR from tool-powered agent functionality
+4. Revenue Impact: 400K+ ARR from tool-powered agent functionality
 
 CLAUDE.md COMPLIANCE:
 - Uses real services ONLY (NO MOCKS)

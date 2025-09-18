@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,19 +23,14 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 Comprehensive Integration Tests for Agent-to-Agent Communication Golden Path
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free/Early/Mid/Enterprise/Platform)
 - Business Goal: AI Agent Collaboration - Ensures agents can communicate and share data effectively
 - Value Impact: Validates agent communication (critical for complex AI workflows)
-- Revenue Impact: Protects $500K+ ARR by ensuring agents work together for optimal results
+- Revenue Impact: Protects 500K+ ARR by ensuring agents work together for optimal results
 
 Critical Golden Path Scenarios Tested:
 1. Agent-to-agent data passing: Triage  ->  Data Helper  ->  Optimization  ->  Reporting

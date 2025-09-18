@@ -56,12 +56,10 @@ class SSOTTestRunner:
         description: Edge cases, concurrency, and stress tests","
         "fast: False"
         },
-        integration: {
-        "file: test_orchestration_integration.py,"
-        description: Integration with real orchestration components,
-        fast: True"
-        fast: True""
-
+        "integration": {
+            "file": "test_orchestration_integration.py",
+            "description": "Integration with real orchestration components",
+            "fast": True
         },
         violations": {"
         file: test_no_ssot_violations.py,

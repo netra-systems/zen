@@ -123,8 +123,7 @@ async def test_websocket_connection_established_timeout():
         
         if connection_established and not welcome_message_received:
             print("\n SEARCH:  DIAGNOSIS:")
-            print("   - WebSocket connection succeeds (authentication working)")
-            print("   - Welcome message never arrives (server-side issue)")
+            print("   - WebSocket connection succeeds (authentication working)""   - Welcome message never arrives (server-side issue)")
             print("   - Likely causes:")
             print("     1. SSOT authentication failing after connection acceptance")
             print("     2. Service dependencies (agent_supervisor/thread_service) missing")

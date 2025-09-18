@@ -5,7 +5,7 @@ Integration Tests for WebSocket Authentication and Session Management
 MISSION CRITICAL: WebSocket authentication integration for secure chat.
 Tests real WebSocket authentication flows with agent event delivery.
 
-Business Value: $500K+ ARR - Secure multi-user chat authentication
+Business Value: 500K+ ARR - Secure multi-user chat authentication
 - Tests WebSocket authentication with real auth flows
 - Validates session management for authenticated WebSocket connections
 - Ensures secure agent event delivery with proper user verification

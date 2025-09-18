@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Fix end-to-end agent-database pattern filtering reliability
 - Value Impact: Complete agent workflows with database persistence must work end-to-end
-- Strategic Impact: $500K+ ARR protection from agent execution and database integration failures
+- Strategic Impact: 500K+ ARR protection from agent execution and database integration failures
 
 EXPECTED RESULT: FAIL - Reproduces Issue #1270 end-to-end failures on staging
 This test suite intentionally creates failing E2E tests to reproduce the end-to-end

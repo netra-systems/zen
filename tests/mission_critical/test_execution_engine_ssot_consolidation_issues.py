@@ -10,7 +10,7 @@ These tests are DESIGNED TO FAIL initially to prove problems exist:
 3. Factory Pattern Issues (2 tests)
 4. Golden Path Protection (1 test)
 
-Business Impact: $500K+ ARR at risk from execution engine inconsistencies
+Business Impact: 500K+ ARR at risk from execution engine inconsistencies
 Architecture Impact: 60% reduction in duplicated execution logic needed
 
 NO DOCKER DEPENDENCIES - Unit/Integration/E2E Staging only
@@ -639,7 +639,7 @@ class GoldenPathProtectionTests(SSotAsyncTestCase):
         This test validates the complete user journey: login  ->  agent execution  ->  response.
         Should fail if execution engine consolidation issues break the golden path.
         
-        Business Impact: $500K+ ARR dependency on reliable execution flow
+        Business Impact: 500K+ ARR dependency on reliable execution flow
         """
         golden_path_violations = []
         

@@ -6,7 +6,7 @@ Tests MUST FAIL initially, proving that multiple patterns exist across agents.
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - System Architecture
 - Business Goal: SSOT Compliance & Code Consistency
-- Value Impact: Standardized WebSocket patterns = Reliable chat UX = $500K+ ARR protection
+- Value Impact: Standardized WebSocket patterns = Reliable chat UX = 500K+ ARR protection
 - Strategic Impact: Multiple WebSocket patterns create maintenance burden and inconsistent UX
 
 CRITICAL SSOT VIOLATIONS TO DETECT:

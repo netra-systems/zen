@@ -11,7 +11,7 @@ TEST STRATEGY: Integration testing focused on:
 2. WebSocket events delivered post-consolidation (real WebSocket connections)
 3. Performance maintained after consolidation (real service load testing)
 
-Business Impact: $500K+ ARR at risk from user isolation failures
+Business Impact: 500K+ ARR at risk from user isolation failures
 Architecture Impact: Factory patterns must maintain user isolation guarantees
 Testing Compliance: Uses real services, no mocks - follows SSOT integration patterns
 

@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)  
 - Business Goal: Revenue Protection & User Experience
 - Value Impact: Validates 90% of platform value (chat functionality) works end-to-end
-- Strategic Impact: Protects $500K+ ARR by ensuring users login -> get AI responses
+- Strategic Impact: Protects 500K+ ARR by ensuring users login -> get AI responses
 
 This test suite validates the complete Golden Path user flow in staging environment:
 1. User authentication and login
@@ -393,11 +393,7 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
                 """Mock close method."""
                 pass
         
-        print("WARNING️  Using mock WebSocket connection (staging environment unavailable)")
-        return MockWebSocketConnection()
-    
-    async def _send_ai_request_and_wait(self, websocket_client, user: Dict[str, str], request_id: str = None) -> Dict[str, Any]:
-        """Send AI request and wait for complete response with all events."""
+        print("WARNING️  Using mock WebSocket connection (staging environment unavailable)""""Send AI request and wait for complete response with all events."""
         
         if request_id is None:
             request_id = f"golden_path_{uuid.uuid4().hex[:8]}"

@@ -9,10 +9,7 @@ class TestWebSocketConnection:
         self._closed = False
 """
         """Send JSON message."""Send JSON message."""
-        raise RuntimeError("WebSocket is closed)"
-        self.messages_sent.append(message)
-
-    async def close(self, code: int = 1000, reason: str = "Normal closure):"
+        raise RuntimeError("WebSocket is closed)""Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -73,18 +70,9 @@ from shared.isolated_environment import get_env
 
         for method in methods:"""
         "formatted_string)"
-        print(" PASS:  PASS: All BaseAgent WebSocket methods available)"
-
-    def test_has_websocket_adapter(self):
-        """Verify WebSocketBridgeAdapter is initialized."""
+        print(" PASS:  PASS: All BaseAgent WebSocket methods available)""""Verify WebSocketBridgeAdapter is initialized."""
         pass"""
-        " PASS:  Has WebSocketBridgeAdapter)"
-        print(" PASS:  PASS: WebSocketBridgeAdapter properly initialized)"
-
-    # ========== FIX 2: JSON Handling SSOT ==========
-
-    def test_no_deprecated_json_imports(self):
-        """Verify no deprecated JSON imports."""
+        " PASS:  Has WebSocketBridgeAdapter)"" PASS:  PASS: WebSocketBridgeAdapter properly initialized)""""Verify no deprecated JSON imports."""
 import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
 """
         " PASS:  No deprecated extract_json_from_response import)"
@@ -167,12 +155,7 @@ from netra_backend.app.services.cache.cache_helpers import CacheHelpers
 
                 # Verify agent_started was called
         mock_adapter.emit_agent_started.assert_called()
-        print(" PASS:  PASS: WebSocket events properly emitted)"
-
-                # ========== FIX 5: UserExecutionContext Pattern ==========
-
-    async def test_context_isolation(self):
-        """Verify proper context isolation."""
+        print(" PASS:  PASS: WebSocket events properly emitted)""""Verify proper context isolation."""
         pass
                     # Create multiple contexts
         contexts = [ )"""
@@ -234,8 +217,7 @@ import netra_backend.app.agents.triage.unified_triage_agent as triage_module
         print(" PASS:  BaseAgent inheritance: FIXED)"
         print(" PASS:  JSON handling SSOT: FIXED)"
         print(" PASS:  Cache hash generation: FIXED)"
-        print(" PASS:  WebSocket integration: FIXED)"
-        print(" PASS:  UserExecutionContext: MAINTAINED)"
+        print(" PASS:  WebSocket integration: FIXED)"" PASS:  UserExecutionContext: MAINTAINED)"
         print(" PASS:  No direct environment access: COMPLIANT)"
         print("=*80)"
         print("All SSOT violations have been successfully resolved!)"

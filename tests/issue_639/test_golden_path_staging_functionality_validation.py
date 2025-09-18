@@ -3,7 +3,7 @@ Test Plan for Issue #639: Golden Path Staging Functionality Validation After Fix
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) 
-- Business Goal: Restore and validate $500K+ ARR golden path functionality
+- Business Goal: Restore and validate 500K+ ARR golden path functionality
 - Value Impact: Ensure complete end-to-end chat functionality works in staging
 - Strategic Impact: Critical validation for production deployment confidence
 
@@ -23,7 +23,7 @@ Key Testing Strategy:
 - Validate complete Golden Path user journey functionality
 - Ensure all 5 critical WebSocket events are delivered
 - Verify staging environment supports production-like workflows
-- Validate $500K+ ARR business value functionality
+- Validate 500K+ ARR business value functionality
 """
 
 import asyncio

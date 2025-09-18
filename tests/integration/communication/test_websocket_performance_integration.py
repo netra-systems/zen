@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure WebSocket performance supports responsive AI interactions
 - Value Impact: Performance directly affects user experience and engagement
-- Strategic Impact: Performance scalability enables platform growth and $500K+ ARR retention
+- Strategic Impact: Performance scalability enables platform growth and 500K+ ARR retention
 
 CRITICAL: WebSocket performance enables real-time AI value delivery per CLAUDE.md
 Poor performance degrades user trust and reduces AI interaction frequency.

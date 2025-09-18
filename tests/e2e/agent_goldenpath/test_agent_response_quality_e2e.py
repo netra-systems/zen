@@ -3,13 +3,13 @@ E2E Tests for Agent Response Quality Validation - Golden Path Business Value
 
 MISSION CRITICAL: Validates that agents return substantive, problem-solving responses
 that deliver real business value to users. This tests the core chat functionality
-representing 90% of platform business value ($500K+ ARR).
+representing 90% of platform business value (500K+ ARR).
 
 Business Value Justification (BVJ):
 - Segment: All Users (Free/Early/Mid/Enterprise)
 - Business Goal: Customer Satisfaction & Platform Revenue Protection
 - Value Impact: Validates AI responses provide actionable insights and real solutions
-- Strategic Impact: $500K+ ARR depends on quality AI chat interactions
+- Strategic Impact: 500K+ ARR depends on quality AI chat interactions
 
 Test Strategy:
 - REAL SERVICES: Staging GCP Cloud Run environment only (NO Docker)

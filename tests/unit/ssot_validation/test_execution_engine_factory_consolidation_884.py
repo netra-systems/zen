@@ -7,7 +7,7 @@ This test is DESIGNED TO FAIL initially to detect multiple ExecutionEngineFactor
 that fragment execution engine creation and cause inconsistent AI response delivery.
 
 BUSINESS IMPACT:
-- $500K+ ARR at risk due to execution engine factory proliferation
+- 500K+ ARR at risk due to execution engine factory proliferation
 - Multiple factory implementations cause inconsistent agent execution
 - Factory fragmentation blocks reliable Golden Path user flow
 - WebSocket event delivery becomes inconsistent across different execution paths
@@ -43,7 +43,7 @@ class ExecutionEngineFactoryConsolidation884Tests(SSotBaseTestCase):
         """Set up test with factory proliferation analysis"""
         super().setup_method(method)
         self.record_metric("expected_failure_documented", True)
-        self.record_metric("business_impact", "$500K+ ARR at risk due to factory proliferation")
+        self.record_metric("business_impact", "500K+ ARR at risk due to factory proliferation")
         self.record_metric("issue_number", "884")
         
     def test_execution_engine_factory_should_fail_before_consolidation(self):
@@ -145,7 +145,7 @@ class ExecutionEngineFactoryConsolidation884Tests(SSotBaseTestCase):
             f"Found: {factory_implementations}. "
             f"Expected: Single SSOT factory implementation. "
             f"This factory proliferation causes execution engine fragmentation "
-            f"and blocks consistent AI response delivery for $500K+ ARR Golden Path."
+            f"and blocks consistent AI response delivery for 500K+ ARR Golden Path."
         )
         
         # Validate factory methods are consolidated

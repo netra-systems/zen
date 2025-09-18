@@ -2,7 +2,7 @@
 Authenticated User Journeys Batch 4 E2E Tests
 
 CRITICAL: This test suite validates complete authenticated user journeys for the Golden Path
-user flow that generates $500K+ ARR. These tests protect core business value by ensuring
+user flow that generates 500K+ ARR. These tests protect core business value by ensuring
 authenticated users can complete the full journey from login to actionable AI results.
 
 Business Value Justification (BVJ):

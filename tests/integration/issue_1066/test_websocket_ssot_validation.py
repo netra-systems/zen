@@ -4,7 +4,7 @@ Test WebSocket SSOT Pattern Validation - Issue #1066
 Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise)
 - Business Goal: Validate SSOT WebSocket patterns ensure proper user isolation
-- Value Impact: Protect $500K+ ARR through enterprise-grade multi-user security
+- Value Impact: Protect 500K+ ARR through enterprise-grade multi-user security
 - Revenue Impact: Enable regulatory compliance (HIPAA, SOC2, SEC) for enterprise customers
 
 CRITICAL: Tests validate that SSOT patterns work correctly and provide proper user isolation.

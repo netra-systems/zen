@@ -11,7 +11,7 @@ This test validates that Issue #565 ExecutionEngine migration is deployment-safe
 
 Business Value: Platform/Internal - Deployment Safety & System Reliability
 Protects production stability and ensures zero-downtime deployment of the
-ExecutionEngine migration protecting $500K+ ARR Golden Path functionality.
+ExecutionEngine migration protecting 500K+ ARR Golden Path functionality.
 
 CRITICAL: These tests simulate production deployment scenarios to validate
 that the migration can be deployed safely without service interruption.
@@ -87,13 +87,7 @@ class DeploymentSafetyValidationTests(SSotAsyncTestCase):
                 if hasattr(engine, 'is_active') and engine.is_active():
                     await engine.cleanup()
             except Exception as e:
-                print(f"Warning: Engine cleanup failed: {e}")
-
-        self.created_engines.clear()
-        await super().teardown_method(method)
-
-    def create_deployment_user_context(self, user_id: str, environment: str = 'production') -> UserExecutionContext:
-        """Create UserExecutionContext for deployment testing."""
+                print(f"Warning: Engine cleanup failed: {e}""""Create UserExecutionContext for deployment testing."""
         return UserExecutionContext(
             user_id=user_id,
             thread_id=f"thread_{user_id}_{environment}",

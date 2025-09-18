@@ -3,7 +3,7 @@ WebSocket Golden Path Integration Tests - Service Independent
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - Test Infrastructure  
-- Business Goal: Validate $500K+ ARR Golden Path WebSocket functionality without Docker dependencies
+- Business Goal: Validate 500K+ ARR Golden Path WebSocket functionality without Docker dependencies
 - Value Impact: Enables WebSocket integration testing with 90%+ execution success rate
 - Strategic Impact: Protects critical real-time chat functionality validation
 
@@ -345,9 +345,7 @@ class WebSocketGoldenPathHybridTests(WebSocketIntegrationTestBase):
             # Verify disconnection
             if hasattr(websocket_service, 'is_connected'):
                 connected_after_disconnect = websocket_service.is_connected()
-                assert not connected_after_disconnect, "WebSocket should report disconnected after disconnect()"
-        
-        logger.info("WebSocket connection resilience test completed")
+                assert not connected_after_disconnect, "WebSocket should report disconnected after disconnect()""WebSocket connection resilience test completed")
         
     @pytest.mark.integration
     @pytest.mark.golden_path

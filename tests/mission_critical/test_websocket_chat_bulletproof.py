@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''MISSION CRITICAL: Bulletproof WebSocket Chat Event Tests'
 
-Business Value: $500K+ plus ARR - Core chat functionality is KING
+Business Value: 500K+  ARR - Core chat functionality is KING
 Tests: Comprehensive real-world scenarios with extreme robustness
 
 This test suite ensures:

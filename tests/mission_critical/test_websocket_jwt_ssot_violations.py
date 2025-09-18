@@ -6,7 +6,7 @@ MISSION CRITICAL: These tests detect SSOT violations that block Golden Path user
 Issue #525 - P0 SSOT violations prevent proper WebSocket JWT validation consolidation.
 
 CRITICAL BUSINESS IMPACT:
-    - $500K+ plus ARR dependent on WebSocket authentication working correctly
+    - 500K+  ARR dependent on WebSocket authentication working correctly
 - Golden Path user flow requires reliable JWT validation 
 - SSOT violations create authentication inconsistencies
 - Multiple JWT validation paths cause auth failures
@@ -113,7 +113,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
             len(golden_path_violations), 0,
             f\n🚨 MISSION CRITICAL P0 SSOT VIOLATIONS BLOCKING GOLDEN PATH:\n
             f{'='*80}\n
-            fBUSINESS IMPACT: $500K+ plus ARR dependent on Golden Path user flow\n""
+            fBUSINESS IMPACT: 500K+  ARR dependent on Golden Path user flow\n""
             fISSUE: #525 - WebSocket JWT validation SSOT consolidation required\n
             f{'='*80}\n
             f"VIOLATIONS DETECTED:\n +"

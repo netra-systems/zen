@@ -5,7 +5,7 @@ This test validates that WebSocket integration is consistent and reliable
 between different AgentRegistry implementations, focusing on the critical
 WebSocket bridge that enables real-time chat functionality.
 
-Business Impact: WebSocket events are critical for $500K+ ARR chat functionality.
+Business Impact: WebSocket events are critical for 500K+ ARR chat functionality.
 Any inconsistency in WebSocket bridge integration compromises the Golden Path
 user flow: Users login -> AI agents process -> Users receive real-time responses.
 
@@ -276,7 +276,7 @@ class WebSocketAgentBridgeSSotTests(SSotAsyncTestCase):
                           "agent_started should come before agent_completed")
 
         print("CHECK WebSocket event sequence validated for Golden Path")
-        print("💰 BUSINESS VALUE: All $500K+ ARR critical events can be sent")
+        print("💰 BUSINESS VALUE: All 500K+ ARR critical events can be sent")
 
     async def test_websocket_diagnostics_consistency(self):
         """

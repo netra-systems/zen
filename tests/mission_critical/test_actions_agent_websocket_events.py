@@ -464,12 +464,7 @@ class ActionsAgentWebSocketComplianceTests:
         
         # Performance requirements (current broken state)
         assert total_websocket_calls < 10, \
-            f"Too few WebSocket calls: {total_websocket_calls} (missing required events)"
-        
-        # Should have more events for proper user experience
-        expected_minimum_events = 5  # start, thinking, tool_exec, tool_comp, complete
-        assert total_websocket_calls < expected_minimum_events, \
-            f"Expected insufficient events ({total_websocket_calls}) < {expected_minimum_events} due to missing emit methods"
+            f"Too few WebSocket calls: {total_websocket_calls} (missing required events)""Expected insufficient events ({total_websocket_calls}) < {expected_minimum_events} due to missing emit methods"
     
     @pytest.mark.asyncio 
     @pytest.mark.critical

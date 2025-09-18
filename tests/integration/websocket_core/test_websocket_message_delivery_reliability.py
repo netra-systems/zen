@@ -2,7 +2,7 @@
 WebSocket Message Delivery Reliability Test
 
 GitHub Issue: #1056 - Message router fragmentation blocking Golden Path
-Business Impact: $500K+ ARR - Users cannot receive AI responses reliably
+Business Impact: 500K+ ARR - Users cannot receive AI responses reliably
 
 PURPOSE: Validate WebSocket events reach correct users during consolidation
 STATUS: MUST PASS before, during, and after SSOT consolidation
@@ -43,7 +43,7 @@ class WebSocketMessageDeliveryReliabilityTests(SSotAsyncTestCase):
         Test WebSocket message delivery reliability during MessageRouter changes.
 
         CRITICAL: This test MUST PASS always to protect Golden Path.
-        BUSINESS VALUE: Ensures reliable real-time communication for $500K+ ARR.
+        BUSINESS VALUE: Ensures reliable real-time communication for 500K+ ARR.
         """
         overall_success = True
         scenario_results = []
@@ -67,7 +67,7 @@ class WebSocketMessageDeliveryReliabilityTests(SSotAsyncTestCase):
             self.logger.info(f'CHECK GOLDEN PATH PROTECTED: WebSocket message delivery reliability maintained ({overall_delivery_rate * 100:.1f}%)')
         else:
             failed_scenarios = [r['scenario_name'] for r in scenario_results if not r['success']]
-            self.fail(f'GOLDEN PATH VIOLATION: WebSocket message delivery reliability compromised. Overall delivery rate {overall_delivery_rate * 100:.1f}% below required {min_required_delivery_rate * 100:.1f}%. Failed scenarios: {failed_scenarios}. This indicates MessageRouter SSOT changes are affecting reliable message delivery, critical for real-time user experience and $500K+ ARR Golden Path protection.')
+            self.fail(f'GOLDEN PATH VIOLATION: WebSocket message delivery reliability compromised. Overall delivery rate {overall_delivery_rate * 100:.1f}% below required {min_required_delivery_rate * 100:.1f}%. Failed scenarios: {failed_scenarios}. This indicates MessageRouter SSOT changes are affecting reliable message delivery, critical for real-time user experience and 500K+ ARR Golden Path protection.')
 
     async def _test_delivery_scenario(self, scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Test a specific message delivery scenario."""

@@ -4,7 +4,7 @@
 GitHub Issue: #844 SSOT-incomplete-migration-multiple-websocket-managers
 
 THIS TEST VALIDATES THE COMPLETE GOLDEN PATH WITH SSOT WEBSOCKET INTEGRATION.
-Business Value: $500K+ ARR - Ensures complete user journey works after SSOT consolidation
+Business Value: 500K+ ARR - Ensures complete user journey works after SSOT consolidation
 
 PURPOSE:
 - Validate complete Golden Path user journey with SSOT WebSocket manager
@@ -31,7 +31,7 @@ TEST STRATEGY:
 BUSINESS IMPACT:
 This is the ultimate test - if this passes, users can login and get complete
 AI responses with real-time updates, proving SSOT consolidation preserves 
-the core business value proposition worth $500K+ ARR.
+the core business value proposition worth 500K+ ARR.
 """
 
 import os

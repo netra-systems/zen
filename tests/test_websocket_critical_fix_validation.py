@@ -15,15 +15,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -32,12 +24,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-    # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Real WebSocket connection for testing instead of mocks."""
 
 # REMOVED_SYNTAX_ERROR: def __init__(self):
     # REMOVED_SYNTAX_ERROR: pass
@@ -63,13 +50,13 @@ def lazy_import(module_path: str, component: str = None):
     # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
 
     #!/usr/bin/env python
-    # REMOVED_SYNTAX_ERROR: '''WEBSOCKET CRITICAL FIX VALIDATION TEST SUITE
+    # REMOVED_SYNTAX_ERROR: """WEBSOCKET CRITICAL FIX VALIDATION TEST SUITE
 
     # REMOVED_SYNTAX_ERROR: This test suite validates the critical WebSocket tool execution interface fix
     # REMOVED_SYNTAX_ERROR: implemented on 2025-08-30. The fix ensures that tool execution events are
     # REMOVED_SYNTAX_ERROR: properly sent to the frontend during agent execution.
 
-    # REMOVED_SYNTAX_ERROR: Business Value: $500K+ ARR - Core chat functionality must work
+    # REMOVED_SYNTAX_ERROR: Business Value: 500K+ ARR - Core chat functionality must work
     # REMOVED_SYNTAX_ERROR: Critical Issue: Tool execution events were not being sent, making the UI appear broken
 
     # REMOVED_SYNTAX_ERROR: Test Coverage:
@@ -85,7 +72,7 @@ def lazy_import(module_path: str, component: str = None):
             # REMOVED_SYNTAX_ERROR: - enhance_tool_dispatcher_with_notifications()
             # REMOVED_SYNTAX_ERROR: - UnifiedToolExecutionEngine
             # REMOVED_SYNTAX_ERROR: - WebSocket event handling
-            # REMOVED_SYNTAX_ERROR: '''
+            # REMOVED_SYNTAX_ERROR: """'''
 
             # REMOVED_SYNTAX_ERROR: import asyncio
             # REMOVED_SYNTAX_ERROR: import json

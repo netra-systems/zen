@@ -9,7 +9,7 @@ def lazy_import(module_path: str, component: str = None):
     "Lazy import pattern for performance optimization"
     if module_path not in _lazy_imports:
         try:
-            module = __import__(module_path, fromlist=[component) if component else [)
+            module = __import__(module_path, fromlist=[component] if component else [])
             if component:
                 _lazy_imports[module_path] = getattr(module, component)
             else:
@@ -26,7 +26,7 @@ def lazy_import(module_path: str, component: str = None):
     Lazy import pattern for performance optimization""
     if module_path not in _lazy_imports:
         try:
-            module = __import__(module_path, fromlist=[component) if component else [)
+            module = __import__(module_path, fromlist=[component] if component else [])
             if component:
                 _lazy_imports[module_path] = getattr(module, component)
             else:
@@ -40,7 +40,7 @@ def lazy_import(module_path: str, component: str = None):
 "MISSION CRITICAL: Database Golden Path Session Factory Test Suite"
 
 THIS SUITE VALIDATES GOLDEN PATH DATABASE SESSION CREATION
-Business Value: $500K+ plus ARR - Ensures WebSocket connections can create database sessions
+Business Value: 500K+  ARR - Ensures WebSocket connections can create database sessions
 
 CRITICAL GOLDEN PATH FLOWS TO VALIDATE:
     1. WebSocket manager can successfully create database sessions
@@ -142,21 +142,13 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
             # Pattern 2: session factory method
             if hasattr(db_manager, 'get_session_factory'):
                 session_methods_available.append('get_session_factory')
-                logger.info([U+2713] WebSocket manager can use get_session_factory)"
-                logger.info([U+2713] WebSocket manager can use get_session_factory)""
+                logger.info([U+2713] WebSocket manager can use get_session_factory)"""
 
             
             # Pattern 3: create_session method
             if hasattr(db_manager, 'create_session'):
                 session_methods_available.append('create_session')
-                logger.info("[U+2713] WebSocket manager can use create_session)"
-            
-            # Pattern 4: initialize then use sessions
-            if hasattr(db_manager, 'initialize'):
-                session_methods_available.append('initialize')
-                logger.info([U+2713] WebSocket manager can initialize database)
-            
-            self.record_metric("websocket_session_methods, session_methods_available)"
+                logger.info("[U+2713] WebSocket manager can use create_session)""websocket_session_methods, session_methods_available)"
             
             # Validate that WebSocket manager has at least one way to create sessions
             if session_methods_available:
@@ -201,8 +193,7 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
                 This blocks WebSocket connections and chat functionality.
             )
         
-        logger.info([U+2713] WebSocket manager database session creation validated)"
-        logger.info([U+2713] WebSocket manager database session creation validated)""
+        logger.info([U+2713] WebSocket manager database session creation validated)"""
 
     
     async def test_user_login_database_session_creation_works(self):
@@ -392,8 +383,7 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
                     # Simulate session usage
                     session = await db_manager.get_async_session()
                     self.record_metric(websocket_session_creation_test, success)
-                    logger.debug(WebSocket session creation pattern test passed)"
-                    logger.debug(WebSocket session creation pattern test passed)""
+                    logger.debug(WebSocket session creation pattern test passed)"""
 
             
             elif 'initialize' in session_methods:
