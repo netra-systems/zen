@@ -384,7 +384,7 @@ class InfrastructureResilienceManager:
         """Check Redis service health."""
         try:
             # Import here to avoid circular imports
-            from netra_backend.app.core.redis_manager import get_redis_manager
+            from netra_backend.app.redis_manager import get_redis_manager
 
             redis_manager = get_redis_manager()
 
