@@ -41,8 +41,9 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.websocket_core.unified_manager import WebSocketManagerMode
 from netra_backend.app.websocket_core.types import WebSocketConnectionState, MessageType, ConnectionMetadata
-from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.core.token_validator import TokenValidator
+# ISSUE #1322 FIX: Use auth_integration layer instead of direct auth_service imports
+from netra_backend.app.auth_integration.auth import validate_token_jwt
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.types.core_types import UserID, ThreadID, ensure_user_id
 from shared.types.user_types import TestUserData
 from netra_backend.app.logging_config import central_logger
@@ -192,7 +193,7 @@ class WebSocketAuthenticationIntegrationTests(SSotAsyncTestCase):
         mock_ws = MockAuthenticatedWebSocket(user_data.user_id, connection_id, expired_token)
         self.mock_websockets.append(mock_ws)
         try:
-            with patch('auth_service.auth_core.core.jwt_handler.JWTHandler.validate_token') as mock_validate:
+            with patch('netra_backend.app.auth_integration.auth.validate_token_jwt') as mock_validate:
                 mock_validate.side_effect = jwt.ExpiredSignatureError('Token has expired')
                 with pytest.raises(jwt.ExpiredSignatureError):
                     user_context = await self.create_mock_user_context_from_token(expired_token, user_data)
@@ -219,7 +220,7 @@ class WebSocketAuthenticationIntegrationTests(SSotAsyncTestCase):
         mock_ws = MockAuthenticatedWebSocket(user_data.user_id, connection_id, invalid_token)
         self.mock_websockets.append(mock_ws)
         try:
-            with patch('auth_service.auth_core.core.jwt_handler.JWTHandler.validate_token') as mock_validate:
+            with patch('netra_backend.app.auth_integration.auth.validate_token_jwt') as mock_validate:
                 mock_validate.side_effect = jwt.InvalidTokenError('Invalid token')
                 with pytest.raises(jwt.InvalidTokenError):
                     user_context = await self.create_mock_user_context_from_token(invalid_token, user_data)
@@ -277,7 +278,7 @@ class WebSocketAuthenticationIntegrationTests(SSotAsyncTestCase):
         """
         test_user_data = TestUserData(user_id=f'context_user_{uuid.uuid4().hex[:8]}', email='context-test@netrasystems.ai', tier='mid', thread_id=f'context_thread_{uuid.uuid4().hex[:8]}')
         token = self.create_test_jwt_token(test_user_data, expired=False, invalid=False)
-        with patch('auth_service.auth_core.core.jwt_handler.JWTHandler.decode_token') as mock_decode:
+        with patch('netra_backend.app.auth_integration.auth.validate_token_jwt') as mock_decode:
             mock_decode.return_value = {'user_id': test_user_data.user_id, 'email': test_user_data.email, 'tier': test_user_data.tier, 'exp': (datetime.now(UTC) + timedelta(hours=24)).timestamp(), 'iat': datetime.now(UTC).timestamp(), 'iss': 'netra-auth-test'}
             user_context = await self.create_mock_user_context_from_token(token, test_user_data)
             assert user_context.user_id == test_user_data.user_id, 'User ID should match token'
