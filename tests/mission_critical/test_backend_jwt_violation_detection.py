@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 P0 Mission Critical Test: Backend JWT SSOT Violation Detection
 =============================================================
@@ -10,7 +10,7 @@ refactor. This provides proof that violations exist and validates refactor succe
 
 Business Value:
     """
-""""
+"""
 
 - Protects $""500K"" plus ARR from JWT secret cascade failures
 - Documents SSOT compliance baseline (current 40/100 score)
@@ -89,7 +89,7 @@ class BackendJWTViolationDetector:
         self.target_ssot_score = 95   # Post-refactor target
         
     def detect_backend_jwt_secret_access_violation(self) -> bool:
-        """"
+        """
 
         VIOLATION TEST: Detect backend JWT secret access (SSOT violation).
         
@@ -245,7 +245,7 @@ class BackendJWTViolationDetector:
         return violation_found
     
     def detect_websocket_auth_fallback_violations(self) -> bool:
-    """"
+    """
 
         VIOLATION TEST: Detect WebSocket authentication fallback logic (SSOT violation).
         
@@ -421,7 +421,7 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         logger.info(= * 60)
     
     def test_backend_jwt_secret_access_exists(self):
-    """"
+    """
 
         CRITICAL: Test backend JWT secret access violation exists.
         
@@ -454,7 +454,7 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         )
     
     def test_backend_has_jwt_validation_methods(self):
-        """"
+        """
 
         CRITICAL: Test backend JWT validation methods violation exists.
         
@@ -485,7 +485,7 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         )
     
     def test_websocket_auth_fallback_logic_exists(self):
-    """"
+    """
 
         CRITICAL: Test WebSocket authentication fallback logic violation exists.
         
@@ -512,7 +512,7 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         logger.info(fWebSocket auth fallback test result: {'VIOLATION EXISTS' if violation_exists else 'NO VIOLATION'})
     
     def test_ssot_compliance_baseline(self):
-        """"
+        """
 
         CRITICAL: Document SSOT compliance baseline for refactor validation.
         

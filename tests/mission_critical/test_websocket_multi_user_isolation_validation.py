@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 MISSION CRITICAL: Multi-User WebSocket Isolation Validation Tests - Issue #1199
 
@@ -24,7 +24,7 @@ ensuring enterprise-grade security for multi-tenant deployments.
 
 
 """
-""""
+"""
 
 import asyncio
 import json
@@ -87,7 +87,7 @@ class MultiUserTestMetrics:
 
 
 class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
-    """"
+    """
 
     Multi-user WebSocket isolation validation tests.
     
@@ -663,7 +663,7 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
 
 
 if __name__ == __main__:
-    """"
+    """
 
     Run multi-user WebSocket isolation validation tests.
     

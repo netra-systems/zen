@@ -152,7 +152,7 @@ class CloudRunURLComplianceTests:
             pytest.fail(error_msg)
     
     def test_core_config_uses_load_balancer_endpoints(self, core_config_files):
-        """"
+        """
 
         MISSION CRITICAL: Core configuration files must use load balancer endpoints
         

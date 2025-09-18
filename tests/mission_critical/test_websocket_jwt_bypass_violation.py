@@ -1,4 +1,4 @@
-""""
+"""
 
  ALERT:  MISSION CRITICAL: WebSocket JWT Bypass Violation Reproduction Test
 
@@ -26,7 +26,7 @@ AUTH SSOT REQUIREMENT:
 ""
 
 
-""""
+"""
 
 import asyncio
 import json

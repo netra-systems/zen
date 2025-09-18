@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""""
+"""
 
 Mission Critical: Configuration Regression Prevention Tests
 
@@ -9,12 +9,12 @@ configuration regressions before deployment.
 
 Based on CRITICAL_CONFIG_REGRESSION_AUDIT_REPORT.md findings.
 """
-""""
+"""
 
 
 """
 """
-""""
+"""
 
 import os
 import sys
@@ -55,7 +55,7 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
         }
     
     def test_service_secret_presence_all_environments(self):
-        """"
+        """
 
         Test that SERVICE_SECRET is properly configured across all environments.
         
@@ -357,7 +357,7 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
                                    fWeak pattern '{weak_secret[:20]}...' should be rejected)
     
     def test_environment_specific_config_isolation(self):
-    """"
+    """
 
         Test that environment-specific configs don't leak across environments.'
         
@@ -399,7 +399,7 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
                 pass  # Actual validation would happen in deployment
     
     def test_configuration_change_detection(self):
-        """"
+        """
 
         Test that configuration changes are detectable.
         
@@ -455,7 +455,7 @@ class ConfigurationRegressionIntegrationTests(SSotBaseTestCase, unittest.TestCas
         }
     
     def test_cross_service_config_consistency(self):
-        """"
+        """
 
         Test that configuration is consistent across services.
 

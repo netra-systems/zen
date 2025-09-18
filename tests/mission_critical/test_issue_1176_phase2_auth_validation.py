@@ -1,4 +1,4 @@
-""""
+"""
 
 Issue #1176 Phase 2: Authentication Stabilization and Infrastructure Validation
 
@@ -23,7 +23,7 @@ Expected Behavior:
 ""
 
 
-""""
+"""
 
 import asyncio
 import logging
@@ -393,7 +393,7 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
 
 # Issue #1176 Phase 2: Standalone test execution
 if __name__ == __main__:
-    """"
+    """
 
     Standalone execution for Issue #1176 Phase 2 validation.
 

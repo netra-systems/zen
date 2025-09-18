@@ -1,4 +1,4 @@
-""""
+"""
 
 Standalone WebSocket Bridge Performance Test - Clean Version (Windows Compatible)
 

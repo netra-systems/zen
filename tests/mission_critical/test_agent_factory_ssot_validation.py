@@ -54,14 +54,14 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
         self.test_user_contexts.clear()
 
     def test_agent_registry_factory_user_isolation_ssot_compliance(self):
-        """""TEST FAILS: AgentRegistry factory allows shared state between users.
+        """TEST FAILS: AgentRegistry factory allows shared state between users.
 
         CRITICAL BUSINESS IMPACT: Shared state causes WebSocket events to be delivered
         to wrong users, directly violating 500K USD ARR Golden Path user experience.
 
         EXPECTED FAILURE: Multiple users get same AgentRegistry instance.
         PASSES AFTER: Each user gets isolated AgentRegistry with unique WebSocket manager.
-        """""
+        """
         
         try:
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -125,14 +125,14 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
                 )
 
     def test_websocket_manager_factory_isolation_ssot_compliance(self):
-        """""TEST FAILS: WebSocket manager factory allows cross-user contamination.
+        """TEST FAILS: WebSocket manager factory allows cross-user contamination.
 
         CRITICAL BUSINESS IMPACT: WebSocket events sent to wrong users breaks chat
         functionality and violates user privacy. Core Golden Path failure.
 
         EXPECTED FAILURE: WebSocket managers shared between users.
         PASSES AFTER: Each user gets isolated WebSocket manager with no cross-contamination.
-        """""
+        """
 
         try:
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -217,14 +217,14 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
                         )
 
     async def test_concurrent_agent_execution_context_isolation(self):
-        """""TEST FAILS: Concurrent agent executions contaminate each other's context."
+        """TEST FAILS: Concurrent agent executions contaminate each other's context."
 
         CRITICAL BUSINESS IMPACT: Race conditions in concurrent chat sessions cause
         agent responses to be mixed up between users. Direct Golden Path failure.
 
         EXPECTED FAILURE: Agent contexts bleed between concurrent executions.
         PASSES AFTER: Complete isolation between concurrent user sessions.
-        """"
+        """
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
         except ImportError as e:
@@ -326,8 +326,8 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
             )
 
     async def test_agent_factory_memory_isolation_ssot_compliance(self):
-        """""TEST FAILS: Agent factories create shared memory state between users."
-        """""TEST FAILS: Agent factories create shared memory state between users.""
+        """TEST FAILS: Agent factories create shared memory state between users."
+        """TEST FAILS: Agent factories create shared memory state between users.""
 
 
         CRITICAL BUSINESS IMPACT: Memory leaks and state contamination between users
@@ -336,7 +336,7 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
         EXPECTED FAILURE: Agent instances share memory state.
         PASSES AFTER: Complete memory isolation between user agent instances.
         """
-        """"
+        """
 
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -422,7 +422,7 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
                 )
 
     async def test_factory_cleanup_prevents_memory_leaks(self):
-        """""TEST FAILS: Factory pattern doesn't properly clean up user resources."
+        """TEST FAILS: Factory pattern doesn't properly clean up user resources."
 
         CRITICAL BUSINESS IMPACT: Memory leaks in production cause system degradation
         and eventual Golden Path service failure under load.

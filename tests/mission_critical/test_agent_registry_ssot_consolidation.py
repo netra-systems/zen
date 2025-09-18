@@ -1,11 +1,11 @@
-""""
+"""
 
 SSOT Agent Registry Consolidation Validation Tests
 
 Issue #845: Critical P0 test suite for validating AgentRegistry SSOT consolidation
 Business Impact: $"500K" plus ARR Golden Path protection (login -> AI responses)
 
-""""
+"""
 
 Tests duplicate AgentRegistry consolidation from:
     - Basic: /netra_backend/app/agents/registry.py (419 lines) -> TO BE ELIMINATED

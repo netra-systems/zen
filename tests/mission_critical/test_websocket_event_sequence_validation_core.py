@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 MISSION CRITICAL: Core WebSocket Event Sequence Validation Tests - Issue #1199
 
@@ -24,7 +24,7 @@ They validate real-world scenarios where WebSocket events might be missing or ma
 
 
 """
-""""
+"""
 
 import asyncio
 import json
@@ -64,7 +64,7 @@ class EventSequenceTestResult:
 
 
 class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
-    """"
+    """
 
     Core WebSocket event sequence validation tests.
     
@@ -129,7 +129,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_complete_five_event_sequence_validation(self):
-    """"
+    """
 
         CRITICAL: Test that all 5 required WebSocket events are delivered in sequence.
         

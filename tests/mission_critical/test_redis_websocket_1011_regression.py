@@ -1,4 +1,4 @@
-""""
+"""
 
 Redis WebSocket 1011 Regression Test Suite - Mission Critical
 
@@ -25,7 +25,7 @@ GOLDEN PATH PROTECTION: Users login -> get AI responses
 ""
 
 
-""""
+"""
 
 import asyncio
 import pytest

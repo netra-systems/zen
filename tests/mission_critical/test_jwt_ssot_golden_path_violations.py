@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical: JWT SSOT Violations Blocking Golden Path
 
@@ -16,7 +16,7 @@ These tests are designed to FAIL initially, proving P0 SSOT violations block Gol
 ""
 
 
-""""
+"""
 
 import asyncio
 import json
@@ -194,7 +194,7 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         )
 
     def test_websocket_authentication_inconsistency_violations(self):
-        """"
+        """
 
         CRITICAL TEST - DESIGNED TO FAIL
 
@@ -611,7 +611,7 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
 
     def teardown_method(self, method):
         Clean up mission critical test environment."""
-        Clean up mission critical test environment.""""
+        Clean up mission critical test environment."""
 
         super().teardown_method(method)
 

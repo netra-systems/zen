@@ -1,8 +1,8 @@
-""""
+"""
 
 SSOT Import Pattern Violations Test Suite
 
-""""
+"""
 
 Detects legacy test framework imports that violate Single Source of Truth principles.
 This test is designed to FAIL initially to detect current violations (51+ expected violations).
@@ -52,7 +52,7 @@ class ImportPatternViolation:
 
 
 class SSOTImportPatternViolationsTests(SSotBaseTestCase):
-    """"
+    """
 
     Mission Critical test suite to detect and validate SSOT import compliance.
     

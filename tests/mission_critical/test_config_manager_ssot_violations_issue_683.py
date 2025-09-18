@@ -1,4 +1,4 @@
-""""
+"""
 
 Test Configuration Manager SSOT Violations for Issue #683 (Mission Critical)
 
@@ -17,7 +17,7 @@ Test Strategy: Detect SSOT violations that contribute to configuration validatio
 ""
 
 
-""""
+"""
 
 import pytest
 import os
@@ -57,7 +57,7 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
         super().teardown_method(method)
 
     def test_multiple_config_managers_ssot_violation(self):
-    """"
+    """
 
         CRITICAL SSOT VIOLATION: Test detection of multiple configuration manager instances.
 
@@ -329,7 +329,7 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
                       fThis causes inconsistent environment state in staging: {ssot_violations})
 
     def test_configuration_loader_ssot_violations(self):
-    """"
+    """
 
         CRITICAL SSOT VIOLATION: Test detection of multiple configuration loader implementations.
 

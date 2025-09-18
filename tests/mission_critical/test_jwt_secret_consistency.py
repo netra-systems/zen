@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 P0 Mission Critical Test: JWT Secret Consistency Validation
 ============================================================
@@ -22,7 +22,7 @@ CRITICAL REQUIREMENTS:
 
 Mission Critical because JWT secret sync failures cause:
     """
-""""
+"""
 
 - 100% user lockout from authentication system
 - Complete WebSocket authentication failure
@@ -383,7 +383,7 @@ class JWTSecretConsistencyValidator:
             return False
     
     def test_token_rotation_consistency(self) -> bool:
-        """"
+        """
 
         Test JWT secret rotation scenarios maintain service continuity.
         
@@ -535,7 +535,7 @@ class JWTSecretConsistencyValidator:
             return False
     
     def generate_comprehensive_report(self) -> Dict[str, Any]:
-        """"
+        """
 
         Generate comprehensive JWT secret consistency validation report.
         
@@ -605,7 +605,7 @@ class JWTSecretConsistencyValidator:
 
 
 class JWTSecretConsistencyTests(SSotBaseTestCase):
-    """"
+    """
 
     P0 Mission Critical Test Suite: JWT Secret Consistency
     

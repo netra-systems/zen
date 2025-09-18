@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""""
+"""
 
 MISSION CRITICAL TEST SUITE: Enhanced Staging WebSocket Agent Events - COMPREHENSIVE AUTH & USER JOURNEYS
 =====================================================================================================
@@ -12,7 +12,7 @@ COMPREHENSIVE COVERAGE:
 - 10+ Performance Under Load Tests with Concurrent WebSocket Connections
 - Real Staging Environment Testing (wss://api.staging.netrasystems.ai/ws)
 """
-""""
+"""
 
 - Complete User Experience Validation from Signup to AI Value Delivery
 - Revenue-Critical WebSocket Event Flows

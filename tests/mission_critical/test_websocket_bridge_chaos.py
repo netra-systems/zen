@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 Comprehensive Chaos Engineering Tests for WebSocket Bridge
 
@@ -32,7 +32,7 @@ Test Categories:
 
 
 """
-""""
+"""
 
 import asyncio
 import json

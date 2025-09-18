@@ -144,7 +144,7 @@ class E2EMigrationDetectionUtility:
         return imports
     
     def extract_class_definitions_from_ast(self, tree: ast.Module) -> List[Dict[str, Any]]:
-    """"
+    """
 
         Extract class definitions and their inheritance.
         
@@ -176,7 +176,7 @@ class E2EMigrationDetectionUtility:
         return classes
     
     def detect_basee2etest_violations(self, file_path: Path) -> Dict[str, List[str]]:
-        """"
+        """
 
         Detect BaseE2ETest inheritance violations in a file.
         

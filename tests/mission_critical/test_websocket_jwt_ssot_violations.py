@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical WebSocket JWT SSOT Violations Detection
 
@@ -16,7 +16,7 @@ These tests are designed to FAIL initially, proving P0 SSOT violations block Gol
 ""
 
 
-""""
+"""
 
 import pytest
 import asyncio
@@ -54,7 +54,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
         ]
 
     def test_mission_critical_golden_path_jwt_validation_ssot_violations(self):
-    """"
+    """
 
         MISSION CRITICAL TEST - DESIGNED TO FAIL
         

@@ -1,9 +1,9 @@
-""""
+"""
 
 Test Secret Configuration Validation for Issue #683
 
 This test reproduces the configuration validation failures identified in staging environment
-""""
+"""
 
 configuration validation tests. Focus on SecretConfig class validation and secret injection
 bridge gaps between SecretConfig and GCP deployment.
@@ -55,7 +55,7 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
         super().teardown_method(method)
 
     def test_secret_config_missing_required_secrets_staging(self):
-    """"
+    """
 
         REPRODUCER: Test secret configuration validation failure when required secrets are missing.
 
@@ -115,7 +115,7 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
             assert missing required secret in str(exc_info.value) or validation failed in str(exc_info.value)
 
     def test_secret_config_project_id_resolution_failure(self):
-        """"
+        """
 
         REPRODUCER: Test SecretReference project ID resolution failure in staging.
 
@@ -143,7 +143,7 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
         )
 
     def test_secret_config_validation_with_partial_secrets(self):
-        """"
+        """
 
         REPRODUCER: Test validation failure with partially configured secrets.
 

@@ -1,4 +1,4 @@
-""""
+"""
 
 ULTRA CRITICAL: DATABASE_URL SSOT Migration Validation Test Suite
 
@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Value Impact: System reliability and data integrity - Prevents catastrophic database connectivity failures
 - Strategic Impact: Migration success ensures platform stability, prevents service outages
 
-""""
+"""
 
 CRITICAL MISSION: This test suite validates the complete migration from direct DATABASE_URL usage
 to DatabaseURLBuilder SSOT patterns. Any failures in this migration could cause system-wide
@@ -348,7 +348,7 @@ class DatabaseURLSSOTMigrationValidator:
             return False
     
     def validate_migration_completeness(self) -> bool:
-        """"
+        """
 
         Test 5: Migration Completeness Tests
         Verifies that migrated files use DatabaseURLBuilder and old patterns are replaced.
@@ -431,7 +431,7 @@ class DatabaseURLSSOTMigrationValidator:
             return False
     
     def validate_backward_compatibility(self) -> bool:
-        """"
+        """
 
         Test 6: Backward Compatibility Tests
         Ensures same URLs are generated and no breaking changes occurred.
@@ -506,7 +506,7 @@ class DatabaseURLSSOTMigrationValidator:
             return False
     
     def validate_security_requirements(self) -> bool:
-    """"
+    """
 
         Test 7: Security Validation Tests
         Validates credential masking, environment isolation, and security measures.

@@ -1,4 +1,4 @@
-""""
+"""
 
 Issue #519: Pytest Configuration Management Tests - Phase 2
 
@@ -17,7 +17,7 @@ Priority: P0 - Required for $""500K"" plus ARR protection
 ""
 
 
-""""
+"""
 
 import subprocess
 import sys

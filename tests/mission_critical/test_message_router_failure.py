@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Test: MessageRouter SSOT Compliance Validation
 
@@ -6,7 +6,7 @@ Tests that the MessageRouter SSOT violation is resolved and staging deployment w
 This test validates that the MessageRouter Phase 1 proxy implementation is working correctly.
 
 Business Value: Platform/Internal - System Stability & Golden Path Protection
-""""
+"""
 
 - Protects $""500K"" plus ARR chat functionality from MessageRouter routing conflicts
 - Ensures single canonical routing implementation for reliability

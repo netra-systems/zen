@@ -1,4 +1,4 @@
-""""
+"""
 
 ClickHouse Logging Fix Validation - Mission Critical Regression Prevention Tests
 ==============================================================================
@@ -40,7 +40,7 @@ All other tests should PASS in both phases with different log patterns
 ""
 
 
-""""
+"""
 
 import asyncio
 import logging
@@ -116,7 +116,7 @@ class ClickHouseLoggingFixValidationTests:
     
     @pytest.mark.asyncio
     async def test_before_fix_behavior_reproduction(self):
-    """"
+    """
 
         Test Case 13: Before fix behavior reproduction
         

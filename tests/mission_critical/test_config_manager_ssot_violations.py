@@ -1,4 +1,4 @@
-""""
+"""
 
 Test SSOT Config Manager Violations - Issue #667
 
@@ -25,7 +25,7 @@ failures that prevent user login and AI chat functionality.
 ""
 
 
-""""
+"""
 
 import pytest
 import sys
@@ -42,7 +42,7 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
     "Test suite to reproduce and validate config manager SSOT violations."
 
     def test_config_manager_import_conflicts_detected(self):
-    """"
+    """
 
         EXPECTED TO FAIL - Detect import conflicts between 3 config managers.
 
@@ -86,7 +86,7 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
         )
 
     def test_config_manager_method_signature_conflicts(self):
-    """"
+    """
 
         EXPECTED TO FAIL - Detect method signature conflicts between managers.
 

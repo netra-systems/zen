@@ -1,10 +1,10 @@
-""""
+"""
 
 MISSION CRITICAL: Configuration Manager SSOT Violation Tests - Issue #757
 
 **BUSINESS VALUE JUSTIFICATION (BVJ):**
 - **Segment:** Platform/Internal - $""500K"" plus ARR Protection
-""""
+"""
 
 - **Business Goal:** Protect Golden Path user flow from configuration race conditions
 - **Value Impact:** Prevents startup failures that block user authentication and chat functionality

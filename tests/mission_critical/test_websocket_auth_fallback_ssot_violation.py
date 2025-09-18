@@ -1,4 +1,4 @@
-""""
+"""
 
  ALERT:  MISSION CRITICAL: WebSocket Auth Fallback SSOT Violation
 
@@ -18,7 +18,7 @@ EXPECTED BEHAVIOR:
 Business Value Justification (BVJ):
     - Segment: Platform/Engineering - SSOT compliance and maintainability
 - Business Goal: System Stability - Eliminate duplicate auth logic maintenance 
-""""
+"""
 
 - Value Impact: Reduces auth bugs and security vulnerabilities from logic duplication
 - Revenue Impact: Auth fallback bugs could cause service outages ($""100K""+ revenue risk)
@@ -137,7 +137,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_fallback_logic_complexity_violation(self):
-    """"
+    """
 
         VIOLATION REPRODUCTION: WebSocket fallback logic is complex and duplicates SSOT.
         
@@ -213,7 +213,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_fallback_auth_client_core_duplication_violation(self):
-        """"
+        """
 
         VIOLATION REPRODUCTION: WebSocket duplicates auth_client_core fallback logic.
         
@@ -405,7 +405,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_fallback_creates_auth_state_violation(self):
-        """"
+        """
 
         VIOLATION REPRODUCTION: WebSocket fallback creates auth state independently.
         

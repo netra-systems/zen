@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""""
+"""
 
 MISSION CRITICAL TEST SUITE: Staging WebSocket Agent Events
 
@@ -14,7 +14,7 @@ This test suite:
 5. Ensures SSL/TLS handling is correct for wss:// connections
 
 ANY FAILURE HERE INDICATES STAGING WEBSOCKET ISSUES THAT WILL AFFECT PRODUCTION.
-""""
+"""
 
 import asyncio
 import json

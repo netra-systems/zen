@@ -1,4 +1,4 @@
-""""
+"""
 
 Issue #1069: Golden Path Protection During Critical Infrastructure Fixes
 
@@ -13,7 +13,7 @@ They ensure that infrastructure gap remediation does not break core customer val
 
 Test Coverage:
     1. Golden Path stability during ClickHouse driver infrastructure fixes
-""""
+"""
 
 2. User flow protection during execution engine import path remediation
 3. Chat functionality preservation during WebSocket SSOT consolidation
@@ -79,7 +79,7 @@ class Issue1069GoldenPathProtectionTests(SSotAsyncTestCase):
 
     @pytest.mark.mission_critical
     def test_user_flow_protection_during_execution_engine_fixes(self):
-    """"
+    """
 
         Test user flow protection during execution engine import path remediation.
 
@@ -124,7 +124,7 @@ class Issue1069GoldenPathProtectionTests(SSotAsyncTestCase):
 
     @pytest.mark.mission_critical
     def test_end_to_end_customer_value_delivery_validation(self):
-    """"
+    """
 
         Test end-to-end customer value delivery validation during infrastructure changes.
 
@@ -173,7 +173,7 @@ class Issue1069GoldenPathProtectionTests(SSotAsyncTestCase):
 
     @pytest.mark.mission_critical
     def test_agent_execution_stability_during_import_fixes(self):
-    """"
+    """
 
         Test agent execution stability during import path consolidation.
 
@@ -218,7 +218,7 @@ class Issue1069GoldenPathProtectionTests(SSotAsyncTestCase):
 
     @pytest.mark.mission_critical
     def test_500k_arr_protection_validation_during_infrastructure_changes(self):
-    """"
+    """
 
         Test $""500K"" plus ARR protection validation during critical infrastructure changes.
 

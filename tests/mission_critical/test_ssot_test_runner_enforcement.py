@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 MISSION CRITICAL: SSOT Test Runner Enforcement
 ==============================================
@@ -35,7 +35,7 @@ VIOLATION IMPACT:
 
 
 """
-""""
+"""
 
 import sys
 from pathlib import Path

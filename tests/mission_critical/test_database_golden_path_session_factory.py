@@ -112,7 +112,7 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
         self._flow_failures = []
         
     async def test_websocket_manager_can_create_database_sessions(self):
-        """"
+        """
 
         DESIGNED TO PASS: WebSocket manager successfully creates DB sessions
         

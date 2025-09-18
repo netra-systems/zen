@@ -1,8 +1,8 @@
-""""
+"""
 
 Mission Critical Test: Import Statement Integrity for Issue #976
 
-""""
+"""
 
 This test reproduces the specific import failures identified in Issue #976:
     - NameError: name 'SSotBaseTestCase' is not defined

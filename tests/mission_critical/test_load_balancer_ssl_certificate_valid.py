@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Test: Load Balancer SSL Certificate Validation
 
@@ -17,7 +17,7 @@ This addresses GitHub issue #113: GCP Load Balancer SSL Configuration
 ""
 
 
-""""
+"""
 
 import asyncio
 import ssl
@@ -143,7 +143,7 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_load_balancer_ssl_security_configuration(self):
-        """"
+        """
 
         HARD FAIL: Load balancer SSL configuration MUST meet security standards.
         
@@ -211,7 +211,7 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_ssl_certificate_trust_chain_complete(self):
-    """"
+    """
 
         HARD FAIL: SSL certificate trust chain MUST be complete and valid.
         

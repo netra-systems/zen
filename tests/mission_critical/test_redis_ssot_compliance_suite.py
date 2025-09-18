@@ -1,4 +1,4 @@
-""""
+"""
 
 Redis SSOT Compliance Test Suite - Mission Critical Validation
 
@@ -20,7 +20,7 @@ CRITICAL: Uses REAL Redis services (non-Docker) as specified in requirements
 ""
 
 
-""""
+"""
 
 import asyncio
 import pytest

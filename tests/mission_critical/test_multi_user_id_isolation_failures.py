@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Test Suite for Multi-User ID Isolation Failures
 
@@ -27,7 +27,7 @@ Critical Violations to Detect:
 ""
 
 
-""""
+"""
 
 import pytest
 import asyncio
@@ -175,7 +175,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_cross_user_context_contamination_violations_SHOULD_FAIL(self):
-        """"
+        """
 
         EXPECTED TO FAIL: User contexts contaminate each other through shared ID generation.
         
@@ -283,7 +283,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_multi_user_isolation_violations_SHOULD_FAIL(self):
-        """"
+        """
 
         EXPECTED TO FAIL: WebSocket isolation fails allowing cross-user message delivery.
         

@@ -1,4 +1,4 @@
-""""
+"""
 
 JWT Golden Path Protection Tests
 
@@ -25,7 +25,7 @@ These tests protect Golden Path business value by:
 ""
 
 
-""""
+"""
 
 import asyncio
 import aiohttp
@@ -243,7 +243,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_multi_user_jwt_isolation_golden_path(self):
-    """"
+    """
 
         GOLDEN PATH TEST: Multi-user JWT isolation in chat scenarios.
         

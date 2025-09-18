@@ -67,7 +67,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
             self.set_env_var(key, value)
 
     def test_golden_path_user_flow_preserved_after_ssot_fixes(self):
-        """"
+        """
 
         MISSION CRITICAL: Validate Golden Path user flow works after SSOT fixes.
 

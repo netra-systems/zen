@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-""""
+"""
 
 Mission Critical Test Suite: Multiple BaseTestCase Inheritance Violation Reproduction - Issue #1075
 
 Business Value: Platform/Internal - Test Infrastructure SSOT Compliance  
 """
-""""
+"""
 
 Critical for $""500K"" plus ARR protection through unified test base class patterns and consistent testing infrastructure.
 
@@ -59,7 +59,7 @@ class BaseTestCaseViolation:
 
 
 class MultipleBaseTestCaseConsolidationTests(SSotBaseTestCase):
-    """"
+    """
 
     Test suite to reproduce and validate multiple BaseTestCase inheritance violations.
     
@@ -94,7 +94,7 @@ class MultipleBaseTestCaseConsolidationTests(SSotBaseTestCase):
         }
 
     def scan_file_for_basetestcase_violations(self, file_path: Path) -> List[BaseTestCaseViolation]:
-        """"
+        """
 
         Scan a Python file for multiple BaseTestCase inheritance violations.
         
@@ -265,7 +265,7 @@ class MultipleBaseTestCaseConsolidationTests(SSotBaseTestCase):
         return all_violations
 
     def validate_ssot_base_test_case_functionality(self) -> Dict[str, Any]:
-    """"
+    """
 
         Validate that the SSOT BaseTestCase exists and provides required functionality.
         This should PASS even before remediation.
@@ -313,7 +313,7 @@ class MultipleBaseTestCaseConsolidationTests(SSotBaseTestCase):
         return validation_results
 
     def test_reproduce_multiple_basetestcase_violations(self):
-        """"
+        """
 
         REPRODUCTION TEST: This test WILL FAIL until violations are remediated.
         

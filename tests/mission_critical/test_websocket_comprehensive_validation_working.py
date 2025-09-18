@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""""
+"""
 
 MISSION CRITICAL: Comprehensive WebSocket Validation Test Suite
 
@@ -24,7 +24,7 @@ ANY FAILURE HERE BLOCKS DEPLOYMENT.
 
 
 """
-""""
+"""
 
 import asyncio
 import json

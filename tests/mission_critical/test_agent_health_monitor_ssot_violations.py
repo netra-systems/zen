@@ -1,4 +1,4 @@
-""""
+"""
 
 AgentHealthMonitor SSOT Violations Reproduction Test
 
@@ -9,7 +9,7 @@ BUSINESS IMPACT:
     - Segment: Platform (affects all user tiers)
 - Goal: Stability - prevent inconsistent agent death detection
 - Value Impact: Inconsistent thresholds create silent agent failures affecting 90% of chat value
-""""
+"""
 
 - Revenue Impact: Prevents user churn from unreliable AI interactions
 

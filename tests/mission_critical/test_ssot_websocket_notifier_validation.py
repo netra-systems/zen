@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 MISSION CRITICAL TEST SUITE: SSOT WebSocketNotifier Validation
 
@@ -8,7 +8,7 @@ Prevents duplicate WebSocketNotifier implementations that cause agent event deli
 
 This test suite validates:
     """
-""""
+"""
 
 1.0Exactly 1 WebSocketNotifier class exists in production code
 2.0No duplicate implementations in rollback utilities or deprecated files

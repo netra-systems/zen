@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
-    """"
+    """
 
     Test suite to detect and validate DatabaseManager SSOT consolidation.
     
@@ -72,7 +72,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
         ]
         
     def test_multiple_database_manager_classes_detected(self):
-    """"
+    """
 
         DESIGNED TO FAIL: Detect duplicate DatabaseManager implementations
         
@@ -174,7 +174,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
             self.record_metric(no_imports_found, True)
     
     def test_consolidated_database_manager_single_source(self):
-    """"
+    """
 
         DESIGNED TO PASS: Post-SSOT should have single DatabaseManager
         
@@ -253,7 +253,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
         
         Returns:
             List of dictionaries with class location details
-        """"
+        """
 
         database_manager_classes = []
         
@@ -292,7 +292,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
         return database_manager_classes
     
     def _find_database_manager_imports(self) -> List[Dict[str, Any]]:
-    """"
+    """
 
         Find all DatabaseManager import statements in the codebase.
         

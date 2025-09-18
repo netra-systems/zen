@@ -1,4 +1,4 @@
-""""
+"""
 
 Simple SSOT Violation Detection Test
 
@@ -7,12 +7,12 @@ It directly tests the violation at test_framework/ssot/database.py:596.
 
 EXPECTED BEHAVIOR: This test should FAIL initially, exposing the SSOT violation.
 After remediation, the test should PASS.
-""""
+"""
 
 
 """
 """
-""""
+"""
 
 import asyncio
 import sys
@@ -54,7 +54,7 @@ class SSOTViolationDetectionTests:
         
     @pytest.mark.asyncio
     async def test_ssot_violation_structure_difference(self):
-    """"
+    """
 
         CRITICAL TEST: Expose SSOT violation through structure comparison.
         

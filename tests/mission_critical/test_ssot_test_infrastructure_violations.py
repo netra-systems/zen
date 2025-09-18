@@ -1,4 +1,4 @@
-""""
+"""
 
 SSOT Test Infrastructure Violations Test Suite
 
@@ -10,7 +10,7 @@ Validates SSOT test infrastructure compliance to eliminate conftest.py conflicts
 
 Test Strategy:
     1. Scan entire codebase for duplicate conftest.py files
-""""
+"""
 
 2. Identify conflicting fixture definitions across modules
 3. Flag pytest configuration conflicts
@@ -100,7 +100,7 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
         ]
         
     def test_detect_duplicate_conftest_files(self):
-    """"
+    """
 
         CRITICAL: Detect duplicate conftest.py files across services.
         
@@ -244,7 +244,7 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
             )
             
     def test_detect_direct_pytest_execution_patterns(self):
-    """"
+    """
 
         LOW: Detect direct pytest execution bypassing SSOT runner.
         
@@ -274,7 +274,7 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
             )
             
     def test_comprehensive_infrastructure_violation_report(self):
-    """"
+    """
 
         Generate comprehensive SSOT test infrastructure violation report.
         

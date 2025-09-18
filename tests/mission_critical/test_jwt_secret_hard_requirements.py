@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 Mission Critical: JWT Secret Hard Requirements Test
 
@@ -9,12 +9,12 @@ JWT secrets are not provided, with no fallbacks allowed.
 This test prevents authentication failures by ensuring proper secret configuration
 before deployment.
 """
-""""
+"""
 
 
 """
 """
-""""
+"""
 
 import os
 import sys

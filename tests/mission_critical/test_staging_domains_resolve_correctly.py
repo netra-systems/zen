@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Test: Staging Domains Resolve Correctly
 
@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Validates production-like domain resolution for staging environment
 
 CRITICAL: This test ensures that all *.staging.netrasystems.ai domains resolve correctly
-""""
+"""
 
 and are accessible from the test environment. DNS resolution failures cause complete
 system inaccessibility for all user segments.
@@ -205,7 +205,7 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_staging_domains_ssl_certificates_valid(self):
-    """"
+    """
 
         HARD FAIL: All staging domains MUST have valid SSL certificates.
         

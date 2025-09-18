@@ -1,10 +1,10 @@
-""""
+"""
 
 MISSION CRITICAL: ExecutionEngine Import Fragmentation Detection Test
 Issue #1196 Phase 2 - SSOT ExecutionEngine Consolidation
 
 PURPOSE:
-    """"
+    """
 
 - Detect 105+ ExecutionEngine import variations (EXPECTED TO FAIL initially)
 - Prove fragmentation causes Golden Path instability
@@ -213,7 +213,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
 
     @pytest.mark.mission_critical
     def test_import_performance_impact_measurement(self):
-    """"
+    """
 
         Measure import performance impact of fragmentation
 

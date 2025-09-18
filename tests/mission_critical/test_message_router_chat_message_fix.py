@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Test Suite: MessageRouter Chat Message Type Fix
 
@@ -17,7 +17,7 @@ is working properly and business value is restored.
 ""
 
 
-""""
+"""
 
 import asyncio
 import json
@@ -36,7 +36,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 
 
 class ChatMessageBusinessValueTests:
-    """"
+    """
 
     Test suite focused on business value of 'chat_message' type handling.
     
@@ -246,7 +246,7 @@ class ChatMessageBusinessValueTests:
     
     @pytest.mark.asyncio
     async def test_chat_message_agent_workflow_blocked(self):
-        """"
+        """
 
         Test that 'chat_message' unknown type prevents agent workflow initiation.
         
@@ -418,7 +418,7 @@ class ChatMessageTechnicalValidationTests:
     
     @pytest.mark.asyncio
     async def test_websocket_unknown_message_acknowledgment_format(self):
-    """"
+    """
 
         Test the exact format of acknowledgments sent for unknown message types.
         
@@ -479,7 +479,7 @@ class ChatMessageTechnicalValidationTests:
 
 
 class ChatMessageRouterIntegrationTests:
-    """"
+    """
 
     Integration tests for MessageRouter with 'chat_message' type.
     

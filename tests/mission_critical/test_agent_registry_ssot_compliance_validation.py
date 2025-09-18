@@ -1,4 +1,4 @@
-""""
+"""
 
 AgentRegistry SSOT Compliance Validation Tests - Issue #1080
 
@@ -17,7 +17,7 @@ Priority: P0 Critical - Golden Path validation
 ""
 
 
-""""
+"""
 
 import pytest
 import asyncio
@@ -129,7 +129,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
                 )
 
     async def test_unified_websocket_event_delivery(self):
-    """"
+    """
 
         CRITICAL: Validate consistent WebSocket event delivery across all contexts
         
@@ -351,7 +351,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
         }
 
     async def test_ssot_compliance_comprehensive_validation(self):
-    """"
+    """
 
         Comprehensive validation of all SSOT compliance aspects
         

@@ -8,8 +8,7 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
 """
-        """Send JSON message.""""""
-        """Send JSON message.""""""
+        """Send JSON message."""Send JSON message."""
         raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
@@ -22,13 +21,9 @@ class TestWebSocketConnection:
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()"""
-        return self.messages_sent.copy()"""
         """
-        """
-        Integration test suite to verify TriageSubAgent SSOT compliance after fixes."""
         Integration test suite to verify TriageSubAgent SSOT compliance after fixes."""
         This test suite confirms that all SSOT violations have been fixed."""
-        This test suite confirms that all SSOT violations have been fixed.""""
 
 
 import asyncio
@@ -52,12 +47,9 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 """
-"""
         """Test suite to verify TriageSubAgent SSOT compliance after fixes."""
 """
-"""
         """Set up test fixtures."""
-        self.agent = TriageSubAgent()"""
         self.agent = TriageSubAgent()"""
         user_id="test_user,"
         thread_id="test_thread,"
@@ -71,7 +63,6 @@ from shared.isolated_environment import get_env
     def test_extends_base_agent(self):
         """Verify TriageSubAgent extends BaseAgent."""
         pass"""
-        pass"""
         " PASS:  TriageSubAgent extends BaseAgent)"
         print(" PASS:  PASS: TriageSubAgent properly extends BaseAgent)"
 
@@ -81,13 +72,11 @@ from shared.isolated_environment import get_env
         'emit_agent_started', 'emit_error']
 
         for method in methods:"""
-        for method in methods:"""
         "formatted_string)"
         print(" PASS:  PASS: All BaseAgent WebSocket methods available)"
 
     def test_has_websocket_adapter(self):
         """Verify WebSocketBridgeAdapter is initialized."""
-        pass"""
         pass"""
         " PASS:  Has WebSocketBridgeAdapter)"
         print(" PASS:  PASS: WebSocketBridgeAdapter properly initialized)"
@@ -97,7 +86,6 @@ from shared.isolated_environment import get_env
     def test_no_deprecated_json_imports(self):
         """Verify no deprecated JSON imports."""
 import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
-"""
 """
         " PASS:  No deprecated extract_json_from_response import)"
         print(" PASS:  PASS: Deprecated JSON imports removed)"
@@ -112,7 +100,6 @@ from netra_backend.app.core.serialization.unified_json_handler import ( )
         LLMResponseParser, JSONErrorFixer, safe_json_loads
     
 """
-"""
         test_json = '{"test": "value}'"
         result = core.extract_and_validate_json(test_json)
         self.assertIsInstance(result, dict)
@@ -121,7 +108,6 @@ from netra_backend.app.core.serialization.unified_json_handler import ( )
     def test_json_error_recovery(self):
         """Verify JSON error recovery works."""
         core = TriageCore(self.context)
-"""
 """
         malformed = '{"test": "value'  # Missing closing brace )"
         result = core.extract_and_validate_json(malformed)
@@ -136,14 +122,12 @@ from netra_backend.app.core.serialization.unified_json_handler import ( )
         """Verify no custom hashlib usage."""
         pass
     # Check hashlib not imported in cache_utils"""
-    # Check hashlib not imported in cache_utils"""
         " PASS:  No hashlib import in cache_utils)"
         print(" PASS:  PASS: Custom hashlib removed from cache_utils)"
 
     def test_uses_cache_helpers(self):
         """Verify CacheHelpers is used for hashing."""
 from netra_backend.app.services.cache.cache_helpers import CacheHelpers
-"""
 """
         test_request = "test request"
         hash_result = cache_utils.generate_request_hash(test_request)
@@ -154,8 +138,7 @@ from netra_backend.app.services.cache.cache_helpers import CacheHelpers
         print(" PASS:  PASS: Using CacheHelpers for hash generation)"
 
     def test_cache_with_user_context(self):
-        """Verify cache includes user context when available.""""""
-        """Verify cache includes user context when available.""""""
+        """Verify cache includes user context when available."""Verify cache includes user context when available."""
         test_request = "test request"
 
     # Hash without context
@@ -180,7 +163,6 @@ from netra_backend.app.services.cache.cache_helpers import CacheHelpers
         # Execute the agent
         try:
         await self.agent.execute(self.context, stream_updates=True)"""
-        await self.agent.execute(self.context, stream_updates=True)"""
         pass  # We"re testing event emission, not full execution"
 
                 # Verify agent_started was called
@@ -193,7 +175,6 @@ from netra_backend.app.services.cache.cache_helpers import CacheHelpers
         """Verify proper context isolation."""
         pass
                     # Create multiple contexts
-        contexts = [ )"""
         contexts = [ )"""
         user_id="formatted_string,"
         thread_id="formatted_string,"
@@ -226,7 +207,6 @@ import netra_backend.app.agents.triage.unified_triage_agent as triage_module
         content = f.read()
         self.assertNotIn('os.environ[', content) )
         self.assertNotIn('os.environ.get(', content) )"""
-        self.assertNotIn('os.environ.get(', content) )"""
         print(" PASS:  PASS: No direct os.environ access detected)"
 
                 # ========== Integration Test ==========
@@ -242,7 +222,6 @@ import netra_backend.app.agents.triage.unified_triage_agent as triage_module
         self.assertIsInstance(result, dict)
         self.assertIn('metadata', result)
         self.assertIn('run_id', result['metadata'])
-        self.assertEqual(result['metadata']['run_id'], self.context.run_id)"""
         self.assertEqual(result['metadata']['run_id'], self.context.run_id)"""
         print(" PASS:  PASS: Full execution works with all fixes)"
 

@@ -1,4 +1,4 @@
-""""
+"""
 
 MISSION CRITICAL: SSOT Regression Prevention Test Suite
 
@@ -15,7 +15,7 @@ They catch violations that could lead to system instability or cascade failures.
 ""
 
 
-""""
+"""
 
 import asyncio
 import ast
@@ -354,7 +354,7 @@ class SSOTRegressionPreventionTests:
         assert len(isolation_failures) == 0, "fWebSocket isolation failed: {len(isolation_failures)} failures detected"
     
     def test_agent_registry_isolation_concurrent_execution(self):
-    """"
+    """
 
         ISOLATION CRITICAL: Test agent registry isolation between concurrent executions.
         Verifies each execution context has isolated agent registries with no state sharing.
@@ -478,7 +478,7 @@ class SSOTRegressionPreventionTests:
         assert len(isolation_failures) == 0, "fAgent registry isolation failed: {len(isolation_failures)} failures detected"
     
     async def test_race_condition_prevention_concurrent_state_access(self):
-    """"
+    """
 
         ISOLATION CRITICAL: Test race condition prevention in concurrent state access.
         Verifies state management prevents race conditions and maintains data integrity.
@@ -832,7 +832,7 @@ class SSOTRegressionPreventionTests:
         assert len(security_failures) == 0, "fCRITICAL SECURITY FAILURE: {len(security_failures)} boundary breaches detected"
     
     async def test_database_session_isolation_transaction_boundaries(self):
-    """"
+    """
 
         ISOLATION CRITICAL: Test database session isolation with transaction boundaries.
         Verifies each session has proper transaction isolation with no data leakage.
@@ -1507,7 +1507,7 @@ class SSOTContinuousComplianceTests:
         logger.info(fCompleted continuous compliance test cleanup (ID: {self.test_id})
     
     def test_continuous_system_health_real_services(self):
-    """"
+    """
 
         HEALTH CRITICAL: Continuously monitor system health with REAL services.
         This test runs regularly to ensure all real service components are healthy.

@@ -1,4 +1,4 @@
-""""
+"""
 
 MISSION CRITICAL: WebSocket Event Emission Validation Test
 
@@ -19,7 +19,7 @@ but validates that the integration points are correctly connected.
 ""
 
 
-""""
+"""
 
 import asyncio
 import pytest

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-""""
+"""
 
 MISSION CRITICAL: SSOT Environment Validation Tests
 
 """
-""""
+"""
 
 PURPOSE: Prevent revenue loss from configuration errors by validating SSOT compliance
          in environment management and configuration validation patterns.
@@ -74,7 +74,7 @@ class SsotValidationResult:
 
 
 class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
-    """"
+    """
 
     Mission-critical tests for SSOT environment validation.
     
@@ -112,7 +112,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
         self.record_metric(revenue_protection_checks, 0)
     
     def test_central_validator_ssot_compliance(self):
-    """"
+    """
 
         CRITICAL: Validate Central Configuration Validator SSOT compliance.
         
@@ -370,7 +370,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             self.fail(fCritical error in startup validator SSOT integration test: {e})
     
     def test_backend_configuration_validator_ssot_compliance(self):
-    """"
+    """
 
         CRITICAL: Validate backend configuration validator SSOT compliance.
         
@@ -446,7 +446,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             self.fail(fCritical error in backend configuration validator SSOT test: {e})
     
     def test_cross_environment_validation_consistency(self):
-    """"
+    """
 
         CRITICAL: Validate cross-environment validation consistency.
         

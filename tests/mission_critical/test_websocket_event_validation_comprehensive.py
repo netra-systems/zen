@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""""
+"""
 
 MISSION CRITICAL TEST SUITE: Comprehensive WebSocket Event Validation
 =====================================================================
@@ -36,7 +36,7 @@ ANY FAILURE HERE INDICATES WEBSOCKET EVENTS DO NOT DELIVER BUSINESS VALUE.
 
 
 """
-""""
+"""
 
 import asyncio
 import json

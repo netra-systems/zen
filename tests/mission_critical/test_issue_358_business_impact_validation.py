@@ -1,8 +1,8 @@
-""""
+"""
 
 Mission Critical Tests for Issue #358: Business Impact Validation
 
-""""
+"""
 
 CRITICAL ISSUE: Complete system lockout preventing users from accessing AI responses
 BUSINESS IMPACT: $""500K"" plus ARR at risk due to complete Golden Path failure
@@ -372,7 +372,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_customer_experience_complete_degradation(self):
-    """"
+    """
 
         MISSION CRITICAL FAILURE: Validate complete customer experience failure.
         

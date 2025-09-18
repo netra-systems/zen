@@ -1,4 +1,4 @@
-""""
+"""
 
 SSOT Docker Manager Compliance Validation Tests
 ============================================
@@ -7,7 +7,7 @@ CRITICAL MISSION: Prove Docker Manager SSOT violation exists and validate fix wo
 
 This test suite validates:
     1. SSOT ENFORCEMENT: Only ONE Docker Manager implementation should exist and be used
-""""
+"""
 
 2. IMPORT VALIDATION: All imports must resolve to the same real implementation
 3. GOLDEN PATH PROTECTION: Real services vs mocks for $""500K"" plus ARR functionality
@@ -91,7 +91,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                fExpected: Only real implementation should exist - This FAILURE proves violation exists
 
     def test_ssot_violation_mock_docker_manager_has_mock_implementations(self):
-    """"
+    """
 
         PROVES VIOLATION: Mock Docker Manager contains MagicMock/AsyncMock implementations.
 
@@ -306,7 +306,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                    fAll imports should resolve to real implementation only
 
     def test_golden_path_websocket_events_require_real_services(self):
-    """"
+    """
 
         VALIDATES GOLDEN PATH: WebSocket events require real Docker services for $""500K"" plus ARR.
 

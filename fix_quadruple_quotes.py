@@ -99,15 +99,15 @@ def main():
             total_replacements += num_replacements
             print(f"  Fixed {file_path.name}: {num_replacements} replacements")
         else:
-            print(f"  ⚠️  No changes needed: {file_path.name}")
+            print(f"  No changes needed: {file_path.name}")
 
-    print(f"\n📈 SUMMARY:")
-    print(f"  • Files scanned: {len(problem_files)}")
-    print(f"  • Files fixed: {total_files_fixed}")
-    print(f"  • Total replacements: {total_replacements}")
+    print(f"\nSUMMARY:")
+    print(f"  Files scanned: {len(problem_files)}")
+    print(f"  Files fixed: {total_files_fixed}")
+    print(f"  Total replacements: {total_replacements}")
 
     # Verify fixes by re-scanning
-    print(f"\n🔍 Verifying fixes...")
+    print(f"\nVerifying fixes...")
     remaining_issues = 0
 
     for py_file in mission_critical_dir.glob("*.py"):
@@ -116,19 +116,19 @@ def main():
                 content = f.read()
                 if '""""' in content:
                     remaining_issues += 1
-                    print(f"  ⚠️  Still has issues: {py_file.name}")
+                    print(f"  Still has issues: {py_file.name}")
         except Exception as e:
-            print(f"  ❌ Could not verify {py_file}: {e}")
+            print(f"  Could not verify {py_file}: {e}")
 
     if remaining_issues == 0:
-        print("✅ All quadruple quote issues resolved!")
+        print("All quadruple quote issues resolved!")
     else:
-        print(f"⚠️  {remaining_issues} files still have quadruple quote issues")
+        print(f"{remaining_issues} files still have quadruple quote issues")
 
-    print(f"\n🎯 BUSINESS IMPACT:")
-    print(f"  • Mission critical test files fixed: {total_files_fixed}")
-    print(f"  • Test collection improvement: {((len(problem_files) - remaining_issues) / len(problem_files)) * 100:.1f}%")
-    print(f"  • Golden Path validation readiness: {'READY' if remaining_issues == 0 else 'PARTIAL'}")
+    print(f"\nBUSINESS IMPACT:")
+    print(f"  Mission critical test files fixed: {total_files_fixed}")
+    print(f"  Test collection improvement: {((len(problem_files) - remaining_issues) / len(problem_files)) * 100:.1f}%")
+    print(f"  Golden Path validation readiness: {'READY' if remaining_issues == 0 else 'PARTIAL'}")
 
 if __name__ == "__main__":
     main()

@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
-    """"
+    """
 
     Test suite to detect and validate DatabaseManager SSOT function violations.
     
@@ -222,7 +222,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             raise
     
     def test_database_manager_has_session_factory_methods(self):
-    """"
+    """
 
         DESIGNED TO PASS: Verify DatabaseManager provides session creation
         
@@ -287,7 +287,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             raise
     
     def test_websocket_factory_database_integration_works(self):
-    """"
+    """
 
         DESIGNED TO PASS: Verify WebSocket factory can access database after SSOT fix
         

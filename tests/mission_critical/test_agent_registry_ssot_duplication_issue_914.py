@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 Test suite for Issue #914: AgentRegistry SSOT Duplication
 
@@ -9,7 +9,7 @@ duplication problems exist.
 
 Business Impact:
     """
-""""
+"""
 
 - $""500K"" plus ARR Golden Path functionality at risk from registry inconsistencies
 - Multi-user system stability compromised by duplicate implementations

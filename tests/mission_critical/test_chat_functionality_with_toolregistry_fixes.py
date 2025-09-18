@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Tests for Chat Functionality with ToolRegistry Fixes
 
@@ -22,7 +22,7 @@ See: /Users/rindhujajohnson/Netra/GitHub/netra-apex/audit/staging/auto-solve-loo
 ""
 
 
-""""
+"""
 
 import asyncio
 import json
@@ -450,7 +450,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
         await websocket.close()
         
     async def test_concurrent_users_chat_without_registry_conflicts(self):
-    """"
+    """
 
         Test that multiple users can chat simultaneously without registry conflicts.
         

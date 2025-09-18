@@ -1,5 +1,5 @@
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
-""""
+"""
 
 Mission Critical Server Message Validation Tests - POST FIX
 
@@ -16,7 +16,7 @@ both flat event structures and ServerMessage format with nested payload.
 
 
 """
-""""
+"""
 
 import json
 from datetime import datetime, timezone

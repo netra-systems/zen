@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 Mission Critical Test Suite: Configuration Manager SSOT Compliance Violations Detection
 
@@ -31,7 +31,7 @@ Date: 2025-9-13
 
 
 """
-""""
+"""
 
 import ast
 import os
@@ -286,7 +286,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         )
 
     def test_detect_auth_trace_logger_ssot_violation(self):
-    """"
+    """
 
         MUST FAIL CURRENTLY - Detect SSOT violation in auth trace logger.
 
@@ -351,7 +351,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         )
 
     def test_detect_corpus_admin_ssot_violation(self):
-    """"
+    """
 
         MUST FAIL CURRENTLY - Detect SSOT violation in unified corpus admin.
 

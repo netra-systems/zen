@@ -77,7 +77,7 @@ logger = logging.getLogger(__name__)
 
 
 class RedisValidationSsotCriticalTest(SSotBaseTestCase):
-    """"
+    """
 
     Mission Critical Redis Validation SSOT Compliance Test.
     
@@ -115,7 +115,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         self.expected_ssot_location = shared/redis_validation
         
     def test_redis_validation_ssot_violations_detected(self):
-    """"
+    """
 
         CRITICAL: Test that multiple Redis validation implementations exist.
         

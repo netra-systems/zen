@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical WebSocket Error Messaging Reliability Tests
 
@@ -23,7 +23,7 @@ This test suite MUST pass before any deployment to production.
 ""
 
 
-""""
+"""
 
 import asyncio
 import json
@@ -95,7 +95,7 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
         )
     
     async def test_mission_critical_error_message_function_signatures(self):
-        """"
+        """
 
         MISSION CRITICAL: Validate that all error message creation functions work correctly.
         
@@ -483,7 +483,7 @@ class WebSocketErrorMessagingBusinessContinuityTests(SSotAsyncTestCase):
             self.fail(fMISSION CRITICAL: Error message creation interfered with chat functionality: {e})
     
     async def test_error_message_escalation_path(self):
-        """"
+        """
 
         MISSION CRITICAL: Test error message escalation for business critical failures.
         

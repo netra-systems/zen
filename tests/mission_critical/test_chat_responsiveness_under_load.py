@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 Comprehensive Chat Responsiveness Under Load Tests - Issue #976 Restoration
 
@@ -29,7 +29,7 @@ SSOT Compliance:
 
 
 """
-""""
+"""
 
 import asyncio
 import time
@@ -69,7 +69,7 @@ logger = get_logger(__name__)
 
 
 class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
-    """"
+    """
 
     Comprehensive tests for chat responsiveness under concurrent load conditions.
 
@@ -278,7 +278,7 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_user_context_isolation_under_load(self):
-        """"
+        """
 
         Test that user contexts remain properly isolated during concurrent operations.
 

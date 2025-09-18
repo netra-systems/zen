@@ -1,4 +1,4 @@
-""""
+"""
 
 SSOT Function Behavioral Consistency Tests for Issue #1076
 
@@ -17,7 +17,7 @@ Priority: CRITICAL - These tests ensure behavioral consistency in SSOT architect
 ""
 
 
-""""
+"""
 
 import pytest
 from pathlib import Path
@@ -496,7 +496,7 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
             )
 
     def test_database_function_behavioral_consistency(self):
-    """"
+    """
 
         CRITICAL: Ensure database functions behave consistently.
 

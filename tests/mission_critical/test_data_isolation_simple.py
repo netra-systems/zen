@@ -522,7 +522,7 @@ class RealDataLayerIsolationTests:
 
     @pytest.mark.asyncio
     async def test_real_websocket_user_isolation(self, backend_client):
-        """"
+        """
 
         CRITICAL: WebSocket message isolation between users using real connections.
         

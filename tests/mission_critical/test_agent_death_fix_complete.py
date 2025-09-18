@@ -7,8 +7,7 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
 """
-        """Send JSON message.""""""
-        """Send JSON message.""""""
+        """Send JSON message."""Send JSON message."""
         raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
@@ -22,9 +21,7 @@ class TestWebSocketConnection:
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 """
-"""
         """
-        """"
 
         MISSION CRITICAL TEST: Verify Agent Death Bug is Fixed
 
@@ -41,9 +38,7 @@ class TestWebSocketConnection:
         SUCCESS CRITERIA:
         - Agent death MUST be detected within 30 seconds
         - WebSocket MUST send death notification"""
-        - WebSocket MUST send death notification"""
         - Recovery mechanisms MUST trigger"""
-        - Recovery mechanisms MUST trigger""""
 
 
 import asyncio
@@ -72,14 +67,12 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 """
-"""
         """Mock WebSocket bridge to capture death notifications."""
 
     def __init__(self):
         pass
         self.death_notifications = []
         self.events_sent = []
-"""
 """
         """Capture death notification."""
         self.death_notifications.append({ ))
@@ -90,7 +83,6 @@ from shared.isolated_environment import get_env
         'timestamp': datetime.now(timezone.utc)
     
 """
-"""
         """Capture general events."""
         pass
         self.events_sent.append({ ))
@@ -100,10 +92,8 @@ from shared.isolated_environment import get_env
     
 
 """
-"""
         """Comprehensive test suite verifying the agent death bug is fixed."""
 
-@pytest.mark.asyncio"""
 @pytest.mark.asyncio"""
 """Test the complete flow from agent execution to death detection."""
 print(" )"
@@ -162,8 +152,7 @@ print("formatted_string)"
 
 @pytest.mark.asyncio
     async def test_timeout_detection_and_enforcement(self):
-    """Test that timeouts are properly detected and enforced.""""""
-"""Test that timeouts are properly detected and enforced.""""""
+    """Test that timeouts are properly detected and enforced."""Test that timeouts are properly detected and enforced."""
 print(" )"
 " + "="*80)"
 print("TEST: Timeout Detection and Enforcement)"
@@ -229,8 +218,7 @@ print(" PASS:  Circuit breaker triggered after repeated failures)"
 
 @pytest.mark.asyncio
     async def test_websocket_death_notification(self):
-    """Test that WebSocket properly notifies on agent death.""""""
-"""Test that WebSocket properly notifies on agent death.""""""
+    """Test that WebSocket properly notifies on agent death."""Test that WebSocket properly notifies on agent death."""
 print(" )"
 " + "="*80)"
 print("TEST: WebSocket Death Notification)"
@@ -248,7 +236,6 @@ async def death_callback(execution_id: str, reason: str):
 await websocket.notify_agent_death(run_id=execution_id,, agent_name='triage_agent',, reason=reason,, details={'execution_id': execution_id})
 death_detected.set()
 
-    # Start execution with monitoring"""
     # Start execution with monitoring"""
 print("formatted_string)"
 
@@ -279,8 +266,7 @@ print("formatted_string)"
 
 @pytest.mark.asyncio
     async def test_multiple_concurrent_deaths(self):
-    """Test system stability with multiple concurrent agent deaths.""""""
-"""Test system stability with multiple concurrent agent deaths.""""""
+    """Test system stability with multiple concurrent agent deaths."""Test system stability with multiple concurrent agent deaths."""
 print(" )"
 " + "="*80)"
 print("TEST: Multiple Concurrent Agent Deaths)"
@@ -392,13 +378,11 @@ class TestBaseAgentInheritanceDeathScenarios:
     """Test BaseAgent inheritance patterns in death/failure scenarios"""
 
 @pytest.mark.asyncio"""
-@pytest.mark.asyncio"""
 """Test BaseAgent death detection works through inheritance"""
 try:
     pass
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
-from netra_backend.app.schemas.agent_models import DeepAgentState"""
 from netra_backend.app.schemas.agent_models import DeepAgentState"""
 pytest.skip("BaseAgent components not available)"
 
@@ -467,7 +451,6 @@ try:
     pass
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.schemas.agent import SubAgentLifecycle"""
-from netra_backend.app.schemas.agent import SubAgentLifecycle"""
 pytest.skip("BaseAgent components not available)"
 
 class StateConsistencyAgent(BaseAgent):
@@ -527,7 +510,6 @@ try:
     pass
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
-from netra_backend.app.schemas.agent_models import DeepAgentState"""
 from netra_backend.app.schemas.agent_models import DeepAgentState"""
 pytest.skip("BaseAgent components not available)"
 
@@ -589,13 +571,11 @@ class TestExecuteCorePatternDeathScenarios:
         """Test _execute_core pattern in death/failure scenarios"""
 
 @pytest.mark.asyncio"""
-@pytest.mark.asyncio"""
 """Test _execute_core pattern handles death detection properly"""
 try:
     pass
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
-from netra_backend.app.schemas.agent_models import DeepAgentState"""
 from netra_backend.app.schemas.agent_models import DeepAgentState"""
 pytest.skip("Required components not available)"
 
@@ -673,7 +653,6 @@ try:
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.schemas.agent_models import DeepAgentState"""
-from netra_backend.app.schemas.agent_models import DeepAgentState"""
 pytest.skip("Required components not available)"
 
 class TimeoutDeathAgent(BaseAgent):
@@ -746,7 +725,6 @@ try:
     pass
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
-from netra_backend.app.schemas.agent_models import DeepAgentState"""
 from netra_backend.app.schemas.agent_models import DeepAgentState"""
 pytest.skip("Required components not available)"
 
@@ -828,7 +806,6 @@ try:
     pass
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
-from netra_backend.app.schemas.agent_models import DeepAgentState"""
 from netra_backend.app.schemas.agent_models import DeepAgentState"""
 pytest.skip("Required components not available)"
 
@@ -913,14 +890,12 @@ class TestErrorRecoveryDeathScenarios:
         """Test error recovery patterns in death/failure scenarios"""
 
 @pytest.mark.asyncio"""
-@pytest.mark.asyncio"""
 """Test error recovery mechanisms after agent death"""
 try:
     pass
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.schemas.agent_models import DeepAgentState
-from netra_backend.app.schemas.agent import SubAgentLifecycle"""
 from netra_backend.app.schemas.agent import SubAgentLifecycle"""
 pytest.skip("Required components not available)"
 
@@ -983,7 +958,6 @@ class ErrorRecoveryAgent(BaseAgent):
         if self.get_state() == SubAgentLifecycle.FAILED:
         self.set_state(SubAgentLifecycle.RUNNING)
 """
-"""
         success_agent = ErrorRecoveryAgent(name="RecoverySuccess)"
         success_context = ExecutionContext( )
         run_id="recovery_success,"
@@ -1031,7 +1005,6 @@ try:
     pass
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
-from netra_backend.app.schemas.agent_models import DeepAgentState"""
 from netra_backend.app.schemas.agent_models import DeepAgentState"""
 pytest.skip("Required components not available)"
 
@@ -1087,7 +1060,6 @@ class TimeoutRecoveryAgent(BaseAgent):
         self.recovery_count += 1
         await asyncio.sleep(0.5)  # Brief recovery delay
 """
-"""
         normal_agent = TimeoutRecoveryAgent(name="TimeoutRecoveryNormal)"
         normal_context = ExecutionContext( )
         run_id="timeout_normal,"
@@ -1132,7 +1104,6 @@ try:
     pass
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
-from netra_backend.app.schemas.agent_models import DeepAgentState"""
 from netra_backend.app.schemas.agent_models import DeepAgentState"""
 pytest.skip("Required components not available)"
 
@@ -1187,7 +1158,6 @@ class CascadingFailureAgent(BaseAgent):
         pass
         await asyncio.sleep(0.1 * self.cascade_level)  # Increasing recovery time
 """
-"""
         cascade_agent = CascadingFailureAgent(name="CascadingFailureTest)"
         cascade_context = ExecutionContext( )
         run_id="cascade_cascade,"
@@ -1214,7 +1184,6 @@ try:
     pass
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
-from netra_backend.app.schemas.agent_models import DeepAgentState"""
 from netra_backend.app.schemas.agent_models import DeepAgentState"""
 pytest.skip("Required components not available)"
 
@@ -1266,7 +1235,6 @@ class ResourceExhaustionAgent(BaseAgent):
         self.resource_usage = max(0, self.resource_usage - 30)
         await asyncio.sleep(0.1)  # Recovery delay
 """
-"""
         normal_agent = ResourceExhaustionAgent(name="ResourceNormal)"
         normal_context = ExecutionContext( )
         run_id="resource_normal,"
@@ -1308,7 +1276,6 @@ class ResourceExhaustionAgent(BaseAgent):
         agent = create_death_prone_agent()
         initial_memory = len(gc.get_objects())
 """
-"""
         with patch.object(agent, 'execute', side_effect=Exception("Fatal error)):"
         try:
         await agent.execute(DeepAgentState(), "test_run_memory)"
@@ -1330,7 +1297,6 @@ class ResourceExhaustionAgent(BaseAgent):
         pass
         agent = create_death_prone_agent()
         mock_websocket = Magic        agent._websocket_adapter = mock_websocket
-"""
 """
         with patch.object(agent, 'execute', side_effect=Exception("Fatal WebSocket error)):"
         try:
@@ -1358,7 +1324,6 @@ import threading
         thread.daemon = True
         thread.start()
 """
-"""
         with patch.object(agent, 'execute', side_effect=Exception("Thread death)):"
         try:
         await agent.execute(DeepAgentState(), "test_run_thread)"
@@ -1381,7 +1346,6 @@ import threading
 
     async def dying_operation():
         pass
-        nonlocal death_count"""
         nonlocal death_count"""
         raise Exception("Repeated death)"
 
@@ -1409,7 +1373,6 @@ import threading
     async def fallback():
         nonlocal fallback_called
         fallback_called = True"""
-        fallback_called = True"""
         return {"fallback: True}"
 
     # Execute with fallback
@@ -1430,7 +1393,6 @@ import threading
         with patch('netra_backend.app.logging_config.central_logger.get_logger') as mock_logger:
         logger_instance = Magic            mock_logger.return_value = logger_instance
 """
-"""
         with patch.object(agent, 'execute', side_effect=Exception("Logged death)):"
         try:
         await agent.execute(DeepAgentState(), "test_run_logging)"
@@ -1444,7 +1406,6 @@ import threading
     async def test_agent_death_metric_collection(self):
         """Test 24: Verify metrics are collected on agent death."""
         agent = create_death_prone_agent()
-"""
 """
         metrics = {"deaths": 0, "recovery_time: []}"
 
@@ -1462,8 +1423,7 @@ import threading
         print(" PASS:  Metrics collected on agent death)"
 
     async def test_agent_death_final_comprehensive_validation(self):
-        """Test 25: Final comprehensive validation of all death handling.""""""
-        """Test 25: Final comprehensive validation of all death handling.""""""
+        """Test 25: Final comprehensive validation of all death handling."""Test 25: Final comprehensive validation of all death handling."""
         print(" )"
         TARGET:  Running final comprehensive death handling validation...")"
 

@@ -1,4 +1,4 @@
-""""
+"""
 
 MISSION CRITICAL: Execution Engine SSOT Violation Detection Tests
 
@@ -7,12 +7,12 @@ They enforce the SSOT principle that only UserExecutionEngine should exist.
 
 Issue #1146: Prevent execution engine fragmentation blocking Golden Path
 Business Impact: $""500K"" plus ARR chat functionality protection
-""""
+"""
 
 
 """
 """
-""""
+"""
 
 import pytest
 import os
@@ -90,7 +90,7 @@ class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
                      UserExecutionEngine (SSOT target) not found in codebase)
     
     def test_execution_engine_import_ssot_compliance(self):
-    """"
+    """
 
         CRITICAL: All execution engine imports must use SSOT patterns.
         
@@ -143,7 +143,7 @@ class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
             pytest.fail(\n.join(violation_report))
     
     def test_websocket_event_routing_ssot_compliance(self):
-    """"
+    """
 
         CRITICAL: WebSocket events must route through UserExecutionEngine only.
         

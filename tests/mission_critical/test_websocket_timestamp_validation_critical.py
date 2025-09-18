@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Tests for WebSocket Timestamp Validation
 
@@ -26,7 +26,7 @@ CRITICAL: If these tests fail, WebSocket chat is BROKEN and deployment must be B
 ""
 
 
-""""
+"""
 
 import pytest
 import time
@@ -49,7 +49,7 @@ class WebSocketTimestampValidationCriticalTests:
     "Mission critical tests for timestamp validation - MUST NEVER FAIL."
 
     def test_iso_datetime_string_rejection_critical(self):
-        """"
+        """
 
         MISSION CRITICAL: ISO datetime strings MUST be rejected.
         
@@ -114,7 +114,7 @@ class WebSocketTimestampValidationCriticalTests:
                 pytest.fail(fCRITICAL: Valid timestamp {timestamp} rejected: {e})
 
     def test_critical_agent_events_timestamp_validation(self):
-        """"
+        """
 
         MISSION CRITICAL: Agent events that deliver business value must validate timestamps.
         
@@ -154,7 +154,7 @@ class WebSocketTimestampValidationCriticalTests:
             assert len(timestamp_errors) > 0, "fCRITICAL: {event_type} timestamp validation broken"
 
     def test_create_standard_message_timestamp_safety(self):
-    """"
+    """
 
         MISSION CRITICAL: Standard message creation must generate safe timestamps.
         
@@ -266,7 +266,7 @@ class WebSocketTimestampValidationCriticalTests:
             pytest.fail(fCRITICAL: None timestamp rejected: {e})
 
     def test_string_numeric_rejection_critical(self):
-    """"
+    """
 
         MISSION CRITICAL: String numeric values must be rejected.
         
@@ -300,7 +300,7 @@ class WebSocketTimestampValidationCriticalTests:
             assert timestamp_errors[0]['type'] == 'float_parsing', "CRITICAL: Wrong error type for string numeric"
 
     def test_edge_case_timestamps_critical(self):
-    """"
+    """
 
         MISSION CRITICAL: Edge case timestamps must be handled safely.
         

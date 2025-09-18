@@ -1,4 +1,4 @@
-""""
+"""
 
 SSOT WebSocket Bridge Integration Protection Tests
 
@@ -18,7 +18,7 @@ Priority: P0 (Critical/Blocking) - WebSocket events = chat functionality = 90% p
 ""
 
 
-""""
+"""
 
 import pytest
 import asyncio

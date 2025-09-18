@@ -1,4 +1,4 @@
-""""
+"""
 
 [U+1F534] MISSION CRITICAL: Authentication JWT Core Flows Test Suite
 
@@ -23,7 +23,7 @@ FAILURE = COMPLETE SYSTEM UNAVAILABLE
 ""
 
 
-""""
+"""
 
 import asyncio
 import json
@@ -183,7 +183,7 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
             pytest.skip(Database required for mission critical auth tests)
     
     async def test_jwt_token_generation_core_business_flow(self):
-    """"
+    """
 
         MISSION CRITICAL: JWT token generation for user authentication.
         
@@ -219,7 +219,7 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
         logger.info( PASS:  MISSION CRITICAL: JWT token generation validated)
         
     async def test_jwt_token_validation_core_business_flow(self):
-        """"
+        """
 
         MISSION CRITICAL: JWT token validation for API access.
         
@@ -258,7 +258,7 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
         logger.info( PASS:  MISSION CRITICAL: JWT token validation confirmed)
         
     async def test_cross_service_jwt_consistency_revenue_critical(self):
-    """"
+    """
 
         MISSION CRITICAL: JWT consistency between auth and backend services.
         
@@ -372,7 +372,7 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
         logger.info(f PASS:  MISSION CRITICAL: Multi-user isolation validated for {user_count} users)
         
     async def test_auth_performance_under_load_revenue_impact(self):
-        """"
+        """
 
         MISSION CRITICAL: Authentication performance under user load.
         

@@ -1,4 +1,4 @@
-""""
+"""
 
  ALERT:  MISSION CRITICAL: JWT Secret Consistency SSOT Violation
 
@@ -28,7 +28,7 @@ CRITICAL JWT CONSISTENCY REQUIREMENT:
 ""
 
 
-""""
+"""
 
 import asyncio
 import json
@@ -254,7 +254,7 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_jwt_validation_options_inconsistency_violation(self):
-    """"
+    """
 
         VIOLATION REPRODUCTION: Different JWT validation options across services.
         

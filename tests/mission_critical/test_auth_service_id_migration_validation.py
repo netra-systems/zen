@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Auth Service ID Migration Validation Test Suite
 
@@ -8,7 +8,7 @@ Tests EXACT violations in auth service that block 90%+ migration completion.
 Business Value Justification:
     - Segment: ALL (Critical security infrastructure)
 - Business Goal: Eliminate raw UUID violations causing ID collision risks
-""""
+"""
 
 - Value Impact: Prevents user data leakage from ID collisions ($""100K""+ security risk)
 - Strategic Impact: CRITICAL - Foundation for entire platform ID migration
@@ -86,7 +86,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
     # ================================================================================
 
     def test_auth_database_models_raw_uuid_violations_SHOULD_FAIL(self):
-        """"
+        """
 
         EXPECTED TO FAIL: Detect exact raw UUID violations in auth database models.
         
@@ -495,7 +495,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
     # ================================================================================
 
     def test_unified_id_generator_produces_structured_auth_ids_SHOULD_PASS_AFTER_MIGRATION(self):
-    """"
+    """
 
         This test should PASS after migration to validate UnifiedIdGenerator compliance.
         
@@ -589,7 +589,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
     # ================================================================================
 
     def test_auth_service_integration_after_migration_SHOULD_PASS_AFTER_MIGRATION(self):
-    """"
+    """
 
         Integration test to validate that auth service works properly after migration.
         
@@ -723,7 +723,7 @@ class AuthServiceIDViolationPatternsTests(SSotBaseTestCase):
         )
 
     def test_detect_session_creation_uuid_patterns_SHOULD_FAIL(self):
-    """"
+    """
 
         EXPECTED TO FAIL: Detect session creation UUID patterns in auth service.
         

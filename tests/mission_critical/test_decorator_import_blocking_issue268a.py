@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Test: Decorator Import Error Blocking Issue #""268A""
 
@@ -8,7 +8,7 @@ BUSINESS VALUE JUSTIFICATION:
 - Value Impact: Unlocks 7,474 unit tests for $""400K""+ ARR validation
 - Revenue Impact: Prevents regression testing gaps that could impact all customer segments
 
-""""
+"""
 
 This test validates that the experimental_test decorator import issue
 is resolved and that unit test discovery works properly.
@@ -227,7 +227,7 @@ class PostFixValidationTests(SSotBaseTestCase):
     
     @pytest.mark.integration  
     def test_full_unit_test_suite_runs_successfully(self):
-    """"
+    """
 
         INTEGRATION TEST: Validates that the full unit test suite can run after fix.
         

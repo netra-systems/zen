@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 MISSION CRITICAL: WebSocket Message Queue Resilience Test
 
@@ -18,7 +18,7 @@ CRITICAL REQUIREMENTS VALIDATED:
 
 
 """
-""""
+"""
 
 import asyncio
 import json

@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical: Deterministic Startup Memory Leak Prevention Test - Issue #601 Fix
 
@@ -24,7 +24,7 @@ Created: 2025-9-12
 ""
 
 
-""""
+"""
 
 import asyncio
 import gc
@@ -154,7 +154,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_startup_memory_leak_prevention_with_strategic_mocking(self):
-    """"
+    """
 
         Test startup doesn't create memory leaks - Issue #601 FIX Applied.'
         
@@ -591,7 +591,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
 
 # Execution guard for direct test running
 if __name__ == __main__:
-    """"
+    """
 
     Direct execution for Issue #601 validation
     
