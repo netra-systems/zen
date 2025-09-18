@@ -1,19 +1,41 @@
 #!/usr/bin/env python3
 """
 Usage Examples:
-  python zen_orchestrator.py --workspace ~/my-project --dry-run
-  python zen_orchestrator.py --list-commands
+
+Direct Command Execution:
+  python zen_orchestrator.py "/help"  # Execute single command directly
+  python zen_orchestrator.py "/analyze-code" --workspace ~/my-project
+  python zen_orchestrator.py "/debug-issue" --instance-name "debug-session"
+  python zen_orchestrator.py "/optimize-performance" --session-id "perf-1"
+  python zen_orchestrator.py "/generate-docs" --clear-history --compact-history
+
+Configuration File Mode:
   python zen_orchestrator.py --config config.json
+  python zen_orchestrator.py --config config.json --workspace ~/my-project
+
+Default Instances Mode:
+  python zen_orchestrator.py --workspace ~/my-project --dry-run
   python zen_orchestrator.py --startup-delay 2.0  # 2 second delay between launches
   python zen_orchestrator.py --startup-delay 0.5  # 0.5 second delay between launches
   python zen_orchestrator.py --max-line-length 1000  # Longer output lines
   python zen_orchestrator.py --status-report-interval 60  # Status reports every 60s
   python zen_orchestrator.py --quiet  # Minimal output, errors only
-  python zen_orchestrator.py --start-at "2h"  # Start 2 hours from now
-  python zen_orchestrator.py --start-at "30m"  # Start in 30 minutes
-  python zen_orchestrator.py --start-at "1am"  # Start at 1 AM (today or tomorrow)
-  python zen_orchestrator.py --start-at "14:30"  # Start at 2:30 PM (today or tomorrow)
-  python zen_orchestrator.py --start-at "10:30pm"  # Start at 10:30 PM (today or tomorrow)
+
+Command Discovery:
+  python zen_orchestrator.py --list-commands  # Show all available commands
+  python zen_orchestrator.py --inspect-command "/analyze-code"  # Inspect specific command
+
+Scheduling:
+  python zen_orchestrator.py "/analyze-code" --start-at "2h"  # Start 2 hours from now
+  python zen_orchestrator.py "/debug-issue" --start-at "30m"  # Start in 30 minutes
+  python zen_orchestrator.py "/optimize" --start-at "1am"  # Start at 1 AM (today or tomorrow)
+  python zen_orchestrator.py "/review-code" --start-at "14:30"  # Start at 2:30 PM (today or tomorrow)
+  python zen_orchestrator.py "/generate-docs" --start-at "10:30pm"  # Start at 10:30 PM (today or tomorrow)
+
+Precedence Rules:
+  1. Direct command (highest) - python zen_orchestrator.py "/command"
+  2. Config file (medium) - python zen_orchestrator.py --config file.json
+  3. Default instances (lowest) - python zen_orchestrator.py
 """
 
 import asyncio
@@ -2101,9 +2123,70 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
         )
     ]
 
+def create_direct_instance(args, workspace: Path) -> Optional[InstanceConfig]:
+    """Create InstanceConfig from direct command arguments.
+
+    Args:
+        args: Parsed command line arguments
+        workspace: Working directory path
+
+    Returns:
+        InstanceConfig if direct command provided, None otherwise
+
+    Raises:
+        SystemExit: If command validation fails
+    """
+    if not args.command:
+        return None
+
+    # Create temporary orchestrator to validate command
+    # Note: We use minimal initialization since we only need command validation
+    temp_orchestrator = ClaudeInstanceOrchestrator(
+        workspace,
+        max_console_lines=0,  # Minimal console output for validation
+        startup_delay=0,
+        quiet=True  # Suppress output during validation
+    )
+
+    # Validate command exists
+    available_commands = temp_orchestrator.discover_available_commands()
+    if args.command not in available_commands:
+        logger.error(f"Invalid command: {args.command}")
+        logger.error(f"Available commands: {', '.join(sorted(available_commands))}")
+        logger.error("Use 'zen --list-commands' to see all available commands with descriptions")
+        sys.exit(1)
+
+    # Generate instance name if not provided
+    instance_name = args.instance_name
+    if not instance_name:
+        # Create readable name from command
+        clean_command = args.command.strip('/')
+        instance_name = f"direct-{clean_command}-{uuid4().hex[:8]}"
+
+    # Generate description if not provided
+    instance_description = args.instance_description
+    if not instance_description:
+        instance_description = f"Direct execution of {args.command}"
+
+    # Create and return InstanceConfig
+    return InstanceConfig(
+        command=args.command,
+        name=instance_name,
+        description=instance_description,
+        output_format=args.output_format,
+        session_id=args.session_id,
+        clear_history=args.clear_history,
+        compact_history=args.compact_history,
+        max_tokens_per_command=args.overall_token_budget
+    )
+
 async def main():
     """Main orchestrator function"""
     parser = argparse.ArgumentParser(description="Claude Code Instance Orchestrator")
+
+    # Direct command argument (positional)
+    parser.add_argument("command", nargs="?", help="Direct command to execute (e.g., '/analyze-code')")
+
     parser.add_argument("--workspace", type=str, default=None,
                        help="Workspace directory (default: current directory)")
     parser.add_argument("--config", type=Path, help="Custom instance configuration file")
@@ -2132,6 +2215,13 @@ async def main():
                        help="Schedule orchestration to start at specific time. Examples: '2h' (2 hours from now), '30m' (30 minutes), '14:30' (2:30 PM today), '1am' (1 AM today/tomorrow)")
     parser.add_argument("--use-cloud-sql", action="store_true",
                        help="Save metrics to CloudSQL database (NetraOptimizer integration)")
+
+    # Direct command options
+    parser.add_argument("--instance-name", type=str, help="Instance name for direct command execution")
+    parser.add_argument("--instance-description", type=str, help="Instance description for direct command execution")
+    parser.add_argument("--session-id", type=str, help="Session ID for direct command execution")
+    parser.add_argument("--clear-history", action="store_true", help="Clear history before direct command execution")
+    parser.add_argument("--compact-history", action="store_true", help="Compact history before direct command execution")
 
     # Token budget arguments
     parser.add_argument("--overall-token-budget", type=int, default=None,
@@ -2171,8 +2261,25 @@ async def main():
     
     logger.info(f"Using workspace: {workspace}")
 
-    # Load instance configurations FIRST to extract budget settings
-    if args.config and args.config.exists():
+    # Load instance configurations with direct command precedence
+    direct_instance = create_direct_instance(args, workspace)
+
+    if direct_instance:
+        # Direct command mode - highest precedence
+        instances = [direct_instance]
+        logger.info(f"Executing direct command: {direct_instance.command}")
+
+        # Load budget settings from config file if available (for direct command mode)
+        if args.config and args.config.exists():
+            logger.info(f"Loading budget configuration from {args.config} (direct command mode)")
+            with open(args.config) as f:
+                config_data = json.load(f)
+            budget_config = config_data.get("budget", {})
+            if budget_config:
+                config_budget_settings = budget_config
+                logger.info(f"Loaded budget configuration from config file: {budget_config}")
+    elif args.config and args.config.exists():
+        # Config file mode - second precedence
         logger.info(f"Loading config from {args.config}")
         with open(args.config) as f:
             config_data = json.load(f)
@@ -2184,6 +2291,7 @@ async def main():
             config_budget_settings = budget_config
             logger.info(f"Loaded budget configuration from config file: {budget_config}")
     else:
+        # Default instances mode - lowest precedence
         logger.info("Using default instance configurations")
         instances = create_default_instances(args.output_format)
 
