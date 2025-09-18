@@ -1090,9 +1090,9 @@ class AgentWebSocketIntegrationEnhancedTests:
         
         # Test tool execution with WebSocket wrapping
         tool_request = {
-            tool_name": "test_tool,
-            parameters: {query: test query}","
-            "execution_id: f"exec_{uuid.uuid4().hex[:8]}"
+            "tool_name": "test_tool",
+            "parameters": {"query": "test query"},
+            "execution_id": f"exec_{uuid.uuid4().hex[:8]}"
         }
         
         # Mock WebSocket event capture
@@ -1112,15 +1112,15 @@ class AgentWebSocketIntegrationEnhancedTests:
             )
         except Exception as e:
             # Expected f"or test tool, capture events during execution attempt
-            logger.info(fTool execution failed as expected: {e}")"
-        
+            logger.info(f"Tool execution failed as expected: {e}")
+
         # Verify WebSocket events were generated
-        event_types = [event["type] for event in captured_events]
-        
+        event_types = [event["type"] for event in captured_events]
+
         # Should have tool_executing and tool_completed events at minimum
-        assert tool_executing in event_types, Missing tool_executing WebSocket event
-        
-        logger.info(f PASS:  Enhanced tool execution WebSocket wrapping validated - Events: {event_types}")"
+        assert "tool_executing" in event_types, "Missing tool_executing WebSocket event"
+
+        logger.info(f"PASS: Enhanced tool execution WebSocket wrapping validated - Events: {event_types}")
 
     @pytest.mark.asyncio
     @pytest.mark.critical
