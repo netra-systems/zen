@@ -1,0 +1,10 @@
+{
+  "workspace": ".",
+  "instances": [
+    {
+      "command": "/help",
+      "name": "legacy_help",
+      "description": "Legacy config test"
+    }
+  ]
+}

@@ -79,12 +79,13 @@ def test_command_budgets_without_overall_budget():
         try:
             from token_budget.budget_manager import TokenBudgetManager
 
-            # This is the problematic initialization - overall_token_budget is None
+            # This is the fixed initialization - pass has_command_budgets=True
             orchestrator = ClaudeInstanceOrchestrator(
                 workspace_dir=Path.cwd(),
                 overall_token_budget=None,  # This should still allow command budgets to work
                 budget_enforcement_mode=budget_config.get("enforcement_mode", "warn"),
-                enable_budget_visuals=not budget_config.get("disable_visuals", False)
+                enable_budget_visuals=not budget_config.get("disable_visuals", False),
+                has_command_budgets=True  # NEW: indicate command budgets are configured
             )
 
             print(f"Orchestrator created. Budget manager: {orchestrator.budget_manager}")
