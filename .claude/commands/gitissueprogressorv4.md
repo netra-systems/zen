@@ -143,19 +143,20 @@ Master:
         UPDATE the comment on the ISSUE with the results
 
 4) EXECUTE THE REMEDIATION ITEM SPECIFIC PLAN: SNST :
-    4.1) UPDATE the comment on the ISSUE with the results
-    4.2) Run startup tests (non docker) fix import or other types of startup issues related to this change.
+    4.1) Make a new comment or update an existing comment on the ISSUE with the results
+    4.2) If applicable: run startup tests (non docker) fix import or other types of startup issues related to this change.
     4.3) Git commit work in conceptual batches. 
     4.4) Sync with origin: push/pull latest, and handle merge conflicts
 
 5) PROOF: SNST : Spawn a sub agent
-    PROVE THAT THE CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
-    otherwise go back and ensure that any code changes exclusively add value as one atomic package of commit and
-    do not introduce new problems.
-    5.1)  Run startup tests (non docker) fix import or other types of startup issues related to this change.
-    5.2) UPDATE a comment on the ISSUE with PROOF
+    If applicable:
+        PROVE THAT THE CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
+        otherwise go back and ensure that any code changes exclusively add value as one atomic package of commit and
+        do not introduce new problems.
+        5.1)  Run startup tests (non docker) fix import or other types of startup issues related to this change.
+        5.2) UPDATE a comment on the ISSUE with PROOF
 
-*Skip step 6 if recently deployed*
+*Skip step 6 if recently deployed or issue is not related to deployment*
 6) Staging Deploy SNST :  Spawn a sub agent PROVE THAT THE CHANGES WORK OR FAIL IN STAGING.
     6.1) Deploy the service (only deploy the service(s) with the files edited/updated)
     if it hasn't been deployed last 3 minutes.
