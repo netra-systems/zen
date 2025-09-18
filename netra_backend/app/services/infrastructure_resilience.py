@@ -247,6 +247,24 @@ class InfrastructureResilienceManager:
         if not self._monitoring_enabled:
             logger.warning("Infrastructure monitoring is disabled")
             return
+        
+        logger.info(f"Starting infrastructure monitoring for {self.environment} environment")
+        logger.info(f"Monitoring {len(self._health_checks)} services: {[s.service.value for s in self._health_checks.values()]}")
+        
+        # Log initial configuration for debugging
+        for service, health_check in self._health_checks.items():
+            logger.info(f"Service {service.value}: timeout={health_check.timeout}s, "
+                       f"interval={health_check.check_interval}s, "
+                       f"failure_threshold={health_check.failure_threshold}, "
+                       f"critical_to_chat={health_check.critical_to_chat}")
+        
+        # Log degradation strategies for debugging
+        for service, strategy in self._degradation_strategies.items():
+            logger.info(f"Degradation strategy for {service.value}: "
+                       f"fallback={strategy.fallback_enabled}, "
+                       f"circuit_breaker={strategy.circuit_breaker_enabled}, "
+                       f"max_retries={strategy.max_retries}, "
+                       f"retry_delay={strategy.retry_delay}s")
 
         logger.info("Starting infrastructure service monitoring...")
 
@@ -338,6 +356,7 @@ class InfrastructureResilienceManager:
             from netra_backend.app.db.database_manager import get_database_manager
 
             manager = get_database_manager()
+            logger.debug(f"Database health check starting for {self.environment}")
 
             # Simple connection test with timeout
             start_time = time.time()
@@ -347,10 +366,17 @@ class InfrastructureResilienceManager:
 
             connection_time = time.time() - start_time
             monitor_connection_attempt(self.environment, connection_time, True)
+            
+            # Log successful connection with performance metrics
+            logger.debug(f"Database health check PASSED: connection_time={connection_time:.3f}s")
+            if connection_time > 5.0:
+                logger.warning(f"Database connection slow: {connection_time:.3f}s (threshold: 5.0s) - potential infrastructure pressure")
 
             return True
         except Exception as e:
-            logger.error(f"Database health check failed: {e}")
+            logger.error(f"Database health check FAILED: {type(e).__name__}: {e}")
+            logger.error(f"Database health check environment: {self.environment}")
+            logger.error(f"This indicates database infrastructure issues that will impact chat functionality")
             monitor_connection_attempt(self.environment, 0.0, False)
             return False
 
@@ -391,14 +417,36 @@ class InfrastructureResilienceManager:
     async def _check_auth_service_health(self) -> bool:
         """Check auth service health."""
         try:
-            # Simple auth service connectivity check
-            # This is a basic implementation - could be enhanced with actual auth service ping
+            # Enhanced auth service connectivity check with detailed diagnostics
             from netra_backend.app.auth_integration.auth import get_auth_handler
+            from netra_backend.app.clients.auth_client_core import get_auth_client
+            
+            logger.debug(f"Auth service health check starting for {self.environment}")
 
+            # Check auth handler availability
             auth_handler = get_auth_handler()
-            return auth_handler is not None
+            if auth_handler is None:
+                logger.error("Auth service health check FAILED: auth_handler is None")
+                return False
+            
+            # Try to get auth client and test basic functionality
+            try:
+                auth_client = get_auth_client()
+                if auth_client is None:
+                    logger.error("Auth service health check FAILED: auth_client is None")
+                    return False
+                    
+                logger.debug("Auth service health check PASSED: handler and client available")
+                return True
+            except Exception as client_error:
+                logger.error(f"Auth service health check FAILED: client error: {type(client_error).__name__}: {client_error}")
+                logger.error("This indicates auth service infrastructure issues that will impact user authentication")
+                return False
+                
         except Exception as e:
-            logger.error(f"Auth service health check failed: {e}")
+            logger.error(f"Auth service health check FAILED: {type(e).__name__}: {e}")
+            logger.error(f"Auth service health check environment: {self.environment}")
+            logger.error("This indicates critical auth service infrastructure failure affecting user login")
             return False
 
     async def _check_vpc_connector_health(self) -> bool:

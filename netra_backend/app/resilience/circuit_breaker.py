@@ -483,7 +483,19 @@ class CircuitBreaker:
 
         self._trigger_state_change_handlers(old_state, self._state, reason)
 
-        logger.warning(f"Circuit breaker {self.name} opened: {reason}")
+        # Enhanced logging for infrastructure debugging
+        logger.warning(f"🔴 CIRCUIT BREAKER OPENED: {self.name}")
+        logger.warning(f"  Reason: {reason}")
+        logger.warning(f"  Previous state: {old_state.value}")
+        logger.warning(f"  Failure count: {self._failure_count}")
+        logger.warning(f"  Last failure: {self._last_failure_time}")
+        logger.warning(f"  Last failure reason: {self._last_failure_reason}")
+        logger.warning(f"  This service is now FAILING FAST - check infrastructure status")
+        
+        # Critical infrastructure warning
+        if self.name in ["database", "auth_service", "websocket"]:
+            logger.critical(f"CRITICAL: {self.name} circuit breaker opened - CHAT FUNCTIONALITY IMPACTED")
+            logger.critical(f"Infrastructure team attention required: {self.name} service degraded")
 
     def _transition_to_half_open(self, reason: str) -> None:
         """Transition circuit breaker to HALF_OPEN state."""
@@ -512,7 +524,16 @@ class CircuitBreaker:
 
         self._trigger_state_change_handlers(old_state, self._state, reason)
 
-        logger.info(f"Circuit breaker {self.name} closed: {reason}")
+        # Enhanced recovery logging for infrastructure debugging
+        logger.info(f"✅ CIRCUIT BREAKER RECOVERED: {self.name}")
+        logger.info(f"  Reason: {reason}")
+        logger.info(f"  Previous state: {old_state.value}")
+        logger.info(f"  Service restored to normal operation")
+        
+        # Critical infrastructure recovery notification
+        if self.name in ["database", "auth_service", "websocket"]:
+            logger.info(f"🎉 INFRASTRUCTURE RECOVERY: {self.name} service restored - chat functionality available")
+            logger.info(f"Infrastructure team: {self.name} service health restored")
 
     def _trigger_state_change_handlers(self, old_state: CircuitBreakerState,
                                       new_state: CircuitBreakerState, reason: str) -> None:

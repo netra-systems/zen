@@ -752,6 +752,37 @@ class E2EAuthHelper:
         headers = self.get_auth_headers(token)
         return aiohttp.ClientSession(headers=headers)
     
+    async def create_authenticated_user_session(self, user_credentials: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Create an authenticated user session with a test user.
+        Wrapper for backward compatibility with existing tests.
+        
+        Args:
+            user_credentials: Optional dict with user data (email, password, name, etc.)
+        
+        Returns:
+            Dict containing authentication result with user_id, access_token, success, etc.
+        """
+        # Extract user data from credentials or use defaults
+        if user_credentials is None:
+            user_credentials = {}
+            
+        email = user_credentials.get('email')
+        password = user_credentials.get('password') 
+        name = user_credentials.get('name')
+        user_id = user_credentials.get('user_id')
+        permissions = user_credentials.get('permissions')
+        tier = user_credentials.get('user_tier', 'free')
+        
+        # Use existing authenticate_test_user method which returns the expected format
+        return await self.authenticate_test_user(
+            email=email,
+            password=password,
+            tier=tier,
+            permissions=permissions,
+            force_new=True  # Always create new session for these tests
+        )
+    
     def create_sync_authenticated_client(self) -> httpx.Client:
         """
         Create an authenticated httpx client for sync tests.

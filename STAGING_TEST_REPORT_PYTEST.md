@@ -1,16 +1,16 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-17 16:48:07
+**Generated:** 2025-09-17 21:50:38
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 2
+- **Total Tests:** 1
 - **Passed:** 0 (0.0%)
-- **Failed:** 2 (100.0%)
+- **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 0.43 seconds
+- **Duration:** 23.45 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,38 +19,29 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_complete_golden_path_staging_workflow | FAIL failed | 0.000s | test_golden_path_complete_staging.py |
-| test_websocket_race_condition_prevention_staging | FAIL failed | 0.102s | test_golden_path_complete_staging.py |
+| test_real_websocket_message_flow | FAIL failed | 10.004s | test_2_message_flow_staging.py |
 
 ## Failed Tests Details
 
-### FAILED: test_complete_golden_path_staging_workflow
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_golden_path_complete_staging.py
-- **Duration:** 0.000s
-- **Error:** tests/e2e/staging/test_golden_path_complete_staging.py:119: in test_complete_golden_path_staging_workflow
-    if not self.test_user.get('authenticated', False):
-           ^^^^^^^^^^^^^^
-E   AttributeError: 'GoldenPathCompleteStagingTests' object has no attribute 'test_user'...
-
-### FAILED: test_websocket_race_condition_prevention_staging
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_golden_path_complete_staging.py
-- **Duration:** 0.102s
-- **Error:** tests/e2e/staging/test_golden_path_complete_staging.py:229: in test_websocket_race_condition_prevention_staging
-    test_user = await self._create_staging_test_user()
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests/e2e/staging/test_golden_path_complete_staging.py:88: in _create_staging_test_user
-    async with session.post(f"{cls.staging_config['auth_url']}/auth/test-user", json=auth_payload) as response:
-                               ^^^^^^^^^^^^^^^^^^
-E   AttributeError: type obj...
+### FAILED: test_real_websocket_message_flow
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_2_message_flow_staging.py
+- **Duration:** 10.004s
+- **Error:** /opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:543: in __await_impl__
+    await self.connection.handshake(
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:104: in handshake
+    await asyncio.wait(
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/tasks.py:451: in wait
+    return await _wait(fs, timeout, return_when, loop)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cel...
 
 ## Pytest Output Format
 
 ```
-test_golden_path_complete_staging.py::test_complete_golden_path_staging_workflow FAILED
-test_golden_path_complete_staging.py::test_websocket_race_condition_prevention_staging FAILED
+test_2_message_flow_staging.py::test_real_websocket_message_flow FAILED
 
 ==================================================
-0 passed, 2 failed in 0.43s
+0 passed, 1 failed in 23.45s
 ```
 
 ## Test Coverage Matrix

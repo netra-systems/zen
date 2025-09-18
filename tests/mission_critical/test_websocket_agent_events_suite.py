@@ -394,7 +394,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                         # Log critical events
                         event_type = event.get("type", "unknown")
                         if event_type in validator.REQUIRED_EVENTS:
-                            logger.info(f"✅ Required event received: {event_type}")
+                            # logger.info(f"✅ Required event received: {event_type}")
                         
                         # Stop after completion event
                         if event_type == "agent_completed":
@@ -409,23 +409,23 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
             success, failures = validator.validate_critical_requirements()
             
             if not success:
-                error_details = \n.join([
-                    ❌ CRITICAL: WebSocket Agent Event Validation FAILED,"
-                    fEvents collected: {len(validator.events)}",
+                error_details = "\n".join([
+                    "❌ CRITICAL: WebSocket Agent Event Validation FAILED",
+                    f"Events collected: {len(validator.events)}",
                     f"Event types: {list(validator.event_counts.keys())}",
-                    f"Required events: {validator.REQUIRED_EVENTS}","
-                    f"Missing events: {validator.REQUIRED_EVENTS - set(validator.event_counts.keys())},
-                    Failures:,
-                    *f"ailures
+                    f"Required events: {validator.REQUIRED_EVENTS}",
+                    f"Missing events: {validator.REQUIRED_EVENTS - set(validator.event_counts.keys())}",
+                    "Failures:",
+                    *failures
                 ]
                 pytest.fail(error_details)
             
             # Validate business requirements
-            assert len(validator.events) >= 3, fToo few events captured: {len(validator.events)}"
-            assert validator.event_counts.get(agent_started", 0) >= 1, "Missing agent_started event
-            assert validator.event_counts.get(agent_completed, 0) >= 1, Missing agent_completed event
+            assert len(validator.events) >= 3, f"Too few events captured: {len(validator.events)}"
+            assert validator.event_counts.get("agent_started", 0) >= 1, "Missing agent_started event"
+            assert validator.event_counts.get("agent_completed", 0) >= 1, "Missing agent_completed event"
             
-            logger.inf"o(f✅ WebSocket Agent Events Golden Path VALIDATED - {len(validator.events)} events received")"
+            # logger.info(f"✅ WebSocket Agent Events Golden Path VALIDATED - {len(validator.events)} events received")"
             
         finally:
             await ws_client.disconnect()
@@ -437,12 +437,12 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     @pytest.mark.unit
     @pytest.mark.state_persistence
     async def test_state_persistence_during_pipeline_execution(self):
-    "
+        """
         Test state persistence and checkpointing during pipeline execution.
         
         BVJ: System reliability - enables recovery from failures and resumption
         Critical Path: Step execution  ->  State checkpoint  ->  Recovery capability
-        "
+        """
         # Arrange: Create PipelineExecutor
         pipeline_executor = PipelineExecutor(
             engine=self.mock_execution_engine,

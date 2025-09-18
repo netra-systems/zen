@@ -50,6 +50,21 @@ from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_log
 
 logger = central_logger.get_logger(__name__)
 
+# Issue #1300: Import WebSocket authentication monitoring
+try:
+    from netra_backend.app.websocket_core.auth_monitoring import (
+        get_websocket_auth_monitor,
+        AuthEventType,
+        track_auth_attempt,
+        track_token_validation,
+        track_connection_event
+    )
+    _auth_monitoring_available = True
+    logger.info("Issue #1300: WebSocket authentication monitoring imported successfully")
+except ImportError as e:
+    logger.warning(f"Issue #1300: WebSocket authentication monitoring not available: {e}")
+    _auth_monitoring_available = False
+
 
 def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[str, Any]]:
     """
@@ -1307,6 +1322,15 @@ async def authenticate_websocket_ssot(
     
     logger.info(f"SSOT AUTH: Starting consolidated WebSocket authentication for connection {connection_id}")
     
+    # Issue #1300: Initialize authentication monitoring for this attempt
+    auth_monitor = None
+    user_id_for_tracking = None
+    if _auth_monitoring_available:
+        try:
+            auth_monitor = get_websocket_auth_monitor()
+        except Exception as e:
+            logger.warning(f"Issue #1300: Failed to initialize auth monitoring: {e}")
+    
     try:
         # STEP 1: Extract E2E context if not provided (consolidated from extract_e2e_context_from_websocket)
         if e2e_context is None:
@@ -1317,6 +1341,21 @@ async def authenticate_websocket_ssot(
         if not token:
             error_msg = "No authentication token found in WebSocket headers or subprotocols"
             logger.warning(f"SSOT AUTH: {error_msg} for connection {connection_id}")
+            
+            # Issue #1300: Track token extraction failure
+            if auth_monitor:
+                try:
+                    await auth_monitor.record_auth_event(
+                        event_type=AuthEventType.AUTH_FAILURE,
+                        connection_id=connection_id,
+                        success=False,
+                        error_code="NO_TOKEN",
+                        error_message=error_msg,
+                        metadata={"step": "token_extraction"}
+                    )
+                except Exception as e:
+                    logger.warning(f"Issue #1300: Failed to track token extraction failure: {e}")
+            
             return WebSocketAuthResult(
                 success=False,
                 error_message=error_msg,
@@ -1328,25 +1367,74 @@ async def authenticate_websocket_ssot(
         
         # STEP 4: Perform authentication with circuit breaker and retry logic
         # (consolidated from UnifiedWebSocketAuthenticator logic)
+        auth_start_time = time.time()
         auth_result, user_context_from_auth = await auth_service.authenticate_websocket(
             websocket,
             e2e_context=e2e_context,
             preliminary_connection_id=connection_id
         )
+        auth_latency_ms = (time.time() - auth_start_time) * 1000
 
         # STEP 5: Handle authentication result
         if not auth_result.success:
             logger.warning(f"SSOT AUTH: Authentication failed for connection {connection_id}: {auth_result.error}")
+            
+            # Issue #1300: Track authentication failure
+            if auth_monitor:
+                try:
+                    await auth_monitor.record_auth_event(
+                        event_type=AuthEventType.AUTH_FAILURE,
+                        user_id=auth_result.user_id if hasattr(auth_result, 'user_id') else None,
+                        connection_id=connection_id,
+                        success=False,
+                        latency_ms=auth_latency_ms,
+                        error_code=auth_result.error_code,
+                        error_message=auth_result.error,
+                        metadata={"step": "authentication_service"}
+                    )
+                except Exception as e:
+                    logger.warning(f"Issue #1300: Failed to track auth failure: {e}")
+            
             return WebSocketAuthResult(
                 success=False,
                 error_message=auth_result.error,
                 error_code=auth_result.error_code
             )
         
+        # Issue #1300: Track successful authentication 
+        user_id_for_tracking = auth_result.user_id if hasattr(auth_result, 'user_id') else None
+        if auth_monitor and user_id_for_tracking:
+            try:
+                await auth_monitor.record_auth_event(
+                    event_type=AuthEventType.LOGIN,
+                    user_id=user_id_for_tracking,
+                    connection_id=connection_id,
+                    success=True,
+                    latency_ms=auth_latency_ms,
+                    metadata={"step": "authentication_service", "auth_method": "websocket"}
+                )
+            except Exception as e:
+                logger.warning(f"Issue #1300: Failed to track auth success: {e}")
+
         # STEP 6: Create user execution context (consolidated from UserContextExtractor logic)
         if not auth_result.user_id:
             error_msg = "Authentication successful but user ID missing"
             logger.error(f"SSOT AUTH: {error_msg} for connection {connection_id}")
+            
+            # Issue #1300: Track missing user ID error
+            if auth_monitor:
+                try:
+                    await auth_monitor.record_auth_event(
+                        event_type=AuthEventType.AUTH_FAILURE,
+                        connection_id=connection_id,
+                        success=False,
+                        error_code="MISSING_USER_ID",
+                        error_message=error_msg,
+                        metadata={"step": "user_context_creation"}
+                    )
+                except Exception as e:
+                    logger.warning(f"Issue #1300: Failed to track missing user ID: {e}")
+            
             return WebSocketAuthResult(
                 success=False,
                 error_message=error_msg,
@@ -1415,6 +1503,26 @@ async def authenticate_websocket_ssot(
         
         # STEP 8: Create successful result
         response_time = (time.time() - start_time) * 1000
+
+        # Issue #1300: Track session creation and connection upgrade
+        if auth_monitor and user_id_for_tracking:
+            try:
+                # Track session creation
+                await auth_monitor.track_session_creation(
+                    user_id=user_id_for_tracking,
+                    session_id=websocket_client_id,  # Use websocket client ID as session ID
+                    connection_id=connection_id
+                )
+                
+                # Track successful connection upgrade 
+                await auth_monitor.track_connection_upgrade(
+                    user_id=user_id_for_tracking,
+                    connection_id=connection_id,
+                    success=True,
+                    latency_ms=response_time
+                )
+            except Exception as e:
+                logger.warning(f"Issue #1300: Failed to track session/connection events: {e}")
         
         logger.info(f"SSOT AUTH: Success for user {auth_result.user_id[:8]}... in {response_time:.1f}ms (connection {connection_id})")
         
@@ -1442,6 +1550,22 @@ async def authenticate_websocket_ssot(
         error_msg = f"SSOT authentication error: {str(e)}"
         
         logger.error(f"SSOT AUTH: Exception for connection {connection_id} after {response_time:.1f}ms: {e}", exc_info=True)
+        
+        # Issue #1300: Track authentication exception
+        if auth_monitor:
+            try:
+                await auth_monitor.record_auth_event(
+                    event_type=AuthEventType.AUTH_FAILURE,
+                    user_id=user_id_for_tracking,
+                    connection_id=connection_id,
+                    success=False,
+                    latency_ms=response_time,
+                    error_code="SSOT_AUTH_EXCEPTION",
+                    error_message=error_msg,
+                    metadata={"exception_type": type(e).__name__, "step": "authentication_flow"}
+                )
+            except Exception as monitor_e:
+                logger.warning(f"Issue #1300: Failed to track auth exception: {monitor_e}")
         
         return WebSocketAuthResult(
             success=False,
