@@ -76,6 +76,13 @@ except ImportError as e:
     ClaudePricingEngine = None
     TokenUsageData = None
 
+# Add CLI extensions imports
+try:
+    from cli_extensions import handle_example_commands
+except ImportError as e:
+    # Graceful fallback if CLI extensions are not available
+    handle_example_commands = None
+
 # NetraOptimizer database functionality has been removed for security
 # Local token metrics are preserved without database persistence
 
@@ -606,11 +613,11 @@ class ClaudeInstanceOrchestrator:
                 content = content[:self.max_line_length-3] + "..."
 
             # Create clear visual separation
-            instance_header = f"╔═[{name}]" + "═" * (20 - len(name) - 4) if len(name) < 16 else f"╔═[{name}]═"
+            instance_header = f"+=[{name}]" + "=" * (20 - len(name) - 4) if len(name) < 16 else f"+=[{name}]="
             if prefix:
                 instance_header += f" {prefix} "
 
-            return f"{instance_header}\n║ {content}\n╚" + "═" * (len(instance_header) - 1)
+            return f"{instance_header}\n| {content}\n+" + "=" * (len(instance_header) - 1)
 
         async def read_stream(stream, prefix):
             nonlocal line_count
@@ -675,14 +682,14 @@ class ClaudeInstanceOrchestrator:
         finally:
             # Show final summary of recent lines for this instance
             if recent_lines_buffer and self.max_console_lines > 0:
-                final_header = f"╔═══ FINAL OUTPUT [{name}] ═══╗"
+                final_header = f"+=== FINAL OUTPUT [{name}] ===+"
                 print(f"\n{final_header}")
-                print(f"║ Last {len(recent_lines_buffer)} lines of {line_count} total")
-                print(f"║ Status: {status.status}")
+                print(f"| Last {len(recent_lines_buffer)} lines of {line_count} total")
+                print(f"| Status: {status.status}")
                 if status.start_time:
                     duration = time.time() - status.start_time
-                    print(f"║ Duration: {duration:.1f}s")
-                print("╚" + "═" * (len(final_header) - 2) + "╝\n")
+                    print(f"| Duration: {duration:.1f}s")
+                print("+" + "=" * (len(final_header) - 2) + "+\n")
 
             # Always show completion message with clear formatting
             completion_msg = f"🏁 [{name}] COMPLETED - {line_count} lines processed, output saved"
@@ -887,23 +894,23 @@ class ClaudeInstanceOrchestrator:
         token_median = self._calculate_token_median()
 
         # Print the report header
-        header = f"╔═══ {report_type} [{datetime.now().strftime('%H:%M:%S')}] ═══╗"
+        header = f"+=== {report_type} [{datetime.now().strftime('%H:%M:%S')}] ===+"
         print(f"\n{header}")
-        print(f"║ Total: {len(self.statuses)} instances")
-        print(f"║ Running: {status_counts['running']}, Completed: {status_counts['completed']}, Failed: {status_counts['failed']}, Pending: {status_counts['pending']}")
+        print(f"| Total: {len(self.statuses)} instances")
+        print(f"| Running: {status_counts['running']}, Completed: {status_counts['completed']}, Failed: {status_counts['failed']}, Pending: {status_counts['pending']}")
 
         # Show token usage summary
         total_tokens_all = sum(s.total_tokens for s in self.statuses.values())
         total_cached_all = sum(s.cached_tokens for s in self.statuses.values())
         total_tools_all = sum(s.tool_calls for s in self.statuses.values())
         median_str = self._format_tokens(int(token_median)) if token_median > 0 else "0"
-        print(f"║ Tokens: {self._format_tokens(total_tokens_all)} total, {self._format_tokens(total_cached_all)} cached | Median: {median_str} | Tools: {total_tools_all}")
+        print(f"| Tokens: {self._format_tokens(total_tokens_all)} total, {self._format_tokens(total_cached_all)} cached | Median: {median_str} | Tools: {total_tools_all}")
 
         # --- ADD COST TRANSPARENCY SECTION ---
         if self.pricing_engine:
             total_cost = sum(self._calculate_cost(s) for s in self.statuses.values())
             avg_cost_per_instance = total_cost / len(self.statuses) if self.statuses else 0
-            print(f"║ 💰 Cost: ${total_cost:.4f} total, ${avg_cost_per_instance:.4f} avg/instance | Pricing: Claude compliant")
+            print(f"| 💰 Cost: ${total_cost:.4f} total, ${avg_cost_per_instance:.4f} avg/instance | Pricing: Claude compliant")
 
         # --- ADD BUDGET STATUS SECTION ---
         if self.budget_manager and self.enable_budget_visuals and render_progress_bar:
@@ -916,27 +923,27 @@ class ClaudeInstanceOrchestrator:
             if bm.overall_budget is not None:
                 overall_bar = render_progress_bar(bm.total_usage, bm.overall_budget)
                 total_formatted = self._format_tokens(bm.overall_budget)
-                print(f"║ Overall: {overall_bar} {used_formatted}/{total_formatted}")
+                print(f"| Overall: {overall_bar} {used_formatted}/{total_formatted}")
             else:
-                print(f"║ Overall: [UNLIMITED] {used_formatted} used")
+                print(f"| Overall: [UNLIMITED] {used_formatted} used")
 
             if bm.command_budgets:
-                print(f"║ Command Budgets:")
+                print(f"| Command Budgets:")
                 for name, budget_info in bm.command_budgets.items():
                     bar = render_progress_bar(budget_info.used, budget_info.limit)
                     limit_formatted = self._format_tokens(budget_info.limit)
                     used_cmd_formatted = self._format_tokens(budget_info.used)
-                    print(f"║   {name:<20} {bar} {used_cmd_formatted}/{limit_formatted}")
+                    print(f"|   {name:<20} {bar} {used_cmd_formatted}/{limit_formatted}")
             else:
-                print(f"║ Command Budgets: None configured")
+                print(f"| Command Budgets: None configured")
 
-        print(f"║")
+        print(f"|")
         
         # Print column headers with separated cache metrics
-        print(f"║  {'Status':<8} {'Name':<30} {'Model':<10} {'Duration':<10} {'Overall':<8} {'Tokens':<8} {'Cache Cr':<8} {'Cache Rd':<8} {'Tools':<6} {'Budget':<10}")
-        print(f"║  {'─'*8} {'─'*30} {'─'*10} {'─'*10} {'─'*8} {'─'*8} {'─'*8} {'─'*8} {'─'*6} {'─'*10}")
-        print(f"║  📝 Model shows actual Claude model used (critical for accurate cost tracking)")
-        print(f"║  💡 Tip: Model may differ from your config - Claude routes requests intelligently")
+        print(f"|  {'Status':<8} {'Name':<30} {'Model':<10} {'Duration':<10} {'Overall':<8} {'Tokens':<8} {'Cache Cr':<8} {'Cache Rd':<8} {'Tools':<6} {'Budget':<10}")
+        print(f"|  {'-'*8} {'-'*30} {'-'*10} {'-'*10} {'-'*8} {'-'*8} {'-'*8} {'-'*8} {'-'*6} {'-'*10}")
+        print(f"|  📝 Model shows actual Claude model used (critical for accurate cost tracking)")
+        print(f"|  💡 Tip: Model may differ from your config - Claude routes requests intelligently")
 
         for name, status in self.statuses.items():
             # Status emoji
@@ -991,9 +998,9 @@ class ClaudeInstanceOrchestrator:
             # Create detailed line with separated cache metrics
             detail = f"  {emoji:<8} {name:<30} {model_short:<10} {time_info:<10} {overall_tokens:<8} {tokens_info:<8} {cache_creation_info:<8} {cache_read_info:<8} {tool_info:<6} {budget_info:<10}"
 
-            print(f"║{detail}")
+            print(f"|{detail}")
 
-        footer = "╚" + "═" * (len(header) - 2) + "╝"
+        footer = "+" + "=" * (len(header) - 2) + "+"
         print(f"{footer}")
 
         # --- ADD DETAILED TOOL USAGE TABLE WITH TOKENS AND COSTS ---
@@ -1014,9 +1021,9 @@ class ClaudeInstanceOrchestrator:
 
 
         if all_tools:
-            print(f"\n╔═══ TOOL USAGE DETAILS ═══╗")
-            print(f"║ {'Tool Name':<20} {'Uses':<8} {'Tokens':<10} {'Cost ($)':<10} {'Used By':<35}")
-            print(f"║ {'─'*20} {'─'*8} {'─'*10} {'─'*10} {'─'*35}")
+            print(f"\n+=== TOOL USAGE DETAILS ===+")
+            print(f"| {'Tool Name':<20} {'Uses':<8} {'Tokens':<10} {'Cost ($)':<10} {'Used By':<35}")
+            print(f"| {'-'*20} {'-'*8} {'-'*10} {'-'*10} {'-'*35}")
 
             total_tool_uses = 0
             total_tool_tokens = 0
@@ -1036,17 +1043,17 @@ class ClaudeInstanceOrchestrator:
                 token_str = f"{tool_tokens:,}" if tool_tokens > 0 else "0"
                 cost_str = f"{tool_cost:.4f}" if tool_cost > 0 else "0"
 
-                print(f"║ {tool_name:<20} {tool_count:<8} {token_str:<10} {cost_str:<10} {instances_str:<35}")
+                print(f"| {tool_name:<20} {tool_count:<8} {token_str:<10} {cost_str:<10} {instances_str:<35}")
 
                 total_tool_uses += tool_count
                 total_tool_tokens += tool_tokens
                 total_tool_cost += tool_cost
 
-            print(f"║ {'─'*20} {'─'*8} {'─'*10} {'─'*10} {'─'*35}")
+            print(f"| {'-'*20} {'-'*8} {'-'*10} {'-'*10} {'-'*35}")
             total_tokens_str = f"{total_tool_tokens:,}" if total_tool_tokens > 0 else "0"
             total_cost_str = f"{total_tool_cost:.4f}" if total_tool_cost > 0 else "0"
-            print(f"║ {'TOTAL':<20} {total_tool_uses:<8} {total_tokens_str:<10} {total_cost_str:<10}")
-            print(f"╚{'═'*95}╝")
+            print(f"| {'TOTAL':<20} {total_tool_uses:<8} {total_tokens_str:<10} {total_cost_str:<10}")
+            print(f"+{'='*95}+")
 
         print()
 
@@ -1079,18 +1086,18 @@ class ClaudeInstanceOrchestrator:
                                         ]):
                                             # CRITICAL ERROR - Make it VERY visible
                                             error_msg = f"""
-╔════════════════════════════════════════════════════════════════════════════╗
-║ 🚨🚨🚨 PERMISSION ERROR DETECTED - COMMAND BLOCKED 🚨🚨🚨                  ║
-║ Instance: {instance_name:<60}║
-║ Error: {error_content[:68]:<68}║
-╠════════════════════════════════════════════════════════════════════════════╣
-║ SOLUTION: zen_orchestrator.py now uses bypassPermissions by default:        ║
-║   • Default: bypassPermissions (avoids approval prompts on all platforms)   ║
-║   • Users can override via permission_mode in config if needed              ║
-║                                                                              ║
-║ Current platform: {platform.system():<58}║
-║ Using permission mode: {self.instances[instance_name].permission_mode:<52}║
-╚════════════════════════════════════════════════════════════════════════════╝
++============================================================================+
+| 🚨🚨🚨 PERMISSION ERROR DETECTED - COMMAND BLOCKED 🚨🚨🚨                  |
+| Instance: {instance_name:<60}|
+| Error: {error_content[:68]:<68}|
++============================================================================+
+| SOLUTION: zen_orchestrator.py now uses bypassPermissions by default:        |
+|   • Default: bypassPermissions (avoids approval prompts on all platforms)   |
+|   • Users can override via permission_mode in config if needed              |
+|                                                                              |
+| Current platform: {platform.system():<58}|
+| Using permission mode: {self.instances[instance_name].permission_mode:<52}|
++============================================================================+
 """
                                             print(error_msg, flush=True)
                                             logger.critical(f"PERMISSION ERROR in {instance_name}: {error_content}")
@@ -1109,11 +1116,11 @@ class ClaudeInstanceOrchestrator:
             'insufficient permissions'
         ]):
             error_msg = f"""
-╔════════════════════════════════════════════════════════════════════════════╗
-║ ⚠️  PERMISSION WARNING DETECTED                                             ║
-║ Instance: {instance_name:<60}║
-║ Line: {line_stripped[:70]:<70}║
-╚════════════════════════════════════════════════════════════════════════════╝
++============================================================================+
+| ⚠️  PERMISSION WARNING DETECTED                                             |
+| Instance: {instance_name:<60}|
+| Line: {line_stripped[:70]:<70}|
++============================================================================+
 """
             print(error_msg, flush=True)
             logger.warning(f"Permission warning in {instance_name}: {line_stripped}")
@@ -2233,6 +2240,14 @@ async def main():
     parser.add_argument("--disable-budget-visuals", action="store_true",
                        help="Disable budget visualization in status reports")
 
+    # New example and template commands
+    parser.add_argument("--generate-example", type=str, metavar="TYPE",
+                       help="Generate example configuration (data_analysis, code_review, content_creation, testing_workflow, migration_workflow, debugging_workflow)")
+    parser.add_argument("--list-examples", action="store_true",
+                       help="List all available example configurations")
+    parser.add_argument("--show-prompt-template", action="store_true",
+                       help="Show LLM prompt template for configuration generation")
+
     args = parser.parse_args()
 
     # Initialize config budget settings (will be populated if config file is loaded)
@@ -2260,6 +2275,11 @@ async def main():
         logger.warning("This might not be a Claude Code workspace")
     
     logger.info(f"Using workspace: {workspace}")
+
+    # Handle CLI extension commands
+    if handle_example_commands and handle_example_commands(args):
+        return
+
 
     # Load instance configurations with direct command precedence
     direct_instance = create_direct_instance(args, workspace)
@@ -2537,10 +2557,10 @@ async def main():
         col_widths = [20, 10, 10, 12, 8, 8, 8, 8, 6, 10]
 
         # Print header
-        header_row = "║ " + " │ ".join(h.ljust(w) for h, w in zip(headers, col_widths)) + " ║"
-        print("╔" + "═" * (len(header_row) - 2) + "╗")
+        header_row = "| " + " | ".join(h.ljust(w) for h, w in zip(headers, col_widths)) + " |"
+        print("+" + "=" * (len(header_row) - 2) + "+")
         print(header_row)
-        print("╠" + "─" * (len(header_row) - 2) + "╣")
+        print("+" + "-" * (len(header_row) - 2) + "+")
 
         # Print data rows
         for name, status in orchestrator.statuses.items():
@@ -2565,10 +2585,10 @@ async def main():
             row_data = [instance_name, status_str, duration_str, total_tokens_str, input_tokens_str,
                        output_tokens_str, cache_creation_str, cache_read_str, tools_str, cost_str]
 
-            row = "║ " + " │ ".join(data.ljust(w) for data, w in zip(row_data, col_widths)) + " ║"
+            row = "| " + " | ".join(data.ljust(w) for data, w in zip(row_data, col_widths)) + " |"
             print(row)
 
-        print("╚" + "═" * (len(header_row) - 2) + "╝")
+        print("+" + "=" * (len(header_row) - 2) + "+")
 
         # Check for permission errors FIRST - Issue #1320
         permission_errors = []
@@ -2581,23 +2601,23 @@ async def main():
         # Display CRITICAL permission errors prominently
         if permission_errors:
             print(f"""
-╔════════════════════════════════════════════════════════════════════════════════════════════╗
-║ 🚨🚨🚨 CRITICAL: {len(permission_errors)} PERMISSION ERROR(S) DETECTED - COMMANDS WERE BLOCKED! 🚨🚨🚨    ║
-╠════════════════════════════════════════════════════════════════════════════════════════════╣
-║ Platform: {platform.system():<80}║
-║ Permission Mode Used: {orchestrator.instances[permission_errors[0][0]].permission_mode if permission_errors else 'Unknown':<68}║
-╠════════════════════════════════════════════════════════════════════════════════════════════╣
++============================================================================================+
+| 🚨🚨🚨 CRITICAL: {len(permission_errors)} PERMISSION ERROR(S) DETECTED - COMMANDS WERE BLOCKED! 🚨🚨🚨    |
++============================================================================================+
+| Platform: {platform.system():<80}|
+| Permission Mode Used: {orchestrator.instances[permission_errors[0][0]].permission_mode if permission_errors else 'Unknown':<68}|
++============================================================================================+
 """)
             for name, status in permission_errors:
                 error_preview = status.error.replace('\n', ' ')[:70]
-                print(f"║ ❌ {name:<20} │ {error_preview:<68} ║")
-            print(f"""╠════════════════════════════════════════════════════════════════════════════════════════════╣
-║ SOLUTION: zen_orchestrator.py defaults to bypassPermissions to avoid approval prompts       ║
-║   • Default: bypassPermissions (works on all platforms)                                     ║
-║   • Users can override via permission_mode in config if needed                              ║
-║                                                                                              ║
-║ If still seeing errors, manually set permission mode in your config or update Claude Code.  ║
-╚════════════════════════════════════════════════════════════════════════════════════════════╝
+                print(f"| ❌ {name:<20} | {error_preview:<68} |")
+            print(f"""+============================================================================================+
+| SOLUTION: zen_orchestrator.py defaults to bypassPermissions to avoid approval prompts       |
+|   • Default: bypassPermissions (works on all platforms)                                     |
+|   • Users can override via permission_mode in config if needed                              |
+|                                                                                              |
+| If still seeing errors, manually set permission mode in your config or update Claude Code.  |
++============================================================================================+
 """)
 
         # Print additional details if there are outputs or errors
