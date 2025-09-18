@@ -1794,7 +1794,38 @@ def _validate_critical_environment_configuration() -> Dict[str, Any]:
             redis_url = env.get("REDIS_URL")
             if not redis_url:
                 validation_result["warnings"].append(f"REDIS_URL not configured in {current_env} environment")
-        
+
+        # Check 7: DEMO_MODE and security debug settings validation for staging/production
+        # Issue #338: Validate DEMO_MODE and security debug settings in staging environment
+        if current_env in ["staging", "production"]:
+            validation_result["checks_performed"].append("demo_mode_security_config")
+
+            # Check DEMO_MODE - should not be enabled in staging/production
+            demo_mode = env.get("DEMO_MODE", "0")
+            if demo_mode in ["1", "true", "True", "TRUE", "yes", "Yes", "YES"]:
+                warning_msg = f"DEMO_MODE is enabled ('{demo_mode}') in {current_env} environment - this may bypass security controls"
+                validation_result["warnings"].append(warning_msg)
+                logger.critical(f"SECURITY WARNING: {warning_msg}")
+
+            # Check for various auth bypass/debug settings that should not be enabled in staging/production
+            security_bypass_settings = [
+                ("BYPASS_AUTH_VALIDATION", "Authentication bypass"),
+                ("AUTH_DEBUG", "Authentication debug mode"),
+                ("DISABLE_JWT_VALIDATION", "JWT validation bypass"),
+                ("SKIP_TOKEN_VALIDATION", "Token validation bypass"),
+                ("AUTH_MOCK_MODE", "Authentication mock mode"),
+                ("DISABLE_CORS", "CORS protection bypass"),
+                ("DEBUG_AUTH", "Debug authentication mode"),
+                ("INSECURE_MODE", "Insecure mode")
+            ]
+
+            for setting_name, description in security_bypass_settings:
+                setting_value = env.get(setting_name, "")
+                if setting_value and setting_value.lower() in ["1", "true", "yes", "enabled", "on"]:
+                    warning_msg = f"{description} is enabled ('{setting_value}') in {current_env} environment - this may compromise security"
+                    validation_result["warnings"].append(warning_msg)
+                    logger.critical(f"SECURITY WARNING: {warning_msg}")
+
         # Log validation summary
         if validation_result["valid"]:
             logger.debug(f" SEARCH:  ENV VALIDATION: {len(validation_result['checks_performed'])} checks passed")
