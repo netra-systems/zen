@@ -110,21 +110,19 @@ class ServiceAvailabilityChecker:
         """Checks actual availability of services for E2E testing."""
 
     def __init__(self, timeout: float = 15.0):
-        '''Initialize service availability checker.'
+        '''Initialize service availability checker.
 
         Args:
         timeout: Connection timeout in seconds (increased for better reliability)
-        '''
         '''
         self.timeout = timeout
         self.logger = logging.getLogger("")
 
     async def check_all_services(self) -> ServiceAvailability:
-        '''Check availability of all services.'
+        '''Check availability of all services.
 
         Returns:
         ServiceAvailability object with status of all services
-        '''
         '''
         self.logger.info("")
 
@@ -545,14 +543,13 @@ class ServiceAvailabilityChecker:
 
                                     # Convenience function for easy usage
     async def get_service_availability(timeout: float = 5.0) -> ServiceAvailability:
-        '''Get current service availability.'
+        '''Get current service availability.
 
         Args:
         timeout: Connection timeout in seconds
 
         Returns:
         ServiceAvailability object with current service status
-        '''
         '''
         checker = ServiceAvailabilityChecker(timeout=timeout)
         return await checker.check_all_services()

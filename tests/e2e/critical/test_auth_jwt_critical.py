@@ -190,6 +190,12 @@ class CriticalJWTAuthenticationTests:
         """Start real services and wait for health"""
         await self.services_manager.start_all_services(skip_frontend=True)
         
+        # Pre-flight service availability check
+        async with RealAuthServiceClient() as auth_client:
+            availability = await auth_client.check_service_availability()
+            if not availability['available']:
+                raise RuntimeError(f"Auth service not available: {availability['status']} at {availability['url']}")
+        
         # Wait for services to be ready with retries
         max_retries = 30  # 30 seconds total wait time
         retry_count = 0
@@ -208,7 +214,7 @@ class CriticalJWTAuthenticationTests:
             await asyncio.sleep(1.0)
         
         if retry_count >= max_retries:
-            raise RuntimeError("Services failed to start after 30 seconds")
+            raise RuntimeError("Services failed to start after 30 seconds. Auth service might be on wrong port or misconfigured.")
         
     def teardown_method(self):
         """Cleanup"""
@@ -308,6 +314,12 @@ class CriticalAuthenticationFlowTests:
         """Start real services and wait for health"""
         await self.services_manager.start_all_services(skip_frontend=True)
         
+        # Pre-flight service availability check
+        async with RealAuthServiceClient() as auth_client:
+            availability = await auth_client.check_service_availability()
+            if not availability['available']:
+                raise RuntimeError(f"Auth service not available: {availability['status']} at {availability['url']}")
+        
         # Wait for services to be ready with retries
         max_retries = 30  # 30 seconds total wait time
         retry_count = 0
@@ -326,7 +338,7 @@ class CriticalAuthenticationFlowTests:
             await asyncio.sleep(1.0)
         
         if retry_count >= max_retries:
-            raise RuntimeError("Services failed to start after 30 seconds")
+            raise RuntimeError("Services failed to start after 30 seconds. Auth service might be on wrong port or misconfigured.")
         
     def teardown_method(self):
         """Cleanup"""  
