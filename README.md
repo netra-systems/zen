@@ -68,11 +68,11 @@ For example if a request is made when it is under budget, that single request ma
 - **Budget Exceeded Behavior**:
   - `warn` mode: Zen logs warnings but continues execution
   - `block` mode: Zen prevents running new instances or halts in progress commands, depending on the nature of the budget config.
-- **Token Counting**: Budget calculations are based on estimates and may not match exact billing from Claude/OpenAI
+- **Token Counting**: Budget calculations are based on estimates and may not match exact billing from Claude/Codex
 
 ### Target Audience and Use Cases
 
-**Zen is designed for internal developer productivity and automation workflows and is *not* suitable for all use cases:**
+Zen is designed for internal developer productivity and automation workflows and is *not* suitable for all use cases.
 
 It is generally expected that you already familiar with claude code
 in order to get the most value out of Zen.
@@ -145,15 +145,8 @@ python -m zen_orchestrator --help
 The **Model** column in Zen's status display shows the **actual model used** by Claude Code for each API response, not necessarily the model you configured in your settings.
 
 **Key Points:**
-- **Intentional Design**: This column reflects reality - what model Claude actually used to process your request
 - **Cost Tracking Value**: Knowing the actual model is critical for accurate cost calculation since different models have vastly different pricing (e.g., Opus costs 5x more than Sonnet)
 - **Dynamic Detection**: Zen automatically detects the model from Claude's API responses in real-time
-- **Fallback Behavior**: If model detection fails, it defaults to "claude-3-5-sonnet" for cost calculations
-
-**Why This Matters:**
-- Your configuration might specify Opus, but Claude might use Sonnet for simpler tasks
-- Accurate cost tracking requires knowing the actual model used, not just your preference
-- Budget management and token usage calculations depend on correct model identification
 
 **Example Status Display:**
 ```
@@ -184,24 +177,19 @@ Every Zen configuration has the same basic structure:
   "instances": [
     {
       "command": "/command || prompt",
-      "permission_mode": "bypassPermissions", # Default
-      "output_format": "stream-json", # Default
-      "max_tokens_per_command": 12000, # Optional
-      "allowed_tools": ["Read", "Write", "Edit", "Task"],  # Optional
-      # Other optional features
-    }#,
-    #{
-    #  next instance
-    #}
-    #... series of instances
+      "permission_mode": "bypassPermissions", // Default
+      "output_format": "stream-json", // Default
+      "max_tokens_per_command": 12000, // Optional
+      "allowed_tools": ["Read", "Write", "Edit", "Task"],  // Optional
+      // Other optional features
+    }//,
+    //{
+    //  next instance
+    //}
+    //... series of instances
   ]
 }
 ```
-
-**Output Truncation:**
-- **Problem**: Long outputs may be truncated in console display
-- **Workaround**: Use `--max-console-lines` and `--max-line-length` parameters, or redirect output to files
-- **Impact**: Full execution logs are preserved but may not be visible in real-time
 
 ### Key Configuration Elements
 
@@ -210,6 +198,8 @@ Every Zen configuration has the same basic structure:
 | `command` | Task specification | Can use existing /commands or any string literal input |
 | `max_tokens_per_command` | Token budget | Allocate based on complexity |
 | `allowed_tools` | Tool permissions | Grant minimal necessary tools |
+
+For Output Truncation control: `--max-console-lines` and `--max-line-length` parameters, or redirect output to files
 
 ### Scheduling
 
@@ -230,13 +220,13 @@ zen --config my_config.json --start-at "30m"
 ## Expected questions
 
 ### 1. Do I have to use /commands?
-No. You can just put your string query (prompt) and it works the same.
-It does seem to be a best practice though to version controlled `/commands`.
+- No. You can just put your string query (prompt) and it works the same.
+- It does seem to be a best practice though to version controlled `/commands`.
 
 ### 2. Does this replace using Claude command directly?
-No. At least not yet fully.
-As we primarily using structured commands, internally we see 80%+ of our usage through Zen.
-Ad hoc questions or validating if a command is working as expected for now is better through Claude directly.
+- No. At least not yet fully.
+- As we primarily using structured commands, internally we see 80%+ of our usage through Zen.
+- Ad hoc questions or validating if a command is working as expected for now is better through Claude directly.
 
 ### 3. What does this assume?
 - You have claude code installed, authenticated, and configured already.
@@ -259,22 +249,6 @@ Our intent is to add an optional system where non-PII usage data is sent to Netr
 There is a time and a place for wanting to have multiple windows and git trees open.
 Zen's intent is the opposite: make running `n` code clis more peaceful.
 Why activate your "giga-brain" when you can run one command instead?
-
-
-## Configuration
-
-Create a JSON file with your tasks:
-
-```json
-{
-  "instances": [
-    {
-      "name": "task-1",
-      "command": "/my-existing-claude-code-command",
-    }
-  ]
-}
-```
 
 
 ## Zen --help
@@ -312,7 +286,6 @@ options:
                         Seconds between rolling status reports (default: 5)
   --start-at START_AT   Schedule orchestration to start at specific time. Examples: '2h' (2 hours from now), '30m' (30 minutes),
                         '14:30' (2:30 PM today), '1am' (1 AM today/tomorrow)
-  --use-cloud-sql       Save metrics to CloudSQL database (NetraOptimizer integration)
   --overall-token-budget OVERALL_TOKEN_BUDGET
                         Global token budget for the entire session.
   --command-budget COMMAND_BUDGET
@@ -348,14 +321,20 @@ python test_runner.py
 
 ## Basic Usage
 
-### 1. Direct Command Execution (NEW)
+### Command Execution
 Execute commands directly without config files:
 ```bash
 # Execute a single command directly
-zen "/help"
+zen "/my-existing-claude-command"
+
+# Execute with config (recommended usage pattern)
+zen --config /my-config.json
 
 # Execute with custom workspace
 zen "/analyze-code" --workspace ~/my-project
+
+# Execute with token budget
+zen "/complex-analysis" --overall-token-budget 5000
 
 # Execute with custom instance name
 zen "/debug-issue" --instance-name "debug-session"
@@ -363,20 +342,16 @@ zen "/debug-issue" --instance-name "debug-session"
 # Execute with session continuity
 zen "/optimize-performance" --session-id "perf-session-1"
 
-# Execute with history management
-zen "/generate-docs" --clear-history --compact-history
+# Start in 2 hours
+zen --config my_config.json --start-at "2h"
 
-# Execute with token budget
-zen "/complex-analysis" --overall-token-budget 5000
+# Start at specific time
+zen --config my_config.json --start-at "14:30"
+
 ```
 
-**Direct Command Features:**
-- **No Config Required**: Skip JSON file creation for simple tasks
-- **Custom Options**: Set instance name, description, session ID
-- **History Control**: Clear or compact history before execution
-- **Budget Integration**: Works with all existing budget features
 
-### 2. Quick Test
+### Quick Test
 ```bash
 # List available commands (auto-detects workspace)
 zen --list-commands
@@ -388,13 +363,7 @@ zen --dry-run
 zen
 ```
 
-**What happens when you run zen:**
-1. **Auto-detects workspace:** Finds your project root by looking for `.git`, `.claude`, etc.
-2. **Discovers commands:** Scans `<workspace>/.claude/commands/` for available slash commands
-3. **Uses real commands:** Default instances now use actual slash commands (e.g., `/analyze-repository`, `/README`) instead of plain prompts
-4. **Works from anywhere:** Whether you're in the `zen/` directory or project root
-
-### 4. Workspace Management
+### Workspace Management
 ```bash
 # Auto-detect workspace (looks for project root with .git, .claude, etc.)
 zen --dry-run
@@ -406,13 +375,7 @@ zen --workspace ~/projects/myapp
 zen --timeout 300 --workspace ~/projects/myapp
 ```
 
-**Auto-Detection Logic:**
-- Zen automatically detects your project root by looking for common project indicators (`.git`, `.claude`, `package.json`, `setup.py`, `pyproject.toml`, `Cargo.toml`)
-- If zen is in a subdirectory (like `/my-project/zen/`), it will use `/my-project/` as the workspace
-- Falls back to current working directory if no project indicators are found
-- You can always override with `--workspace` if needed
-
-### 5. Token Budget Control
+### Token Budget Control
 ```bash
 # Set overall budget
 zen --overall-token-budget 100000
@@ -425,7 +388,7 @@ zen --budget-enforcement-mode block  # Stop when exceeded
 zen --budget-enforcement-mode warn   # Warn but continue
 ```
 
-### 6. Scheduled Execution
+### Scheduled Execution
 ```bash
 # Start in 2 hours
 zen --start-at "2h"
@@ -435,7 +398,7 @@ zen --start-at "14:30"  # 2:30 PM today
 zen --start-at "1am"    # 1 AM tomorrow
 ```
 
-### 7. Execution Mode Precedence
+### Execution Mode Precedence
 Zen supports three execution modes with clear precedence rules:
 
 1. **Direct Command** (Highest Priority)
@@ -453,16 +416,7 @@ Zen supports three execution modes with clear precedence rules:
    zen  # Uses built-in default commands
    ```
 
-**Mixed Usage:**
-```bash
-# Direct command overrides config file
-zen "/direct-cmd" --config my-config.json  # Executes /direct-cmd, ignores config
-
-# Config file overrides defaults
-zen --config my-config.json  # Uses config, ignores defaults
-```
-
-## Advanced Features
+## Other Features
 
 ### Parallel Execution Control
 ```bash
@@ -494,25 +448,6 @@ zen --quiet
 # Change status report interval
 zen --status-report-interval 30  # Every 30 seconds
 ```
-
-## Integration with Claude Code
-
-Zen works seamlessly with Claude Code workspaces:
-
-1. Navigate to your Claude Code project:
-```bash
-cd ~/projects/my-claude-project
-```
-
-2. Run Zen to orchestrate multiple instances:
-```bash
-zen --config zen-config.json
-```
-
-3. Monitor the execution:
-- Real-time status updates
-- Token usage tracking
-- Progress visualization
 
 ## Environment Variables
 
@@ -572,11 +507,6 @@ zen --inspect-command /analyze
 - **Cause**: Estimates based on local token counting vs. server-side billing
 - **Workaround**: Use conservative budget limits and monitor actual usage through provider dashboards
 
-**Scheduling Precision:**
-- **Problem**: `--start-at` timing may have minor delays (±30 seconds)
-- **Cause**: System scheduling overhead and startup time variations
-- **Workaround**: Account for potential delays in time-sensitive workflows
-
 **Configuration File Validation:**
 - **Problem**: Limited validation of JSON configuration files
 - **Impact**: Invalid configurations may cause runtime errors
@@ -586,7 +516,6 @@ zen --inspect-command /analyze
 - **Problem**: Interrupted executions may leave background processes running
 - **Workaround**: Monitor system processes and manually terminate if necessary
 - **Planned Fix**: Improved signal handling and cleanup in future versions
-
 
 ## Example Configurations
 
