@@ -19,13 +19,14 @@ CRITICAL REQUIREMENTS per CLAUDE.md:
 """
 
 import pytest
-import jwt
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, Optional, List
 from unittest.mock import Mock, patch
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
+from netra_backend.app.auth_integration.auth import validate_token_jwt
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.types import UserID, ThreadID, SessionID
 
 

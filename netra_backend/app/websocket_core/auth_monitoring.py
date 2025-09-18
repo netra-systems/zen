@@ -37,7 +37,7 @@ from netra_backend.app.monitoring.authentication_monitor_service import (
     AuthenticationStatus,
     record_auth_attempt
 )
-from netra_backend.app.websocket_core.websocket_metrics import (
+from netra_backend.app.monitoring.websocket_metrics import (
     get_websocket_metrics_collector,
     record_websocket_event
 )
