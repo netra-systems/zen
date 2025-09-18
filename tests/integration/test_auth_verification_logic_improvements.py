@@ -30,7 +30,6 @@ from enum import Enum
 import pytest
 import httpx
 import json
-import jwt
 from urllib.parse import urlparse
 from shared.isolated_environment import IsolatedEnvironment
 
