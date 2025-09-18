@@ -89,6 +89,169 @@ class TestInstanceConfig:
         assert config.name == "MyTest"
         assert config.description == "Execute /test"
 
+    def test_instance_config_direct_attribute_setting(self):
+        """Test direct attribute setting on InstanceConfig instance (Issue #1319)"""
+        # Create instance with minimal configuration
+        config = InstanceConfig(command="/test-command")
+
+        # Test direct attribute assignment works correctly
+        config.max_tokens_per_command = 1000
+        assert config.max_tokens_per_command == 1000
+
+        # Test modifying other attributes directly
+        config.permission_mode = "acceptAll"
+        assert config.permission_mode == "acceptAll"
+
+        config.output_format = "json"
+        assert config.output_format == "json"
+
+        config.session_id = "direct-session-123"
+        assert config.session_id == "direct-session-123"
+
+        config.clear_history = True
+        assert config.clear_history is True
+
+        config.compact_history = True
+        assert config.compact_history is True
+
+        # Test setting list attributes
+        config.allowed_tools = ["tool1", "tool2", "tool3"]
+        assert config.allowed_tools == ["tool1", "tool2", "tool3"]
+
+        config.pre_commands = ["/init", "/setup"]
+        assert config.pre_commands == ["/init", "/setup"]
+
+    def test_instance_config_max_tokens_scenarios(self):
+        """Test max_tokens_per_command configuration scenarios"""
+        # Test default None value
+        config = InstanceConfig(command="/test")
+        assert config.max_tokens_per_command is None
+
+        # Test setting via constructor
+        config = InstanceConfig(command="/test", max_tokens_per_command=2000)
+        assert config.max_tokens_per_command == 2000
+
+        # Test setting directly on instance
+        config = InstanceConfig(command="/test")
+        config.max_tokens_per_command = 1500
+        assert config.max_tokens_per_command == 1500
+
+        # Test updating existing value
+        config.max_tokens_per_command = 3000
+        assert config.max_tokens_per_command == 3000
+
+        # Test setting to None
+        config.max_tokens_per_command = None
+        assert config.max_tokens_per_command is None
+
+    def test_instance_config_post_initialization_modification(self):
+        """Test attribute modification after instance initialization"""
+        # Create instance with constructor values
+        config = InstanceConfig(
+            command="/original-command",
+            name="original-name",
+            description="original description",
+            max_tokens_per_command=1000
+        )
+
+        # Verify initial state
+        assert config.command == "/original-command"
+        assert config.name == "original-name"
+        assert config.description == "original description"
+        assert config.max_tokens_per_command == 1000
+
+        # Modify attributes directly
+        config.command = "/modified-command"
+        config.name = "modified-name"
+        config.description = "modified description"
+        config.max_tokens_per_command = 2000
+
+        # Verify changes
+        assert config.command == "/modified-command"
+        assert config.name == "modified-name"
+        assert config.description == "modified description"
+        assert config.max_tokens_per_command == 2000
+
+    def test_instance_config_configuration_override_patterns(self):
+        """Test configuration file override patterns"""
+        # Test starting with defaults
+        config = InstanceConfig(command="/base-command")
+        assert config.max_tokens_per_command is None
+        assert config.permission_mode == "acceptEdits"
+        assert config.output_format == "stream-json"
+
+        # Simulate configuration file override
+        config.max_tokens_per_command = 1500  # From config file
+        config.permission_mode = "acceptAll"   # From config file
+        config.output_format = "json"          # From config file
+
+        # Verify overrides applied
+        assert config.max_tokens_per_command == 1500
+        assert config.permission_mode == "acceptAll"
+        assert config.output_format == "json"
+
+        # Simulate CLI argument precedence over config file
+        config.max_tokens_per_command = 2500  # CLI override
+        config.permission_mode = "manual"     # CLI override
+
+        # Verify CLI precedence
+        assert config.max_tokens_per_command == 2500
+        assert config.permission_mode == "manual"
+        assert config.output_format == "json"  # Unchanged from config
+
+    def test_instance_config_cli_argument_precedence(self):
+        """Test CLI argument precedence over other configuration methods"""
+        # Start with instance created from config file values
+        config = InstanceConfig(
+            command="/test-command",
+            max_tokens_per_command=1000,
+            permission_mode="acceptEdits",
+            output_format="stream-json"
+        )
+
+        # Simulate CLI arguments overriding config values
+        config.max_tokens_per_command = 3000    # --max-tokens-per-command 3000
+        config.permission_mode = "acceptAll"    # --permission-mode acceptAll
+        config.session_id = "cli-session-456"   # --session-id cli-session-456
+        config.clear_history = True             # --clear-history
+        config.allowed_tools = ["bash", "edit"] # --allowed-tools bash,edit
+
+        # Verify CLI precedence
+        assert config.max_tokens_per_command == 3000
+        assert config.permission_mode == "acceptAll"
+        assert config.session_id == "cli-session-456"
+        assert config.clear_history is True
+        assert config.allowed_tools == ["bash", "edit"]
+        assert config.output_format == "stream-json"  # Unchanged from original
+
+    def test_instance_config_attribute_types_preserved(self):
+        """Test that attribute types are preserved during direct setting"""
+        config = InstanceConfig(command="/test")
+
+        # Test integer type preservation
+        config.max_tokens_per_command = 1000
+        assert isinstance(config.max_tokens_per_command, int)
+        assert config.max_tokens_per_command == 1000
+
+        # Test string type preservation
+        config.session_id = "test-session"
+        assert isinstance(config.session_id, str)
+        assert config.session_id == "test-session"
+
+        # Test boolean type preservation
+        config.clear_history = True
+        assert isinstance(config.clear_history, bool)
+        assert config.clear_history is True
+
+        # Test list type preservation
+        config.allowed_tools = ["tool1", "tool2"]
+        assert isinstance(config.allowed_tools, list)
+        assert config.allowed_tools == ["tool1", "tool2"]
+
+        # Test None type preservation
+        config.max_tokens_per_command = None
+        assert config.max_tokens_per_command is None
+
 
 class TestInstanceStatus:
     """Test InstanceStatus dataclass functionality"""
