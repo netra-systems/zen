@@ -168,7 +168,7 @@ def require_docker_services_smart() -> None:
         logger.info(f"🌐 Staging Base URL: {staging_base_url}")
         logger.info(f"🌐 Staging Base URL: {staging_base_url}")
         logger.info(f"🌐 Staging Base URL: {staging_base_url}")
-        logger.info(f"🌐 Staging Auth URL: {staging_auth_url})"
+        logger.info(f"🌐 Staging Auth URL: {staging_auth_url}")
 
         # Phase 3: Enhanced staging environment health validation
         staging_healthy = validate_staging_environment_health(staging_websocket_url)
@@ -202,16 +202,16 @@ def require_docker_services_smart() -> None:
         os.environ["REQUIRE_ALL_AGENT_EVENTS"] = "true"  # Require all 5 critical events
         
         # Issue #773: Set graceful degradation flags
-        os.environ["GRACEFUL_SERVICE_DEGRADATION] = true"
-        os.environ[FAST_TIMEOUT_MODE] = true
-        os.environ[CLOUD_RUN_COMPATIBLE] = true"
-        os.environ[CLOUD_RUN_COMPATIBLE] = true"
-        os.environ[CLOUD_RUN_COMPATIBLE] = true"
-        os.environ[CLOUD_RUN_COMPATIBLE] = true"
+        os.environ["GRACEFUL_SERVICE_DEGRADATION"] = "true"
+        os.environ["FAST_TIMEOUT_MODE"] = "true"
+        os.environ["CLOUD_RUN_COMPATIBLE"] = "true"
+        os.environ["CLOUD_RUN_COMPATIBLE"] = "true"
+        os.environ["CLOUD_RUN_COMPATIBLE"] = "true"
+        os.environ["CLOUD_RUN_COMPATIBLE"] = "true"
 
     except Exception as e:
-        logger.error(f"❌ ISSUES #680, #773: Enhanced smart Docker check failed: {e})"
-        pytest.skip(fNeither Docker nor staging environment available: {e})
+        logger.error(f"❌ ISSUES #680, #773: Enhanced smart Docker check failed: {e}")
+        pytest.skip(f"Neither Docker nor staging environment available: {e}")
 
 
 def is_docker_available() -> bool:
