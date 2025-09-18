@@ -148,10 +148,10 @@ def require_docker_services_smart() -> None:
         if not staging_enabled:
             if is_windows:
                 # Last resort for Windows: try to start mock server with relaxed settings
-                logger.warning(🪟 Windows last resort: attempting mock server with relaxed settings)"
-                logger.warning(🪟 Windows last resort: attempting mock server with relaxed settings)"
-                logger.warning(🪟 Windows last resort: attempting mock server with relaxed settings)"
-                logger.warning(🪟 Windows last resort: attempting mock server with relaxed settings)"
+                logger.warning("🪟 Windows last resort: attempting mock server with relaxed settings")
+                logger.warning("🪟 Windows last resort: attempting mock server with relaxed settings")
+                logger.warning("🪟 Windows last resort: attempting mock server with relaxed settings")
+                logger.warning("🪟 Windows last resort: attempting mock server with relaxed settings")
                 try:
                     import os
                     os.environ["DOCKER_BYPASS"] = "true"
@@ -161,45 +161,45 @@ def require_docker_services_smart() -> None:
                 except Exception as final_error:
                     logger.error(f"❌ Windows mock server last resort failed: {final_error}")
 
-            pytest.skip(❌ Docker unavailable, staging fallback disabled, and no mock server available. Enable with USE_STAGING_FALLBACK=true or set DOCKER_BYPASS=true")"
+            pytest.skip("❌ Docker unavailable, staging fallback disabled, and no mock server available. Enable with USE_STAGING_FALLBACK=true or set DOCKER_BYPASS=true")
 
-        logger.info(f🌐 Staging WebSocket URL: {staging_websocket_url})
-        logger.info(f🌐 Staging Base URL: {staging_base_url})"
-        logger.info(f🌐 Staging Base URL: {staging_base_url})"
-        logger.info(f🌐 Staging Base URL: {staging_base_url})"
-        logger.info(f🌐 Staging Base URL: {staging_base_url})"
+        logger.info(f"🌐 Staging WebSocket URL: {staging_websocket_url}")
+        logger.info(f"🌐 Staging Base URL: {staging_base_url}")
+        logger.info(f"🌐 Staging Base URL: {staging_base_url}")
+        logger.info(f"🌐 Staging Base URL: {staging_base_url}")
+        logger.info(f"🌐 Staging Base URL: {staging_base_url}")
         logger.info(f"🌐 Staging Auth URL: {staging_auth_url})"
 
         # Phase 3: Enhanced staging environment health validation
         staging_healthy = validate_staging_environment_health(staging_websocket_url)
         if not staging_healthy:
             if is_windows:
-                logger.warning(⚠️ Staging environment health check failed on Windows - trying mock server fallback)
+                logger.warning("⚠️ Staging environment health check failed on Windows - trying mock server fallback")
                 try:
                     asyncio.run(setup_mock_websocket_environment())
-                    logger.info(✅ Mock WebSocket server fallback after staging failure)"
-                    logger.info(✅ Mock WebSocket server fallback after staging failure)"
-                    logger.info(✅ Mock WebSocket server fallback after staging failure)"
-                    logger.info(✅ Mock WebSocket server fallback after staging failure)"
+                    logger.info("✅ Mock WebSocket server fallback after staging failure")
+                    logger.info("✅ Mock WebSocket server fallback after staging failure")
+                    logger.info("✅ Mock WebSocket server fallback after staging failure")
+                    logger.info("✅ Mock WebSocket server fallback after staging failure")
                     return
                 except Exception as mock_fallback_error:
-                    logger.error(f❌ Mock server fallback after staging failure: {mock_fallback_error}")"
+                    logger.error(f"❌ Mock server fallback after staging failure: {mock_fallback_error}")
 
-            logger.warning(⚠️ Staging environment health check failed - proceeding anyway for development testing)
+            logger.warning("⚠️ Staging environment health check failed - proceeding anyway for development testing")
 
         # Phase 4: Configure test environment for staging with full configuration
         setup_staging_test_environment(staging_websocket_url, staging_base_url, staging_auth_url)
-        logger.info(✅ Successfully configured enhanced staging environment fallback - tests will proceed")"
+        logger.info("✅ Successfully configured enhanced staging environment fallback - tests will proceed")
 
         # Phase 5: Set permissive test mode for development but enable strict WebSocket event validation
         import os
-        os.environ[PERMISSIVE_TEST_MODE] = true
-        os.environ[SKIP_STRICT_HEALTH_CHECKS] = true"
-        os.environ[SKIP_STRICT_HEALTH_CHECKS] = true"
-        os.environ[SKIP_STRICT_HEALTH_CHECKS] = true"
-        os.environ[SKIP_STRICT_HEALTH_CHECKS] = true"
-        os.environ["VALIDATE_WEBSOCKET_EVENTS] = true  # Ensure WebSocket events are validated"
-        os.environ[REQUIRE_ALL_AGENT_EVENTS] = true  # Require all 5 critical events
+        os.environ["PERMISSIVE_TEST_MODE"] = "true"
+        os.environ["SKIP_STRICT_HEALTH_CHECKS"] = "true"
+        os.environ["SKIP_STRICT_HEALTH_CHECKS"] = "true"
+        os.environ["SKIP_STRICT_HEALTH_CHECKS"] = "true"
+        os.environ["SKIP_STRICT_HEALTH_CHECKS"] = "true"
+        os.environ["VALIDATE_WEBSOCKET_EVENTS"] = "true"  # Ensure WebSocket events are validated
+        os.environ["REQUIRE_ALL_AGENT_EVENTS"] = "true"  # Require all 5 critical events
         
         # Issue #773: Set graceful degradation flags
         os.environ["GRACEFUL_SERVICE_DEGRADATION] = true"
