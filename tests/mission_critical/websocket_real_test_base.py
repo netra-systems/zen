@@ -55,12 +55,11 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # CRITICAL: Always require real services - NO MOCKS per CLAUDE.md
 def require_docker_services() -> None:
-    """"
-
+    """
     Require Docker services for all tests - fail fast if not available.
 
     CRITICAL: Per CLAUDE.md, MOCKS = Abomination. Tests must use real services.
-    """"
+    """
 
     
     try:
@@ -75,7 +74,7 @@ def require_docker_services_smart() -> None:
     """Smart Docker services requirement with Windows Docker bypass and mock WebSocket server support."
 
     ENHANCED for Issue #860: Windows WebSocket connection failure resolution.
-    Business Impact: Protects $"500K" plus ARR validation coverage with Windows development support.
+    Business Impact: Protects $500K+ ARR validation coverage with Windows development support.
 
     Flow:
     1. Check platform and Docker availability (fast, "2s" timeout)
@@ -86,7 +85,7 @@ def require_docker_services_smart() -> None:
     6. Load staging configuration from .env.staging.e2e
     7. Validate staging environment health with proper URLs
     8. Configure test environment for staging/mock validation with all 5 WebSocket events
-    """"
+    """
 
     import platform
 

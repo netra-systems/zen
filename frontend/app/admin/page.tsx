@@ -176,7 +176,7 @@ const AdminDashboard = ({ setActiveTab }: { setActiveTab: (tab: string) => void 
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {adminSections.map((section, index) => createAdminSectionCard(section, index))}
+      {adminSections.map((section, index) => createAdminSectionCard(section, index, setActiveTab))}
     </div>
   );
 };
