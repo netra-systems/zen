@@ -207,10 +207,8 @@ class AuthIntegrationStartupTests(BaseIntegrationTest):
             auth_middleware = MagicMock()
             middleware_initialized = True
         assert middleware_initialized, 'Authentication middleware must initialize'
-        with patch('netra_backend.app.auth_integration.jwt_handler.JWTHandler') as mock_jwt_handler_class:
-            mock_jwt_handler = AsyncMock()
-            mock_jwt_handler.verify_token.return_value = {'user_id': 'test_user_123', 'email': 'test@example.com'}
-            mock_jwt_handler_class.return_value = mock_jwt_handler
+        with patch('netra_backend.app.auth_integration.auth.auth_service_get_session_user') as mock_auth_service:
+            mock_auth_service.return_value = {'user_id': 'test_user_123', 'email': 'test@example.com'}
             middleware_processed = True
             try:
                 result = await self._mock_middleware_call(mock_request, mock_call_next)
