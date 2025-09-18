@@ -45,16 +45,24 @@ def _fix_sqlite_url(database_url: str) -> str:
     """Fix SQLite URL format if needed.
 
     SQLAlchemy expects sqlite:/// (three slashes) but we might get sqlite:/ (two slashes)
+    For async usage, we also need to use aiosqlite driver.
     """
     if database_url.startswith('sqlite:/') and not database_url.startswith('sqlite:///'):
         # Convert sqlite:/path to sqlite:///path
         if database_url.startswith('sqlite://'):
             # Already properly formatted with double slash for host (which is empty)
-            return database_url
+            fixed_url = database_url
         else:
             # Fix sqlite:/path to sqlite:///path
-            return database_url.replace('sqlite:/', 'sqlite:///', 1)
-    return database_url
+            fixed_url = database_url.replace('sqlite:/', 'sqlite:///', 1)
+    else:
+        fixed_url = database_url
+
+    # For async SQLAlchemy, we need to use aiosqlite driver for SQLite
+    if fixed_url.startswith('sqlite:///'):
+        fixed_url = fixed_url.replace('sqlite:///', 'sqlite+aiosqlite:///', 1)
+
+    return fixed_url
 
 def _get_isolation_level_for_database(database_url: str) -> str:
     """Get appropriate isolation level based on database engine type.
