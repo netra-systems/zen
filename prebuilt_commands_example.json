@@ -1,0 +1,30 @@
+{
+  "instances": [
+    {
+      "name": "git-gardener",
+      "command": "/gitcommitgardener",
+      "description": "Clean up git commits with tool usage tracking",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 8000
+    },
+    {
+      "name": "test-runner",
+      "command": "/runtests unit, integration",
+      "description": "Run comprehensive tests",
+      "max_tokens_per_command": 15000
+    },
+    {
+      "name": "code-formatter",
+      "command": "/formatcode python, javascript --fix-imports",
+      "description": "Format code and fix imports",
+      "max_tokens_per_command": 10000
+    },
+    {
+      "name": "security-audit",
+      "command": "/securityaudit --scan-dependencies --check-secrets",
+      "description": "Security audit with dependency scanning",
+      "max_tokens_per_command": 12000
+    }
+  ]
+}

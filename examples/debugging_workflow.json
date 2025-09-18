@@ -1,0 +1,149 @@
+{
+  "// Description": "Interactive debugging session workflow for complex issue resolution",
+  "// Use Case": "Investigating production issues, analyzing bug reports, and systematic problem-solving",
+  "// Best Practices": "Systematic approach from symptom analysis to root cause identification and resolution",
+
+  "instances": [
+    {
+      "name": "symptom-analyzer",
+      "command": "/analyze reported symptoms and gather initial information; Review error logs, user reports, and system metrics; Identify patterns and potential related issues; Create initial hypothesis list",
+      "description": "Analyzes reported symptoms and gathers diagnostic information",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 12000,
+      "allowed_tools": ["Read", "Grep", "Glob", "Write", "Task"],
+      "session_id": "symptom_analysis_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "/clear",
+        "Set context: I am analyzing symptoms and gathering diagnostic information",
+        "Focus: Error patterns, system metrics, user impact, timeline analysis"
+      ]
+    },
+    {
+      "name": "environment-investigator",
+      "command": "/investigate system environment and configuration; Check system resources, network connectivity, and service dependencies; Analyze configuration changes and deployment history; Identify environmental factors",
+      "description": "Investigates system environment and infrastructure factors",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 10000,
+      "allowed_tools": ["Bash", "Read", "Grep", "Write", "Task"],
+      "session_id": "environment_investigation_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am investigating system environment and infrastructure",
+        "Focus: Resource usage, network status, service health, configuration changes"
+      ]
+    },
+    {
+      "name": "code-detective",
+      "command": "/analyze code for potential issues; Review recent changes, examine error-prone areas, and check for race conditions; Analyze algorithmic complexity and resource usage; Identify code-related root causes",
+      "description": "Investigates code-related causes of the reported issues",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 15000,
+      "allowed_tools": ["Read", "Grep", "Glob", "Write", "Task"],
+      "session_id": "code_investigation_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am investigating code-related causes of reported issues",
+        "Focus: Recent changes, error-prone patterns, race conditions, resource usage"
+      ]
+    },
+    {
+      "name": "data-forensics-specialist",
+      "command": "/analyze data-related issues; Check data integrity, database performance, and query patterns; Investigate data corruption, inconsistencies, or performance bottlenecks; Analyze transaction logs",
+      "description": "Investigates data-related aspects of the issue",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 12000,
+      "allowed_tools": ["Bash", "Read", "Grep", "Write", "Task"],
+      "session_id": "data_forensics_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am investigating data-related aspects of the issue",
+        "Focus: Data integrity, query performance, transaction logs, consistency checks"
+      ]
+    },
+    {
+      "name": "reproduction-engineer",
+      "command": "/create reliable reproduction steps; Design test cases to consistently reproduce the issue; Create minimal reproduction examples; Validate reproduction steps across different environments",
+      "description": "Creates reliable reproduction steps for the issue",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 10000,
+      "allowed_tools": ["Write", "Edit", "Bash", "Task"],
+      "session_id": "reproduction_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am creating reliable reproduction steps for the issue",
+        "Focus: Minimal test cases, consistent reproduction, cross-environment validation"
+      ]
+    },
+    {
+      "name": "root-cause-synthesizer",
+      "command": "/synthesize findings and identify root cause; Analyze all investigation results to determine the true root cause; Eliminate false hypotheses and confirm the primary issue; Create comprehensive root cause analysis",
+      "description": "Synthesizes all findings to identify the true root cause",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 15000,
+      "allowed_tools": ["Read", "Write", "Edit", "Task"],
+      "session_id": "root_cause_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am synthesizing all investigation findings to identify root cause",
+        "Method: Eliminate hypotheses, confirm primary cause, create comprehensive analysis"
+      ]
+    },
+    {
+      "name": "solution-architect",
+      "command": "/design comprehensive solution; Create fix strategy addressing root cause and preventing recurrence; Design implementation plan with testing and validation steps; Consider impact and rollback procedures",
+      "description": "Designs comprehensive solution strategy",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 14000,
+      "allowed_tools": ["Read", "Write", "Edit", "MultiEdit", "Task"],
+      "session_id": "solution_design_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am designing comprehensive solution strategy",
+        "Include: Fix implementation, testing plan, prevention measures, rollback procedures"
+      ]
+    }
+  ],
+
+  "// Debugging Methodology": {
+    "investigation_order": "Symptoms → Environment → Code → Data → Reproduction → Root Cause → Solution",
+    "hypothesis_testing": "Create testable hypotheses, gather evidence, eliminate false leads",
+    "documentation_requirements": "Timeline, evidence, hypotheses tested, root cause, solution plan",
+    "validation_criteria": "Issue reproduced, root cause confirmed, solution tested"
+  },
+
+  "// Issue Classification": {
+    "severity_levels": "Critical (system down), High (major functionality), Medium (performance), Low (cosmetic)",
+    "impact_assessment": "Users affected, business impact, data integrity risk, security implications",
+    "urgency_factors": "Customer visibility, revenue impact, compliance requirements, escalation level"
+  },
+
+  "// Configuration Notes": {
+    "execution_strategy": "Parallel investigation with synthesis phases",
+    "session_management": "Each investigator maintains independent analysis context",
+    "token_allocation": "Code and root cause analysis get most tokens for thorough investigation",
+    "tool_integration": "Full tool access for comprehensive investigation capabilities",
+    "best_practices": [
+      "Gather evidence before forming conclusions",
+      "Test hypotheses systematically",
+      "Document investigation process thoroughly",
+      "Focus on root cause, not just symptoms",
+      "Design solutions that prevent recurrence",
+      "Always plan for rollback scenarios"
+    ]
+  }
+}
