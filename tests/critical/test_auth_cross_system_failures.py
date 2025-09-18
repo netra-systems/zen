@@ -39,15 +39,15 @@ import jwt as pyjwt
 from fastapi.testclient import TestClient
 
     # Set test environment before any imports
-env.set("TESTING", "true", "test)"
-env.set("ENVIRONMENT", "test", "test)"
-env.set("SKIP_STARTUP_CHECKS", "true", "test)"
-env.set("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only", "test)"
+env.set("TESTING", "true", "test"))
+env.set("ENVIRONMENT", "test", "test")
+env.set("SKIP_STARTUP_CHECKS", "true", "test")
+env.set("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only", "test")
 
     # Force enable auth service for cross-system testing
-env.set("AUTH_SERVICE_ENABLED", "true", "test)"
-env.set("AUTH_FAST_TEST_MODE", "false", "test)"
-env.set("AUTH_SERVICE_URL", "http://127.0.0.1:8001", "test)"
+env.set("AUTH_SERVICE_ENABLED", "true", "test")
+env.set("AUTH_FAST_TEST_MODE", "false", "test")
+env.set("AUTH_SERVICE_URL", "http://127.0.0.1:8001", "test")
 
     # Add project root to path for imports
 import sys
