@@ -58,12 +58,11 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
     # Import modules but defer app creation until test execution
 try:
-    pass
-import netra_backend.app.main
-from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.clients.auth_client import auth_client
-from netra_backend.app.db.models_postgres import User
-backend_available = True
+    import netra_backend.app.main
+    from netra_backend.app.auth_integration.auth import get_current_user
+    from netra_backend.app.clients.auth_client import auth_client
+    from netra_backend.app.db.models_postgres import User
+    backend_available = True
 except ImportError as e:
     print("")
 backend_available = False
