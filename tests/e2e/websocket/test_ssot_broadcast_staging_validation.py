@@ -3,7 +3,7 @@
 Business Value Justification (BVJ):
 - Segment: Enterprise/Platform (Production-ready validation)
 - Business Goal: Golden Path reliability in staging environment
-- Value Impact: Validates $500K+ ARR Golden Path works with SSOT consolidation
+- Value Impact: Validates 500K+ ARR Golden Path works with SSOT consolidation
 - Strategic Impact: Final validation before production SSOT deployment
 
 E2E staging tests for SSOT WebSocket broadcast consolidation:
@@ -88,7 +88,7 @@ class SSOTBroadcastStagingValidationTests(SSotAsyncTestCase):
                 await websocket.send(json.dumps(connect_message))
                 connection_response = json.loads(await websocket.recv())
                 assert connection_response.get('type') in ['connection_established', 'connected'], f'Staging connection failed: {connection_response}'
-                logger.info('✅ Staging WebSocket connection established')
+                logger.info('CHECK Staging WebSocket connection established')
                 for i, event in enumerate(golden_path_events):
                     staging_event = {**event, 'staging_validation': {'sequence': i + 1, 'total_events': len(golden_path_events), 'ssot_consolidation_test': True, 'environment': 'staging'}}
                     golden_path_message = {'type': 'user_message', 'user_id': staging_user, 'content': f"Golden Path step {i + 1}: {event['type']}", 'golden_path_event': staging_event, 'thread_id': f'golden_path_staging_thread', 'ssot_validation': True}
@@ -103,7 +103,7 @@ class SSOTBroadcastStagingValidationTests(SSotAsyncTestCase):
                                 break
                         except asyncio.TimeoutError:
                             continue
-                        except websockets.exceptions.ConnectionClosed:
+                        except websockets.ConnectionClosed:
                             logger.error('WebSocket connection closed during Golden Path validation')
                             break
                     golden_path_results.append({'step': i + 1, 'event_type': event['type'], 'responses': step_responses, 'expected_event': event, 'success': len(step_responses) > 0})
@@ -124,7 +124,7 @@ class SSOTBroadcastStagingValidationTests(SSotAsyncTestCase):
         total_responses = sum((len(r.get('responses', [])) for r in successful_steps))
         assert total_responses >= total_expected_steps, f'Insufficient staging responses: {total_responses} responses for {total_expected_steps} events'
         logger.info('🎯 GOLDEN PATH STAGING VALIDATION RESULTS:')
-        logger.info(f'   ✅ Successful steps: {len(successful_steps)}/{total_expected_steps}')
+        logger.info(f'   CHECK Successful steps: {len(successful_steps)}/{total_expected_steps}')
         logger.info(f'   ⚡ Total validation time: {total_validation_time:.2f}s')
         logger.info(f'   📊 Total responses received: {total_responses}')
         logger.info(f'   🚀 SSOT Golden Path validation: SUCCESS')
@@ -176,7 +176,7 @@ class SSOTBroadcastStagingValidationTests(SSotAsyncTestCase):
                     auth_validation_results.append(('invalid_auth_handling', invalid_auth_handled, invalid_response))
                 except asyncio.TimeoutError:
                     auth_validation_results.append(('invalid_auth_handling', True, 'no_response'))
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             auth_validation_results.append(('invalid_auth_handling', True, 'connection_rejected'))
         except Exception as e:
             logger.warning(f'Invalid auth test error: {e}')
@@ -188,9 +188,9 @@ class SSOTBroadcastStagingValidationTests(SSotAsyncTestCase):
         if authenticated_broadcast_result:
             assert authenticated_broadcast_result[1], f'Authenticated broadcast through SSOT failed: {authenticated_broadcast_result}'
         assert invalid_auth_result and invalid_auth_result[1], f'Invalid authentication not handled properly: {invalid_auth_result}'
-        logger.info('✅ Real authentication integration validated:')
+        logger.info('CHECK Real authentication integration validated:')
         for test_name, success, details in auth_validation_results:
-            status = '✅ PASS' if success else '❌ FAIL'
+            status = 'CHECK PASS' if success else 'X FAIL'
             logger.info(f'   {status}: {test_name}')
 
     @pytest.mark.asyncio
@@ -307,10 +307,10 @@ class SSOTStagingReadinessValidationTests:
         deployment_ready = len(passed_mandatory) == len(mandatory_checks)
         logger.info('📋 STAGING DEPLOYMENT READINESS CHECKLIST:')
         for result in readiness_results:
-            status = '✅ PASS' if result['result'] else '❌ FAIL'
+            status = 'CHECK PASS' if result['result'] else 'X FAIL'
             requirement = f"[{result['requirement']}]"
             logger.info(f"   {status} {requirement}: {result['description']}")
-        logger.info(f"🎯 DEPLOYMENT READINESS: {('✅ READY' if deployment_ready else '❌ NOT READY')}")
+        logger.info(f"🎯 DEPLOYMENT READINESS: {('CHECK READY' if deployment_ready else 'X NOT READY')}")
         logger.info(f'   📊 Mandatory checks: {len(passed_mandatory)}/{len(mandatory_checks)} passed')
         assert deployment_ready, f'SSOT not ready for production: {len(mandatory_checks) - len(passed_mandatory)} mandatory checks failed'
         logger.info('🚀 SSOT CONSOLIDATION READY FOR PRODUCTION DEPLOYMENT')

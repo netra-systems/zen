@@ -139,7 +139,7 @@ class OAuthFlowsTests:
         """Test OAuth redirect URI configuration is correct."""
         from auth_service.auth_core.security.oauth_security import OAuthSecurityManager
         oauth_manager = OAuthSecurityManager()
-        test_uris = ['https://app.netra.ai/auth/callback', 'https://app.staging.netra.ai/auth/callback', 'http://localhost:3000/auth/callback', 'https://malicious.com/callback']
+        test_uris = ['https://app.netrasystems.ai/auth/callback', 'https://app.staging.netrasystems.ai/auth/callback', 'http://localhost:3000/auth/callback', 'https://malicious.com/callback']
         assert oauth_manager.validate_redirect_uri(test_uris[0])
         assert oauth_manager.validate_redirect_uri(test_uris[1])
         assert oauth_manager.validate_redirect_uri(test_uris[2])
@@ -258,8 +258,9 @@ class RedisOperationsTests:
     def test_redis_connection_availability(self):
         """Test Redis connection can be established."""
         try:
-            from auth_service.auth_core.redis_manager import RedisManager
-            redis_manager = RedisManager()
+            from auth_service.auth_core.redis_manager import auth_redis_manager
+            # Use SSOT auth_redis_manager singleton instead of creating new instance
+            redis_manager = auth_redis_manager
             assert redis_manager is not None
         except ImportError:
             import logging

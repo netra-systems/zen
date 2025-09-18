@@ -958,12 +958,11 @@ class GCPWebSocketInitializationValidator:
             timeout_seconds = max(timeout_seconds, 10.0)  # Minimum 10s for Cloud Run services phase (increased from 8s)
             self.logger.info(f"Cloud Run detected: Extended timeout to {timeout_seconds}s for services phase")
         
-        # PHASE 1 EXPONENTIAL BACKOFF: Enhanced progressive check intervals with exponential backoff
-        check_intervals = [0.05, 0.1, 0.2, 0.5, 1.0, 1.5, 2.0]  # Start with 50ms, grow to 2s with exponential backoff
-        current_interval_index = 0
-        max_iterations = int(timeout_seconds * 15) + 100  # Circuit breaker based on total time (reduced multiplier for longer intervals)
+        # ISSUE #1171 FIX: Use fixed check interval to eliminate 2.8s timing variance
+        # Previous exponential backoff caused unpredictable WebSocket connection timing
+        fixed_check_interval = 0.1  # Fixed 100ms intervals for consistent timing
+        max_iterations = int(timeout_seconds * 12)  # Adjusted for fixed interval
         iteration_count = 0
-        consecutive_same_phase = 0  # Track how long we've been in the same phase for exponential backoff
         
         valid_phases = ['services', 'websocket', 'finalize', 'complete']
         phase_order = ['init', 'dependencies', 'database', 'cache', 'services', 'websocket', 'finalize', 'complete']
@@ -974,11 +973,11 @@ class GCPWebSocketInitializationValidator:
         
         minimum_phase_index = phase_order.index(minimum_phase)
         
-        # PHASE 1 ENHANCED LOGGING: Improved startup phase wait logging with context
+        # ISSUE #1171 FIX: Updated logging to reflect fixed timing approach
         self.logger.info(
-            f"🔄 PHASE 1 PROGRESSIVE WAIT: Starting startup phase wait for '{minimum_phase}' "
-            f"(timeout: {timeout_seconds}s, cloud_run: {self.is_cloud_run}, environment: {self.environment}). "
-            f"This may take longer in Cloud Run due to service initialization."
+            f"🔄 WEBSOCKET STARTUP WAIT: Starting fixed-interval startup phase wait for '{minimum_phase}' "
+            f"(timeout: {timeout_seconds}s, interval: {fixed_check_interval}s, cloud_run: {self.is_cloud_run}, "
+            f"environment: {self.environment}). Fixed timing eliminates race condition variance."
         )
         
         last_phase = None
@@ -989,58 +988,35 @@ class GCPWebSocketInitializationValidator:
                 if hasattr(self.app_state, 'startup_phase'):
                     current_phase = str(self.app_state.startup_phase).lower()
                     
-                    # PHASE 1 EXPONENTIAL BACKOFF: Enhanced phase transition tracking with backoff logic
+                    # ISSUE #1171 FIX: Simplified phase transition tracking without backoff
                     if current_phase != last_phase:
                         if last_phase:
                             phase_duration = time.time() - phase_change_time
                             self.logger.info(f"✅ Phase transition: {last_phase} -> {current_phase} (duration: {phase_duration:.2f}s)")
                         last_phase = current_phase
                         phase_change_time = time.time()
-
-                        # Reset check interval and consecutive phase counter on phase changes for responsiveness
-                        current_interval_index = 0
-                        consecutive_same_phase = 0
-                    else:
-                        # EXPONENTIAL BACKOFF: Same phase for multiple iterations
-                        consecutive_same_phase += 1
-
-                        # Apply exponential backoff if stuck in same phase for too long
-                        if consecutive_same_phase > 10 and current_interval_index < len(check_intervals) - 1:
-                            current_interval_index = min(current_interval_index + 1, len(check_intervals) - 1)
-                            if consecutive_same_phase % 20 == 0:  # Log every 20 iterations when stuck
-                                elapsed = time.time() - start_time
-                                self.logger.info(
-                                    f"🔄 EXPONENTIAL BACKOFF: Phase '{current_phase}' stable for {consecutive_same_phase} iterations "
-                                    f"({elapsed:.1f}s), increasing check interval to {check_intervals[current_interval_index]:.2f}s"
-                                )
                     
                     if current_phase in phase_order:
                         current_phase_index = phase_order.index(current_phase)
                         
                         if current_phase_index >= minimum_phase_index:
                             elapsed = time.time() - start_time
-                            # PHASE 1 ENHANCED SUCCESS LOGGING: More detailed success information
+                            # ISSUE #1171 FIX: Updated success logging to reflect fixed timing
                             self.logger.info(
-                                f"✅ PHASE 1 SUCCESS: Progressive wait completed successfully! "
+                                f"✅ WEBSOCKET READY: Fixed-interval wait completed successfully! "
                                 f"Startup phase '{current_phase}' reached minimum required '{minimum_phase}' "
-                                f"after {elapsed:.2f}s ({iteration_count} iterations). "
+                                f"after {elapsed:.2f}s ({iteration_count} iterations @ {fixed_check_interval}s each). "
                                 f"Cloud Run environment: {self.is_cloud_run}. "
-                                f"WebSocket connections can now proceed safely."
+                                f"WebSocket connections now have consistent timing."
                             )
                             return True
                         else:
-                            # Check if we're in the target phase that's still initializing
-                            if current_phase == minimum_phase:
-                                # We're in the target phase but may not be complete
-                                # Use shorter intervals for responsiveness
-                                current_interval_index = min(current_interval_index, 2)
-                            
                             elapsed = time.time() - start_time
-                            # PHASE 1 ENHANCED PROGRESS LOGGING: More informative progress messages
-                            if iteration_count % 30 == 0:  # Log every 3-6s depending on interval
+                            # ISSUE #1171 FIX: Fixed progress logging interval for consistent timing
+                            if iteration_count % 10 == 0:  # Log every 1s with fixed 0.1s interval
                                 progress_pct = (current_phase_index / len(phase_order)) * 100
                                 self.logger.info(
-                                    f"🔄 PHASE 1 PROGRESS: Phase '{current_phase}' -> waiting for '{minimum_phase}' "
+                                    f"🔄 WEBSOCKET WAIT: Phase '{current_phase}' -> waiting for '{minimum_phase}' "
                                     f"({elapsed:.1f}s elapsed, {progress_pct:.0f}% startup progress, "
                                     f"iterations: {iteration_count}, cloud_run: {self.is_cloud_run})"
                                 )
@@ -1054,28 +1030,13 @@ class GCPWebSocketInitializationValidator:
                     self.logger.error("Startup failed - aborting progressive phase wait")
                     return False
                 
-                # Progressive delay: adjust check interval based on progress
-                current_interval = check_intervals[min(current_interval_index, len(check_intervals) - 1)]
-                
-                # Adaptive interval adjustment
-                elapsed = time.time() - start_time
-                if elapsed > timeout_seconds * 0.7:  # In final 30% of timeout
-                    # Use faster checks in final phase
-                    current_interval = min(current_interval, 0.1)
-                elif current_phase == minimum_phase:
-                    # We're in target phase, check frequently
-                    current_interval = min(current_interval, 0.2)
-                else:
-                    # Gradually increase interval for efficiency
-                    if iteration_count % 20 == 0 and current_interval_index < len(check_intervals) - 1:
-                        current_interval_index += 1
-                
-                await asyncio.sleep(current_interval)
+                # ISSUE #1171 FIX: Use fixed interval to eliminate timing variance
+                await asyncio.sleep(fixed_check_interval)
                 iteration_count += 1
                 
             except Exception as e:
                 self.logger.warning(f"Error in progressive startup phase check: {e}")
-                await asyncio.sleep(0.5)  # Fixed delay on errors
+                await asyncio.sleep(fixed_check_interval)  # ISSUE #1171 FIX: Consistent interval
                 iteration_count += 1
         
         # Timeout or circuit breaker reached

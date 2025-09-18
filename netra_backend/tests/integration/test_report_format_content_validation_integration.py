@@ -22,7 +22,7 @@ import json
 import uuid
 import re
 from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from decimal import Decimal
 
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -174,7 +174,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
         report_content = {
             "title": "Cloud Infrastructure Cost Optimization Analysis",
             "metadata": {
-                "generated_at": datetime.utcnow().isoformat(),
+                "generated_at": datetime.now(UTC).isoformat(),
                 "report_type": "cost_optimization",
                 "data_sources": ["aws_billing_api", "cloudwatch_metrics"],
                 "confidence_score": 0.87
@@ -199,7 +199,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
         await real_services_fixture["db"].execute("""
             INSERT INTO reports (id, user_id, title, content, business_value_score, created_at)
             VALUES ($1, $2, $3, $4, $5, $6)
-        """, report_id, user_id, report_content["title"], json.dumps(report_content), 8.7, datetime.utcnow())
+        """, report_id, user_id, report_content["title"], json.dumps(report_content), 8.7, datetime.now(UTC))
         
         # Validate business value
         value_validation = await validator.validate_report_business_value(report_content)
@@ -234,7 +234,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
         comprehensive_report = {
             "title": "Enterprise Security and Compliance Assessment Report",
             "metadata": {
-                "generated_at": datetime.utcnow().isoformat(),
+                "generated_at": datetime.now(UTC).isoformat(),
                 "report_type": "security_assessment",
                 "data_sources": ["security_scan_api", "compliance_db", "audit_logs", "vulnerability_feeds"],
                 "confidence_score": 0.92,
@@ -276,7 +276,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, title, content, business_value_score, created_at, report_type)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
         """, report_id, user_id, comprehensive_report["title"], json.dumps(comprehensive_report), 9.2, 
-            datetime.utcnow(), "security_assessment")
+            datetime.now(UTC), "security_assessment")
         
         # Validate comprehensive structure
         value_validation = await validator.validate_report_business_value(comprehensive_report)
@@ -306,9 +306,9 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
         
         # Store source data for verification
         source_data_entries = [
-            ("aws_cost_data", {"total_cost": 15420.50, "period": "2024-01"}, datetime.utcnow()),
-            ("performance_metrics", {"avg_cpu": 45.2, "avg_memory": 67.8}, datetime.utcnow()),
-            ("security_events", {"critical_alerts": 12, "high_alerts": 34}, datetime.utcnow())
+            ("aws_cost_data", {"total_cost": 15420.50, "period": "2024-01"}, datetime.now(UTC)),
+            ("performance_metrics", {"avg_cpu": 45.2, "avg_memory": 67.8}, datetime.now(UTC)),
+            ("security_events", {"critical_alerts": 12, "high_alerts": 34}, datetime.now(UTC))
         ]
         
         for data_type, data_content, timestamp in source_data_entries:
@@ -322,7 +322,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
         accuracy_report = {
             "title": "Monthly Infrastructure Performance and Cost Analysis",
             "metadata": {
-                "generated_at": datetime.utcnow().isoformat(),
+                "generated_at": datetime.now(UTC).isoformat(),
                 "report_type": "performance_cost",
                 "data_sources": ["aws_billing", "cloudwatch", "security_monitoring"],
                 "confidence_score": 0.94,
@@ -354,7 +354,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, title, content, business_value_score, created_at, data_checksum)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
         """, report_id, user_id, accuracy_report["title"], json.dumps(accuracy_report), 8.9, 
-            datetime.utcnow(), "abc123def456")
+            datetime.now(UTC), "abc123def456")
         
         # Validate data accuracy by cross-referencing source data
         cost_query = """
@@ -390,7 +390,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
         base_content = {
             "title": "Quarterly Business Intelligence Report",
             "metadata": {
-                "generated_at": datetime.utcnow().isoformat(),
+                "generated_at": datetime.now(UTC).isoformat(),
                 "report_type": "business_intelligence",
                 "data_sources": ["analytics_db", "crm_api", "financial_system"],
                 "confidence_score": 0.89
@@ -414,7 +414,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
         await real_services_fixture["db"].execute("""
             INSERT INTO reports (id, user_id, title, content, business_value_score, created_at)
             VALUES ($1, $2, $3, $4, $5, $6)
-        """, base_report_id, user_id, base_content["title"], json.dumps(base_content), 9.1, datetime.utcnow())
+        """, base_report_id, user_id, base_content["title"], json.dumps(base_content), 9.1, datetime.now(UTC))
         
         # Generate multiple format versions
         format_variants = [
@@ -429,7 +429,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO report_formats (id, base_report_id, format_type, content, created_at)
                 VALUES ($1, $2, $3, $4, $5)
-            """, format_id, base_report_id, format_type, formatted_content, datetime.utcnow())
+            """, format_id, base_report_id, format_type, formatted_content, datetime.now(UTC))
         
         # Validate all formats were generated
         formats_query = """
@@ -468,7 +468,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
             "title": "Security Compliance Status Report",
             "version": "1.0",
             "metadata": {
-                "generated_at": datetime.utcnow().isoformat(),
+                "generated_at": datetime.now(UTC).isoformat(),
                 "report_type": "compliance",
                 "confidence_score": 0.85
             },
@@ -481,7 +481,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
             INSERT INTO report_versions (id, report_id, version, content, created_at, change_description)
             VALUES ($1, $2, $3, $4, $5, $6)
         """, UnifiedIdGenerator.generate_base_id("v1"), report_id, "1.0", 
-            json.dumps(v1_content), datetime.utcnow(), "Initial compliance assessment")
+            json.dumps(v1_content), datetime.now(UTC), "Initial compliance assessment")
         
         # Version 1.1 - Updated after remediation
         await asyncio.sleep(0.1)  # Ensure different timestamp
@@ -489,7 +489,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
             "title": "Security Compliance Status Report",
             "version": "1.1", 
             "metadata": {
-                "generated_at": datetime.utcnow().isoformat(),
+                "generated_at": datetime.now(UTC).isoformat(),
                 "report_type": "compliance",
                 "confidence_score": 0.91
             },
@@ -503,7 +503,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
             INSERT INTO report_versions (id, report_id, version, content, created_at, change_description)
             VALUES ($1, $2, $3, $4, $5, $6)
         """, UnifiedIdGenerator.generate_base_id("v1_1"), report_id, "1.1", 
-            json.dumps(v1_1_content), datetime.utcnow(), "Updated after security remediation - 5 gaps resolved")
+            json.dumps(v1_1_content), datetime.now(UTC), "Updated after security remediation - 5 gaps resolved")
         
         # Version 2.0 - Major revision with new analysis
         await asyncio.sleep(0.1)
@@ -511,7 +511,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
             "title": "Security Compliance Status Report",
             "version": "2.0",
             "metadata": {
-                "generated_at": datetime.utcnow().isoformat(),
+                "generated_at": datetime.now(UTC).isoformat(),
                 "report_type": "compliance",
                 "confidence_score": 0.96
             },
@@ -526,7 +526,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
             INSERT INTO report_versions (id, report_id, version, content, created_at, change_description)
             VALUES ($1, $2, $3, $4, $5, $6)
         """, UnifiedIdGenerator.generate_base_id("v2"), report_id, "2.0", 
-            json.dumps(v2_content), datetime.utcnow(), "Major revision - compliance program complete, certification ready")
+            json.dumps(v2_content), datetime.now(UTC), "Major revision - compliance program complete, certification ready")
         
         # Validate version history tracking
         versions_query = """
@@ -584,7 +584,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
                 INSERT INTO user_profiles (user_id, role, interests, detail_level, created_at)
                 VALUES ($1, $2, $3, $4, $5)
             """, profile["user_id"], profile["role"], json.dumps(profile["interests"]), 
-                profile["detail_level"], datetime.utcnow())
+                profile["detail_level"], datetime.now(UTC))
         
         # Generate personalized reports for each user type
         base_data = {
@@ -654,7 +654,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
                 INSERT INTO reports (id, user_id, title, content, personalization_data, business_value_score, created_at)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
             """, report_id, report["user_id"], report["title"], json.dumps(report), 
-                json.dumps(report["personalization"]), 8.5, datetime.utcnow())
+                json.dumps(report["personalization"]), 8.5, datetime.now(UTC))
             personalized_reports.append(report_id)
         
         # Validate personalization effectiveness
@@ -734,7 +734,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
                 INSERT INTO reports (id, user_id, title, business_value_score, content_quality_metrics, created_at)
                 VALUES ($1, $2, $3, $4, $5, $6)
             """, report_id, user_id, report_data["title"], report_data["business_value_score"],
-                json.dumps(report_data["content_quality"]), datetime.utcnow())
+                json.dumps(report_data["content_quality"]), datetime.now(UTC))
             
             report_ids.append((report_id, report_data))
         
@@ -750,7 +750,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO report_feedback (id, report_id, user_id, rating, comment, feedback_type, created_at)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
-            """, feedback_id, report_id, user_id, rating, comment, feedback_type, datetime.utcnow())
+            """, feedback_id, report_id, user_id, rating, comment, feedback_type, datetime.now(UTC))
         
         # Calculate comprehensive quality scores
         for report_id, report_data in report_ids:
@@ -822,7 +822,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
             },
             "language": "en",
             "metadata": {
-                "generated_at": datetime.utcnow().isoformat(),
+                "generated_at": datetime.now(UTC).isoformat(),
                 "accessibility_compliance": "WCAG_2.1_AA",
                 "language_code": "en-US"
             },
@@ -848,7 +848,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, title, content, accessibility_features, language_code, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
         """, base_report_id, user_id, base_report["title"], json.dumps(base_report),
-            json.dumps(base_report["accessibility_features"]), "en-US", datetime.utcnow())
+            json.dumps(base_report["accessibility_features"]), "en-US", datetime.now(UTC))
         
         # Create internationalized versions
         international_versions = [
@@ -887,7 +887,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
                 INSERT INTO report_translations (id, base_report_id, language_code, title, content, region, created_at)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
             """, intl_id, base_report_id, intl_version["language_code"], intl_version["title"],
-                json.dumps(intl_content), intl_version["region"], datetime.utcnow())
+                json.dumps(intl_content), intl_version["region"], datetime.now(UTC))
         
         # Validate accessibility compliance
         accessibility_query = """
@@ -937,7 +937,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
         large_report_content = {
             "title": "Enterprise Performance Analytics Dashboard",
             "metadata": {
-                "generated_at": datetime.utcnow().isoformat(),
+                "generated_at": datetime.now(UTC).isoformat(),
                 "report_type": "performance_analytics",
                 "data_points_processed": 50000,
                 "generation_optimizations": ["parallel_processing", "data_caching", "incremental_updates"]
@@ -959,7 +959,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
             large_report_content["detailed_sections"][f"section_{section_num}"] = section_content
         
         # Measure report storage performance
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         
         report_id = UnifiedIdGenerator.generate_base_id("perf_report")
         await real_services_fixture["db"].execute("""
@@ -968,7 +968,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
         """, report_id, user_id, large_report_content["title"], json.dumps(large_report_content), 
             8.9, start_time, len(json.dumps(large_report_content)))
         
-        storage_time = (datetime.utcnow() - start_time).total_seconds()
+        storage_time = (datetime.now(UTC) - start_time).total_seconds()
         
         # Test caching mechanism
         cache_key = f"report_cache_{user_id}_{report_id}"
@@ -978,9 +978,9 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["redis"].set(cache_key, json.dumps(large_report_content), ex=3600)
             
             # Measure cache retrieval performance
-            cache_start = datetime.utcnow()
+            cache_start = datetime.now(UTC)
             cached_content = await real_services_fixture["redis"].get(cache_key)
-            cache_retrieval_time = (datetime.utcnow() - cache_start).total_seconds()
+            cache_retrieval_time = (datetime.now(UTC) - cache_start).total_seconds()
             
             assert cached_content is not None  # Content successfully cached
             assert cache_retrieval_time < 0.1  # Cache retrieval under 100ms
@@ -998,7 +998,7 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
             INSERT INTO report_performance_metrics (id, report_id, metrics, measured_at)
             VALUES ($1, $2, $3, $4)
         """, UnifiedIdGenerator.generate_base_id("perf_metrics"), report_id, 
-            json.dumps(perf_metrics), datetime.utcnow())
+            json.dumps(perf_metrics), datetime.now(UTC))
         
         # Validate performance requirements
         assert storage_time < 5.0  # Report storage under 5 seconds
@@ -1006,22 +1006,22 @@ class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
         assert perf_metrics["sections_generated"] == 10  # All sections generated
         
         # Test incremental update performance
-        update_start = datetime.utcnow()
+        update_start = datetime.now(UTC)
         
         # Simulate incremental update (adding new section)
         large_report_content["detailed_sections"]["section_incremental"] = {
             "title": "Incremental Update Section",
             "insights": ["New insight from incremental analysis"],
-            "added_at": datetime.utcnow().isoformat()
+            "added_at": datetime.now(UTC).isoformat()
         }
         
         await real_services_fixture["db"].execute("""
             UPDATE reports 
             SET content = $1, updated_at = $2
             WHERE id = $3
-        """, json.dumps(large_report_content), datetime.utcnow(), report_id)
+        """, json.dumps(large_report_content), datetime.now(UTC), report_id)
         
-        update_time = (datetime.utcnow() - update_start).total_seconds()
+        update_time = (datetime.now(UTC) - update_start).total_seconds()
         
         # Incremental updates should be fast
         assert update_time < 1.0  # Incremental update under 1 second

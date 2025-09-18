@@ -96,7 +96,7 @@
                 <example>
                     staging_env = {
                         'ENVIRONMENT': 'staging',
-                        'K_SERVICE': 'netra-auth-staging',
+                        'K_SERVICE': 'netra-auth',
                         'GCP_PROJECT_ID': 'netra-staging',
                     }
                     with patch.dict(os.environ, staging_env, clear=True):

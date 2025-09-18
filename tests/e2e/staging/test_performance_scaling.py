@@ -214,7 +214,7 @@ class PerformanceScalingTests:
         """
         Test 1: Concurrent Multi-User Agent Execution with Performance Monitoring
         
-        Business Value: $750K+ ARR validation - Tests that:
+        Business Value: 750K+ ARR validation - Tests that:
         1. System handles 20+ concurrent users executing agents simultaneously
         2. Performance remains within enterprise SLA thresholds
         3. Each user receives isolated, responsive service  
@@ -353,7 +353,7 @@ class PerformanceScalingTests:
         """
         Test 2: Throughput Optimization Under Enterprise Load Scenarios
         
-        Business Value: $500K+ ARR validation - Tests that:
+        Business Value: 500K+ ARR validation - Tests that:
         1. System optimizes throughput for high-volume enterprise workloads
         2. Request processing efficiency scales with increased load
         3. WebSocket message throughput remains high under sustained load

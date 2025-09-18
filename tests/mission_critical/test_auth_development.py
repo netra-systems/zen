@@ -1,8 +1,10 @@
-# REMOVED_SYNTAX_ERROR: '''
-# REMOVED_SYNTAX_ERROR: Development Auth Test Suite
-# REMOVED_SYNTAX_ERROR: ============================
-# REMOVED_SYNTAX_ERROR: Simplified auth test that works with local development environment
-# REMOVED_SYNTAX_ERROR: '''
+'''
+'''
+Development Auth Test Suite
+============================
+Simplified auth test that works with local development environment
+'''
+'''
 
 import asyncio
 import json
@@ -30,243 +32,260 @@ from netra_backend.app.core.unified.jwt_validator import UnifiedJWTValidator
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# REMOVED_SYNTAX_ERROR: class TestDevelopmentAuth:
-    # REMOVED_SYNTAX_ERROR: """Test auth functionality in development environment"""
 
-    # REMOVED_SYNTAX_ERROR: @classmethod
-# REMOVED_SYNTAX_ERROR: def setup_class(cls):
-    # REMOVED_SYNTAX_ERROR: """Setup test environment"""
-    # REMOVED_SYNTAX_ERROR: cls.env = IsolatedEnvironment.get_instance()
-    # Ensure we're in development mode
-    # REMOVED_SYNTAX_ERROR: cls.env.set("ENVIRONMENT", "development")
+class TestDevelopmentAuth:
+    "Test auth functionality in development environment"
 
-    # Set required secrets for development (must be at least 32 chars)
-    # REMOVED_SYNTAX_ERROR: cls.env.set("SERVICE_SECRET", "dev-service-secret-for-testing-purposes-only")
-    # REMOVED_SYNTAX_ERROR: cls.env.set("JWT_SECRET_KEY", "dev-jwt-secret-for-testing-only-must-be-32-chars")
-    # REMOVED_SYNTAX_ERROR: cls.env.set("SERVICE_ID", "test-service-id")
+    @classmethod
+    def setup_class(cls):
+        ""Setup test environment""
 
-    # Clear any cached secrets
-    # REMOVED_SYNTAX_ERROR: SharedJWTSecretManager.clear_cache()
+        cls.env = IsolatedEnvironment.get_instance()
 
-    # Initialize components
-    # REMOVED_SYNTAX_ERROR: cls.auth_config = AuthConfig()
-    # REMOVED_SYNTAX_ERROR: cls.jwt_handler = JWTHandler()
-    # REMOVED_SYNTAX_ERROR: cls.backend_validator = UnifiedJWTValidator()
+        # Ensure we're in development mode'
+        cls.env.set(ENVIRONMENT, development")"
 
-    # Service URLs for development
-    # REMOVED_SYNTAX_ERROR: cls.auth_url = "http://localhost:8081"
-    # REMOVED_SYNTAX_ERROR: cls.backend_url = "http://localhost:8000"
+        # Set required secrets for development (must be at least 32 chars)
+        cls.env.set("SERVICE_SECRET, dev-service-secret-for-testing-purposes-only)"
+        cls.env.set(JWT_SECRET_KEY, dev-jwt-secret-for-testing-only-must-be-32-chars)
+        cls.env.set("SERVICE_ID, test-service-id)"
 
-# REMOVED_SYNTAX_ERROR: def test_jwt_secret_synchronization(self):
-    # REMOVED_SYNTAX_ERROR: """Test that JWT secrets are synchronized across services"""
-    # REMOVED_SYNTAX_ERROR: logger.info("Testing JWT secret synchronization...")
+        # Clear any cached secrets
+        SharedJWTSecretManager.clear_cache()
 
-    # Get secrets from both services
-    # REMOVED_SYNTAX_ERROR: auth_secret = self.auth_config.get_jwt_secret()
-    # REMOVED_SYNTAX_ERROR: shared_secret = SharedJWTSecretManager.get_jwt_secret()
+        # Initialize components
+        cls.auth_config = AuthConfig()
+        cls.jwt_handler = JWTHandler()
+        cls.backend_validator = UnifiedJWTValidator()
 
-    # They should be the same
-    # REMOVED_SYNTAX_ERROR: assert auth_secret == shared_secret, "JWT secrets are not synchronized!"
+        # Service URLs for development
+        cls.auth_url = http://localhost:8081
+        cls.backend_url = http://localhost:8000"
+        cls.backend_url = http://localhost:8000""
 
-    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  JWT secrets are synchronized")
 
-# REMOVED_SYNTAX_ERROR: def test_token_generation(self):
-    # REMOVED_SYNTAX_ERROR: """Test token generation"""
-    # REMOVED_SYNTAX_ERROR: logger.info("Testing token generation...")
+    def test_jwt_secret_synchronization(self):
+        "Test that JWT secrets are synchronized across services"
+        logger.info(Testing JWT secret synchronization...")"
 
-    # Generate a token
-    # REMOVED_SYNTAX_ERROR: token = self.jwt_handler.create_access_token( )
-    # REMOVED_SYNTAX_ERROR: user_id="test_user_123",
-    # REMOVED_SYNTAX_ERROR: email="test@example.com",
-    # REMOVED_SYNTAX_ERROR: permissions=["read", "write"]
-    
-    # REMOVED_SYNTAX_ERROR: assert token is not None, "Failed to generate token"
-    # REMOVED_SYNTAX_ERROR: assert isinstance(token, str), "Token should be a string"
+        # Get secrets from both services
+        auth_secret = self.auth_config.get_jwt_secret()
+        shared_secret = SharedJWTSecretManager.get_jwt_secret()
 
-    # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
+        # They should be the same
+        assert auth_secret == shared_secret, "JWT secrets are not synchronized!"
 
-# REMOVED_SYNTAX_ERROR: def test_token_validation(self):
-    # REMOVED_SYNTAX_ERROR: """Test token validation"""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("Testing token validation...")
+        logger.info(CHECK JWT secrets are synchronized)"
+        logger.info(CHECK JWT secrets are synchronized)""
 
-    # Generate a token
-    # REMOVED_SYNTAX_ERROR: token = self.jwt_handler.create_access_token( )
-    # REMOVED_SYNTAX_ERROR: user_id="test_user_456",
-    # REMOVED_SYNTAX_ERROR: email="validate@example.com",
-    # REMOVED_SYNTAX_ERROR: permissions=["read"]
-    
 
-    # Validate the token
-    # REMOVED_SYNTAX_ERROR: decoded = self.jwt_handler.validate_token_for_consumption(token)
-    # REMOVED_SYNTAX_ERROR: assert decoded is not None, "Failed to decode token"
+    def test_token_generation(self):
+        "Test token generation"
+        logger.info(Testing token generation...")"
 
-    # JWT uses 'sub' for subject (user ID)
-    # REMOVED_SYNTAX_ERROR: user_id = decoded.get("sub") or decoded.get("user_id")
-    # REMOVED_SYNTAX_ERROR: assert user_id == "test_user_456", "formatted_string"
-    # REMOVED_SYNTAX_ERROR: assert decoded.get("email") == "validate@pytest.fixture}"
+        # Generate a token
+        token = self.jwt_handler.create_access_token(
+            user_id=test_user_123,
+            email=test@example.com,"
+            email=test@example.com,"
+            permissions=["read, write]"
 
-    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Token validation successful")
+        assert token is not None, "Failed to generate token"
+        assert isinstance(token, str), Token should be a string""
 
-# REMOVED_SYNTAX_ERROR: def test_cross_service_validation(self):
-    # REMOVED_SYNTAX_ERROR: """Test that backend and auth use same JWT secret"""
-    # REMOVED_SYNTAX_ERROR: logger.info("Testing cross-service JWT secret consistency...")
+        logger.info(fCHECK Token generated successfully: {token[:20]}...)
 
-    # Generate token with auth service handler
-    # REMOVED_SYNTAX_ERROR: auth_token = self.jwt_handler.create_access_token( )
-    # REMOVED_SYNTAX_ERROR: user_id="cross_service_user",
-    # REMOVED_SYNTAX_ERROR: email="cross@example.com",
-    # REMOVED_SYNTAX_ERROR: permissions=["admin"]
-    
+    def test_token_validation(self):
+        Test token validation""
+        logger.info(Testing token validation...)
 
-    # Try to decode with backend's JWT secret (proving they're the same)
-    # REMOVED_SYNTAX_ERROR: import jwt
+        # Generate a token
+        token = self.jwt_handler.create_access_token(
+            user_id=test_user_456,"
+            user_id=test_user_456,"
+            email="validate@example.com,"
+            permissions=[read]
 
-    # REMOVED_SYNTAX_ERROR: try:
-        # Get the backend's JWT secret
-        # REMOVED_SYNTAX_ERROR: backend_secret = SharedJWTSecretManager.get_jwt_secret()
+        # Validate the token
+        decoded = self.jwt_handler.validate_token_for_consumption(token)
+        assert decoded is not None, "Failed to decode token"
 
-        # Decode the auth token with backend's secret (skip all optional validations)
-        # REMOVED_SYNTAX_ERROR: decoded = jwt.decode( )
-        # REMOVED_SYNTAX_ERROR: auth_token,
-        # REMOVED_SYNTAX_ERROR: backend_secret,
-        # REMOVED_SYNTAX_ERROR: algorithms=["HS256"],
-        # REMOVED_SYNTAX_ERROR: options={ )
-        # REMOVED_SYNTAX_ERROR: "verify_signature": True,  # Keep signature validation
-        # REMOVED_SYNTAX_ERROR: "verify_aud": False,       # Skip audience
-        # REMOVED_SYNTAX_ERROR: "verify_exp": False,       # Skip expiration
-        # REMOVED_SYNTAX_ERROR: "verify_nbf": False,       # Skip not before
-        # REMOVED_SYNTAX_ERROR: "verify_iat": False        # Skip issued at
-        
-        
+        # JWT uses 'sub' for subject (user ID)
+        user_id = decoded.get(sub) or decoded.get(user_id)
+        assert user_id == test_user_456, f"Wrong user ID: {user_id}"
+        assert decoded.get(email) == "validate@example.com, Wrong email"
 
-        # Check that we can decode it (means secrets match)
-        # REMOVED_SYNTAX_ERROR: assert decoded is not None, "Failed to decode auth token with backend secret"
+        logger.info(CHECK Token validation successful)"
+        logger.info(CHECK Token validation successful)""
 
-        # Verify the claims
-        # REMOVED_SYNTAX_ERROR: user_id = decoded.get("sub") or decoded.get("user_id")
-        # REMOVED_SYNTAX_ERROR: assert user_id == "cross_service_user", "formatted_string"
 
-        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Cross-service validation successful - JWT secrets match!")
-        # REMOVED_SYNTAX_ERROR: except jwt.InvalidTokenError as e:
-            # REMOVED_SYNTAX_ERROR: logger.error(f"JWT secrets don"t match between services: {e}")
-            # REMOVED_SYNTAX_ERROR: raise
-            # REMOVED_SYNTAX_ERROR: except Exception as e:
-                # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
-                # REMOVED_SYNTAX_ERROR: raise
+    def test_cross_service_validation(self):
+        "Test that backend and auth use same JWT secret"
+        logger.info("Testing cross-service JWT secret consistency...)"
 
-                # Removed problematic line: @pytest.mark.asyncio
-                # Removed problematic line: async def test_service_health_check(self):
-                    # REMOVED_SYNTAX_ERROR: """Test service connectivity"""
-                    # REMOVED_SYNTAX_ERROR: pass
-                    # REMOVED_SYNTAX_ERROR: logger.info("Testing service health checks...")
+        # Generate token with auth service handler
+        auth_token = self.jwt_handler.create_access_token(
+            user_id=cross_service_user,
+            email=cross@example.com,"
+            email=cross@example.com,"
+            permissions=[admin"]"
 
-                    # REMOVED_SYNTAX_ERROR: async with httpx.AsyncClient() as client:
-                        # Check auth service
-                        # REMOVED_SYNTAX_ERROR: try:
-                            # REMOVED_SYNTAX_ERROR: auth_response = await client.get("formatted_string")
-                            # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                            # REMOVED_SYNTAX_ERROR: assert auth_response.status_code == 200, "formatted_string"
-                            # REMOVED_SYNTAX_ERROR: except (httpx.ConnectError, httpx.RequestError) as e:
-                                # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
+        # Try to decode with backend's JWT secret (proving they're the same)
+        import jwt
 
-                                # Check backend service
-                                # REMOVED_SYNTAX_ERROR: try:
-                                    # REMOVED_SYNTAX_ERROR: backend_response = await client.get("formatted_string")
-                                    # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                    # REMOVED_SYNTAX_ERROR: assert backend_response.status_code == 200, "formatted_string"
-                                    # REMOVED_SYNTAX_ERROR: except (httpx.ConnectError, httpx.RequestError) as e:
-                                        # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
+        try:
+            # Get the backend's JWT secret'
+            backend_secret = SharedJWTSecretManager.get_jwt_secret()
 
-                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Service health checks completed")
+            # Decode the auth token with backend's secret (skip all optional validations)'
+            decoded = jwt.decode(
+                auth_token,
+                backend_secret,
+                algorithms=[HS256],
+                options={
+                    verify_signature": True,  # Keep signature validation"
+                    verify_aud: False,       # Skip audience
+                    verify_exp: False,       # Skip expiration"
+                    verify_exp: False,       # Skip expiration"
+                    "verify_nbf: False,       # Skip not before"
+                    verify_iat: False        # Skip issued at
+                }
 
-                                        # Removed problematic line: @pytest.mark.asyncio
-                                        # Removed problematic line: async def test_login_flow(self):
-                                            # REMOVED_SYNTAX_ERROR: """Test complete login flow"""
-                                            # REMOVED_SYNTAX_ERROR: logger.info("Testing login flow...")
+            # Check that we can decode it (means secrets match)
+            assert decoded is not None, "Failed to decode auth token with backend secret"
 
-                                            # REMOVED_SYNTAX_ERROR: async with httpx.AsyncClient() as client:
-                                                # Register a test user
-                                                # REMOVED_SYNTAX_ERROR: register_data = { )
-                                                # REMOVED_SYNTAX_ERROR: "email": "formatted_string",
-                                                # REMOVED_SYNTAX_ERROR: "password": "TestPassword123!",
-                                                # REMOVED_SYNTAX_ERROR: "full_name": "Test User"
-                                                
+            # Verify the claims
+            user_id = decoded.get(sub) or decoded.get(user_id)
+            assert user_id == cross_service_user, f"Wrong user ID: {user_id}"
 
-                                                # REMOVED_SYNTAX_ERROR: try:
-                                                    # Register
-                                                    # REMOVED_SYNTAX_ERROR: reg_response = await client.post( )
-                                                    # REMOVED_SYNTAX_ERROR: "formatted_string",
-                                                    # REMOVED_SYNTAX_ERROR: json=register_data
-                                                    
+            logger.info(CHECK Cross-service validation successful - JWT secrets match!)"
+            logger.info(CHECK Cross-service validation successful - JWT secrets match!)""
 
-                                                    # REMOVED_SYNTAX_ERROR: if reg_response.status_code == 200:
-                                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  User registration successful")
 
-                                                        # Login
-                                                        # REMOVED_SYNTAX_ERROR: login_data = { )
-                                                        # REMOVED_SYNTAX_ERROR: "username": register_data["email"],
-                                                        # REMOVED_SYNTAX_ERROR: "password": register_data["password"]
-                                                        
+        except jwt.InvalidTokenError as e:
+            logger.error(fJWT secrets don't match between services: {e})'
+            raise
+        except Exception as e:
+            logger.error(fCross-service validation failed: {e})
+            raise
 
-                                                        # REMOVED_SYNTAX_ERROR: login_response = await client.post( )
-                                                        # REMOVED_SYNTAX_ERROR: "formatted_string",
-                                                        # REMOVED_SYNTAX_ERROR: data=login_data
-                                                        
+    @pytest.mark.asyncio
+    async def test_service_health_check(self):
+        "Test service connectivity"
+        logger.info(Testing service health checks...)"
+        logger.info(Testing service health checks...)""
 
-                                                        # REMOVED_SYNTAX_ERROR: if login_response.status_code == 200:
-                                                            # REMOVED_SYNTAX_ERROR: result = login_response.json()
-                                                            # REMOVED_SYNTAX_ERROR: assert "access_token" in result, "No access token in response"
-                                                            # REMOVED_SYNTAX_ERROR: assert "token_type" in result, "No token type in response"
-                                                            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Login successful")
-                                                            # REMOVED_SYNTAX_ERROR: else:
-                                                                # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
-                                                                # REMOVED_SYNTAX_ERROR: else:
-                                                                    # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
 
-                                                                    # REMOVED_SYNTAX_ERROR: except (httpx.ConnectError, httpx.RequestError) as e:
-                                                                        # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
+        async with httpx.AsyncClient() as client:
+            # Check auth service
+            try:
+                auth_response = await client.get(f"{self.auth_url}/health)"
+                logger.info(fAuth service health: {auth_response.status_code})
+                assert auth_response.status_code == 200, "fAuth service unhealthy: {auth_response.status_code}"
+            except (httpx.ConnectError, httpx.RequestError) as e:
+                logger.warning(fAuth service connection failed: {e}")"
 
-                                                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Login flow test completed")
+            # Check backend service
+            try:
+                backend_response = await client.get(f{self.backend_url}/health)
+                logger.info(fBackend service health: {backend_response.status_code})
+                assert backend_response.status_code == 200, f"Backend service unhealthy: {backend_response.status_code}"
+            except (httpx.ConnectError, httpx.RequestError) as e:
+                logger.warning(fBackend service connection failed: {e}")"
 
-# REMOVED_SYNTAX_ERROR: def main():
-    # REMOVED_SYNTAX_ERROR: """Run all tests"""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("=" * 60)
-    # REMOVED_SYNTAX_ERROR: logger.info("DEVELOPMENT AUTH TEST SUITE")
-    # REMOVED_SYNTAX_ERROR: logger.info("=" * 60)
+        logger.info(CHECK Service health checks completed)
 
-    # REMOVED_SYNTAX_ERROR: test_suite = TestDevelopmentAuth()
-    # REMOVED_SYNTAX_ERROR: test_suite.setup_class()
+    @pytest.mark.asyncio
+    async def test_login_flow(self):
+        ""Test complete login flow"
+        logger.info(Testing login flow...)"
+        logger.info(Testing login flow...)""
+
+
+        async with httpx.AsyncClient() as client:
+            # Register a test user
+            register_data = {
+                email": ftestuser{int(datetime.now().timestamp())}@example.com,"
+                password: TestPassword123!,
+                full_name: "Test User"
+            }
+
+            try:
+                # Register
+                reg_response = await client.post(
+                    f{self.auth_url}/auth/register","
+                    json=register_data
+                )
+
+                if reg_response.status_code == 200:
+                    logger.info(CHECK User registration successful)
+
+                    # Login
+                    login_data = {
+                        username": register_data[email],"
+                        password: register_data[password]
+                    }
+
+                    login_response = await client.post(
+                        f{self.auth_url}/auth/token,"
+                        f{self.auth_url}/auth/token,""
+
+                        data=login_data
+                    )
+
+                    if login_response.status_code == 200:
+                        result = login_response.json()
+                        assert "access_token in result, No access token in response"
+                        assert token_type in result, "No token type in response"
+                        logger.info("CHECK Login successful)"
+                    else:
+                        logger.warning(fLogin failed: {login_response.status_code})
+                else:
+                    logger.warning(fRegistration failed: {reg_response.status_code})
+
+            except (httpx.ConnectError, httpx.RequestError) as e:
+                logger.warning(fLogin flow failed due to connection: {e}")"
+
+        logger.info(CHECK Login flow test completed)
+
+
+def main():
+    "Run all tests"
+    logger.info(= * 60)
+    logger.info(DEVELOPMENT AUTH TEST SUITE")"
+    logger.info(= * 60)
+
+    test_suite = TestDevelopmentAuth()
+    test_suite.setup_class()
 
     # Run synchronous tests
-    # REMOVED_SYNTAX_ERROR: try:
-        # REMOVED_SYNTAX_ERROR: test_suite.test_jwt_secret_synchronization()
-        # REMOVED_SYNTAX_ERROR: test_suite.test_token_generation()
-        # REMOVED_SYNTAX_ERROR: test_suite.test_token_validation()
-        # REMOVED_SYNTAX_ERROR: test_suite.test_cross_service_validation()
-        # REMOVED_SYNTAX_ERROR: logger.info(" )
-        # REMOVED_SYNTAX_ERROR:  PASS:  All synchronous tests passed!")
-        # REMOVED_SYNTAX_ERROR: except Exception as e:
-            # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
-            # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-            # REMOVED_SYNTAX_ERROR: return 1
+    try:
+        test_suite.test_jwt_secret_synchronization()
+        test_suite.test_token_generation()
+        test_suite.test_token_validation()
+        test_suite.test_cross_service_validation()
+        logger.info(CHECK All synchronous tests passed!)"
+        logger.info(CHECK All synchronous tests passed!)""
 
-            # Run async tests
-            # REMOVED_SYNTAX_ERROR: try:
-                # REMOVED_SYNTAX_ERROR: asyncio.run(test_suite.test_service_health_check())
-                # REMOVED_SYNTAX_ERROR: asyncio.run(test_suite.test_login_flow())
-                # REMOVED_SYNTAX_ERROR: logger.info(" )
-                # REMOVED_SYNTAX_ERROR:  PASS:  All async tests completed!")
-                # REMOVED_SYNTAX_ERROR: except Exception as e:
-                    # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
-                    # REMOVED_SYNTAX_ERROR: return 1
+    except Exception as e:
+        logger.error(f"Synchronous test failed: {e})"
+        return 1
 
-                    # REMOVED_SYNTAX_ERROR: logger.info(" )
-                    # REMOVED_SYNTAX_ERROR: " + "=" * 60)
-                    # REMOVED_SYNTAX_ERROR: logger.info("ALL TESTS PASSED SUCCESSFULLY!")
-                    # REMOVED_SYNTAX_ERROR: logger.info("=" * 60)
-                    # REMOVED_SYNTAX_ERROR: return 0
+    # Run async tests
+    try:
+        asyncio.run(test_suite.test_service_health_check())
+        asyncio.run(test_suite.test_login_flow())
+        logger.info(CHECK All async tests completed!)
+    except Exception as e:
+        logger.error(fAsync test failed: {e})
+        return 1
 
-                    # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-                        # REMOVED_SYNTAX_ERROR: sys.exit(main())
+    logger.info(\n + "= * 60)"
+    logger.info(ALL TESTS PASSED SUCCESSFULLY!")"
+    logger.info(= * 60)
+    return 0
+
+
+if __name__ == __main__":"
+    sys.exit(main())
+))))

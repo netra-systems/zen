@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,12 +23,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 ClickHouse Golden Path Logging E2E Tests - Observability Validation
 ================================================================
 
@@ -221,7 +208,7 @@ class ClickHouseGoldenPathLoggingE2ETests(SSotBaseTestCase):
         with IsolatedEnvironment(golden_path_env):
             # Create authenticated user for complete golden path
             authenticated_user = await self.auth_helper.create_authenticated_user(
-                email="goldenpath@test.netra.ai",
+                email="goldenpath@test.netrasystems.ai",
                 user_id=UserID("golden-path-user-123")
             )
             
@@ -319,7 +306,7 @@ class ClickHouseGoldenPathLoggingE2ETests(SSotBaseTestCase):
             with self._capture_system_logs() as log_capture:
                 # Create authenticated user
                 authenticated_user = await self.auth_helper.create_authenticated_user(
-                    email="mixedfailure@test.netra.ai",
+                    email="mixedfailure@test.netrasystems.ai",
                     user_id=UserID("mixed-failure-user-456")
                 )
                 
@@ -401,7 +388,7 @@ class ClickHouseGoldenPathLoggingE2ETests(SSotBaseTestCase):
         with IsolatedEnvironment(alerting_env):
             # Create authenticated user for realistic scenario
             authenticated_user = await self.auth_helper.create_authenticated_user(
-                email="alerting@test.netra.ai",
+                email="alerting@test.netrasystems.ai",
                 user_id=UserID("alerting-test-user-789")
             )
             
@@ -502,7 +489,7 @@ class ClickHouseGoldenPathLoggingE2ETests(SSotBaseTestCase):
         with IsolatedEnvironment(volume_test_env):
             # Create authenticated user
             authenticated_user = await self.auth_helper.create_authenticated_user(
-                email="volume@test.netra.ai",
+                email="volume@test.netrasystems.ai",
                 user_id=UserID("volume-test-user-999")
             )
             

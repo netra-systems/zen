@@ -1,11 +1,11 @@
 """
 Mission Critical Tests for OperationalBusinessValueMonitor Service and Issue #938
 
-This test suite contains MISSION CRITICAL tests that protect the $500K+ ARR Golden Path
+This test suite contains MISSION CRITICAL tests that protect the 500K+ ARR Golden Path
 business value through operational business value monitoring, PLUS tests for Issue #938 
 Environment URL Configuration Using Localhost Block Staging.
 
-Business Impact: $500K+ ARR Protection - Mission Critical
+Business Impact: 500K+ ARR Protection - Mission Critical
 These tests directly protect our revenue stream by ensuring business value monitoring
 catches critical issues before they impact customers, AND ensure staging deployment
 configuration works correctly.
@@ -14,7 +14,7 @@ configuration works correctly.
 Tests reproduce and validate the critical configuration issue where:
 1. ENVIRONMENT=staging is set correctly  
 2. But localhost URLs are still being loaded/validated causing staging deployment failures
-3. This blocks $500K+ ARR Golden Path functionality in staging environment
+3. This blocks 500K+ ARR Golden Path functionality in staging environment
 
 Test Approach:
 - Tests should FAIL initially to reproduce issues
@@ -212,7 +212,7 @@ class MissionCriticalGoldenPathProtectionTests(SSotAsyncTestCase):
 class EnvironmentURLConfigurationLocalhostBlockingStagingTests(SSotBaseTestCase):
     """Test suite for Issue #938 - Environment URL Configuration Using Localhost Block Staging.
     
-    **BUSINESS CRITICAL**: This issue blocks staging deployment which impacts $500K+ ARR
+    **BUSINESS CRITICAL**: This issue blocks staging deployment which impacts 500K+ ARR
     Golden Path functionality. Tests should initially FAIL to reproduce the problem.
     """
 
@@ -628,7 +628,7 @@ class GCPStagingEnvironmentValidationTests(SSotBaseTestCase):
         """E2E Test: GCP staging environment configuration should pass validation.
         
         **GOLDEN PATH PROTECTION**: This test ensures the staging environment
-        configuration passes validation, protecting $500K+ ARR functionality.
+        configuration passes validation, protecting 500K+ ARR functionality.
         """
         # ARRANGE: Use real configuration and validator
         config_manager = self.config_manager

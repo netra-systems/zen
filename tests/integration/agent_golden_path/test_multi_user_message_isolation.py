@@ -61,14 +61,14 @@ class MultiUserMessageIsolationTests(SSotAsyncTestCase):
         self.logger.info(f'  Properly isolated messages: {properly_isolated}')
         self.logger.info(f'  Overall isolation rate: {overall_isolation_rate * 100:.2f}%')
         for result in isolation_results:
-            status = '✅' if result['success'] else '❌'
+            status = 'CHECK' if result['success'] else 'X'
             isolation_pct = result['isolation_rate'] * 100
             self.logger.info(f"  {status} {result['scenario_name']}: {isolation_pct:.2f}% isolation rate")
         min_required_isolation_rate = 0.95
         sensitive_scenarios = [r for r in isolation_results if r.get('contains_sensitive_data')]
         sensitive_violations = [r for r in sensitive_scenarios if r['isolation_rate'] < 1.0]
         if overall_isolation_rate >= min_required_isolation_rate and (not sensitive_violations):
-            self.logger.info(f'✅ GOLDEN PATH PROTECTED: Multi-user message isolation maintained ({overall_isolation_rate * 100:.2f}%)')
+            self.logger.info(f'CHECK GOLDEN PATH PROTECTED: Multi-user message isolation maintained ({overall_isolation_rate * 100:.2f}%)')
         else:
             failed_scenarios = [r['scenario_name'] for r in isolation_results if not r['success']]
             error_details = []
@@ -197,10 +197,10 @@ class MultiUserMessageIsolationTests(SSotAsyncTestCase):
                 overall_success = False
         self.logger.info('User data contamination prevention analysis:')
         for result in contamination_results:
-            status = '✅' if result['success'] else '❌'
+            status = 'CHECK' if result['success'] else 'X'
             self.logger.info(f"  {status} {result['scenario_name']}: {result['isolation_rate'] * 100:.2f}% data isolation")
         if overall_success:
-            self.logger.info('✅ GOLDEN PATH PROTECTED: User data contamination prevention maintained')
+            self.logger.info('CHECK GOLDEN PATH PROTECTED: User data contamination prevention maintained')
         else:
             failed_scenarios = [r['scenario_name'] for r in contamination_results if not r['success']]
             self.fail(f'GOLDEN PATH VIOLATION: User data contamination prevention compromised in scenarios: {failed_scenarios}. This indicates MessageRouter SSOT changes are allowing data leakage between users, creating privacy violations and accuracy issues for Golden Path user experience.')

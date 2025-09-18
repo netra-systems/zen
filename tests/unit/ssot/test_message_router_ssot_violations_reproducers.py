@@ -88,7 +88,7 @@ class MessageRouterSSOTViolationDetectionTests(SSotBaseTestCase, unittest.TestCa
         )
 
         # If we reach here, SSOT compliance is achieved
-        self.logger.info("✅ SSOT COMPLIANCE: Only one MessageRouter class definition found")
+        self.logger.info("CHECK SSOT COMPLIANCE: Only one MessageRouter class definition found")
 
     def test_detect_interface_inconsistencies_register_vs_add_handler(self):
         """
@@ -204,9 +204,9 @@ class MessageRouterSSOTViolationDetectionTests(SSotBaseTestCase, unittest.TestCa
 
         # If we have both proxy and canonical, ensure proper relationship
         if len(proxy_implementations) > 0 and len(canonical_implementations) == 1:
-            self.logger.info("✅ PROXY PATTERN: Detected proxy forwarding to single canonical implementation")
+            self.logger.info("CHECK PROXY PATTERN: Detected proxy forwarding to single canonical implementation")
         elif len(canonical_implementations) == 1 and len(proxy_implementations) == 0:
-            self.logger.info("✅ DIRECT CANONICAL: Single canonical implementation without proxy")
+            self.logger.info("CHECK DIRECT CANONICAL: Single canonical implementation without proxy")
         else:
             self.fail(
                 f"IMPLEMENTATION PATTERN VIOLATION: Inconsistent proxy/canonical pattern. "

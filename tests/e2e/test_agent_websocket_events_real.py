@@ -1,6 +1,6 @@
 """Agent WebSocket Events E2E Tests - CLAUDE.md Compliant Real Authentication
 
-CRITICAL: $500K+ ARR protection by ensuring agent communication works with REAL authentication.
+CRITICAL: 500K+ ARR protection by ensuring agent communication works with REAL authentication.
 This test validates that ALL required agent lifecycle events are sent and received correctly
 using REAL WebSocket connections and REAL authentication - NO MOCKS, NO BYPASSING.
 
@@ -64,7 +64,7 @@ class RealWebSocketEventCollector:
                     break
             except asyncio.TimeoutError:
                 continue
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 logger.info('WebSocket connection closed during listening')
                 break
             except Exception as e:
@@ -197,7 +197,7 @@ class AgentWebSocketEventsRealTests(SSotAsyncTestCase):
     async def test_agent_websocket_events_mission_critical_real(self):
         """Test that mission-critical agent WebSocket events work using REAL services and authentication.
         
-        Business Impact: Core product functionality - $500K+ ARR protection.
+        Business Impact: Core product functionality - 500K+ ARR protection.
         This test validates ALL required WebSocket events using REAL authentication and connections.
         
         CLAUDE.md COMPLIANCE:
@@ -257,7 +257,7 @@ class AgentWebSocketEventsRealTests(SSotAsyncTestCase):
         logger.info('=' * 80)
         assert report['total_events'] > 0, 'CRITICAL FAILURE: No WebSocket events received from agent execution'
         critical_missing = report['mission_critical_missing']
-        assert len(critical_missing) == 0, f'CRITICAL FAILURE: Missing mission-critical events: {critical_missing}. This breaks $500K+ ARR functionality!'
+        assert len(critical_missing) == 0, f'CRITICAL FAILURE: Missing mission-critical events: {critical_missing}. This breaks 500K+ ARR functionality!'
         assert report['valid_order'], f"CRITICAL FAILURE: Invalid event order: {report['event_sequence']}. Agent events must follow correct sequence!"
         assert report['total_events'] >= 5, f"CRITICAL FAILURE: Expected at least 5 events, got {report['total_events']}. Incomplete agent execution!"
         event_types = set(report['unique_event_types'])
@@ -265,7 +265,7 @@ class AgentWebSocketEventsRealTests(SSotAsyncTestCase):
             assert required_event in event_types, f"CRITICAL FAILURE: Missing required event '{required_event}'. This breaks user experience!"
         logger.info(f' PASS:  MISSION CRITICAL agent WebSocket events test PASSED - execution time: {execution_time:.3f}s')
         logger.info(f"    TARGET:  Events validated: {report['total_events']}, Critical coverage: 100%")
-        logger.info(f'   [U+1F4B0] $500K+ ARR functionality protected: Real-time agent communication working')
+        logger.info(f'   [U+1F4B0] 500K+ ARR functionality protected: Real-time agent communication working')
         return report
 
     @pytest.mark.asyncio

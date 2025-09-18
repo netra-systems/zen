@@ -4,7 +4,7 @@ Comprehensive Unit Tests for WebSocket Authentication (Golden Path SSOT)
 Business Value Justification (BVJ):
 - Segment: All (Free  ->  Enterprise) - Authentication gateway for all users
 - Business Goal: Security & Access Control - Prevent unauthorized access to AI features
-- Value Impact: Prevents 1011 errors that block $500K+ ARR chat functionality
+- Value Impact: Prevents 1011 errors that block 500K+ ARR chat functionality
 - Revenue Impact: CRITICAL - Enables secure multi-tenant AI platform access
 
 CRITICAL: These tests validate the authentication layer that secures WebSocket connections.

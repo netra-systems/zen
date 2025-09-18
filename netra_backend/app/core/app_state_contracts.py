@@ -115,7 +115,7 @@ class WebSocketBridgeValidator(AppStateValidator):
         )
 
 
-class ExecutionEngineFactoryValidator(AppStateValidator):
+class UserExecutionEngineValidator(AppStateValidator):
     """Validates ExecutionEngineFactory meets contract requirements"""
     
     def validate(self, app_state: Any) -> ValidationResult:

@@ -10,11 +10,11 @@ TESTING CONSTRAINTS:
 - NO Docker required - Unit test only
 - Uses SSOT testing infrastructure
 - Validates import paths and circular dependency prevention
-- Tests Golden Path WebSocket functionality ($500K+ ARR protection)
+- Tests Golden Path WebSocket functionality (500K+ ARR protection)
 
 BUSINESS VALUE:
 - Segment: ALL (Free -> Enterprise) - Golden Path Infrastructure
-- Goal: Eliminate SSOT violations threatening $500K+ ARR
+- Goal: Eliminate SSOT violations threatening 500K+ ARR
 - Impact: Ensures reliable WebSocket operations after factory removal
 - Revenue Impact: Prevents WebSocket initialization failures affecting chat
 """
@@ -72,7 +72,7 @@ class WebSocketFactoryImportValidationTests(SSotAsyncTestCase):
             from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             self.assertTrue(hasattr(WebSocketManager, '__init__'), 'WebSocketManager class missing __init__ method')
             self.assertTrue(callable(get_websocket_manager), 'get_websocket_manager is not callable')
-            logger.info('✅ Canonical SSOT imports functional')
+            logger.info('CHECK Canonical SSOT imports functional')
         except ImportError as e:
             self.fail(f'SSOT FAILURE: Canonical WebSocket imports broken: {e}')
 
@@ -90,7 +90,7 @@ class WebSocketFactoryImportValidationTests(SSotAsyncTestCase):
             user_context = UserExecutionContext(user_id=self.test_user_id, websocket_client_id='test_client_factory_validation')
             self.assertIsNotNone(user_context)
             self.assertEqual(user_context.user_id, self.test_user_id)
-            logger.info('✅ UserExecutionContext creation via SSOT paths successful')
+            logger.info('CHECK UserExecutionContext creation via SSOT paths successful')
         except Exception as e:
             self.fail(f'SSOT FAILURE: UserExecutionContext creation failed: {e}')
 
@@ -110,13 +110,13 @@ class WebSocketFactoryImportValidationTests(SSotAsyncTestCase):
                     del sys.modules[import_path]
                 module = __import__(import_path, fromlist=[''])
                 successfully_imported[import_path] = module
-                logger.debug(f'✅ Successfully imported: {import_path}')
+                logger.debug(f'CHECK Successfully imported: {import_path}')
             except ImportError as e:
                 self.fail(f'CIRCULAR DEPENDENCY: Import failed for {import_path}: {e}')
             except Exception as e:
                 self.fail(f'UNEXPECTED ERROR: Import error for {import_path}: {e}')
         self.assertEqual(len(successfully_imported), len(import_paths_to_test), 'Not all critical modules imported successfully')
-        logger.info('✅ No circular dependencies detected in SSOT import paths')
+        logger.info('CHECK No circular dependencies detected in SSOT import paths')
 
     async def test_websocket_manager_initialization_without_factory(self):
         """
@@ -133,7 +133,7 @@ class WebSocketFactoryImportValidationTests(SSotAsyncTestCase):
             websocket_manager = WebSocketManager(user_context=user_context)
             self.assertIsNotNone(websocket_manager)
             self.assertEqual(websocket_manager.user_context.user_id, self.test_user_id)
-            logger.info('✅ WebSocket manager initialization successful without factory')
+            logger.info('CHECK WebSocket manager initialization successful without factory')
         except Exception as e:
             self.fail(f'WEBSOCKET INIT FAILURE: Manager initialization failed: {e}')
 if __name__ == '__main__':

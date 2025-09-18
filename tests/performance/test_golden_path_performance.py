@@ -11,7 +11,7 @@ PURPOSE:
 - Ensures scalability for enterprise workloads
 
 BUSINESS VALUE:
-- Protects $500K+ ARR system performance expectations
+- Protects 500K+ ARR system performance expectations
 - Ensures enterprise-grade performance SLAs
 - Validates system can handle expected user loads
 - Tests performance improvements from Issue #1116 factory migration

@@ -4,7 +4,7 @@ Integration Tests for WebSocket SSOT Factory Patterns (Issue #1128)
 PURPOSE: Test WebSocket manager initialization via canonical SSOT imports only,
 validate multi-user isolation, and test WebSocket event emission with real services.
 
-Business Impact: $500K+ ARR chat functionality requires proper SSOT patterns.
+Business Impact: 500K+ ARR chat functionality requires proper SSOT patterns.
 Test Environment: Uses real services (PostgreSQL, Redis) but no Docker.
 """
 
@@ -76,9 +76,9 @@ class WebSocketSSOTFactoryPatternsTests(SSotAsyncTestCase):
             from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketConnection, WebSocketManagerMode
         except ImportError as e:
             pytest.fail(
-                f"❌ Canonical SSOT import failed: {e}\n"
+                f"X Canonical SSOT import failed: {e}\n"
                 f"🔧 WebSocket SSOT patterns not properly implemented\n"
-                f"💰 Business Impact: $500K+ ARR chat functionality compromised"
+                f"💰 Business Impact: 500K+ ARR chat functionality compromised"
             )
 
         # Test factory method initialization
@@ -88,7 +88,7 @@ class WebSocketSSOTFactoryPatternsTests(SSotAsyncTestCase):
             assert isinstance(websocket_manager, WebSocketManager), "Should return WebSocketManager instance"
         except Exception as e:
             pytest.fail(
-                f"❌ WebSocket manager initialization failed: {e}\n"
+                f"X WebSocket manager initialization failed: {e}\n"
                 f"🔧 SSOT factory pattern not working properly"
             )
 
@@ -232,7 +232,7 @@ class WebSocketSSOTFactoryPatternsTests(SSotAsyncTestCase):
 
         except Exception as e:
             pytest.fail(
-                f"❌ WebSocket factory dependency injection failed: {e}\n"
+                f"X WebSocket factory dependency injection failed: {e}\n"
                 f"🔧 SSOT factory pattern not properly implemented"
             )
 
@@ -269,7 +269,7 @@ class WebSocketSSOTFactoryPatternsTests(SSotAsyncTestCase):
 
         except Exception as e:
             pytest.fail(
-                f"❌ WebSocket manager real service integration failed: {e}\n"
+                f"X WebSocket manager real service integration failed: {e}\n"
                 f"🔧 SSOT patterns may not properly integrate with backend services"
             )
 
@@ -288,7 +288,7 @@ class WebSocketSSOTFactoryPatternsTests(SSotAsyncTestCase):
             pass
 
         assert ssot_import_success, (
-            "❌ Canonical SSOT import should work\n"
+            "X Canonical SSOT import should work\n"
             "🔧 from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager"
         )
 

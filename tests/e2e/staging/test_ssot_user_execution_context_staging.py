@@ -7,7 +7,7 @@ to validate consolidation works in production-like conditions.
 This test is DESIGNED TO FAIL initially to prove SSOT violations cause
 staging environment failures with real GCP infrastructure.
 
-Business Impact: $500K+ ARR at risk from staging deployment failures
+Business Impact: 500K+ ARR at risk from staging deployment failures
 that prevent customer validation and production deployment confidence.
 
 CRITICAL REQUIREMENTS:
@@ -97,7 +97,7 @@ class SSotUserExecutionContextStagingTests(SSotAsyncTestCase):
             websocket_endpoint='/ws',
             health_check_endpoint='/health',
             test_user_credentials={
-                'email': self.env.get('STAGING_TEST_USER_EMAIL', 'test@netra.ai'),
+                'email': self.env.get('STAGING_TEST_USER_EMAIL', 'test@netrasystems.ai'),
                 'password': self.env.get('STAGING_TEST_USER_PASSWORD', 'test_password')
             }
         )

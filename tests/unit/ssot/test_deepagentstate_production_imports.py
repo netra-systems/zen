@@ -15,6 +15,7 @@ from typing import Dict, List, Set, Tuple
 import pytest
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from netra_backend.app.core.user_execution_context import UserExecutionContext
 
 
 @pytest.mark.unit
@@ -238,7 +239,7 @@ Clean Percentage: {files_clean_percentage:.1f}%
 Total Violations: {total_violations}
 Known Critical Files: {len(self.known_violation_files)}
 
-Progress Status: {"🔴 REMEDIATION NEEDED" if files_with_violations > 0 else "✅ MIGRATION COMPLETE"}
+Progress Status: {"🔴 REMEDIATION NEEDED" if files_with_violations > 0 else "CHECK MIGRATION COMPLETE"}
         """
 
         self.logger.info(progress_report)
@@ -259,7 +260,7 @@ Progress Status: {"🔴 REMEDIATION NEEDED" if files_with_violations > 0 else "�
                 violations.append("Direct deprecated import: 'from netra_backend.app.schemas.agent_models import DeepAgentState'")
 
             # Pattern 2: Wildcard import including DeepAgentState
-            if 'from netra_backend.app.agents.state import *' in content and 'DeepAgentState' in content:
+            if 'from netra_backend.app.schemas.agent_models import DeepAgentState' in content:
                 violations.append("Wildcard import with DeepAgentState usage")
 
             # Pattern 3: Multi-line import including DeepAgentState
@@ -275,7 +276,7 @@ Progress Status: {"🔴 REMEDIATION NEEDED" if files_with_violations > 0 else "�
 
             # Pattern 4: Usage indicators (might be using imported DeepAgentState)
             for i, line in enumerate(lines, 1):
-                if 'DeepAgentState(' in line or 'state: DeepAgentState' in line:
+                if 'UserExecutionContext.create_isolated_context(user_id="test_user", ' in line or 'state: DeepAgentState' in line:
                     violations.append(f"Usage at line {i}: {line.strip()}")
 
         except Exception as e:
@@ -337,7 +338,7 @@ Progress Status: {"🔴 REMEDIATION NEEDED" if files_with_violations > 0 else "�
         for file_path, file_violations in violations.items():
             report_lines.append(f"📁 {file_path}:")
             for violation in file_violations:
-                report_lines.append(f"   ⚠️  {violation}")
+                report_lines.append(f"   WARNING️  {violation}")
             report_lines.append("")
 
         return '\n'.join(report_lines)

@@ -1,12 +1,12 @@
 """
 E2E Tests for Complete Supervisor Orchestration Workflow
 
-Business Value: $500K+ ARR Golden Path Protection - Complete User Flow
+Business Value: 500K+ ARR Golden Path Protection - Complete User Flow
 Purpose: Validate complete workflow in staging environment
-Focus: User request → supervisor orchestration → AI response
+Focus: User request -> supervisor orchestration -> AI response
 
 This validates Issue #1188 Phase 3.4 complete supervisor orchestration workflow.
-Tests the full Golden Path: User request → Supervisor → Sub-agents → AI Response
+Tests the full Golden Path: User request -> Supervisor -> Sub-agents -> AI Response
 """
 
 import pytest
@@ -84,8 +84,8 @@ class SupervisorOrchestrationCompleteE2ETests(SSotAsyncTestCase):
         """
         Test the complete Golden Path user flow end-to-end.
 
-        Business Impact: Validates $500K+ ARR core user experience.
-        Flow: User Login → Request → Supervisor → Sub-agents → AI Response
+        Business Impact: Validates 500K+ ARR core user experience.
+        Flow: User Login -> Request -> Supervisor -> Sub-agents -> AI Response
         """
         with patch('netra_backend.app.agents.supervisor.agent_instance_factory.create_agent_instance_factory') as mock_factory_creator:
             # Mock agent factory
@@ -415,7 +415,7 @@ class GoldenPathBusinessValueValidationTests(SSotAsyncTestCase):
         """
         Test that supervisor orchestration delivers complete user value.
 
-        Business Impact: Validates $500K+ ARR value proposition.
+        Business Impact: Validates 500K+ ARR value proposition.
         """
         # Mock realistic business scenario
         business_request = {

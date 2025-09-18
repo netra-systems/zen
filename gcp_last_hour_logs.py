@@ -46,7 +46,7 @@ def get_last_hour_logs(project_id: str = "netra-staging"):
         time_filter = f'timestamp >= "{one_hour_ago.isoformat()}"'
 
         # Focus on all netra services with different severities
-        services_filter = 'resource.type="cloud_run_revision" AND (resource.labels.service_name="netra-backend-staging" OR resource.labels.service_name="netra-auth-staging" OR resource.labels.service_name="netra-frontend-staging")'
+        services_filter = 'resource.type="cloud_run_revision" AND (resource.labels.service_name="netra-backend-staging" OR resource.labels.service_name="netra-auth" OR resource.labels.service_name="netra-frontend-staging")'
 
         logs_by_severity = {}
 

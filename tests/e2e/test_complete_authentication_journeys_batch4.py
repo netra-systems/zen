@@ -159,12 +159,12 @@ class CompleteAuthenticationJourneysE2ETests(SSotAsyncTestCase):
                     followup_message = {'type': 'ping', 'sequence': i, 'user_id': user_data['user_id'], 'timestamp': datetime.now(timezone.utc).isoformat()}
                     await websocket.send(json.dumps(followup_message))
                     await asyncio.sleep(0.1)
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             if e.code == 1011:
                 raise AssertionError(f'WebSocket connection closed with 1011 error: {e}. This indicates authentication or server configuration issues that break chat functionality.')
             else:
                 print(f'WebSocket connection closed: {e.code} - {e.reason}')
-        except websockets.exceptions.InvalidHandshake as e:
+        except websockets.InvalidHandshake as e:
             raise AssertionError(f'WebSocket handshake failed: {e}. This indicates authentication headers or WebSocket configuration issues.')
         except ConnectionRefusedError:
             pytest.skip('WebSocket service not available for E2E connection test')
@@ -329,7 +329,7 @@ class CompleteAuthenticationJourneysE2ETests(SSotAsyncTestCase):
         websocket_url = self.env.get('WEBSOCKET_URL', 'ws://localhost:8000/ws')
         try:
             expired_headers = self.websocket_auth_helper.get_websocket_headers(expired_token)
-            with pytest.raises((websockets.exceptions.ConnectionClosed, websockets.exceptions.InvalidHandshake, ConnectionRefusedError, OSError)):
+            with pytest.raises((websockets.ConnectionClosed, websockets.InvalidHandshake, ConnectionRefusedError, OSError)):
                 async with websockets.connect(websocket_url, additional_headers=expired_headers, open_timeout=3.0, close_timeout=1.0) as ws:
                     await ws.send('{"type": "test"}')
                     await asyncio.sleep(0.1)

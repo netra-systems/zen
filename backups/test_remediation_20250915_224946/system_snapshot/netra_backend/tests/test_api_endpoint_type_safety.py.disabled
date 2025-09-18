@@ -1,0 +1,496 @@
+"""API Endpoint Type Safety Tests.
+
+Tests to ensure API endpoint payloads match expected types between frontend and backend.
+"""
+
+import json
+import pytest
+from typing import Dict, Any, List, Optional
+from datetime import datetime
+from pydantic import ValidationError
+
+# Import API schemas
+from netra_backend.app.schemas.Request import RequestModel, StartAgentPayload
+from netra_backend.app.schemas.Generation import ContentGenParams, LogGenParams, SyntheticDataGenParams
+from netra_backend.app.schemas.Auth import LoginRequest, LoginResponse, TokenData
+from netra_backend.app.schemas.User import UserCreate, UserUpdate
+from netra_backend.app.schemas.registry import User as UserResponse
+from netra_backend.app.schemas.Config import ConfigRequest, ConfigResponse
+from netra_backend.app.schemas.Corpus import CorpusCreate, CorpusResponse, CorpusUpdate
+from netra_backend.app.schemas.Reference import ReferenceCreate, ReferenceResponse
+from netra_backend.app.schemas.Supply import SupplyRequest, SupplyResponse
+from netra_backend.app.schemas.Analysis import AnalysisRequest, AnalysisResult
+from netra_backend.app.schemas.Tool import ToolExecutionRequest, ToolExecutionResponse
+from netra_backend.app.schemas.ToolPermission import ToolPermissionRequest, ToolPermissionResponse
+
+
+class APIRequestFactory:
+    """Factory for creating test API requests."""
+    
+    @staticmethod
+    def create_generation_request() -> Dict[str, Any]:
+        """Create a generation request payload."""
+        return {
+            "prompt": "Generate optimization recommendations",
+            "model": "gpt-4",
+            "max_tokens": 1000,
+            "temperature": 0.7,
+            "user_id": "user123",
+            "metadata": {
+                "session_id": "session456",
+                "request_type": "optimization"
+            }
+        }
+    
+    @staticmethod
+    def create_auth_request() -> Dict[str, Any]:
+        """Create an authentication request payload."""
+        return {
+            "username": "testuser@example.com",
+            "password": "secure_password_123",
+            "remember_me": True
+        }
+    
+    @staticmethod
+    def create_user_request() -> Dict[str, Any]:
+        """Create a user creation request payload."""
+        return {
+            "email": "newuser@example.com",
+            "full_name": "Test User",
+            "role": "analyst",
+            "metadata": {
+                "department": "engineering",
+                "team": "optimization"
+            }
+        }
+    
+    @staticmethod
+    def create_corpus_request() -> Dict[str, Any]:
+        """Create a corpus request payload."""
+        return {
+            "name": "Performance Logs Corpus",
+            "description": "Collection of system performance logs",
+            "source_type": "logs",
+            "filters": {
+                "date_range": "last_30_days",
+                "severity": ["error", "warning"]
+            },
+            "metadata": {
+                "created_by": "user123",
+                "tags": ["performance", "monitoring"]
+            }
+        }
+    
+    @staticmethod
+    def create_analysis_request() -> Dict[str, Any]:
+        """Create an analysis request payload."""
+        return {
+            "request_model": {
+                "id": "analysis123",
+                "user_id": "user123",
+                "query": "Analyze cost optimization opportunities",
+                "workloads": [
+                    {
+                        "run_id": "run456",
+                        "query": "Identify high-cost resources",
+                        "data_source": {
+                            "source_table": "cloud_costs",
+                            "filters": {"region": "us-west-2"}
+                        },
+                        "time_range": {
+                            "start_time": "2025-01-01T00:00:00Z",
+                            "end_time": "2025-01-31T23:59:59Z"
+                        }
+                    }
+                ],
+                "constraints": {
+                    "max_cost": 10000,
+                    "priority": "high"
+                }
+            }
+        }
+    
+    @staticmethod
+    def create_tool_execution_request() -> Dict[str, Any]:
+        """Create a tool execution request payload."""
+        return {
+            "tool_name": "cost_analyzer",
+            "tool_args": {
+                "period": "monthly",
+                "granularity": "daily",
+                "group_by": ["service", "region"],
+                "filters": {
+                    "min_cost": 100
+                }
+            },
+            "run_id": "run789",
+            "user_id": "user123",
+            "async_execution": True
+        }
+
+
+class TestAPIRequestValidation:
+    """Test API request payload validation."""
+    
+    def test_generation_request_validation(self):
+        """Test generation request payload validation."""
+        request_data = APIRequestFactory.create_generation_request()
+        
+        try:
+            request = ContentGenParams(**request_data)
+            assert request.samples_per_type == 10
+            assert request.temperature == 0.7
+            assert request.max_cores == 4
+        except ValidationError as e:
+            pytest.fail(f"Generation request validation failed: {e}")
+    
+    def test_auth_request_validation(self):
+        """Test authentication request validation."""
+        request_data = APIRequestFactory.create_auth_request()
+        
+        try:
+            request = LoginRequest(**request_data)
+            assert request.username == "testuser@example.com"
+            assert request.remember_me is True
+        except ValidationError as e:
+            pytest.fail(f"Auth request validation failed: {e}")
+    
+    def test_user_creation_validation(self):
+        """Test user creation request validation."""
+        request_data = APIRequestFactory.create_user_request()
+        
+        try:
+            request = UserCreate(**request_data)
+            assert request.email == "newuser@example.com"
+            assert request.full_name == "Test User"
+            assert request.role == "analyst"
+        except ValidationError as e:
+            pytest.fail(f"User creation validation failed: {e}")
+    
+    def test_corpus_request_validation(self):
+        """Test corpus request validation."""
+        request_data = APIRequestFactory.create_corpus_request()
+        
+        try:
+            request = CorpusCreate(**request_data)
+            assert request.name == "Performance Logs Corpus"
+            assert request.source_type == "logs"
+            assert "error" in request.filters["severity"]
+        except ValidationError as e:
+            pytest.fail(f"Corpus request validation failed: {e}")
+    
+    def test_analysis_request_validation(self):
+        """Test analysis request validation."""
+        request_data = APIRequestFactory.create_analysis_request()
+        
+        try:
+            request = AnalysisRequest(**request_data)
+            assert request.request_model.user_id == "user123"
+            assert len(request.request_model.workloads) == 1
+            workload = request.request_model.workloads[0]
+            assert workload.data_source.source_table == "cloud_costs"
+        except ValidationError as e:
+            pytest.fail(f"Analysis request validation failed: {e}")
+    
+    def test_tool_execution_validation(self):
+        """Test tool execution request validation."""
+        request_data = APIRequestFactory.create_tool_execution_request()
+        
+        try:
+            request = ToolExecutionRequest(**request_data)
+            assert request.tool_name == "cost_analyzer"
+            assert request.tool_args["period"] == "monthly"
+            assert request.async_execution is True
+        except ValidationError as e:
+            pytest.fail(f"Tool execution validation failed: {e}")
+
+
+class TestAPIResponseValidation:
+    """Test API response payload validation."""
+    
+    def test_synthetic_data_generation_params(self):
+        """Test synthetic data generation parameters validation."""
+        request_data = {
+            "num_traces": 10000,
+            "num_users": 100,
+            "error_rate": 0.05,
+            "event_types": ["search", "login", "purchase"],
+            "source_table": "content_corpus",
+            "destination_table": "synthetic_data"
+        }
+        
+        try:
+            request = SyntheticDataGenParams(**request_data)
+            assert request.num_traces == 10000
+            assert request.num_users == 100
+            assert request.error_rate == 0.05
+        except ValidationError as e:
+            pytest.fail(f"Synthetic data generation params validation failed: {e}")
+    
+    def test_auth_response_structure(self):
+        """Test authentication response structure."""
+        response_data = {
+            "access_token": "eyJhbGciOiJIUzI1NiIs...",
+            "token_type": "bearer",
+            "expires_in": 3600,
+            "refresh_token": "refresh_token_abc123",
+            "user": {
+                "id": "user123",
+                "email": "testuser@example.com",
+                "full_name": "Test User",
+                "role": "analyst"
+            }
+        }
+        
+        try:
+            response = LoginResponse(**response_data)
+            assert response.access_token.startswith("eyJ")
+            assert response.token_type == "bearer"
+            assert response.user["email"] == "testuser@example.com"
+        except ValidationError as e:
+            pytest.fail(f"Auth response validation failed: {e}")
+    
+    def test_user_response_structure(self):
+        """Test user response structure."""
+        response_data = {
+            "id": "user123",
+            "email": "testuser@example.com",
+            "full_name": "Test User",
+            "role": "analyst",
+            "created_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat(),
+            "is_active": True,
+            "metadata": {
+                "last_login": datetime.now().isoformat(),
+                "login_count": 5
+            }
+        }
+        
+        try:
+            response = UserResponse(**response_data)
+            assert response.id == "user123"
+            assert response.is_active is True
+        except ValidationError as e:
+            pytest.fail(f"User response validation failed: {e}")
+    
+    def test_analysis_result_structure(self):
+        """Test analysis result structure."""
+        result_data = {
+            "id": "result123",
+            "analysis_id": "analysis456",
+            "data": {
+                "findings": [
+                    {
+                        "type": "cost_optimization",
+                        "description": "Underutilized resources detected",
+                        "potential_savings": 5000,
+                        "recommendations": [
+                            "Resize instances",
+                            "Enable auto-scaling"
+                        ]
+                    }
+                ],
+                "summary": {
+                    "total_potential_savings": 5000,
+                    "risk_level": "low"
+                }
+            },
+            "created_at": datetime.now().isoformat()
+        }
+        
+        try:
+            result = AnalysisResult(**result_data)
+            assert result.analysis_id == "analysis456"
+            assert result.data["summary"]["total_potential_savings"] == 5000
+        except ValidationError as e:
+            pytest.fail(f"Analysis result validation failed: {e}")
+    
+    def test_tool_execution_response(self):
+        """Test tool execution response structure."""
+        response_data = {
+            "execution_id": "exec123",
+            "tool_name": "cost_analyzer",
+            "status": "completed",
+            "result": {
+                "total_cost": 15000,
+                "breakdown": {
+                    "compute": 8000,
+                    "storage": 4000,
+                    "network": 3000
+                },
+                "trends": {
+                    "monthly_growth": 0.15,
+                    "projected_next_month": 17250
+                }
+            },
+            "execution_time": 2.5,
+            "metadata": {
+                "cache_used": False,
+                "data_points_analyzed": 10000
+            }
+        }
+        
+        try:
+            response = ToolExecutionResponse(**response_data)
+            assert response.execution_id == "exec123"
+            assert response.status == "completed"
+            assert response.result["total_cost"] == 15000
+        except ValidationError as e:
+            pytest.fail(f"Tool execution response validation failed: {e}")
+
+
+class TestAPIErrorResponses:
+    """Test API error response structures."""
+    
+    def test_validation_error_response(self):
+        """Test validation error response structure."""
+        error_response = {
+            "error": {
+                "type": "validation_error",
+                "message": "Invalid request parameters",
+                "details": [
+                    {
+                        "field": "email",
+                        "message": "Invalid email format",
+                        "value": "not-an-email"
+                    }
+                ],
+                "request_id": "req123",
+                "timestamp": datetime.now().isoformat()
+            }
+        }
+        
+        assert error_response["error"]["type"] == "validation_error"
+        assert len(error_response["error"]["details"]) == 1
+    
+    def test_authentication_error_response(self):
+        """Test authentication error response structure."""
+        error_response = {
+            "error": {
+                "type": "authentication_error",
+                "message": "Invalid credentials",
+                "code": "AUTH_FAILED",
+                "request_id": "req456",
+                "timestamp": datetime.now().isoformat()
+            }
+        }
+        
+        assert error_response["error"]["code"] == "AUTH_FAILED"
+    
+    def test_rate_limit_error_response(self):
+        """Test rate limit error response structure."""
+        error_response = {
+            "error": {
+                "type": "rate_limit_error",
+                "message": "Rate limit exceeded",
+                "retry_after": 60,
+                "limit": 100,
+                "remaining": 0,
+                "reset_at": datetime.now().isoformat()
+            }
+        }
+        
+        assert error_response["error"]["retry_after"] == 60
+        assert error_response["error"]["remaining"] == 0
+
+
+class TestPaginationAndFiltering:
+    """Test pagination and filtering parameter validation."""
+    
+    def test_pagination_parameters(self):
+        """Test pagination parameter validation."""
+        pagination_params = {
+            "page": 1,
+            "page_size": 50,
+            "sort_by": "created_at",
+            "sort_order": "desc"
+        }
+        
+        assert pagination_params["page"] > 0
+        assert pagination_params["page_size"] <= 100
+        assert pagination_params["sort_order"] in ["asc", "desc"]
+    
+    def test_filtering_parameters(self):
+        """Test filtering parameter validation."""
+        filter_params = {
+            "status": ["active", "pending"],
+            "date_from": "2025-01-01T00:00:00Z",
+            "date_to": "2025-01-31T23:59:59Z",
+            "tags": ["optimization", "performance"],
+            "search": "cost reduction"
+        }
+        
+        assert isinstance(filter_params["status"], list)
+        assert "T" in filter_params["date_from"]  # ISO format
+    
+    def test_response_with_pagination(self):
+        """Test paginated response structure."""
+        paginated_response = {
+            "data": [
+                {"id": "item1", "name": "Item 1"},
+                {"id": "item2", "name": "Item 2"}
+            ],
+            "pagination": {
+                "page": 1,
+                "page_size": 50,
+                "total_items": 150,
+                "total_pages": 3,
+                "has_next": True,
+                "has_previous": False
+            }
+        }
+        
+        assert len(paginated_response["data"]) == 2
+        assert paginated_response["pagination"]["total_pages"] == 3
+
+
+class TestFileUploadAndDownload:
+    """Test file upload and download payload structures."""
+    
+    def test_file_upload_request(self):
+        """Test file upload request structure."""
+        upload_request = {
+            "filename": "performance_logs.csv",
+            "content_type": "text/csv",
+            "size": 1048576,  # 1MB
+            "metadata": {
+                "description": "Q1 2025 performance logs",
+                "tags": ["logs", "performance"],
+                "upload_reason": "analysis"
+            }
+        }
+        
+        assert upload_request["content_type"] == "text/csv"
+        assert upload_request["size"] > 0
+    
+    def test_file_upload_response(self):
+        """Test file upload response structure."""
+        upload_response = {
+            "file_id": "file123",
+            "filename": "performance_logs.csv",
+            "url": "/api/files/file123",
+            "size": 1048576,
+            "checksum": "sha256:abc123...",
+            "uploaded_at": datetime.now().isoformat(),
+            "expires_at": datetime.now().isoformat()
+        }
+        
+        assert upload_response["file_id"] == "file123"
+        assert upload_response["checksum"].startswith("sha256:")
+    
+    def test_file_download_response(self):
+        """Test file download response headers."""
+        download_headers = {
+            "Content-Type": "text/csv",
+            "Content-Disposition": 'attachment; filename="performance_logs.csv"',
+            "Content-Length": "1048576",
+            "Cache-Control": "no-cache",
+            "ETag": '"abc123"'
+        }
+        
+        assert "attachment" in download_headers["Content-Disposition"]
+        assert download_headers["Cache-Control"] == "no-cache"
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

@@ -7,6 +7,7 @@ import logging
 
 from fastapi import FastAPI
 
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.utils.multiprocessing_cleanup import cleanup_multiprocessing
@@ -131,6 +132,43 @@ async def cleanup_resources(app: FastAPI) -> None:
     logger.info("WebSocket connections handled by factory pattern - individual cleanup via context")
 
 
+async def _shutdown_infrastructure_resilience(app: FastAPI, logger: logging.Logger) -> None:
+    """Shutdown infrastructure resilience monitoring and circuit breakers."""
+    try:
+        logger.info("Shutting down infrastructure resilience components...")
+
+        # Stop infrastructure resilience monitoring
+        if hasattr(app.state, 'resilience_manager'):
+            try:
+                from netra_backend.app.services.infrastructure_resilience import shutdown_infrastructure_resilience
+                await shutdown_infrastructure_resilience()
+                logger.info("Infrastructure resilience monitoring stopped")
+            except Exception as e:
+                logger.error(f"Error stopping infrastructure resilience monitoring: {e}")
+
+        # Reset circuit breakers to closed state for clean shutdown
+        if hasattr(app.state, 'circuit_breakers'):
+            try:
+                for name, circuit_breaker in app.state.circuit_breakers.items():
+                    circuit_breaker.reset()
+                logger.info("Circuit breakers reset for clean shutdown")
+            except Exception as e:
+                logger.error(f"Error resetting circuit breakers: {e}")
+
+        # Clear circuit breaker manager
+        if hasattr(app.state, 'circuit_breaker_manager'):
+            try:
+                app.state.circuit_breaker_manager.reset_all()
+                logger.info("Circuit breaker manager reset")
+            except Exception as e:
+                logger.error(f"Error resetting circuit breaker manager: {e}")
+
+        logger.info("Infrastructure resilience shutdown complete")
+
+    except Exception as e:
+        logger.error(f"Error during infrastructure resilience shutdown: {e}")
+
+
 async def finalize_shutdown() -> None:
     """Finalize shutdown process."""
     try:
@@ -166,7 +204,13 @@ async def run_complete_shutdown(app: FastAPI, logger: logging.Logger) -> None:
     try:
         await stop_monitoring(app, logger)
     except asyncio.CancelledError:
-        logger.info("Monitoring shutdown cancelled - continuing with resource cleanup")
+        logger.info("Monitoring shutdown cancelled - continuing with infrastructure resilience cleanup")
+
+    # Shutdown infrastructure resilience monitoring
+    try:
+        await _shutdown_infrastructure_resilience(app, logger)
+    except asyncio.CancelledError:
+        logger.info("Infrastructure resilience shutdown cancelled - continuing with resource cleanup")
     
     try:
         await cleanup_resources(app)

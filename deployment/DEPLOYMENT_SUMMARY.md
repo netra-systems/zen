@@ -18,7 +18,7 @@ I have successfully implemented a comprehensive **zero-downtime production deplo
 
 **Key Features**:
 - Real-time rollout percentage control
-- Internal user testing (netra.ai domains)
+- Internal user testing (netrasystems.ai domains)
 - Automatic rollback on isolation score drops
 - Feature flag health monitoring integration
 

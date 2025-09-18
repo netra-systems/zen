@@ -19,13 +19,13 @@ Users login → AI agents process requests → Users receive AI responses
 SSOT ACHIEVEMENT: Both import paths now resolve to identical class objects.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 import warnings
 import threading
 from typing import Dict, Optional
 
 # Setup logging
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # ISSUE #863 PHASE 3: Direct re-export for SSOT compliance
 # Import and re-export all classes from supervisor registry so both paths resolve to same objects

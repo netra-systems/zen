@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free  ->  Enterprise) - Core agent execution bridge for all tiers
 - Business Goal: Agent Integration & Chat Value Delivery
 - Value Impact: Connects WebSocket infrastructure to agent execution (90% of platform value)
-- Revenue Impact: CRITICAL - Enables AI-powered interactions that drive $500K+ ARR
+- Revenue Impact: CRITICAL - Enables AI-powered interactions that drive 500K+ ARR
 
 CRITICAL: These tests validate the bridge between WebSocket messages and agent execution.
 This handler is responsible for converting user messages into agent requests and ensuring

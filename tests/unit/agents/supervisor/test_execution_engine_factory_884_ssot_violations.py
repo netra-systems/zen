@@ -1,7 +1,7 @@
 """Phase 1 Unit Tests: Execution Engine Factory SSOT Violations (Issue #884)
 
 CRITICAL BUSINESS VALUE: These tests reproduce execution engine factory fragmentation
-issues that block the Golden Path user flow (login → AI response), protecting $500K+ ARR.
+issues that block the Golden Path user flow (login -> AI response), protecting 500K+ ARR.
 
 EXPECTED BEHAVIOR: All tests in this file should INITIALLY FAIL to demonstrate
 SSOT violations in execution engine factory patterns. They will pass after consolidation.
@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Segment: Platform/Internal
 - Business Goal: Ensure execution engine factory SSOT compliance and reliability
 - Value Impact: Prevents factory fragmentation, user isolation failures, memory leaks
-- Strategic Impact: Foundation for $500K+ ARR multi-user chat functionality
+- Strategic Impact: Foundation for 500K+ ARR multi-user chat functionality
 
 Test Philosophy:
 - FAILING TESTS FIRST: These tests reproduce real SSOT violations before fixing them
@@ -314,7 +314,7 @@ class ExecutionEngineFactorySSOTViolations884Tests(SSotAsyncTestCase):
         """Log detailed test failure information for analysis."""
         print(f'\n=== EXECUTION ENGINE FACTORY SSOT VIOLATION: {test_name} ===')
         print(f'Timestamp: {datetime.now().isoformat()}')
-        print(f'Business Impact: Golden Path blocked - $500K+ ARR at risk')
+        print(f'Business Impact: Golden Path blocked - 500K+ ARR at risk')
         print(f'Issue: #884 Execution Engine Factory Fragmentation')
         print('\nFailure Details:')
         for key, value in failure_details.items():

@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,17 +23,12 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 E2E GCP Staging Test Suite: UnifiedConfigurationManager Production Critical
 
 Business Value Justification (BVJ):
 - Segment: Platform/All (Free, Early, Mid, Enterprise) - Production validation for all customers
-- Business Goal: Production environment validation preventing $500K+ ARR service outages
+- Business Goal: Production environment validation preventing 500K+ ARR service outages
 - Value Impact: GCP staging environment testing validates production-ready configuration management
 - Strategic Impact: CRITICAL - Production validation preventing enterprise customer loss ($15K+ MRR per customer)
 
@@ -110,7 +97,7 @@ class UnifiedConfigurationManagerGCPStagingProductionCriticalTests(BaseE2ETest):
             "LOG_LEVEL": "INFO",
             "DEBUG": "false",
             "ENABLE_METRICS": "true",
-            "CORS_ORIGINS": "https://staging.netra.ai,https://staging-api.netra.ai"
+            "CORS_ORIGINS": "https://staging.netrasystems.ai,https://staging-api.netrasystems.ai"
         }
         
         for key, value in staging_config.items():
@@ -157,7 +144,7 @@ class UnifiedConfigurationManagerGCPStagingProductionCriticalTests(BaseE2ETest):
         PRODUCTION CRITICAL: Test GCP environment configuration validation for production readiness.
         
         Protects: Production deployment configuration consistency
-        Business Impact: Invalid GCP configurations can cause complete production outages ($500K+ ARR loss)
+        Business Impact: Invalid GCP configurations can cause complete production outages (500K+ ARR loss)
         """
         manager = gcp_staging_manager
         
@@ -243,7 +230,7 @@ class UnifiedConfigurationManagerGCPStagingProductionCriticalTests(BaseE2ETest):
                 "LOG_LEVEL": "INFO",
                 "DEBUG": "false",
                 "JWT_SECRET_KEY": "global_jwt_secret_key",  # Same across regions
-                "CORS_ORIGINS": f"https://{region}-staging.netra.ai"
+                "CORS_ORIGINS": f"https://{region}-staging.netrasystems.ai"
             }
             
             # Region-specific configurations

@@ -1,9 +1,9 @@
 """GOLDEN PATH PROTECTION TESTS: Core Business Value (MUST ALWAYS PASS).
 
 These tests MUST PASS throughout the entire SSOT migration process.
-They protect the core business value: login → get AI responses (90% platform value).
+They protect the core business value: login -> get AI responses (90% platform value).
 
-Business Impact: Protects $500K+ ARR by ensuring core chat functionality works.
+Business Impact: Protects 500K+ ARR by ensuring core chat functionality works.
 """
 import asyncio
 import time
@@ -27,23 +27,23 @@ class GoldenPathProtectionTests(SSotAsyncTestCase, unittest.TestCase):
         continues to work throughout the SSOT migration process.
         
         Expected Behavior: MUST ALWAYS PASS (before, during, after migration)
-        Business Impact: Protects $500K+ ARR core functionality
+        Business Impact: Protects 500K+ ARR core functionality
         """
         logger.info('🌟 GOLDEN PATH TEST: Complete user flow - login to AI response')
         user_context = self._create_authenticated_user_context('golden_path_user')
-        logger.info(f'Step 1 ✅: User authenticated - {user_context.user_id}')
+        logger.info(f'Step 1 CHECK: User authenticated - {user_context.user_id}')
         execution_engine = await self._create_migration_compatible_execution_engine(user_context)
-        logger.info('Step 2 ✅: Execution engine created')
+        logger.info('Step 2 CHECK: Execution engine created')
         agent_context = AgentExecutionContext(agent_name='triage_agent', user_id=user_context.user_id, thread_id=user_context.thread_id, run_id=user_context.run_id, metadata={'user_input': 'What is the weather like today?', 'test_case': 'golden_path_protection', 'business_critical': True, 'arr_protection': '$500K+'})
         start_time = time.time()
         result = await self._execute_agent_with_business_validation(execution_engine, agent_context, user_context)
         execution_time = time.time() - start_time
-        logger.info(f'Step 3 ✅: Agent executed in {execution_time:.2f}s')
+        logger.info(f'Step 3 CHECK: Agent executed in {execution_time:.2f}s')
         await self._validate_golden_path_requirements(result, execution_time)
-        logger.info('Step 4 ✅: Business requirements validated')
+        logger.info('Step 4 CHECK: Business requirements validated')
         await self._cleanup_execution_engine(execution_engine)
-        logger.info('Step 5 ✅: Cleanup completed')
-        logger.info(f'🌟 GOLDEN PATH PROTECTED: User login → AI response in {execution_time:.2f}s')
+        logger.info('Step 5 CHECK: Cleanup completed')
+        logger.info(f'🌟 GOLDEN PATH PROTECTED: User login -> AI response in {execution_time:.2f}s')
         await self._log_golden_path_success(user_context, execution_time, result)
 
     async def test_golden_path_websocket_events(self):
@@ -201,7 +201,7 @@ class GoldenPathProtectionTests(SSotAsyncTestCase, unittest.TestCase):
             pytest.fail(f"GOLDEN PATH FAILURE: AI response too short/empty: '{ai_response}'. Not providing substantive value to users.")
         if 'weather' not in ai_response.lower():
             pytest.fail(f"GOLDEN PATH FAILURE: AI response not relevant to weather query: '{ai_response}'. AI not understanding or addressing user needs.")
-        logger.info('✅ All golden path business requirements validated')
+        logger.info('CHECK All golden path business requirements validated')
 
     def _create_comprehensive_websocket_bridge(self, events_captured: List, timestamps: List):
         """Create comprehensive WebSocket bridge for event monitoring."""
@@ -261,7 +261,7 @@ class GoldenPathProtectionTests(SSotAsyncTestCase, unittest.TestCase):
             matching_events = [e for e in events_captured if e['type'] == required_event]
             if len(matching_events) == 0:
                 pytest.fail(f"GOLDEN PATH WEBSOCKET FAILURE: Required event '{required_event}' not delivered. Real-time chat experience broken. Captured events: {captured_event_types}")
-        logger.info(f'✅ All {len(required_events)} critical WebSocket events delivered')
+        logger.info(f'CHECK All {len(required_events)} critical WebSocket events delivered')
 
     async def _validate_websocket_event_sequence(self, events_captured: List, timestamps: List):
         """Validate WebSocket event sequence and timing."""
@@ -276,7 +276,7 @@ class GoldenPathProtectionTests(SSotAsyncTestCase, unittest.TestCase):
             total_duration = timestamps[-1] - timestamps[0]
             if total_duration < 0.1:
                 pytest.fail(f'GOLDEN PATH WEBSOCKET TIMING FAILURE: Events too close together ({total_duration:.3f}s). May indicate batching issues.')
-        logger.info('✅ WebSocket event sequence and timing validated')
+        logger.info('CHECK WebSocket event sequence and timing validated')
 
     async def _simulate_golden_path_user_session(self, user_context: UserExecutionContext, user_id: int):
         """Simulate complete user session for concurrent testing."""

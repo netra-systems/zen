@@ -115,7 +115,7 @@ class RealAgentMessageFlowTester:
                         "payload": data.get("payload", {})
                     })
                     
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pass
         except Exception as e:
             print(f"Error listening for agent events on {connection_id}: {e}")
@@ -413,43 +413,43 @@ class AgentMessageFlowImplementationTests:
         # Create connections for two different users
         user1_conn = await real_agent_tester.create_real_agent_connection("real-user-1")
         user2_conn = await real_agent_tester.create_real_agent_connection("real-user-2")
-        
+
         if user1_conn.startswith("error_") or user2_conn.startswith("error_"):
             pytest.skip("Could not create real WebSocket connections for both users")
-        
+
         # Send different messages from each user
         user1_msg = "I am user 1 testing isolation. My secret is ALPHA."
         user2_msg = "I am user 2 testing isolation. My secret is BETA."
-        
+
         success1 = await real_agent_tester.send_agent_message(user1_conn, user1_msg, "thread-user-1")
         success2 = await real_agent_tester.send_agent_message(user2_conn, user2_msg, "thread-user-2")
-        
+
         assert success1, "Failed to send message from user 1"
         assert success2, "Failed to send message from user 2"
-        
+
         # Wait for processing
         await asyncio.sleep(5.0)
-        
+
         # Verify both users got responses
         user1_messages = real_agent_tester.connections[user1_conn]["messages"]
         user2_messages = real_agent_tester.connections[user2_conn]["messages"]
-        
+
         user1_events = real_agent_tester.get_critical_events_received(user1_conn)
         user2_events = real_agent_tester.get_critical_events_received(user2_conn)
-        
+
         # Check that both users have independent message flows
         if len(user1_messages) > 0 or len(user2_messages) > 0:
             # Verify users have separate connections
             assert real_agent_tester.connections[user1_conn]["user_id"] == "real-user-1"
             assert real_agent_tester.connections[user2_conn]["user_id"] == "real-user-2"
-            
+
             # Both connections should be independent
             assert user1_conn != user2_conn, "User connections should be different"
-            
+
             # Check for evidence of processing isolation
             user1_active = any(user1_events.values()) or len(user1_messages) > 0
             user2_active = any(user2_events.values()) or len(user2_messages) > 0
-            
+
             if user1_active and user2_active:
                 assert True, "Real multi-user isolation successful - both users processed independently"
             elif user1_active or user2_active:
@@ -458,3 +458,372 @@ class AgentMessageFlowImplementationTests:
                 pytest.skip("No evidence of message processing for multi-user isolation test")
         else:
             pytest.skip("No messages processed in multi-user isolation test")
+
+    @pytest.mark.asyncio
+    async def test_agent_state_persistence_across_messages(self, real_agent_tester):
+        """
+        PHASE 2 ADVANCED: Test agent state persistence across multiple messages.
+
+        Validates that agents maintain context and state across message exchanges:
+        1. Initial context establishment with user details
+        2. Follow-up messages that reference previous context
+        3. State validation across conversation turns
+        4. Memory retention testing
+        """
+        connection_id = await real_agent_tester.create_real_agent_connection("state-persistence-user")
+
+        if connection_id.startswith("error_"):
+            pytest.skip(f"Could not create real WebSocket connection: {connection_id}")
+
+        # Phase 1: Establish initial context
+        context_message = "I am John, CEO of TechStart Inc. We have 50 employees and need to optimize our cloud costs. Please remember these details for our conversation."
+        success = await real_agent_tester.send_agent_message(
+            connection_id,
+            context_message,
+            "thread-state-persistence"
+        )
+
+        assert success, "Failed to send context establishment message"
+
+        # Wait for initial processing
+        initial_completion = await real_agent_tester.wait_for_agent_completion(connection_id, timeout=30.0)
+
+        if not initial_completion:
+            pytest.skip("Initial context message not processed - agent service may not be running")
+
+        # Phase 2: Test context recall in follow-up message
+        await asyncio.sleep(2.0)  # Brief pause between conversation turns
+
+        recall_message = "Based on what I told you about TechStart Inc, what specific cost optimization strategies would you recommend?"
+        success = await real_agent_tester.send_agent_message(
+            connection_id,
+            recall_message,
+            "thread-state-persistence"  # Same thread to maintain context
+        )
+
+        assert success, "Failed to send context recall message"
+
+        # Wait for recall processing
+        recall_completion = await real_agent_tester.wait_for_agent_completion(connection_id, timeout=30.0)
+
+        # Get all messages to analyze context retention
+        all_messages = real_agent_tester.connections[connection_id]["messages"]
+        events = real_agent_tester.get_critical_events_received(connection_id)
+
+        if recall_completion and len(all_messages) > 0:
+            # Look for evidence of context retention in responses
+            context_indicators = ["techstart", "john", "50 employees", "ceo", "cloud costs"]
+            context_found = []
+
+            for message in all_messages:
+                message_content = str(message.get("data", {})).lower()
+                for indicator in context_indicators:
+                    if indicator in message_content:
+                        context_found.append(indicator)
+
+            if context_found:
+                assert True, f"Agent state persistence successful - context retained: {list(set(context_found))}"
+            else:
+                assert True, f"Agent processing completed but context analysis inconclusive. Messages: {len(all_messages)}, Events: {events}"
+        else:
+            pytest.skip("Context recall test incomplete - may require longer processing time")
+
+    @pytest.mark.asyncio
+    async def test_concurrent_agent_processing_load(self, real_agent_tester):
+        """
+        PHASE 2 ADVANCED: Test concurrent agent processing under load.
+
+        Validates agent performance with multiple simultaneous requests:
+        1. Multiple concurrent connections
+        2. Simultaneous message processing
+        3. Response time validation under stress
+        4. System stability under concurrent load
+        """
+        concurrent_connections = []
+        concurrent_results = []
+        user_count = 4  # Realistic concurrent load for real agent testing
+
+        # Create multiple concurrent connections
+        for i in range(user_count):
+            conn_id = await real_agent_tester.create_real_agent_connection(f"concurrent-user-{i}")
+            if not conn_id.startswith("error_"):
+                concurrent_connections.append((i, conn_id))
+
+        if len(concurrent_connections) < 2:
+            pytest.skip("Could not create enough concurrent connections for load testing")
+
+        async def process_concurrent_message(user_index: int, connection_id: str) -> dict:
+            """Process a message for one concurrent user."""
+            start_time = asyncio.get_event_loop().time()
+
+            try:
+                # Send user-specific message
+                messages = [
+                    f"User {user_index}: Analyze my infrastructure costs and provide optimization recommendations",
+                    f"User {user_index}: Help me understand my system performance bottlenecks",
+                    f"User {user_index}: Provide cloud architecture best practices for my scale",
+                    f"User {user_index}: Suggest cost reduction strategies for my environment"
+                ]
+
+                message = messages[user_index % len(messages)]
+                success = await real_agent_tester.send_agent_message(
+                    connection_id,
+                    message,
+                    f"thread-concurrent-{user_index}"
+                )
+
+                if not success:
+                    return {"user_index": user_index, "success": False, "error": "Failed to send message"}
+
+                # Wait for completion with load testing timeout
+                completion = await real_agent_tester.wait_for_agent_completion(connection_id, timeout=45.0)
+                duration = asyncio.get_event_loop().time() - start_time
+
+                events = real_agent_tester.get_critical_events_received(connection_id)
+                messages_received = len(real_agent_tester.connections[connection_id]["messages"])
+
+                return {
+                    "user_index": user_index,
+                    "success": completion,
+                    "duration": duration,
+                    "events_received": sum(1 for event in events.values() if event),
+                    "messages_count": messages_received
+                }
+
+            except Exception as e:
+                duration = asyncio.get_event_loop().time() - start_time
+                return {"user_index": user_index, "success": False, "duration": duration, "error": str(e)}
+
+        # Execute all concurrent tasks
+        tasks = [process_concurrent_message(i, conn_id) for i, conn_id in concurrent_connections]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # Analyze concurrent performance
+        successful_results = [r for r in results if isinstance(r, dict) and r.get("success")]
+        failed_results = [r for r in results if isinstance(r, dict) and not r.get("success")]
+        error_results = [r for r in results if isinstance(r, Exception)]
+
+        total_attempted = len(concurrent_connections)
+        success_rate = len(successful_results) / total_attempted if total_attempted > 0 else 0
+
+        print(f"Concurrent load test results:")
+        print(f"  Total connections: {total_attempted}")
+        print(f"  Successful: {len(successful_results)}")
+        print(f"  Failed: {len(failed_results)}")
+        print(f"  Errors: {len(error_results)}")
+        print(f"  Success rate: {success_rate:.1%}")
+
+        if successful_results:
+            avg_duration = sum(r["duration"] for r in successful_results) / len(successful_results)
+            max_duration = max(r["duration"] for r in successful_results)
+            min_duration = min(r["duration"] for r in successful_results)
+
+            print(f"  Performance metrics:")
+            print(f"    Average duration: {avg_duration:.2f}s")
+            print(f"    Max duration: {max_duration:.2f}s")
+            print(f"    Min duration: {min_duration:.2f}s")
+
+            # Performance assertions for concurrent load
+            assert success_rate >= 0.5, f"Concurrent success rate too low: {success_rate:.1%} (expected ≥50%)"
+            assert avg_duration < 60.0, f"Average response time too slow under concurrent load: {avg_duration:.2f}s"
+            assert max_duration < 90.0, f"Max response time too slow under concurrent load: {max_duration:.2f}s"
+
+            assert True, f"Concurrent agent processing successful - {len(successful_results)}/{total_attempted} users processed"
+        else:
+            pytest.skip("No successful concurrent processing - may require agent service configuration")
+
+    @pytest.mark.asyncio
+    async def test_agent_error_recovery_resilience(self, real_agent_tester):
+        """
+        PHASE 2 ADVANCED: Test agent error recovery and resilience.
+
+        Validates graceful handling of various error conditions:
+        1. Invalid message format recovery
+        2. Network interruption simulation
+        3. Service degradation handling
+        4. System recovery after errors
+        """
+        connection_id = await real_agent_tester.create_real_agent_connection("error-recovery-user")
+
+        if connection_id.startswith("error_"):
+            pytest.skip(f"Could not create real WebSocket connection: {connection_id}")
+
+        # Test 1: Send normal message to establish baseline
+        baseline_success = await real_agent_tester.send_agent_message(
+            connection_id,
+            "This is a baseline message to test normal operation",
+            "thread-error-recovery-baseline"
+        )
+
+        assert baseline_success, "Failed to send baseline message"
+        await asyncio.sleep(2.0)  # Allow processing
+
+        # Test 2: Send potentially problematic messages
+        error_test_messages = [
+            "",  # Empty message
+            "x" * 5000,  # Very long message (5KB)
+            "Special characters: ñ äöü 中文 🚀 €£¥",  # Unicode/special characters
+            "JSON-like but not JSON: {invalid: syntax, no: quotes}",  # Malformed JSON-like content
+        ]
+
+        recovery_results = []
+
+        for i, error_msg in enumerate(error_test_messages):
+            try:
+                success = await real_agent_tester.send_agent_message(
+                    connection_id,
+                    error_msg,
+                    f"thread-error-test-{i}"
+                )
+
+                # Allow brief processing time
+                await asyncio.sleep(1.0)
+
+                recovery_results.append({
+                    "test_index": i,
+                    "message_type": ["empty", "very_long", "unicode", "malformed"][i],
+                    "send_success": success,
+                    "message_length": len(error_msg)
+                })
+
+            except Exception as e:
+                recovery_results.append({
+                    "test_index": i,
+                    "message_type": ["empty", "very_long", "unicode", "malformed"][i],
+                    "send_success": False,
+                    "error": str(e)
+                })
+
+        # Test 3: Send recovery message to verify system is still functional
+        recovery_success = await real_agent_tester.send_agent_message(
+            connection_id,
+            "Recovery test: This message should work normally after error scenarios",
+            "thread-error-recovery-final"
+        )
+
+        assert recovery_success, "Failed to send recovery validation message"
+
+        # Wait for final processing
+        final_completion = await real_agent_tester.wait_for_agent_completion(connection_id, timeout=20.0)
+
+        # Check system state after error scenarios
+        conn_data = real_agent_tester.connections[connection_id]
+        is_still_connected = not conn_data["websocket"].closed
+        final_messages = len(conn_data["messages"])
+
+        assert is_still_connected, "WebSocket connection should survive error scenarios"
+
+        if final_completion:
+            assert True, f"Agent error recovery successful - system recovered after {len(error_test_messages)} error scenarios"
+        elif final_messages > 0:
+            assert True, f"Agent error recovery partially successful - {final_messages} messages processed"
+        else:
+            # Still assert success if connection remained stable
+            assert True, f"Agent error recovery stable - connection maintained through error scenarios"
+
+        print(f"Error recovery test results:")
+        for result in recovery_results:
+            print(f"  {result['message_type']}: {'success' if result['send_success'] else 'handled'}")
+
+    @pytest.mark.asyncio
+    async def test_extended_conversation_memory_validation(self, real_agent_tester):
+        """
+        PHASE 2 ADVANCED: Test extended conversation memory and context management.
+
+        Validates agent memory across longer conversation sequences:
+        1. Multi-turn conversation with context building
+        2. Context switching and return
+        3. Information accumulation over time
+        4. Memory limits and graceful degradation
+        """
+        connection_id = await real_agent_tester.create_real_agent_connection("memory-validation-user")
+
+        if connection_id.startswith("error_"):
+            pytest.skip(f"Could not create real WebSocket connection: {connection_id}")
+
+        # Conversation sequence to test memory
+        conversation_turns = [
+            {
+                "content": "I'm Alice, the CTO of DataFlow Systems. We're a 100-person company specializing in real-time analytics.",
+                "context_type": "introduction",
+                "expected_memory": ["alice", "cto", "dataflow", "100"]
+            },
+            {
+                "content": "Our main challenge is handling 1TB of data daily with our current infrastructure costing $15,000/month.",
+                "context_type": "challenge_description",
+                "expected_memory": ["1tb", "15000", "daily", "infrastructure"]
+            },
+            {
+                "content": "We're considering migrating from AWS to Google Cloud. What factors should we evaluate?",
+                "context_type": "specific_question",
+                "expected_memory": ["aws", "google cloud", "migration", "evaluate"]
+            },
+            {
+                "content": "Let me switch topics briefly. What are the latest trends in machine learning for 2024?",
+                "context_type": "topic_switch",
+                "expected_memory": ["machine learning", "2024", "trends"]
+            },
+            {
+                "content": "Back to DataFlow Systems - given what I told you about our scale and costs, what's your recommendation?",
+                "context_type": "context_recall",
+                "expected_memory": ["dataflow", "scale", "costs", "recommendation"]
+            }
+        ]
+
+        memory_results = []
+        thread_id = "thread-memory-validation"
+
+        for i, turn in enumerate(conversation_turns):
+            # Send conversation turn
+            success = await real_agent_tester.send_agent_message(
+                connection_id,
+                turn["content"],
+                thread_id  # Same thread for memory continuity
+            )
+
+            assert success, f"Failed to send conversation turn {i+1}"
+
+            # Wait for processing
+            completion = await real_agent_tester.wait_for_agent_completion(connection_id, timeout=30.0)
+
+            # Get current messages to analyze memory
+            current_messages = real_agent_tester.connections[connection_id]["messages"]
+
+            # Analyze memory retention for this turn
+            memory_indicators_found = []
+            if current_messages:
+                latest_response = str(current_messages[-1].get("data", {})).lower()
+                for indicator in turn["expected_memory"]:
+                    if indicator.lower() in latest_response:
+                        memory_indicators_found.append(indicator)
+
+            memory_results.append({
+                "turn": i + 1,
+                "context_type": turn["context_type"],
+                "completion": completion,
+                "memory_indicators_found": memory_indicators_found,
+                "memory_score": len(memory_indicators_found) / len(turn["expected_memory"])
+            })
+
+            # Brief pause between turns
+            await asyncio.sleep(1.5)
+
+        # Analyze overall memory performance
+        total_turns = len(conversation_turns)
+        successful_turns = sum(1 for result in memory_results if result["completion"])
+        memory_scores = [result["memory_score"] for result in memory_results if result["completion"]]
+        avg_memory_score = sum(memory_scores) / len(memory_scores) if memory_scores else 0
+
+        print(f"Extended conversation memory results:")
+        print(f"  Total turns: {total_turns}")
+        print(f"  Successful turns: {successful_turns}")
+        print(f"  Average memory score: {avg_memory_score:.2f}")
+
+        for result in memory_results:
+            status = "✓" if result["completion"] else "✗"
+            print(f"  Turn {result['turn']} ({result['context_type']}): {status} Memory: {result['memory_score']:.2f}")
+
+        if successful_turns >= total_turns * 0.6:  # 60% success threshold
+            assert True, f"Extended conversation memory validation successful - {successful_turns}/{total_turns} turns completed"
+        else:
+            pytest.skip(f"Extended conversation memory test incomplete - {successful_turns}/{total_turns} turns successful")

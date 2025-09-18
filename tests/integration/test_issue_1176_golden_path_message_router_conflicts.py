@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure message routing works reliably for Golden Path
 - Value Impact: MessageRouter conflicts prevent AI responses from reaching users
-- Strategic Impact: Core platform functionality ($500K+ ARR at risk)
+- Strategic Impact: Core platform functionality (500K+ ARR at risk)
 
 This suite tests integration-level MessageRouter conflicts that occur when
 multiple routing implementations exist in the system, causing Golden Path
@@ -44,7 +44,7 @@ class GoldenPathMessageRouterConflictsTests(BaseIntegrationTest):
         
         Root Cause: Multiple MessageRouter implementations exist in system,
         and different components select different routers causing message routing
-        inconsistencies that break Golden Path user → AI response flow.
+        inconsistencies that break Golden Path user -> AI response flow.
         """
         # Set up Golden Path scenario: user sends message, expects AI response
         websocket_manager = WebSocketManager()
@@ -55,11 +55,7 @@ class GoldenPathMessageRouterConflictsTests(BaseIntegrationTest):
         
         # Establish WebSocket connection
         connection = await websocket_manager.authenticate_user(test_token)
-        assert connection, "WebSocket connection should work (component level)"
-        
-        # User sends message through WebSocket
-        user_message = {
-            "type": "agent_request",
+        assert connection, "WebSocket connection should work (component level)""type": "agent_request",
             "agent": "triage_agent", 
             "message": "Help me optimize costs",
             "thread_id": "thread_123"

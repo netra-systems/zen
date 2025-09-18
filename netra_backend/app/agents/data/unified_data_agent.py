@@ -946,22 +946,56 @@ class UnifiedDataAgent(BaseAgent):
         event_type: str,
         data: Dict[str, Any]
     ) -> None:
-        """Emit WebSocket event for real-time updates.
-        
+        """Emit WebSocket event for real-time updates - SSOT MIGRATION.
+
         CRITICAL: This ensures all 5 required events are sent for chat UX.
+        SSOT MIGRATION: Now uses websocket_bridge instead of direct websocket_manager.
         """
         try:
-            # Get WebSocket manager from context or registry
-            if hasattr(context, 'websocket_manager'):
-                ws_manager = context.websocket_manager
-                await ws_manager.send_event(event_type, data)
-            
+            # SSOT MIGRATION: Use websocket_bridge instead of direct websocket_manager
+            if hasattr(context, 'websocket_bridge') and context.websocket_bridge:
+                # Map legacy event types to SSOT notification methods
+                agent_name = "UnifiedDataAgent"
+
+                if event_type == "agent_started":
+                    await context.websocket_bridge.notify_agent_started(
+                        context, agent_name, data
+                    )
+                elif event_type == "agent_thinking":
+                    reasoning = data.get("thought", "Processing data")
+                    await context.websocket_bridge.notify_agent_thinking(
+                        context, agent_name, reasoning, data
+                    )
+                elif event_type == "tool_executing":
+                    tool_name = data.get("tool_name", "unknown_tool")
+                    tool_input = data.get("args", {})
+                    await context.websocket_bridge.notify_tool_executing(
+                        context, agent_name, tool_name, tool_input, data
+                    )
+                elif event_type == "tool_completed":
+                    tool_name = data.get("tool_name", "unknown_tool")
+                    tool_result = data.get("result", {})
+                    await context.websocket_bridge.notify_tool_completed(
+                        context, agent_name, tool_name, tool_result, data
+                    )
+                elif event_type == "agent_completed":
+                    await context.websocket_bridge.notify_agent_completed(
+                        context, agent_name, data
+                    )
+                else:
+                    # For any other events, use error notification
+                    await context.websocket_bridge.notify_error(
+                        context, agent_name, f"Unknown event type: {event_type}"
+                    )
+            else:
+                self.logger.warning(f"No websocket_bridge in context for event: {event_type}")
+
             # Also log for debugging
             self.logger.debug(
                 f"WebSocket event: {event_type}",
                 extra={"data": data, "user_id": context.user_id}
             )
-            
+
         except Exception as e:
             # Don't fail execution if WebSocket fails
             self.logger.warning(f"Failed to emit WebSocket event: {e}")

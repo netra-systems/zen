@@ -29,6 +29,14 @@ repos:
         stages: [commit]
         verbose: true
 
+      - id: syntax-validation
+        name: Python Syntax Validation (Issue #1277 Prevention)
+        entry: python scripts/prevent_syntax_errors.py --pre-commit
+        language: system
+        files: '\.py$'
+        stages: [commit]
+        verbose: true
+
   # Code Quality (Standard patterns)
   - repo: https://github.com/psf/black
     rev: 23.12.1

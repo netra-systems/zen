@@ -11,7 +11,7 @@ PURPOSE:
 - Ensures system stability under adverse conditions
 
 BUSINESS VALUE:
-- Protects $500K+ ARR system reliability and uptime
+- Protects 500K+ ARR system reliability and uptime
 - Ensures graceful degradation under failure conditions
 - Validates enterprise-grade error handling
 - Tests system resilience and recovery capabilities
@@ -713,7 +713,7 @@ class GoldenPathErrorRecoveryTests(SSotAsyncTestCase):
         self,
         subprotocols: List[str],
         timeout: float
-    ) -> Optional[websockets.WebSocketClientProtocol]:
+    ) -> Optional[websockets.ClientConnection]:
         """Establish connection for error recovery testing"""
         try:
             ssl_context = ssl.create_default_context()

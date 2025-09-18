@@ -116,7 +116,7 @@ class StartupClickHouseEnvironmentIntegrationTests:
                         assert result['status'] == 'skipped'
                         assert result['required'] == False
                         mock_setup.assert_not_called()
-                        logger.info('✓ Integration test confirmed Docker unavailability handling')
+                        logger.info('CHECK Integration test confirmed Docker unavailability handling')
                 except Exception as e:
                     pytest.fail(f'ClickHouse startup should handle Docker unavailability gracefully in staging: {e}')
 
@@ -204,7 +204,7 @@ class StartupClickHouseEnvironmentIntegrationTests:
                         assert result['status'] == 'failed'
                         assert result['required'] == False
                         assert result['error'] is not None
-                        logger.info(f"✓ Confirmed Issue #568: ClickHouse failed due to Docker unavailability: {result['error']}")
+                        logger.info(f"CHECK Confirmed Issue #568: ClickHouse failed due to Docker unavailability: {result['error']}")
                 else:
                     logger.info("Docker is available - this environment doesn't reproduce Issue #568")
 if __name__ == '__main__':

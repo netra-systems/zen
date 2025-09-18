@@ -101,7 +101,7 @@ class CrossServiceAuthCascadeFailuresTests(SSotAsyncTestCase):
         auth_service_validation = self.jwt_handler.validate_token(auth_service_token)
         assert auth_service_validation is not None, "Auth service validation should pass"
         assert auth_service_validation["sub"] == self.test_user_id
-        logger.info(f"✓ Auth service validation passed for user {self.test_user_id[:8]}...")
+        logger.info(f"CHECK Auth service validation passed for user {self.test_user_id[:8]}...")
         
         # Step 3: Test backend integration handoff (EXPECTED TO FAIL due to cascade)
         with patch.object(auth_client, 'validate_token_jwt') as mock_auth_client:
@@ -168,7 +168,7 @@ class CrossServiceAuthCascadeFailuresTests(SSotAsyncTestCase):
             )
             assert ws_success is True, "WebSocket authentication should pass individually"
             assert ws_user_context is not None
-            logger.info("✓ WebSocket authentication passed individually")
+            logger.info("CHECK WebSocket authentication passed individually")
         
         # Step 3: Test integrated WebSocket + Backend authentication (EXPECTED TO FAIL)
         with patch.object(auth_client, 'validate_token_jwt') as mock_backend_auth:
@@ -230,7 +230,7 @@ class CrossServiceAuthCascadeFailuresTests(SSotAsyncTestCase):
         auth_service_validation = self.jwt_handler.validate_token(service_token, "service")
         assert auth_service_validation is not None, "Auth service validation should pass for service token"
         assert auth_service_validation.get("service") == "netra-backend"
-        logger.info("✓ Service token validation passed in auth service")
+        logger.info("CHECK Service token validation passed in auth service")
         
         # Step 3: Test backend service validation (EXPECTED TO FAIL due to cascade)
         with patch.object(auth_client, 'validate_token_jwt') as mock_service_auth:

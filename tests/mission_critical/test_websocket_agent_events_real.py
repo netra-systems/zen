@@ -2,7 +2,7 @@
 """MISSION CRITICAL TEST SUITE: WebSocket Agent Events - REAL SERVICES ONLY
 
 THIS SUITE MUST PASS OR THE PRODUCT IS BROKEN.
-Business Value: $500K+ ARR - Core chat functionality
+Business Value: 500K+ ARR - Core chat functionality
 
 This test suite uses ONLY real WebSocket connections per CLAUDE.md "MOCKS = Abomination":
 1. Real WebSocket connections to actual backend services
@@ -256,7 +256,7 @@ class WebSocketAgentEventsRealTests:
         MISSION CRITICAL: Test all 5 required WebSocket events with REAL services.
         
         CLAUDE.md Section 6.1: This test validates the core chat functionality that 
-        generates $500K+ ARR. All 5 events must be sent: agent_started, agent_thinking, 
+        generates 500K+ ARR. All 5 events must be sent: agent_started, agent_thinking, 
         tool_executing, tool_completed, agent_completed.
         
         Uses real WebSocket connections, real agent execution, real event timing.

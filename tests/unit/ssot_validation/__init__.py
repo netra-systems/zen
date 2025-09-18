@@ -1,6 +1,14 @@
 """
-SSOT validation tests for Issue #802 ExecutionEngine migration.
+SSOT Validation Test Suite
 
-This module contains unit tests that validate the completion of Issue #565
-ExecutionEngine migration to SSOT patterns.
+Issue #909: Critical P0 SSOT violations in agent execution infrastructure
+This package contains tests to detect and validate SSOT compliance violations.
+
+Business Impact: $500K+ ARR at risk due to Golden Path success rate at ~60% (needs 99.9%)
+
+Test Categories:
+- Agent Registry SSOT violations
+- Execution Engine multiplicity violations
+- Import path conflicts
+- Factory pattern compliance
 """

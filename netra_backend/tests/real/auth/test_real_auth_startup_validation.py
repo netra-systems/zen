@@ -17,7 +17,7 @@ and is ready to handle requests without failures or security vulnerabilities.
 import asyncio
 import json
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List
 from unittest.mock import patch
 import pytest
@@ -205,7 +205,7 @@ class RealAuthStartupValidationTests:
             if len(jwt_secret) < 32:
                 return {'success': False, 'error': 'JWT secret too short (minimum 32 characters)'}
             import jwt
-            test_payload = {JWTConstants.SUBJECT: 'startup_test', JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=5)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE}
+            test_payload = {JWTConstants.SUBJECT: 'startup_test', JWTConstants.ISSUED_AT: int(datetime.now(UTC).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) + timedelta(minutes=5)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE}
             test_token = jwt.encode(test_payload, jwt_secret, algorithm=JWTConstants.HS256_ALGORITHM)
             decoded_payload = jwt.decode(test_token, jwt_secret, algorithms=[JWTConstants.HS256_ALGORITHM])
             if decoded_payload[JWTConstants.SUBJECT] != 'startup_test':

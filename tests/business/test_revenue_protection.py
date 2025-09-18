@@ -34,8 +34,8 @@ from urllib.parse import urljoin
 
 # Business revenue protection test configuration
 STAGING_BASE_URL = "https://auth.staging.netrasystems.ai"
-STAGING_WS_URL = "wss://backend.staging.netrasystems.ai/ws"
-STAGING_API_URL = "https://backend.staging.netrasystems.ai"
+STAGING_WS_URL = "wss://api.staging.netrasystems.ai/ws"
+STAGING_API_URL = "https://api.staging.netrasystems.ai"
 
 @dataclass
 class RevenueProtectionMetric:
@@ -658,7 +658,7 @@ class RevenueProtectionTests:
                           if test_category.lower().replace(' ', '_') in m.name.lower().replace(' ', '_')]
 
         for metric in category_metrics:
-            status_emoji = "✅" if metric.status == "PASS" else "❌" if metric.status == "FAIL" else "⚠️"
+            status_emoji = "CHECK" if metric.status == "PASS" else "X" if metric.status == "FAIL" else "WARNING️"
             
             # Format the value based on unit
             if metric.unit in ["seconds", "hours"]:
@@ -679,7 +679,7 @@ class RevenueProtectionTests:
                 print(f"   Customer Segments: {', '.join(metric.customer_segments_affected)}")
             
             if metric.mitigation_required:
-                print(f"   ⚠️ MITIGATION REQUIRED: Revenue impact possible")
+                print(f"   WARNING️ MITIGATION REQUIRED: Revenue impact possible")
 
         # Calculate revenue risk assessment
         critical_failures = [m for m in category_metrics if m.status == "FAIL" and m.revenue_impact_severity == "CRITICAL"]
@@ -695,13 +695,13 @@ class RevenueProtectionTests:
             print(f"\n🚨 REVENUE RISK: CRITICAL (${self.validator.total_revenue_at_risk:,.2f} at risk)")
             print("   Business Impact: Immediate revenue protection action required")
         elif high_risk_failures:
-            print(f"\n⚠️ REVENUE RISK: HIGH (${self.validator.total_revenue_at_risk:,.2f} potential impact)")
+            print(f"\nWARNING️ REVENUE RISK: HIGH (${self.validator.total_revenue_at_risk:,.2f} potential impact)")
             print("   Business Impact: Revenue monitoring and mitigation recommended")
         elif total_failures:
-            print(f"\n⚠️ REVENUE RISK: MEDIUM ({len(total_failures)} issues)")
+            print(f"\nWARNING️ REVENUE RISK: MEDIUM ({len(total_failures)} issues)")
             print("   Business Impact: Revenue optimization opportunities identified")
         else:
-            print(f"\n✅ REVENUE RISK: LOW (Revenue protection measures effective)")
+            print(f"\nCHECK REVENUE RISK: LOW (Revenue protection measures effective)")
             print("   Business Impact: $500K+ ARR protected and maintained")
 
 if __name__ == "__main__":
@@ -743,15 +743,15 @@ if __name__ == "__main__":
                 print(f"   - {failure.name}: {failure.business_impact}")
             sys.exit(1)
         elif total_revenue_at_risk > 100000:
-            print(f"\n⚠️ BUSINESS OUTCOME: HIGH REVENUE RISK")
+            print(f"\nWARNING️ BUSINESS OUTCOME: HIGH REVENUE RISK")
             print(f"Revenue protection issues put ${total_revenue_at_risk:,.2f} at risk")
             sys.exit(1)
         else:
-            print("\n✅ BUSINESS OUTCOME: REVENUE PROTECTION EFFECTIVE")
+            print("\nCHECK BUSINESS OUTCOME: REVENUE PROTECTION EFFECTIVE")
             print("Revenue protection measures safeguard $500K+ ARR business value")
             sys.exit(0)
 
     except Exception as e:
-        print(f"\n❌ REVENUE PROTECTION VALIDATION FAILED: {e}")
+        print(f"\nX REVENUE PROTECTION VALIDATION FAILED: {e}")
         print("Cannot validate revenue protection measures")
         sys.exit(1)

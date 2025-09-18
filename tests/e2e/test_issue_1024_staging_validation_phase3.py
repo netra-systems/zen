@@ -4,7 +4,7 @@ Phase 3: E2E Tests for Issue #1024 - GCP Staging Validation
 Business Value Justification (BVJ):
 - Segment: Platform (All segments depend on staging validation)
 - Business Goal: Stability - Ensure staging environment Golden Path works
-- Value Impact: Validates $500K+ ARR production readiness through staging
+- Value Impact: Validates 500K+ ARR production readiness through staging
 - Revenue Impact: Prevents production failures and customer impact
 
 CRITICAL PURPOSE: Validate Golden Path reliability on GCP staging environment

@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-09-17T15:59:50.580769",
+  "results": {
+    "total_attempted": 14,
+    "successful_repairs": 0,
+    "failed_repairs": 14,
+    "repairs_made": [],
+    "total_original_errors": 779
+  },
+  "backups_location": "focused_repair_backups"
+}

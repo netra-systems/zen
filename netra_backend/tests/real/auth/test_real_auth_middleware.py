@@ -17,7 +17,7 @@ proper request processing as described in auth middleware requirements.
 import asyncio
 import json
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, Callable
 from unittest.mock import patch, MagicMock
 import pytest
@@ -81,7 +81,7 @@ class RealAuthMiddlewareTests:
         """Factory function to create test JWT tokens."""
 
         def _create_token(payload: Dict[str, Any]) -> str:
-            default_payload = {JWTConstants.SUBJECT: 'test_user', JWTConstants.EMAIL: 'test@netra.ai', JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'user_id': 12345}
+            default_payload = {JWTConstants.SUBJECT: 'test_user', JWTConstants.EMAIL: 'test@netrasystems.ai', JWTConstants.ISSUED_AT: int(datetime.now(UTC).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) + timedelta(minutes=30)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'user_id': 12345}
             default_payload.update(payload)
             return jwt.encode(default_payload, jwt_secret_key, algorithm=JWTConstants.HS256_ALGORITHM)
         return _create_token
@@ -121,7 +121,7 @@ class RealAuthMiddlewareTests:
     @pytest.mark.asyncio
     async def test_middleware_expired_token_handling(self, async_client: AsyncClient, jwt_secret_key: str):
         """Test middleware handles expired tokens correctly."""
-        expired_payload = {JWTConstants.SUBJECT: 'expired_user', JWTConstants.EMAIL: 'expired@netra.ai', JWTConstants.ISSUED_AT: int((datetime.utcnow() - timedelta(hours=2)).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() - timedelta(hours=1)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'user_id': 99999}
+        expired_payload = {JWTConstants.SUBJECT: 'expired_user', JWTConstants.EMAIL: 'expired@netrasystems.ai', JWTConstants.ISSUED_AT: int((datetime.now(UTC) - timedelta(hours=2)).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) - timedelta(hours=1)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'user_id': 99999}
         expired_token = jwt.encode(expired_payload, jwt_secret_key, algorithm=JWTConstants.HS256_ALGORITHM)
         headers = {HeaderConstants.AUTHORIZATION: f'{HeaderConstants.BEARER_PREFIX}{expired_token}', HeaderConstants.CONTENT_TYPE: HeaderConstants.APPLICATION_JSON}
         try:
@@ -155,7 +155,7 @@ class RealAuthMiddlewareTests:
     @pytest.mark.asyncio
     async def test_middleware_user_context_extraction(self, async_client: AsyncClient, create_test_token: Callable[[Dict[str, Any]], str]):
         """Test middleware extracts user context correctly."""
-        user_context = {'user_id': 77777, 'email': 'context.test@netra.ai', 'full_name': 'Context Test User', 'permissions': ['read', 'write', 'admin'], 'workspace_id': 'workspace_123', 'tenant_id': 'tenant_456'}
+        user_context = {'user_id': 77777, 'email': 'context.test@netrasystems.ai', 'full_name': 'Context Test User', 'permissions': ['read', 'write', 'admin'], 'workspace_id': 'workspace_123', 'tenant_id': 'tenant_456'}
         token = create_test_token(user_context)
         headers = {HeaderConstants.AUTHORIZATION: f'{HeaderConstants.BEARER_PREFIX}{token}', HeaderConstants.CONTENT_TYPE: HeaderConstants.APPLICATION_JSON}
         try:
@@ -251,7 +251,7 @@ class RealAuthMiddlewareTests:
     @pytest.mark.asyncio
     async def test_middleware_request_logging_and_metrics(self, async_client: AsyncClient, create_test_token: Callable[[Dict[str, Any]], str]):
         """Test middleware request logging and metrics collection."""
-        token = create_test_token({'user_id': 99999, 'email': 'metrics@netra.ai'})
+        token = create_test_token({'user_id': 99999, 'email': 'metrics@netrasystems.ai'})
         headers = {HeaderConstants.AUTHORIZATION: f'{HeaderConstants.BEARER_PREFIX}{token}', HeaderConstants.CONTENT_TYPE: HeaderConstants.APPLICATION_JSON}
         request_scenarios = [{'method': 'GET', 'path': '/health', 'headers': headers}, {'method': 'GET', 'path': '/health', 'headers': {}}, {'method': 'POST', 'path': '/health', 'headers': headers, 'json': {'test': 'data'}}]
         for scenario in request_scenarios:

@@ -25,7 +25,7 @@ import jwt as pyjwt
 
 # Set up staging environment URLs
 BACKEND_URL = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
-AUTH_SERVICE_URL = "https://netra-auth-staging-pnovr5vsba-uc.a.run.app"
+AUTH_SERVICE_URL = "https://netra-auth-pnovr5vsba-uc.a.run.app"
 
 class TestAuthCrossSystemStaging:
     """

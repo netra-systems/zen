@@ -93,7 +93,7 @@ class TestStagingConnectivitySimple(unittest.TestCase):
                                 result["content"] = "Could not parse response content"
 
                             connectivity_results.append(result)
-                            print(f"✅ {endpoint['name']}: HTTP {response.status} in {duration:.2f}s")
+                            print(f"CHECK {endpoint['name']}: HTTP {response.status} in {duration:.2f}s")
 
                     except Exception as e:
                         duration = time.time() - start_time
@@ -105,7 +105,7 @@ class TestStagingConnectivitySimple(unittest.TestCase):
                             "duration": duration
                         }
                         connectivity_results.append(result)
-                        print(f"❌ {endpoint['name']}: {e} after {duration:.2f}s")
+                        print(f"X {endpoint['name']}: {e} after {duration:.2f}s")
 
                 return connectivity_results
 
@@ -125,9 +125,9 @@ class TestStagingConnectivitySimple(unittest.TestCase):
         backend_reachable = [r for r in backend_results if r.get("reachable", False)]
 
         if backend_reachable:
-            print("✅ Backend staging endpoints reachable - infrastructure connectivity OK")
+            print("CHECK Backend staging endpoints reachable - infrastructure connectivity OK")
         else:
-            print("❌ Backend staging endpoints unreachable - potential infrastructure issue")
+            print("X Backend staging endpoints unreachable - potential infrastructure issue")
 
     def test_health_endpoint_during_startup_issues(self):
         """
@@ -162,7 +162,7 @@ class TestStagingConnectivitySimple(unittest.TestCase):
                             }
                             health_checks.append(health_result)
 
-                            status_icon = "✅" if response.status == 200 else "⚠️" if response.status == 503 else "❌"
+                            status_icon = "CHECK" if response.status == 200 else "WARNING️" if response.status == 503 else "X"
                             print(f"{status_icon} Health check {check_num + 1}: HTTP {response.status} in {check_duration:.2f}s")
 
                             if response_data:
@@ -177,7 +177,7 @@ class TestStagingConnectivitySimple(unittest.TestCase):
                             "duration": check_duration
                         }
                         health_checks.append(health_result)
-                        print(f"❌ Health check {check_num + 1}: {e} after {check_duration:.2f}s")
+                        print(f"X Health check {check_num + 1}: {e} after {check_duration:.2f}s")
 
                     # Wait between checks
                     if check_num < 2:
@@ -195,7 +195,7 @@ class TestStagingConnectivitySimple(unittest.TestCase):
         if successful_checks:
             # Some health checks succeeded
             avg_response_time = sum(r["duration"] for r in successful_checks) / len(successful_checks)
-            print(f"✅ {len(successful_checks)}/3 health checks succeeded (avg: {avg_response_time:.2f}s)")
+            print(f"CHECK {len(successful_checks)}/3 health checks succeeded (avg: {avg_response_time:.2f}s)")
 
             # Validate response times
             for check in successful_checks:
@@ -205,11 +205,11 @@ class TestStagingConnectivitySimple(unittest.TestCase):
         if failed_checks:
             # Some health checks failed
             avg_failure_time = sum(r["duration"] for r in failed_checks) / len(failed_checks)
-            print(f"❌ {len(failed_checks)}/3 health checks failed (avg: {avg_failure_time:.2f}s)")
+            print(f"X {len(failed_checks)}/3 health checks failed (avg: {avg_failure_time:.2f}s)")
 
             # If all checks fail, this indicates the Issue #1278 startup problem
             if len(failed_checks) == len(health_results):
-                print("❌ All health checks failed - this reproduces Issue #1278 startup failure")
+                print("X All health checks failed - this reproduces Issue #1278 startup failure")
 
         # Should have at least some response (success or controlled failure)
         self.assertGreater(len(health_results), 0, "Should get some health check responses")
@@ -242,10 +242,10 @@ class TestStagingConnectivitySimple(unittest.TestCase):
                         }
 
                         if response.status == 200:
-                            print(f"✅ Database health: OK in {db_health_duration:.2f}s")
+                            print(f"CHECK Database health: OK in {db_health_duration:.2f}s")
                             print(f"   Response: {response_data}")
                         else:
-                            print(f"❌ Database health: HTTP {response.status} in {db_health_duration:.2f}s")
+                            print(f"X Database health: HTTP {response.status} in {db_health_duration:.2f}s")
                             print(f"   Response: {response_data}")
 
                         return result
@@ -257,7 +257,7 @@ class TestStagingConnectivitySimple(unittest.TestCase):
                         "error": str(e),
                         "duration": db_health_duration
                     }
-                    print(f"❌ Database health check failed: {e} after {db_health_duration:.2f}s")
+                    print(f"X Database health check failed: {e} after {db_health_duration:.2f}s")
                     return result
 
         # Run database health check
@@ -270,17 +270,17 @@ class TestStagingConnectivitySimple(unittest.TestCase):
                 self.assertEqual(db_result["status_code"], 200)
                 self.assertLess(db_result["duration"], 10.0,
                                "Healthy database should respond quickly")
-                print("✅ Database connectivity appears to be working")
+                print("CHECK Database connectivity appears to be working")
             else:
                 # Database health endpoint responded with error
                 self.assertIn(db_result["status_code"], [503, 500, 502],
                              "Database errors should use appropriate HTTP status codes")
-                print(f"❌ Database health reports issues (HTTP {db_result['status_code']}) - this reproduces Issue #1278")
+                print(f"X Database health reports issues (HTTP {db_result['status_code']}) - this reproduces Issue #1278")
         else:
             # Database health endpoint completely unreachable
             self.assertGreater(db_result["duration"], 10.0,
                               "Complete failure should take reasonable time")
-            print("❌ Database health endpoint unreachable - severe infrastructure issue")
+            print("X Database health endpoint unreachable - severe infrastructure issue")
 
     def test_application_availability_patterns(self):
         """
@@ -351,13 +351,13 @@ class TestStagingConnectivitySimple(unittest.TestCase):
         print(f"  Unavailable: {unavailable_checks}")
 
         if availability_percentage >= 80:
-            print("✅ High availability - staging environment appears stable")
+            print("CHECK High availability - staging environment appears stable")
             self.assertGreaterEqual(availability_percentage, 80,
                                    "Staging should have high availability when working properly")
         elif availability_percentage >= 50:
-            print("⚠️ Partial availability - intermittent issues detected")
+            print("WARNING️ Partial availability - intermittent issues detected")
         else:
-            print("❌ Low availability - significant infrastructure issues (reproducing Issue #1278)")
+            print("X Low availability - significant infrastructure issues (reproducing Issue #1278)")
 
         # Should have attempted some checks
         self.assertGreater(total_checks, 0, "Should have performed availability checks")

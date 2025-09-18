@@ -1,0 +1,16 @@
+{
+  "instances": [
+    {
+      "command": "/test-update-e2e-fix-fakes",
+      "name": "test-update-e2e-fix-fakes",
+      "description": "Updates E2E tests and fixes mock issues",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": ["/clear"]
+    }
+  ]
+}

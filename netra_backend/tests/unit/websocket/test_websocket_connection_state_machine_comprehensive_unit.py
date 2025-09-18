@@ -14,7 +14,7 @@ These tests are critical for the Golden Path user flow requirements.
 
 import pytest
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from enum import Enum
 from typing import Dict, List, Optional, Any
 from unittest.mock import Mock, AsyncMock, patch
@@ -172,38 +172,38 @@ class MockWebSocketStateMachine:
     def _on_entering_connecting(self):
         """Actions when entering CONNECTING state."""
         self.health_metrics['connection_attempts'] += 1
-        self.connection_metadata['last_connection_attempt'] = datetime.utcnow().isoformat()
+        self.connection_metadata['last_connection_attempt'] = datetime.now(UTC).isoformat()
     
     def _on_entering_connected(self):
         """Actions when entering CONNECTED state."""
-        self.connection_metadata['connected_at'] = datetime.utcnow().isoformat()
+        self.connection_metadata['connected_at'] = datetime.now(UTC).isoformat()
         self.connection_metadata['connection_stable'] = True
     
     def _on_entering_authenticated(self):
         """Actions when entering AUTHENTICATED state."""
-        self.connection_metadata['authenticated_at'] = datetime.utcnow().isoformat()
+        self.connection_metadata['authenticated_at'] = datetime.now(UTC).isoformat()
         self.connection_metadata['auth_valid'] = True
     
     def _on_entering_active(self):
         """Actions when entering ACTIVE state."""
-        self.connection_metadata['active_since'] = datetime.utcnow().isoformat()
+        self.connection_metadata['active_since'] = datetime.now(UTC).isoformat()
         self.connection_metadata['ready_for_messages'] = True
     
     def _on_entering_error(self):
         """Actions when entering ERROR state."""
-        self.connection_metadata['last_error'] = datetime.utcnow().isoformat()
+        self.connection_metadata['last_error'] = datetime.now(UTC).isoformat()
         self.connection_metadata['ready_for_messages'] = False
     
     def _on_entering_disconnected(self):
         """Actions when entering DISCONNECTED state."""
-        self.connection_metadata['disconnected_at'] = datetime.utcnow().isoformat()
+        self.connection_metadata['disconnected_at'] = datetime.now(UTC).isoformat()
         self.connection_metadata['connection_stable'] = False
         self.connection_metadata['ready_for_messages'] = False
     
     def _on_exiting_active(self):
         """Actions when exiting ACTIVE state."""
         if 'active_since' in self.connection_metadata:
-            active_duration = (datetime.utcnow() - datetime.fromisoformat(
+            active_duration = (datetime.now(UTC) - datetime.fromisoformat(
                 self.connection_metadata['active_since'])).total_seconds()
             self.health_metrics['total_uptime_seconds'] += active_duration
     
@@ -214,7 +214,7 @@ class MockWebSocketStateMachine:
     def _on_exiting_error(self):
         """Actions when exiting ERROR state."""
         # Log error recovery
-        self.connection_metadata['last_error_recovery'] = datetime.utcnow().isoformat()
+        self.connection_metadata['last_error_recovery'] = datetime.now(UTC).isoformat()
     
     def can_transition_to(self, target_state: WebSocketConnectionState) -> bool:
         """Check if transition to target state is valid."""
@@ -251,7 +251,7 @@ class MockWebSocketStateMachine:
         self.state_history.append({
             'state': state.value,
             'action': 'entry',
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(UTC).isoformat(),
             'reason': reason
         })
     
@@ -271,7 +271,7 @@ class MockWebSocketStateMachine:
             'from_state': from_state.value,
             'to_state': to_state.value,
             'trigger': trigger,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(UTC).isoformat(),
             'metadata': metadata or {}
         })
     
@@ -291,7 +291,7 @@ class MockWebSocketStateMachine:
             'from_state': from_state.value,
             'to_state': to_state.value,
             'trigger': trigger,
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.now(UTC).isoformat()
         })
     
     async def send_message(self, message: Dict[str, Any]) -> bool:
@@ -303,7 +303,7 @@ class MockWebSocketStateMachine:
             self.error_log.append({
                 'type': 'message_send_failed',
                 'reason': f'invalid_state_{self.current_state.value}',
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'message_type': message.get('type', 'unknown')
             })
             return False
@@ -318,7 +318,7 @@ class MockWebSocketStateMachine:
         
         self.message_queue.append({
             **message,
-            'sent_at': datetime.utcnow().isoformat(),
+            'sent_at': datetime.now(UTC).isoformat(),
             'connection_state': self.current_state.value
         })
         self.health_metrics['successful_messages'] += 1
@@ -353,7 +353,7 @@ class MockWebSocketStateMachine:
                 start_time = datetime.fromisoformat(entry['timestamp'])
                 
                 # Find next transition or use current time
-                end_time = datetime.utcnow()
+                end_time = datetime.now(UTC)
                 for j in range(i + 1, len(self.state_history)):
                     if 'from_state' in self.state_history[j] and self.state_history[j]['from_state'] == state:
                         end_time = datetime.fromisoformat(self.state_history[j]['timestamp'])

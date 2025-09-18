@@ -28,7 +28,7 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-'\nE2E GCP Staging Test Suite for UnifiedWebSocketManager - Golden Path Validation\n\nBusiness Value Justification (BVJ):\n- Segment: All (Free, Early, Mid, Enterprise) - Golden Path protects all revenue streams\n- Business Goal: Validate Production-Like Golden Path protecting $500K+ ARR  \n- Value Impact: E2E tests ensure WebSocket manager works in real GCP Cloud Run environment\n- Strategic Impact: MISSION CRITICAL - Validates the complete user journey that drives all revenue\n\nThis E2E test suite validates UnifiedWebSocketManager in the actual GCP staging environment,\nfollowing CLAUDE.md Golden Path requirements: Real GCP infrastructure, real Cloud Run, real networking.\n\nGOLDEN PATH CRITICAL AREAS (10/10 Business Criticality):\n1. Real GCP Cloud Run WebSocket Connection Establishment (production-like environment)\n2. Real GCP Load Balancer WebSocket Upgrade Handling (production networking)  \n3. Real GCP VPC Network Latency and Performance (production conditions)\n4. Real GCP Auto-scaling WebSocket Connection Handling (production scalability)\n5. Real GCP Secret Manager Authentication Integration (production security)\n6. Real GCP Logging and Monitoring Integration (production observability)\n7. Real GCP Redis Connection Pool Management (production state management)\n8. Real GCP Database Connection Handling (production data persistence)\n9. Real GCP Service Mesh Traffic Management (production networking)\n10. Complete User Journey: Login  ->  Chat  ->  AI Response (Golden Path business flow)\n\nTest Structure:  \n- 12 E2E Tests (4 high difficulty) running against real GCP staging environment\n- Real production-like infrastructure validation\n- Complete Golden Path user journey testing\n- Real Cloud Run race condition and timing validation\n- Real GCP performance and scalability testing\n'
+'\nE2E GCP Staging Test Suite for UnifiedWebSocketManager - Golden Path Validation\n\nBusiness Value Justification (BVJ):\n- Segment: All (Free, Early, Mid, Enterprise) - Golden Path protects all revenue streams\n- Business Goal: Validate Production-Like Golden Path protecting 500K+ ARR  \n- Value Impact: E2E tests ensure WebSocket manager works in real GCP Cloud Run environment\n- Strategic Impact: MISSION CRITICAL - Validates the complete user journey that drives all revenue\n\nThis E2E test suite validates UnifiedWebSocketManager in the actual GCP staging environment,\nfollowing CLAUDE.md Golden Path requirements: Real GCP infrastructure, real Cloud Run, real networking.\n\nGOLDEN PATH CRITICAL AREAS (10/10 Business Criticality):\n1. Real GCP Cloud Run WebSocket Connection Establishment (production-like environment)\n2. Real GCP Load Balancer WebSocket Upgrade Handling (production networking)  \n3. Real GCP VPC Network Latency and Performance (production conditions)\n4. Real GCP Auto-scaling WebSocket Connection Handling (production scalability)\n5. Real GCP Secret Manager Authentication Integration (production security)\n6. Real GCP Logging and Monitoring Integration (production observability)\n7. Real GCP Redis Connection Pool Management (production state management)\n8. Real GCP Database Connection Handling (production data persistence)\n9. Real GCP Service Mesh Traffic Management (production networking)\n10. Complete User Journey: Login  ->  Chat  ->  AI Response (Golden Path business flow)\n\nTest Structure:  \n- 12 E2E Tests (4 high difficulty) running against real GCP staging environment\n- Real production-like infrastructure validation\n- Complete Golden Path user journey testing\n- Real Cloud Run race condition and timing validation\n- Real GCP performance and scalability testing\n'
 import asyncio
 import pytest
 import time
@@ -103,7 +103,7 @@ class GCPWebSocketClient:
                     except:
                         pass
                 self.received_messages.append({'message': data, 'received_at': datetime.now(timezone.utc), 'latency_ms': message_latency * 1000 if message_latency else None})
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             self.connected = False
             logger.info('GCP WebSocket connection closed')
         except Exception as e:
@@ -204,7 +204,7 @@ class UnifiedWebSocketManagerGCPGoldenPathTests(BaseIntegrationTest):
         """
         HIGH DIFFICULTY: Test complete Golden Path user journey in GCP staging.
         
-        Business Value: Validates the complete $500K+ ARR user flow in production-like environment.
+        Business Value: Validates the complete 500K+ ARR user flow in production-like environment.
         Can Fail: If Golden Path breaks in GCP, the entire business model fails.
         """
         ws_client = GCPWebSocketClient(self.staging_url, self.auth_token)

@@ -1,15 +1,15 @@
 """
 SSOT Golden Path Registry Consolidation Protection Tests
 
-Issue #845: Critical P0 test suite ensuring Golden Path (login → AI responses) remains intact
-Business Impact: $500K+ ARR depends on complete user flow working after registry consolidation
+Issue #845: Critical P0 test suite ensuring Golden Path (login -> AI responses) remains intact
+Business Impact: 500K+ ARR depends on complete user flow working after registry consolidation
 
 Golden Path Flow Protected:
-1. User Login → Authentication validation ✅
-2. Agent Selection → Registry retrieval ⚠️ CONSOLIDATION IMPACT  
-3. Request Processing → Agent execution ✅
-4. WebSocket Events → Real-time updates ⚠️ CONSOLIDATION IMPACT
-5. AI Response → User receives value ✅
+1. User Login -> Authentication validation CHECK
+2. Agent Selection -> Registry retrieval WARNING️ CONSOLIDATION IMPACT  
+3. Request Processing -> Agent execution CHECK
+4. WebSocket Events -> Real-time updates WARNING️ CONSOLIDATION IMPACT
+5. AI Response -> User receives value CHECK
 
 Created: 2025-01-13 - SSOT Gardner agents focus
 Priority: P0 (Critical/Blocking) - Golden Path = 90% of platform business value
@@ -27,7 +27,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 
 @pytest.mark.e2e
 class GoldenPathRegistryConsolidationTests(SSotAsyncTestCase):
-    """Critical P0 tests ensuring Golden Path (login → AI responses) survives registry consolidation"""
+    """Critical P0 tests ensuring Golden Path (login -> AI responses) survives registry consolidation"""
 
     def setUp(self):
         """Set up Golden Path test environment with staging GCP (no Docker)"""
@@ -43,7 +43,7 @@ class GoldenPathRegistryConsolidationTests(SSotAsyncTestCase):
 
     async def test_login_to_ai_response_flow_intact(self):
         """
-        CRITICAL: Full Golden Path - user login → agent selection → AI response
+        CRITICAL: Full Golden Path - user login -> agent selection -> AI response
         
         Business Impact: Complete user experience must work end-to-end
         Expected: PASS - entire flow works seamlessly after consolidation
@@ -63,7 +63,7 @@ class GoldenPathRegistryConsolidationTests(SSotAsyncTestCase):
         ai_response = await self._validate_ai_response_delivery()
         self.assertIsNotNone(ai_response, 'AI response must be delivered to complete Golden Path')
         golden_path_success = all([authenticated_user, selected_agent, user_session, request_result, len(websocket_events) >= 3, ai_response])
-        self.assertTrue(golden_path_success, 'Complete Golden Path (login → AI response) must work')
+        self.assertTrue(golden_path_success, 'Complete Golden Path (login -> AI response) must work')
 
     async def test_agent_selection_mechanism_preserved(self):
         """

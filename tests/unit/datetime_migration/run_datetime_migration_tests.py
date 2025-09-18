@@ -104,7 +104,7 @@ class DateTimeMigrationTestRunner:
 
         # Check for deprecated pattern detection tests
         deprecated_tests_found = failed_tests > 0
-        print(f"\nDeprecated Pattern Detection: {'✅ WORKING' if deprecated_tests_found else '❌ NOT DETECTING'}")
+        print(f"\nDeprecated Pattern Detection: {'CHECK WORKING' if deprecated_tests_found else 'X NOT DETECTING'}")
         print("(Failing tests indicate deprecated patterns are correctly detected)")
 
         return {
@@ -138,7 +138,7 @@ class DateTimeMigrationTestRunner:
                         lines = f.readlines()
 
                     for line_num, line in enumerate(lines, 1):
-                        if "datetime.utcnow()" in line:
+                        if "datetime.now(UTC)" in line:
                             patterns_found.append(f"Line {line_num}: {line.strip()}")
 
                     results[file_path] = patterns_found
@@ -167,7 +167,7 @@ class DateTimeMigrationTestRunner:
                     print(f"    {pattern}")
                 total_patterns += len(patterns)
             else:
-                print("  ✅ No deprecated patterns found")
+                print("  CHECK No deprecated patterns found")
 
         print(f"\n🔍 TOTAL DEPRECATED PATTERNS: {total_patterns}")
         print("📋 TARGET: These patterns will be migrated to datetime.now(timezone.utc)")
@@ -181,14 +181,14 @@ class DateTimeMigrationTestRunner:
         print("=" * 70)
 
         # Test that old and new patterns produce equivalent results
-        from datetime import datetime, timezone
+        from datetime import datetime, timezone, UTC
         import time
 
         test_results = {}
 
         # Test 1: Timestamp equivalence
         print("\n🧪 Testing timestamp equivalence...")
-        old_timestamp = datetime.utcnow()
+        old_timestamp = datetime.now(UTC)
         time.sleep(0.001)  # Tiny delay
         new_timestamp = datetime.now(timezone.utc)
 
@@ -203,11 +203,11 @@ class DateTimeMigrationTestRunner:
         }
 
         print(f"  Time difference: {time_diff:.6f} seconds")
-        print(f"  Equivalence test: {'✅ PASSED' if equivalence_passed else '❌ FAILED'}")
+        print(f"  Equivalence test: {'CHECK PASSED' if equivalence_passed else 'X FAILED'}")
 
         # Test 2: ISO format compatibility
         print("\n🧪 Testing ISO format compatibility...")
-        old_iso = datetime.utcnow().isoformat()
+        old_iso = datetime.now(UTC).isoformat()
         new_iso = datetime.now(timezone.utc).isoformat()
 
         old_parseable = True
@@ -231,9 +231,9 @@ class DateTimeMigrationTestRunner:
             'new_includes_timezone': new_iso.endswith('+00:00')
         }
 
-        print(f"  Old format parseable: {'✅' if old_parseable else '❌'}")
-        print(f"  New format parseable: {'✅' if new_parseable else '❌'}")
-        print(f"  New format includes timezone: {'✅' if new_iso.endswith('+00:00') else '❌'}")
+        print(f"  Old format parseable: {'CHECK' if old_parseable else 'X'}")
+        print(f"  New format parseable: {'CHECK' if new_parseable else 'X'}")
+        print(f"  New format includes timezone: {'CHECK' if new_iso.endswith('+00:00') else 'X'}")
 
         return test_results
 
@@ -255,8 +255,8 @@ class DateTimeMigrationTestRunner:
                 warnings.simplefilter("always")
 
                 # Execute some datetime operations
-                from datetime import datetime
-                test_timestamp = datetime.utcnow()  # Deprecated in Python 3.12+
+                from datetime import datetime, UTC
+                test_timestamp = datetime.now(UTC)  # Deprecated in Python 3.12+
 
                 # Check for warnings
                 datetime_warnings = [warning for warning in w
@@ -319,20 +319,20 @@ class DateTimeMigrationTestRunner:
 
         if 'timestamp_equivalence' in equivalence_results:
             eq_result = equivalence_results['timestamp_equivalence']
-            report.append(f"  Timestamp Equivalence: {'✅ PASSED' if eq_result['passed'] else '❌ FAILED'}")
+            report.append(f"  Timestamp Equivalence: {'CHECK PASSED' if eq_result['passed'] else 'X FAILED'}")
             report.append(f"  Time Difference: {eq_result['time_diff_seconds']:.6f} seconds")
 
         if 'iso_format_compatibility' in equivalence_results:
             iso_result = equivalence_results['iso_format_compatibility']
-            report.append(f"  ISO Format Compatibility: {'✅ PASSED' if iso_result['old_parseable'] and iso_result['new_parseable'] else '❌ FAILED'}")
-            report.append(f"  New Format Includes Timezone: {'✅' if iso_result['new_includes_timezone'] else '❌'}")
+            report.append(f"  ISO Format Compatibility: {'CHECK PASSED' if iso_result['old_parseable'] and iso_result['new_parseable'] else 'X FAILED'}")
+            report.append(f"  New Format Includes Timezone: {'CHECK' if iso_result['new_includes_timezone'] else 'X'}")
 
         report.append("")
 
         # Migration recommendations
         report.append("🎯 MIGRATION RECOMMENDATIONS")
         report.append("-" * 30)
-        report.append("1. Apply datetime.utcnow() → datetime.now(timezone.utc) migration to all 5 files")
+        report.append("1. Apply datetime.now(UTC) -> datetime.now(timezone.utc) migration to all 5 files")
         report.append("2. Update import statements to include timezone")
         report.append("3. Run post-migration tests to validate functionality")
         report.append("4. Monitor for deprecation warnings in Python 3.12+")
@@ -342,11 +342,11 @@ class DateTimeMigrationTestRunner:
         report.append("🔄 MIGRATION PATTERN")
         report.append("-" * 20)
         report.append("BEFORE:")
-        report.append("  from datetime import datetime")
-        report.append("  timestamp = datetime.utcnow()")
+        report.append("  from datetime import datetime"), UTC
+        report.append("  timestamp = datetime.now(UTC)")
         report.append("")
         report.append("AFTER:")
-        report.append("  from datetime import datetime, timezone")
+        report.append("  from datetime import datetime, timezone"), UTC
         report.append("  timestamp = datetime.now(timezone.utc)")
         report.append("")
 
@@ -380,10 +380,10 @@ def main():
     print("\n" + "=" * 70)
     print("📊 FINAL TEST EXECUTION SUMMARY")
     print("=" * 70)
-    print(f"✅ Test Suite Execution: COMPLETED")
+    print(f"CHECK Test Suite Execution: COMPLETED")
     print(f"🔍 Deprecated Patterns: {'DETECTED' if pre_migration_results.get('deprecated_patterns_detected') else 'NOT DETECTED'}")
     print(f"⚖️ Behavioral Equivalence: VALIDATED")
-    print(f"⚠️ Warning Detection: {'ACTIVE' if warning_results.get('warnings_detected') else 'INACTIVE'}")
+    print(f"WARNING️ Warning Detection: {'ACTIVE' if warning_results.get('warnings_detected') else 'INACTIVE'}")
     print("\n🎯 READY FOR PHASE 2: Apply datetime migration to target files")
 
 

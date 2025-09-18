@@ -154,7 +154,8 @@ class DockerServicesAuditor:
     def check_redis_connectivity(self, host: str, port: int) -> Tuple[bool, str]:
         """Test Redis connectivity"""
         try:
-            client = await get_redis_client()  # MIGRATED: was redis.Redis(host=host, port=port, socket_timeout=5)
+            import redis
+            client = redis.Redis(host=host, port=port, socket_timeout=5)  # FIXED: Removed await from non-async method
             client.ping()
             return True, "Connected successfully"
         except redis.ConnectionError as e:

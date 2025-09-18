@@ -3,14 +3,14 @@ Golden Path User Flow Integration Tests - Service Independent
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - Test Infrastructure
-- Business Goal: Validate complete $500K+ ARR Golden Path user journey without Docker dependencies
+- Business Goal: Validate complete 500K+ ARR Golden Path user journey without Docker dependencies
 - Value Impact: Enables end-to-end Golden Path testing with 90%+ execution success rate  
 - Strategic Impact: Protects complete user experience delivering 90% of platform business value
 
 This module tests the complete Golden Path user flow integration:
 1. User authentication and session establishment
 2. Chat interface initialization and WebSocket connection
-3. User message → Agent execution → Tool usage → Business value delivery
+3. User message -> Agent execution -> Tool usage -> Business value delivery
 4. Real-time WebSocket event delivery throughout the flow
 5. Session management and graceful error handling
 
@@ -43,7 +43,7 @@ class GoldenPathUserFlowHybridTests(ServiceIndependentIntegrationTest):
         """
         Test complete Golden Path user journey from login to business value delivery.
         
-        CRITICAL: This validates the complete $500K+ ARR user experience end-to-end.
+        CRITICAL: This validates the complete 500K+ ARR user experience end-to-end.
         """
         # Ensure acceptable execution confidence for complete flow
         self.assert_execution_confidence_acceptable(min_confidence=0.7)

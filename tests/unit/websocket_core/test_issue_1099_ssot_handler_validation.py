@@ -105,7 +105,7 @@ class TestSSOTHandlerValidation:
             assert isinstance(result, bool)
             assert result == True
         
-        print("✅ SSOT AgentMessageHandler interface validation passed")
+        print("CHECK SSOT AgentMessageHandler interface validation passed")
     
     @pytest.mark.asyncio
     async def test_ssot_connection_handler_interface_validation(self, mock_websocket):
@@ -145,7 +145,7 @@ class TestSSOTHandlerValidation:
         result = await handler.handle_message("user_123", mock_websocket, disconnect_message)
         assert isinstance(result, bool)
         
-        print("✅ SSOT ConnectionHandler interface validation passed")
+        print("CHECK SSOT ConnectionHandler interface validation passed")
     
     @pytest.mark.asyncio
     async def test_ssot_message_processing_validation(self, mock_message_handler_service, mock_websocket):
@@ -203,7 +203,7 @@ class TestSSOTHandlerValidation:
             result = await handler.handle_message("user_123", mock_websocket, chat_message)
             assert result == True
         
-        print("✅ SSOT message processing validation passed")
+        print("CHECK SSOT message processing validation passed")
     
     @pytest.mark.asyncio
     async def test_ssot_error_handling_validation(self, mock_message_handler_service, mock_websocket):
@@ -240,7 +240,7 @@ class TestSSOTHandlerValidation:
         # Should handle gracefully, not crash
         assert isinstance(result, bool)
         
-        print("✅ SSOT error handling validation passed")
+        print("CHECK SSOT error handling validation passed")
     
     @pytest.mark.asyncio
     async def test_ssot_websocket_context_integration_validation(self, mock_message_handler_service, mock_websocket):
@@ -275,7 +275,7 @@ class TestSSOTHandlerValidation:
                         mock_context.validate_for_message_processing.assert_called()
                         mock_context.update_activity.assert_called()
         
-        print("✅ SSOT WebSocket context integration validation passed")
+        print("CHECK SSOT WebSocket context integration validation passed")
     
     @pytest.mark.asyncio
     async def test_ssot_user_isolation_validation(self, mock_message_handler_service, mock_websocket):
@@ -326,7 +326,7 @@ class TestSSOTHandlerValidation:
                         for i, context in enumerate(created_contexts):
                             assert context.user_id == users[i]
         
-        print("✅ SSOT user isolation validation passed")
+        print("CHECK SSOT user isolation validation passed")
     
     def test_ssot_message_router_validation(self):
         """
@@ -364,7 +364,7 @@ class TestSSOTHandlerValidation:
         assert 'routing_errors' in stats
         assert 'active_connections' in stats
         
-        print("✅ SSOT message router validation passed")
+        print("CHECK SSOT message router validation passed")
     
     @pytest.mark.asyncio
     async def test_ssot_connection_management_validation(self):
@@ -414,7 +414,7 @@ class TestSSOTHandlerValidation:
         user_connections = router.get_user_connections(user_id)
         assert len(user_connections) == 5
         
-        print("✅ SSOT connection management validation passed")
+        print("CHECK SSOT connection management validation passed")
     
     @pytest.mark.asyncio
     async def test_ssot_message_routing_validation(self):
@@ -468,7 +468,7 @@ class TestSSOTHandlerValidation:
             assert len(delivered_connections) == 1
             assert delivered_connections[0] == "conn_session"
         
-        print("✅ SSOT message routing validation passed")
+        print("CHECK SSOT message routing validation passed")
     
     def test_ssot_performance_validation(self, mock_message_handler_service):
         """
@@ -503,7 +503,7 @@ class TestSSOTHandlerValidation:
         # Message type checking should be very fast (< 10ms for 30 checks)
         assert checking_time < 0.01  # 10ms
         
-        print(f"✅ SSOT performance validation passed: "
+        print(f"CHECK SSOT performance validation passed: "
               f"creation={creation_time:.3f}s, checking={checking_time:.3f}s")
     
     @pytest.mark.asyncio
@@ -542,7 +542,7 @@ class TestSSOTHandlerValidation:
             result = await handler.handle_message("user_123", mock_websocket, minimal_message)
             assert result == True
         
-        print("✅ SSOT backwards compatibility validation passed")
+        print("CHECK SSOT backwards compatibility validation passed")
 
 
 class TestSSOTIntegrationCapabilities:
@@ -577,7 +577,7 @@ class TestSSOTIntegrationCapabilities:
                         result = await handler.handle_message("user_123", mock_websocket, message)
                         assert result == True
         
-        print("✅ SSOT database integration validation passed")
+        print("CHECK SSOT database integration validation passed")
     
     @pytest.mark.asyncio
     async def test_ssot_websocket_manager_integration_validation(self, mock_message_handler_service, mock_websocket):
@@ -607,7 +607,7 @@ class TestSSOTIntegrationCapabilities:
                     result = await handler.handle_message("user_123", mock_websocket, message)
                     assert result == True
         
-        print("✅ SSOT WebSocket manager integration validation passed")
+        print("CHECK SSOT WebSocket manager integration validation passed")
     
     @pytest.mark.asyncio 
     async def test_ssot_supervisor_integration_validation(self, mock_message_handler_service, mock_websocket):
@@ -635,7 +635,7 @@ class TestSSOTIntegrationCapabilities:
                         result = await handler.handle_message("user_123", mock_websocket, message)
                         assert result == True
         
-        print("✅ SSOT supervisor integration validation passed")
+        print("CHECK SSOT supervisor integration validation passed")
 
 
 if __name__ == "__main__":
@@ -651,11 +651,11 @@ if __name__ == "__main__":
     ])
     
     if exit_code == 0:
-        print("\n✅ SSOT HANDLER VALIDATION SUCCESSFUL")
+        print("\nCHECK SSOT HANDLER VALIDATION SUCCESSFUL")
         print("All SSOT handlers meet requirements for legacy replacement")
         print("SSOT handlers ready for migration implementation")
     else:
-        print("\n❌ SSOT HANDLER VALIDATION FAILED")
+        print("\nX SSOT HANDLER VALIDATION FAILED")
         print("SSOT handlers need fixes before they can replace legacy handlers")
     
     exit(exit_code)

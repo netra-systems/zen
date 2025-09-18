@@ -54,9 +54,9 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
         super().setUp()
         
         # Staging environment configuration
-        self.staging_base_url = "https://backend.staging.netrasystems.ai"
-        self.staging_ws_url = "wss://backend.staging.netrasystems.ai/ws"
-        self.demo_ws_url = "wss://backend.staging.netrasystems.ai/api/demo/ws"
+        self.staging_base_url = "https://api.staging.netrasystems.ai"
+        self.staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
+        self.demo_ws_url = "wss://api.staging.netrasystems.ai/api/demo/ws"
         
         # Test configuration
         self.golden_path_timeout = 60.0  # 60 seconds for complete journey
@@ -76,13 +76,13 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
 
     async def test_complete_user_journey_with_websocket_events(self):
         """
-        Test complete Golden Path: login → send message → receive AI response.
+        Test complete Golden Path: login -> send message -> receive AI response.
         
         CURRENT STATE: SHOULD PASS - Golden Path must remain functional
         TARGET STATE: SHOULD PASS - Full user journey working with SSOT manager
         
         Business Impact: Validates complete user experience with consolidated WebSocket manager
-        Critical: $500K+ ARR depends on this user journey working reliably
+        Critical: 500K+ ARR depends on this user journey working reliably
         """
         logger.info("🚀 Testing complete Golden Path user journey (Issue #1182)")
         
@@ -105,7 +105,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
                 validation.websocket_connection_success = True
                 validation.performance_metrics['connection_time'] = connection_time
                 
-                logger.info(f"✓ WebSocket connected successfully in {connection_time:.2f}s")
+                logger.info(f"CHECK WebSocket connected successfully in {connection_time:.2f}s")
                 
                 # Step 2: Send user message to trigger agent workflow
                 logger.info("💬 Step 2: Sending user message to trigger Golden Path...")
@@ -121,7 +121,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
                 message_send_time = time.time()
                 await websocket.send(json.dumps(test_message))
                 
-                logger.info(f"✓ User message sent: {test_message['content'][:50]}...")
+                logger.info(f"CHECK User message sent: {test_message['content'][:50]}...")
                 
                 # Step 3: Listen for WebSocket events and AI response
                 logger.info("🔄 Step 3: Listening for WebSocket events and AI response...")
@@ -147,7 +147,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
                         
                         # Log event details for analysis
                         if event_type in self.expected_events:
-                            logger.info(f"✓ Expected event received: {event_type}")
+                            logger.info(f"CHECK Expected event received: {event_type}")
                         
                         # Check for AI response completion
                         if event_type == "agent_completed" or event_type == "ai_response":
@@ -164,11 +164,11 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
                     except asyncio.TimeoutError:
                         # Continue listening until overall timeout
                         continue
-                    except websockets.exceptions.ConnectionClosed:
-                        logger.error("❌ WebSocket connection closed unexpectedly")
+                    except websockets.ConnectionClosed:
+                        logger.error("X WebSocket connection closed unexpectedly")
                         break
                     except json.JSONDecodeError as e:
-                        logger.warning(f"⚠️ Non-JSON message received: {message}")
+                        logger.warning(f"WARNING️ Non-JSON message received: {message}")
                         continue
                 
                 # Step 4: Analyze Golden Path completion
@@ -215,16 +215,16 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
         except Exception as e:
             validation.errors.append(str(e))
             validation.user_journey_success = False
-            logger.error(f"❌ Golden Path validation failed: {e}")
+            logger.error(f"X Golden Path validation failed: {e}")
         
         self.validation_results.append(validation)
         
         # CRITICAL: Golden Path must work for business continuity
-        # This should PASS to protect $500K+ ARR functionality
+        # This should PASS to protect 500K+ ARR functionality
         self.assertTrue(
             validation.user_journey_success,
             f"Golden Path user journey failed after Issue #1182 WebSocket SSOT migration. "
-            f"Critical business impact: $500K+ ARR at risk. "
+            f"Critical business impact: 500K+ ARR at risk. "
             f"Connection: {validation.websocket_connection_success}, "
             f"Events: {validation.event_delivery_complete}, "
             f"AI Response: {validation.ai_response_received}. "
@@ -247,9 +247,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
         Business Impact: Real-time user experience depends on these events
         Events: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
         """
-        logger.info("📡 Testing WebSocket five critical events delivery (Issue #1182)")
-        
-        validation = GoldenPathValidation(test_scenario="five_critical_events")
+        logger.info("📡 Testing WebSocket five critical events delivery (Issue #1182)""five_critical_events")
         
         try:
             logger.info("📡 Connecting to staging WebSocket for event validation...")
@@ -261,7 +259,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
             ) as websocket:
                 
                 validation.websocket_connection_success = True
-                logger.info("✓ WebSocket connected for event validation")
+                logger.info("CHECK WebSocket connected for event validation")
                 
                 # Send message to trigger all agent events
                 test_message = {
@@ -291,7 +289,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
                                 'timestamp': time.time() - event_start_time,
                                 'data': event_data
                             })
-                            logger.info(f"✓ Critical event received: {event_type}")
+                            logger.info(f"CHECK Critical event received: {event_type}")
                         
                         # Check if we've received all expected events
                         if len(received_events) >= len(self.expected_events):
@@ -305,7 +303,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
                             
                     except asyncio.TimeoutError:
                         continue
-                    except (websockets.exceptions.ConnectionClosed, json.JSONDecodeError):
+                    except (websockets.ConnectionClosed, json.JSONDecodeError):
                         break
                 
                 # Analyze event delivery
@@ -346,7 +344,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
         except Exception as e:
             validation.errors.append(str(e))
             validation.user_journey_success = False
-            logger.error(f"❌ Critical events validation failed: {e}")
+            logger.error(f"X Critical events validation failed: {e}")
         
         self.validation_results.append(validation)
         
@@ -435,7 +433,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
                                     
                             except asyncio.TimeoutError:
                                 continue
-                            except (websockets.exceptions.ConnectionClosed, json.JSONDecodeError):
+                            except (websockets.ConnectionClosed, json.JSONDecodeError):
                                 break
                         
                         user_result.update({
@@ -445,12 +443,12 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
                             'total_time': time.time() - user_start_time
                         })
                         
-                        logger.info(f"✓ User {user_index}: {events_count} events, AI response: {ai_response_received}")
+                        logger.info(f"CHECK User {user_index}: {events_count} events, AI response: {ai_response_received}")
                         
                 except Exception as e:
                     user_result['error'] = str(e)
                     user_result['total_time'] = time.time() - user_start_time
-                    logger.error(f"❌ User {user_index} failed: {e}")
+                    logger.error(f"X User {user_index} failed: {e}")
                 
                 return user_result
             
@@ -499,7 +497,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
         except Exception as e:
             validation.errors.append(str(e))
             validation.user_journey_success = False
-            logger.error(f"❌ Concurrent users test failed: {e}")
+            logger.error(f"X Concurrent users test failed: {e}")
         
         self.validation_results.append(validation)
         
@@ -529,7 +527,7 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
             
             # Business impact summary
             if successful_journeys == total_validations:
-                logger.info("🎯 GOLDEN PATH FULLY PROTECTED: $500K+ ARR functionality validated")
+                logger.info("🎯 GOLDEN PATH FULLY PROTECTED: 500K+ ARR functionality validated")
             else:
                 logger.error(f"🚨 GOLDEN PATH AT RISK: {total_validations - successful_journeys} failures detected")
             

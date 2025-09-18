@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 1. Segment: Mid, Enterprise
 2. Business Goal: Comprehensive supply chain intelligence and market analysis
 3. Value Impact: Advanced supply research capabilities for competitive advantage
-4. Revenue Impact: $350K+ ARR from enhanced supply chain consulting features
+4. Revenue Impact: 350K+ ARR from enhanced supply chain consulting features
 
 CLAUDE.md COMPLIANCE:
 - Uses real services ONLY (NO MOCKS)
@@ -258,7 +258,7 @@ class EnhancedSupplyResearcherTester:
                 if missing_events:
                     report.append(f'     WARNING: MISSING REQUIRED EVENTS: {missing_events}')
                 else:
-                    report.append('    ✓ All required WebSocket events received')
+                    report.append('    CHECK All required WebSocket events received')
                 report.append('    Performance Metrics:')
                 report.append(f'      - Research started: {val.time_to_research_start:.2f}s' if val.time_to_research_start else '      - Research not started')
                 report.append(f'      - First analysis: {val.time_to_first_analysis:.2f}s' if val.time_to_first_analysis else '      - No analysis observed')
@@ -270,11 +270,11 @@ class EnhancedSupplyResearcherTester:
                 report.append(f'      - Actionability score: {val.actionability_score:.1%}')
                 report.append(f'      - Data quality score: {val.data_quality_score:.1%}')
                 report.append('    Business Validation:')
-                report.append(f'      ✓ Research objectives met: {val.research_objectives_met}')
-                report.append(f'      ✓ Stakeholder questions answered: {val.stakeholder_questions_answered}')
-                report.append(f'      ✓ Strategic insights provided: {val.strategic_insights_provided}')
-                report.append(f'      ✓ Implementation guidance included: {val.implementation_guidance_included}')
-                report.append(f'      ✓ Enterprise quality standards: {val.quality_meets_enterprise_standards}')
+                report.append(f'      CHECK Research objectives met: {val.research_objectives_met}')
+                report.append(f'      CHECK Stakeholder questions answered: {val.stakeholder_questions_answered}')
+                report.append(f'      CHECK Strategic insights provided: {val.strategic_insights_provided}')
+                report.append(f'      CHECK Implementation guidance included: {val.implementation_guidance_included}')
+                report.append(f'      CHECK Enterprise quality standards: {val.quality_meets_enterprise_standards}')
                 if val.research_methodology:
                     report.append(f'    Research Methodology ({len(val.research_methodology)} methods):')
                     for method in val.research_methodology[:2]:

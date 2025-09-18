@@ -1,31 +1,32 @@
 # Staging Environment Connectivity Report
-Generated: 2025-09-15 13:09:20
-Environment: https://api.staging.netrasystems.ai
+Generated: 2025-09-17 23:17:10
+Environment: https://staging.netrasystems.ai
 
 ## Executive Summary
 - **Total Tests**: 3
-- **Successful**: 0
-- **Success Rate**: 0.0%
+- **Successful**: 1
+- **Success Rate**: 33.3%
 
 ## Test Results
 ### http_connectivity
-- **Status**:  FAIL:  FAIL
-- **Duration**: 10.260s
-- **Error**: 
+- **Status**:  PASS:  PASS
+- **Duration**: 2.381s
+- **Health Status**: 200
+- **Service Status**: degraded
+- **Version**: 1.0.0
 
 ### websocket_connectivity
 - **Status**:  FAIL:  FAIL
-- **Duration**: 10.007s
+- **Duration**: 10.010s
 - **Error**: 
 
 ### agent_request_pipeline
 - **Status**:  FAIL:  FAIL
-- **Duration**: 9.999s
+- **Duration**: 10.009s
 - **Error**: 
 
 ## Recommendations
  WARNING: [U+FE0F] **Some connectivity issues detected**
-- Fix http_connectivity: 
 - Fix websocket_connectivity: 
 - Fix agent_request_pipeline: 
 

@@ -361,6 +361,9 @@ def patch_env(env_vars: Dict[str, str], clear: bool = False, source: str = "patc
     """
     return EnvironmentPatcher(env_vars, clear, source)
 
+# Alias for backward compatibility with tests expecting different fixture names
+isolated_env_fixture = isolated_env
+
 # Auto-registration with pytest
 def pytest_configure(config):
     """Auto-configure pytest with isolated environment fixtures."""

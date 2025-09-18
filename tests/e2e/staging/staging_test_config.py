@@ -9,7 +9,7 @@ Business Value Justification:
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Staging environment validates Golden Path reliability
 - Value Impact: Staging coordination prevents production deployment failures
-- Strategic Impact: Reliable staging protects $500K+ ARR from coordination bugs
+- Strategic Impact: Reliable staging protects 500K+ ARR from coordination bugs
 """
 
 import os
@@ -21,9 +21,9 @@ from shared.isolated_environment import get_env
 class StagingConfig:
     """Staging environment configuration for E2E coordination tests."""
 
-    # Primary service endpoints (canonical URLs)
-    BASE_URL: str = "https://api.staging.netrasystems.ai"
-    AUTH_URL: str = "https://auth.staging.netrasystems.ai"
+    # Primary service endpoints (canonical URLs) - Issue #1278 domain fix
+    BASE_URL: str = "https://staging.netrasystems.ai"
+    AUTH_URL: str = "https://staging.netrasystems.ai"
     FRONTEND_URL: str = "https://staging.netrasystems.ai"
 
     # WebSocket coordination endpoints

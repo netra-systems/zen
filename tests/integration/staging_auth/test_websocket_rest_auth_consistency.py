@@ -5,7 +5,7 @@ PURPOSE: Integration test validating authentication consistency between WebSocke
 EXPECTED: PASS after SSOT remediation - validates cross-protocol auth consistency
 TARGET: WebSocket and REST API use same auth service delegation patterns
 
-BUSINESS VALUE: Ensures consistent authentication experience for $500K+ ARR across protocols
+BUSINESS VALUE: Ensures consistent authentication experience for 500K+ ARR across protocols
 EXECUTION: Staging environment integration - NO Docker dependency
 """
 import logging
@@ -30,7 +30,7 @@ class WebSocketRESTAuthConsistencyTests(SSotAsyncTestCase):
     async def asyncSetUpClass(cls):
         """Setup cross-protocol auth consistency testing"""
         await super().asyncSetUpClass()
-        cls.staging_auth_service_url = os.getenv('STAGING_AUTH_SERVICE_URL', 'https://auth-staging.netra-apex.com')
+        cls.staging_auth_service_url = os.getenv('STAGING_AUTH_SERVICE_URL', 'https://auth.netra-apex.com')
         cls.staging_backend_url = os.getenv('STAGING_BACKEND_URL', 'https://backend-staging.netra-apex.com')
         cls.staging_websocket_url = os.getenv('STAGING_WEBSOCKET_URL', 'wss://websocket-staging.netra-apex.com')
         cls.staging_test_email = 'websocket-rest-test@example.com'
@@ -110,7 +110,7 @@ class WebSocketRESTAuthConsistencyTests(SSotAsyncTestCase):
             assert 'user_id' in websocket_data, 'WebSocket provides user data from auth service'
             logger.info('WebSocket authentication successful')
             return websocket_data
-        except (websockets.exceptions.WebSocketException, ConnectionError) as e:
+        except (websockets.WebSocketException, ConnectionError) as e:
             pytest.skip(f'Staging WebSocket not accessible: {e}')
 
     async def _validate_cross_protocol_consistency(self, rest_data: Dict, websocket_data: Dict):

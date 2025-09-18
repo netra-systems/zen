@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise/Mid-Market (Multi-tenant customers)
 - Business Goal: Platform Scalability & Enterprise Trust
 - Value Impact: Proves platform can serve multiple enterprise customers safely
-- Strategic Impact: $500K+ ARR depends on enterprise confidence in isolation
+- Strategic Impact: 500K+ ARR depends on enterprise confidence in isolation
 
 Multi-User Isolation Requirements:
 1. Complete user context isolation (no data leakage between users)
@@ -306,7 +306,7 @@ class MultiUserIsolationE2ETests(SSotAsyncTestCase):
                 self.logger.info(f"   User {result['user_index']} ({result['scenario']}): Score {isolation_val.get('isolation_score', 0):.2f}, Duration {result['duration']:.1f}s")
         except Exception as e:
             total_time = time.time() - concurrent_test_start_time
-            self.logger.error(f'❌ CONCURRENT MULTI-USER ISOLATION FAILED')
+            self.logger.error(f'X CONCURRENT MULTI-USER ISOLATION FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f'   Metrics collected: {len(isolation_metrics)}')
@@ -402,7 +402,7 @@ class MultiUserIsolationE2ETests(SSotAsyncTestCase):
             self.logger.info(f'   Privacy Boundaries: SECURE')
         except Exception as e:
             total_time = time.time() - boundary_test_start_time
-            self.logger.error(f'❌ USER CONTEXT BOUNDARY VALIDATION FAILED')
+            self.logger.error(f'X USER CONTEXT BOUNDARY VALIDATION FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             raise AssertionError(f'User context boundary validation failed after {total_time:.1f}s: {e}. Privacy boundary failures create serious compliance and security risks.')

@@ -731,7 +731,7 @@
     # REMOVED_SYNTAX_ERROR: "[U+0645][U+0631][U+062D][U+0628][U+0627] [U+0628][U+0627][U+0644][U+0639][U+0627][U+0644][U+0645]",  # Arabic (RTL)
     # REMOVED_SYNTAX_ERROR: "
     # REMOVED_SYNTAX_ERROR: \t\r",  # Control characters
-    # REMOVED_SYNTAX_ERROR: "null\x00byte",  # Null byte
+    # REMOVED_SYNTAX_ERROR: "null\\\\\100byte",  # Null byte
     # REMOVED_SYNTAX_ERROR: '{"nested": "json"}',  # JSON in string
     # REMOVED_SYNTAX_ERROR: "<script>alert('xss')</script>",  # HTML/XSS attempt
     # REMOVED_SYNTAX_ERROR: ""; DROP TABLE users; --",  # SQL injection attempt

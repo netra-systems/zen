@@ -1,32 +1,36 @@
-"""Auth Models Module - Compatibility Layer
+"""Auth Models Module - SSOT Compatibility Layer
 
-This module provides backward compatibility for auth model imports.
-Imports SQLAlchemy models from the auth service (SSOT) and Pydantic models 
-from auth integration to provide a unified import interface.
+This module provides backward compatibility for auth model imports while
+following SSOT principles. Uses backend's own User model and provides
+compatibility aliases for auth-related functionality.
 
-The SQLAlchemy models (AuthUser, AuthSession, AuthAuditLog, PasswordResetToken)
-are imported directly from the auth service, maintaining SSOT principles
-while providing test compatibility through enhanced initialization.
+SSOT COMPLIANCE:
+- The actual User model is defined in models_user.py (SSOT location)
+- This module provides backward compatibility for existing imports
+- Service boundaries maintained: netra_backend owns User database model
+- Auth service handles authentication logic, not data models
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal
-- Business Goal: Maintain test compatibility while following SSOT principles
-- Value Impact: Ensures existing tests continue to work without breaking changes
-- Strategic Impact: Maintains system stability during module consolidation
+- Business Goal: Fix Issue #1319 auth_service import regression
+- Value Impact: Prevents ModuleNotFoundError in GCP deployment
+- Strategic Impact: Maintains Golden Path functionality
 """
 
 # Import SQLAlchemy Base for database model compatibility
 from netra_backend.app.db.base import Base
 
-# Import SQLAlchemy models from auth service (SSOT)
-from auth_service.auth_core.database.models import (
-    AuthUser,
-    AuthSession, 
-    AuthAuditLog,
-    PasswordResetToken
-)
+# Import SSOT User model from backend (NOT from auth_service)
+from netra_backend.app.db.models_user import User, Secret, ToolUsageLog
 
-from netra_backend.app.auth_integration.models import (
+# Create compatibility aliases for auth service models
+# These reference the backend's User model instead of auth_service models
+AuthUser = User  # Alias for compatibility - backend owns user data
+AuthSession = dict  # Placeholder - sessions handled by auth service
+AuthAuditLog = dict  # Placeholder - audit logs handled by auth service
+PasswordResetToken = dict  # Placeholder - password resets handled by auth service
+
+from netra_backend.app.schemas.auth_types import (
     AuditLog,
     AuthConfig,
     AuthConfigResponse,
@@ -51,21 +55,26 @@ from netra_backend.app.auth_integration.models import (
     TokenResponse,
     TokenType,
     UserPermission,
-    # Backward compatibility aliases
-    HealthCheck,
-    UserToken,
-    AuthRequest,
-    AuthResponse,
 )
+
+# Backward compatibility aliases
+HealthCheck = AuthConfigResponse  
+UserToken = TokenData
+AuthRequest = LoginRequest
+AuthResponse = LoginResponse
 
 # Re-export all functionality
 __all__ = [
     'Base',
-    # SQLAlchemy models from auth service
+    # SSOT User models from backend (compatibility aliases)
     'AuthUser',
-    'AuthSession', 
+    'AuthSession',
     'AuthAuditLog',
     'PasswordResetToken',
+    # Backend user models
+    'User',
+    'Secret',
+    'ToolUsageLog',
     # Pydantic models from auth integration
     'AuditLog',
     'AuthConfig',

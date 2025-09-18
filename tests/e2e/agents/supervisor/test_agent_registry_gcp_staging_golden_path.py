@@ -28,7 +28,7 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-'\n[U+1F31F] E2E GCP STAGING TEST SUITE: Agent Registry Golden Path Protection\n\nBusiness Value Justification (BVJ):\n- Segment: ALL (Free  ->  Enterprise) - Protects $500K+ ARR\n- Business Goal: Validate agent orchestration works in production-like GCP staging environment\n- Value Impact: Ensures Golden Path agent execution delivers reliable chat experience\n- Revenue Impact: Prevents production failures that could cause mass user abandonment\n\nGOLDEN PATH VALIDATION:\nThis test suite validates the COMPLETE Golden Path user flow in GCP staging:\n1. User Authentication  ->  2. Agent Registry Initialization  ->  3. Agent Creation\n4. Tool Integration  ->  5. WebSocket Events  ->  6. Agent Execution  ->  7. Response Delivery\n\nCRITICAL E2E SCENARIOS TESTED:\n1. Golden Path Agent Execution - Complete user flow from login to AI response\n2. Multi-User Enterprise Isolation - Concurrent enterprise customers with complete isolation  \n3. Production WebSocket Events - All 5 critical events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)\n4. Production Tool Execution - Real tools with actual GCP services\n5. Production Database Integration - Agent state persistence in GCP Cloud SQL\n6. Production Performance Validation - Enterprise-scale load testing in staging\n\nPRODUCTION ENVIRONMENT SIMULATION:\n- Uses GCP staging infrastructure (Cloud Run, Cloud SQL, Redis, WebSocket)\n- Real authentication flows with JWT tokens\n- Real database connections and transactions\n- Real WebSocket connections and event delivery\n- Real tool execution with GCP services\n- Real concurrency and resource management\n\nRISK MITIGATION:\n- Each test validates production readiness of specific Golden Path components\n- Tests designed to catch production issues before they affect real users\n- Comprehensive load testing prevents performance surprises in production\n- Real service integration catches configuration and networking issues\n\nThis test suite protects the CORE REVENUE FLOW: Users  ->  Chat  ->  Agent Orchestration  ->  AI Responses\n'
+'\n[U+1F31F] E2E GCP STAGING TEST SUITE: Agent Registry Golden Path Protection\n\nBusiness Value Justification (BVJ):\n- Segment: ALL (Free  ->  Enterprise) - Protects 500K+ ARR\n- Business Goal: Validate agent orchestration works in production-like GCP staging environment\n- Value Impact: Ensures Golden Path agent execution delivers reliable chat experience\n- Revenue Impact: Prevents production failures that could cause mass user abandonment\n\nGOLDEN PATH VALIDATION:\nThis test suite validates the COMPLETE Golden Path user flow in GCP staging:\n1. User Authentication  ->  2. Agent Registry Initialization  ->  3. Agent Creation\n4. Tool Integration  ->  5. WebSocket Events  ->  6. Agent Execution  ->  7. Response Delivery\n\nCRITICAL E2E SCENARIOS TESTED:\n1. Golden Path Agent Execution - Complete user flow from login to AI response\n2. Multi-User Enterprise Isolation - Concurrent enterprise customers with complete isolation  \n3. Production WebSocket Events - All 5 critical events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)\n4. Production Tool Execution - Real tools with actual GCP services\n5. Production Database Integration - Agent state persistence in GCP Cloud SQL\n6. Production Performance Validation - Enterprise-scale load testing in staging\n\nPRODUCTION ENVIRONMENT SIMULATION:\n- Uses GCP staging infrastructure (Cloud Run, Cloud SQL, Redis, WebSocket)\n- Real authentication flows with JWT tokens\n- Real database connections and transactions\n- Real WebSocket connections and event delivery\n- Real tool execution with GCP services\n- Real concurrency and resource management\n\nRISK MITIGATION:\n- Each test validates production readiness of specific Golden Path components\n- Tests designed to catch production issues before they affect real users\n- Comprehensive load testing prevents performance surprises in production\n- Real service integration catches configuration and networking issues\n\nThis test suite protects the CORE REVENUE FLOW: Users  ->  Chat  ->  Agent Orchestration  ->  AI Responses\n'
 import asyncio
 import pytest
 import uuid
@@ -43,7 +43,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.config import get_config
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.dependencies import get_user_execution_context
@@ -53,7 +53,7 @@ from netra_backend.app.tools.data_analysis_tool import DataAnalysisTool
 
 @pytest.mark.e2e
 class GoldenPathAgentExecutionTests(SSotAsyncTestCase):
-    """Test Suite 1: Golden Path Agent Execution (Protects $500K+ ARR core flow)
+    """Test Suite 1: Golden Path Agent Execution (Protects 500K+ ARR core flow)
     
     Business Value: Validates complete user journey from authentication to AI response
     Revenue Risk: Golden Path failures break core platform value delivery
@@ -62,7 +62,7 @@ class GoldenPathAgentExecutionTests(SSotAsyncTestCase):
     async def asyncSetUp(self):
         """Set up GCP staging environment for Golden Path testing."""
         super().setUp()
-        self.config = get_unified_config()
+        self.config = get_config()
         self.staging_project = self.config.get('GCP_PROJECT_ID', 'netra-staging')
         self.llm_manager = LLMManager()
         self.db_manager = DatabaseManager()
@@ -195,7 +195,7 @@ class MultiUserEnterpriseIsolationTests(SSotAsyncTestCase):
     async def asyncSetUp(self):
         """Set up multi-user enterprise testing environment."""
         super().setUp()
-        self.config = get_unified_config()
+        self.config = get_config()
         self.llm_manager = LLMManager()
         self.db_manager = DatabaseManager()
         try:
@@ -309,7 +309,7 @@ class ProductionToolExecutionTests(SSotAsyncTestCase):
     async def asyncSetUp(self):
         """Set up production tool execution testing."""
         super().setUp()
-        self.config = get_unified_config()
+        self.config = get_config()
         self.llm_manager = LLMManager()
         try:
             await self.llm_manager.initialize()
@@ -375,7 +375,7 @@ class ProductionPerformanceValidationTests(SSotAsyncTestCase):
     async def asyncSetUp(self):
         """Set up production performance testing."""
         super().setUp()
-        self.config = get_unified_config()
+        self.config = get_config()
         self.llm_manager = LLMManager()
         self.db_manager = DatabaseManager()
         try:

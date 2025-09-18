@@ -471,8 +471,9 @@ class RedisCacheManager:
         return health
 
 
-# Create default instance for SSOT access
-default_redis_cache_manager = RedisCacheManager()
+# Use SSOT Redis manager instead of direct instantiation
+from netra_backend.app.redis_manager import redis_manager
+default_redis_cache_manager = None  # Lazy initialization with SSOT pattern
 
 # Export for direct module access
 __all__ = [

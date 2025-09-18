@@ -130,7 +130,6 @@
     "immer": "^10.1.1",
     "jest-websocket-mock": "^2.5.0",
     "jspdf": "^3.0.1",
-    "jwt-decode": "^4.0.0",
     "katex": "^0.16.22",
     "langchain": "^0.3.30",
     "lucide-react": "^0.541.0",

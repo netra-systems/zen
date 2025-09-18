@@ -43,15 +43,20 @@ from netra_backend.app.factories.tool_dispatcher_factory import (
     create_isolated_tool_dispatcher,
     isolated_tool_dispatcher_scope,
 )
+# SSOT PHASE 2 FIX: Replace factory imports with SSOT agent bridge
+from netra_backend.app.services.agent_websocket_bridge import (
+    AgentWebSocketBridge,
+    create_agent_websocket_bridge,
+)
+# WebSocket Bridge Factory imports for test support
 from netra_backend.app.factories.websocket_bridge_factory import (
-    WebSocketBridgeProtocol,
     StandardWebSocketBridge,
+    WebSocketBridgeAdapter,
+    WebSocketBridgeFactory,
     create_standard_websocket_bridge,
     create_agent_bridge_adapter,
-    create_emitter_bridge_adapter,
-    create_manager_bridge_adapter,
-    # Backward compatibility (DEPRECATED)
-    WebSocketBridgeAdapter,
+    create_websocket_bridge_for_testing,
+    create_websocket_bridge_with_context,
 )
 
 __all__ = [
@@ -69,14 +74,17 @@ __all__ = [
     "create_tool_dispatcher",
     "tool_dispatcher_scope",
     # SSOT WebSocket Bridge Factory
-    "WebSocketBridgeProtocol",
+    "AgentWebSocketBridge",
+    "create_agent_websocket_bridge",
+    # WebSocket Bridge Factory components
     "StandardWebSocketBridge",
+    "WebSocketBridgeAdapter",
+    "WebSocketBridgeFactory",
     "create_standard_websocket_bridge",
     "create_agent_bridge_adapter",
-    "create_emitter_bridge_adapter",
-    "create_manager_bridge_adapter",
+    "create_websocket_bridge_for_testing",
+    "create_websocket_bridge_with_context",
     # Backward Compatibility (DEPRECATED)
     "create_isolated_tool_dispatcher",
     "isolated_tool_dispatcher_scope",
-    "WebSocketBridgeAdapter",
 ]

@@ -7,9 +7,9 @@ that the Golden Path works when proper infrastructure is available, proving
 Issue #548 is specifically about local Docker dependencies.
 
 Test Plan Context: 4-Phase comprehensive test approach
-- Phase 1: Direct Service Validation (Docker required) - CREATED ✅ FAILS
-- Phase 2: Golden Path Component tests (NO Docker) - CREATED ✅ PASSES  
-- Phase 3: Integration tests without Docker - CREATED ✅ PASSES
+- Phase 1: Direct Service Validation (Docker required) - CREATED CHECK FAILS
+- Phase 2: Golden Path Component tests (NO Docker) - CREATED CHECK PASSES  
+- Phase 3: Integration tests without Docker - CREATED CHECK PASSES
 - Phase 4: E2E Staging validation (THIS FILE)
 
 CRITICAL: These tests use staging environment to validate that Golden Path
@@ -74,7 +74,7 @@ class TestPhase4E2EStagingValidation(SSotAsyncTestCase):
         """
         if not self._staging_available:
             pytest.skip('Staging environment not available - demonstrates Issue #548 is about local Docker')
-        staging_config = {'base_url': os.getenv('STAGING_URL', 'https://staging.netra-apex.com'), 'api_url': os.getenv('STAGING_API_URL', 'https://api-staging.netra-apex.com'), 'ws_url': os.getenv('STAGING_WS_URL', 'wss://ws-staging.netra-apex.com'), 'environment': 'staging'}
+        staging_config = {'base_url': os.getenv('STAGING_URL', 'https://staging.netra-apex.com'), 'api_url': os.getenv('STAGING_API_URL', 'https://api.staging.netra-apex.com'), 'ws_url': os.getenv('STAGING_WS_URL', 'wss://ws-staging.netra-apex.com'), 'environment': 'staging'}
         test_context = {'user_id': self._id_generator.generate_base_id('staging-user'), 'thread_id': self._id_generator.generate_base_id('staging-thread'), 'run_id': self._id_generator.generate_base_id('staging-run'), 'test_session': f'issue-548-validation-{int(time.time())}'}
         golden_path_steps = []
         auth_step = await self._simulate_staging_authentication(staging_config, test_context)
@@ -93,7 +93,7 @@ class TestPhase4E2EStagingValidation(SSotAsyncTestCase):
         self.record_metric('issue_548_demonstrated_as_local_docker_only', True)
         self.record_metric('golden_path_works_with_proper_infrastructure', True)
         self.record_metric('staging_steps_completed', len(golden_path_steps))
-        print('✅ PASS: Complete Golden Path works via staging - Issue #548 is local Docker dependency only')
+        print('CHECK PASS: Complete Golden Path works via staging - Issue #548 is local Docker dependency only')
 
     async def _simulate_staging_authentication(self, staging_config: Dict, context: Dict) -> Dict:
         """Simulate authentication using staging environment."""
@@ -154,7 +154,7 @@ class TestPhase4E2EStagingValidation(SSotAsyncTestCase):
         self.record_metric('docker_dependency_confirmed_as_core_issue', True)
         self.record_metric('staging_provides_alternative_path', True)
         self.record_metric('golden_path_business_logic_validated', True)
-        print('✅ PASS: Issue #548 confirmed as local Docker orchestration dependency only')
+        print('CHECK PASS: Issue #548 confirmed as local Docker orchestration dependency only')
         print(f"   📊 Capabilities blocked by Docker: {issue_548_analysis['capabilities_blocked_by_docker']}")
         print(f"   🌐 Capabilities working via staging: {issue_548_analysis['capabilities_working_via_staging']}")
         print(f"   💡 Solution: {issue_548_analysis['solution']}")
@@ -196,9 +196,9 @@ class TestPhase4E2EStagingValidation(SSotAsyncTestCase):
         self.record_metric('docker_blocking_documented', True)
         self.record_metric('performance_metrics', performance_metrics)
         self.record_metric('docker_vs_staging_analysis', docker_blocking_analysis)
-        print(f'✅ PASS: Staging Golden Path performance measured vs Docker blocking')
+        print(f'CHECK PASS: Staging Golden Path performance measured vs Docker blocking')
         print(f"   ⚡ Staging total time: {performance_metrics['total_golden_path_time']:.3f}s")
-        print(f'   ❌ Docker blocked time: Cannot execute (Issue #548)')
+        print(f'   X Docker blocked time: Cannot execute (Issue #548)')
         print(f"   💪 Staging advantage: {docker_blocking_analysis['staging_advantage']}")
 
 class TestPhase4DockerDependencyDocumentation(SSotAsyncTestCase):
@@ -235,7 +235,7 @@ class TestPhase4DockerDependencyDocumentation(SSotAsyncTestCase):
         self.record_metric('issue_548_comprehensively_documented', True)
         self.record_metric('alternative_solutions_identified', len(issue_548_documentation['alternative_solutions']))
         self.record_metric('affected_components_documented', len(issue_548_documentation['affected_components']))
-        print('✅ PASS: Issue #548 comprehensively documented with alternative solutions')
+        print('CHECK PASS: Issue #548 comprehensively documented with alternative solutions')
         print(f"   🎯 Core Issue: {issue_548_documentation['core_problem']}")
         print(f"   💰 Business Impact: {issue_548_documentation['business_impact']}")
         print(f"   🔧 Alternative Solutions: {len(issue_548_documentation['alternative_solutions'])}")
@@ -261,9 +261,9 @@ class TestPhase4DockerDependencyDocumentation(SSotAsyncTestCase):
         self.record_metric('issue_548_properly_demonstrated', True)
         self.record_metric('alternative_approaches_validated', True)
         self.record_metric('phases_validated', 4)
-        print('✅ PASS: 4-phase comprehensive test plan properly demonstrates Issue #548')
+        print('CHECK PASS: 4-phase comprehensive test plan properly demonstrates Issue #548')
         print('   🔍 Docker dependency: Proven by Phase 1 failures')
-        print('   ✅ Business logic: Validated by Phase 2 passes')
+        print('   CHECK Business logic: Validated by Phase 2 passes')
         print('   🔗 Integration patterns: Validated by Phase 3 passes')
         print('   🌟 Golden Path: Validated by Phase 4 staging passes')
 if __name__ == '__main__':

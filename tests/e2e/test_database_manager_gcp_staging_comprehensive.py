@@ -6,7 +6,7 @@ Tests production-scale database operations with real Cloud SQL and VPC connector
 Business Value Justification (BVJ):
 - Segment: Platform/Enterprise - Production infrastructure validation
 - Business Goal: Ensure DatabaseManager performs reliably in GCP production environment
-- Value Impact: Prevents production outages and data loss worth $500K+ ARR
+- Value Impact: Prevents production outages and data loss worth 500K+ ARR
 - Strategic Impact: Validates entire database infrastructure stack under real production conditions
 
 TEST PHILOSOPHY: Production-Like Environment Validation
@@ -50,7 +50,7 @@ logger = logging.getLogger(__name__)
 class DatabaseManagerGCPCloudSQLTests(BaseIntegrationTest):
     """E2E tests for DatabaseManager with GCP Cloud SQL.
     
-    Business Value: Validates production database connectivity preventing $500K+ ARR outages
+    Business Value: Validates production database connectivity preventing 500K+ ARR outages
     """
 
     def setup_method(self):
@@ -88,7 +88,7 @@ class DatabaseManagerGCPCloudSQLTests(BaseIntegrationTest):
         """Test DatabaseManager connects to GCP Cloud SQL via Unix socket.
         
         Business Value: Validates production database connectivity architecture.
-        Protects: $500K+ ARR from total platform failure due to database connectivity
+        Protects: 500K+ ARR from total platform failure due to database connectivity
         """
         for key, value in self.gcp_staging_env.items():
             isolated_env.set(key, value, source='e2e_staging_test')
@@ -106,7 +106,7 @@ class DatabaseManagerGCPCloudSQLTests(BaseIntegrationTest):
             assert 'netra-staging' in database_url, 'Should connect to staging instance'
             engine = db_manager.get_engine('primary')
             await self._create_staging_test_tables(engine)
-            test_email = f'gcp_test_{int(time.time())}@netra.ai'
+            test_email = f'gcp_test_{int(time.time())}@netrasystems.ai'
             async with db_manager.get_session() as session:
                 await session.execute(text('INSERT INTO e2e_staging_users (email, username, subscription_tier, metadata_json) VALUES (:email, :username, :tier, :metadata)'), {'email': test_email, 'username': 'gcp_cloud_sql_user', 'tier': 'enterprise', 'metadata': '{"source": "e2e_test", "environment": "gcp_staging"}'})
                 await session.commit()
@@ -155,7 +155,7 @@ class DatabaseManagerGCPCloudSQLTests(BaseIntegrationTest):
                 result = await session.execute(text('SELECT ssl_is_used(), version() as db_version'))
                 ssl_status = result.fetchone()
                 logger.info(f"Database version: {(ssl_status[1] if ssl_status else 'Unknown')}")
-                test_email = f'ssl_test_{int(time.time())}@netra.ai'
+                test_email = f'ssl_test_{int(time.time())}@netrasystems.ai'
                 await session.execute(text('INSERT INTO e2e_staging_users (email, username, metadata_json) VALUES (:email, :username, :metadata)'), {'email': test_email, 'username': 'ssl_security_test', 'metadata': '{"sensitive_data": "encrypted_in_transit", "test_type": "ssl_validation"}'})
                 await session.commit()
                 result = await session.execute(text('SELECT metadata_json FROM e2e_staging_users WHERE email = :email'), {'email': test_email})
@@ -172,7 +172,7 @@ class DatabaseManagerGCPCloudSQLTests(BaseIntegrationTest):
         """Test Cloud SQL transaction integrity under production-like load.
         
         Business Value: Validates data integrity under concurrent production load.
-        Protects: Customer data consistency worth $500K+ ARR
+        Protects: Customer data consistency worth 500K+ ARR
         """
         for key, value in self.gcp_staging_env.items():
             isolated_env.set(key, value, source='e2e_staging_test')
@@ -192,7 +192,7 @@ class DatabaseManagerGCPCloudSQLTests(BaseIntegrationTest):
                 for op in range(operations):
                     try:
                         async with db_manager.get_session() as session:
-                            test_email = f'load_test_user_{user_id}_{op}@netra.ai'
+                            test_email = f'load_test_user_{user_id}_{op}@netrasystems.ai'
                             await session.execute(text('INSERT INTO e2e_staging_users (email, username, subscription_tier, metadata_json) VALUES (:email, :username, :tier, :metadata)'), {'email': test_email, 'username': f'load_user_{user_id}', 'tier': 'premium', 'metadata': f'{{"user_id": {user_id}, "operation": {op}, "test": "load_test"}}'})
                             start_time = time.time()
                             await session.execute(text('SELECT COUNT(*) FROM e2e_staging_users WHERE subscription_tier = :tier'), {'tier': 'premium'})
@@ -228,7 +228,7 @@ class DatabaseManagerGCPCloudSQLTests(BaseIntegrationTest):
                         else:
                             successful_operations += 1
             async with db_manager.get_session() as session:
-                result = await session.execute(text('SELECT COUNT(*) FROM e2e_staging_users WHERE email LIKE :pattern'), {'pattern': 'load_test_user_%@netra.ai'})
+                result = await session.execute(text('SELECT COUNT(*) FROM e2e_staging_users WHERE email LIKE :pattern'), {'pattern': 'load_test_user_%@netrasystems.ai'})
                 user_count = result.scalar()
                 result = await session.execute(text('SELECT COUNT(*), AVG(duration_ms) FROM e2e_performance_metrics WHERE test_name = :test'), {'test': 'gcp_load_test'})
                 metrics_row = result.fetchone()
@@ -240,7 +240,7 @@ class DatabaseManagerGCPCloudSQLTests(BaseIntegrationTest):
                 assert successful_operations >= total_operations * 0.9, f'Too many failed operations: {failed_operations}'
                 assert operations_per_second > 5, f'GCP throughput too low: {operations_per_second:.2f} ops/sec'
                 assert avg_duration < 100, f'Average query time too high: {avg_duration:.2f}ms'
-                await session.execute(text('DELETE FROM e2e_staging_users WHERE email LIKE :pattern'), {'pattern': 'load_test_user_%@netra.ai'})
+                await session.execute(text('DELETE FROM e2e_staging_users WHERE email LIKE :pattern'), {'pattern': 'load_test_user_%@netrasystems.ai'})
                 await session.execute(text('DELETE FROM e2e_performance_metrics WHERE test_name = :test'), {'test': 'gcp_load_test'})
                 await session.commit()
             await db_manager.close_all()
@@ -505,7 +505,7 @@ class DatabaseManagerMonitoringIntegrationTests(BaseIntegrationTest):
         """Test DatabaseManager integration with GCP monitoring systems.
         
         Business Value: Ensures production monitoring and alerting works correctly.
-        Protects: Incident response and system observability for $500K+ ARR platform
+        Protects: Incident response and system observability for 500K+ ARR platform
         """
         monitoring_env = {'ENVIRONMENT': 'staging', 'POSTGRES_HOST': '/cloudsql/netra-staging:us-central1:netra-staging-db', 'POSTGRES_USER': 'netra-staging-user', 'POSTGRES_PASSWORD': os.environ.get('GCP_STAGING_DB_PASSWORD', ''), 'POSTGRES_DB': 'netra_staging', 'ENABLE_DB_LOGGING': 'true', 'ENABLE_PERFORMANCE_MONITORING': 'true'}
         if not os.environ.get('GCP_STAGING_DB_PASSWORD'):

@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 1. Segment: All customer segments (Free to Enterprise)
 2. Business Goal: Ensure substantive chat value delivery
 3. Value Impact: Core chat functionality with real AI responses
-4. Revenue Impact: $500K+ ARR protection from chat failures
+4. Revenue Impact: 500K+ ARR protection from chat failures
 
 CLAUDE.md COMPLIANCE:
 - Uses real LLM and real services (NO MOCKS)

@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise (primary), Mid-tier (secondary) - customers paying for security
 - Business Goal: Validate complete user data isolation during concurrent chat operations
 - Value Impact: Prevents data leakage incidents that could cause customer churn and legal issues
-- Strategic Impact: Protects $500K+ ARR by maintaining enterprise trust in multi-user system
+- Strategic Impact: Protects 500K+ ARR by maintaining enterprise trust in multi-user system
 
 CRITICAL REQUIREMENTS per CLAUDE.md:
 1. MUST use REAL services with REAL authentication - NO mocks per "MOCKS = Abomination"

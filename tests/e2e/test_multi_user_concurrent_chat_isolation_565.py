@@ -8,7 +8,7 @@ using GCP staging environment with real LLM integration.
 
 Business Value Justification (BVJ):
 - Segment: All Users (Free, Early, Mid, Enterprise)
-- Business Goal: Protect $500K+ ARR chat functionality with secure multi-user operation
+- Business Goal: Protect 500K+ ARR chat functionality with secure multi-user operation
 - Value Impact: Ensures users never see each other's private conversations or agent responses
 - Strategic Impact: Enables production-scale concurrent user support without data contamination
 
@@ -122,7 +122,7 @@ class MultiUserConcurrentChatIsolation565Tests(SSotAsyncTestCase):
         """
         MISSION CRITICAL E2E TEST: Complete user isolation in concurrent chat scenarios.
         
-        Business Impact: Protects $500K+ ARR by ensuring users never see each other's private chats
+        Business Impact: Protects 500K+ ARR by ensuring users never see each other's private chats
         Expected: PASS - perfect isolation with full business value delivery
         """
         print("\n" + "="*90)
@@ -214,7 +214,7 @@ class MultiUserConcurrentChatIsolation565Tests(SSotAsyncTestCase):
                     }
                     
             except Exception as e:
-                print(f"   ❌ Chat session failed for {user_id}: {str(e)}")
+                print(f"   X Chat session failed for {user_id}: {str(e)}")
                 return {
                     'user_id': user_id,
                     'scenario': scenario,
@@ -240,7 +240,7 @@ class MultiUserConcurrentChatIsolation565Tests(SSotAsyncTestCase):
         
         for result in session_results:
             if isinstance(result, Exception):
-                print(f"   ❌ Session exception: {result}")
+                print(f"   X Session exception: {result}")
                 continue
                 
             user_id = result['user_id']
@@ -317,7 +317,7 @@ class MultiUserConcurrentChatIsolation565Tests(SSotAsyncTestCase):
         
         print(f"   - Contamination issues detected: {len(contamination_detected)}")
         for contamination in contamination_detected[:5]:  # Show first 5
-            print(f"     ⚠️ {contamination}")
+            print(f"     WARNING️ {contamination}")
         
         # VALIDATION 3: No cross-user contamination allowed
         self.assertEqual(len(contamination_detected), 0,
@@ -333,8 +333,8 @@ class MultiUserConcurrentChatIsolation565Tests(SSotAsyncTestCase):
             
             print(f"   👤 {user_id}:")
             print(f"      - Response length: {response_length} chars")
-            print(f"      - Actionable content: {'✅' if has_actionable else '❌'}")
-            print(f"      - Query relevant: {'✅' if is_relevant else '❌'}")
+            print(f"      - Actionable content: {'CHECK' if has_actionable else 'X'}")
+            print(f"      - Query relevant: {'CHECK' if is_relevant else 'X'}")
             
             # VALIDATION: Each user should get substantive, relevant responses
             self.assertGreater(response_length, 100,
@@ -362,7 +362,7 @@ class MultiUserConcurrentChatIsolation565Tests(SSotAsyncTestCase):
             self.assertIn('agent_completed', event_types,
                          f"User {user_id} missing agent_completed event")
         
-        print("\n✅ CONCURRENT MULTI-USER CHAT ISOLATION: All validations passed")
+        print("\nCHECK CONCURRENT MULTI-USER CHAT ISOLATION: All validations passed")
         
         # Store results for reporting
         self.test_results['concurrent_chat_isolation'].append({
@@ -521,7 +521,7 @@ class MultiUserConcurrentChatIsolation565Tests(SSotAsyncTestCase):
             self.assertGreaterEqual(success_rate, min_success_rate,
                                    f"Success rate too low: {success_rate:.1f}% < {min_success_rate}%")
             
-            print(f"✅ PERFORMANCE VALIDATION: {success_rate:.1f}% success rate, {avg_response_time:.2f}s avg response")
+            print(f"CHECK PERFORMANCE VALIDATION: {success_rate:.1f}% success rate, {avg_response_time:.2f}s avg response")
         
         else:
             self.fail("No successful sessions for performance analysis")
@@ -556,7 +556,7 @@ class MultiUserConcurrentChatIsolation565Tests(SSotAsyncTestCase):
                     if status == 'PASS':
                         passed_tests += 1
                     
-                    status_icon = "✅" if status == 'PASS' else "❌"
+                    status_icon = "CHECK" if status == 'PASS' else "X"
                     print(f"   {status_icon} {result['test']}: {status}")
                     
                     # Print key metrics
@@ -576,14 +576,14 @@ class MultiUserConcurrentChatIsolation565Tests(SSotAsyncTestCase):
         
         if success_rate >= 100:
             print(f"\n🎉 SUCCESS: Issue #565 UserExecutionEngine migration delivers:")
-            print(f"   ✅ Perfect user isolation in concurrent scenarios")
-            print(f"   ✅ $500K+ ARR chat functionality preserved")
-            print(f"   ✅ Production-ready multi-user support")
-            print(f"   ✅ Zero cross-user data contamination")
+            print(f"   CHECK Perfect user isolation in concurrent scenarios")
+            print(f"   CHECK 500K+ ARR chat functionality preserved")
+            print(f"   CHECK Production-ready multi-user support")
+            print(f"   CHECK Zero cross-user data contamination")
         elif success_rate >= 80:
-            print(f"\n⚠️ MOSTLY SUCCESSFUL: Minor issues detected but core functionality works")
+            print(f"\nWARNING️ MOSTLY SUCCESSFUL: Minor issues detected but core functionality works")
         else:
-            print(f"\n❌ SIGNIFICANT ISSUES: E2E validation failed - migration needs review")
+            print(f"\nX SIGNIFICANT ISSUES: E2E validation failed - migration needs review")
 
 
 if __name__ == "__main__":
@@ -606,11 +606,11 @@ if __name__ == "__main__":
     # Report final status
     if result.wasSuccessful():
         print("\n🎉 SUCCESS: Multi-user concurrent chat E2E validation PASSED")
-        print("✅ UserExecutionEngine ready for production deployment")
-        print("💰 $500K+ ARR chat functionality protected with perfect user isolation")
+        print("CHECK UserExecutionEngine ready for production deployment")
+        print("💰 500K+ ARR chat functionality protected with perfect user isolation")
     else:
-        print("\n❌ FAILURE: E2E validation failed")
+        print("\nX FAILURE: E2E validation failed")
         print(f"   - Tests run: {result.testsRun}")
         print(f"   - Failures: {len(result.failures)}")
         print(f"   - Errors: {len(result.errors)}")
-        print("⚠️ Review results before production deployment")
+        print("WARNING️ Review results before production deployment")

@@ -100,8 +100,15 @@
 **/scripts/
 **/dev-tools/
 **/dev_launcher/
-**/monitoring/
 **/prometheus/
+# EMERGENCY FIX: Exclude general monitoring but allow netra_backend monitoring modules
+monitoring/
+deployment/monitoring/
+!netra_backend/app/monitoring/
+!netra_backend/app/services/monitoring/
+
+# Keep netra_backend monitoring services (CRITICAL for GCP Error Reporting)
+!netra_backend/app/services/monitoring/
 
 # Claude Code and AI Tools
 **/.claude/
@@ -134,10 +141,15 @@
 **/migration_log.txt
 
 # Infrastructure Files Not Needed in Containers
-**/infrastructure/
+# EXCEPTION: Allow netra_backend/app/infrastructure for staging deployment
+infrastructure/
+deployment/infrastructure/
+!netra_backend/app/infrastructure/
 **/deployment/
 **/gcp/
 **/cloud*
+# EXCEPTION: Allow CloudEnvironmentDetector module (Issue #1305)
+!**/cloud_environment_detector.py
 **/k8s/
 **/kubernetes/
 

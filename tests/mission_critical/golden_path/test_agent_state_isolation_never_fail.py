@@ -1030,10 +1030,7 @@ class AgentStateIsolationNeverFailTests:
             
             success_rate = (successful_websocket_tests / len(connected_contexts)) * 100
             assert success_rate >= 95.0, (
-                f"WebSocket auth isolation success rate: {success_rate}% (MUST be >= 95% for security)"
-            )
-            
-            logger.info(f" PASS:  SECURITY: WebSocket auth isolation verified for {len(connected_contexts)} connections")
+                f"WebSocket auth isolation success rate: {success_rate}% (MUST be >= 95% for security)"" PASS:  SECURITY: WebSocket auth isolation verified for {len(connected_contexts)} connections")
             logger.info(f"[U+1F50C] WEBSOCKET: Zero authentication violations - Security requirements satisfied")
             
         finally:

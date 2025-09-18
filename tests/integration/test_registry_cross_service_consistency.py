@@ -8,7 +8,7 @@ EXPECTED BEHAVIOR: Tests should validate service integration patterns work
 consistently regardless of registry implementation used by different services.
 
 Business Impact:
-- Protects Golden Path: Users login → get AI responses
+- Protects Golden Path: Users login -> get AI responses
 - Ensures service-to-service communication reliability
 - Maintains $500K+ ARR cross-service functionality
 - Validates microservice independence during SSOT transition

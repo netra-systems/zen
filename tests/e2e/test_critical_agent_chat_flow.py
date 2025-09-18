@@ -28,7 +28,7 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-'\nMISSION CRITICAL E2E TEST: Agent Chat WebSocket Flow - REAL SERVICES ONLY\n\nTHIS IS THE PRIMARY VALIDATION FOR CHAT FUNCTIONALITY.\nBusiness Value: $500K+ ARR - Core product functionality depends on this.\n\nTests the complete Golden Path user flow:\n1. User authentication with real auth service\n2. WebSocket connection establishment \n3. User sends message via WebSocket\n4. Supervisor agent processes message with real LLM\n5. All 5 business-critical WebSocket events are sent\n6. User receives meaningful agent response\n7. Complete cleanup and validation\n\nCRITICAL REQUIREMENTS per CLAUDE.md:\n- NO MOCKS - Use real services only\n- REAL WEBSOCKET CONNECTIONS - Test actual WebSocket events\n- REAL AGENT EXECUTION - Full agent workflow with real LLM calls\n- PROPER ERROR HANDLING - Tests must fail hard when things go wrong\n- VALIDATE ALL 5 WEBSOCKET EVENTS - Complete event sequence validation\n- END-TO-END USER FLOW - Complete chat experience validation\n\nIf this test fails, the chat UI is completely broken and deployment is BLOCKED.\n'
+'\nMISSION CRITICAL E2E TEST: Agent Chat WebSocket Flow - REAL SERVICES ONLY\n\nTHIS IS THE PRIMARY VALIDATION FOR CHAT FUNCTIONALITY.\nBusiness Value: 500K+ ARR - Core product functionality depends on this.\n\nTests the complete Golden Path user flow:\n1. User authentication with real auth service\n2. WebSocket connection establishment \n3. User sends message via WebSocket\n4. Supervisor agent processes message with real LLM\n5. All 5 business-critical WebSocket events are sent\n6. User receives meaningful agent response\n7. Complete cleanup and validation\n\nCRITICAL REQUIREMENTS per CLAUDE.md:\n- NO MOCKS - Use real services only\n- REAL WEBSOCKET CONNECTIONS - Test actual WebSocket events\n- REAL AGENT EXECUTION - Full agent workflow with real LLM calls\n- PROPER ERROR HANDLING - Tests must fail hard when things go wrong\n- VALIDATE ALL 5 WEBSOCKET EVENTS - Complete event sequence validation\n- END-TO-END USER FLOW - Complete chat experience validation\n\nIf this test fails, the chat UI is completely broken and deployment is BLOCKED.\n'
 import asyncio
 import json
 import os
@@ -39,7 +39,7 @@ import websockets
 from collections import defaultdict
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Set, Any, Optional, AsyncGenerator, Tuple
 from unittest.mock import AsyncMock
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -78,7 +78,7 @@ class WebSocketEventValidator:
 
     def record_event(self, event: Dict[str, Any]) -> None:
         """Record and categorize WebSocket event."""
-        self.events.append({**event, 'timestamp': time.time() - self.start_time, 'received_at': datetime.utcnow().isoformat()})
+        self.events.append({**event, 'timestamp': time.time() - self.start_time, 'received_at': datetime.now(UTC).isoformat()})
         event_type = event.get('type', '').lower()
         event_data = event.get('data', {})
         logger.info(f'[U+1F4E5] WebSocket Event Received: {event_type}')
@@ -220,7 +220,7 @@ class CriticalAgentChatFlowTests(SSotBaseTestCase):
         5. All WebSocket events received
         6. Meaningful response returned
         
-        CRITICAL: This test protects $500K+ ARR by ensuring chat works.
+        CRITICAL: This test protects 500K+ ARR by ensuring chat works.
         """
         logger.info(' TARGET:  STARTING MISSION CRITICAL GOLDEN PATH CHAT FLOW TEST')
         logger.info('=' * 80)
@@ -242,7 +242,7 @@ class CriticalAgentChatFlowTests(SSotBaseTestCase):
             await ws_manager.connect_user(user_id, mock_websocket, connection_id)
             logger.success(f' PASS:  WebSocket connected for user {user_id}')
             logger.info('[U+1F4AC] Step 5: Sending test message through chat system...')
-            test_message = {'type': 'chat_message', 'content': 'What is the current status of the AI optimization system?', 'user_id': user_id, 'thread_id': thread_id, 'connection_id': connection_id, 'timestamp': datetime.utcnow().isoformat()}
+            test_message = {'type': 'chat_message', 'content': 'What is the current status of the AI optimization system?', 'user_id': user_id, 'thread_id': thread_id, 'connection_id': connection_id, 'timestamp': datetime.now(UTC).isoformat()}
             await self._simulate_agent_processing(ws_manager, test_message)
             logger.info('[U+23F3] Step 6: Waiting for agent processing and WebSocket events...')
             await asyncio.sleep(2.0)

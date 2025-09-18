@@ -2,7 +2,7 @@
 Issue #1264: Staging Database Connectivity Integration Tests
 
 CRITICAL P0 ISSUE: Integration tests to validate staging database connectivity
-and detect MySQL vs PostgreSQL configuration issues in GCP environment.
+and detect PostgreSQL configuration issues in GCP environment.
 
 These tests run against the actual staging environment to validate database
 configuration and detect the 8+ second timeout issue.
@@ -78,8 +78,6 @@ class StagingDatabaseConnectivityTester:
         # Determine database type from URL
         if config.database_url.startswith('postgresql'):
             result['database_url_type'] = 'PostgreSQL'
-        elif config.database_url.startswith('mysql'):
-            result['database_url_type'] = 'MySQL'
         else:
             result['database_url_type'] = 'Unknown'
         
@@ -94,13 +92,13 @@ class StagingDatabaseConnectivityTester:
             connection_timeout = 10.0  # 10 second timeout
             
             # For testing purposes, simulate different scenarios based on configuration
-            if 'mysql' in config.database_url.lower():
-                # Simulate MySQL connection timeout (8+ seconds)
+            if '/cloudsql/' in config.database_url and 'postgresql' in config.database_url:
+                # Simulate potential PostgreSQL Cloud SQL timeout (8+ seconds)
                 await asyncio.sleep(8.5)
                 result['timeout_detected'] = True
-                result['error_message'] = "Connection timeout - possible MySQL/PostgreSQL mismatch"
+                result['error_message'] = "Connection timeout - possible PostgreSQL configuration issues"
             else:
-                # Simulate PostgreSQL connection (fast)
+                # Simulate regular PostgreSQL connection (fast)
                 await asyncio.sleep(0.1)
                 result['connection_successful'] = True
         
@@ -128,14 +126,14 @@ class StagingDatabaseConnectivityTester:
             )
             analysis['severity'] = 'CRITICAL'
         
-        # Check for database type mismatch
-        if result['database_url_type'] == 'MySQL':
+        # Check for non-PostgreSQL database type
+        if result['database_url_type'] != 'PostgreSQL':
             analysis['issue_1264_indicators'].append(
-                "Database URL indicates MySQL configuration"
+                f"Database URL indicates {result['database_url_type']} instead of PostgreSQL"
             )
             analysis['severity'] = 'CRITICAL'
             analysis['recommendations'].append(
-                "Verify Cloud SQL instance is configured as PostgreSQL, not MySQL"
+                "Verify database URL is properly configured for PostgreSQL"
             )
         
         # Check for timeout errors
@@ -207,10 +205,10 @@ class TestStagingDatabaseConnectivity:
                     "Staging configuration must have database_url configured"
                 )
                 
-                # CRITICAL: Validate it's PostgreSQL, not MySQL
+                # CRITICAL: Validate it's PostgreSQL
                 assert config.database_url.startswith('postgresql'), (
                     f"ISSUE #1264 DETECTED: Database URL indicates {config.database_url.split('://')[0]} "
-                    f"instead of PostgreSQL. This confirms the Cloud SQL instance is misconfigured."
+                    f"instead of PostgreSQL. This indicates a database URL configuration problem."
                 )
                 
                 print(f"✓ Staging configuration loads PostgreSQL URL correctly")
@@ -224,7 +222,7 @@ class TestStagingDatabaseConnectivity:
         INTEGRATION TEST: Measure database connection time in staging.
         
         This test measures actual connection time to detect the 8+ second
-        timeout issue that occurs when MySQL is configured instead of PostgreSQL.
+        timeout issue that occurs with PostgreSQL configuration problems.
         """
         print(f"\n=== DATABASE CONNECTION TIMEOUT MEASUREMENT ===")
         
@@ -267,14 +265,14 @@ class TestStagingDatabaseConnectivity:
                 # CRITICAL ASSERTION: Connection time should be reasonable
                 assert result['connection_time'] < 8.0, (
                     f"ISSUE #1264 CONFIRMED: Database connection took {result['connection_time']:.2f} seconds. "
-                    f"This indicates the Cloud SQL instance may be misconfigured as MySQL instead of PostgreSQL, "
+                    f"This indicates the Cloud SQL instance may have PostgreSQL configuration problems, "
                     f"causing timeout when trying to connect with PostgreSQL drivers."
                 )
                 
-                # CRITICAL ASSERTION: Should be PostgreSQL, not MySQL
+                # CRITICAL ASSERTION: Should be PostgreSQL
                 assert result['database_url_type'] == 'PostgreSQL', (
                     f"ISSUE #1264 CONFIRMED: Database URL type is {result['database_url_type']} instead of PostgreSQL. "
-                    f"This confirms the Cloud SQL instance is misconfigured."
+                    f"This confirms a database URL configuration problem."
                 )
                 
                 print(f"✓ Database connection time acceptable: {result['connection_time']:.2f} seconds")
@@ -443,7 +441,7 @@ if __name__ == "__main__":
     print("ISSUE #1264: STAGING DATABASE CONNECTIVITY INTEGRATION TESTS")
     print("=" * 80)
     print("Testing staging GCP environment database connectivity")
-    print("Expected to FAIL if Cloud SQL is misconfigured as MySQL")
+    print("Expected to FAIL if Cloud SQL has PostgreSQL configuration issues")
     print("Expected to PASS after infrastructure fix")
     print("=" * 80)
     
@@ -495,7 +493,7 @@ if __name__ == "__main__":
         print(f"   {e}")
         print(f"\n" + "=" * 80)
         print(f"INTEGRATION TEST FAILURE - This confirms Issue #1264 in staging environment")
-        print(f"Infrastructure fix required: Configure Cloud SQL as PostgreSQL")
+        print(f"Infrastructure fix required: Fix Cloud SQL PostgreSQL configuration")
         print(f"=" * 80)
         sys.exit(1)
         

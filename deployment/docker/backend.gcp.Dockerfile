@@ -15,6 +15,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY netra_backend/ ./netra_backend/
 COPY shared/ ./shared/
+COPY auth_service/ ./auth_service/
+
+# Explicitly ensure monitoring module is included (Fix for staging outage - Issue #1278)
+COPY netra_backend/app/services/monitoring/ ./netra_backend/app/services/monitoring/
+
+# Validate critical imports at build time to catch import issues before deployment
+RUN python -c "import sys; sys.path.insert(0, '/app'); from netra_backend.app.core.environment_context.cloud_environment_detector import get_cloud_environment_detector, CloudPlatform; print('✅ CloudEnvironmentDetector import validation successful')"
 
 # Set environment variables
 ENV PYTHONPATH=/app

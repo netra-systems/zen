@@ -8,7 +8,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { AuthProvider, AuthContext } from '@/auth/context';
 import { authService } from '@/auth/unified-auth-service';
-import { jwtDecode } from 'jwt-decode';
+// jwt-decode import removed - JWT authentication removed
 import { useAuthStore } from '@/store/authStore';
 import { logger } from '@/lib/logger';
 import { mockAuthServiceResponses } from '@/__tests__/mocks/auth-service-mock';
@@ -48,7 +48,7 @@ export const setupBasicMocks = () => {
   jest.mocked(authService.getDevLogoutFlag).mockReturnValue(false);
   setupAuthServiceMethods();
   setupAuthServiceClientMocks();
-  (jwtDecode as jest.Mock).mockReturnValue(mockUser);
+  // JWT decode mock removed - using ticket authentication instead
 };
 
 export const setupAuthServiceMethods = () => {
@@ -85,7 +85,7 @@ export const setupAuthStore = () => {
 
 export const setupTokenMocks = (token: string = mockToken) => {
   jest.mocked(authService.getToken).mockReturnValue(token);
-  (jwtDecode as jest.Mock).mockReturnValue(mockUser);
+  // JWT decode mock removed - using ticket authentication instead
 };
 
 export const setupDevModeMocks = (isDevMode: boolean = true) => {

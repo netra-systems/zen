@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - error handling affects all customers
 - Business Goal: Validate graceful error recovery maintains customer trust and engagement
 - Value Impact: Prevents customer churn during system issues through transparent error communication
-- Strategic Impact: Protects $500K+ ARR by maintaining service reliability reputation
+- Strategic Impact: Protects 500K+ ARR by maintaining service reliability reputation
 
 CRITICAL REQUIREMENTS per CLAUDE.md:
 1. MUST use REAL services with REAL error scenarios - NO mocked errors

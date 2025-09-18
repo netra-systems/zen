@@ -7,7 +7,7 @@ EXPECTATION: Tests should FAIL initially to demonstrate recovery gaps
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - E2E Recovery Testing
 - Business Goal: Revenue Protection - Ensure staging can recover from validation issues
-- Value Impact: Protects $500K+ ARR by validating error recovery scenarios
+- Value Impact: Protects 500K+ ARR by validating error recovery scenarios
 - Strategic Impact: Validates production readiness through recovery testing
 
 These tests are designed to FAIL initially, demonstrating:

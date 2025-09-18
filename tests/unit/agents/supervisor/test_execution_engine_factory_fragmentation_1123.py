@@ -1,7 +1,7 @@
 """Phase 1 Unit Tests: Execution Engine Factory Fragmentation Reproduction (Issue #1123)
 
 CRITICAL BUSINESS VALUE: These tests reproduce factory fragmentation issues that block
-the Golden Path user flow (login → AI response), protecting $500K+ ARR functionality.
+the Golden Path user flow (login -> AI response), protecting 500K+ ARR functionality.
 
 EXPECTED BEHAVIOR: All tests in this file should INITIALLY FAIL to demonstrate
 the factory fragmentation problems. They will pass after SSOT consolidation.
@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Segment: Platform/Internal
 - Business Goal: Ensure factory pattern reliability and SSOT compliance
 - Value Impact: Prevents user isolation failures, memory leaks, and WebSocket 1011 errors
-- Strategic Impact: Foundation for $500K+ ARR multi-user chat functionality
+- Strategic Impact: Foundation for 500K+ ARR multi-user chat functionality
 
 Test Philosophy:
 - FAILING TESTS FIRST: These tests reproduce real issues before fixing them
@@ -345,7 +345,7 @@ class ExecutionEngineFactoryFragmentation1123Tests(SSotAsyncTestCase):
         """Log detailed test failure information for analysis."""
         print(f'\n=== FACTORY FRAGMENTATION TEST FAILURE: {test_name} ===')
         print(f'Timestamp: {datetime.now().isoformat()}')
-        print(f'Business Impact: Golden Path blocked - $500K+ ARR at risk')
+        print(f'Business Impact: Golden Path blocked - 500K+ ARR at risk')
         print(f'Issue: #1123 Execution Engine Factory Fragmentation')
         print('\nFailure Details:')
         for key, value in failure_details.items():

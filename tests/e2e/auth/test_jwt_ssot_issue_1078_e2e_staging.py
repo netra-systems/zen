@@ -6,7 +6,7 @@ These tests should FAIL initially with JWT inconsistencies, then PASS after reme
 Business Value Justification (BVJ):
 - Segment: Platform/Enterprise (Production readiness)
 - Business Goal: Ensure JWT SSOT works reliably in production-like environment
-- Value Impact: Validates $500K+ ARR authentication system reliability  
+- Value Impact: Validates 500K+ ARR authentication system reliability  
 - Revenue Impact: Prevents staging deployment failures that block customer onboarding
 """
 import asyncio
@@ -153,7 +153,7 @@ class JWTSSOTIssue1078E2EStagingTests(BaseE2ETest):
                                 "or failing silently, indicating SSOT delegation issues."
                             )
                 
-                except websockets.exceptions.ConnectionClosed as e:
+                except websockets.ConnectionClosed as e:
                     pytest.fail(
                         f"WEBSOCKET CONNECTION FAILED (Issue #1078):\n"
                         f"Connection closed during handshake: {e}\n\n"
@@ -161,7 +161,7 @@ class JWTSSOTIssue1078E2EStagingTests(BaseE2ETest):
                         "Connection failure suggests JWT validation inconsistency."
                     )
                 
-                except websockets.exceptions.InvalidStatusCode as e:
+                except websockets.InvalidStatusCode as e:
                     if e.status_code == 403:
                         pytest.fail(
                             f"WEBSOCKET JWT 403 ERROR (Issue #1078):\n"
@@ -248,7 +248,7 @@ class JWTSSOTIssue1078E2EStagingTests(BaseE2ETest):
                             except asyncio.TimeoutError:
                                 connection_results[pattern_name] = "TIMEOUT"
                     
-                    except websockets.exceptions.InvalidStatusCode as e:
+                    except websockets.InvalidStatusCode as e:
                         connection_results[pattern_name] = f"STATUS_{e.status_code}"
                     
                     except Exception as e:
@@ -352,7 +352,7 @@ class JWTSSOTIssue1078E2EStagingTests(BaseE2ETest):
                         f"JWT SECRET SYNCHRONIZATION FAILURE (Issue #1078):\n"
                         f"Auth service token rejected by backend endpoints:\n\n" +
                         "\n".join([
-                            f"  ❌ {path} ({result['description']}): Status {result['status']}"
+                            f"  X {path} ({result['description']}): Status {result['status']}"
                             for path, result in auth_errors.items()
                         ]) +
                         f"\n\n🚨 CRITICAL JWT SECRET MISMATCH DETECTED!\n"
@@ -372,7 +372,7 @@ class JWTSSOTIssue1078E2EStagingTests(BaseE2ETest):
                     pytest.fail(
                         f"BACKEND ENDPOINT ERRORS (Issue #1078):\n" +
                         "\n".join([
-                            f"  ⚠️  {path}: Status {result['status']}"
+                            f"  WARNING️  {path}: Status {result['status']}"
                             for path, result in other_errors.items()
                         ]) +
                         "\n\nSome backend endpoints have issues that prevent JWT validation testing."

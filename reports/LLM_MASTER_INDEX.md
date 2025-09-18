@@ -1,5 +1,5 @@
 # 🤖 LLM MASTER INDEX - Netra Apex Navigation Guide
-**Last Updated: 2025-09-15** | **System Health:** ✅ EXCELLENT (95% - Issue #1116 SSOT Agent Factory Migration Complete, Enterprise User Isolation Implemented)
+**Last Updated: 2025-09-17** | **System Health:** ⚠️ CRITICAL INFRASTRUCTURE GAPS (98.7% SSOT Architecture Excellence but Runtime Services Blocked)
 
 ## 🔴 CRITICAL: Cross-System Navigation
 
@@ -27,12 +27,13 @@
 |------|-------|-----------|
 | **User flow analysis** | [`docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md`](docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md) | **MISSION CRITICAL: Complete user journey** |
 | **WebSocket/Chat issues** | [`docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md`](docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md) | **Race conditions, missing events, $500K+ ARR** |
+| **Secret loading issues** | [`docs/SECRET_VALUE_LOADING_FLOW.md`](docs/SECRET_VALUE_LOADING_FLOW.md) | **🚨 CRITICAL: Silent failures, service account access** |
 | **Review changes** | [`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) | Module-specific checklists |
 | **Fix a bug** | [`SPEC/learnings/index.xml`](SPEC/learnings/index.xml) | Check learnings first |
 | **Add new feature** | [`SPEC/core.xml`](SPEC/core.xml) | Architecture patterns |
 | **Agent implementation** | [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) | **Complete agent patterns & migration** |
 | **Fix tests** | [`SPEC/test_infrastructure_ssot.xml`](SPEC/test_infrastructure_ssot.xml) | **SSOT test infrastructure (94.5% compliance)** |
-| **Deploy changes** | [`scripts/deploy_to_gcp.py`](scripts/deploy_to_gcp.py) | Official deploy script |
+| **Deploy changes** | [`scripts/deploy_to_gcp_actual.py`](scripts/deploy_to_gcp_actual.py) | **Official deploy script (WITH SECRET VALIDATION)** |
 | **Check compliance** | [`scripts/check_architecture_compliance.py`](scripts/check_architecture_compliance.py) | Architecture validator |
 | **WebSocket issues** | [`SPEC/learnings/websocket_agent_integration_critical.xml`](SPEC/learnings/websocket_agent_integration_critical.xml) | Critical fixes |
 | **Auth problems** | [`SPEC/learnings/auth_race_conditions_critical.xml`](SPEC/learnings/auth_race_conditions_critical.xml) | Auth learnings |
@@ -83,11 +84,12 @@ python tests/mission_critical/test_deterministic_startup_validation.py   # Start
 
 ## 📍 COMMONLY CONFUSED FILES & LOCATIONS
 
-## 🚨 RECENT CRITICAL UPDATES (2025-09-15)
+## 🚨 RECENT CRITICAL UPDATES (2025-09-17)
 
-### Infrastructure Changes (Current as of 2025-09-15)
+### Infrastructure Status (Critical Update 2025-09-17)
 | Component | Update | Impact |
 |-----------|---------|--------|
+| **🚨 CRITICAL: Comprehensive Validation** | Infrastructure gaps identified (2025-09-17) | Excellent SSOT architecture (98.7%) but auth/backend services unavailable blocking Golden Path |
 | **SSOT WebSocket Bridge Migration** | Phase 1 Complete (Issue #1101) | Comprehensive message routing audit and SSOT migration |
 | **Configuration Manager SSOT** | Phase 1 Complete (Issue #667) | Unified imports and compatibility |
 | **Agent WebSocket Bridge Testing** | 516% improvement (11.1% → 57.4% success) | Issue #762 Phase 1 complete |
@@ -643,9 +645,9 @@ python scripts/query_string_literals.py validate "CONFIG_KEY"
 
 ---
 
-**For complete cross-system navigation and detailed integration maps, refer to (Updated 2025-09-15):**
+**For complete cross-system navigation and detailed integration maps, refer to (Updated 2025-09-17):**
 - [`SPEC/CROSS_SYSTEM_MASTER_INDEX.md`](SPEC/CROSS_SYSTEM_MASTER_INDEX.md) - Complete navigation
 - [`SPEC/SYSTEM_INTEGRATION_MAP.xml`](SPEC/SYSTEM_INTEGRATION_MAP.xml) - Integration points
-- [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) - Current system health
-- [`docs/index.md`](../docs/index.md) - Master documentation navigation (Updated 2025-09-15)
-- [`docs/SSOT_IMPORT_REGISTRY.md`](../docs/SSOT_IMPORT_REGISTRY.md) - Authoritative import mappings (Current as of 2025-09-15)
+- [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) - Current system health and critical infrastructure status
+- [`docs/index.md`](../docs/index.md) - Master documentation navigation (Updated 2025-09-17)
+- [`docs/SSOT_IMPORT_REGISTRY.md`](../docs/SSOT_IMPORT_REGISTRY.md) - Authoritative import mappings (Current as of 2025-09-17)

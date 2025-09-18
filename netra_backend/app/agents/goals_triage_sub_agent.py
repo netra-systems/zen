@@ -17,6 +17,7 @@ from enum import Enum
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.user_execution_context import UserExecutionContext
+# SSOT: Import SessionManager for type hints and parameter compatibility
 from netra_backend.app.database.session_manager import SessionManager
 from netra_backend.app.core.serialization.unified_json_handler import (
     LLMResponseParser,
@@ -570,8 +571,9 @@ class GoalsTriageSubAgent(BaseAgent):
         
         self.logger.info(f"GoalsTriageSubAgent executing for user {context.user_id}, run {context.run_id}")
         
-        # Create database session manager from context
-        session_manager = SessionManager()
+        # SSOT: SessionManager is a stub - no actual database operations needed
+        # Real database access should use context.db_session or DatabaseManager
+        session_manager = SessionManager()  # Create stub instance for backward compatibility
         
         try:
             # Validate preconditions
@@ -605,27 +607,12 @@ class GoalsTriageSubAgent(BaseAgent):
             if stream_updates:
                 await self.emit_thinking("Switching to fallback goal analysis due to processing issues...")
             
-            return await self._execute_fallback_logic(context, user_request, session_manager)
+            return await self._execute_fallback_logic(context, user_request, None)
             
         finally:
-            # Ensure session cleanup
-            try:
-                await session_manager.close()
-            except Exception as cleanup_error:
-                # Create error context for cleanup failure
-                cleanup_error_context = ErrorContext(
-                    trace_id=str(uuid4()),
-                    operation="session_cleanup",
-                    agent_name="GoalsTriageSubAgent",
-                    operation_name="execute_cleanup",
-                    user_id=context.user_id,
-                    run_id=context.run_id,
-                    timestamp=datetime.now(timezone.utc),
-                    details={"cleanup_operation": "session_manager.close()"}
-                )
-                
-                # Handle cleanup error using unified error handler
-                await agent_error_handler.handle_error(cleanup_error, cleanup_error_context)
+            # SSOT: Removed close() call - SessionManager stub has no close method
+            # Database cleanup happens automatically via context.db_session lifecycle
+            pass
         
     def _validate_context(self, context: UserExecutionContext) -> None:
         """Validate UserExecutionContext for goal triage.

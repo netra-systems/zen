@@ -20,7 +20,7 @@ import time
 import uuid
 from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import jwt
 import pytest
 from unittest.mock import AsyncMock, MagicMock
@@ -138,7 +138,7 @@ class MockSAMLProvider:
     """
     
     def __init__(self):
-        self.issuer = "https://test-saml-provider.netra.ai"
+        self.issuer = "https://test-saml-provider.netrasystems.ai"
         self.assertions = {}
         
     def create_mock_assertion(self, subject: str, attributes: Dict[str, Any] = None) -> str:
@@ -207,7 +207,7 @@ def create_real_jwt_token(user_id: str, permissions: List[str], email: Optional[
     Args:
         user_id: User identifier for the JWT subject
         permissions: List of permissions to include in the token
-        email: User email (optional, defaults to {user_id}@test.netra.ai)
+        email: User email (optional, defaults to {user_id}@test.netrasystems.ai)
         expires_in: Token expiration in seconds (default: 3600)
     
     Returns:
@@ -223,9 +223,9 @@ def create_real_jwt_token(user_id: str, permissions: List[str], email: Optional[
     
     # Generate intelligent default email if not provided (backwards compatibility)
     if email is None:
-        email = f"{user_id}@test.netra.ai"
+        email = f"{user_id}@test.netrasystems.ai"
     
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     payload = {
         "sub": user_id,
         "email": email,
@@ -246,7 +246,7 @@ def create_test_user_token(user_id: Optional[str] = None, permissions: Optional[
     if permissions is None:
         permissions = ["basic_chat", "agent_access"]
         
-    email = f"{user_id}@test.netra.ai"
+    email = f"{user_id}@test.netrasystems.ai"
     return create_real_jwt_token(user_id, permissions, email)
 
 

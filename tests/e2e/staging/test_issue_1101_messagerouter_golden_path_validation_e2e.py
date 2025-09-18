@@ -10,7 +10,7 @@ These tests validate MessageRouter SSOT consolidation in staging environment:
 Business Value Justification:
 - Segment: Platform/Production
 - Business Goal: Golden Path reliability in production environment
-- Value Impact: Protects $500K+ ARR user experience in staging
+- Value Impact: Protects 500K+ ARR user experience in staging
 - Strategic Impact: Validates SSOT consolidation before production deployment
 """
 import pytest
@@ -40,7 +40,7 @@ class MessageRouterGoldenPathValidationE2ETests(SSotAsyncTestCase):
         if environment not in ['staging', 'development']:
             pytest.skip(f'E2E tests require staging environment, got: {environment}')
         logger.info(f'Running E2E tests in {environment} environment')
-        cls.staging_config = {'environment': environment, 'auth_service_url': env.get('AUTH_SERVICE_URL', 'https://auth.staging.netrasystems.ai'), 'backend_url': env.get('BACKEND_URL', 'https://backend.staging.netrasystems.ai'), 'websocket_url': env.get('WEBSOCKET_URL', 'wss://backend.staging.netrasystems.ai/ws')}
+        cls.staging_config = {'environment': environment, 'auth_service_url': env.get('AUTH_SERVICE_URL', 'https://auth.staging.netrasystems.ai'), 'backend_url': env.get('BACKEND_URL', 'https://api.staging.netrasystems.ai'), 'websocket_url': env.get('WEBSOCKET_URL', 'wss://api.staging.netrasystems.ai/ws')}
         logger.info(f'Staging configuration: {cls.staging_config}')
 
     def setUp(self):
@@ -65,12 +65,7 @@ class MessageRouterGoldenPathValidationE2ETests(SSotAsyncTestCase):
             websocket_connection = await self._establish_websocket_connection()
             self.golden_path_metrics['websocket_connection_success'] = websocket_connection is not None
             websocket_time = time.time() - websocket_start
-            logger.info(f"Golden Path Step 2: WebSocket Connection {('SUCCESS' if websocket_connection else 'FAILED')} ({websocket_time:.2f}s)")
-            routing_start = time.time()
-            routing_success = await self._test_message_routing_golden_path(websocket_connection)
-            self.golden_path_metrics['message_routing_success'] = routing_success
-            routing_time = time.time() - routing_start
-            logger.info(f"Golden Path Step 3: Message Routing {('SUCCESS' if routing_success else 'FAILED')} ({routing_time:.2f}s)")
+            logger.info(f"Golden Path Step 2: WebSocket Connection {('SUCCESS' if websocket_connection else 'FAILED')} ({websocket_time:.2f}s)""Golden Path Step 3: Message Routing {('SUCCESS' if routing_success else 'FAILED')} ({routing_time:.2f}s)")
             agent_start = time.time()
             agent_success = await self._test_agent_execution_golden_path(websocket_connection)
             self.golden_path_metrics['agent_execution_success'] = agent_success

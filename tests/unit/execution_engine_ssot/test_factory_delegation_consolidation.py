@@ -8,7 +8,7 @@ This validates that ExecutionEngineFactory and related factories route to UserEx
 Expected to FAIL before SSOT consolidation (proves multiple factory patterns exist)
 Expected to PASS after SSOT consolidation (proves all factories use UserExecutionEngine)
 
-Business Impact: $500K+ ARR Golden Path protection - consistent factory patterns prevent execution failures
+Business Impact: 500K+ ARR Golden Path protection - consistent factory patterns prevent execution failures
 """
 
 import pytest
@@ -29,13 +29,15 @@ import unittest
 from unittest.mock import Mock, AsyncMock, patch
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from test_framework.ssot.mock_factory import SSotMockFactory
 
 
-class MockWebSocketManager:
-    """Mock WebSocket manager for factory testing"""
-    def __init__(self, user_id: str):
-        self.user_id = user_id
-        self.send_agent_event = AsyncMock()
+def create_mock_websocket_manager_for_factory(user_id: str):
+    """Create WebSocket manager mock using SSOT factory for factory testing"""
+    mock_manager = SSotMockFactory.create_websocket_manager_mock()
+    mock_manager.user_id = user_id
+    mock_manager.send_agent_event = AsyncMock()
+    return mock_manager
 
 
 @pytest.mark.unit
@@ -46,7 +48,7 @@ class FactoryDelegationConsolidationTests(SSotAsyncTestCase):
         """Set up test fixtures"""
         self.test_user_id = "factory_test_user"
         self.test_session_id = "factory_test_session"
-        self.mock_websocket = MockWebSocketManager(self.test_user_id)
+        self.mock_websocket = create_mock_websocket_manager_for_factory(self.test_user_id)
         
     def test_factory_imports_available(self):
         """Test that all factory implementations can be imported"""
@@ -294,7 +296,7 @@ class FactoryDelegationConsolidationTests(SSotAsyncTestCase):
             """Create engine concurrently"""
             try:
                 with patch('netra_backend.app.websocket_core.websocket_manager_factory.WebSocketManagerFactory.get_manager') as mock_get_manager:
-                    mock_ws = MockWebSocketManager(f"concurrent_user_{user_index}")
+                    mock_ws = create_mock_websocket_manager_for_factory(f"concurrent_user_{user_index}")
                     mock_get_manager.return_value = mock_ws
                     
                     engine = factory.create_execution_engine(

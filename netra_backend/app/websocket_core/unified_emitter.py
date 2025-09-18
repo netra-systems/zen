@@ -1,3 +1,4 @@
+from netra_backend.app.logging_config import central_logger
 """
 UnifiedWebSocketEmitter - THE ONLY emitter implementation
 
@@ -41,7 +42,7 @@ central_logger = CentralLoggerCompat()
 
 if TYPE_CHECKING:
     # ISSUE #824 REMEDIATION: Use canonical SSOT import path
-    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = get_logger(__name__)
@@ -417,6 +418,10 @@ class UnifiedWebSocketEmitter:
         CRITICAL EVENT: Tool execution completed.
         Shows the results from tool execution.
         
+        Event Structure (FIX #935):
+            - Top-level 'results' field: Promoted from metadata.result if available
+            - Nested 'metadata.result' field: Maintained for backward compatibility
+        
         Args:
             data: Event data including tool name and results
             
@@ -550,6 +555,22 @@ class UnifiedWebSocketEmitter:
         else:
             max_attempts = self.MAX_CRITICAL_RETRIES if is_auth_event else self.MAX_RETRIES
         
+        # ISSUE #1039 FIX: Ensure tool_executing events have tool_name at top level
+        # ISSUE #935 FIX: Ensure tool_completed events have results at top level
+        final_event_data = data.copy()
+        if event_type == 'tool_executing' and 'tool_name' in data:
+            # Promote tool_name to top level for frontend/validation compatibility
+            final_event_data = {
+                'tool_name': data['tool_name'],
+                **data  # Include all other fields
+            }
+        elif event_type == 'tool_completed' and 'metadata' in data and 'result' in data['metadata']:
+            # FIX #935: Promote tool results to top level for frontend compatibility
+            final_event_data = {
+                'results': data['metadata']['result'],  # Add top-level results field
+                **data  # Include all other fields (metadata.result kept for backward compatibility)
+            }
+        
         # Emit with retries
         last_error = None
         for attempt in range(max_attempts):
@@ -557,7 +578,7 @@ class UnifiedWebSocketEmitter:
                 await self.manager.emit_critical_event(
                     user_id=self.user_id,
                     event_type=event_type,
-                    data=data
+                    data=final_event_data
                 )
                 
                 # Success - log and return
@@ -686,12 +707,15 @@ class UnifiedWebSocketEmitter:
         if metadata is None:
             metadata = {}
         
-        await self.emit_tool_executing({
+        # ISSUE #1039 FIX: Ensure tool_name is available at top level for frontend/validation compatibility
+        event_data = {
             'tool_name': tool_name,
             'metadata': metadata,
             'status': 'executing',
             'timestamp': time.time()
-        })
+        }
+        
+        await self.emit_tool_executing(event_data)
     
     async def notify_tool_completed(self, tool_name: str, metadata: Dict[str, Any] = None):
         """
@@ -1610,15 +1634,27 @@ class AuthenticationConnectionMonitor:
 
 class WebSocketEmitterFactory:
     """
-    PHASE 3: Unified factory for creating WebSocket emitters.
-    Consolidates factory patterns from various implementations and ensures
-    consistent interfaces across all factory methods.
-    
-    This factory addresses Issue #1176 coordination gaps by standardizing:
-    - Parameter naming (manager vs websocket_manager)
-    - Method signatures across all factory patterns
-    - Context handling and validation
-    - Error handling and fallback behavior
+    DEPRECATED: Over-engineered factory for WebSocket emitters - Issue #1194 Cleanup.
+
+    This factory adds unnecessary parameter validation and indirection over direct
+    constructor calls. It exemplifies the factory pattern over-engineering that
+    Issue #1194 addresses.
+
+    MIGRATION PATH:
+    - Replace WebSocketEmitterFactory.create_emitter() with UnifiedWebSocketEmitter()
+    - Replace WebSocketEmitterFactory.create_scoped_emitter() with UnifiedWebSocketEmitter()
+    - Replace WebSocketEmitterFactory.create_performance_emitter() with UnifiedWebSocketEmitter(performance_mode=True)
+    - Replace WebSocketEmitterFactory.create_auth_emitter() with AuthenticationWebSocketEmitter()
+
+    Example:
+        # OLD (over-engineered)
+        factory = WebSocketEmitterFactory()
+        emitter = factory.create_emitter(manager, user_id, context)
+
+        # NEW (direct instantiation)
+        emitter = UnifiedWebSocketEmitter(manager, user_id, context)
+
+    This factory is maintained temporarily for backward compatibility.
     """
     
     @staticmethod
@@ -1629,30 +1665,32 @@ class WebSocketEmitterFactory:
         performance_mode: bool = False
     ) -> UnifiedWebSocketEmitter:
         """
-        Create a new emitter instance.
-        
-        Args:
-            manager: WebSocket manager (standardized parameter name)
-            user_id: Target user ID
-            context: Optional execution context
-            performance_mode: Enable high-throughput mode
-            
-        Returns:
-            New UnifiedWebSocketEmitter instance
-            
-        Raises:
-            ValueError: If required parameters are missing
-            TypeError: If parameter types are invalid
+        DEPRECATED: Use UnifiedWebSocketEmitter() constructor directly.
+
+        This method adds unnecessary parameter validation that's already handled
+        by the UnifiedWebSocketEmitter constructor.
+
+        Example:
+            # OLD (over-engineered)
+            emitter = WebSocketEmitterFactory.create_emitter(manager, user_id, context)
+
+            # NEW (direct instantiation)
+            emitter = UnifiedWebSocketEmitter(manager, user_id, context, performance_mode)
         """
-        # PHASE 3 COORDINATION FIX: Standardized parameter validation
+        logger.warning(
+            "WebSocketEmitterFactory.create_emitter() is deprecated. "
+            "Use UnifiedWebSocketEmitter() constructor directly for Issue #1194 compliance."
+        )
+
+        # Keep the validation temporarily for backward compatibility
         if not manager:
             raise ValueError("WebSocketEmitterFactory.create_emitter requires valid manager")
         if not user_id:
             raise ValueError("WebSocketEmitterFactory.create_emitter requires valid user_id")
-        
+
         try:
             return UnifiedWebSocketEmitter(
-                manager=manager,  # Use standardized parameter name
+                manager=manager,
                 user_id=user_id,
                 context=context,
                 performance_mode=performance_mode
@@ -1667,29 +1705,33 @@ class WebSocketEmitterFactory:
         context: 'UserExecutionContext'
     ) -> UnifiedWebSocketEmitter:
         """
-        Create a context-scoped emitter.
-        
-        Args:
-            manager: WebSocket manager (standardized parameter name)
-            context: Execution context (required)
-            
-        Returns:
-            New UnifiedWebSocketEmitter with context
-            
-        Raises:
-            ValueError: If required parameters are missing or invalid
+        DEPRECATED: Use UnifiedWebSocketEmitter(manager, context.user_id, context) directly.
+
+        This method adds unnecessary validation. Use the constructor directly.
+
+        Example:
+            # OLD (over-engineered)
+            emitter = WebSocketEmitterFactory.create_scoped_emitter(manager, context)
+
+            # NEW (direct instantiation)
+            emitter = UnifiedWebSocketEmitter(manager, context.user_id, context)
         """
-        # PHASE 3 COORDINATION FIX: Enhanced context validation
+        logger.warning(
+            "WebSocketEmitterFactory.create_scoped_emitter() is deprecated. "
+            "Use UnifiedWebSocketEmitter() constructor directly for Issue #1194 compliance."
+        )
+
+        # Keep validation temporarily for backward compatibility
         if not manager:
             raise ValueError("WebSocketEmitterFactory.create_scoped_emitter requires valid manager")
         if not context:
             raise ValueError("WebSocketEmitterFactory.create_scoped_emitter requires valid context")
         if not hasattr(context, 'user_id') or not context.user_id:
             raise ValueError("WebSocketEmitterFactory.create_scoped_emitter requires context with valid user_id")
-        
+
         try:
             return UnifiedWebSocketEmitter(
-                manager=manager,  # Use standardized parameter name
+                manager=manager,
                 user_id=context.user_id,
                 context=context
             )

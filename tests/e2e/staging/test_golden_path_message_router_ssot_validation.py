@@ -4,7 +4,7 @@ E2E Staging Tests: Golden Path Message Router SSOT Validation - Issue #1101
 PURPOSE: Validate complete Golden Path functionality with consolidated MessageRouter
 ensuring users login and receive AI responses consistently after SSOT consolidation.
 
-BUSINESS IMPACT: Protect $500K+ ARR Golden Path functionality during SSOT migration
+BUSINESS IMPACT: Protect 500K+ ARR Golden Path functionality during SSOT migration
 ENVIRONMENT: GCP Staging with real authentication and services
 
 These tests validate the complete user journey works with unified message routing.
@@ -23,7 +23,7 @@ class GoldenPathMessageRouterSSOTValidationTests(SSotAsyncTestCase):
         """Set up test fixtures."""
         super().setUp()
         self.staging_base_url = 'https://auth.staging.netrasystems.ai'
-        self.websocket_url = 'wss://backend.staging.netrasystems.ai/ws'
+        self.websocket_url = 'wss://api.staging.netrasystems.ai/ws'
         self.timeout = 60.0
         self.test_users = []
         self.websocket_connections = []
@@ -55,7 +55,7 @@ class GoldenPathMessageRouterSSOTValidationTests(SSotAsyncTestCase):
         5. AI response delivered back to user
         6. All 5 critical WebSocket events delivered
 
-        BUSINESS VALUE: $500K+ ARR Golden Path functionality
+        BUSINESS VALUE: 500K+ ARR Golden Path functionality
         """
         test_user = await self._create_test_user()
         self.test_users.append(test_user)

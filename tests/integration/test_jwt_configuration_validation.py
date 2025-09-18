@@ -16,7 +16,7 @@ import json
 import base64
 from typing import Dict, List, Optional, Tuple, Any
 from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import hashlib
 
 # Test subject imports (no Docker dependencies)
@@ -404,7 +404,7 @@ class JWTConfigurationSynchronizationTests:
         """Generate test JWT token."""
         try:
             # Add standard JWT claims
-            now = datetime.utcnow()
+            now = datetime.now(UTC)
             payload.update({
                 "iat": now,
                 "exp": now + timedelta(hours=1),

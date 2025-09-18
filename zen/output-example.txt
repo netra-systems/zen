@@ -1,0 +1,150 @@
+anthony@Shivanginis-MacBook-Pro netra-apex % zen --overall-token-budget 50000 --budget-enforcement-mode block
+2025-09-17 11:03:28,267 - zen_orchestrator - INFO - Using workspace: /Users/anthony/Desktop/netra-apex
+2025-09-17 11:03:28,267 - zen_orchestrator - INFO - 🎯 Token transparency pricing engine enabled - Claude pricing compliance active
+2025-09-17 11:03:28,267 - zen_orchestrator - INFO - 🎯 Token budget tracking enabled - Overall: 50,000 tokens | Mode: BLOCK
+2025-09-17 11:03:28,267 - zen_orchestrator - INFO - Using default instance configurations
+2025-09-17 11:03:28,267 - zen_orchestrator - WARNING - Command '1+1 ' not found in available commands
+2025-09-17 11:03:28,267 - zen_orchestrator - INFO - Available commands: /README, /action, /agent-test, /analyze-repository, /audit-docker-logs, /audit-gcp-error-loop, /audit-gcp-logs, /audit-issue-depends, /audit-staging-logs-gcp-loop, /canary, /clear, /clear-old-issue-locks, /compact, /compliance, /createtestsv2, /critical-path-planning, /debug-error, /dependency-analysis, /dependency-health-check, /deploy-gcp, /docker-rebuild, /e2e-fix-directly, /failingtestsgardener, /gcploggardener, /gitcommitgardener, /gitissueplannerv1, /gitissueprogressorv2, /gitissueprogressorv3, /gitissueprogressorv4, /help, /issue-consolidation, /issue_untangle, /issuecrush, /issuemergesamegardener, /pre-commit, /priority-test-create, /prmergergit, /refresh-issue-config, /refresh-upate-tests, /refreshgardener, /run-demo, /run-unit-frontend-tests, /runtests, /scope-work, /ssot-regression-check, /ssotgardener, /stale-resolver-issue-status, /tdd, /test-create-integration, /test-create-unit-coverage, /test-fix-REMOVED_SYNTAX_ERROR, /test-real, /test-update-e2e-fix-fakes, /testgardener, /ultimate-test-deploy-loop, /websocket-test
+2025-09-17 11:03:28,267 - zen_orchestrator - INFO - Added instance: 1+1  - Execute 1+1 
+2025-09-17 11:03:28,268 - zen_orchestrator - WARNING - Command 'Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.' not found in available commands
+2025-09-17 11:03:28,268 - zen_orchestrator - INFO - Available commands: /README, /action, /agent-test, /analyze-repository, /audit-docker-logs, /audit-gcp-error-loop, /audit-gcp-logs, /audit-issue-depends, /audit-staging-logs-gcp-loop, /canary, /clear, /clear-old-issue-locks, /compact, /compliance, /createtestsv2, /critical-path-planning, /debug-error, /dependency-analysis, /dependency-health-check, /deploy-gcp, /docker-rebuild, /e2e-fix-directly, /failingtestsgardener, /gcploggardener, /gitcommitgardener, /gitissueplannerv1, /gitissueprogressorv2, /gitissueprogressorv3, /gitissueprogressorv4, /help, /issue-consolidation, /issue_untangle, /issuecrush, /issuemergesamegardener, /pre-commit, /priority-test-create, /prmergergit, /refresh-issue-config, /refresh-upate-tests, /refreshgardener, /run-demo, /run-unit-frontend-tests, /runtests, /scope-work, /ssot-regression-check, /ssotgardener, /stale-resolver-issue-status, /tdd, /test-create-integration, /test-create-unit-coverage, /test-fix-REMOVED_SYNTAX_ERROR, /test-real, /test-update-e2e-fix-fakes, /testgardener, /ultimate-test-deploy-loop, /websocket-test
+2025-09-17 11:03:28,268 - zen_orchestrator - INFO - Added instance: Write 3 short stories about AI native engineering. Spawn a new sub agent for each story. - Execute Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.
+2025-09-17 11:03:28,268 - zen_orchestrator - INFO - Starting Claude Code instance orchestration
+2025-09-17 11:03:28,268 - zen_orchestrator - INFO - Starting 2 instances with 5.0s delay between launches (timeout: 10000s each)
+2025-09-17 11:03:28,268 - zen_orchestrator - INFO - Instance 'Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.' will start in 5.0s
+2025-09-17 11:03:28,268 - zen_orchestrator - INFO - Now starting instance '1+1 ' (after 0.0s delay)
+2025-09-17 11:03:28,268 - zen_orchestrator - INFO - 🎯 Budget check for 1+1 : command=1+1, estimated=1000 tokens
+2025-09-17 11:03:28,268 - zen_orchestrator - INFO - ✅ Budget check passed for 1+1 : Within budget limits
+2025-09-17 11:03:28,268 - zen_orchestrator - INFO - Starting instance: 1+1 
+2025-09-17 11:03:28,268 - zen_orchestrator - INFO - Command: /usr/local/bin/claude -p 1+1  --output-format=stream-json --permission-mode=bypassPermissions --verbose
+2025-09-17 11:03:28,270 - zen_orchestrator - INFO - Waiting 5.0s before starting instance 'Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.'
+2025-09-17 11:03:28,270 - zen_orchestrator - INFO - Instance 1+1  started with PID 75889
+
+╔═[1+1 ]════════════ STDOUT 
+║ {"type":"system","subtype":"init","cwd":"/Users/anthony/Desktop/netra-apex","session_id":"e5f44d5a-f390-4e2a-a73f-1efd918e3641","tools":["Task","Bash","Glob","Grep","ExitPlanMode","Read","Edit","MultiEdit","Write","NotebookEdit","WebFetch","TodoWrite","WebSearch","BashOutput","KillBash"],"mcp_servers":[],"model":"claude-opus-4-1-20250805","permissionMode":"bypassPermissions","slash_commands":["gitcommitgardener","audit-gcp-logs","ultimate-test-deploy-loop","canary","issue-consolidation","run-demo","action","websocket-test","priority-test-create","clear-old-issue-locks","gitissueplannerv1","testgardener","gitissueprogressorv2","analyze-repository","refresh-issue-config","test-fix-REMOVED_SYNTAX_ERROR","gitissueprogressorv3","createtestsv2","issuecrush","compliance","pre-commit","stale-resolver...
+╚═══════════════════════════
+
+2025-09-17 11:03:29,222 - zen_orchestrator - WARNING - 🚫 NO TOKENS [1+1 ]: total_tokens is still 0 - token detection may be failing
+2025-09-17 11:03:32,100 - zen_orchestrator - INFO - 📊 TOKEN DATA: Found nested usage data: {'input_tokens': 4, 'cache_creation_input_tokens': 0, 'cache_read_input_tokens': 29709, 'cache_creation': {'ephemeral_5m_input_tokens': 0, 'ephemeral_1h_input_tokens': 0}, 'output_tokens': 2, 'service_tier': 'standard'}
+2025-09-17 11:03:32,100 - zen_orchestrator - INFO - ✅ JSON PARSE SUCCESS [1+1 ]: tokens 0 → 29715
+2025-09-17 11:03:32,100 - zen_orchestrator - INFO - 💰 BUDGET UPDATE [1+1 ]: Recording 29715 tokens for command '1+1'
+
+╔═[1+1 ]════════════ STDOUT 
+║ {"type":"result","subtype":"success","is_error":false,"duration_ms":2905,"duration_api_ms":2885,"num_turns":1,"result":"2","session_id":"e5f44d5a-f390-4e2a-a73f-1efd918e3641","total_cost_usd":0.0449985,"usage":{"input_tokens":4,"cache_creation_input_tokens":0,"cache_read_input_tokens":29709,"output_tokens":5,"server_tool_use":{"web_search_requests":0},"service_tier":"standard","cache_creation":{"ephemeral_1h_input_tokens":0,"ephemeral_5m_input_tokens":0}},"permission_denials":[],"uuid":"2bbf9602-8abc-4ec6-b15e-0a24430e0f25"}
+╚═══════════════════════════
+
+2025-09-17 11:03:32,114 - zen_orchestrator - INFO - 📊 TOKEN DATA: Found usage data: {'input_tokens': 4, 'cache_creation_input_tokens': 0, 'cache_read_input_tokens': 29709, 'output_tokens': 5, 'server_tool_use': {'web_search_requests': 0}, 'service_tier': 'standard', 'cache_creation': {'ephemeral_1h_input_tokens': 0, 'ephemeral_5m_input_tokens': 0}}
+2025-09-17 11:03:32,114 - zen_orchestrator - INFO - ✅ JSON PARSE SUCCESS [1+1 ]: tokens 29715 → 29718
+2025-09-17 11:03:32,114 - zen_orchestrator - INFO - 💰 BUDGET UPDATE [1+1 ]: Recording 3 tokens for command '1+1'
+
+╔═══ FINAL OUTPUT [1+1 ] ═══╗
+║ Last 3 lines of 3 total
+║ Status: running
+║ Duration: 3.9s
+╚═══════════════════════════╝
+
+
+============================================================
+🏁 [1+1 ] COMPLETED - 3 lines processed, output saved
+============================================================
+
+2025-09-17 11:03:32,125 - zen_orchestrator - INFO - Instance 1+1  completed successfully
+2025-09-17 11:03:33,271 - zen_orchestrator - INFO - Now starting instance 'Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.' (after 5.0s delay)
+2025-09-17 11:03:33,272 - zen_orchestrator - INFO - 🎯 Budget check for Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.: command=Write, estimated=1000 tokens
+2025-09-17 11:03:33,272 - zen_orchestrator - INFO - ✅ Budget check passed for Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.: Within budget limits
+2025-09-17 11:03:33,272 - zen_orchestrator - INFO - Starting instance: Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.
+2025-09-17 11:03:33,272 - zen_orchestrator - INFO - Command: /usr/local/bin/claude -p Write 3 short stories about AI native engineering. Spawn a new sub agent for each story. --output-format=stream-json --permission-mode=bypassPermissions --verbose
+
+╔═══ STATUS REPORT [11:03:33] ═══╗
+║ Total: 2 instances
+║ Running: 1, Completed: 1, Failed: 0, Pending: 0
+║ Tokens: 29.7K total, 29.7K cached | Median: 29.7K | Tools: 0
+║ 💰 Cost: $0.0090 total, $0.0045 avg/instance | Pricing: Claude compliant
+|
+| TOKEN BUDGET STATUS |
+║ Overall: [###########---------] 59% 29.7K/50.0K
+║ Command Budgets: None configured
+║
+║  Status   Name                           Model      Duration   Overall  Tokens   Cache    Tools 
+║  ──────── ────────────────────────────── ────────── ────────── ──────── ──────── ──────── ──────
+║  ✅        1+1                            35sonnet   3.9s       29.7K    9        29.7K    0     
+║  🏃        Write 3 short stories about AI native engineering. Spawn a new sub agent for each story. sonnet4    0.0s       0        0        0        0     
+╚════════════════════════════════╝
+
+2025-09-17 11:03:33,280 - zen_orchestrator - INFO - Instance Write 3 short stories about AI native engineering. Spawn a new sub agent for each story. started with PID 75951
+
+╔═[Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.]═ STDOUT 
+║ {"type":"system","subtype":"init","cwd":"/Users/anthony/Desktop/netra-apex","session_id":"02328d28-a6ff-4c78-8b6b-4c1af23e395d","tools":["Task","Bash","Glob","Grep","ExitPlanMode","Read","Edit","MultiEdit","Write","NotebookEdit","WebFetch","TodoWrite","WebSearch","BashOutput","KillBash"],"mcp_servers":[],"model":"claude-opus-4-1-20250805","permissionMode":"bypassPermissions","slash_commands":["gitcommitgardener","audit-gcp-logs","ultimate-test-deploy-loop","canary","issue-consolidation","run-demo","action","websocket-test","priority-test-create","clear-old-issue-locks","gitissueplannerv1","testgardener","gitissueprogressorv2","analyze-repository","refresh-issue-config","test-fix-REMOVED_SYNTAX_ERROR","gitissueprogressorv3","createtestsv2","issuecrush","compliance","pre-commit","stale-resolver...
+╚════════════════════════════════════════════════════════════════════════════════════════════════════
+
+2025-09-17 11:03:34,164 - zen_orchestrator - WARNING - 🚫 NO TOKENS [Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.]: total_tokens is still 0 - token detection may be failing
+2025-09-17 11:03:37,202 - zen_orchestrator - INFO - 📊 TOKEN DATA: Found nested usage data: {'input_tokens': 4, 'cache_creation_input_tokens': 14760, 'cache_read_input_tokens': 14966, 'cache_creation': {'ephemeral_5m_input_tokens': 14760, 'ephemeral_1h_input_tokens': 0}, 'output_tokens': 3, 'service_tier': 'standard'}
+2025-09-17 11:03:37,202 - zen_orchestrator - INFO - ✅ JSON PARSE SUCCESS [Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.]: tokens 0 → 29733
+2025-09-17 11:03:37,202 - zen_orchestrator - INFO - 💰 BUDGET UPDATE [Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.]: Recording 29733 tokens for command 'Write'
+2025-09-17 11:03:37,202 - zen_orchestrator - ERROR - 🚫 🔴 RUNTIME TERMINATION: Runtime budget violation for Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.: Overall budget exceeded: 59451/50000 tokens
+2025-09-17 11:03:37,202 - zen_orchestrator - INFO - Terminating instance Write 3 short stories about AI native engineering. Spawn a new sub agent for each story. (PID: 75951): Terminated due to budget violation - Overall budget exceeded: 59451/50000 tokens
+2025-09-17 11:03:37,203 - zen_orchestrator - INFO - Sent SIGTERM to Write 3 short stories about AI native engineering. Spawn a new sub agent for each story. (PID: 75951)
+
+╔═══ FINAL OUTPUT [Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.] ═══╗
+║ Last 2 lines of 2 total
+║ Status: failed
+║ Duration: 3.9s
+╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+
+============================================================
+🏁 [Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.] COMPLETED - 2 lines processed, output saved
+============================================================
+
+2025-09-17 11:03:37,213 - zen_orchestrator - ERROR - Instance Write 3 short stories about AI native engineering. Spawn a new sub agent for each story. failed with return code 143
+2025-09-17 11:03:37,213 - zen_orchestrator - ERROR - Error output: Terminated due to budget violation - Overall budget exceeded: 59451/50000 tokens
+
+╔═══ FINAL STATUS [11:03:37] ═══╗
+║ Total: 2 instances
+║ Running: 0, Completed: 1, Failed: 1, Pending: 0
+║ Tokens: 59.5K total, 59.4K cached | Median: 29.7K | Tools: 0
+║ 💰 Cost: $0.3085 total, $0.1542 avg/instance | Pricing: Claude compliant
+|
+| TOKEN BUDGET STATUS |
+║ Overall: [####################] 100% 59.5K/50.0K
+║ Command Budgets: None configured
+║
+║  Status   Name                           Model      Duration   Overall  Tokens   Cache    Tools 
+║  ──────── ────────────────────────────── ────────── ────────── ──────── ──────── ──────── ──────
+║  ✅        1+1                            35sonnet   3.9s       29.7K    9        29.7K    0     
+║  ❌        Write 3 short stories about AI native engineering. Spawn a new sub agent for each story. opus4      3.9s       29.7K    7        29.7K    0     
+╚═══════════════════════════════╝
+
+2025-09-17 11:03:37,214 - zen_orchestrator - INFO - Orchestration completed in 8.95s
+2025-09-17 11:03:37,214 - zen_orchestrator - INFO - Results: 1 completed, 1 failed
+2025-09-17 11:03:37,214 - zen_orchestrator - INFO - Token Usage: 59,451 total (59,435 cached, 100.0% hit rate), 0 tool calls
+2025-09-17 11:03:37,214 - zen_orchestrator - INFO - 💰 Total Cost: $0.3085 (Claude pricing compliant)
+
+========================================================================================================================
+NETRA ZEN RESULTS
+========================================================================================================================
+╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║ Instance             │ Status     │ Duration   │ Total Tokens │ Input    │ Output   │ Cached   │ Tools  │ Cost       ║
+╠──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╣
+║ 1+1                  │ completed  │ 3.9s       │ 29,718       │ 4        │ 5        │ 29,709   │ 0      │ $0.0090    ║
+║ Write 3 short stori  │ failed     │ 3.9s       │ 29,733       │ 4        │ 3        │ 29,726   │ 0      │ $0.2995    ║
+╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+Additional Details:
+----------------------------------------
+
+1+1 :
+  Output Preview: {"type":"system","subtype":"init","cwd":"/Users/anthony/Desktop/netra-apex","session_id":"e5f44d5a-f390-4e2a-a73f-1efd918e3641","tools":["Task","Bash"...
+
+WRITE 3 SHORT STORIES ABOUT AI NATIVE ENGINEERING. SPAWN A NEW SUB AGENT FOR EACH STORY.:
+  Output Preview: {"type":"system","subtype":"init","cwd":"/Users/anthony/Desktop/netra-apex","session_id":"02328d28-a6ff-4c78-8b6b-4c1af23e395d","tools":["Task","Bash"...
+  Errors: Terminated due to budget violation - Overall budget exceeded: 59451/50000 tokens...
+
+================================================================================
+🚀 NEED DETAILED TOKEN ANALYTICS & DATA ACCESS?
+================================================================================
+For comprehensive token usage analytics, historical data,
+and advanced reporting features, upgrade to Netra Apex.
+
+🌐 Learn more: https://netrasystems.ai/
+================================================================================

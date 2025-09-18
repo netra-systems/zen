@@ -32,7 +32,7 @@ import json
 import time
 import hashlib
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from typing import Dict, Any, Optional, List
 from dataclasses import asdict
 
@@ -128,7 +128,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
             RETURNING id
         """, user_data["email"], user_data["full_name"], 
         hashlib.sha256(test_password.encode()).hexdigest(),
-        True, False, datetime.utcnow())
+        True, False, datetime.now(UTC))
         
         self.created_users.append(str(user_id))
         
@@ -235,7 +235,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
             UPDATE auth.users 
             SET is_verified = true, verification_token = null, verified_at = $1
             WHERE verification_token = $2
-        """, datetime.utcnow(), verification_token)
+        """, datetime.now(UTC), verification_token)
         
         # Verify user is now verified
         verified_user = await self.real_services.postgres.fetchrow("""
@@ -273,7 +273,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id
-        """, user_id, "user", "free", 2, 10, datetime.utcnow(), datetime.utcnow())
+        """, user_id, "user", "free", 2, 10, datetime.now(UTC), datetime.now(UTC))
         
         # Verify profile defaults
         profile = await self.real_services.postgres.fetchrow("""
@@ -402,7 +402,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
         # Update last login timestamp
         await self.real_services.postgres.execute("""
             UPDATE auth.users SET last_login = $1 WHERE id = $2
-        """, datetime.utcnow(), user_id)
+        """, datetime.now(UTC), user_id)
         
         # Create login session in Redis
         login_session_key = f"login_session:{user_id}:{uuid.uuid4().hex}"
@@ -461,7 +461,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
                 last_login = $8
             RETURNING id
         """, oauth_user_data["email"], oauth_user_data["name"], oauth_user_data["picture"],
-        True, True, oauth_user_data["provider"], oauth_user_data["provider_id"], datetime.utcnow())
+        True, True, oauth_user_data["provider"], oauth_user_data["provider_id"], datetime.now(UTC))
         
         self.created_users.append(str(user_id))
         
@@ -986,7 +986,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
         await self.real_services.postgres.execute("""
             INSERT INTO backend.threads (id, user_id, title, created_at, is_private)
             VALUES ($1, $2, $3, $4, $5)
-        """, resource_id, user_ids["owner"], "Test Thread Resource", datetime.utcnow(), False)
+        """, resource_id, user_ids["owner"], "Test Thread Resource", datetime.now(UTC), False)
         
         # Create resource access control entries
         resource_access = [
@@ -1073,7 +1073,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
                     current_agent_count, current_thread_count, created_at
                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             """, user_id, config["tier"], config["max_agents"], config["max_threads"], 
-            config["api_access"], 0, 0, datetime.utcnow())
+            config["api_access"], 0, 0, datetime.now(UTC))
             
             tier_user_ids[config["tier"]] = str(user_id)
             self.created_users.append(str(user_id))
@@ -1098,7 +1098,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
                         await self.real_services.postgres.execute("""
                             INSERT INTO backend.agents (id, user_id, name, created_at)
                             VALUES ($1, $2, $3, $4)
-                        """, agent_id, user_id, f"Test Agent {agent_num}", datetime.utcnow())
+                        """, agent_id, user_id, f"Test Agent {agent_num}", datetime.now(UTC))
                         
                         # Update count
                         await self.real_services.postgres.execute("""
@@ -1189,7 +1189,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
             INSERT INTO backend.organizations (name, slug, plan, created_at)
             VALUES ($1, $2, $3, $4)
             RETURNING id
-        """, "Hierarchy Test Org", f"hierarchy-test-{uuid.uuid4().hex[:8]}", "enterprise", datetime.utcnow())
+        """, "Hierarchy Test Org", f"hierarchy-test-{uuid.uuid4().hex[:8]}", "enterprise", datetime.now(UTC))
         
         # Add users to organization with roles
         for role, user_info in hierarchy_users.items():
@@ -1334,7 +1334,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
             RETURNING id
         """, user_id, profile_data["bio"], profile_data["company"], profile_data["location"],
         profile_data["timezone"], json.dumps(profile_data["preferences"]), 
-        json.dumps(profile_data["social_links"]), datetime.utcnow())
+        json.dumps(profile_data["social_links"]), datetime.now(UTC))
         
         # READ: Verify profile creation
         created_profile = await self.real_services.postgres.fetchrow("""
@@ -1380,7 +1380,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
             SET bio = $1, company = $2, location = $3, preferences = $4, updated_at = $5
             WHERE user_id = $6
         """, updated_data["bio"], updated_data["company"], updated_data["location"],
-        json.dumps(updated_data["preferences"]), datetime.utcnow(), user_id)
+        json.dumps(updated_data["preferences"]), datetime.now(UTC), user_id)
         
         # Verify UPDATE
         updated_profile = await self.real_services.postgres.fetchrow("""
@@ -1538,7 +1538,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
         logged_activities = []
         for i, activity in enumerate(activities):
             activity_id = str(uuid.uuid4())
-            timestamp = datetime.utcnow()
+            timestamp = datetime.now(UTC)
             
             # Store in PostgreSQL audit table
             await self.real_services.postgres.execute("""
@@ -1655,7 +1655,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
             ) VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id
         """, user_id, "Backup test user profile", "Backup Test Corp", "enterprise",
-        json.dumps({"theme": "dark", "notifications": True}), datetime.utcnow())
+        json.dumps({"theme": "dark", "notifications": True}), datetime.now(UTC))
         
         user_data_components["profile"] = {"id": profile_id, "table": "backend.user_profiles"}
         
@@ -1666,7 +1666,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
                 INSERT INTO backend.threads (id, user_id, title, created_at)
                 VALUES ($1, $2, $3, $4)
                 RETURNING id
-            """, str(uuid.uuid4()), user_id, f"Backup Test Thread {i+1}", datetime.utcnow())
+            """, str(uuid.uuid4()), user_id, f"Backup Test Thread {i+1}", datetime.now(UTC))
             thread_ids.append(thread_id)
         
         user_data_components["threads"] = {"ids": thread_ids, "table": "backend.threads"}
@@ -1678,7 +1678,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
                 INSERT INTO backend.agents (id, user_id, name, created_at)
                 VALUES ($1, $2, $3, $4)
                 RETURNING id
-            """, str(uuid.uuid4()), user_id, f"Backup Test Agent {i+1}", datetime.utcnow())
+            """, str(uuid.uuid4()), user_id, f"Backup Test Agent {i+1}", datetime.now(UTC))
             agent_ids.append(agent_id)
         
         user_data_components["agents"] = {"ids": agent_ids, "table": "backend.agents"}
@@ -1774,7 +1774,7 @@ class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id
         """, user_id, profile_data["bio"], profile_data["company"], profile_data["subscription_tier"],
-        profile_data["preferences"], datetime.utcnow())
+        profile_data["preferences"], datetime.now(UTC))
         
         # Restore threads
         for thread_data in recovery_backup["components"]["threads"]:

@@ -7,6 +7,7 @@ import { authService as authServiceClient } from '@/lib/auth-service-config';
 import { authService } from '@/auth';
 import { authInterceptor } from '@/lib/auth-interceptor';
 import { logger } from '@/lib/logger';
+import { websocketTicketService } from '@/services/websocketTicketService';
 
 export interface AuthUser {
   id: string;
@@ -28,10 +29,14 @@ export interface AuthValidationResult {
   error?: string;
 }
 
+// Import from dedicated ticket service
+import type { WebSocketTicket, TicketRequestResult } from '@/types/websocket-ticket';
+
 /**
  * Unified authentication service that integrates all auth functionality
  */
 class UnifiedAuthService {
+  // Remove internal ticket management - delegated to websocketTicketService
   
   /**
    * Initialize authentication and validate current session
@@ -149,6 +154,9 @@ class UnifiedAuthService {
    */
   async handleLogout(): Promise<void> {
     try {
+      // Clear ticket cache before logout using dedicated service
+      websocketTicketService.clearTicketCache();
+      
       const config = await authService.getAuthConfig();
       await authService.handleLogout(config);
       
@@ -160,6 +168,7 @@ class UnifiedAuthService {
       });
       
       // Fallback: clear local state even if server logout fails
+      websocketTicketService.clearTicketCache();
       authService.removeToken();
       authService.setDevLogoutFlag();
       
@@ -207,10 +216,52 @@ class UnifiedAuthService {
   }
 
   /**
-   * Set up authentication for WebSocket connections
+   * Request a WebSocket authentication ticket (delegated to dedicated service)
    */
-  getWebSocketAuthConfig(): { token: string | null; refreshToken: () => Promise<string | null> } {
+  async requestWebSocketTicket(): Promise<TicketRequestResult> {
+    return await websocketTicketService.acquireTicket();
+  }
+
+  /**
+   * Get cached WebSocket ticket or request a new one (delegated to dedicated service)
+   */
+  async getWebSocketTicket(): Promise<TicketRequestResult> {
+    return await websocketTicketService.acquireTicket();
+  }
+
+  /**
+   * Clear ticket cache (delegated to dedicated service)
+   */
+  clearTicketCache(): void {
+    websocketTicketService.clearTicketCache();
+  }
+
+  /**
+   * Check if ticket authentication should be used
+   */
+  private shouldUseTicketAuth(): boolean {
+    // Feature flag for ticket authentication
+    const ticketAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_WEBSOCKET_TICKETS !== 'false';
+    
+    // Use the dedicated service's configuration
+    const config = websocketTicketService.getConfig();
+    
+    return ticketAuthEnabled && config.enabled;
+  }
+
+  /**
+   * Set up authentication for WebSocket connections (updated for ticket support)
+   */
+  getWebSocketAuthConfig(): { 
+    token: string | null; 
+    refreshToken: () => Promise<string | null>;
+    getTicket: () => Promise<TicketRequestResult>;
+    useTicketAuth: boolean;
+  } {
+    const useTicketAuth = this.shouldUseTicketAuth();
+    
     return {
+      // Maintain JWT token for backward compatibility
       token: authService.getToken(),
       refreshToken: async () => {
         try {
@@ -224,7 +275,10 @@ class UnifiedAuthService {
           logger.error('WebSocket token refresh failed', error as Error);
           return null;
         }
-      }
+      },
+      // Use dedicated ticket service for ticket-based authentication
+      getTicket: () => websocketTicketService.acquireTicket(),
+      useTicketAuth // Feature flag controlled
     };
   }
 
@@ -236,6 +290,9 @@ class UnifiedAuthService {
       component: 'UnifiedAuthService',
       action: 'handleAuthError'
     });
+
+    // Clear ticket cache on auth errors using dedicated service
+    websocketTicketService.clearTicketCache();
 
     // If it's a 401 error, trigger logout
     if (error?.status === 401 || error?.message?.includes('401')) {

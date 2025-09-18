@@ -7,7 +7,7 @@ Business Value: Platform/Internal - Ensures consistent WebSocket contracts
 
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Protocol
-from datetime import datetime
+from datetime import datetime, UTC
 
 
 # WebSocketManagerProtocol removed - use comprehensive protocol from protocols.py
@@ -100,7 +100,7 @@ class ConnectionInfo:
     
     def update_ping(self) -> None:
         """Update last ping timestamp."""
-        self.last_ping = datetime.utcnow()
+        self.last_ping = datetime.now(UTC)
 
 
 class WebSocketState:

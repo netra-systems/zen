@@ -5,7 +5,7 @@ Provides standardized execution context and result structures.
 """
 
 from typing import Any, Dict, List, Optional, Union
-from datetime import datetime
+from datetime import datetime, UTC
 from dataclasses import dataclass
 
 # SSOT: Import ExecutionStatus from core_enums to prevent duplication
@@ -50,7 +50,7 @@ class ExecutionContext:
         if self.metadata is None:
             self.metadata = {}
         if self.created_at is None:
-            self.created_at = datetime.utcnow()
+            self.created_at = datetime.now(UTC)
 
 
 @dataclass

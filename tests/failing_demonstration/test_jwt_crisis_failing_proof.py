@@ -130,7 +130,7 @@ class JWTCrisisFailingProofTests(SSotBaseTestCase):
         """
         PROOF OF FAILURE: Golden Path user flow blocked by JWT crisis.
         
-        Golden Path: User login → WebSocket connection → Agent events → AI response
+        Golden Path: User login -> WebSocket connection -> Agent events -> AI response
         Blockage: WebSocket connection fails due to JWT configuration
         
         Expected Initial State: FAILURE (Golden Path cannot complete)

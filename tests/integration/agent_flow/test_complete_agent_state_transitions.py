@@ -24,8 +24,8 @@ ARCHITECTURE ALIGNMENT:
 - Follows Golden Path user flow requirements from GOLDEN_PATH_USER_FLOW_COMPLETE.md
 
 This test validates that agent state is properly persisted and maintained through
-the complete 5-event WebSocket flow: agent_started → agent_thinking → tool_executing → 
-tool_completed → agent_completed, including failure recovery scenarios.
+the complete 5-event WebSocket flow: agent_started -> agent_thinking -> tool_executing -> 
+tool_completed -> agent_completed, including failure recovery scenarios.
 """
 
 import asyncio
@@ -209,7 +209,7 @@ class CompleteAgentStateTransitionsTests(SSotAsyncTestCase):
         
         This test validates that agent state is properly maintained and persisted
         through the complete Golden Path user flow:
-        agent_started → agent_thinking → tool_executing → tool_completed → agent_completed
+        agent_started -> agent_thinking -> tool_executing -> tool_completed -> agent_completed
         
         CRITICAL: This protects $500K+ ARR chat functionality by ensuring users
         can track agent progress and recover from failures without losing context.

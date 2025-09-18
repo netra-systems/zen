@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
 - Segment: Platform/All tiers (affects all users)
 - Business Goal: User Experience & Platform Reliability 
 - Value Impact: Ensures real-time agent progress updates and responsive user interface
-- Revenue Impact: Protects $500K+ ARR by providing transparent agent execution visibility
+- Revenue Impact: Protects 500K+ ARR by providing transparent agent execution visibility
 
 These tests validate the WebSocket coordination between agents and the frontend,
 ensuring that all 5 critical WebSocket events are properly emitted during agent
@@ -125,7 +125,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         # Create authenticated user session
         auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
         user_id = f"websocket_events_user_{uuid.uuid4().hex[:8]}"
-        email = f"{user_id}@test.netra.ai"
+        email = f"{user_id}@test.netrasystems.ai"
         
         # Create JWT and establish WebSocket connection
         jwt_token = auth_helper.create_test_jwt_token(
@@ -171,7 +171,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         # Validate business value - user experience impact
         await self._validate_user_experience_impact(execution_trace)
         
-        logger.info(f"✅ Critical WebSocket events coverage test completed: "
+        logger.info(f"CHECK Critical WebSocket events coverage test completed: "
                    f"events_received={len(execution_trace.critical_events_received)}/5, "
                    f"total_events={len(execution_trace.websocket_events)}")
         
@@ -194,7 +194,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         # Create user session
         auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
         user_id = f"multi_agent_coord_user_{uuid.uuid4().hex[:8]}"
-        email = f"{user_id}@test.netra.ai"
+        email = f"{user_id}@test.netrasystems.ai"
         
         jwt_token = auth_helper.create_test_jwt_token(user_id=user_id, email=email)
         websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
@@ -243,7 +243,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         # Validate no event interference between agents
         await self._validate_no_agent_event_interference(coordination_traces)
         
-        logger.info(f"✅ Multi-agent WebSocket coordination test completed: "
+        logger.info(f"CHECK Multi-agent WebSocket coordination test completed: "
                    f"agents_coordinated={len(coordination_traces)}")
         
         await websocket.close()
@@ -264,7 +264,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         # Create user session
         auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
         user_id = f"realtime_events_user_{uuid.uuid4().hex[:8]}"
-        email = f"{user_id}@test.netra.ai"
+        email = f"{user_id}@test.netrasystems.ai"
         
         jwt_token = auth_helper.create_test_jwt_token(user_id=user_id, email=email)
         websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
@@ -295,7 +295,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         # Validate real-time user experience metrics
         await self._validate_realtime_user_experience(realtime_metrics)
         
-        logger.info(f"✅ Real-time WebSocket event delivery test completed: "
+        logger.info(f"CHECK Real-time WebSocket event delivery test completed: "
                    f"avg_latency={realtime_metrics['average_event_latency']:.1f}ms")
         
         await websocket.close()
@@ -320,7 +320,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         for i in range(session_count):
             auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
             user_id = f"concurrent_ws_user_{i}_{uuid.uuid4().hex[:8]}"
-            email = f"{user_id}@test.netra.ai"
+            email = f"{user_id}@test.netrasystems.ai"
             
             jwt_token = auth_helper.create_test_jwt_token(user_id=user_id, email=email)
             websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
@@ -384,7 +384,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         self.assertLess(avg_coordination_time, self.execution_timeout,
                        f"Average concurrent coordination time too high: {avg_coordination_time:.1f}s")
         
-        logger.info(f"✅ Concurrent agent WebSocket coordination test completed: "
+        logger.info(f"CHECK Concurrent agent WebSocket coordination test completed: "
                    f"{len(successful_coordinations)}/{len(concurrent_sessions)} successful")
         
         # Clean up sessions

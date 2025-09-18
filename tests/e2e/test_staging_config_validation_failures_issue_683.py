@@ -5,7 +5,7 @@ This E2E test reproduces the complete staging environment configuration validati
 failures by testing against actual staging GCP environment. This test validates
 the complete user flow through staging configuration validation.
 
-Business Impact: Protects $500K+ ARR staging validation pipeline
+Business Impact: Protects 500K+ ARR staging validation pipeline
 Priority: P0 - Mission Critical
 
 Issue #683: Staging environment configuration validation failures
@@ -271,7 +271,7 @@ class StagingConfigValidationFailuresIssue683Tests(SSotAsyncTestCase):
                     if not field_value or field_value.strip() == '':
                         validation_failures.append(f"Service integration field '{field}' missing or empty")
             if validation_failures:
-                pytest.fail(f'Complete staging system validation failure: Multiple validation failures detected: {validation_failures}. This represents the complete failure state that would prevent successful staging deployment and protect the $500K+ ARR pipeline.')
+                pytest.fail(f'Complete staging system validation failure: Multiple validation failures detected: {validation_failures}. This represents the complete failure state that would prevent successful staging deployment and protect the 500K+ ARR pipeline.')
         except Exception as e:
             error_message = str(e).lower()
             validation_failures.append(f'System validation exception: {str(e)}')

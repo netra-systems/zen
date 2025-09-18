@@ -85,7 +85,7 @@ class RealWebSocketServer:
                             response = await self.message_handlers[message_type](data)
                             if response:
                                 await websocket.send(json.dumps(response))
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 logger.info(f'Real WebSocket client disconnected: {client_id}')
             finally:
                 if client_id in self.connected_clients:
@@ -139,7 +139,7 @@ class RealWebSocketClient:
             async for message in self.websocket:
                 data = json.loads(message)
                 self.received_messages.append({'message': data, 'timestamp': datetime.now(timezone.utc)})
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             self.connected = False
 
     async def send_json(self, data: Dict[str, Any]):

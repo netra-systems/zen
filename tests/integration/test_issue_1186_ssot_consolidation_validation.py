@@ -26,8 +26,8 @@ Test Strategy:
 - Performance regression testing with real service latency
 
 Expected Outcomes After SSOT Consolidation:
-- Import count: 406 → <5 fragmented imports
-- Singleton violations: 45 → 0 violations  
+- Import count: 406 -> <5 fragmented imports
+- Singleton violations: 45 -> 0 violations  
 - User isolation: 100% guaranteed with real services
 - WebSocket routing: 100% accuracy with real connections
 - Performance: <10% regression with consolidated patterns
@@ -77,7 +77,7 @@ class Issue1186SSOTConsolidationValidationTests(SSotAsyncTestCase):
     maintaining enterprise-grade user isolation with real services.
     
     Key Validations:
-    1. Import fragmentation eliminated (406 → <5)
+    1. Import fragmentation eliminated (406 -> <5)
     2. User isolation with real PostgreSQL + Redis 
     3. Factory-based isolation works correctly
     4. WebSocket event routing integrity maintained
@@ -182,7 +182,7 @@ class Issue1186SSOTConsolidationValidationTests(SSotAsyncTestCase):
             f"Canonical import usage {canonical_percentage:.1f}% below 95% threshold"
         )
         
-        logger.info("✅ SSOT Import Consolidation Validation: PASSED")
+        logger.info("CHECK SSOT Import Consolidation Validation: PASSED")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -227,7 +227,7 @@ class Issue1186SSOTConsolidationValidationTests(SSotAsyncTestCase):
             f"State contamination detected: {contamination_check.get('contamination_details', 'Unknown')}"
         )
         
-        logger.info("✅ Factory-Based User Isolation (Real Database): PASSED")
+        logger.info("CHECK Factory-Based User Isolation (Real Database): PASSED")
 
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -276,7 +276,7 @@ class Issue1186SSOTConsolidationValidationTests(SSotAsyncTestCase):
             f"Redis performance degraded: {performance_check['average_latency_ms']:.2f}ms"
         )
         
-        logger.info("✅ Multi-User Concurrent Execution (Real Redis): PASSED")
+        logger.info("CHECK Multi-User Concurrent Execution (Real Redis): PASSED")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -316,7 +316,7 @@ class Issue1186SSOTConsolidationValidationTests(SSotAsyncTestCase):
             f"WebSocket event leakage detected: {event_isolation_check.get('leakage_details', 'Unknown')}"
         )
         
-        logger.info("✅ WebSocket Event Routing Integrity: PASSED")
+        logger.info("CHECK WebSocket Event Routing Integrity: PASSED")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -364,7 +364,7 @@ class Issue1186SSOTConsolidationValidationTests(SSotAsyncTestCase):
                 f"Operation {operation} exceeds threshold: {current_latency:.2f}ms > {threshold}ms"
             )
         
-        logger.info("✅ SSOT Consolidation Performance: PASSED")
+        logger.info("CHECK SSOT Consolidation Performance: PASSED")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -411,7 +411,7 @@ class Issue1186SSOTConsolidationValidationTests(SSotAsyncTestCase):
             f"Audit trail incomplete: {audit_validation.get('missing_events', 'Unknown')}"
         )
         
-        logger.info("✅ Enterprise Compliance User Isolation: PASSED")
+        logger.info("CHECK Enterprise Compliance User Isolation: PASSED")
 
     # === HELPER METHODS ===
 

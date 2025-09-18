@@ -8,7 +8,7 @@ import asyncio
 import json
 import logging
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Any, Dict, Optional, Set
 
 # JWT import removed - SSOT compliance: all JWT operations delegated to auth service
@@ -16,7 +16,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 
 from netra_backend.app.auth_integration.auth import auth_client
 from netra_backend.app.core.configuration import get_configuration
-from netra_backend.app.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 logger = logging.getLogger(__name__)
 
@@ -196,7 +196,7 @@ class TokenRefreshHandler:
                 from datetime import datetime
                 exp_time = datetime.fromisoformat(str(expires_at).replace('Z', '+00:00'))
             
-            time_until_expiry = exp_time - datetime.utcnow()
+            time_until_expiry = exp_time - datetime.now(UTC)
             
             # Refresh if less than 5 minutes until expiry
             return time_until_expiry < timedelta(minutes=5)

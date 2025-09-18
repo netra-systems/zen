@@ -11,7 +11,7 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-from netra_backend.app.core.configuration.base import config_manager
+from netra_backend.app.config import get_config
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -44,7 +44,7 @@ class SecretEncryption:
     
     def _create_fernet_from_env(self) -> Fernet:
         """Create Fernet instance from environment variable."""
-        config = config_manager.get_config()
+        config = get_config()
         fernet_key = getattr(config, 'fernet_key', None)
         if fernet_key:
             return Fernet(fernet_key.encode())

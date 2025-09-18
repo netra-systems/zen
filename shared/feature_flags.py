@@ -19,17 +19,30 @@ Key Features:
 - Environment-aware configuration
 """
 
-# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import json
 import time
 import hashlib
 import logging
+import redis
 from typing import Dict, Optional, Any, List, Tuple, Union
 from dataclasses import dataclass, asdict
 from enum import Enum
 from contextlib import contextmanager
 import threading
 from shared.isolated_environment import IsolatedEnvironment
+
+# Import redis for type annotations and fallback instantiation
+try:
+    import redis
+except ImportError:
+    redis = None
+
+# SSOT Redis client access
+try:
+    from netra_backend.app.services.redis_client import get_redis_client_sync
+except ImportError:
+    # Fallback for shared module independence
+    get_redis_client_sync = None
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +111,7 @@ class ProductionFeatureFlags:
         # Configuration
         self.redis_prefix = f"feature_flags:{self.environment}"
         self.metrics_prefix = f"isolation_metrics:{self.environment}"
-        self.internal_user_domains = {"netrasystems.ai", "netra.ai"}
+        self.internal_user_domains = {"netrasystems.ai", "netrasystems.ai"}
         
         # Circuit breaker settings
         self.circuit_breaker_window_seconds = 300  # 5 minutes
@@ -112,27 +125,37 @@ class ProductionFeatureFlags:
         if self._redis_client is None:
             with self._lock:
                 if self._redis_client is None:
-                    redis_url = self.env.get("REDIS_URL")
-                    if not redis_url:
-                        # Fallback for development
-                        redis_host = self.env.get("REDIS_HOST", "localhost")
-                        redis_port = int(self.env.get("REDIS_PORT", "6379"))
-                        redis_db = int(self.env.get("REDIS_DB", "0"))
-                        self._redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                            host=redis_host,
-                            port=redis_port,
-                            db=redis_db,
-                            decode_responses=True,
-                            socket_connect_timeout=5,
-                            socket_timeout=5
-                        )
-                    else:
-                        self._redis_client = redis.from_url(
-                            redis_url,
-                            decode_responses=True,
-                            socket_connect_timeout=5,
-                            socket_timeout=5
-                        )
+                    # Try SSOT Redis client first
+                    if get_redis_client_sync:
+                        try:
+                            self._redis_client = get_redis_client_sync()
+                            logger.info("Using SSOT Redis client for feature flags")
+                        except Exception as e:
+                            logger.warning(f"SSOT Redis client failed, falling back to direct instantiation: {e}")
+                    
+                    # Fallback to direct instantiation if SSOT unavailable
+                    if self._redis_client is None:
+                        redis_url = self.env.get("REDIS_URL")
+                        if not redis_url:
+                            # Development fallback
+                            redis_host = self.env.get("REDIS_HOST", "localhost")
+                            redis_port = int(self.env.get("REDIS_PORT", "6379"))
+                            redis_db = int(self.env.get("REDIS_DB", "0"))
+                            self._redis_client = redis.Redis(
+                                host=redis_host,
+                                port=redis_port,
+                                db=redis_db,
+                                decode_responses=True,
+                                socket_connect_timeout=5,
+                                socket_timeout=5
+                            )
+                        else:
+                            self._redis_client = redis.from_url(
+                                redis_url,
+                                decode_responses=True,
+                                socket_connect_timeout=5,
+                                socket_timeout=5
+                            )
         return self._redis_client
 
     def create_flag(self, name: str, config: FeatureFlagConfig) -> bool:

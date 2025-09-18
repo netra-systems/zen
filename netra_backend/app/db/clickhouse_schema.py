@@ -6,7 +6,7 @@ Provides table creation, verification, and management utilities
 import asyncio
 from typing import Dict, List, Optional, Any
 from datetime import datetime
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from pathlib import Path
 
 # Import transaction error handling for specific error types
@@ -34,7 +34,7 @@ except (ImportError, ModuleNotFoundError):
         TABLE_ALREADY_EXISTS = 57
         DATABASE_ALREADY_EXISTS = 81
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 
@@ -77,14 +77,15 @@ class ClickHouseTraceSchema:
         self.password = password
         self.client_kwargs = kwargs
         
-        self._client: Optional[ClickHouseClient] = None
         self.migration_path = Path(__file__).parent.parent.parent / 'migrations' / 'clickhouse'
         
-    def _get_client(self) -> ClickHouseClient:
-        """Get or create ClickHouse client."""
-        if self._client is None:
-            self._client = get_clickhouse_client()
-        return self._client
+    def _get_client(self):
+        """Get ClickHouse client as async context manager.
+
+        Returns:
+            AsyncContextManager that yields ClickHouseClient when used with 'async with'
+        """
+        return get_clickhouse_client()
     
     async def create_tables(self) -> bool:
         """
@@ -92,42 +93,41 @@ class ClickHouseTraceSchema:
         Returns True if all tables created successfully.
         """
         try:
-            client = self._get_client()
-            
-            # Process all migration files in order
-            migration_files = sorted(self.migration_path.glob('*.sql'))
-            if not migration_files:
-                logger.error(f"No migration files found in {self.migration_path}")
-                return False
-            
-            total_statements = 0
-            for migration_file in migration_files:
-                logger.info(f"Processing migration: {migration_file.name}")
-                
-                with open(migration_file, 'r') as f:
-                    sql_content = f.read()
-                
-                # Split SQL into individual statements
-                statements = self._parse_sql_statements(sql_content)
-                
-                # Execute each statement
-                for idx, statement in enumerate(statements):
-                    if statement.strip():
-                        try:
-                            await asyncio.get_event_loop().run_in_executor(
-                                None, client.execute, statement
-                            )
-                            total_statements += 1
-                            logger.debug(f"Executed statement {idx + 1}/{len(statements)} from {migration_file.name}")
-                        except ServerException as e:
-                            # Ignore "already exists" errors
-                            if e.code not in [ErrorCodes.TABLE_ALREADY_EXISTS, 
-                                             ErrorCodes.DATABASE_ALREADY_EXISTS]:
-                                logger.error(f"Failed to execute statement {idx + 1} from {migration_file.name}: {e}")
-                                raise
-            
-            logger.info(f"Successfully executed {total_statements} statements from {len(migration_files)} migration files")
-            return True
+            async with self._get_client() as client:
+                # Process all migration files in order
+                migration_files = sorted(self.migration_path.glob('*.sql'))
+                if not migration_files:
+                    logger.error(f"No migration files found in {self.migration_path}")
+                    return False
+
+                total_statements = 0
+                for migration_file in migration_files:
+                    logger.info(f"Processing migration: {migration_file.name}")
+
+                    with open(migration_file, 'r') as f:
+                        sql_content = f.read()
+
+                    # Split SQL into individual statements
+                    statements = self._parse_sql_statements(sql_content)
+
+                    # Execute each statement
+                    for idx, statement in enumerate(statements):
+                        if statement.strip():
+                            try:
+                                await asyncio.get_event_loop().run_in_executor(
+                                    None, client.execute, statement
+                                )
+                                total_statements += 1
+                                logger.debug(f"Executed statement {idx + 1}/{len(statements)} from {migration_file.name}")
+                            except ServerException as e:
+                                # Ignore "already exists" errors
+                                if e.code not in [ErrorCodes.TABLE_ALREADY_EXISTS,
+                                                 ErrorCodes.DATABASE_ALREADY_EXISTS]:
+                                    logger.error(f"Failed to execute statement {idx + 1} from {migration_file.name}: {e}")
+                                    raise
+
+                logger.info(f"Successfully executed {total_statements} statements from {len(migration_files)} migration files")
+                return True
             
         except Exception as e:
             logger.error(f"Failed to create tables: {e}")
@@ -141,37 +141,36 @@ class ClickHouseTraceSchema:
         verification_status = {}
         
         try:
-            client = self._get_client()
-            
-            # Check database exists
-            db_exists = await self._database_exists(client)
-            verification_status['database'] = db_exists
-            
-            if not db_exists:
-                logger.warning(f"Database {self.database} does not exist")
+            async with self._get_client() as client:
+                # Check database exists
+                db_exists = await self._database_exists(client)
+                verification_status['database'] = db_exists
+
+                if not db_exists:
+                    logger.warning(f"Database {self.database} does not exist")
+                    return verification_status
+
+                # Check each table
+                for table in self.TABLES:
+                    exists = await self._table_exists(client, table)
+                    verification_status[table] = exists
+
+                    if exists:
+                        # Verify table structure
+                        structure_valid = await self._verify_table_structure(client, table)
+                        verification_status[f"{table}_structure"] = structure_valid
+
+                # Check materialized views
+                for view in self.MATERIALIZED_VIEWS:
+                    exists = await self._table_exists(client, view)
+                    verification_status[view] = exists
+
+                # Log summary
+                total_checks = len(verification_status)
+                passed_checks = sum(1 for v in verification_status.values() if v)
+                logger.info(f"Schema verification: {passed_checks}/{total_checks} checks passed")
+
                 return verification_status
-            
-            # Check each table
-            for table in self.TABLES:
-                exists = await self._table_exists(client, table)
-                verification_status[table] = exists
-                
-                if exists:
-                    # Verify table structure
-                    structure_valid = await self._verify_table_structure(client, table)
-                    verification_status[f"{table}_structure"] = structure_valid
-            
-            # Check materialized views
-            for view in self.MATERIALIZED_VIEWS:
-                exists = await self._table_exists(client, view)
-                verification_status[view] = exists
-            
-            # Log summary
-            total_checks = len(verification_status)
-            passed_checks = sum(1 for v in verification_status.values() if v)
-            logger.info(f"Schema verification: {passed_checks}/{total_checks} checks passed")
-            
-            return verification_status
             
         except Exception as e:
             logger.error(f"Failed to verify schema: {e}")
@@ -183,42 +182,41 @@ class ClickHouseTraceSchema:
         Returns dict mapping table names to row counts.
         """
         stats = {}
-        
+
         try:
-            client = self._get_client()
-            
-            for table in self.TABLES:
+            async with self._get_client() as client:
+                for table in self.TABLES:
+                    try:
+                        result = await asyncio.get_event_loop().run_in_executor(
+                            None,
+                            client.execute,
+                            f"SELECT count() as count FROM {self.database}.{table}"
+                        )
+                        stats[table] = result[0][0] if result else 0
+                    except Exception as e:
+                        logger.warning(f"Failed to get stats for {table}: {e}")
+                        stats[table] = -1
+
+                # Get database size
                 try:
                     result = await asyncio.get_event_loop().run_in_executor(
                         None,
                         client.execute,
-                        f"SELECT count() as count FROM {self.database}.{table}"
+                        f"""
+                        SELECT
+                            sum(bytes_on_disk) as total_bytes,
+                            sum(rows) as total_rows
+                        FROM system.parts
+                        WHERE database = '{self.database}' AND active
+                        """
                     )
-                    stats[table] = result[0][0] if result else 0
+                    if result:
+                        stats['total_bytes'] = result[0][0] or 0
+                        stats['total_rows'] = result[0][1] or 0
                 except Exception as e:
-                    logger.warning(f"Failed to get stats for {table}: {e}")
-                    stats[table] = -1
-            
-            # Get database size
-            try:
-                result = await asyncio.get_event_loop().run_in_executor(
-                    None,
-                    client.execute,
-                    f"""
-                    SELECT 
-                        sum(bytes_on_disk) as total_bytes,
-                        sum(rows) as total_rows
-                    FROM system.parts
-                    WHERE database = '{self.database}' AND active
-                    """
-                )
-                if result:
-                    stats['total_bytes'] = result[0][0] or 0
-                    stats['total_rows'] = result[0][1] or 0
-            except Exception as e:
-                logger.warning(f"Failed to get database size: {e}")
-            
-            return stats
+                    logger.warning(f"Failed to get database size: {e}")
+
+                return stats
             
         except Exception as e:
             logger.error(f"Failed to get table stats: {e}")
@@ -234,16 +232,15 @@ class ClickHouseTraceSchema:
             return False
         
         try:
-            client = self._get_client()
-            
-            await asyncio.get_event_loop().run_in_executor(
-                None,
-                client.execute,
-                f"TRUNCATE TABLE {self.database}.{table_name}"
-            )
-            
-            logger.info(f"Successfully truncated table {table_name}")
-            return True
+            async with self._get_client() as client:
+                await asyncio.get_event_loop().run_in_executor(
+                    None,
+                    client.execute,
+                    f"TRUNCATE TABLE {self.database}.{table_name}"
+                )
+
+                logger.info(f"Successfully truncated table {table_name}")
+                return True
             
         except Exception as e:
             logger.error(f"Failed to truncate table {table_name}: {e}")
@@ -257,22 +254,21 @@ class ClickHouseTraceSchema:
         optimization_status = {}
         
         try:
-            client = self._get_client()
-            
-            for table in self.TABLES:
-                try:
-                    await asyncio.get_event_loop().run_in_executor(
-                        None,
-                        client.execute,
-                        f"OPTIMIZE TABLE {self.database}.{table} FINAL"
-                    )
-                    optimization_status[table] = True
-                    logger.debug(f"Optimized table {table}")
-                except Exception as e:
-                    logger.warning(f"Failed to optimize {table}: {e}")
-                    optimization_status[table] = False
-            
-            return optimization_status
+            async with self._get_client() as client:
+                for table in self.TABLES:
+                    try:
+                        await asyncio.get_event_loop().run_in_executor(
+                            None,
+                            client.execute,
+                            f"OPTIMIZE TABLE {self.database}.{table} FINAL"
+                        )
+                        optimization_status[table] = True
+                        logger.debug(f"Optimized table {table}")
+                    except Exception as e:
+                        logger.warning(f"Failed to optimize {table}: {e}")
+                        optimization_status[table] = False
+
+                return optimization_status
             
         except Exception as e:
             logger.error(f"Failed to optimize tables: {e}")
@@ -284,32 +280,31 @@ class ClickHouseTraceSchema:
         Returns True if successful.
         """
         try:
-            client = self._get_client()
-            
-            # Drop materialized views first
-            for view in self.MATERIALIZED_VIEWS:
-                try:
-                    await asyncio.get_event_loop().run_in_executor(
-                        None,
-                        client.execute,
-                        f"DROP TABLE IF EXISTS {self.database}.{view}"
-                    )
-                except Exception as e:
-                    logger.warning(f"Failed to drop view {view}: {e}")
-            
-            # Drop tables
-            for table in self.TABLES:
-                try:
-                    await asyncio.get_event_loop().run_in_executor(
-                        None,
-                        client.execute,
-                        f"DROP TABLE IF EXISTS {self.database}.{table}"
-                    )
-                except Exception as e:
-                    logger.warning(f"Failed to drop table {table}: {e}")
-            
-            logger.info("Dropped all tables and views")
-            return True
+            async with self._get_client() as client:
+                # Drop materialized views first
+                for view in self.MATERIALIZED_VIEWS:
+                    try:
+                        await asyncio.get_event_loop().run_in_executor(
+                            None,
+                            client.execute,
+                            f"DROP TABLE IF EXISTS {self.database}.{view}"
+                        )
+                    except Exception as e:
+                        logger.warning(f"Failed to drop view {view}: {e}")
+
+                # Drop tables
+                for table in self.TABLES:
+                    try:
+                        await asyncio.get_event_loop().run_in_executor(
+                            None,
+                            client.execute,
+                            f"DROP TABLE IF EXISTS {self.database}.{table}"
+                        )
+                    except Exception as e:
+                        logger.warning(f"Failed to drop table {table}: {e}")
+
+                logger.info("Dropped all tables and views")
+                return True
             
         except Exception as e:
             logger.error(f"Failed to drop tables: {e}")
@@ -325,31 +320,30 @@ class ClickHouseTraceSchema:
             return []
         
         try:
-            client = self._get_client()
-            
-            result = await asyncio.get_event_loop().run_in_executor(
-                None,
-                client.execute,
-                f"""
-                SELECT 
-                    name,
-                    type,
-                    default_expression
-                FROM system.columns
-                WHERE database = '{self.database}' AND table = '{table_name}'
-                ORDER BY position
-                """
-            )
-            
-            columns = []
-            for row in result:
-                columns.append({
-                    'name': row[0],
-                    'type': row[1],
-                    'default': row[2] or ''
-                })
-            
-            return columns
+            async with self._get_client() as client:
+                result = await asyncio.get_event_loop().run_in_executor(
+                    None,
+                    client.execute,
+                    f"""
+                    SELECT
+                        name,
+                        type,
+                        default_expression
+                    FROM system.columns
+                    WHERE database = '{self.database}' AND table = '{table_name}'
+                    ORDER BY position
+                    """
+                )
+
+                columns = []
+                for row in result:
+                    columns.append({
+                        'name': row[0],
+                        'type': row[1],
+                        'default': row[2] or ''
+                    })
+
+                return columns
             
         except Exception as e:
             logger.error(f"Failed to get columns for {table_name}: {e}")
@@ -435,12 +429,12 @@ class ClickHouseTraceSchema:
             TableCreationError: For table creation specific errors
         """
         try:
-            client = self._get_client()
-            await asyncio.get_event_loop().run_in_executor(
-                None, client.execute, table_schema
-            )
-            logger.info(f"Successfully created table {table_name}")
-            return True
+            async with self._get_client() as client:
+                await asyncio.get_event_loop().run_in_executor(
+                    None, client.execute, table_schema
+                )
+                logger.info(f"Successfully created table {table_name}")
+                return True
         except Exception as e:
             # Classify the error for specific handling
             classified_error = classify_error(e)
@@ -468,13 +462,13 @@ class ClickHouseTraceSchema:
             ColumnModificationError: For column modification specific errors
         """
         try:
-            client = self._get_client()
-            alter_query = f"ALTER TABLE {self.database}.{table_name} MODIFY COLUMN {column_name} {new_type}"
-            await asyncio.get_event_loop().run_in_executor(
-                None, client.execute, alter_query
-            )
-            logger.info(f"Successfully modified column {column_name} in {table_name}")
-            return True
+            async with self._get_client() as client:
+                alter_query = f"ALTER TABLE {self.database}.{table_name} MODIFY COLUMN {column_name} {new_type}"
+                await asyncio.get_event_loop().run_in_executor(
+                    None, client.execute, alter_query
+                )
+                logger.info(f"Successfully modified column {column_name} in {table_name}")
+                return True
         except Exception as e:
             # Classify the error for specific handling
             classified_error = classify_error(e)
@@ -505,14 +499,14 @@ class ClickHouseTraceSchema:
             IndexCreationError: For index creation specific errors
         """
         try:
-            client = self._get_client()
-            columns_str = ", ".join(columns)
-            index_query = f"ALTER TABLE {self.database}.{table_name} ADD INDEX {index_name} ({columns_str}) TYPE minmax GRANULARITY 1"
-            await asyncio.get_event_loop().run_in_executor(
-                None, client.execute, index_query
-            )
-            logger.info(f"Successfully created index {index_name} on {table_name}")
-            return True
+            async with self._get_client() as client:
+                columns_str = ", ".join(columns)
+                index_query = f"ALTER TABLE {self.database}.{table_name} ADD INDEX {index_name} ({columns_str}) TYPE minmax GRANULARITY 1"
+                await asyncio.get_event_loop().run_in_executor(
+                    None, client.execute, index_query
+                )
+                logger.info(f"Successfully created index {index_name} on {table_name}")
+                return True
         except Exception as e:
             # Classify the error for specific handling
             classified_error = classify_error(e)
@@ -543,41 +537,40 @@ class ClickHouseTraceSchema:
         """
         completed_steps = []
         try:
-            client = self._get_client()
-            
-            for step_num, statement in enumerate(migration_steps, 1):
-                try:
-                    await asyncio.get_event_loop().run_in_executor(
-                        None, client.execute, statement
-                    )
-                    completed_steps.append(statement)
-                    logger.debug(f"Migration {migration_name}: Completed step {step_num}/{len(migration_steps)}")
-                except Exception as e:
-                    # Classify the error and add migration context
-                    classified_error = classify_error(e)
-                    error_message = (
-                        f"Migration Error: Migration '{migration_name}' failed at step {step_num} of {len(migration_steps)}. "
-                        f"Completed Steps: {len(completed_steps)} statements executed successfully. "
-                        f"Failed Statement: {statement[:100]}... "
-                        f"Rollback Required: Consider reversing the {len(completed_steps)} completed operations. "
-                        f"Error: {classified_error}"
-                    )
-                    
-                    # Raise the appropriate error type with migration context
-                    if isinstance(classified_error, TableCreationError):
-                        raise TableCreationError(error_message) from e
-                    elif isinstance(classified_error, ColumnModificationError):
-                        raise ColumnModificationError(error_message) from e
-                    elif isinstance(classified_error, IndexCreationError):
-                        raise IndexCreationError(error_message) from e
-                    else:
-                        # For other classified errors, raise them with context
-                        if hasattr(classified_error, 'context'):
-                            # It's a custom schema error, create new instance with message
-                            raise classified_error.__class__(error_message) from e
+            async with self._get_client() as client:
+                for step_num, statement in enumerate(migration_steps, 1):
+                    try:
+                        await asyncio.get_event_loop().run_in_executor(
+                            None, client.execute, statement
+                        )
+                        completed_steps.append(statement)
+                        logger.debug(f"Migration {migration_name}: Completed step {step_num}/{len(migration_steps)}")
+                    except Exception as e:
+                        # Classify the error and add migration context
+                        classified_error = classify_error(e)
+                        error_message = (
+                            f"Migration Error: Migration '{migration_name}' failed at step {step_num} of {len(migration_steps)}. "
+                            f"Completed Steps: {len(completed_steps)} statements executed successfully. "
+                            f"Failed Statement: {statement[:100]}... "
+                            f"Rollback Required: Consider reversing the {len(completed_steps)} completed operations. "
+                            f"Error: {classified_error}"
+                        )
+                        
+                        # Raise the appropriate error type with migration context
+                        if isinstance(classified_error, TableCreationError):
+                            raise TableCreationError(error_message) from e
+                        elif isinstance(classified_error, ColumnModificationError):
+                            raise ColumnModificationError(error_message) from e
+                        elif isinstance(classified_error, IndexCreationError):
+                            raise IndexCreationError(error_message) from e
                         else:
-                            # It's a SQLAlchemy or other error, just raise the classified error
-                            raise classified_error from e
+                            # For other classified errors, raise them with context
+                            if hasattr(classified_error, 'context'):
+                                # It's a custom schema error, create new instance with message
+                                raise classified_error.__class__(error_message) from e
+                            else:
+                                # It's a SQLAlchemy or other error, just raise the classified error
+                                raise classified_error from e
             
             logger.info(f"Migration {migration_name}: All {len(migration_steps)} steps completed successfully")
             return True
@@ -600,13 +593,13 @@ class ClickHouseTraceSchema:
             Various errors with dependency context
         """
         try:
-            client = self._get_client()
-            drop_query = f"DROP TABLE IF EXISTS {self.database}.{table_name}"
-            await asyncio.get_event_loop().run_in_executor(
-                None, client.execute, drop_query
-            )
-            logger.info(f"Successfully dropped table {table_name}")
-            return True
+            async with self._get_client() as client:
+                drop_query = f"DROP TABLE IF EXISTS {self.database}.{table_name}"
+                await asyncio.get_event_loop().run_in_executor(
+                    None, client.execute, drop_query
+                )
+                logger.info(f"Successfully dropped table {table_name}")
+                return True
         except Exception as e:
             # Classify the error and add dependency context if needed
             classified_error = classify_error(e)
@@ -638,14 +631,14 @@ class ClickHouseTraceSchema:
             Various errors with constraint context
         """
         try:
-            client = self._get_client()
-            # Simple validation query - check if table is readable
-            validation_query = f"SELECT count() FROM {self.database}.{table_name} LIMIT 1"
-            await asyncio.get_event_loop().run_in_executor(
-                None, client.execute, validation_query
-            )
-            logger.info(f"Table constraints validated for {table_name}")
-            return True
+            async with self._get_client() as client:
+                # Simple validation query - check if table is readable
+                validation_query = f"SELECT count() FROM {self.database}.{table_name} LIMIT 1"
+                await asyncio.get_event_loop().run_in_executor(
+                    None, client.execute, validation_query
+                )
+                logger.info(f"Table constraints validated for {table_name}")
+                return True
         except Exception as e:
             # Classify the error and add constraint context if needed
             classified_error = classify_error(e)
@@ -664,10 +657,14 @@ class ClickHouseTraceSchema:
                 raise classified_error from e
 
     def close(self):
-        """Close ClickHouse connection."""
-        if self._client:
-            self._client.disconnect()
-            self._client = None
+        """Close ClickHouse connection.
+
+        Note: Since we now use async context managers,
+        connections are automatically closed when exiting the context.
+        This method is kept for backward compatibility.
+        """
+        # No-op since connections are automatically managed by async context managers
+        pass
 
 
 # Convenience functions for module-level usage

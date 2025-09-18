@@ -279,7 +279,7 @@ Peak Memory Increase: {memory_increase:.2f}MB
 Memory After Cleanup: {memory_leaked:.2f}MB
 Memory Efficiency: {memory_increase / (mock_count * 2):.4f}MB per mock
 
-ASSESSMENT: {'✅ EFFICIENT' if memory_leaked < 10 else '⚠️ POSSIBLE LEAK'}
+ASSESSMENT: {'CHECK EFFICIENT' if memory_leaked < 10 else 'WARNING️ POSSIBLE LEAK'}
         """
 
         self.logger.info(f"Memory Efficiency:\n{memory_report}")

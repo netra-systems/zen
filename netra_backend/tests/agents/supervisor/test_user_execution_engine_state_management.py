@@ -134,9 +134,21 @@ class UserExecutionEngineStateManagementTests(SSotAsyncTestCase):
 
     async def test_execution_state_lifecycle_basic(self):
         """Test basic execution state lifecycle and transitions."""
+        # Create mock agent factory
+        from unittest.mock import Mock
+        mock_agent_factory = Mock()
+        mock_agent_factory._agent_registry = self.agent_registry
+
+        # Create mock websocket emitter with proper structure for UserExecutionEngine
+        mock_websocket_emitter = Mock()
+        mock_websocket_emitter.websocket_bridge = self.websocket_bridge  # Property expects this
+        mock_websocket_emitter.manager = self.websocket_bridge  # Keep for backward compatibility
+
+        # Use modern constructor signature
         engine = UserExecutionEngine(
-            agent_registry=self.agent_registry,
-            websocket_bridge=self.websocket_bridge
+            context=self.test_context,
+            agent_factory=mock_agent_factory,
+            websocket_emitter=mock_websocket_emitter
         )
 
         # Mock execution pipeline that tracks state transitions
@@ -212,9 +224,21 @@ class UserExecutionEngineStateManagementTests(SSotAsyncTestCase):
 
     async def test_execution_performance_monitoring(self):
         """Test execution performance monitoring and timing accuracy."""
+        # Create mock agent factory
+        from unittest.mock import Mock
+        mock_agent_factory = Mock()
+        mock_agent_factory._agent_registry = self.agent_registry
+
+        # Create mock websocket emitter with proper structure for UserExecutionEngine
+        mock_websocket_emitter = Mock()
+        mock_websocket_emitter.websocket_bridge = self.websocket_bridge  # Property expects this
+        mock_websocket_emitter.manager = self.websocket_bridge  # Keep for backward compatibility
+
+        # Use modern constructor signature
         engine = UserExecutionEngine(
-            agent_registry=self.agent_registry,
-            websocket_bridge=self.websocket_bridge
+            context=self.test_context,
+            agent_factory=mock_agent_factory,
+            websocket_emitter=mock_websocket_emitter
         )
 
         # Performance test data
@@ -310,9 +334,21 @@ class UserExecutionEngineStateManagementTests(SSotAsyncTestCase):
 
     async def test_execution_result_validation_and_structure(self):
         """Test execution result validation and proper data structure."""
+        # Create mock agent factory
+        from unittest.mock import Mock
+        mock_agent_factory = Mock()
+        mock_agent_factory._agent_registry = self.agent_registry
+
+        # Create mock websocket emitter with proper structure for UserExecutionEngine
+        mock_websocket_emitter = Mock()
+        mock_websocket_emitter.websocket_bridge = self.websocket_bridge  # Property expects this
+        mock_websocket_emitter.manager = self.websocket_bridge  # Keep for backward compatibility
+
+        # Use modern constructor signature
         engine = UserExecutionEngine(
-            agent_registry=self.agent_registry,
-            websocket_bridge=self.websocket_bridge
+            context=self.test_context,
+            agent_factory=mock_agent_factory,
+            websocket_emitter=mock_websocket_emitter
         )
 
         async def result_validation_execution(context: UserExecutionContext, request: str):
@@ -396,9 +432,21 @@ class UserExecutionEngineStateManagementTests(SSotAsyncTestCase):
 
     async def test_pipeline_step_tracking_and_progress(self):
         """Test pipeline step tracking and progress reporting."""
+        # Create mock agent factory
+        from unittest.mock import Mock
+        mock_agent_factory = Mock()
+        mock_agent_factory._agent_registry = self.agent_registry
+
+        # Create mock websocket emitter with proper structure for UserExecutionEngine
+        mock_websocket_emitter = Mock()
+        mock_websocket_emitter.websocket_bridge = self.websocket_bridge  # Property expects this
+        mock_websocket_emitter.manager = self.websocket_bridge  # Keep for backward compatibility
+
+        # Use modern constructor signature
         engine = UserExecutionEngine(
-            agent_registry=self.agent_registry,
-            websocket_bridge=self.websocket_bridge
+            context=self.test_context,
+            agent_factory=mock_agent_factory,
+            websocket_emitter=mock_websocket_emitter
         )
 
         # Track pipeline steps for verification
@@ -541,9 +589,21 @@ class UserExecutionEngineStateManagementTests(SSotAsyncTestCase):
 
     async def test_error_state_handling_and_recovery(self):
         """Test error state handling and recovery patterns."""
+        # Create mock agent factory
+        from unittest.mock import Mock
+        mock_agent_factory = Mock()
+        mock_agent_factory._agent_registry = self.agent_registry
+
+        # Create mock websocket emitter with proper structure for UserExecutionEngine
+        mock_websocket_emitter = Mock()
+        mock_websocket_emitter.websocket_bridge = self.websocket_bridge  # Property expects this
+        mock_websocket_emitter.manager = self.websocket_bridge  # Keep for backward compatibility
+
+        # Use modern constructor signature
         engine = UserExecutionEngine(
-            agent_registry=self.agent_registry,
-            websocket_bridge=self.websocket_bridge
+            context=self.test_context,
+            agent_factory=mock_agent_factory,
+            websocket_emitter=mock_websocket_emitter
         )
 
         # Track error states and recovery attempts

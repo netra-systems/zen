@@ -4,7 +4,7 @@ E2E Tests for Multi-User Isolation Security
 Business Value Justification (BVJ):
 - Segment: Enterprise/Platform Security
 - Business Goal: Ensure complete user data isolation and security compliance
-- Value Impact: Protects $500K+ ARR by preventing data breaches and security violations
+- Value Impact: Protects 500K+ ARR by preventing data breaches and security violations
 - Strategic Impact: Validates platform security foundation for enterprise customers
 
 This test suite validates multi-user isolation security in GCP staging:
@@ -60,7 +60,7 @@ class MultiUserIsolationSecurityTests(BaseE2ETest):
     """
     Test multi-user isolation security in GCP staging environment.
     
-    BUSINESS IMPACT: Protects $500K+ ARR by ensuring enterprise-grade security
+    BUSINESS IMPACT: Protects 500K+ ARR by ensuring enterprise-grade security
     SECURITY CRITICAL: Prevents data breaches and compliance violations
     """
 
@@ -74,9 +74,9 @@ class MultiUserIsolationSecurityTests(BaseE2ETest):
         self.data_leakage_detection_samples = 100
         
         # GCP staging endpoints
-        self.staging_websocket_url = "wss://staging.netra.ai/ws"
-        self.staging_auth_url = "https://auth-staging.netra.ai"
-        self.staging_api_url = "https://api-staging.netra.ai"
+        self.staging_websocket_url = "wss://staging.netrasystems.ai/ws"
+        self.staging_auth_url = "https://auth.netrasystems.ai"
+        self.staging_api_url = "https://api.staging.netrasystems.ai"
         
         # Security violation tracking
         self.security_violations = []
@@ -572,7 +572,7 @@ class MultiUserIsolationSecurityTests(BaseE2ETest):
                     events.append(event)
                 except asyncio.TimeoutError:
                     continue
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pass
         
         return events

@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,15 +23,10 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 E2E Authentication Edge Cases and Network Failures - Business Critical Testing
 
-MISSION: Test authentication scenarios that protect $500K+ ARR functionality.
+MISSION: Test authentication scenarios that protect 500K+ ARR functionality.
 
 This comprehensive test file validates critical authentication flows that enable
 revenue-generating features. Unlike the previous disabled version, this implementation:
@@ -123,7 +110,7 @@ class AuthenticationEdgeCasesBusinessCriticalTests(SSotAsyncTestCase):
     Test authentication edge cases and network connectivity failures for business-critical scenarios.
     
     BUSINESS VALUE: Enterprise/Internal - Revenue Protection & System Reliability
-    Validates authentication flows protecting $500K+ ARR and Enterprise customers ($15K+ MRR each).
+    Validates authentication flows protecting 500K+ ARR and Enterprise customers ($15K+ MRR each).
     
     CRITICAL SCENARIOS TESTED:
     1. Token expiration with refresh mechanism (Enterprise SSO)
@@ -603,22 +590,18 @@ class AuthenticationEdgeCasesBusinessCriticalTests(SSotAsyncTestCase):
                         self.record_metric('chat_message_response_time', message_duration)
                         self.record_metric('websocket_chat_integration', 'success')
                         
-                        logger.info(f" PASS:  BUSINESS SUCCESS: WebSocket chat authentication integration working ({message_duration:.3f}s)")
-                    
-                    except asyncio.TimeoutError:
-                        pytest.fail(
-                            "WebSocket chat message timed out - indicates authentication or chat system failure. "
+                        logger.info(f" PASS:  BUSINESS SUCCESS: WebSocket chat authentication integration working ({message_duration:.3f}s)""WebSocket chat message timed out - indicates authentication or chat system failure. "
                             "BUSINESS IMPACT: HIGH - Chat functionality (90% of platform value) not working."
                         )
             
-            except websockets.exceptions.ConnectionClosed as e:
+            except websockets.ConnectionClosed as e:
                 pytest.fail(
                     f"WebSocket connection closed unexpectedly: {e}. "
                     f"This could indicate authentication failure or network issues. "
                     f"BUSINESS IMPACT: Users cannot access chat functionality."
                 )
             
-            except websockets.exceptions.WebSocketException as e:
+            except websockets.WebSocketException as e:
                 pytest.fail(
                     f"WebSocket error during authentication test: {e}. "
                     f"This could prevent chat functionality from working properly."

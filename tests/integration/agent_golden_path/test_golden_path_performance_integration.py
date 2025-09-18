@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 CRITICAL REQUIREMENTS per CLAUDE.md:
 - Uses SSOT BaseTestCase patterns from test_framework/ssot/base_test_case.py
 - NO MOCKS for performance integration tests - uses real performance measurement
-- Tests must validate Golden Path performance SLAs for $500K+ ARR platform scalability
+- Tests must validate Golden Path performance SLAs for 500K+ ARR platform scalability
 - Performance benchmarking for Golden Path flows under various load conditions
 - Concurrent user scalability testing with resource monitoring
 - Response time distribution analysis for optimization insights
@@ -60,21 +60,13 @@ try:
     REAL_COMPONENTS_AVAILABLE = True
 except ImportError as e:
     # Graceful fallback if components not available
-    print(f"Warning: Some real components not available: {e}")
-    REAL_COMPONENTS_AVAILABLE = False
-    UserExecutionContext = MagicMock
-    get_websocket_manager = MagicMock
-    BaseAgent = MagicMock
-    AgentExecutionContext = MagicMock
-
-class GoldenPathPerformanceIntegrationTests(SSotAsyncTestCase):
-    """
+    print(f"Warning: Some real components not available: {e}""""
     P0 Critical Integration Tests for Golden Path Performance Validation.
 
     This test class validates Golden Path performance characteristics:
-    Performance Benchmarking → Scalability Testing → Resource Optimization
+    Performance Benchmarking -> Scalability Testing -> Resource Optimization
 
-    Tests protect $500K+ ARR platform scalability by validating:
+    Tests protect 500K+ ARR platform scalability by validating:
     - Golden Path performance benchmarks meeting business SLAs
     - Concurrent user scalability with realistic load patterns
     - Resource utilization monitoring and optimization

@@ -4,7 +4,7 @@ COMPREHENSIVE E2E TEST: User Onboarding Experience - REAL SERVICES ONLY
 
 Business Value Justification (BVJ):
 - Segment: ALL customer segments (Free, Early, Mid, Enterprise) - direct revenue impact
-- Business Goal: Protect $500K+ ARR by validating THE critical user onboarding pipeline
+- Business Goal: Protect 500K+ ARR by validating THE critical user onboarding pipeline
 - Value Impact: Ensures complete user journey from signup to AI cost optimization value
 - Strategic Impact: Complete onboarding = 70%+ conversion to paid tier ($2K+ annual customer value each)
   - Failed onboarding = 100% customer churn = $0 revenue

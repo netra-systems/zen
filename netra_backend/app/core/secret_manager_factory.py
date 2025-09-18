@@ -5,14 +5,14 @@ Provides factory functions for creating secret managers based on environment.
 
 import os
 
-from netra_backend.app.core.configuration.base import config_manager
+from netra_backend.app.config import get_config
 from netra_backend.app.core.secret_manager_core import EnhancedSecretManager
 from netra_backend.app.schemas.config_types import EnvironmentType
 
 
 def create_secret_manager() -> EnhancedSecretManager:
     """Create secret manager based on environment."""
-    config = config_manager.get_config()
+    config = get_config()
     env_name = getattr(config, 'environment', 'development').lower()
     
     environment = _get_environment_type(env_name)

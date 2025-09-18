@@ -11,7 +11,7 @@ Test Suites:
 - test_websocket_agent_coordination.py: WebSocket coordination for agents
 
 Business Value:
-These tests protect $500K+ ARR by ensuring reliable agent orchestration,
+These tests protect 500K+ ARR by ensuring reliable agent orchestration,
 multi-user isolation, and real-time WebSocket coordination for enterprise customers.
 
 Environment: GCP Staging (NO DOCKER)

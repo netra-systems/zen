@@ -4,7 +4,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise (concurrent user validation required)  
 - Business Goal: Validate multi-user isolation and concurrency
 - Value Impact: Prevents enterprise customer churn from concurrency issues
-- Revenue Impact: Protects $100K+ ARR from enterprise contracts
+- Revenue Impact: Protects 100K+ ARR from enterprise contracts
 
 This module provides models and utilities for testing concurrent user scenarios
 in E2E tests, ensuring proper user isolation and system scalability.

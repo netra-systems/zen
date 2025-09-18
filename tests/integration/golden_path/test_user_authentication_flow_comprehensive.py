@@ -302,7 +302,7 @@ class UserAuthenticationFlowComprehensiveTests(DatabaseIntegrationTest, CacheInt
         assert recovery_validation['user_id'] == expired_user.user_id, 'Recovery must maintain user identity'
         try:
             invalid_ws_headers = self.websocket_auth_helper.get_websocket_headers('invalid.token')
-            with pytest.raises((websockets.exceptions.ConnectionClosed, websockets.exceptions.InvalidHandshake, ConnectionError, OSError)):
+            with pytest.raises((websockets.ConnectionClosed, websockets.InvalidHandshake, ConnectionError, OSError)):
                 websocket_conn = await websockets.connect(self.websocket_url, additional_headers=invalid_ws_headers, open_timeout=5.0)
             logger.info(' PASS:  WebSocket authentication error handled correctly')
         except Exception as e:
@@ -459,12 +459,12 @@ class UserAuthenticationFlowComprehensiveTests(DatabaseIntegrationTest, CacheInt
         middleware_execution_order = []
         middleware_components = ['cors_middleware', 'rate_limiting_middleware', 'jwt_validation_middleware', 'user_context_middleware', 'authorization_middleware', 'business_logic_handler']
         middleware_user = await create_test_user_with_auth(email=f'middleware_test_{int(time.time())}@example.com', name='Middleware Test User', permissions=['read', 'write', 'middleware_test'], environment=self.environment)
-        request_context = {'headers': {'Authorization': f"Bearer {middleware_user['access_token']}", 'Content-Type': 'application/json', 'Origin': 'https://app.netra.ai', 'X-Forwarded-For': '192.168.1.100', 'User-Agent': 'Mozilla/5.0 (Test Client)'}, 'method': 'POST', 'path': '/api/chat/send', 'body': {'message': 'Test middleware order'}, 'user_id': None, 'permissions': None, 'rate_limit_passed': False, 'authenticated': False, 'authorized': False}
+        request_context = {'headers': {'Authorization': f"Bearer {middleware_user['access_token']}", 'Content-Type': 'application/json', 'Origin': 'https://app.netrasystems.ai', 'X-Forwarded-For': '192.168.1.100', 'User-Agent': 'Mozilla/5.0 (Test Client)'}, 'method': 'POST', 'path': '/api/chat/send', 'body': {'message': 'Test middleware order'}, 'user_id': None, 'permissions': None, 'rate_limit_passed': False, 'authenticated': False, 'authorized': False}
 
         def cors_middleware(context):
             """Simulate CORS middleware processing."""
             origin = context['headers'].get('Origin')
-            if origin and 'netra.ai' in origin:
+            if origin and 'netrasystems.ai' in origin:
                 context['cors_valid'] = True
                 middleware_execution_order.append('cors_middleware')
                 return True
@@ -560,7 +560,7 @@ class UserAuthenticationFlowComprehensiveTests(DatabaseIntegrationTest, CacheInt
         assert request_context['authenticated'], 'User must be authenticated'
         assert request_context['authorized'], 'User must be authorized'
         assert request_context['response']['status'] == 'success', 'Business logic must succeed'
-        invalid_request_context = {'headers': {'Authorization': 'Bearer invalid.token.here', 'Content-Type': 'application/json', 'Origin': 'https://app.netra.ai'}, 'method': 'POST', 'path': '/api/chat/send', 'body': {'message': 'Test with invalid token'}}
+        invalid_request_context = {'headers': {'Authorization': 'Bearer invalid.token.here', 'Content-Type': 'application/json', 'Origin': 'https://app.netrasystems.ai'}, 'method': 'POST', 'path': '/api/chat/send', 'body': {'message': 'Test with invalid token'}}
         error_middleware_order = []
         cors_passed = cors_middleware(invalid_request_context)
         if cors_passed:
@@ -686,10 +686,10 @@ class UserAuthenticationFlowComprehensiveTests(DatabaseIntegrationTest, CacheInt
             try:
                 await websocket_conn.send(json.dumps(expired_message))
                 logger.info(' WARNING: [U+FE0F] WebSocket message sent with expired token (server may not check immediately)')
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 logger.info(' PASS:  WebSocket connection closed due to token expiration')
             await websocket_conn.close()
-        except (websockets.exceptions.InvalidHandshake, websockets.exceptions.ConnectionClosed, asyncio.TimeoutError, ConnectionError, OSError) as e:
+        except (websockets.InvalidHandshake, websockets.ConnectionClosed, asyncio.TimeoutError, ConnectionError, OSError) as e:
             logger.info(f' PASS:  WebSocket timeout test handled connection error gracefully: {e}')
         refresh_user = await create_test_user_with_auth(email=f'refresh_test_{int(time.time())}@example.com', name='Refresh Test User', permissions=['read', 'write', 'token_refresh'], environment=self.environment)
         original_token = self.auth_helper.create_test_jwt_token(user_id=refresh_user['user_id'], email=refresh_user['email'], permissions=refresh_user['permissions'], exp_minutes=0.1)

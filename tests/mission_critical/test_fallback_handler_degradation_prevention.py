@@ -2,7 +2,7 @@
 """MISSION CRITICAL: Fallback Handler Degradation Prevention Test Suite
 
 THIS SUITE MUST PASS OR THE PRODUCT IS BROKEN.
-Business Value: $500K+ ARR - Core agent business value protection
+Business Value: 500K+ ARR - Core agent business value protection
 
 PURPOSE: This test suite prevents the fallback handler anti-pattern that degrades
 business value by ensuring users NEVER receive mock responses instead of real AI agent value.

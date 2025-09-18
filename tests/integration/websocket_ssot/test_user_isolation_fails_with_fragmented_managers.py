@@ -136,7 +136,7 @@ class UserIsolationFailsWithFragmentedManagersTests(SSotAsyncTestCase):
             )
             
             if user2_connection_in_manager1:
-                logger.error("❌ CRITICAL USER ISOLATION VIOLATION: Manager1 contains User2's connection!")
+                logger.error("X CRITICAL USER ISOLATION VIOLATION: Manager1 contains User2's connection!")
                 logger.error(f"User1 manager can access User2's data: {self.user_context_2.user_id}")
                 logger.error("This represents a severe security breach in multi-tenant environment")
                 
@@ -152,7 +152,7 @@ class UserIsolationFailsWithFragmentedManagersTests(SSotAsyncTestCase):
                     f"potentially affecting $500K+ ARR from enterprise accounts requiring strict isolation."
                 )
             
-            logger.info("✅ User1 manager properly isolated from User2 data")
+            logger.info("CHECK User1 manager properly isolated from User2 data")
             
             # Test 2: Manager2 should only have User2's connections  
             manager2_connections = await self._get_user_connections(manager2, self.user_context_2.user_id)
@@ -176,7 +176,7 @@ class UserIsolationFailsWithFragmentedManagersTests(SSotAsyncTestCase):
             )
             
             if user1_connection_in_manager2:
-                logger.error("❌ CRITICAL USER ISOLATION VIOLATION: Manager2 contains User1's connection!")
+                logger.error("X CRITICAL USER ISOLATION VIOLATION: Manager2 contains User1's connection!")
                 logger.error(f"User2 manager can access User1's data: {self.user_context_1.user_id}")
                 
                 pytest.fail(
@@ -185,15 +185,15 @@ class UserIsolationFailsWithFragmentedManagersTests(SSotAsyncTestCase):
                     f"BUSINESS IMPACT: Enterprise multi-tenant isolation completely compromised."
                 )
                 
-            logger.info("✅ User2 manager properly isolated from User1 data")
+            logger.info("CHECK User2 manager properly isolated from User1 data")
             
             # Test 3: Cross-manager state verification
             await self._verify_cross_manager_isolation(manager1, manager2)
             
-            logger.info("✅ User isolation test PASSED - managers properly isolated")
+            logger.info("CHECK User isolation test PASSED - managers properly isolated")
             
         except Exception as e:
-            logger.error(f"❌ USER ISOLATION TEST FAILED: {e}")
+            logger.error(f"X USER ISOLATION TEST FAILED: {e}")
             raise
     
     async def _get_user_connections(self, manager, user_id):
@@ -231,7 +231,7 @@ class UserIsolationFailsWithFragmentedManagersTests(SSotAsyncTestCase):
                 manager2_storage_id = id(manager2.connections)
                 
                 if manager1_storage_id == manager2_storage_id:
-                    logger.error("❌ SHARED STATE VIOLATION: Managers share connection storage!")
+                    logger.error("X SHARED STATE VIOLATION: Managers share connection storage!")
                     pytest.fail(
                         f"SHARED STATE DETECTED: Manager1 and Manager2 share connection storage "
                         f"(storage_id={manager1_storage_id}). "
@@ -239,14 +239,14 @@ class UserIsolationFailsWithFragmentedManagersTests(SSotAsyncTestCase):
                         f"Business Impact: Shared state creates cross-contamination risk."
                     )
                 
-                logger.info(f"✅ Managers have independent connection storage: {manager1_storage_id} != {manager2_storage_id}")
+                logger.info(f"CHECK Managers have independent connection storage: {manager1_storage_id} != {manager2_storage_id}")
             
             # Check if managers are the same instance (should be different for proper isolation)
             manager1_instance_id = id(manager1)
             manager2_instance_id = id(manager2)
             
             if manager1_instance_id == manager2_instance_id:
-                logger.error("❌ INSTANCE SHARING VIOLATION: Same manager instance used for different users!")
+                logger.error("X INSTANCE SHARING VIOLATION: Same manager instance used for different users!")
                 pytest.fail(
                     f"INSTANCE SHARING DETECTED: Same manager instance ({manager1_instance_id}) used for "
                     f"different user contexts. "
@@ -254,7 +254,7 @@ class UserIsolationFailsWithFragmentedManagersTests(SSotAsyncTestCase):
                     f"Business Impact: Single instance shared between users creates contamination risk."
                 )
             
-            logger.info(f"✅ Managers are properly isolated instances: {manager1_instance_id} != {manager2_instance_id}")
+            logger.info(f"CHECK Managers are properly isolated instances: {manager1_instance_id} != {manager2_instance_id}")
             
         except Exception as e:
             logger.error(f"Cross-manager isolation verification failed: {e}")
@@ -323,7 +323,7 @@ class UserIsolationFailsWithFragmentedManagersTests(SSotAsyncTestCase):
             )
             
             if user2_data_in_user1 or user1_data_in_user2:
-                logger.error("❌ CONCURRENT ISOLATION VIOLATION: User data mixed during concurrent operations!")
+                logger.error("X CONCURRENT ISOLATION VIOLATION: User data mixed during concurrent operations!")
                 pytest.fail(
                     f"CONCURRENT ISOLATION FAILURE: User data contamination detected during concurrent operations. "
                     f"User2 data in User1: {user2_data_in_user1}, User1 data in User2: {user1_data_in_user2}. "
@@ -331,10 +331,10 @@ class UserIsolationFailsWithFragmentedManagersTests(SSotAsyncTestCase):
                     f"Business Impact: Concurrent user operations cause data contamination in enterprise environment."
                 )
             
-            logger.info("✅ Concurrent operations maintained proper user isolation")
+            logger.info("CHECK Concurrent operations maintained proper user isolation")
             
         except Exception as e:
-            logger.error(f"❌ CONCURRENT ISOLATION TEST FAILED: {e}")
+            logger.error(f"X CONCURRENT ISOLATION TEST FAILED: {e}")
             raise
 
     def teardown_method(self, method):

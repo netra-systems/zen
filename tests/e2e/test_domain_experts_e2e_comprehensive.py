@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 1. Segment: Mid, Enterprise
 2. Business Goal: Enable specialized AI consultation and domain expertise
 3. Value Impact: Domain experts provide expert-level advice in specific industries
-4. Revenue Impact: $400K+ ARR from specialized consulting and domain expertise features
+4. Revenue Impact: 400K+ ARR from specialized consulting and domain expertise features
 
 CLAUDE.md COMPLIANCE:
 - Uses real services ONLY (NO MOCKS)
@@ -243,18 +243,18 @@ class RealDomainExpertsTester:
                 if missing_events:
                     report.append(f'     WARNING: MISSING REQUIRED EVENTS: {missing_events}')
                 else:
-                    report.append('    ✓ All required WebSocket events received')
+                    report.append('    CHECK All required WebSocket events received')
                 report.append('    Performance Metrics:')
                 report.append(f'      - Expert started: {val.time_to_expert_started:.2f}s' if val.time_to_expert_started else '      - Expert not started')
                 report.append(f'      - First expertise: {val.time_to_first_expertise:.2f}s' if val.time_to_first_expertise else '      - No expertise observed')
                 report.append(f'      - Domain analysis: {val.time_to_domain_analysis:.2f}s' if val.time_to_domain_analysis else '      - No analysis performed')
                 report.append(f'      - Consultation completion: {val.time_to_consultation_completion:.2f}s' if val.time_to_consultation_completion else '      - Consultation not completed')
                 report.append('    Domain Expertise Validation:')
-                report.append(f'      ✓ Expert knowledge demonstrated: {val.expert_knowledge_demonstrated}')
-                report.append(f'      ✓ Domain-specific analysis: {val.domain_specific_analysis}')
-                report.append(f'      ✓ Actionable recommendations: {val.actionable_recommendations}')
-                report.append(f'      ✓ Compliance validated: {val.compliance_validated}')
-                report.append(f'      ✓ Overall consultation quality: {val.consultation_quality:.1%}')
+                report.append(f'      CHECK Expert knowledge demonstrated: {val.expert_knowledge_demonstrated}')
+                report.append(f'      CHECK Domain-specific analysis: {val.domain_specific_analysis}')
+                report.append(f'      CHECK Actionable recommendations: {val.actionable_recommendations}')
+                report.append(f'      CHECK Compliance validated: {val.compliance_validated}')
+                report.append(f'      CHECK Overall consultation quality: {val.consultation_quality:.1%}')
                 if val.expertise_applied:
                     report.append(f'    Expertise Applied ({len(val.expertise_applied)} insights):')
                     for insight in val.expertise_applied[:2]:

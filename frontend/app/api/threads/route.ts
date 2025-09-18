@@ -37,7 +37,7 @@ function getServiceAuthHeaders(request: NextRequest): Record<string, string> {
   }
 
   // Add service account email for GCP auth
-  const serviceAccount = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || 'netra-frontend@staging.netra.ai';
+  const serviceAccount = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || 'netra-frontend@staging.netrasystems.ai';
   if (serviceAccount) {
     headers['X-Service-Account'] = serviceAccount;
   }

@@ -2,7 +2,7 @@
 """MISSION CRITICAL: Database Import Dependency Resolution Test Suite
 
 THIS SUITE DETECTS CIRCULAR IMPORT DEPENDENCIES IN DATABASE MODULES
-Business Value: $500K+ ARR - Prevents startup failures and WebSocket factory initialization
+Business Value: 500K+ ARR - Prevents startup failures and WebSocket factory initialization
 
 CRITICAL VIOLATIONS TO DETECT:
 1. Circular import dependencies between database modules
@@ -306,8 +306,7 @@ class DatabaseImportDependencyResolutionTests(SSotBaseTestCase):
                 logger.info("[U+2713] Step 4: WebSocket manager import")
                 self.record_metric("step4_websocket_manager_success", True)
             except ImportError:
-                logger.info("[U+25CB] Step 4: WebSocket manager not found (acceptable)")
-                self.record_metric("step4_websocket_manager_optional", True)
+                logger.info("[U+25CB] Step 4: WebSocket manager not found (acceptable)""step4_websocket_manager_optional", True)
         except Exception as e:
             initialization_success = False
             initialization_errors.append(f"Step 4 (WebSocket): {e}")

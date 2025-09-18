@@ -11,14 +11,15 @@ from pydantic import BaseModel, Field
 
 from netra_backend.app.agents.data_sub_agent.models import (
     AnomalyDetectionResponse,
-    DataAnalysisResponse,
 )
+# Import SSOT DataAnalysisResponse from shared_types
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.state import OptimizationsResult
 from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class ArtifactValidationError(Exception):

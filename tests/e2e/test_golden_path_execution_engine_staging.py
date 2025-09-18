@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise, Platform)
 - Business Goal: Protect 90% of platform business value through chat functionality  
 - Value Impact: Ensure zero regression in core user experience during SSOT migration
-- Strategic Impact: $500K+ ARR protected through validated Golden Path functionality
+- Strategic Impact: 500K+ ARR protected through validated Golden Path functionality
 
 Test Focus:
 - Real staging GCP environment (no Docker)
@@ -111,7 +111,7 @@ class GoldenPathExecutionEngineStagingE2ETests(BaseE2ETest):
         final_response = completion_events[-1]
         response_data = final_response.get('data', {})
         self.assertIsNotNone(response_data.get('result'), 'Golden Path requires substantive AI response')
-        print(f'✅ GOLDEN PATH SUCCESS: Deprecated ExecutionEngine compatibility validated')
+        print(f'CHECK GOLDEN PATH SUCCESS: Deprecated ExecutionEngine compatibility validated')
         print(f'   - User authentication: PASSED')
         print(f'   - WebSocket events: {len(events_collected)} events collected')
         print(f'   - Critical events: All 5 delivered')
@@ -174,7 +174,7 @@ class GoldenPathExecutionEngineStagingE2ETests(BaseE2ETest):
         response_data = final_response.get('data', {})
         self.assertIsNotNone(response_data.get('result'), 'Golden Path requires AI response')
         self.assertEqual(response_data.get('user_id'), test_user['user_id'], 'Golden Path response must be scoped to correct user')
-        print(f'✅ GOLDEN PATH SSOT SUCCESS: UserExecutionEngine migration validated')
+        print(f'CHECK GOLDEN PATH SSOT SUCCESS: UserExecutionEngine migration validated')
         print(f"   - User isolation: CONFIRMED (user_id={test_user['user_id']})")
         print(f'   - WebSocket events: {len(events_collected)} events with user context')
         print(f'   - Security enhancement: User data properly isolated')
@@ -192,7 +192,7 @@ class GoldenPathExecutionEngineStagingE2ETests(BaseE2ETest):
         deprecated ExecutionEngine shared state between users. This test validates that
         UserExecutionEngine prevents data contamination in concurrent Golden Path scenarios.
         
-        BUSINESS CRITICAL: Multi-user isolation prevents security breaches worth $500K+ ARR.
+        BUSINESS CRITICAL: Multi-user isolation prevents security breaches worth 500K+ ARR.
         """
         if not USER_EXECUTION_ENGINE_AVAILABLE:
             pytest.skip(f'UserExecutionEngine not available for concurrent testing: {USER_EXECUTION_ENGINE_ERROR}')
@@ -252,7 +252,7 @@ class GoldenPathExecutionEngineStagingE2ETests(BaseE2ETest):
             expected_user_id = result['user_id']
             for event in user_events:
                 self.assertEqual(event['data']['user_id'], expected_user_id, f'WebSocket event contamination: Wrong user_id in event')
-        print(f'✅ GOLDEN PATH CONCURRENT SUCCESS: Multi-user isolation validated')
+        print(f'CHECK GOLDEN PATH CONCURRENT SUCCESS: Multi-user isolation validated')
         print(f'   - Concurrent users: {len(concurrent_users)}')
         print(f'   - Security isolation: CONFIRMED - no data contamination')
         print(f'   - Engine isolation: Each user has unique engine instance')

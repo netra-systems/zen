@@ -1,0 +1,39 @@
+{
+  "instances": [
+    {
+      "command": "/gitissueprogressorv4 978",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv4 967",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv4 966",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv4 962",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv4 959",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv4 958",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv4 957",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json"
+    }
+  ]
+}

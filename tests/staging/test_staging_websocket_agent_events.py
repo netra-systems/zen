@@ -121,6 +121,6 @@ if __name__ == "__main__":
                     print(f"{test_name}: {test_result}")
             exit(1)
         else:
-            print("\n✅ All staging WebSocket tests PASSED!")
+            print("\nCHECK All staging WebSocket tests PASSED!")
             
     asyncio.run(main())

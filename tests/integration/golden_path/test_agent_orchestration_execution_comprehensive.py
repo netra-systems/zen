@@ -26,7 +26,7 @@ import json
 import pytest
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -94,9 +94,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             logger.info('🔧 Setting up mock database session for UserExecutionContext...')
             self._db_session = AsyncMock()
             self.test_user_context = self.test_user_context.with_db_session(self._db_session)
-            logger.info('✅ Mock database session created and attached to UserExecutionContext')
+            logger.info('CHECK Mock database session created and attached to UserExecutionContext')
         except Exception as e:
-            logger.error(f'❌ Failed to setup test database session: {e}')
+            logger.error(f'X Failed to setup test database session: {e}')
             logger.warning('   - Tests may fail due to missing database session')
 
     def _create_user_context_with_db_session(self, user_id: str=None, thread_id: str=None, run_id: str=None, **kwargs) -> UserExecutionContext:
@@ -215,9 +215,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
                 llm_manager=self.mock_llm_manager, 
                 tool_dispatcher=None
             )
-            logger.info('✅ AgentInstanceFactory configured successfully for tests')
+            logger.info('CHECK AgentInstanceFactory configured successfully for tests')
         except Exception as e:
-            logger.error(f'❌ Failed to configure AgentInstanceFactory: {e}')
+            logger.error(f'X Failed to configure AgentInstanceFactory: {e}')
             raise
             
     async def _ensure_agent_factory_configured(self):
@@ -240,7 +240,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         from unittest.mock import AsyncMock
         mock_db_session = AsyncMock()
         user_context = UserExecutionContext(user_id=realistic_user_context.user_id, thread_id=realistic_user_context.thread_id, run_id=realistic_user_context.run_id, request_id=realistic_user_context.request_id, websocket_client_id=realistic_user_context.websocket_client_id, agent_context=agent_context_data, audit_metadata=realistic_user_context.audit_metadata.copy(), operation_depth=realistic_user_context.operation_depth, parent_request_id=realistic_user_context.parent_request_id, db_session=mock_db_session)
-        logger.info(f'✅ New user context created with database session: {user_context.db_session is not None}')
+        logger.info(f'CHECK New user context created with database session: {user_context.db_session is not None}')
         supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=user_context)
         from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
         websocket_bridge = create_agent_websocket_bridge(user_context)
@@ -379,7 +379,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         engine = await factory.create_for_user(user_context)
         execution1_data = {'message': 'Analyze my current AI infrastructure costs', 'context_key': 'initial_analysis'}
         result1 = await engine.execute_agent_pipeline(agent_name='data_helper', execution_context=user_context, input_data=execution1_data)
-        context_data = {'infrastructure_type': 'cloud_ml', 'monthly_spend': 5000.0, 'analysis_timestamp': datetime.utcnow().isoformat()}
+        context_data = {'infrastructure_type': 'cloud_ml', 'monthly_spend': 5000.0, 'analysis_timestamp': datetime.now(UTC).isoformat()}
         engine.set_agent_result('infrastructure_analysis', context_data)
         execution2_data = {'message': 'Based on previous analysis, suggest optimizations', 'context_key': 'optimization_recommendations', 'use_previous_context': True}
         result2 = await engine.execute_agent_pipeline(agent_name='optimization', execution_context=user_context, input_data=execution2_data)
@@ -410,7 +410,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         original_send_event = getattr(websocket_bridge, 'send_event', None)
 
         async def tracked_send_event(event_type: str, data: Dict[str, Any], **kwargs):
-            event_tracker.append({'type': event_type, 'data': data, 'timestamp': datetime.utcnow(), 'user_id': kwargs.get('user_id', user_context.user_id)})
+            event_tracker.append({'type': event_type, 'data': data, 'timestamp': datetime.now(UTC), 'user_id': kwargs.get('user_id', user_context.user_id)})
             if original_send_event and callable(original_send_event):
                 return await original_send_event(event_type, data, **kwargs)
         if hasattr(websocket_bridge, 'send_event'):
@@ -419,9 +419,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         result = await supervisor.execute(context=user_context, stream_updates=True)
         event_types = [event['type'] for event in event_tracker]
         if 'agent_started' in event_types:
-            logger.info('✅ agent_started event verified')
+            logger.info('CHECK agent_started event verified')
         else:
-            logger.warning(f'⚠️ agent_started not found. Available events: {event_types}')
+            logger.warning(f'WARNING️ agent_started not found. Available events: {event_types}')
         logger.info(f'Event tracker captured {len(event_tracker)} events')
         logger.info(f"WebSocket bridge has _event_history: {hasattr(websocket_bridge, '_event_history')}")
         bridge_events = getattr(websocket_bridge, '_event_history', [])
@@ -430,12 +430,12 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         if total_events == 0:
             logger.warning('No WebSocket events captured - this may indicate WebSocket integration issues')
         else:
-            logger.info(f'✅ Total WebSocket events: {total_events}')
+            logger.info(f'CHECK Total WebSocket events: {total_events}')
         if 'agent_started' in event_types and 'agent_completed' in event_types:
             started_idx = event_types.index('agent_started')
             completed_idx = event_types.index('agent_completed')
             self.assertLess(started_idx, completed_idx, 'agent_started should come before agent_completed')
-            logger.info('✅ Event order verification passed')
+            logger.info('CHECK Event order verification passed')
         else:
             logger.info(f'Event order check skipped - available events: {event_types}')
             self.assertIsNotNone(result)
@@ -551,22 +551,22 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         optimizer_result = await optimizer_agent.execute(message='Generate optimization recommendations', context=user_context, shared_context=shared_context)
         report_result = await report_agent.execute(message='Create comprehensive optimization report', context=user_context, shared_context=shared_context)
         if 'data_analysis' in shared_context:
-            logger.info('✅ data_analysis found in shared_context')
+            logger.info('CHECK data_analysis found in shared_context')
             self.assertIn('data_analysis', shared_context)
         else:
-            logger.warning(f'⚠️ data_analysis not found in shared_context: {shared_context.keys()}')
+            logger.warning(f'WARNING️ data_analysis not found in shared_context: {shared_context.keys()}')
         if 'optimization_plan' in shared_context:
-            logger.info('✅ optimization_plan found in shared_context')
+            logger.info('CHECK optimization_plan found in shared_context')
             self.assertIn('optimization_plan', shared_context)
         else:
-            logger.warning(f'⚠️ optimization_plan not found in shared_context: {shared_context.keys()}')
+            logger.warning(f'WARNING️ optimization_plan not found in shared_context: {shared_context.keys()}')
         if 'data_analysis' in shared_context and 'optimization_plan' in shared_context:
             self.assertEqual(shared_context['data_analysis']['cost_data']['monthly'], 3500)
             expected_savings = 3500 * 0.2
             self.assertEqual(shared_context['optimization_plan']['estimated_savings'], expected_savings)
-            logger.info('✅ Agent coordination data verified')
+            logger.info('CHECK Agent coordination data verified')
         else:
-            logger.warning(f'⚠️ Shared context not fully populated: {shared_context.keys()}')
+            logger.warning(f'WARNING️ Shared context not fully populated: {shared_context.keys()}')
             self.assertIsNotNone(data_result)
             self.assertIsNotNone(optimizer_result)
             self.assertIsNotNone(report_result)
@@ -583,7 +583,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         websocket_bridge = AgentWebSocketBridge()
         factory = ExecutionEngineFactory(websocket_bridge=websocket_bridge)
         engine = await factory.create_for_user(user_context)
-        agent_results = [{'agent_type': 'triage', 'result': {'requirements': ['cost_analysis', 'optimization'], 'priority': 'high'}, 'execution_time': 1.2, 'timestamp': datetime.utcnow()}, {'agent_type': 'data_helper', 'result': {'cost_data': {'monthly': 4200}, 'utilization': {'avg': 0.73}}, 'execution_time': 2.8, 'timestamp': datetime.utcnow()}, {'agent_type': 'optimization', 'result': {'recommendations': ['optimize_scaling'], 'savings': 840}, 'execution_time': 3.1, 'timestamp': datetime.utcnow()}]
+        agent_results = [{'agent_type': 'triage', 'result': {'requirements': ['cost_analysis', 'optimization'], 'priority': 'high'}, 'execution_time': 1.2, 'timestamp': datetime.now(UTC)}, {'agent_type': 'data_helper', 'result': {'cost_data': {'monthly': 4200}, 'utilization': {'avg': 0.73}}, 'execution_time': 2.8, 'timestamp': datetime.now(UTC)}, {'agent_type': 'optimization', 'result': {'recommendations': ['optimize_scaling'], 'savings': 840}, 'execution_time': 3.1, 'timestamp': datetime.now(UTC)}]
         for agent_result in agent_results:
             engine.set_agent_result(agent_result['agent_type'], agent_result['result'])
         aggregated_result = engine.get_all_agent_results()
@@ -615,15 +615,15 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
         async def monitored_execute(*args, **kwargs):
             start_time = time.time()
-            execution_logs.append({'event': 'execution_started', 'timestamp': datetime.utcnow(), 'user_id': user_context.user_id, 'test_scenario': 'monitoring_logging_integration'})
+            execution_logs.append({'event': 'execution_started', 'timestamp': datetime.now(UTC), 'user_id': user_context.user_id, 'test_scenario': 'monitoring_logging_integration'})
             try:
                 result = await original_execute(*args, **kwargs)
                 execution_time = time.time() - start_time
-                execution_logs.append({'event': 'execution_completed', 'timestamp': datetime.utcnow(), 'execution_time': execution_time, 'result_size': len(str(result))})
+                execution_logs.append({'event': 'execution_completed', 'timestamp': datetime.now(UTC), 'execution_time': execution_time, 'result_size': len(str(result))})
                 performance_metrics.append({'agent_type': 'data_helper', 'execution_time': execution_time, 'memory_usage': 'tracked', 'success': True})
                 return result
             except Exception as e:
-                execution_logs.append({'event': 'execution_failed', 'error': str(e), 'timestamp': datetime.utcnow()})
+                execution_logs.append({'event': 'execution_failed', 'error': str(e), 'timestamp': datetime.now(UTC)})
                 raise
         agent.execute = monitored_execute
         result = await agent.execute(message='Test monitoring and logging', context=user_context)
@@ -802,7 +802,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         start_time = time.time()
         result = await agent.execute(message='Optimization with metrics collection', context=user_context)
         execution_time = time.time() - start_time
-        execution_metrics = {'user_id': user_context.user_id, 'agent_type': 'optimization', 'execution_time': execution_time, 'tokens_used': result.get('metrics', {}).get('tokens_used', 0), 'api_calls': result.get('metrics', {}).get('api_calls', 0), 'timestamp': datetime.utcnow(), 'success': True}
+        execution_metrics = {'user_id': user_context.user_id, 'agent_type': 'optimization', 'execution_time': execution_time, 'tokens_used': result.get('metrics', {}).get('tokens_used', 0), 'api_calls': result.get('metrics', {}).get('api_calls', 0), 'timestamp': datetime.now(UTC), 'success': True}
         exec_id = execution_tracker.create_execution(agent_name='optimization', user_id=user_context.user_id, thread_id=user_context.thread_id)
         from netra_backend.app.core.agent_execution_tracker import ExecutionState
         execution_tracker.update_execution_state(exec_id, ExecutionState.COMPLETED)
@@ -829,7 +829,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         async def failing_then_succeeding_execution(request_data, context):
             nonlocal execution_attempts
             execution_attempts += 1
-            state_snapshot = {'attempt': execution_attempts, 'context': context.to_dict(), 'timestamp': datetime.utcnow()}
+            state_snapshot = {'attempt': execution_attempts, 'context': context.to_dict(), 'timestamp': datetime.now(UTC)}
             saved_states.append(state_snapshot)
             if execution_attempts <= 2:
                 raise Exception(f'Execution failed on attempt {execution_attempts}')
@@ -941,9 +941,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         try:
             if hasattr(self, '_db_session'):
                 self._db_session = None
-                logger.info('✅ Mock database session cleanup completed')
+                logger.info('CHECK Mock database session cleanup completed')
         except Exception as e:
-            logger.error(f'❌ Error during database cleanup: {e}')
+            logger.error(f'X Error during database cleanup: {e}')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

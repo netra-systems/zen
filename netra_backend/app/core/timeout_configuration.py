@@ -79,6 +79,10 @@ class TimeoutConfig:
 class CloudNativeTimeoutManager:
     """SSOT manager for cloud-native timeout configurations.
     
+    **SSOT COMPLIANCE**: This class has been consolidated to delegate execution tracking
+    to the AgentExecutionTracker SSOT implementation. TimeoutManager functionality is
+    provided by the unified agent_execution_tracker.py module.
+    
     **CRITICAL BUSINESS REQUIREMENT**: Timeout hierarchy must ensure:
     - WebSocket timeouts > Agent execution timeouts (coordination)
     - Cloud Run environments get longer timeouts (cold starts)
@@ -416,8 +420,9 @@ class CloudNativeTimeoutManager:
         cold_start_buffer = self._calculate_cold_start_buffer('staging', gcp_markers)
         
         # Base timeouts with cold start buffer applied
-        base_websocket_recv = 15.0  # Issue #586 remedy: 15s base timeout
-        base_agent_execution = 12.0  # Must be < WebSocket recv timeout
+        # Issue #1278 Remediation: Increased WebSocket timeout from 15s to 35s for infrastructure resilience
+        base_websocket_recv = 35.0  # Issue #1278: Increased from 15s to 35s for infrastructure delays
+        base_agent_execution = 30.0  # Issue #1278: Increased from 12s to 30s, must be < WebSocket recv timeout
         
         # Apply cold start buffer
         websocket_recv_with_buffer = base_websocket_recv + cold_start_buffer

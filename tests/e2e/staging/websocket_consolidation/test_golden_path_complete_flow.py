@@ -2,13 +2,13 @@
 E2E Staging Test: Golden Path Complete Flow Validation
 
 This test is designed to FAIL initially, proving that the complete Golden Path
-user flow (users login → get AI responses) is broken due to SSOT violations.
+user flow (users login -> get AI responses) is broken due to SSOT violations.
 
 Business Impact:
 - Complete Golden Path user flow broken
 - Users cannot login and get AI responses
 - End-to-end chat functionality non-functional
-- $500K+ ARR completely blocked by system failures
+- 500K+ ARR completely blocked by system failures
 
 SSOT Violations Blocking Golden Path:
 - WebSocket SSOT violations prevent real-time communication
@@ -47,7 +47,7 @@ class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
     CRITICAL E2E: This test proves Golden Path is completely broken.
 
     EXPECTED RESULT: FAIL - Complete user flow broken by SSOT violations
-    BUSINESS IMPACT: $500K+ ARR blocked - users cannot use core platform functionality
+    BUSINESS IMPACT: 500K+ ARR blocked - users cannot use core platform functionality
     """
 
     def setup_method(self):
@@ -64,8 +64,8 @@ class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
         """
         CRITICAL BUSINESS TEST: Prove complete Golden Path user flow fails
 
-        Expected Result: FAIL - Users cannot complete login → AI response flow
-        Business Impact: $500K+ ARR - Core platform functionality completely broken
+        Expected Result: FAIL - Users cannot complete login -> AI response flow
+        Business Impact: 500K+ ARR - Core platform functionality completely broken
         """
         if not self._staging_available():
             pytest.skip('Staging environment not available for E2E testing')
@@ -95,7 +95,7 @@ class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
         except Exception as e:
             self.failure_points.append(f'UNEXPECTED_ERROR: {str(e)}')
             golden_path_steps.append({'step': 'unexpected_error', 'success': False, 'details': {'error': str(e)}})
-        assert self.golden_path_success, f"SSOT VIOLATION: Golden Path user flow COMPLETELY BROKEN. Failure points: {self.failure_points}. Steps completed: {[s['step'] for s in golden_path_steps if s['success']]}. Steps failed: {[s['step'] for s in golden_path_steps if not s['success']]}. BUSINESS IMPACT: $500K+ ARR blocked - users cannot use core platform functionality."
+        assert self.golden_path_success, f"SSOT VIOLATION: Golden Path user flow COMPLETELY BROKEN. Failure points: {self.failure_points}. Steps completed: {[s['step'] for s in golden_path_steps if s['success']]}. Steps failed: {[s['step'] for s in golden_path_steps if not s['success']]}. BUSINESS IMPACT: 500K+ ARR blocked - users cannot use core platform functionality."
 
     @pytest.mark.asyncio
     async def test_concurrent_user_golden_path_failure(self):
@@ -164,7 +164,7 @@ class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
             websocket = await websockets.connect(websocket_url, additional_headers=headers, ping_interval=20, ping_timeout=10, close_timeout=10)
             await websocket.ping()
             return {'success': True, 'websocket': websocket, 'connection_established': True}
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             return {'success': False, 'error': f'WebSocket connection failed with status {e.status_code}', 'status_code': e.status_code}
         except Exception as e:
             return {'success': False, 'error': f'WebSocket connection failed: {str(e)}'}
@@ -251,7 +251,7 @@ class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
 
     def _get_staging_config(self) -> Dict[str, str]:
         """Get staging environment configuration."""
-        return {'auth_service_url': self.env.get_env('STAGING_AUTH_SERVICE_URL', 'https://auth-staging.netra.com'), 'backend_service_url': self.env.get_env('STAGING_BACKEND_SERVICE_URL', 'https://backend-staging.netra.com'), 'websocket_url': self.env.get_env('STAGING_WEBSOCKET_URL', 'wss://backend-staging.netra.com')}
+        return {'auth_service_url': self.env.get_env('STAGING_AUTH_SERVICE_URL', 'https://auth.netra.com'), 'backend_service_url': self.env.get_env('STAGING_BACKEND_SERVICE_URL', 'https://backend-staging.netra.com'), 'websocket_url': self.env.get_env('STAGING_WEBSOCKET_URL', 'wss://backend-staging.netra.com')}
 
     def _staging_available(self) -> bool:
         """Check if staging environment is available for testing."""

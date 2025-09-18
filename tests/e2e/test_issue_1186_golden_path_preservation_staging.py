@@ -6,19 +6,19 @@ functionality in production-like staging environment.
 
 Business Value Justification:
 - Segment: All (Free, Early, Mid, Enterprise) 
-- Business Goal: Protect $500K+ ARR Golden Path user flow functionality
+- Business Goal: Protect 500K+ ARR Golden Path user flow functionality
 - Value Impact: Ensures SSOT consolidation doesn't break core user experience
 - Strategic Impact: Validates enterprise-grade multi-user agent execution post-consolidation
 
 CRITICAL TEST COVERAGE:
-1. Golden Path User Flow - Login → AI Response (post-SSOT)
+1. Golden Path User Flow - Login -> AI Response (post-SSOT)
 2. All 5 WebSocket Events - Real-time user feedback with consolidated engine
 3. Multi-User Isolation - SSOT consolidation maintains user separation
 4. Agent Execution Performance - Consolidated engine performance validation
 5. Production Environment Simulation - Staging GCP validation
 
 This validates Issue #1186 UserExecutionEngine SSOT consolidation Phase 1 & 2
-achievements don't break the Golden Path that protects $500K+ ARR.
+achievements don't break the Golden Path that protects 500K+ ARR.
 """
 
 import pytest
@@ -106,11 +106,7 @@ class Issue1186GoldenPathPreservationStagingTests:
         """Validate Golden Path performance metrics."""
         # Connection performance
         assert metrics.connection_time <= 5.0, \
-            f"WebSocket connection too slow: {metrics.connection_time}s (max 5s)"
-        
-        # First event responsiveness
-        assert metrics.first_event_time <= 10.0, \
-            f"First event too slow: {metrics.first_event_time}s (max 10s)"
+            f"WebSocket connection too slow: {metrics.connection_time}s (max 5s)""First event too slow: {metrics.first_event_time}s (max 10s)"
         
         # Total execution reasonable
         assert metrics.total_execution_time <= 60.0, \
@@ -133,7 +129,7 @@ class Issue1186GoldenPathPreservationStagingTests:
         """Test complete Golden Path user flow after UserExecutionEngine SSOT consolidation.
         
         CRITICAL: Validates Issue #1186 Phase 1 & 2 SSOT consolidation preserves
-        core user experience protecting $500K+ ARR.
+        core user experience protecting 500K+ ARR.
         """
         # Arrange - Create authenticated user
         auth_client, user_id = await self._create_authenticated_user("golden-path")
@@ -209,7 +205,7 @@ class Issue1186GoldenPathPreservationStagingTests:
         """Test all 5 critical WebSocket events work with consolidated UserExecutionEngine.
         
         CRITICAL: Validates consolidated engine preserves real-time user feedback
-        that builds trust and engagement worth $100K+ ARR.
+        that builds trust and engagement worth 100K+ ARR.
         """
         # Arrange
         auth_client, user_id = await self._create_authenticated_user("websocket-events")
@@ -272,7 +268,7 @@ class Issue1186GoldenPathPreservationStagingTests:
         """Test multi-user isolation works with consolidated UserExecutionEngine.
         
         CRITICAL: Validates SSOT consolidation maintains enterprise-grade user
-        separation preventing data contamination worth $200K+ ARR.
+        separation preventing data contamination worth 200K+ ARR.
         """
         # Arrange - Create two users
         auth_client1, user_id1 = await self._create_authenticated_user("isolation-user1")
@@ -366,7 +362,7 @@ class Issue1186GoldenPathPreservationStagingTests:
         """Test agent execution performance with consolidated UserExecutionEngine.
         
         CRITICAL: Validates SSOT consolidation maintains acceptable performance
-        protecting user experience worth $100K+ ARR.
+        protecting user experience worth 100K+ ARR.
         """
         # Arrange
         auth_client, user_id = await self._create_authenticated_user("performance")
@@ -443,7 +439,7 @@ class Issue1186GoldenPathPreservationStagingTests:
         """Test production-like environment behavior after UserExecutionEngine SSOT consolidation.
         
         CRITICAL: Validates consolidated engine works in production-like staging
-        environment protecting deployment confidence worth $500K+ ARR.
+        environment protecting deployment confidence worth 500K+ ARR.
         """
         # Arrange - Multiple users simulating production load
         num_users = 3

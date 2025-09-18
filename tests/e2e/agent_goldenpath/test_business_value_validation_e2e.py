@@ -2,20 +2,20 @@
 E2E Tests for Agent Business Value Validation - Golden Path Core Quality
 
 MISSION CRITICAL: Tests that agents deliver substantive business value through
-quality AI responses that justify $500K+ ARR platform usage. These tests validate
+quality AI responses that justify 500K+ ARR platform usage. These tests validate
 the QUALITY and SUBSTANCE of agent responses, not just technical delivery.
 
 Business Value Justification (BVJ):
 - Segment: Enterprise/Mid/Early (All paying segments)
 - Business Goal: Customer Retention & Platform Value Demonstration
 - Value Impact: Validates AI responses provide real business value, not just chat
-- Strategic Impact: $500K+ ARR depends on agents delivering actionable insights
+- Strategic Impact: 500K+ ARR depends on agents delivering actionable insights
 
 Test Strategy:
 - REAL SERVICES: Staging GCP Cloud Run environment only (NO Docker)
 - REAL AUTH: JWT tokens via staging auth service
 - REAL WEBSOCKETS: wss:// connections to staging backend
-- REAL AGENTS: Complete supervisor → triage → specialist agent orchestration
+- REAL AGENTS: Complete supervisor -> triage -> specialist agent orchestration
 - REAL LLMS: Actual LLM calls with substance validation
 - BUSINESS FOCUS: Response quality, actionability, and user value validation
 
@@ -138,7 +138,7 @@ class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
             websocket = await asyncio.wait_for(websockets.connect(self.__class__.staging_config.urls.websocket_url, additional_headers={'Authorization': f'Bearer {self.access_token}', 'X-Environment': 'staging', 'X-Test-Suite': 'business-value-e2e', 'X-Business-Scenario': 'cost-optimization'}, ssl=ssl_context, ping_interval=30, ping_timeout=10), timeout=20.0)
             connection_time = time.time() - connection_start
             business_metrics.append({'metric': 'websocket_connection_time', 'value': connection_time, 'timestamp': time.time(), 'success': True})
-            self.logger.info(f'✅ WebSocket connected in {connection_time:.2f}s')
+            self.logger.info(f'CHECK WebSocket connected in {connection_time:.2f}s')
             business_scenario = {'company_profile': 'Enterprise SaaS with 50,000 users', 'current_spend': '$25,000/month on AI APIs', 'growth_rate': '40% month-over-month user growth', 'pain_points': ['Cost scaling faster than revenue', 'No intelligent model selection', 'Limited caching strategy', 'Unpredictable monthly costs'], 'target_savings': '30-40% cost reduction', 'constraints': 'Cannot sacrifice response quality'}
             user_message = {'type': 'agent_request', 'agent': 'apex_optimizer_agent', 'message': f"I'm the CTO of an enterprise SaaS company with {business_scenario['company_profile']}. We're currently spending {business_scenario['current_spend']} with {business_scenario['growth_rate']}. Our main challenges are: {', '.join(business_scenario['pain_points'])}. I need a comprehensive optimization strategy to achieve {business_scenario['target_savings']} while maintaining quality. Please provide specific, quantified recommendations with implementation steps, expected savings amounts, and ROI estimates.", 'thread_id': self.thread_id, 'run_id': self.run_id, 'user_id': self.__class__.test_user_id, 'context': {'business_scenario': 'enterprise_cost_optimization', 'expected_business_value': ['dollar amounts', 'percentage savings', 'ROI estimates', 'implementation timeline', 'specific recommendations'], 'validation_criteria': 'quantified_cost_optimization'}}
             message_send_start = time.time()
@@ -207,11 +207,11 @@ class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
             assert business_validation['quality_score'] >= 0.6, f"Business value quality insufficient: {business_validation['quality_score']:.2f}"
         except Exception as e:
             total_time = time.time() - business_start_time
-            self.logger.error(f'❌ BUSINESS VALUE DELIVERY FAILED')
+            self.logger.error(f'X BUSINESS VALUE DELIVERY FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f'   Business metrics collected: {len(business_metrics)}')
-            raise AssertionError(f'Business value delivery failed after {total_time:.1f}s: {e}. This breaks core platform value proposition and threatens $500K+ ARR. Business metrics: {business_metrics}')
+            raise AssertionError(f'Business value delivery failed after {total_time:.1f}s: {e}. This breaks core platform value proposition and threatens 500K+ ARR. Business metrics: {business_metrics}')
 
     async def test_agent_response_quality_meets_enterprise_standards(self):
         """
@@ -271,7 +271,7 @@ class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
                 indicator_coverage = len(found_indicators) / len(scenario['expected_quality_indicators'])
                 assert indicator_coverage >= 0.6, f"Insufficient enterprise topic coverage for {scenario['name']}: {indicator_coverage:.1%} (found: {found_indicators})"
                 quality_metrics.append({'scenario': scenario['name'], 'duration': scenario_duration, 'response_length': len(response_text), 'quality_score': quality_validation['quality_score'], 'indicator_coverage': indicator_coverage, 'meets_enterprise_standards': quality_validation['meets_standards']})
-                self.logger.info(f"✅ {scenario['name']}: Quality {quality_validation['quality_score']:.2f}, Coverage {indicator_coverage:.1%}, Duration {scenario_duration:.1f}s")
+                self.logger.info(f"CHECK {scenario['name']}: Quality {quality_validation['quality_score']:.2f}, Coverage {indicator_coverage:.1%}, Duration {scenario_duration:.1f}s")
             await websocket.close()
             total_quality_time = time.time() - quality_start_time
             avg_quality_score = sum((m['quality_score'] for m in quality_metrics)) / len(quality_metrics)
@@ -286,7 +286,7 @@ class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
             assert avg_indicator_coverage >= 0.55, f'Average enterprise topic coverage insufficient: {avg_indicator_coverage:.1%} (required ≥55%)'
         except Exception as e:
             total_time = time.time() - quality_start_time
-            self.logger.error(f'❌ ENTERPRISE QUALITY STANDARDS FAILED')
+            self.logger.error(f'X ENTERPRISE QUALITY STANDARDS FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             raise AssertionError(f'Enterprise quality validation failed after {total_time:.1f}s: {e}. This threatens enterprise customer retention and premium pricing model.')
@@ -341,7 +341,7 @@ class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
                         elif event_type == 'tool_completed':
                             tool_completed_seen = True
                             tool_events.append(event)
-                            self.logger.info(f"✅ Tool completed: {event.get('data', {}).get('tool_name', 'unknown')}")
+                            self.logger.info(f"CHECK Tool completed: {event.get('data', {}).get('tool_name', 'unknown')}")
                         elif event_type == 'agent_completed':
                             final_response = event
                             break
@@ -377,10 +377,10 @@ class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
             assert avg_specificity >= 0.55, f'Tool enhancement insufficient: {avg_specificity:.2f} avg specificity (required ≥0.55 for value demonstration)'
         except Exception as e:
             total_time = time.time() - tool_integration_start
-            self.logger.error(f'❌ AGENT TOOL INTEGRATION FAILED')
+            self.logger.error(f'X AGENT TOOL INTEGRATION FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
-            raise AssertionError(f'Tool integration validation failed after {total_time:.1f}s: {e}. Tool integration is a core platform differentiator for $500K+ ARR. Tool metrics: {tool_metrics}')
+            raise AssertionError(f'Tool integration validation failed after {total_time:.1f}s: {e}. Tool integration is a core platform differentiator for 500K+ ARR. Tool metrics: {tool_metrics}')
 
     async def test_end_to_end_business_value_pipeline_validation(self):
         """
@@ -391,7 +391,7 @@ class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
         
         Complete pipeline validation:
         1. Complex business scenario input
-        2. Multi-agent coordination (supervisor → specialists)
+        2. Multi-agent coordination (supervisor -> specialists)
         3. Tool integration for enhanced analysis
         4. WebSocket events for real-time feedback
         5. Final response with >0.7 quality threshold
@@ -413,14 +413,14 @@ class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
             websocket = await asyncio.wait_for(websockets.connect(self.__class__.staging_config.urls.websocket_url, additional_headers={'Authorization': f'Bearer {self.access_token}', 'X-Environment': 'staging', 'X-Test-Suite': 'e2e-business-value-pipeline', 'X-Validation-Level': 'comprehensive', 'X-Business-Tier': 'enterprise-plus'}, ssl=ssl_context, ping_interval=30, ping_timeout=10), timeout=25.0)
             connection_time = time.time() - connection_start
             pipeline_validation['phases_completed'].append('connection_established')
-            self.logger.info(f'✅ Phase 1: WebSocket connection established in {connection_time:.2f}s')
+            self.logger.info(f'CHECK Phase 1: WebSocket connection established in {connection_time:.2f}s')
             enterprise_pipeline_scenario = {'type': 'agent_request', 'agent': 'supervisor_agent', 'message': "I'm the Chief Innovation Officer at a Fortune 500 healthcare company. We're evaluating a $2.5M annual AI infrastructure investment with these requirements: \n\nCURRENT SITUATION:\n• Processing 10M patient records annually\n• Current AI costs: $180,000/month (mostly GPT-4)\n• HIPAA, SOC2, and FDA compliance mandatory\n• 24/7 uptime requirement (99.99% SLA)\n• Multi-geography deployment (US, EU, APAC)\n\nOPTIMIZATION GOALS:\n• 35% cost reduction while maintaining quality\n• Sub-200ms response times for patient queries\n• Scalability to 50M records by 2025\n• Full audit trail and explainable AI\n• Integration with existing Epic/Cerner systems\n\nDELIVERABLES NEEDED:\n1. Comprehensive technical architecture recommendation\n2. Detailed cost-benefit analysis with ROI projections\n3. Implementation roadmap with risk mitigation\n4. Compliance validation strategy\n5. Performance optimization plan\n6. Vendor selection criteria and evaluation matrix\n\nPlease provide a complete strategic analysis with specific recommendations, quantified projections, and implementation timelines. This decision will impact patient care for millions of people and requires your highest level of analysis and business value delivery.", 'thread_id': f'e2e_pipeline_test_{int(time.time())}', 'run_id': f'e2e_pipeline_run_{int(time.time())}', 'user_id': self.__class__.test_user_id, 'context': {'business_scenario': 'fortune_500_healthcare_ai_strategy', 'investment_scale': '$2.5M_annual', 'complexity': 'maximum', 'expected_agents': ['supervisor_agent', 'triage_agent', 'apex_optimizer_agent', 'data_helper_agent'], 'expected_tools': ['cost_calculator', 'roi_analyzer', 'compliance_validator', 'performance_optimizer'], 'expected_business_value': ['cost reduction', 'roi projections', 'technical architecture', 'implementation roadmap', 'compliance strategy', 'performance optimization', 'vendor evaluation', 'risk mitigation', 'scalability planning'], 'quality_threshold': 0.8, 'minimum_response_length': 1500}}
             message_send_start = time.time()
             await websocket.send(json.dumps(enterprise_pipeline_scenario))
             message_send_time = time.time() - message_send_start
             pipeline_validation['phases_completed'].append('enterprise_scenario_sent')
             pipeline_validation['business_metrics']['message_send_time'] = message_send_time
-            self.logger.info(f"✅ Phase 2: Comprehensive enterprise scenario sent ({len(enterprise_pipeline_scenario['message'])} chars)")
+            self.logger.info(f"CHECK Phase 2: Comprehensive enterprise scenario sent ({len(enterprise_pipeline_scenario['message'])} chars)")
             pipeline_events = []
             agent_coordination = {}
             tool_usage = {}
@@ -459,7 +459,7 @@ class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
             processing_time = time.time() - collection_start
             pipeline_validation['phases_completed'].append('pipeline_processing_complete')
             pipeline_validation['business_metrics']['processing_time'] = processing_time
-            self.logger.info(f'✅ Phase 3: Pipeline processing completed in {processing_time:.1f}s')
+            self.logger.info(f'CHECK Phase 3: Pipeline processing completed in {processing_time:.1f}s')
             assert len(pipeline_events) > 0, 'Should receive comprehensive pipeline events'
             assert final_response is not None, 'Should receive final business analysis'
             response_data = final_response.get('data', {})
@@ -475,22 +475,22 @@ class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
             business_indicator_coverage = len(quality_evaluation['business_value_indicators']) / len(expected_indicators)
             assert business_indicator_coverage >= 0.7, f"Insufficient Fortune 500 business topic coverage: {business_indicator_coverage:.1%} (found: {quality_evaluation['business_value_indicators']})"
             pipeline_validation['phases_completed'].append('business_value_validated')
-            self.logger.info(f'✅ Phase 4: Business value validation passed')
+            self.logger.info(f'CHECK Phase 4: Business value validation passed')
             unique_agents = list(agent_coordination.keys())
             assert len(unique_agents) >= 2, f'Multi-agent coordination should involve ≥2 agents, detected: {unique_agents}'
             pipeline_validation['phases_completed'].append('agent_coordination_validated')
             pipeline_validation['business_metrics']['agents_coordinated'] = len(unique_agents)
-            self.logger.info(f'✅ Phase 5: Agent coordination validated ({len(unique_agents)} agents)')
+            self.logger.info(f'CHECK Phase 5: Agent coordination validated ({len(unique_agents)} agents)')
             tools_used = list(tool_usage.keys())
             assert len(tools_used) >= 1, f'Tool integration should involve ≥1 tools for Fortune 500 analysis, detected: {tools_used}'
             pipeline_validation['phases_completed'].append('tool_integration_validated')
             pipeline_validation['business_metrics']['tools_used'] = len(tools_used)
-            self.logger.info(f'✅ Phase 6: Tool integration validated ({len(tools_used)} tools)')
+            self.logger.info(f'CHECK Phase 6: Tool integration validated ({len(tools_used)} tools)')
             critical_websocket_events = ['agent_started', 'agent_thinking', 'tool_executing', 'agent_completed']
             missing_events = [event for event in critical_websocket_events if event not in websocket_event_types]
             assert len(missing_events) == 0, f'Missing critical WebSocket events: {missing_events}. Received events: {websocket_event_types}'
             pipeline_validation['phases_completed'].append('websocket_events_validated')
-            self.logger.info(f'✅ Phase 7: WebSocket events completeness validated')
+            self.logger.info(f'CHECK Phase 7: WebSocket events completeness validated')
             customer_value_patterns = ['\\$[\\d,]+', '\\d+%\\s*(?:reduction|savings|improvement)', 'roi|return on investment', 'timeline|roadmap|implementation', 'compliance|hipaa|sox|fda', 'scalability|performance']
             customer_value_matches = []
             for pattern in customer_value_patterns:
@@ -500,7 +500,7 @@ class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
             pipeline_validation['customer_value_indicators'] = customer_value_matches
             assert len(customer_value_matches) >= 5, f'Insufficient customer value indicators for Fortune 500 scenario: {len(customer_value_matches)} found (expected ≥5). Indicators: {customer_value_matches}'
             pipeline_validation['phases_completed'].append('customer_value_validated')
-            self.logger.info(f'✅ Phase 8: Customer value indicators validated ({len(customer_value_matches)} indicators)')
+            self.logger.info(f'CHECK Phase 8: Customer value indicators validated ({len(customer_value_matches)} indicators)')
             await websocket.close()
             total_pipeline_time = time.time() - pipeline_start_time
             pipeline_validation['business_metrics']['total_pipeline_time'] = total_pipeline_time
@@ -524,12 +524,12 @@ class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
             assert quality_evaluation['quality_score'] >= 0.75, f"E2E pipeline quality insufficient for Fortune 500: {quality_evaluation['quality_score']:.3f}"
         except Exception as e:
             total_time = time.time() - pipeline_start_time
-            self.logger.error('❌ END-TO-END BUSINESS VALUE PIPELINE FAILED')
+            self.logger.error('X END-TO-END BUSINESS VALUE PIPELINE FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f"   Phases Completed: {len(pipeline_validation.get('phases_completed', []))}/8")
             self.logger.error(f'   Pipeline State: {pipeline_validation}')
-            raise AssertionError(f'End-to-end business value pipeline validation failed after {total_time:.1f}s: {e}. This represents catastrophic failure of core platform value proposition ($500K+ ARR impact). Pipeline validation state: {pipeline_validation}')
+            raise AssertionError(f'End-to-end business value pipeline validation failed after {total_time:.1f}s: {e}. This represents catastrophic failure of core platform value proposition (500K+ ARR impact). Pipeline validation state: {pipeline_validation}')
 
     def _extract_agent_name_from_event(self, event: Dict[str, Any]) -> Optional[str]:
         """Extract agent name from WebSocket event."""

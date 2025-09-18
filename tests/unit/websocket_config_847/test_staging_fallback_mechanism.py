@@ -97,7 +97,7 @@ class StagingFallbackMechanismTests(unittest.TestCase):
         """
         Test staging fallback when Docker is unavailable.
         
-        Expected: FAIL - demonstrates missing Docker unavailable → staging fallback logic
+        Expected: FAIL - demonstrates missing Docker unavailable -> staging fallback logic
         Business Impact: Shows why system doesn't fallback to staging when Docker fails
         
         ROOT CAUSE: No logic to detect Docker unavailable and switch to staging
@@ -254,7 +254,7 @@ class StagingFallbackMechanismTests(unittest.TestCase):
             self.assertEqual(context.backend_url, 'http://localhost:8000',
                            "TestContext uses hardcoded default")
             
-            # In test environment, priority should be: TEST_BACKEND_URL → DOCKER → STAGING
+            # In test environment, priority should be: TEST_BACKEND_URL -> DOCKER -> STAGING
             environment = env.get('ENVIRONMENT')
             if environment == 'test':
                 # Should use TEST_BACKEND_URL first but doesn't check it
@@ -270,7 +270,7 @@ class StagingFallbackMechanismTests(unittest.TestCase):
         """
         Test connection failure triggering staging fallback.
         
-        Expected: FAIL - demonstrates missing connection failure → staging fallback logic
+        Expected: FAIL - demonstrates missing connection failure -> staging fallback logic
         Business Impact: Shows why connection failures don't trigger automatic fallback
         
         ROOT CAUSE: No connection failure detection with staging fallback
@@ -359,10 +359,10 @@ class StagingFallbackMechanismTests(unittest.TestCase):
         
         ROOT CAUSE SUMMARY:
         1. Staging variables available but TestContext doesn't access them
-        2. No Docker unavailable → staging fallback logic
+        2. No Docker unavailable -> staging fallback logic
         3. No environment-specific fallback priority
         4. No staging service reachability validation
-        5. No connection failure → staging fallback mechanism
+        5. No connection failure -> staging fallback mechanism
         """
         # Complete Issue #847 staging fallback scenario
         issue_847_staging_env = {

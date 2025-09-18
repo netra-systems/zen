@@ -23,6 +23,9 @@ import pytest
 from shared.isolated_environment import get_env
 from test_framework.environment_isolation import (
     isolated_test_env,
+    isolated_env,
+    isolated_test_env_fixture,
+    isolated_session,
     ensure_test_isolation,
     validate_test_environment
 )
@@ -51,7 +54,7 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     ensure_test_isolation()
 
 # Re-export test environment fixtures for convenience
-__all__ = ['isolated_test_env']
+__all__ = ['isolated_test_env', 'isolated_env', 'isolated_test_env_fixture', 'isolated_session']
 
 # Enable pytest-asyncio plugin
 pytest_plugins = ["pytest_asyncio"]

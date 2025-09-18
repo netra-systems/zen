@@ -233,7 +233,7 @@ class Issue841WebSocketViolationsTests(SSotBaseTestCase):
             report_lines.extend([f"🔄 SCENARIO: {integration_violation['scenario']}", f"💼 IMPACT: {integration_violation['business_impact']}"])
             for violation in integration_violation.get('violations', []):
                 if 'error' in violation:
-                    report_lines.append(f"   ❌ {violation['error']}")
+                    report_lines.append(f"   X {violation['error']}")
                 else:
                     report_lines.extend([f"   🔧 {violation['id_type']}: {violation['id_value'][:30]}...", f"      Issue: {violation['violation']}"])
             report_lines.append('')

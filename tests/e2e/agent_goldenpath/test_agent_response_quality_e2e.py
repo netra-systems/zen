@@ -3,13 +3,13 @@ E2E Tests for Agent Response Quality Validation - Golden Path Business Value
 
 MISSION CRITICAL: Validates that agents return substantive, problem-solving responses
 that deliver real business value to users. This tests the core chat functionality
-representing 90% of platform business value ($500K+ ARR).
+representing 90% of platform business value (500K+ ARR).
 
 Business Value Justification (BVJ):
 - Segment: All Users (Free/Early/Mid/Enterprise)
 - Business Goal: Customer Satisfaction & Platform Revenue Protection
 - Value Impact: Validates AI responses provide actionable insights and real solutions
-- Strategic Impact: $500K+ ARR depends on quality AI chat interactions
+- Strategic Impact: 500K+ ARR depends on quality AI chat interactions
 
 Test Strategy:
 - REAL SERVICES: Staging GCP Cloud Run environment only (NO Docker)
@@ -23,7 +23,7 @@ CRITICAL: These tests must fail properly when response quality degrades.
 No mocking, bypassing, or accepting low-quality responses allowed.
 
 GitHub Issue: #861 Agent Golden Path Messages Test Creation - STEP 1
-Coverage Target: 0.9% → 25% improvement (Priority Scenario #1)
+Coverage Target: 0.9% -> 25% improvement (Priority Scenario #1)
 """
 import asyncio
 import pytest
@@ -180,7 +180,7 @@ class AgentResponseQualityE2ETests(SSotAsyncTestCase):
             key_elements = ['cost', 'reduce', '35%', 'optimization', 'strategy']
             addressed_elements = [elem for elem in key_elements if elem in response_text.lower()]
             assert len(addressed_elements) >= 3, f'Response should address key question elements. Found: {addressed_elements} of {key_elements}'
-            self.logger.info('✅ Supervisor agent comprehensive quality validation passed')
+            self.logger.info('CHECK Supervisor agent comprehensive quality validation passed')
         finally:
             await websocket.close()
 
@@ -221,7 +221,7 @@ class AgentResponseQualityE2ETests(SSotAsyncTestCase):
             assert has_analysis, f"Triage response should include analysis language. Sample: {metrics['response_text_sample']}"
             assert metrics['response_length'] >= 150, f"Triage response too brief for technical question: {metrics['response_length']} chars"
             assert is_quality, f"Triage agent response quality insufficient for specialization. Got grade {metrics['quality_grade']} - need quality analysis for routing decisions."
-            self.logger.info('✅ Triage agent specialization quality validation passed')
+            self.logger.info('CHECK Triage agent specialization quality validation passed')
         finally:
             await websocket.close()
 
@@ -262,7 +262,7 @@ class AgentResponseQualityE2ETests(SSotAsyncTestCase):
             assert len(addressed_enterprise) >= 4, f'APEX should address enterprise requirements comprehensively. Found: {addressed_enterprise} of {enterprise_elements}'
             assert metrics['has_numerical_insights'], f"APEX analysis must include numerical insights for enterprise ROI. Sample: {metrics['response_text_sample']}"
             assert metrics['has_specific_recommendations'], f"APEX must provide specific, implementable recommendations. Sample: {metrics['response_text_sample']}"
-            self.logger.info('✅ APEX Optimizer expert-level quality validation passed')
+            self.logger.info('CHECK APEX Optimizer expert-level quality validation passed')
         finally:
             await websocket.close()
 
@@ -303,7 +303,7 @@ class AgentResponseQualityE2ETests(SSotAsyncTestCase):
             assert len(referenced_numbers) >= 2, f'Data Helper should reference specific data points. Found references: {referenced_numbers}'
             assert metrics['has_actionable_content'], f"Data Helper must provide actionable insights based on data analysis. Sample: {metrics['response_text_sample']}"
             assert is_quality, f"Data Helper response quality insufficient for business insights. Got grade {metrics['quality_grade']} - data analysis requires quality insights."
-            self.logger.info('✅ Data Helper insights quality validation passed')
+            self.logger.info('CHECK Data Helper insights quality validation passed')
         finally:
             await websocket.close()
 
@@ -352,7 +352,7 @@ class AgentResponseQualityE2ETests(SSotAsyncTestCase):
             assert quality_variance <= 2, f'Quality variance too high across agents: {quality_variance}. Users expect consistent experience regardless of agent type.'
             actionable_agents = sum((1 for result in agent_results.values() if result['metrics']['has_actionable_content']))
             assert actionable_agents >= len(agent_types) * 0.75, f'Too many agents lack actionable content: {actionable_agents}/{len(agent_types)}. Business users need actionable guidance from all agents.'
-            self.logger.info('✅ Cross-agent quality consistency validation passed')
+            self.logger.info('CHECK Cross-agent quality consistency validation passed')
         finally:
             await websocket.close()
 if __name__ == '__main__':

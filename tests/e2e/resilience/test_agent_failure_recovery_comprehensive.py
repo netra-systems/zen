@@ -1,6 +1,6 @@
 """E2E Agent Resilience and Error Recovery Comprehensive Test - GCP Staging Environment
 
-Business Value: $500K+ ARR protection through failure recovery validation
+Business Value: 500K+ ARR protection through failure recovery validation
 Critical Coverage for Issue #872: Agent resilience and error recovery scenarios
 
 REQUIREMENTS:
@@ -201,7 +201,7 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
     async def setup_test_user_and_connection(self) -> bool:
         """Setup authenticated test user and establish connections"""
         user_id = f"resilience_user_{int(time.time())}_{uuid.uuid4().hex[:6]}"
-        email = f"{user_id}@resiliencetest.netra.ai"
+        email = f"{user_id}@resiliencetest.netrasystems.ai"
         
         # Create JWT token with comprehensive permissions
         access_token = create_real_jwt_token(
@@ -219,7 +219,7 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
         secondary_token = create_real_jwt_token(
             user_id=secondary_user_id,
             permissions=["chat", "agent_execute", "websocket"],
-            email=f"{secondary_user_id}@resiliencetest.netra.ai",
+            email=f"{secondary_user_id}@resiliencetest.netrasystems.ai",
             expires_in=3600
         )
         

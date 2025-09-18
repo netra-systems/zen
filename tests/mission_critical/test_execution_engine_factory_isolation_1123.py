@@ -1,26 +1,26 @@
-"""Issue #1123: Factory Instance Isolation Test - Multi-User Context Validation.
+"Issue #1123: Factory Instance Isolation Test - Multi-User Context Validation."
 
 This test creates NEW validation for execution engine factory instance isolation
 specifically for Issue #1123. It validates that factory creates unique instances
 per user context and ensures proper multi-user isolation.
 
 Business Value Justification:
-- Segment: Platform/Infrastructure
+    - Segment: Platform/Infrastructure
 - Business Goal: Security & User Isolation
-- Value Impact: Protects $500K+ ARR by ensuring secure multi-user chat isolation
+- Value Impact: Protects 500K+  ARR by ensuring secure multi-user chat isolation
 - Strategic Impact: Critical for enterprise compliance (HIPAA, SOC2, SEC requirements)
 
 EXPECTED BEHAVIOR:
-This test SHOULD FAIL initially if factory instances are shared between users
+    This test SHOULD FAIL initially if factory instances are shared between users
 or if user context isolation is compromised. After proper isolation fixes,
 this test should pass, confirming secure multi-user operations.
 
 TEST STRATEGY:
-- Test concurrent user execution contexts remain isolated
+    - Test concurrent user execution contexts remain isolated
 - Validate memory growth bounds per user (not global accumulation)
 - Ensure factory creates unique instances per user
 - Test WebSocket event delivery isolation between users
-"""
+""
 
 import asyncio
 import unittest
@@ -32,7 +32,7 @@ from unittest.mock import Mock, AsyncMock, patch
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.user_execution_context import (
+from netra_backend.app.services.user_execution_context import ()
     UserExecutionContext, create_defensive_user_execution_context
 )
 
@@ -40,10 +40,12 @@ logger = central_logger.get_logger(__name__)
 
 
 class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
-    """Test for ExecutionEngine Factory instance isolation violations (Issue #1123)."""
+    Test for ExecutionEngine Factory instance isolation violations (Issue #1123)."
+    Test for ExecutionEngine Factory instance isolation violations (Issue #1123).""
+
     
     async def asyncSetUp(self):
-        """Set up test environment for factory isolation validation."""
+        "Set up test environment for factory isolation validation."
         await super().asyncSetUp()
         self.isolation_violations = []
         self.memory_violations = []
@@ -54,19 +56,19 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
         self.user_contexts = []
         for i in range(5):  # Create 5 test users
             context = create_defensive_user_execution_context(
-                user_id=f"test_user_{i}_{uuid.uuid4().hex[:8]}"
+                user_id=ftest_user_{i}_{uuid.uuid4().hex[:8]}""
             )
             self.user_contexts.append(context)
         
-        logger.info("🚀 Issue #1123: Starting ExecutionEngine Factory isolation validation")
+        logger.info(🚀 Issue #1123: Starting ExecutionEngine Factory isolation validation)
     
     async def test_factory_creates_unique_instances_per_user(self):
-        """Test that factory creates unique instances per user - SHOULD INITIALLY FAIL if shared."""
-        logger.info("🔍 ISOLATION TEST: Validating factory creates unique instances per user")
+        "Test that factory creates unique instances per user - SHOULD INITIALLY FAIL if shared."
+        logger.info(🔍 ISOLATION TEST: Validating factory creates unique instances per user)
         
         try:
             # Import canonical factory
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 get_execution_engine_factory
             )
             
@@ -74,8 +76,8 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             factory = await get_execution_engine_factory()
             
         except Exception as e:
-            logger.error(f"❌ FACTORY IMPORT FAILED: {e}")
-            self.fail(f"Cannot import canonical ExecutionEngineFactory: {e}")
+            logger.error(fX FACTORY IMPORT FAILED: {e}")"
+            self.fail(fCannot import canonical ExecutionEngineFactory: {e})
         
         # Create engines for multiple users
         engines = []
@@ -83,8 +85,8 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
         user_ids = set()
         
         try:
-            for i, context in enumerate(self.user_contexts[:3]):  # Test 3 users
-                logger.info(f"Creating engine for user {i+1}: {context.user_id}")
+            for i, context in enumerate(self.user_contexts[:3):  # Test 3 users
+                logger.info(fCreating engine for user {i+1}: {context.user_id})
                 
                 # Create engine with proper WebSocket bridge setup
                 with patch('netra_backend.app.agents.supervisor.execution_engine_factory._factory_instance') as mock_factory:
@@ -113,62 +115,69 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
                     engine_ids.add(engine.engine_id)
                     user_ids.add(engine.get_user_context().user_id)
                     
-                    logger.info(f"✅ Created engine {engine.engine_id} for user {context.user_id}")
+                    logger.info(fCHECK Created engine {engine.engine_id} for user {context.user_id}")"
             
         except Exception as e:
-            logger.error(f"❌ ENGINE CREATION FAILED: {e}")
-            self.isolation_violations.append(f"Engine creation failed: {e}")
+            logger.error(fX ENGINE CREATION FAILED: {e})
+            self.isolation_violations.append(fEngine creation failed: {e})"
+            self.isolation_violations.append(fEngine creation failed: {e})""
+
         
         # Validate uniqueness
-        expected_engines = len(self.user_contexts[:3])
+        expected_engines = len(self.user_contexts[:3)
         actual_engines = len(engines)
         unique_engine_ids = len(engine_ids)
         unique_user_ids = len(user_ids)
         
-        logger.info(f"ISOLATION VALIDATION:")
-        logger.info(f"  Expected engines: {expected_engines}")
-        logger.info(f"  Actual engines: {actual_engines}")
-        logger.info(f"  Unique engine IDs: {unique_engine_ids}")
-        logger.info(f"  Unique user IDs: {unique_user_ids}")
+        logger.info(f"ISOLATION VALIDATION:)"
+        logger.info(f  Expected engines: {expected_engines})
+        logger.info(f  Actual engines: {actual_engines})
+        logger.info(f  Unique engine IDs: {unique_engine_ids}")"
+        logger.info(f  Unique user IDs: {unique_user_ids})
         
         # Check for isolation violations
         if unique_engine_ids != expected_engines:
-            violation = f"Engine ID collision: Expected {expected_engines} unique IDs, got {unique_engine_ids}"
+            violation = fEngine ID collision: Expected {expected_engines} unique IDs, got {unique_engine_ids}
             self.isolation_violations.append(violation)
-            logger.error(f"❌ ISOLATION VIOLATION: {violation}")
+            logger.error(f"X ISOLATION VIOLATION: {violation})"
         
         if unique_user_ids != expected_engines:
-            violation = f"User context collision: Expected {expected_engines} unique users, got {unique_user_ids}"
+            violation = fUser context collision: Expected {expected_engines} unique users, got {unique_user_ids}"
+            violation = fUser context collision: Expected {expected_engines} unique users, got {unique_user_ids}""
+
             self.isolation_violations.append(violation)
-            logger.error(f"❌ ISOLATION VIOLATION: {violation}")
+            logger.error(fX ISOLATION VIOLATION: {violation})
         
         # Check for shared references (potential isolation breach)
         for i, engine1 in enumerate(engines):
             for j, engine2 in enumerate(engines):
                 if i != j and engine1 is engine2:
-                    violation = f"Shared engine reference: engines {i} and {j} are the same object"
+                    violation = fShared engine reference: engines {i} and {j} are the same object"
+                    violation = fShared engine reference: engines {i} and {j} are the same object""
+
                     self.isolation_violations.append(violation)
-                    logger.error(f"❌ ISOLATION VIOLATION: {violation}")
+                    logger.error(f"X ISOLATION VIOLATION: {violation})"
         
         # EXPECTED TO FAIL if isolation is compromised
         self.assertEqual(
             len(self.isolation_violations), 0,
-            f"EXPECTED FAILURE (Issue #1123): Factory instance isolation compromised. "
-            f"Found {len(self.isolation_violations)} isolation violations: {self.isolation_violations}. "
-            f"This threatens $500K+ ARR multi-user chat security."
+            fEXPECTED FAILURE (Issue #1123): Factory instance isolation compromised. 
+            fFound {len(self.isolation_violations)} isolation violations: {self.isolation_violations}. 
+            fThis threatens 500K+  ARR multi-user chat security.""
         )
     
     async def test_concurrent_user_execution_isolation(self):
-        """Test concurrent user execution contexts remain isolated - SHOULD INITIALLY FAIL if shared state."""
-        logger.info("🔍 CONCURRENCY TEST: Validating concurrent user execution isolation")
+        Test concurrent user execution contexts remain isolated - SHOULD INITIALLY FAIL if shared state."
+        Test concurrent user execution contexts remain isolated - SHOULD INITIALLY FAIL if shared state."
+        logger.info(🔍 CONCURRENCY TEST: Validating concurrent user execution isolation")"
         
         concurrent_failures = []
         
         async def create_and_execute_user_engine(user_context: UserExecutionContext) -> Dict[str, Any]:
-            """Create and execute engine for a user, return execution details."""
+            Create and execute engine for a user, return execution details.""
             try:
                 # Import canonical factory
-                from netra_backend.app.agents.supervisor.execution_engine_factory import (
+                from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                     get_execution_engine_factory
                 )
                 
@@ -178,7 +187,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
                 with patch.object(factory, 'create_for_user') as mock_create:
                     # Create unique mock engine for this user
                     mock_engine = Mock()
-                    mock_engine.engine_id = f"concurrent_engine_{user_context.user_id}_{uuid.uuid4().hex[:6]}"
+                    mock_engine.engine_id = fconcurrent_engine_{user_context.user_id}_{uuid.uuid4().hex[:6]}
                     mock_engine.get_user_context.return_value = user_context
                     mock_engine.is_active.return_value = True
                     mock_engine.created_at = Mock()
@@ -187,7 +196,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
                     
                     # Simulate some execution state
                     execution_state = {
-                        'user_data': f"sensitive_data_for_{user_context.user_id}",
+                        'user_data': fsensitive_data_for_{user_context.user_id},
                         'execution_count': 1,
                         'memory_usage': 1024 * (hash(user_context.user_id) % 100)  # Unique per user
                     }
@@ -221,7 +230,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
                 raise
         
         # Execute concurrent user operations
-        logger.info("Executing concurrent user operations...")
+        logger.info(Executing concurrent user operations...")"
         
         try:
             # Create tasks for concurrent execution
@@ -234,8 +243,8 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             execution_results = await asyncio.gather(*tasks, return_exceptions=True)
             
         except Exception as e:
-            logger.error(f"❌ CONCURRENT EXECUTION FAILED: {e}")
-            concurrent_failures.append({'error': f"Concurrent execution failed: {e}"})
+            logger.error(fX CONCURRENT EXECUTION FAILED: {e})
+            concurrent_failures.append({'error': fConcurrent execution failed: {e))
         
         # Analyze execution results for isolation violations
         successful_executions = [
@@ -243,10 +252,12 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             if isinstance(result, dict) and 'engine_id' in result
         ]
         
-        logger.info(f"CONCURRENCY VALIDATION:")
-        logger.info(f"  Expected concurrent executions: {len(self.user_contexts[:4])}")
-        logger.info(f"  Successful executions: {len(successful_executions)}")
-        logger.info(f"  Concurrent failures: {len(concurrent_failures)}")
+        logger.info(f"CONCURRENCY VALIDATION:)"
+        logger.info(f  Expected concurrent executions: {len(self.user_contexts[:4]}")"
+        logger.info(f  Successful executions: {len(successful_executions)})
+        logger.info(f  Concurrent failures: {len(concurrent_failures)})"
+        logger.info(f  Concurrent failures: {len(concurrent_failures)})""
+
         
         # Check for user data isolation violations
         user_data_seen = set()
@@ -260,14 +271,14 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             if user_data in user_data_seen:
                 violation = f"User data collision: {user_data} seen multiple times"
                 self.isolation_violations.append(violation)
-                logger.error(f"❌ ISOLATION VIOLATION: {violation}")
+                logger.error(fX ISOLATION VIOLATION: {violation})
             user_data_seen.add(user_data)
             
             # Check for engine ID collision
             if engine_id in engine_ids_seen:
-                violation = f"Engine ID collision: {engine_id} used multiple times"
+                violation = fEngine ID collision: {engine_id} used multiple times
                 self.isolation_violations.append(violation)
-                logger.error(f"❌ ISOLATION VIOLATION: {violation}")
+                logger.error(fX ISOLATION VIOLATION: {violation}")"
             engine_ids_seen.add(engine_id)
         
         self.concurrent_execution_failures = concurrent_failures
@@ -276,27 +287,29 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
         isolation_violation_count = len(self.isolation_violations) + len(concurrent_failures)
         self.assertEqual(
             isolation_violation_count, 0,
-            f"EXPECTED FAILURE (Issue #1123): Concurrent user isolation compromised. "
-            f"Found {len(self.isolation_violations)} isolation violations and "
-            f"{len(concurrent_failures)} concurrent failures. "
-            f"This threatens enterprise compliance and multi-user security."
+            fEXPECTED FAILURE (Issue #1123): Concurrent user isolation compromised. 
+            fFound {len(self.isolation_violations)} isolation violations and 
+            f"{len(concurrent_failures)} concurrent failures."
+            fThis threatens enterprise compliance and multi-user security."
+            fThis threatens enterprise compliance and multi-user security.""
+
         )
     
     async def test_memory_growth_bounds_per_user(self):
-        """Test memory growth bounds per user, not global accumulation - SHOULD INITIALLY FAIL if unbounded."""
-        logger.info("🔍 MEMORY TEST: Validating memory growth bounds per user")
+        Test memory growth bounds per user, not global accumulation - SHOULD INITIALLY FAIL if unbounded.""
+        logger.info(🔍 MEMORY TEST: Validating memory growth bounds per user)
         
         try:
             # Import canonical factory
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 get_execution_engine_factory
             )
             
             factory = await get_execution_engine_factory()
             
         except Exception as e:
-            logger.error(f"❌ FACTORY IMPORT FAILED: {e}")
-            self.fail(f"Cannot import canonical ExecutionEngineFactory: {e}")
+            logger.error(fX FACTORY IMPORT FAILED: {e})
+            self.fail(fCannot import canonical ExecutionEngineFactory: {e}")"
         
         # Test memory bounds for multiple users
         user_memory_usage = {}
@@ -307,13 +320,13 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
                 with patch.object(factory, 'create_for_user') as mock_create:
                     # Create mock engine with memory tracking
                     mock_engine = Mock()
-                    mock_engine.engine_id = f"memory_test_engine_{i}_{uuid.uuid4().hex[:6]}"
+                    mock_engine.engine_id = fmemory_test_engine_{i}_{uuid.uuid4().hex[:6]}
                     mock_engine.get_user_context.return_value = context
                     
                     # Simulate per-user memory usage (should be bounded)
-                    user_memory = 1024 * 1024 * (i + 1)  # 1MB per user, scaling
+                    user_memory = 1024 * 1024 * (i + 1)  # ""1MB"" per user, scaling
                     mock_engine.get_memory_usage = Mock(return_value=user_memory)
-                    mock_engine.get_memory_limit = Mock(return_value=10 * 1024 * 1024)  # 10MB limit
+                    mock_engine.get_memory_limit = Mock(return_value=10 * 1024 * 1024)  # ""10MB"" limit
                     mock_engine.cleanup = AsyncMock()
                     
                     mock_create.return_value = mock_engine
@@ -332,12 +345,12 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
                     
                     global_memory_tracker['total'] += user_memory_actual
                     
-                    logger.info(f"User {context.user_id}: {user_memory_actual / 1024 / 1024:.1f}MB "
-                               f"(limit: {user_memory_limit / 1024 / 1024:.1f}MB)")
+                    logger.info(fUser {context.user_id): {user_memory_actual / 1024 / 1024:.""1f"")MB 
+                               f"(limit: {user_memory_limit / 1024 / 1024:.""1f""}MB))"
             
             except Exception as e:
-                logger.error(f"❌ MEMORY TEST FAILED for user {context.user_id}: {e}")
-                self.memory_violations.append(f"Memory test failed for {context.user_id}: {e}")
+                logger.error(fX MEMORY TEST FAILED for user {context.user_id}: {e}")"
+                self.memory_violations.append(fMemory test failed for {context.user_id}: {e})
         
         # Analyze memory usage patterns
         total_global_memory = global_memory_tracker['total']
@@ -346,35 +359,41 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             if data['exceeds_limit']
         ]
         
-        logger.info(f"MEMORY USAGE VALIDATION:")
-        logger.info(f"  Total users tested: {len(user_memory_usage)}")
-        logger.info(f"  Global memory accumulation: {total_global_memory / 1024 / 1024:.1f}MB")
-        logger.info(f"  Users exceeding limits: {len(users_exceeding_limits)}")
+        logger.info(fMEMORY USAGE VALIDATION:)"
+        logger.info(fMEMORY USAGE VALIDATION:)"
+        logger.info(f"  Total users tested: {len(user_memory_usage)})"
+        logger.info(f  Global memory accumulation: {total_global_memory / 1024 / 1024:.""1f""}MB)""
+
+        logger.info(f  Users exceeding limits: {len(users_exceeding_limits)})
         
         # Check for memory bound violations
         if users_exceeding_limits:
-            violation = f"Memory limit violations: {len(users_exceeding_limits)} users exceeded limits"
+            violation = fMemory limit violations: {len(users_exceeding_limits)} users exceeded limits""
             self.memory_violations.append(violation)
-            logger.error(f"❌ MEMORY VIOLATION: {violation}")
+            logger.error(fX MEMORY VIOLATION: {violation})
         
         # Check for unbounded global growth (should scale linearly, not exponentially)
         expected_max_global = len(user_memory_usage) * 10 * 1024 * 1024  # Max per user * user count
         if total_global_memory > expected_max_global:
-            violation = f"Unbounded global memory growth: {total_global_memory / 1024 / 1024:.1f}MB exceeds expected {expected_max_global / 1024 / 1024:.1f}MB"
+            violation = fUnbounded global memory growth: {total_global_memory / 1024 / 1024:.""1f""}MB exceeds expected {expected_max_global / 1024 / 1024:.""1f""}MB
             self.memory_violations.append(violation)
-            logger.error(f"❌ MEMORY VIOLATION: {violation}")
+            logger.error(f"X MEMORY VIOLATION: {violation})"
         
         # EXPECTED TO FAIL if memory bounds are not properly enforced
         self.assertEqual(
             len(self.memory_violations), 0,
-            f"EXPECTED FAILURE (Issue #1123): Memory growth bounds not properly enforced. "
-            f"Found {len(self.memory_violations)} memory violations: {self.memory_violations}. "
-            f"This threatens system stability under load."
+            fEXPECTED FAILURE (Issue #1123): Memory growth bounds not properly enforced. "
+            fEXPECTED FAILURE (Issue #1123): Memory growth bounds not properly enforced. ""
+
+            fFound {len(self.memory_violations)} memory violations: {self.memory_violations}. 
+            fThis threatens system stability under load."
+            fThis threatens system stability under load.""
+
         )
     
     async def test_comprehensive_isolation_violation_report(self):
-        """Generate comprehensive isolation violation report - SHOULD INITIALLY FAIL if violations exist."""
-        logger.info("📊 COMPREHENSIVE ISOLATION VIOLATION REPORT (Issue #1123)")
+        "Generate comprehensive isolation violation report - SHOULD INITIALLY FAIL if violations exist."
+        logger.info(📊 COMPREHENSIVE ISOLATION VIOLATION REPORT (Issue #1123)")"
         
         # Run all isolation tests if not already done
         if not (self.isolation_violations or self.memory_violations or self.concurrent_execution_failures):
@@ -399,40 +418,43 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             'business_impact': self._assess_isolation_business_impact(total_violations)
         }
         
-        logger.info(f"🚨 FACTORY ISOLATION VIOLATION SUMMARY (Issue #1123):")
-        logger.info(f"  Total Isolation Violations: {isolation_summary['total_isolation_violations']}")
-        logger.info(f"  Instance Isolation: {isolation_summary['instance_isolation_violations']} violations")
-        logger.info(f"  Memory Bounds: {isolation_summary['memory_bound_violations']} violations")
-        logger.info(f"  Concurrent Failures: {isolation_summary['concurrent_execution_failures']} failures")
-        logger.info(f"  Security Impact: {isolation_summary['security_impact']['level']}")
-        logger.info(f"  Compliance Risk: {isolation_summary['compliance_risk']['level']}")
-        logger.info(f"  Business Impact: {isolation_summary['business_impact']['level']}")
+        logger.info(f🚨 FACTORY ISOLATION VIOLATION SUMMARY (Issue #1123):)
+        logger.info(f  Total Isolation Violations: {isolation_summary['total_isolation_violations']})
+        logger.info(f"  Instance Isolation: {isolation_summary['instance_isolation_violations']} violations)"
+        logger.info(f  Memory Bounds: {isolation_summary['memory_bound_violations']} violations")"
+        logger.info(f  Concurrent Failures: {isolation_summary['concurrent_execution_failures']} failures)
+        logger.info(f  Security Impact: {isolation_summary['security_impact']['level']})"
+        logger.info(f  Security Impact: {isolation_summary['security_impact']['level']})"
+        logger.info(f"  Compliance Risk: {isolation_summary['compliance_risk']['level']})"
+        logger.info(f  Business Impact: {isolation_summary['business_impact']['level']})
         
         # Log detailed violations
         all_violations = (
-            [f"Instance: {v}" for v in self.isolation_violations] +
-            [f"Memory: {v}" for v in self.memory_violations] +
-            [f"Concurrent: {f}" for f in self.concurrent_execution_failures]
-        )
+            [fInstance: {v} for v in self.isolation_violations] +
+            [fMemory: {v}" for v in self.memory_violations] +"
+            [fConcurrent: {f} for f in self.concurrent_execution_failures]
         
         for i, violation in enumerate(all_violations[:10], 1):
-            logger.info(f"    {i:2d}. ❌ {violation}")
+            logger.info(f    {i:""2d""}. X {violation})
         
         if len(all_violations) > 10:
-            logger.info(f"    ... and {len(all_violations) - 10} more isolation violations")
+            logger.info(f"    ... and {len(all_violations) - 10} more isolation violations)"
         
         # EXPECTED TO FAIL: Comprehensive isolation violations should be detected
         self.assertEqual(
             total_violations, 0,
-            f"EXPECTED FAILURE (Issue #1123): ExecutionEngine Factory isolation compromised. "
-            f"Detected {total_violations} isolation violations requiring immediate remediation. "
-            f"Security Impact: {isolation_summary['security_impact']['description']} "
-            f"Compliance Risk: {isolation_summary['compliance_risk']['description']} "
-            f"Business Impact: {isolation_summary['business_impact']['description']}"
+            fEXPECTED FAILURE (Issue #1123): ExecutionEngine Factory isolation compromised. "
+            fEXPECTED FAILURE (Issue #1123): ExecutionEngine Factory isolation compromised. ""
+
+            fDetected {total_violations} isolation violations requiring immediate remediation. 
+            fSecurity Impact: {isolation_summary['security_impact']['description']} "
+            fSecurity Impact: {isolation_summary['security_impact']['description']} "
+            f"Compliance Risk: {isolation_summary['compliance_risk']['description']}"
+            fBusiness Impact: {isolation_summary['business_impact']['description']}
         )
     
     def _assess_security_impact(self, violation_count: int) -> Dict[str, str]:
-        """Assess security impact of isolation violations."""
+        Assess security impact of isolation violations.""
         if violation_count > 5:
             return {
                 'level': 'CRITICAL',
@@ -455,7 +477,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             }
     
     def _assess_compliance_risk(self, violation_count: int) -> Dict[str, str]:
-        """Assess compliance risk of isolation violations."""
+        Assess compliance risk of isolation violations.""
         if violation_count > 3:
             return {
                 'level': 'CRITICAL',
@@ -478,11 +500,13 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             }
     
     def _assess_isolation_business_impact(self, violation_count: int) -> Dict[str, str]:
-        """Assess business impact of isolation violations."""
+        Assess business impact of isolation violations."
+        Assess business impact of isolation violations.""
+
         if violation_count > 5:
             return {
                 'level': 'CRITICAL',
-                'description': 'Isolation failures threaten $500K+ ARR enterprise customer trust and retention'
+                'description': 'Isolation failures threaten 500K+  ARR enterprise customer trust and retention'
             }
         elif violation_count > 2:
             return {
@@ -508,3 +532,4 @@ if __name__ == '__main__':
     
     # Run the test
     unittest.main()
+)))))

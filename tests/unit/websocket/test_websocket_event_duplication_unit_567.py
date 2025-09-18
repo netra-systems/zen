@@ -4,7 +4,7 @@ Unit Test Suite for Issue #567: WebSocket Event Duplication Prevention
 Focused unit tests for WebSocket event emission and duplication prevention.
 These tests validate core event emission logic without requiring external dependencies.
 
-Business Impact: Protects $500K+ ARR by ensuring chat functionality reliability
+Business Impact: Protects 500K+ ARR by ensuring chat functionality reliability
 """
 
 import pytest

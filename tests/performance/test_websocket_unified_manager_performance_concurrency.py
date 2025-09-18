@@ -1,10 +1,10 @@
 """
-Performance and Concurrency Test Suite for UnifiedWebSocketManager - $500K+ ARR Protection
+Performance and Concurrency Test Suite for UnifiedWebSocketManager - 500K+ ARR Protection
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - Platform scalability protects all revenue
 - Business Goal: Ensure platform scales to support business growth and concurrent users
-- Value Impact: Performance tests protect $500K+ ARR by preventing system failures under load
+- Value Impact: Performance tests protect 500K+ ARR by preventing system failures under load
 - Strategic Impact: MISSION CRITICAL - Platform must scale to support customer growth
 
 This performance test suite validates UnifiedWebSocketManager under realistic load conditions
@@ -137,7 +137,7 @@ class LoadTestWebSocketServer:
                     self.connected_clients[client_id]['message_count'] += 1
                     response = {'type': 'echo', 'original_message': json.loads(message), 'server_timestamp': datetime.now(timezone.utc).isoformat(), 'message_id': self.message_count}
                     await websocket.send(json.dumps(response))
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 pass
             finally:
                 if client_id in self.connected_clients:

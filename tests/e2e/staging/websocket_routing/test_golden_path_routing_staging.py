@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise/Platform
 - Goal: Golden Path reliability restoration to 99.5%
 - Value Impact: Validates complete user journey routing through staging environment
-- Revenue Impact: Protects $500K+ ARR by ensuring Golden Path works end-to-end
+- Revenue Impact: Protects 500K+ ARR by ensuring Golden Path works end-to-end
 
 This E2E test validates the complete Golden Path user journey through staging
 environment to detect routing fragmentation effects on actual user experience.
@@ -46,7 +46,7 @@ class GoldenPathRoutingStagingE2ETests(BaseE2ETest):
         in staging environment causes Golden Path failures affecting real user experience.
 
         Expected failures:
-        1. User login → chat request → AI response journey breaks due to routing conflicts
+        1. User login -> chat request -> AI response journey breaks due to routing conflicts
         2. Tool execution routing fails in staging environment
         3. WebSocket events not delivered consistently affecting UX
 
@@ -341,7 +341,7 @@ class GoldenPathRoutingStagingE2ETests(BaseE2ETest):
 
         Expected failures:
         1. AI response routing chain breaks at multiple points
-        2. Tool execution → agent processing → response delivery chain fails
+        2. Tool execution -> agent processing -> response delivery chain fails
         3. Business value delivery affected by routing conflicts
 
         SUCCESS CRITERIA: Complete AI response chain works through single router

@@ -10,7 +10,7 @@ from typing import Dict, Any, Optional
 from decimal import Decimal
 from datetime import datetime, timezone
 
-from netra_backend.app.core.configuration.base import UnifiedConfigManager
+from netra_backend.app.config import UnifiedConfigManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

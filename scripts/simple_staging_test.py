@@ -72,7 +72,7 @@ async def main():
             # Connection stayed open, this is success
             print("    PASS:  WebSocket connection stable")
             
-    except websockets.exceptions.ConnectionClosedOK as e:
+    except websockets.ConnectionClosedOK as e:
         print(f"    WARNING: [U+FE0F]  WebSocket closed normally: {e}")
         print(f"    CHART:  Connection lasted: {connection_duration:.3f}s")
         # This might still be considered partial success if connection was established
@@ -80,7 +80,7 @@ async def main():
             print("   [U+2139][U+FE0F]  Connection was established but closed by server")
             connection_successful = True
         
-    except websockets.exceptions.InvalidStatus as e:
+    except websockets.InvalidStatus as e:
         if "403" in str(e) or "401" in str(e):
             print(f"   [U+1F510] Authentication required: {e}")
         else:

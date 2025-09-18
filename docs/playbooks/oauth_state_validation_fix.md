@@ -65,7 +65,7 @@ if not oauth_security.validate_state_parameter(state, session_id):
 ### Long-term Solutions
 
 1. **Shared Domain Architecture**
-   - Deploy all services under `*.netra.ai` domain
+   - Deploy all services under `*.netrasystems.ai` domain
    - Use Cloud Load Balancer with path-based routing
    - Enables cookie sharing across services
 
@@ -93,7 +93,7 @@ python -m pytest auth_service/tests/test_oauth_state_validation.py::TestOAuthSta
 ### Staging Testing
 1. Deploy the fix to staging
 2. Clear browser cookies
-3. Navigate to `https://app.staging.netra.ai`
+3. Navigate to `https://app.staging.netrasystems.ai`
 4. Click "Sign in with Google"
 5. Complete OAuth flow
 6. Verify successful authentication

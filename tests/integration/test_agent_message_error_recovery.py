@@ -75,7 +75,7 @@ class AgentMessageErrorRecoveryTests(SSotAsyncTestCase):
     P0 Critical Integration Tests for Agent Message Error Recovery.
 
     This test class validates comprehensive error recovery during agent message processing:
-    Error Occurrence → Intelligent Detection → Graceful Recovery → Maintained User Experience
+    Error Occurrence -> Intelligent Detection -> Graceful Recovery -> Maintained User Experience
 
     Tests protect $500K+ ARR platform reliability by validating:
     - LLM service failures with intelligent fallback responses

@@ -468,6 +468,53 @@ except ImportError:
 
 
 # =============================================================================
+# PYTEST FIXTURES FOR ENVIRONMENT ISOLATION
+# =============================================================================
+
+try:
+    import pytest
+    
+    @pytest.fixture
+    def isolated_env():
+        """
+        Pytest fixture for isolated environment testing.
+        
+        This fixture provides an isolated environment manager that prevents
+        test pollution and ensures environment variables don't leak between tests.
+        
+        Yields:
+            EnvironmentTestManager: The environment manager for the test
+        """
+        with isolated_test_env() as manager:
+            yield manager
+    
+    @pytest.fixture(scope="function")
+    def isolated_test_env_fixture():
+        """
+        Function-scoped pytest fixture for isolated environment testing.
+        
+        Yields:
+            EnvironmentTestManager: The environment manager for the test
+        """
+        with isolated_test_env() as manager:
+            yield manager
+    
+    @pytest.fixture(scope="session")
+    def isolated_session():
+        """
+        Session-scoped pytest fixture for isolated testing session.
+        
+        Yields:
+            IsolatedSession: The isolated session for the test run
+        """
+        with isolated_test_session() as session:
+            yield session
+
+except ImportError:
+    # pytest not available, skip fixture definitions
+    pass
+
+# =============================================================================
 # EXPORT ALL FUNCTIONS AND CLASSES
 # =============================================================================
 
@@ -488,6 +535,11 @@ __all__ = [
     'isolated_test_session',
     'isolated_test_env',
     'patch_environment',
+    
+    # Pytest fixtures (Issue #1197 Fix)
+    'isolated_env',
+    'isolated_test_env_fixture',
+    'isolated_session',
     
     # Setup helpers
     'ensure_test_isolation',

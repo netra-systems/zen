@@ -8,7 +8,7 @@ for real-time chat functionality. Ensures SSOT mocks enable business-critical te
 Business Value:
 - Validates SSOT WebSocket mocks support Golden Path event delivery testing
 - Ensures real-time chat functionality testing reliability  
-- Protects $500K+ ARR chat-based value delivery through proper event testing
+- Protects 500K+ ARR chat-based value delivery through proper event testing
 
 Golden Path Events:
 1. agent_started - User sees agent began processing
@@ -48,7 +48,7 @@ class WebSocketEventMockValidationTests(SSotBaseTestCase):
         """
         Test that SSOT WebSocket mocks provide Golden Path event interface.
         
-        CRITICAL: Golden Path events are core to $500K+ ARR chat functionality.
+        CRITICAL: Golden Path events are core to 500K+ ARR chat functionality.
         """
         websocket_mock = SSotMockFactory.create_websocket_mock(connection_id='golden-path-test', user_id='test-user')
         self.assertTrue(hasattr(websocket_mock, 'send_json'))
@@ -286,7 +286,7 @@ class WebSocketEventMockValidationTests(SSotBaseTestCase):
         print(f"{'=' * 60}")
         print(f'Golden Path Events Tested: {len(self.GOLDEN_PATH_EVENTS)}')
         for event in self.GOLDEN_PATH_EVENTS:
-            print(f'  ✅ {event}')
+            print(f'  CHECK {event}')
         print(f'Event Mock Integration: Complete')
         print(f'Broadcasting Support: Validated')
         print(f'Error Handling: Tested')

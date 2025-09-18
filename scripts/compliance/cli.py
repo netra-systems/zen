@@ -89,8 +89,16 @@ Examples:
         parser.add_argument('--json-output', help='Output JSON report to file')
         parser.add_argument('--json-only', action='store_true',
                            help='Output only JSON, no human-readable report')
-        parser.add_argument('--threshold', type=float, default=0.0,
-                           help='Minimum compliance score (0-100) to pass')
+        parser.add_argument('--threshold', type=float, default=90.0,
+                           help='Minimum compliance score (0-100) to pass (default: 90.0)')
+        parser.add_argument('--ci-mode', action='store_true',
+                           help='Enable CI/CD mode with enhanced failure reporting')
+        parser.add_argument('--critical-threshold', type=int, default=0,
+                           help='Maximum critical violations allowed (default: 0)')
+        parser.add_argument('--error-threshold', type=int, default=5,
+                           help='Maximum error violations allowed (default: 5)')
+        parser.add_argument('--warning-threshold', type=int, default=20,
+                           help='Maximum warning violations allowed (default: 20)')
 
 
 class OutputHandler:
@@ -146,12 +154,71 @@ class OutputHandler:
     @staticmethod
     def handle_exit_code(args: Any, results: ComplianceResults) -> None:
         """Handle exit code based on results"""
-        should_fail = OutputHandler._should_exit_with_failure(args, results)
-        sys.exit(1 if should_fail else 0)
-    
+        exit_code = OutputHandler._determine_exit_code(args, results)
+        if getattr(args, 'ci_mode', False):
+            OutputHandler._print_ci_summary(args, results, exit_code)
+        sys.exit(exit_code)
+
     @staticmethod
-    def _should_exit_with_failure(args: Any, results: ComplianceResults) -> bool:
-        """Determine if should exit with failure code"""
-        return (args.fail_on_violation and 
-                (results.total_violations > 0 or 
-                 results.compliance_score < args.threshold))
+    def _determine_exit_code(args: Any, results: ComplianceResults) -> int:
+        """Determine appropriate exit code based on violations and thresholds"""
+        # Count violations by severity
+        critical_count = len([v for v in results.violations if v.severity == "critical"])
+        high_count = len([v for v in results.violations if v.severity == "high"])
+        medium_count = len([v for v in results.violations if v.severity == "medium"])
+        low_count = len([v for v in results.violations if v.severity == "low"])
+
+        # Check thresholds if CI mode is enabled
+        if getattr(args, 'ci_mode', False):
+            critical_threshold = getattr(args, 'critical_threshold', 0)
+            error_threshold = getattr(args, 'error_threshold', 5)
+            warning_threshold = getattr(args, 'warning_threshold', 20)
+
+            # Critical violations always fail with code 2
+            if critical_count > critical_threshold:
+                return 2
+
+            # High + medium violations count as "errors"
+            error_violations = high_count + medium_count
+            if error_violations > error_threshold:
+                return 1
+
+            # Check warning threshold
+            if low_count > warning_threshold:
+                return 1
+
+        # Legacy behavior for non-CI mode
+        if getattr(args, 'fail_on_violation', False):
+            if results.total_violations > 0 or results.compliance_score < args.threshold:
+                return 1
+
+        return 0
+
+    @staticmethod
+    def _print_ci_summary(args: Any, results: ComplianceResults, exit_code: int) -> None:
+        """Print CI/CD specific summary"""
+        print("\n" + "="*80)
+        print("🚨 CI/CD SSOT COMPLIANCE SUMMARY")
+        print("="*80)
+
+        # Count violations by severity
+        critical_count = len([v for v in results.violations if v.severity == "critical"])
+        high_count = len([v for v in results.violations if v.severity == "high"])
+        medium_count = len([v for v in results.violations if v.severity == "medium"])
+        low_count = len([v for v in results.violations if v.severity == "low"])
+
+        print(f"Compliance Score: {results.compliance_score:.1f}% (threshold: {args.threshold}%)")
+        print(f"Total Violations: {results.total_violations}")
+        print(f"  🔴 Critical: {critical_count} (threshold: {getattr(args, 'critical_threshold', 0)})")
+        print(f"  🟠 High: {high_count}")
+        print(f"  🟡 Medium: {medium_count}")
+        print(f"  ⚪ Low: {low_count} (threshold: {getattr(args, 'warning_threshold', 20)})")
+
+        if exit_code == 0:
+            print("\n✅ PASSED: All compliance checks passed")
+        elif exit_code == 1:
+            print("\n❌ FAILED: Compliance violations exceed thresholds")
+        elif exit_code == 2:
+            print("\n🚨 CRITICAL: Critical security violations detected")
+
+        print("="*80)

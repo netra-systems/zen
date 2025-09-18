@@ -16,15 +16,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -33,12 +25,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 Critical Cold Start Integration Tests
 Tests the most common and difficult initialization issues that occur during system startup.
 Tests real services with dev launcher (local DB, Redis, ClickHouse).
@@ -67,7 +54,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
 from netra_backend.app.db.database_manager import DatabaseManager
-from auth_service.auth_core.core.session_manager import SessionManager
+# Use SSOT backend SessionManager instead of direct auth service import
+from netra_backend.app.database.session_manager import SessionManager
 from netra_backend.app.db.postgres import Database
 from netra_backend.app.redis_manager import RedisManager
 from database_scripts.create_postgres_tables import create_all_tables
@@ -298,7 +286,7 @@ class ColdStartCriticalIssuesTests:
             "Host": "localhost:8000"
         }
         
-        with pytest.raises(websockets.exceptions.InvalidStatus) as exc_info:
+        with pytest.raises(websockets.InvalidStatus) as exc_info:
             async with websockets.connect(
                 "ws://localhost:8000/ws",
                 extra_headers=headers
@@ -324,7 +312,7 @@ class ColdStartCriticalIssuesTests:
             "Authorization": f"Bearer {token}"
         }
         
-        with pytest.raises(websockets.exceptions.InvalidStatus) as exc_info:
+        with pytest.raises(websockets.InvalidStatus) as exc_info:
             async with websockets.connect(
                 "ws://localhost:8000/ws",
                 extra_headers=headers

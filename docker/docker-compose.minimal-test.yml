@@ -2,6 +2,8 @@
 # Only includes services needed for integration tests
 # Avoids Docker Hub rate limits and build complexity
 
+version: '3.8'
+
 services:
   # ============================================
   # MINIMAL INFRASTRUCTURE FOR INTEGRATION TESTS
@@ -51,7 +53,7 @@ services:
         --maxmemory-policy allkeys-lru
         --tcp-keepalive 30
     ports:
-      - "${MINIMAL_TEST_REDIS_PORT:-6383}:6379"
+      - "${MINIMAL_TEST_REDIS_PORT:-6381}:6379"
     volumes:
       - minimal-test-redis-data:/data
     healthcheck:

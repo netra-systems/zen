@@ -1,21 +1,21 @@
 """
 E2E Tests for Agent Message Pipeline - Golden Path Core Flow
 
-MISSION CRITICAL: Tests the complete user message → agent response pipeline
+MISSION CRITICAL: Tests the complete user message -> agent response pipeline
 in staging GCP environment. This is the core of the Golden Path user journey
-representing 90% of platform business value ($500K+ ARR).
+representing 90% of platform business value (500K+ ARR).
 
 Business Value Justification (BVJ):
 - Segment: All Users (Free/Early/Mid/Enterprise) 
 - Business Goal: Platform Revenue Protection & User Retention
 - Value Impact: Validates complete AI chat functionality works end-to-end
-- Strategic Impact: $500K+ ARR depends on reliable agent message processing
+- Strategic Impact: 500K+ ARR depends on reliable agent message processing
 
 Test Strategy:
 - REAL SERVICES: Staging GCP Cloud Run environment only (NO Docker)
 - REAL AUTH: JWT tokens via staging auth service
 - REAL WEBSOCKETS: wss:// connections to staging backend
-- REAL AGENTS: Complete supervisor → triage → APEX agent orchestration
+- REAL AGENTS: Complete supervisor -> triage -> APEX agent orchestration
 - REAL LLMS: Actual LLM calls for authentic agent responses
 - REAL PERSISTENCE: Chat history saved to staging databases
 
@@ -24,7 +24,7 @@ No mocking, bypassing, or 0-second test completions allowed.
 
 GitHub Issue: #1059 Agent Golden Path Messages E2E Test Creation - Phase 1
 ENHANCEMENT: Business value validation, multi-agent orchestration, response quality >0.7 threshold
-Target Coverage: 15% → 35% improvement
+Target Coverage: 15% -> 35% improvement
 """
 import asyncio
 import pytest
@@ -35,12 +35,13 @@ import websockets
 import ssl
 import re
 from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import httpx
 from collections import defaultdict
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from tests.e2e.staging_config import get_staging_config, is_staging_available
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
+from test_framework.websocket_helpers import WebSocketTestHelpers
 from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
 
 @pytest.mark.e2e
@@ -51,7 +52,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
     """
     E2E tests for the complete agent message pipeline in staging GCP.
     
-    Tests the core Golden Path: User Message → Agent Processing → AI Response
+    Tests the core Golden Path: User Message -> Agent Processing -> AI Response
     
     ENHANCED PHASE 1 (Issue #1059): Business value validation, multi-agent
     orchestration, and response quality scoring with >0.7 threshold.
@@ -119,14 +120,14 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
 
     async def test_complete_user_message_to_agent_response_flow(self):
         """
-        Test complete user message → agent response pipeline in staging GCP.
+        Test complete user message -> agent response pipeline in staging GCP.
         
         GOLDEN PATH CORE: This is the fundamental user journey that must work.
         
         Flow:
         1. User sends message via WebSocket
         2. Backend routes to supervisor agent
-        3. Supervisor orchestrates triage → APEX agents
+        3. Supervisor orchestrates triage -> APEX agents
         4. Agent processes with real LLM calls
         5. Response sent back via WebSocket
         
@@ -142,7 +143,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
             self.thread_id = f'message_pipeline_test_{int(time.time())}'
             self.run_id = f'run_{self.thread_id}'
             self.access_token = self.__class__.auth_helper.create_test_jwt_token(user_id=self.__class__.test_user_id, email=self.__class__.test_user_email, exp_minutes=60)
-        self.logger.info('🎯 Testing complete user message → agent response pipeline')
+        self.logger.info('🎯 Testing complete user message -> agent response pipeline')
         try:
             ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
@@ -151,7 +152,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
             websocket = await asyncio.wait_for(websockets.connect(self.__class__.staging_config.urls.websocket_url, additional_headers={'Authorization': f'Bearer {self.access_token}', 'X-Environment': 'staging', 'X-Test-Suite': 'agent-pipeline-e2e'}, ssl=ssl_context, ping_interval=30, ping_timeout=10), timeout=20.0)
             connection_time = time.time() - connection_start
             pipeline_events.append({'event': 'websocket_connected', 'timestamp': time.time(), 'duration': connection_time, 'success': True})
-            self.logger.info(f'✅ WebSocket connected to staging in {connection_time:.2f}s')
+            self.logger.info(f'CHECK WebSocket connected to staging in {connection_time:.2f}s')
             user_message = {'type': 'agent_request', 'agent': 'supervisor_agent', 'message': 'I need help optimizing my AI costs. My current spend is $2,000/month on GPT-4 calls, and I want to reduce costs by 30% without sacrificing quality. Can you analyze my usage patterns and suggest specific optimizations?', 'thread_id': self.thread_id, 'run_id': self.run_id, 'user_id': self.__class__.test_user_id, 'context': {'test_scenario': 'golden_path_message_pipeline', 'expected_agents': ['supervisor_agent', 'triage_agent', 'apex_optimizer_agent'], 'expected_duration': '30-60s'}}
             message_send_start = time.time()
             await websocket.send(json.dumps(user_message))
@@ -199,7 +200,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
             assert quality_evaluation['meets_threshold'], f"Response fails business value quality threshold. Score: {quality_evaluation['overall_quality_score']:.3f} (required ≥{self.__class__.QUALITY_THRESHOLD_HIGH}). Metrics: {quality_evaluation}"
             assert quality_evaluation['keyword_relevance']['cost_optimization']['score'] >= 0.4, f"Insufficient cost optimization focus in response. Found keywords: {quality_evaluation['keyword_relevance']['cost_optimization']['found']}"
             assert quality_evaluation['actionability_score'] >= 0.3, f"Response lacks actionable recommendations: {quality_evaluation['actionability_score']:.3f}"
-            ack_message = {'type': 'message_acknowledgment', 'thread_id': self.thread_id, 'run_id': self.run_id, 'acknowledged_at': datetime.utcnow().isoformat()}
+            ack_message = {'type': 'message_acknowledgment', 'thread_id': self.thread_id, 'run_id': self.run_id, 'acknowledged_at': datetime.now(UTC).isoformat()}
             await websocket.send(json.dumps(ack_message))
             try:
                 ack_response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
@@ -229,11 +230,11 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
             assert len(quality_evaluation['business_indicators']) >= 1, f"Response lacks expected business value indicators: {quality_evaluation['business_indicators']}"
         except Exception as e:
             total_time = time.time() - pipeline_start_time
-            self.logger.error(f'❌ GOLDEN PATH MESSAGE PIPELINE FAILED')
+            self.logger.error(f'X GOLDEN PATH MESSAGE PIPELINE FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f'   Events collected: {len(pipeline_events)}')
-            raise AssertionError(f'PHASE 1 ENHANCED: Golden Path message pipeline with business value validation failed after {total_time:.1f}s: {e}. Events: {pipeline_events}. This breaks core user functionality and business value delivery ($500K+ ARR impact).')
+            raise AssertionError(f'PHASE 1 ENHANCED: Golden Path message pipeline with business value validation failed after {total_time:.1f}s: {e}. Events: {pipeline_events}. This breaks core user functionality and business value delivery (500K+ ARR impact).')
 
     async def test_agent_error_handling_and_recovery(self):
         """
@@ -273,7 +274,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
                         event_type = event.get('type', 'unknown')
                         if 'error' in event_type.lower():
                             received_error = True
-                            self.logger.info(f'✅ Received expected error: {event_type}')
+                            self.logger.info(f'CHECK Received expected error: {event_type}')
                             break
                     except asyncio.TimeoutError:
                         break
@@ -284,7 +285,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
                     recovery_response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                     recovery_event = json.loads(recovery_response)
                     assert recovery_event.get('type') != 'error', f"System should recover after {scenario['name']} error"
-                    self.logger.info(f"✅ System recovered successfully after {scenario['name']}")
+                    self.logger.info(f"CHECK System recovered successfully after {scenario['name']}")
             self.logger.info('🛡️ All error handling scenarios passed')
         finally:
             await websocket.close()
@@ -364,7 +365,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
             self.logger.info(f'📊 Performance metrics:')
             self.logger.info(f'   Average duration: {avg_duration:.1f}s')
             self.logger.info(f'   Max duration: {max_duration:.1f}s')
-        self.logger.info('✅ Concurrent user processing validation complete')
+        self.logger.info('CHECK Concurrent user processing validation complete')
 
     async def test_large_message_handling(self):
         """
@@ -416,25 +417,544 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
                 assert response_content and len(response_content) > 50, f"Should receive substantive response for {test_case['name']} (got {(len(response_content) if response_content else 0)} chars)"
                 expected_min_response_length = min(200, message_length // 10)
                 assert len(response_content) >= expected_min_response_length, f"Response too short for {test_case['name']}: {len(response_content)} chars (expected ≥{expected_min_response_length})"
-                self.logger.info(f"✅ {test_case['name']}: {case_duration:.1f}s, response: {len(response_content)} chars")
+                self.logger.info(f"CHECK {test_case['name']}: {case_duration:.1f}s, response: {len(response_content)} chars")
             self.logger.info('📏 Large message handling tests completed successfully')
         finally:
             await websocket.close()
 
+    async def test_agent_state_persistence_across_conversations(self):
+        """
+        PHASE 2 ADVANCED: Test agent state persistence across multiple conversation turns.
+
+        Validates that agents maintain context and state across messages:
+        1. Initial context establishment
+        2. Follow-up messages reference previous context
+        3. Agent memory persistence across WebSocket reconnections
+        4. Multi-turn conversation accuracy
+
+        DIFFICULTY: High (30+ minutes)
+        REAL SERVICES: Yes - Staging GCP with persistent state
+        STATUS: Should PASS - Conversation continuity is critical for user experience
+        """
+        self.logger.info('🧠 Testing agent state persistence across conversations')
+
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+
+        websocket = await asyncio.wait_for(
+            websockets.connect(
+                self.__class__.staging_config.urls.websocket_url,
+                additional_headers={
+                    'Authorization': f'Bearer {self.access_token}',
+                    'X-Environment': 'staging',
+                    'X-Test-Suite': 'agent-state-persistence-e2e'
+                },
+                ssl=ssl_context,
+                ping_interval=30,
+                ping_timeout=10
+            ),
+            timeout=20.0
+        )
+
+        try:
+            # Phase 1: Establish initial context
+            initial_context = {
+                'type': 'agent_request',
+                'agent': 'supervisor_agent',
+                'message': 'I am the CTO of a company called "TechCorp" with 500 employees. Our current AWS infrastructure costs $50,000/month. Please remember these details for our conversation.',
+                'thread_id': self.thread_id,
+                'run_id': self.run_id,
+                'user_id': self.__class__.test_user_id,
+                'context': {'conversation_phase': 'context_establishment'}
+            }
+
+            await websocket.send(json.dumps(initial_context))
+            self.logger.info('📤 Phase 1: Initial context sent')
+
+            # Wait for initial response
+            initial_events = []
+            collection_start = time.time()
+            while time.time() - collection_start < 45.0:
+                try:
+                    event_data = await asyncio.wait_for(websocket.recv(), timeout=10.0)
+                    event = json.loads(event_data)
+                    initial_events.append(event)
+
+                    if event.get('type') == 'agent_completed':
+                        break
+                except asyncio.TimeoutError:
+                    continue
+
+            assert len(initial_events) > 0, 'Should receive initial context establishment response'
+            self.logger.info(f'✅ Phase 1 complete: {len(initial_events)} events received')
+
+            # Phase 2: Test context recall in follow-up message
+            await asyncio.sleep(2.0)  # Brief pause between conversation turns
+
+            context_recall = {
+                'type': 'agent_request',
+                'agent': 'supervisor_agent',
+                'message': 'Based on my company details I mentioned earlier, what specific cost optimization strategies would you recommend for TechCorp?',
+                'thread_id': self.thread_id,  # Same thread to maintain context
+                'run_id': f'{self.run_id}_followup',
+                'user_id': self.__class__.test_user_id,
+                'context': {'conversation_phase': 'context_recall_test'}
+            }
+
+            await websocket.send(json.dumps(context_recall))
+            self.logger.info('📤 Phase 2: Context recall test sent')
+
+            # Collect follow-up events
+            followup_events = []
+            collection_start = time.time()
+            while time.time() - collection_start < 45.0:
+                try:
+                    event_data = await asyncio.wait_for(websocket.recv(), timeout=10.0)
+                    event = json.loads(event_data)
+                    followup_events.append(event)
+
+                    if event.get('type') == 'agent_completed':
+                        break
+                except asyncio.TimeoutError:
+                    continue
+
+            assert len(followup_events) > 0, 'Should receive context recall response'
+
+            # Validate context retention
+            final_response = followup_events[-1] if followup_events else {}
+            response_data = final_response.get('data', {})
+            result = response_data.get('result', {})
+            response_text = result.get('response', str(result)) if isinstance(result, dict) else str(result)
+            response_lower = response_text.lower()
+
+            # Check for context indicators
+            context_indicators = ['techcorp', '500 employees', '$50,000', 'aws infrastructure']
+            context_mentions = [indicator for indicator in context_indicators if indicator in response_lower]
+
+            assert len(context_mentions) >= 2, f'Agent should remember context details. Found: {context_mentions} in response: {response_text[:200]}...'
+
+            self.logger.info('✅ Phase 2 complete: Context successfully recalled')
+
+            # Phase 3: Test persistence after brief disconnection simulation
+            await websocket.close()
+            await asyncio.sleep(1.0)  # Brief disconnection
+
+            # Reconnect
+            websocket = await asyncio.wait_for(
+                websockets.connect(
+                    self.__class__.staging_config.urls.websocket_url,
+                    additional_headers={
+                        'Authorization': f'Bearer {self.access_token}',
+                        'X-Environment': 'staging',
+                        'X-Test-Suite': 'agent-state-persistence-reconnection'
+                    },
+                    ssl=ssl_context
+                ),
+                timeout=15.0
+            )
+
+            persistence_test = {
+                'type': 'agent_request',
+                'agent': 'supervisor_agent',
+                'message': 'I want to continue our previous conversation about TechCorp. Can you provide a summary of what we discussed?',
+                'thread_id': self.thread_id,  # Same thread to test persistence
+                'run_id': f'{self.run_id}_persistence',
+                'user_id': self.__class__.test_user_id,
+                'context': {'conversation_phase': 'persistence_test'}
+            }
+
+            await websocket.send(json.dumps(persistence_test))
+            self.logger.info('📤 Phase 3: Persistence test after reconnection')
+
+            # Collect persistence test events
+            persistence_events = []
+            collection_start = time.time()
+            while time.time() - collection_start < 45.0:
+                try:
+                    event_data = await asyncio.wait_for(websocket.recv(), timeout=10.0)
+                    event = json.loads(event_data)
+                    persistence_events.append(event)
+
+                    if event.get('type') == 'agent_completed':
+                        break
+                except asyncio.TimeoutError:
+                    continue
+
+            if persistence_events:
+                final_persistence = persistence_events[-1]
+                persistence_data = final_persistence.get('data', {})
+                persistence_result = persistence_data.get('result', {})
+                persistence_text = persistence_result.get('response', str(persistence_result)) if isinstance(persistence_result, dict) else str(persistence_result)
+
+                # Check if conversation context was maintained
+                persistence_lower = persistence_text.lower()
+                maintained_context = any(indicator in persistence_lower for indicator in ['techcorp', 'previous', 'discussed', 'conversation'])
+
+                if maintained_context:
+                    self.logger.info('✅ Phase 3 complete: State persistence after reconnection successful')
+                else:
+                    self.logger.warning('⚠️ Phase 3: Limited state persistence after reconnection')
+
+            self.logger.info('🧠 Agent state persistence test completed successfully')
+
+        finally:
+            await websocket.close()
+
+    async def test_performance_under_concurrent_load(self):
+        """
+        PHASE 2 ADVANCED: Test performance under concurrent user load.
+
+        Validates system performance with multiple simultaneous users:
+        1. 10+ concurrent user connections
+        2. Simultaneous message processing
+        3. Response time validation under stress
+        4. Memory usage monitoring during extended sessions
+
+        DIFFICULTY: Very High (45+ minutes)
+        REAL SERVICES: Yes - Staging GCP under load conditions
+        STATUS: Should PASS - Platform must handle concurrent users
+        """
+        self.logger.info('⚡ Testing performance under concurrent load')
+
+        concurrent_users = []
+        user_count = 8  # Reduced from 10+ for staging environment constraints
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+
+        # Create concurrent user contexts
+        for i in range(user_count):
+            user_id = f'load_test_user_{i}_{int(time.time())}'
+            user_email = f'load_test_{i}_{int(time.time())}@netra-testing.ai'
+            access_token = self.__class__.auth_helper.create_test_jwt_token(
+                user_id=user_id,
+                email=user_email,
+                exp_minutes=30
+            )
+
+            concurrent_users.append({
+                'user_id': user_id,
+                'email': user_email,
+                'access_token': access_token,
+                'thread_id': f'load_thread_{i}_{int(time.time())}',
+                'message': f'Load test user {i+1}: Analyze infrastructure optimization opportunities for a {50 + i*10}-employee company'
+            })
+
+        async def process_concurrent_user(user_data: Dict[str, Any], user_index: int) -> Dict[str, Any]:
+            """Process messages for a single concurrent user under load."""
+            user_start = time.time()
+            events_received = []
+
+            try:
+                # Connect user
+                websocket = await asyncio.wait_for(
+                    websockets.connect(
+                        self.__class__.staging_config.urls.websocket_url,
+                        additional_headers={
+                            'Authorization': f"Bearer {user_data['access_token']}",
+                            'X-Environment': 'staging',
+                            'X-User-Index': str(user_index),
+                            'X-Load-Test': 'concurrent-performance'
+                        },
+                        ssl=ssl_context
+                    ),
+                    timeout=20.0
+                )
+
+                # Send load test message
+                load_message = {
+                    'type': 'agent_request',
+                    'agent': 'triage_agent',
+                    'message': user_data['message'],
+                    'thread_id': user_data['thread_id'],
+                    'user_id': user_data['user_id'],
+                    'context': {'load_test': True, 'user_index': user_index}
+                }
+
+                await websocket.send(json.dumps(load_message))
+
+                # Collect events with load testing timeout
+                collection_start = time.time()
+                response_timeout = 60.0  # Extended timeout for load conditions
+                completion_received = False
+
+                while time.time() - collection_start < response_timeout:
+                    try:
+                        event_data = await asyncio.wait_for(websocket.recv(), timeout=10.0)
+                        event = json.loads(event_data)
+                        events_received.append(event)
+
+                        if event.get('type') == 'agent_completed':
+                            completion_received = True
+                            break
+                    except asyncio.TimeoutError:
+                        continue
+
+                await websocket.close()
+
+                return {
+                    'user_index': user_index,
+                    'user_id': user_data['user_id'],
+                    'success': completion_received,
+                    'duration': time.time() - user_start,
+                    'events_count': len(events_received),
+                    'completed': completion_received,
+                    'response_time': time.time() - collection_start if completion_received else None
+                }
+
+            except Exception as e:
+                return {
+                    'user_index': user_index,
+                    'user_id': user_data['user_id'],
+                    'success': False,
+                    'duration': time.time() - user_start,
+                    'error': str(e),
+                    'events_count': len(events_received),
+                    'completed': False
+                }
+
+        # Execute concurrent load test
+        load_test_start = time.time()
+        self.logger.info(f'🚀 Starting concurrent load test with {user_count} users')
+
+        tasks = [process_concurrent_user(user, i) for i, user in enumerate(concurrent_users)]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        total_load_time = time.time() - load_test_start
+
+        # Analyze results
+        successful_users = [r for r in results if isinstance(r, dict) and r['success']]
+        failed_users = [r for r in results if isinstance(r, dict) and not r['success']]
+        error_users = [r for r in results if isinstance(r, Exception)]
+
+        success_rate = len(successful_users) / user_count if user_count > 0 else 0
+
+        # Performance metrics
+        if successful_users:
+            response_times = [r['response_time'] for r in successful_users if r['response_time']]
+            if response_times:
+                avg_response_time = sum(response_times) / len(response_times)
+                max_response_time = max(response_times)
+                min_response_time = min(response_times)
+            else:
+                avg_response_time = max_response_time = min_response_time = 0
+
+            avg_duration = sum(r['duration'] for r in successful_users) / len(successful_users)
+        else:
+            avg_response_time = max_response_time = min_response_time = avg_duration = 0
+
+        self.logger.info('⚡ Concurrent load test results:')
+        self.logger.info(f'   Total load test time: {total_load_time:.1f}s')
+        self.logger.info(f'   Successful users: {len(successful_users)}/{user_count} ({success_rate:.1%})')
+        self.logger.info(f'   Failed users: {len(failed_users)}')
+        self.logger.info(f'   Error users: {len(error_users)}')
+
+        if successful_users:
+            self.logger.info(f'   Average response time: {avg_response_time:.1f}s')
+            self.logger.info(f'   Max response time: {max_response_time:.1f}s')
+            self.logger.info(f'   Min response time: {min_response_time:.1f}s')
+            self.logger.info(f'   Average total duration: {avg_duration:.1f}s')
+
+        # Performance assertions
+        assert success_rate >= 0.6, f'Load test success rate too low: {success_rate:.1%} (expected ≥60%). This indicates performance degradation under concurrent load.'
+
+        if successful_users:
+            assert avg_response_time < 120.0, f'Average response time too slow under load: {avg_response_time:.1f}s (expected <120s)'
+            assert max_response_time < 180.0, f'Max response time too slow under load: {max_response_time:.1f}s (expected <180s)'
+
+        self.logger.info('⚡ Performance under concurrent load validation successful')
+
+    async def test_error_recovery_and_resilience(self):
+        """
+        PHASE 2 ADVANCED: Test error recovery and system resilience.
+
+        Validates graceful handling of various failure scenarios:
+        1. WebSocket disconnection and reconnection
+        2. LLM timeout handling
+        3. Invalid message format recovery
+        4. Service degradation graceful handling
+
+        DIFFICULTY: High (35+ minutes)
+        REAL SERVICES: Yes - Staging GCP with error injection
+        STATUS: Should PASS - Error recovery is critical for user experience
+        """
+        self.logger.info('🛡️ Testing error recovery and resilience')
+
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+
+        # Test 1: WebSocket disconnection and reconnection
+        self.logger.info('🔌 Test 1: WebSocket disconnection recovery')
+
+        websocket = await asyncio.wait_for(
+            websockets.connect(
+                self.__class__.staging_config.urls.websocket_url,
+                additional_headers={
+                    'Authorization': f'Bearer {self.access_token}',
+                    'X-Environment': 'staging',
+                    'X-Test-Suite': 'error-recovery-disconnection'
+                },
+                ssl=ssl_context
+            ),
+            timeout=15.0
+        )
+
+        # Send initial message
+        initial_message = {
+            'type': 'agent_request',
+            'agent': 'triage_agent',
+            'message': 'Start processing this message, I will test disconnection recovery',
+            'thread_id': f'error_recovery_{int(time.time())}',
+            'user_id': self.__class__.test_user_id
+        }
+
+        await websocket.send(json.dumps(initial_message))
+        await asyncio.sleep(2.0)  # Let processing start
+
+        # Force disconnection
+        await websocket.close()
+        self.logger.info('🔌 Disconnected WebSocket intentionally')
+
+        # Reconnect after brief delay
+        await asyncio.sleep(1.0)
+        websocket = await asyncio.wait_for(
+            websockets.connect(
+                self.__class__.staging_config.urls.websocket_url,
+                additional_headers={
+                    'Authorization': f'Bearer {self.access_token}',
+                    'X-Environment': 'staging',
+                    'X-Test-Suite': 'error-recovery-reconnection'
+                },
+                ssl=ssl_context
+            ),
+            timeout=15.0
+        )
+
+        # Send recovery message
+        recovery_message = {
+            'type': 'agent_request',
+            'agent': 'triage_agent',
+            'message': 'Test recovery after disconnection. This should work normally.',
+            'thread_id': f'recovery_{int(time.time())}',
+            'user_id': self.__class__.test_user_id
+        }
+
+        await websocket.send(json.dumps(recovery_message))
+
+        # Verify recovery works
+        recovery_success = False
+        collection_start = time.time()
+        while time.time() - collection_start < 30.0:
+            try:
+                event_data = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+                event = json.loads(event_data)
+                if event.get('type') == 'agent_completed':
+                    recovery_success = True
+                    break
+            except asyncio.TimeoutError:
+                continue
+
+        assert recovery_success, 'WebSocket reconnection and recovery should work'
+        self.logger.info('✅ Test 1 passed: WebSocket disconnection recovery successful')
+
+        # Test 2: Invalid message format handling
+        self.logger.info('📨 Test 2: Invalid message format recovery')
+
+        invalid_messages = [
+            '{"invalid": "json_structure"}',  # Missing required fields
+            '{"type": "agent_request"}',       # Missing message content
+            'not_json_at_all',                 # Invalid JSON
+            '{"type": "unknown_type", "message": "test"}',  # Unknown message type
+        ]
+
+        for i, invalid_msg in enumerate(invalid_messages):
+            try:
+                await websocket.send(invalid_msg)
+                await asyncio.sleep(1.0)  # Brief pause between invalid messages
+                self.logger.info(f'📨 Sent invalid message {i+1}/{len(invalid_messages)}')
+            except Exception as e:
+                self.logger.info(f'📨 Invalid message {i+1} caused expected error: {str(e)[:50]}...')
+
+        # Send valid message after invalid ones to test recovery
+        valid_recovery_message = {
+            'type': 'agent_request',
+            'agent': 'triage_agent',
+            'message': 'This valid message should work after invalid ones',
+            'thread_id': f'invalid_recovery_{int(time.time())}',
+            'user_id': self.__class__.test_user_id
+        }
+
+        await websocket.send(json.dumps(valid_recovery_message))
+
+        # Verify system recovered from invalid messages
+        format_recovery_success = False
+        collection_start = time.time()
+        while time.time() - collection_start < 25.0:
+            try:
+                event_data = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+                event = json.loads(event_data)
+                if event.get('type') == 'agent_completed':
+                    format_recovery_success = True
+                    break
+            except asyncio.TimeoutError:
+                continue
+
+        assert format_recovery_success, 'System should recover from invalid message formats'
+        self.logger.info('✅ Test 2 passed: Invalid message format recovery successful')
+
+        # Test 3: Large message handling stress test
+        self.logger.info('📏 Test 3: Large message handling stress')
+
+        # Create a very large message to test limits
+        large_content = "This is a stress test with a very large message. " * 200  # ~10KB message
+        large_message = {
+            'type': 'agent_request',
+            'agent': 'triage_agent',
+            'message': f'Process this large message for stress testing: {large_content}',
+            'thread_id': f'large_stress_{int(time.time())}',
+            'user_id': self.__class__.test_user_id,
+            'context': {'stress_test': True, 'message_size': len(large_content)}
+        }
+
+        await websocket.send(json.dumps(large_message))
+
+        # Verify large message processing
+        large_message_success = False
+        collection_start = time.time()
+        while time.time() - collection_start < 45.0:  # Extended timeout for large message
+            try:
+                event_data = await asyncio.wait_for(websocket.recv(), timeout=10.0)
+                event = json.loads(event_data)
+                if event.get('type') == 'agent_completed':
+                    large_message_success = True
+                    break
+            except asyncio.TimeoutError:
+                continue
+
+        if large_message_success:
+            self.logger.info('✅ Test 3 passed: Large message handling successful')
+        else:
+            self.logger.warning('⚠️ Test 3: Large message may have timed out (acceptable in some cases)')
+
+        await websocket.close()
+        self.logger.info('🛡️ Error recovery and resilience testing completed')
+
     async def test_multi_agent_orchestration_flow_validation(self):
         """
-        Test complete multi-agent orchestration: Supervisor → Triage → APEX flow.
-        
+        Test complete multi-agent orchestration: Supervisor -> Triage -> APEX flow.
+
         PHASE 1 ENHANCEMENT (Issue #1059): Validates the multi-agent coordination
         that delivers superior business value through specialized agent expertise.
-        
+
         Flow validation:
         1. Supervisor agent receives complex request
         2. Supervisor routes to appropriate specialized agents
         3. Triage agent analyzes request complexity and data requirements
         4. APEX optimizer agent provides detailed optimization recommendations
         5. Results are coordinated and returned with business value
-        
+
         DIFFICULTY: Very High (60+ minutes)
         REAL SERVICES: Yes - Complete multi-agent staging orchestration
         STATUS: Should PASS - Multi-agent coordination is core platform differentiator
@@ -512,12 +1032,12 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
             assert quality_evaluation['overall_quality_score'] >= self.__class__.QUALITY_THRESHOLD_HIGH, f"Multi-agent orchestration quality insufficient: {quality_evaluation['overall_quality_score']:.3f}"
         except Exception as e:
             total_time = time.time() - orchestration_start_time
-            self.logger.error('❌ MULTI-AGENT ORCHESTRATION FAILED')
+            self.logger.error('X MULTI-AGENT ORCHESTRATION FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f"   Events collected: {len(orchestration_metrics.get('coordination_events', []))}")
             self.logger.error(f"   Agents detected: {orchestration_metrics.get('agents_invoked', [])}")
-            raise AssertionError(f'Multi-agent orchestration validation failed after {total_time:.1f}s: {e}. This breaks advanced platform capabilities and enterprise value proposition ($500K+ ARR impact). Orchestration metrics: {orchestration_metrics}')
+            raise AssertionError(f'Multi-agent orchestration validation failed after {total_time:.1f}s: {e}. This breaks advanced platform capabilities and enterprise value proposition (500K+ ARR impact). Orchestration metrics: {orchestration_metrics}')
 
     def _extract_agent_info(self, event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Extract agent information from WebSocket events."""

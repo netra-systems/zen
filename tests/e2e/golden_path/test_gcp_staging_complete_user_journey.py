@@ -4,7 +4,7 @@ E2E Tests for GCP Staging Complete User Journey
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Validate complete golden path "users login -> get AI responses" flow
-- Value Impact: Protects $500K+ ARR by ensuring end-to-end chat functionality in staging
+- Value Impact: Protects 500K+ ARR by ensuring end-to-end chat functionality in staging
 - Strategic Impact: Validates 90% of platform value through complete user journey
 
 This test suite validates the complete golden path user journey in GCP staging:
@@ -60,15 +60,15 @@ class GCPStagingCompleteUserJourneyTests(BaseE2ETest):
     """
     Test complete user journey from login to AI response in GCP staging.
     
-    BUSINESS IMPACT: Protects $500K+ ARR by validating end-to-end chat functionality
+    BUSINESS IMPACT: Protects 500K+ ARR by validating end-to-end chat functionality
     """
 
     @pytest.fixture(autouse=True)
     async def setup_staging_environment(self):
         """Set up GCP staging environment configuration."""
-        self.staging_base_url = "https://staging.netra.ai"
-        self.staging_websocket_url = "wss://staging.netra.ai/ws"
-        self.staging_auth_url = "https://auth-staging.netra.ai"
+        self.staging_base_url = "https://staging.netrasystems.ai"
+        self.staging_websocket_url = "wss://staging.netrasystems.ai/ws"
+        self.staging_auth_url = "https://auth.netrasystems.ai"
         
         # Browser compatibility test matrix
         self.browsers = ['chrome', 'firefox']
@@ -318,7 +318,7 @@ class GCPStagingCompleteUserJourneyTests(BaseE2ETest):
         login_button = driver.find_element(By.ID, "login-button")
         
         # Enter test credentials
-        email_field.send_keys("test@netra.ai")
+        email_field.send_keys("test@netrasystems.ai")
         password_field.send_keys("testpassword123")
         login_button.click()
         
@@ -439,7 +439,7 @@ class GCPStagingCompleteUserJourneyTests(BaseE2ETest):
             driver = await self._setup_chrome_driver()
             
             # Use unique test credentials for each user
-            test_user_email = f"test{user_index}@netra.ai"
+            test_user_email = f"test{user_index}@netrasystems.ai"
             
             # Execute basic journey
             await self._perform_user_login(driver)

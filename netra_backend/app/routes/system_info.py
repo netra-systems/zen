@@ -10,14 +10,15 @@ import platform
 import asyncio
 from typing import Any, Dict, List, Optional
 from datetime import datetime, timezone
+from sqlalchemy import text
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
 
 from netra_backend.app.auth_integration import get_current_user_optional
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 router = APIRouter()
 
 
@@ -191,10 +192,7 @@ async def validate_configuration(
             if not env.get("SSL_ENABLED"):
                 warnings.append("SSL is not enabled")
         
-        # Validate JWT configuration
-        jwt_secret = env.get("JWT_SECRET_KEY")
-        if jwt_secret and len(jwt_secret) < 32:
-            warnings.append("JWT_SECRET_KEY should be at least 32 characters")
+        # JWT validation removed - JWT operations delegated to auth service (SSOT compliance)
         
     except Exception as e:
         logger.error(f"Configuration validation failed: {e}")
@@ -224,7 +222,7 @@ async def check_dependencies(
         
         start = time.time()
         async with get_db() as session:
-            result = await session.execute("SELECT version()")
+            result = await session.execute(text("SELECT version()"))
             version = result.scalar()
         latency = (time.time() - start) * 1000
         

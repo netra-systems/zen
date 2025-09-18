@@ -30,7 +30,7 @@ from uuid import uuid4
 from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
-from websockets.exceptions import ConnectionClosed
+from websockets import ConnectionClosed
 
 # =============================================================================
 # E2E TEST INFRASTRUCTURE
@@ -890,7 +890,7 @@ class ExternalServiceIntegrationTests:
             "event_category": "GTM Integration Test",
             "properties": json.dumps({
                 "gtm_event": "page_view",
-                "page_location": "https://netra.ai/dashboard",
+                "page_location": "https://netrasystems.ai/dashboard",
                 "gtm_container_id": "GTM-TEST123"
             }),
             "gtm_container_id": "GTM-TEST123",

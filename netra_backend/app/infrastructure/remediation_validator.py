@@ -26,7 +26,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from infrastructure.vpc_connectivity_fix import (
     VPCConnectivityValidator, 
@@ -113,7 +113,7 @@ class InfrastructureRemediationValidator:
         logger.info("[U+1F680] STARTING COMPREHENSIVE INFRASTRUCTURE REMEDIATION VALIDATION")
         logger.info(" TARGET:  MISSION: Validate Golden Path ($500K+ ARR) protection")
         
-        self.validation_start_time = datetime.utcnow()
+        self.validation_start_time = datetime.now(timezone.utc)
         self.results = []
         
         try:
@@ -732,9 +732,9 @@ class InfrastructureRemediationValidator:
     async def _generate_validation_report(self) -> RemediationValidationReport:
         """Generate comprehensive validation report"""
         if not self.validation_start_time:
-            self.validation_start_time = datetime.utcnow()
+            self.validation_start_time = datetime.now(timezone.utc)
             
-        total_duration_ms = int((datetime.utcnow() - self.validation_start_time).total_seconds() * 1000)
+        total_duration_ms = int((datetime.now(timezone.utc) - self.validation_start_time).total_seconds() * 1000)
         
         # Calculate overall success
         total_tests = len(self.results)
@@ -782,7 +782,7 @@ class InfrastructureRemediationValidator:
         report = RemediationValidationReport(
             overall_success=overall_success,
             total_duration_ms=total_duration_ms,
-            validation_timestamp=datetime.utcnow(),
+            validation_timestamp=datetime.now(timezone.utc),
             results=self.results,
             golden_path_status=golden_path_status,
             business_continuity_score=business_continuity_score,

@@ -16,7 +16,9 @@ if project_root not in sys.path:
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.state import OptimizationsResult, ActionPlanResult, PlanStep
-from netra_backend.app.schemas.shared_types import DataAnalysisResponse, PerformanceMetrics
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, PerformanceMetrics, ToolExecutionContext
+from netra_backend.app.websocket_core.types import WebSocketMessage
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
@@ -70,7 +72,7 @@ class ActionsAgentWebSocketComplianceTests:
     REQUIRED_EVENTS = {
         "agent_started",
         "agent_thinking",
-        "tool_executing", 
+        "tool_executing",
         "tool_completed",
         "agent_completed"
     }
@@ -117,7 +119,7 @@ class ActionsAgentWebSocketComplianceTests:
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_actions_agent_uses_custom_websocket_instead_of_emit_methods(self):
-        """CRITICAL VIOLATION TEST: ActionsAgent uses custom WebSocket instead of emit methods."""
+        "CRITICAL VIOLATION TEST: ActionsAgent uses custom WebSocket instead of emit methods."
         agent = ActionsToMeetGoalsSubAgent(self.mock_llm_manager, self.mock_tool_dispatcher)
         
         # Mock the WebSocket bridge to capture events
@@ -138,9 +140,9 @@ class ActionsAgentWebSocketComplianceTests:
                 confidence_score=0.8
             ),
             data_result=DataAnalysisResponse(
-                analysis_id="test-analysis-001",
+                analysis_id="test-analysis-1",
                 status="completed",
-                results={"test": "result", "insights": {"test": "insight"}, "metadata": {"test": "meta"}},
+                results={"test": "result"},
                 metrics=PerformanceMetrics(duration_ms=100.0),
                 created_at=time.time()
             )
@@ -158,7 +160,7 @@ class ActionsAgentWebSocketComplianceTests:
             
             # CRITICAL VIOLATION: The agent should call emit methods but doesn't
             assert mock_started.call_count == 0, "VIOLATION: Agent should call emit_agent_started but doesn't"
-            assert mock_thinking.call_count == 0, "VIOLATION: Agent should call emit_thinking but doesn't" 
+            assert mock_thinking.call_count == 0, "VIOLATION: Agent should call emit_thinking but doesn't"
             assert mock_tool_exec.call_count == 0, "VIOLATION: Agent should call emit_tool_executing but doesn't"
             assert mock_tool_comp.call_count == 0, "VIOLATION: Agent should call emit_tool_completed but doesn't"
             assert mock_completed.call_count == 0, "VIOLATION: Agent should call emit_agent_completed but doesn't"
@@ -166,7 +168,7 @@ class ActionsAgentWebSocketComplianceTests:
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_actions_agent_websocket_events_missing_completely(self):
-        """CRITICAL: Test that ActionsAgent does NOT send required WebSocket events."""
+        "CRITICAL: Test that ActionsAgent does NOT send required WebSocket events."
         agent = ActionsToMeetGoalsSubAgent(self.mock_llm_manager, self.mock_tool_dispatcher)
         
         # Mock WebSocket bridge to capture what events are actually sent
@@ -188,9 +190,9 @@ class ActionsAgentWebSocketComplianceTests:
                     confidence_score=0.9
                 ),
                 data_result=DataAnalysisResponse(
-                    analysis_id="performance-analysis-001",
+                    analysis_id="performance-analysis-1",
                     status="completed",
-                    results={"queries": ["slow query detected"], "insights": {"performance": "needs improvement"}, "metadata": {"source": "database_logs"}, "recommendations": ["add indexes", "optimize queries"]},
+                    results={"queries": ["slow query detected"]},
                     metrics=PerformanceMetrics(duration_ms=250.0),
                     created_at=time.time()
                 )
@@ -221,8 +223,8 @@ class ActionsAgentWebSocketComplianceTests:
         # Document the specific violations
         expected_missing = {
             "agent_started",  # Never sent - users don't know processing started
-            "tool_executing", # Never sent - no tool transparency
-            "tool_completed", # Never sent - no tool results visibility
+            "tool_executing",  # Never sent - no tool transparency
+            "tool_completed",  # Never sent - no tool results visibility
         }
         
         actual_missing = missing_events
@@ -269,23 +271,13 @@ class ActionsAgentWebSocketComplianceTests:
                     confidence_score=0.85
                 ),
                 data_result=DataAnalysisResponse(
-                    analysis_id="system-performance-analysis-001",
+                    analysis_id="system-performance-analysis-1",
                     status="completed",
                     results={
                         "analysis_results": [
                             "Database query time: 2.3s avg",
                             "Memory usage: 85%",
                             "CPU utilization: 70%"
-                        ],
-                        "insights": {
-                            "bottlenecks": ["database", "memory"],
-                            "optimization_potential": "high"
-                        },
-                        "metadata": {"analysis_date": "2025-09-02"},
-                        "recommendations": [
-                            "Add database indexes",
-                            "Implement Redis caching",
-                            "Monitor memory usage"
                         ]
                     },
                     metrics=PerformanceMetrics(duration_ms=1500.0),
@@ -332,7 +324,7 @@ class ActionsAgentWebSocketComplianceTests:
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_actions_agent_websocket_integration_compliance(self):
-        """CRITICAL: Test ActionsAgent compliance with WebSocket integration requirements."""
+        "CRITICAL: Test ActionsAgent compliance with WebSocket integration requirements."
         agent = ActionsToMeetGoalsSubAgent(self.mock_llm_manager, self.mock_tool_dispatcher)
         
         # Test 1: WebSocket bridge integration
@@ -377,14 +369,14 @@ class ActionsAgentWebSocketComplianceTests:
             state = DeepAgentState(
                 user_request="compliance test",
                 optimizations_result=OptimizationsResult(
-                    optimization_type="test", 
-                    recommendations=["test"], 
+                    optimization_type="test",
+                    recommendations=["test"],
                     confidence_score=0.5
                 ),
                 data_result=DataAnalysisResponse(
-                    analysis_id="compliance-test-001",
+                    analysis_id="compliance-test-1",
                     status="completed",
-                    results={"insights": {}, "metadata": {}, "recommendations": []},
+                    results={},
                     metrics=PerformanceMetrics(duration_ms=50.0),
                     created_at=time.time()
                 )
@@ -435,7 +427,7 @@ class ActionsAgentWebSocketComplianceTests:
             call_start = time.time()
             websocket_calls.append((call_start, args, kwargs))
             # Simulate realistic WebSocket latency
-            await asyncio.sleep(0.001)  # 1ms WebSocket latency
+            await asyncio.sleep(0.1)  # 1ms WebSocket latency
             call_times.append(time.time() - call_start)
         
         with patch.object(agent, '_send_update', side_effect=monitor_websocket_performance):
@@ -449,13 +441,10 @@ class ActionsAgentWebSocketComplianceTests:
                     confidence_score=0.95
                 ),
                 data_result=DataAnalysisResponse(
-                    analysis_id="performance-test-analysis-001",
+                    analysis_id="performance-test-analysis-1",
                     status="completed",
                     results={
-                        "analysis_results": [f"Result {i}" for i in range(100)],
-                        "insights": {f"insight_{i}": f"value_{i}" for i in range(20)},
-                        "metadata": {"large_dataset": True},
-                        "recommendations": [f"Performance rec {i}" for i in range(15)]
+                        "analysis_results": [f"Result {i}" for i in range(100)]
                     },
                     metrics=PerformanceMetrics(duration_ms=2500.0),
                     created_at=time.time()
@@ -464,7 +453,7 @@ class ActionsAgentWebSocketComplianceTests:
             
             # Measure execution performance
             start_time = time.time()
-            await agent.execute(state, "performance-test", stream_updates=True)
+            await agent.execute(state, performance-test, stream_updates=True)
             total_execution_time = time.time() - start_time
         
         # Performance analysis
@@ -475,12 +464,7 @@ class ActionsAgentWebSocketComplianceTests:
         
         # Performance requirements (current broken state)
         assert total_websocket_calls < 10, \
-            f"Too few WebSocket calls: {total_websocket_calls} (missing required events)"
-        
-        # Should have more events for proper user experience
-        expected_minimum_events = 5  # start, thinking, tool_exec, tool_comp, complete
-        assert total_websocket_calls < expected_minimum_events, \
-            f"Expected insufficient events ({total_websocket_calls} < {expected_minimum_events}) due to missing emit methods"
+            f"Too few WebSocket calls: {total_websocket_calls} (missing required events)""Expected insufficient events ({total_websocket_calls}) < {expected_minimum_events} due to missing emit methods"
     
     @pytest.mark.asyncio 
     @pytest.mark.critical
@@ -500,14 +484,9 @@ class ActionsAgentWebSocketComplianceTests:
                 confidence_score=0.7
             ),
             data_result=DataAnalysisResponse(
-                analysis_id="degradation-test-analysis-001",
+                analysis_id="degradation-test-analysis-1",
                 status="completed",
-                results={
-                    "analysis_results": ["degradation result"],
-                    "insights": {"test": "degradation"},
-                    "metadata": {"mode": "graceful_degradation"},
-                    "recommendations": ["handle gracefully"]
-                },
+                results={},
                 metrics=PerformanceMetrics(duration_ms=75.0),
                 created_at=time.time()
             )

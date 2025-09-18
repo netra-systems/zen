@@ -31,7 +31,7 @@ import logging
 import re
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Tuple, Any, Set, Union
 from enum import Enum
 import pytest
@@ -448,7 +448,7 @@ class ErrorMessageValidator:
             "validation_score": 0.0,
             "violations": [],
             "recommendations": [],
-            "validation_timestamp": datetime.utcnow().isoformat()
+            "validation_timestamp": datetime.now(UTC).isoformat()
         }
         
         # Structure validation
@@ -694,7 +694,7 @@ class ErrorMessageValidator:
             self.validation_metrics[metric_key] = []
         
         metric_record = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "validation_score": validation_result["validation_score"],
             "violation_count": len(validation_result["violations"]),
             "critical_violations": sum(1 for v in validation_result["violations"] if v["severity"] == "critical"),
@@ -812,7 +812,7 @@ class ErrorMessageFormattingValidationTests(SSotAsyncTestCase):
         
         # Store validation results in real database
         structure_validation_record = {
-            "test_timestamp": datetime.utcnow().isoformat(),
+            "test_timestamp": datetime.now(UTC).isoformat(),
             "total_test_cases": len(test_cases),
             "validation_scores": [r["validation"]["validation_score"] for r in validation_results],
             "average_validation_score": sum(r["validation"]["validation_score"] for r in validation_results) / len(validation_results),
@@ -882,7 +882,7 @@ class ErrorMessageFormattingValidationTests(SSotAsyncTestCase):
         
         # Store multi-language validation results
         language_validation_record = {
-            "test_timestamp": datetime.utcnow().isoformat(),
+            "test_timestamp": datetime.now(UTC).isoformat(),
             "tested_languages": test_languages,
             "language_results": [
                 {
@@ -964,7 +964,7 @@ class ErrorMessageFormattingValidationTests(SSotAsyncTestCase):
         
         # Store severity formatting validation results
         severity_validation_record = {
-            "test_timestamp": datetime.utcnow().isoformat(),
+            "test_timestamp": datetime.now(UTC).isoformat(),
             "severity_levels_tested": [s.value for s in severity_levels],
             "severity_results": [
                 {
@@ -1048,7 +1048,7 @@ class ErrorMessageFormattingValidationTests(SSotAsyncTestCase):
         
         # Store serialization validation results
         serialization_record = {
-            "test_timestamp": datetime.utcnow().isoformat(),
+            "test_timestamp": datetime.now(UTC).isoformat(),
             "original_validation_score": original_validation["validation_score"],
             "deserialized_validation_score": deserialized_validation["validation_score"],
             "context_fields_preserved": len(deserialized_message.enhanced_context),
@@ -1138,7 +1138,7 @@ class ErrorMessageFormattingValidationTests(SSotAsyncTestCase):
         
         # Store truncation validation results
         truncation_record = {
-            "test_timestamp": datetime.utcnow().isoformat(),
+            "test_timestamp": datetime.now(UTC).isoformat(),
             "original_message_length": len(long_error),
             "truncation_results": [
                 {
@@ -1253,7 +1253,7 @@ class ErrorMessageFormattingValidationTests(SSotAsyncTestCase):
         
         # Store context enhancement validation results
         enhancement_record = {
-            "test_timestamp": datetime.utcnow().isoformat(),
+            "test_timestamp": datetime.now(UTC).isoformat(),
             "scenarios_tested": len(context_scenarios),
             "average_enrichment_score": avg_enrichment_score,
             "enhancement_results": [
@@ -1353,7 +1353,7 @@ class ErrorMessageFormattingValidationTests(SSotAsyncTestCase):
         
         # Store template validation results
         template_record = {
-            "test_timestamp": datetime.utcnow().isoformat(),
+            "test_timestamp": datetime.now(UTC).isoformat(),
             "templates_tested": len(template_test_cases),
             "successful_template_matches": sum(
                 1 for r in template_validation_results 
@@ -1464,7 +1464,7 @@ class ErrorMessageFormattingValidationTests(SSotAsyncTestCase):
         
         # Store transformation validation results
         transformation_record = {
-            "test_timestamp": datetime.utcnow().isoformat(),
+            "test_timestamp": datetime.now(UTC).isoformat(),
             "transformation_cases": len(transformation_cases),
             "average_simplification_ratio": avg_simplification_ratio,
             "transformation_results": [
@@ -1577,7 +1577,7 @@ class ErrorMessageFormattingValidationTests(SSotAsyncTestCase):
         
         # Store technical vs business formatting validation results
         formatting_record = {
-            "test_timestamp": datetime.utcnow().isoformat(),
+            "test_timestamp": datetime.now(UTC).isoformat(),
             "audiences_tested": [r["audience"].value for r in formatting_results],
             "formatting_results": [
                 {
@@ -1701,7 +1701,7 @@ class ErrorMessageFormattingValidationTests(SSotAsyncTestCase):
         
         # Store metadata validation results
         metadata_record = {
-            "test_timestamp": datetime.utcnow().isoformat(),
+            "test_timestamp": datetime.now(UTC).isoformat(),
             "metadata_cases_tested": len(metadata_test_cases),
             "average_richness_score": avg_richness_score,
             "metadata_validation_results": [

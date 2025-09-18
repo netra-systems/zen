@@ -7,7 +7,7 @@ Create failing tests that identify unnecessary factory abstractions and demonstr
 the current over-engineering problems. These tests should FAIL initially to show
 the scope of the problem and guide cleanup efforts.
 
-Business Impact: $500K+ ARR protection through architectural simplification
+Business Impact: 500K+ ARR protection through architectural simplification
 SSOT Compliance: Identify factory patterns that violate Single Source of Truth
 
 These tests are designed to FAIL initially to demonstrate the over-engineering problem.
@@ -132,7 +132,7 @@ class FactoryProliferationPhase2Tests(SSotBaseTestCase):
         # Essential factory patterns (must be preserved)
         self.essential_patterns = {
             'user_execution_engine',  # Critical for multi-user isolation
-            'websocket_event_emitter',  # Critical for $500K+ ARR chat
+            'websocket_event_emitter',  # Critical for 500K+ ARR chat
             'auth_token_validator',  # Critical for security
             'database_connection_pool',  # Critical for data access
             'test_mock_generator'  # Critical for testing infrastructure
@@ -187,7 +187,7 @@ class FactoryProliferationPhase2Tests(SSotBaseTestCase):
         self.assertLessEqual(
             len(all_factories),
             self.factory_limits['total_factories'],
-            f"❌ FACTORY OVER-PROLIFERATION DETECTED: Found {len(all_factories)} factory classes. "
+            f"X FACTORY OVER-PROLIFERATION DETECTED: Found {len(all_factories)} factory classes. "
             f"Expected ≤{self.factory_limits['total_factories']} for business-justified architecture. "
             f"This indicates {len(all_factories) - self.factory_limits['total_factories']} excess factories requiring removal."
         )
@@ -241,7 +241,7 @@ class FactoryProliferationPhase2Tests(SSotBaseTestCase):
         self.assertLessEqual(
             len(single_use_factories),
             self.factory_limits['single_use_factories'],
-            f"❌ SINGLE-USE OVER-ENGINEERING DETECTED: Found {len(single_use_factories)} single-use factories. "
+            f"X SINGLE-USE OVER-ENGINEERING DETECTED: Found {len(single_use_factories)} single-use factories. "
             f"Expected ≤{self.factory_limits['single_use_factories']} for efficient architecture. "
             f"These factories add unnecessary complexity without providing reuse value."
         )
@@ -251,7 +251,7 @@ class FactoryProliferationPhase2Tests(SSotBaseTestCase):
         EXPECTED: FAIL - Demonstrates excessive factory abstraction layers
 
         Detects factory chains like:
-        ExecutionEngineFactory → AgentInstanceFactory → UserWebSocketEmitter
+        ExecutionEngineFactory -> AgentInstanceFactory -> UserWebSocketEmitter
 
         Such chains indicate over-engineering where simpler patterns would suffice.
         """
@@ -268,7 +268,7 @@ class FactoryProliferationPhase2Tests(SSotBaseTestCase):
         print(f"\n🚨 DEEP FACTORY CHAIN VIOLATIONS:")
         for i, chain in enumerate(deep_chains[:5]):
             print(f"  {i+1}. Chain depth: {len(chain['chain'])} levels")
-            print(f"     🔗 Chain: {' → '.join(chain['chain'])}")
+            print(f"     🔗 Chain: {' -> '.join(chain['chain'])}")
             print(f"     📄 Origin: {self._get_relative_path(chain['origin_file'])}")
             print(f"     🎯 Recommendation: Collapse to {min(2, len(chain['chain']))} levels")
 
@@ -283,8 +283,8 @@ class FactoryProliferationPhase2Tests(SSotBaseTestCase):
                 unjustified_chains.append(chain)
 
         print(f"\n📋 CHAIN JUSTIFICATION ANALYSIS:")
-        print(f"  ✅ Justified deep chains: {len(justified_chains)}")
-        print(f"  ❌ Unjustified deep chains: {len(unjustified_chains)}")
+        print(f"  CHECK Justified deep chains: {len(justified_chains)}")
+        print(f"  X Unjustified deep chains: {len(unjustified_chains)}")
 
         self.usage_analysis['factory_chains'] = {
             'all_chains': factory_chains,
@@ -296,7 +296,7 @@ class FactoryProliferationPhase2Tests(SSotBaseTestCase):
         self.assertLessEqual(
             len(unjustified_chains),
             self.factory_limits['deep_factory_chains'],
-            f"❌ FACTORY CHAIN DEPTH VIOLATIONS DETECTED: Found {len(unjustified_chains)} unjustified deep factory chains. "
+            f"X FACTORY CHAIN DEPTH VIOLATIONS DETECTED: Found {len(unjustified_chains)} unjustified deep factory chains. "
             f"Expected ≤{self.factory_limits['deep_factory_chains']} for simplified architecture. "
             f"These chains add unnecessary abstraction layers without business value."
         )
@@ -347,8 +347,8 @@ class FactoryProliferationPhase2Tests(SSotBaseTestCase):
         for i, violation in enumerate(over_abstracted[:6]):
             rel_path = self._get_relative_path(violation['file'])
             print(f"  {i+1}. {violation['name']} ({rel_path})")
-            print(f"     ❌ Issue: {violation['abstraction_issue']}")
-            print(f"     ✅ Replacement: {violation['recommended_replacement']}")
+            print(f"     X Issue: {violation['abstraction_issue']}")
+            print(f"     CHECK Replacement: {violation['recommended_replacement']}")
 
         self.usage_analysis['database_factories'] = {
             'all_db_factories': database_factories,
@@ -360,7 +360,7 @@ class FactoryProliferationPhase2Tests(SSotBaseTestCase):
         self.assertLessEqual(
             len(database_factories),
             self.factory_limits['database_factories'],
-            f"❌ DATABASE FACTORY OVER-ABSTRACTION DETECTED: Found {len(database_factories)} database-related factories. "
+            f"X DATABASE FACTORY OVER-ABSTRACTION DETECTED: Found {len(database_factories)} database-related factories. "
             f"Expected ≤{self.factory_limits['database_factories']} for standard patterns. "
             f"Most database operations can use proven connection pooling patterns instead of custom factories."
         )
@@ -404,7 +404,7 @@ class FactoryProliferationPhase2Tests(SSotBaseTestCase):
         self.assertEqual(
             len(simple_wrapper_factories),
             self.factory_limits['simple_wrapper_factories'],
-            f"❌ SIMPLE WRAPPER OVER-ENGINEERING DETECTED: Found {len(simple_wrapper_factories)} simple wrapper factories. "
+            f"X SIMPLE WRAPPER OVER-ENGINEERING DETECTED: Found {len(simple_wrapper_factories)} simple wrapper factories. "
             f"Expected {self.factory_limits['simple_wrapper_factories']} for efficient architecture. "
             f"Simple wrapper factories add complexity without providing business value."
         )

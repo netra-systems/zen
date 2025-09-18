@@ -95,7 +95,7 @@ class WebSocketEventsStagingTests(StagingTestBase):
                 except asyncio.TimeoutError:
                     print("[INFO] No response received within timeout (may be normal)")
                     
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             # Handle expected authentication errors and server errors
             # Extract status code from the exception (different formats possible)
             status_code = 0
@@ -163,15 +163,12 @@ class WebSocketEventsStagingTests(StagingTestBase):
         if connection_successful:
             print("[PASS] WebSocket connection and authentication successful")
         elif auth_error_received:
-            print("[PASS] WebSocket authentication properly enforced (expected in staging)")
-        elif server_error_occurred:
-            print("[PARTIAL PASS] WebSocket authentication working (JWT accepted), but staging server has issues")
+            print("[PASS] WebSocket authentication properly enforced (expected in staging)""[PARTIAL PASS] WebSocket authentication working (JWT accepted), but staging server has issues")
             print("[INFO] This confirms the JWT 403 authentication fix is successful!")
         else:
             print("[WARNING] No clear success indicators - unexpected behavior")
         
-        assert test_successful, "WebSocket should succeed, reject auth properly, or show server issues (all indicate auth fix works)"
-        print("[PASS] WebSocket connection test completed - staging behavior verified")
+        assert test_successful, "WebSocket should succeed, reject auth properly, or show server issues (all indicate auth fix works)""[PASS] WebSocket connection test completed - staging behavior verified")
     
     @staging_test
     async def test_api_endpoints_for_agents(self):
@@ -269,7 +266,7 @@ class WebSocketEventsStagingTests(StagingTestBase):
                         print(f"[WARNING] Received non-JSON data: {e}")
                         continue
                         
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             # Handle expected authentication errors and server errors  
             status_code = getattr(e.response, 'status', 0) if hasattr(e, 'response') else e.status if hasattr(e, 'status') else 0
             
@@ -322,11 +319,7 @@ class WebSocketEventsStagingTests(StagingTestBase):
         if connection_successful and len(events_received) > 0:
             print("[PASS] WebSocket event flow working with full authentication")
         elif auth_error_received:
-            print("[PASS] WebSocket event flow properly enforces authentication (expected in staging)")
-        elif test_message_sent:
-            print("[PASS] WebSocket event flow connectivity verified (message sent)")
-        else:
-            print("[WARNING] No clear success indicators - unexpected behavior")
+            print("[PASS] WebSocket event flow properly enforces authentication (expected in staging)""[PASS] WebSocket event flow connectivity verified (message sent)""[WARNING] No clear success indicators - unexpected behavior")
         
         assert test_successful, "WebSocket event flow should either work or properly enforce authentication"
         print("[PASS] Real WebSocket event flow test completed")

@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,15 +23,10 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""GCP Redis WebSocket Golden Path E2E Tests (Simple Version)
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""GCP Redis WebSocket Golden Path E2E Tests (Simple Version)
 
 MISSION CRITICAL: These tests validate Redis-WebSocket integration
-readiness for GCP staging to prevent WebSocket 1011 errors and $500K+ ARR failures.
+readiness for GCP staging to prevent WebSocket 1011 errors and 500K+ ARR failures.
 
 DESIGNED TO FAIL INITIALLY:
 - Tests should FAIL showing GCP readiness issues
@@ -136,7 +123,7 @@ class GCPRedisWebSocketGoldenPathSimpleTests(SSotBaseTestCase):
             f"  - End-to-end success rate: {chat_readiness['e2e_success_rate']}%\n" +
             f"  - Critical dependencies: {chat_readiness['critical_dependencies']}\n" +
             f"  - Failure scenarios: {chat_readiness['failure_scenarios']}\n" +
-            "\n\nChat functionality failures would impact $500K+ ARR immediately."
+            "\n\nChat functionality failures would impact 500K+ ARR immediately."
         )
     
     def test_gcp_redis_websocket_production_scalability_readiness(self):
@@ -235,8 +222,7 @@ class GCPRedisWebSocketGoldenPathSimpleTests(SSotBaseTestCase):
             "critical_dependencies": [
                 "Unified Redis manager (MISSING)",
                 "Shared connection pool (MISSING)",
-                "WebSocket readiness validation (UNRELIABLE)",
-                "State synchronization (FRAGMENTED)"
+                "WebSocket readiness validation (UNRELIABLE)""State synchronization (FRAGMENTED)"
             ],
             "failure_scenarios": [
                 "User connects but Redis state fails",

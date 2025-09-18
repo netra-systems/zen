@@ -27,7 +27,7 @@ from shared.isolated_environment import get_env
 
 # Import unified config for non-bootstrap functionality
 try:
-    from netra_backend.app.core.configuration.base import get_unified_config
+    from netra_backend.app.config import get_config as get_unified_config
     UNIFIED_CONFIG_AVAILABLE = True
 except ImportError:
     UNIFIED_CONFIG_AVAILABLE = False
@@ -510,11 +510,7 @@ def get_clickhouse_password_var_name() -> str:
     return EnvironmentConfig.get_clickhouse_password_var(current_env)
 
 
-# Import specific cloud run detection function for compatibility
-try:
-    from netra_backend.app.cloud_environment_detector import detect_cloud_run_environment
-except ImportError:
-    # Fallback implementation if cloud_environment_detector is not available
-    def detect_cloud_run_environment() -> Optional[str]:
-        """Fallback implementation for detect_cloud_run_environment."""
-        return EnvironmentDetector.get_cloud_run_environment() if EnvironmentDetector.is_cloud_run() else None
+# Import cloud run detection from SSOT location
+def detect_cloud_run_environment() -> Optional[str]:
+    """Detect cloud run environment using the environment detector."""
+    return EnvironmentDetector.get_cloud_run_environment() if EnvironmentDetector.is_cloud_run() else None

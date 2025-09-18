@@ -1,0 +1,35 @@
+{
+  "total_violations": 16,
+  "critical_violations": 5,
+  "factory_violations": 8,
+  "import_violations": 3,
+  "user_isolation_violations": 0,
+  "last_updated": "2025-09-16",
+  "phase": "Phase 2 - 69% Reduction Complete",
+  "baseline_description": "Post Phase 2 SSOT cleanup baseline with 53 → 16 violations",
+  "critical_details": [
+    {
+      "file_path": "netra_backend/app/websocket_core/migration_adapter.py",
+      "line_number": 45,
+      "violation_type": "websocket_factory_usage",
+      "description": "Compatibility layer factory reference (allowed)"
+    },
+    {
+      "file_path": "netra_backend/app/websocket_core/canonical_imports.py",
+      "line_number": 78,
+      "violation_type": "factory_pattern",
+      "description": "SSOT canonical factory pattern (allowed)"
+    }
+  ],
+  "compliance_targets": {
+    "phase_3_target": 8,
+    "phase_4_target": 4,
+    "final_target": 0
+  },
+  "tracking_notes": [
+    "Phase 2 achieved 69% reduction (53 → 16 violations)",
+    "Focus on WebSocket factory elimination",
+    "Maintain business continuity during cleanup",
+    "Protect Golden Path user flow"
+  ]
+}

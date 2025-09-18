@@ -35,7 +35,16 @@ def get_env(key: str, default: str = '') -> str:
 from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 from netra_backend.app.config import get_config, settings
 from netra_backend.app.services.backend_health_config import setup_backend_health_service
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
+
+# Infrastructure resilience imports
+from netra_backend.app.services.infrastructure_resilience import (
+    initialize_infrastructure_resilience, get_resilience_manager,
+    register_infrastructure_alert_handler
+)
+from netra_backend.app.resilience.circuit_breaker import (
+    get_circuit_breaker_manager, CircuitBreakerConfig, get_circuit_breaker
+)
 
 
 class StartupPhase(Enum):
@@ -163,7 +172,7 @@ class StartupOrchestrator:
     
     def __init__(self, app: FastAPI):
         self.app = app
-        self.logger = central_logger.get_logger(__name__)
+        self.logger = get_logger(__name__)
         self.start_time = time.time()
         
         # ISSUE #601 FIX: Initialize thread cleanup management with test environment detection
@@ -439,6 +448,10 @@ class StartupOrchestrator:
         # Step 7: Apply startup fixes (CRITICAL)
         await self._apply_startup_fixes()
         self.logger.info("  [U+2713] Step 7: Startup fixes applied")
+
+        # Step 8: Initialize Infrastructure Resilience (CRITICAL for Issue #1278)
+        await self._initialize_infrastructure_resilience()
+        self.logger.info("  [U+2713] Step 8: Infrastructure resilience initialized")
     
     async def _phase3_database_setup(self) -> None:
         """Phase 3: DATABASE - Database connections and schema with Issue #1278 graceful degradation."""
@@ -459,31 +472,78 @@ class StartupOrchestrator:
             # CRITICAL FIX Issue #1278: NO GRACEFUL DEGRADATION in deterministic startup
             # Database is essential for chat functionality - if database fails, startup MUST fail
             self.logger.error(f"Database setup failed: {e}")
-            
+
             # Track the phase failure properly
             if hasattr(self, 'current_phase') and self.current_phase == StartupPhase.DATABASE:
                 self._fail_phase(StartupPhase.DATABASE, e)
                 self.logger.error(f"Phase {StartupPhase.DATABASE.value} marked as failed due to database setup failure")
-            
-            # Check if this is a timeout-related failure (Issue #1278 pattern)  
+
+            # Check if this is a timeout-related failure (Issue #1278 pattern)
             timeout_occurred = "timeout" in str(e).lower()
             enhanced_error_msg = f"Phase 3 database setup failed - deterministic startup requires functional database: {e}"
-            
+
             if timeout_occurred:
                 enhanced_error_msg = f"Phase 3 database timeout failure - Issue #1278 pattern detected: {e}"
-            
-            # NO GRACEFUL DEGRADATION - Database is critical for chat
-            raise DeterministicStartupError(enhanced_error_msg, original_error=e, phase=StartupPhase.DATABASE) from e
+
+            # EMERGENCY P0 BYPASS: Allow degraded startup for infrastructure debugging
+            # This is a temporary fix to debug VPC connector issues while maintaining service availability
+            emergency_bypass = get_env("EMERGENCY_ALLOW_NO_DATABASE", "false").lower() == "true"
+            if emergency_bypass:
+                self.logger.warning("EMERGENCY BYPASS ACTIVATED: Starting without database connection")
+                self.logger.warning("This is a P0 emergency mode for infrastructure debugging only")
+                self.logger.warning(f"Database error (bypassed): {e}")
+
+                # Set degraded state and minimal required state for startup continuation
+                self.app.state.database_available = False
+                self.app.state.startup_mode = "emergency_degraded"
+
+                # Set minimal database state to prevent downstream startup failures
+                self.app.state.db_session_factory = None  # Explicitly set to None with bypass flag
+                self.app.state.emergency_database_bypassed = True
+                self.logger.info("  [⚠️] Step 7: Database bypassed in emergency mode")
+                self.logger.info("  [⚠️] Step 8: Database schema validation bypassed in emergency mode")
+
+                # FIXED: Continue startup sequence instead of terminating prematurely
+                # This allows graceful degradation to work properly
+                self.logger.info("  [⚠️] Database emergency bypass complete - continuing startup sequence for graceful degradation")
+            else:
+                # NO GRACEFUL DEGRADATION - Database is critical for chat (when bypass not active)
+                raise DeterministicStartupError(enhanced_error_msg, original_error=e, phase=StartupPhase.DATABASE) from e
     
     async def _phase4_cache_setup(self) -> None:
         """Phase 4: CACHE - Redis and caching systems."""
         self.logger.info("PHASE 4: CACHE - Redis Setup")
-        
-        # Step 9: Redis connection (CRITICAL)
-        await self._initialize_redis()
-        if not hasattr(self.app.state, 'redis_manager') or self.app.state.redis_manager is None:
-            raise DeterministicStartupError("Redis initialization failed - redis_manager is None")
-        self.logger.info("  [U+2713] Step 9: Redis connected")
+
+        try:
+            # Step 9: Redis connection (CRITICAL)
+            await self._initialize_redis()
+            if not hasattr(self.app.state, 'redis_manager') or self.app.state.redis_manager is None:
+                raise DeterministicStartupError("Redis initialization failed - redis_manager is None")
+            self.logger.info("  [U+2713] Step 9: Redis connected")
+        except Exception as e:
+            # EMERGENCY P0 BYPASS: Allow degraded startup for infrastructure debugging
+            # This is a temporary fix to debug VPC connector issues while maintaining service availability
+            emergency_bypass = get_env("EMERGENCY_ALLOW_NO_DATABASE", "false").lower() == "true"
+            if emergency_bypass:
+                self.logger.warning("EMERGENCY BYPASS ACTIVATED: Starting without Redis connection")
+                self.logger.warning("This is a P0 emergency mode for infrastructure debugging only")
+                self.logger.warning(f"Redis error (bypassed): {e}")
+
+                # Set degraded state and minimal required state for startup continuation
+                self.app.state.redis_available = False
+                self.app.state.startup_mode = "emergency_degraded"
+
+                # Set minimal Redis state to prevent downstream startup failures
+                self.app.state.redis_manager = None  # Explicitly set to None with bypass flag
+                self.app.state.emergency_redis_bypassed = True
+                self.logger.info("  [⚠️] Step 9: Redis bypassed in emergency mode")
+
+                # FIXED: Continue startup sequence instead of terminating prematurely
+                # This allows graceful degradation to work properly
+                self.logger.info("  [⚠️] Redis emergency bypass complete - continuing startup sequence for graceful degradation")
+            else:
+                # Redis is critical for chat functionality - if Redis fails, startup MUST fail (when bypass not active)
+                raise DeterministicStartupError(f"Phase 4 cache setup failed - Redis is critical: {e}", original_error=e, phase=StartupPhase.CACHE) from e
     
     async def _phase5_services_setup(self) -> None:
         """Phase 5: SERVICES - Chat Pipeline and critical services."""
@@ -824,7 +884,7 @@ class StartupOrchestrator:
         # For UserContext-based pattern, verify configuration and factories
         usercontext_configs = {
             'tool_classes': 'Tool Classes (for per-user tool creation)',
-            'websocket_bridge_factory': 'WebSocketBridgeFactory (per-user WebSocket isolation)',
+            'websocket_bridge_factory': 'AgentWebSocketBridge (per-user WebSocket isolation)',
             'execution_engine_factory': 'ExecutionEngineFactory (per-user execution isolation)',
             'websocket_connection_pool': 'WebSocketConnectionPool (connection management)'
         }
@@ -1310,9 +1370,24 @@ class StartupOrchestrator:
         
         # Get environment-aware timeout configuration
         environment = get_env().get("ENVIRONMENT", "development")
+
+        # CRITICAL FIX: Ensure staging environment gets proper timeout configuration
+        # Issue #1278 root cause: Staging getting development timeouts causing 8.0s failures
+        if any(marker in environment.lower() for marker in ["staging", "stag"]) or \
+           get_env().get("GCP_PROJECT_ID", "").endswith("staging") or \
+           get_env().get("K_SERVICE", "").endswith("staging"):
+            environment = "staging"
+
         timeout_config = get_database_timeout_config(environment)
         
         self.logger.info(f"Initializing database for {environment} environment with timeout config: {timeout_config}")
+
+        # CRITICAL FIX: Log diagnostic information for timeout troubleshooting
+        self.logger.info(f"Environment detection - ENVIRONMENT={get_env().get('ENVIRONMENT')}, "
+                        f"GCP_PROJECT_ID={get_env().get('GCP_PROJECT_ID')}, "
+                        f"K_SERVICE={get_env().get('K_SERVICE')}, "
+                        f"final_environment={environment}")
+        self.logger.info(f"Database host will be: {get_env().get('POSTGRES_HOST', 'not_set')}")
         
         # Use environment-specific timeout - Cloud SQL needs more time than local PostgreSQL
         initialization_timeout = timeout_config["initialization_timeout"]
@@ -2052,10 +2127,8 @@ class StartupOrchestrator:
     async def _initialize_factory_patterns(self) -> None:
         """Initialize factory patterns for singleton removal - CRITICAL."""
         from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, get_websocket_bridge_factory
-        from netra_backend.app.agents.supervisor.agent_instance_factory import (
-            get_agent_instance_factory,
-            configure_agent_instance_factory
-        )
+        # PHASE 2A MIGRATION: Removed deprecated get_agent_instance_factory and configure_agent_instance_factory imports
+        # These are no longer needed as we use create_agent_instance_factory(user_context) pattern per-request
         from netra_backend.app.services.factory_adapter import FactoryAdapter, AdapterConfig
         # ISSUE #1144 FIX: Use canonical SSOT import path instead of deprecated module import
         from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
@@ -2080,27 +2153,17 @@ class StartupOrchestrator:
             self.app.state.websocket_connection_pool = connection_pool
             self.logger.info("    [U+2713] WebSocketConnectionPool initialized")
             
-            # 3. Initialize WebSocketBridgeFactory
+            # 3. Initialize AgentWebSocketBridge
             # CRITICAL FIX: Always initialize websocket_factory to prevent "not associated with a value" error
-            websocket_factory = get_websocket_bridge_factory()
-            
-            # Configure with proper parameters including connection pool
-            if hasattr(self.app.state, 'agent_supervisor'):
-                # Create a simple health monitor for now
-                class SimpleHealthMonitor:
-                    async def check_health(self):
-                        return {"status": "healthy"}
-                
-                health_monitor = SimpleHealthMonitor()
-                
-                # Note: With UserExecutionContext pattern, registry is created per-request
-                websocket_factory.configure(
-                    connection_pool=connection_pool,
-                    agent_registry=None,  # Per-request in UserExecutionContext pattern
-                    health_monitor=health_monitor
-                )
+            from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+            websocket_factory = create_agent_websocket_bridge()
+
+            # Note: AgentWebSocketBridge is self-configuring and creates its own dependencies
+            # Connection pool and registry are handled internally via dependency injection
+            # Health monitor is initialized automatically during bridge initialization
             self.app.state.websocket_bridge_factory = websocket_factory
-            self.logger.info("    [U+2713] WebSocketBridgeFactory configured with connection pool")
+            self.app.state.agent_websocket_bridge = websocket_factory  # Also store as agent_websocket_bridge for compatibility
+            self.logger.info("    [U+2713] AgentWebSocketBridge configured with connection pool")
             
             # 4. AgentInstanceFactory - REMOVED SINGLETON PATTERN
             # ISSUE #1142 FIX: AgentInstanceFactory now created per-request in dependencies.py
@@ -2148,12 +2211,141 @@ class StartupOrchestrator:
             # Log factory initialization summary
             status = factory_adapter.get_migration_status()
             self.logger.info("     CHART:  Factory Pattern Migration Status:")
-            self.logger.info(f"      Migration Mode: {status['migration_mode']}")
-            self.logger.info(f"      Routes Enabled: {len(status['route_flags'])}")
-            self.logger.info(f"      Legacy Fallback: {'Enabled' if status['config']['legacy_fallback_enabled'] else 'Disabled'}")
             
         except Exception as e:
-            raise DeterministicStartupError(f"Factory pattern initialization failed: {e}")
+            self.logger.error(f" FAIL:  Factory initialization failed: {e}")
+            raise
+
+    async def _initialize_infrastructure_resilience(self) -> None:
+        """Initialize infrastructure resilience monitoring and circuit breakers - CRITICAL for Issue #1278."""
+        try:
+            self.logger.info("    - Initializing infrastructure resilience components...")
+
+            # 1. Initialize circuit breaker manager with default configuration
+            circuit_breaker_manager = get_circuit_breaker_manager()
+            self.app.state.circuit_breaker_manager = circuit_breaker_manager
+            self.logger.info("    [✓] Circuit breaker manager initialized")
+
+            # 2. Create circuit breakers for critical infrastructure services
+            environment = get_env("ENVIRONMENT", "development")
+
+            # Database circuit breaker with timeout awareness
+            database_config = CircuitBreakerConfig(
+                failure_threshold=3,
+                recovery_timeout=60.0,
+                timeout_threshold=self._get_database_timeout_for_environment(environment),
+                enable_fallback=False,  # Database is critical, no fallback
+                enable_metrics=True,
+                enable_alerts=True
+            )
+            database_cb = get_circuit_breaker("database", database_config)
+            self.logger.info(f"    [✓] Database circuit breaker initialized (timeout: {database_config.timeout_threshold}s)")
+
+            # Redis circuit breaker with fallback enabled
+            redis_config = CircuitBreakerConfig(
+                failure_threshold=3,
+                recovery_timeout=30.0,
+                timeout_threshold=10.0,
+                enable_fallback=True,  # Redis can use in-memory fallback
+                enable_metrics=True,
+                enable_alerts=False  # Less critical than database
+            )
+            redis_cb = get_circuit_breaker("redis", redis_config)
+            self.logger.info("    [✓] Redis circuit breaker initialized")
+
+            # WebSocket circuit breaker
+            websocket_config = CircuitBreakerConfig(
+                failure_threshold=5,
+                recovery_timeout=30.0,
+                timeout_threshold=30.0,
+                enable_fallback=False,  # WebSocket is critical for chat
+                enable_metrics=True,
+                enable_alerts=True,
+                alert_on_state_change=True
+            )
+            websocket_cb = get_circuit_breaker("websocket", websocket_config)
+            self.logger.info("    [✓] WebSocket circuit breaker initialized")
+
+            # 3. Initialize infrastructure resilience manager
+            await initialize_infrastructure_resilience()
+            resilience_manager = get_resilience_manager()
+            self.app.state.resilience_manager = resilience_manager
+            self.logger.info("    [✓] Infrastructure resilience manager initialized")
+
+            # 4. Register alert handlers for critical infrastructure events
+            register_infrastructure_alert_handler(self._handle_infrastructure_alert)
+            self.logger.info("    [✓] Infrastructure alert handlers registered")
+
+            # 5. Add circuit breaker state change handlers
+            circuit_breaker_manager.add_global_state_change_handler(self._handle_circuit_breaker_state_change)
+            circuit_breaker_manager.add_global_failure_handler(self._handle_circuit_breaker_failure)
+            self.logger.info("    [✓] Circuit breaker event handlers registered")
+
+            # 6. Store circuit breakers for easy access
+            self.app.state.circuit_breakers = {
+                'database': database_cb,
+                'redis': redis_cb,
+                'websocket': websocket_cb
+            }
+
+            self.logger.info("    [✓] Infrastructure resilience initialization complete")
+
+        except Exception as e:
+            error_msg = f"Infrastructure resilience initialization failed: {e}"
+            self.logger.error(error_msg)
+            raise DeterministicStartupError(error_msg, original_error=e, phase=self.current_phase)
+
+    def _get_database_timeout_for_environment(self, environment: str) -> float:
+        """Get database timeout configuration for the environment."""
+        try:
+            from netra_backend.app.core.database_timeout_config import get_database_timeout_config
+            timeout_config = get_database_timeout_config(environment)
+            return timeout_config.get('connection_timeout', 30.0)
+        except Exception as e:
+            self.logger.warning(f"Could not get database timeout config: {e}, using default 30s")
+            return 30.0
+
+    def _handle_infrastructure_alert(self, service, status, alert_data):
+        """Handle infrastructure resilience alerts."""
+        from netra_backend.app.services.infrastructure_resilience import ServiceStatus
+
+        level = "CRITICAL" if status in [ServiceStatus.CRITICAL, ServiceStatus.UNAVAILABLE] else "WARNING"
+
+        if alert_data.get('chat_impact', False):
+            self.logger.critical(f"[{level}] INFRASTRUCTURE ALERT - CHAT FUNCTIONALITY IMPACTED")
+            self.logger.critical(f"Service: {service.value}, Status: {status.value}")
+            self.logger.critical(f"Alert: {alert_data}")
+        else:
+            self.logger.warning(f"[{level}] Infrastructure Alert - Service: {service.value}, Status: {status.value}")
+            self.logger.warning(f"Alert Details: {alert_data}")
+
+    def _handle_circuit_breaker_state_change(self, name, old_state, new_state, reason):
+        """Handle circuit breaker state changes."""
+        from netra_backend.app.resilience.circuit_breaker import CircuitBreakerState
+
+        if new_state == CircuitBreakerState.OPEN:
+            self.logger.error(f"CIRCUIT BREAKER OPENED: {name} - {reason}")
+
+            # Alert on critical service circuit breaker opening
+            if name in ['database', 'websocket']:
+                self.logger.critical(f"CRITICAL CIRCUIT BREAKER OPENED: {name}")
+                self.logger.critical("This may impact chat functionality and $500K+ ARR")
+
+        elif new_state == CircuitBreakerState.CLOSED and old_state == CircuitBreakerState.OPEN:
+            self.logger.info(f"CIRCUIT BREAKER RECOVERED: {name} - {reason}")
+        else:
+            self.logger.info(f"Circuit breaker state change: {name} {old_state.value} -> {new_state.value} - {reason}")
+
+    def _handle_circuit_breaker_failure(self, name, failure_type, reason):
+        """Handle circuit breaker failure events."""
+        from netra_backend.app.resilience.circuit_breaker import FailureType
+
+        if failure_type == FailureType.TIMEOUT:
+            self.logger.warning(f"Circuit breaker timeout: {name} - {reason}")
+        elif failure_type in [FailureType.CONNECTION_ERROR, FailureType.SERVICE_UNAVAILABLE]:
+            self.logger.error(f"Circuit breaker connection failure: {name} - {reason}")
+        else:
+            self.logger.warning(f"Circuit breaker failure: {name} ({failure_type.value}) - {reason}")
     
     async def _validate_database_schema(self) -> None:
         """Validate database schema - CRITICAL."""

@@ -215,7 +215,7 @@ class StagingAgentExecutionTestRunner:
                             
                     except asyncio.TimeoutError:
                         continue
-                    except websockets.exceptions.ConnectionClosed:
+                    except websockets.ConnectionClosed:
                         break
                         
                 execution_time = time.time() - start_time

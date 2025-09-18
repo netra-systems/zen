@@ -237,7 +237,7 @@ class WebSocketEventIntegrityTests(BaseE2ETest):
         """
         FAILING TEST: Enterprise customers may not receive premium transparency in events.
         
-        Business Value: Enterprise customers ($500K+ ARR) deserve the highest level 
+        Business Value: Enterprise customers (500K+ ARR) deserve the highest level 
         of transparency about AI processing authenticity through WebSocket events.
         
         Expected Failure: Enterprise customers may receive same generic events as 

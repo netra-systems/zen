@@ -28,7 +28,7 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-'\nE2E Tests for Golden Path Auth Workflow (Issue #395)\n\nMISSION: Create failing E2E tests that reproduce auth service connectivity issues \nin the complete Golden Path user workflow on GCP staging. These tests validate \nthe full user authentication workflow and business impact scenarios.\n\nBusiness Impact:\n- Protects $500K+ ARR by validating complete Golden Path user flow\n- Tests full user authentication workflow on real staging environment\n- Validates business impact scenarios when auth service is unreachable\n- Ensures Golden Path reliability under connectivity stress\n'
+'\nE2E Tests for Golden Path Auth Workflow (Issue #395)\n\nMISSION: Create failing E2E tests that reproduce auth service connectivity issues \nin the complete Golden Path user workflow on GCP staging. These tests validate \nthe full user authentication workflow and business impact scenarios.\n\nBusiness Impact:\n- Protects 500K+ ARR by validating complete Golden Path user flow\n- Tests full user authentication workflow on real staging environment\n- Validates business impact scenarios when auth service is unreachable\n- Ensures Golden Path reliability under connectivity stress\n'
 import asyncio
 import pytest
 import aiohttp
@@ -69,7 +69,7 @@ class GoldenPathAuthE2ETests(SSotAsyncTestCase):
         """
         TEST: Golden Path user login fails when auth service times out
         EXPECTED: Should reproduce Golden Path failures with staging 0.5s timeout
-        BUSINESS IMPACT: Critical for $500K+ ARR user retention
+        BUSINESS IMPACT: Critical for 500K+ ARR user retention
         """
         golden_path_user = {'email': self.staging_config['GOLDEN_PATH_USER_EMAIL'], 'password': 'golden-path-test-password'}
         login_payload = {'username': golden_path_user['email'], 'password': golden_path_user['password']}

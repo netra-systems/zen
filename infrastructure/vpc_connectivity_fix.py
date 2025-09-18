@@ -422,5 +422,55 @@ async def main():
             print("No issues found - VPC connectivity is healthy")
 
 
+# Public API functions for external consumption
+async def check_vpc_connectivity(service_name: str, environment: str = "staging") -> VPCConnectivityStatus:
+    """
+    Public API function to check VPC connectivity for a service.
+
+    This is the main entry point used by test infrastructure and other modules
+    to validate VPC connectivity status.
+
+    Args:
+        service_name: Name of the service to check ("backend", "auth", etc.)
+        environment: Environment to check (default: "staging")
+
+    Returns:
+        VPCConnectivityStatus: Status object with connectivity details
+    """
+    validator = VPCConnectivityValidator(environment=environment)
+    return await validator.validate_vpc_connectivity(service_name)
+
+
+def get_vpc_connectivity_status(service_name: str, environment: str = "staging") -> Dict[str, Any]:
+    """
+    Synchronous wrapper for VPC connectivity checking.
+
+    Used by modules that need to check VPC status without async/await.
+
+    Args:
+        service_name: Name of the service to check
+        environment: Environment to check (default: "staging")
+
+    Returns:
+        Dict with connectivity status details
+    """
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        status = loop.run_until_complete(check_vpc_connectivity(service_name, environment))
+        return {
+            "service_name": status.service_name,
+            "is_healthy": status.is_healthy,
+            "vpc_connector_enabled": status.vpc_connector_enabled,
+            "internal_connectivity": status.internal_connectivity,
+            "database_access": status.database_access,
+            "redis_access": status.redis_access,
+            "auth_service_access": status.auth_service_access,
+            "issues": status.issues
+        }
+    finally:
+        loop.close()
+
+
 if __name__ == "__main__":
     asyncio.run(main())

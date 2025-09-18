@@ -69,7 +69,7 @@ class AgentWebSocketEventsComprehensiveTests(SSotAsyncTestCase):
     P0 Critical Integration Tests for Enhanced Agent WebSocket Event Processing.
 
     This test class validates comprehensive WebSocket event handling:
-    Enhanced Event Sequences → Real-time User Experience → Business Context
+    Enhanced Event Sequences -> Real-time User Experience -> Business Context
 
     Tests protect $500K+ ARR chat functionality by validating:
     - Enhanced WebSocket event sequence timing validation

@@ -17,7 +17,7 @@ This test suite validates the user context factory and isolation patterns:
 import asyncio
 import uuid
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 from contextlib import asynccontextmanager
@@ -156,14 +156,14 @@ class UserContextFactoryIntegrationTests(BaseIntegrationTest):
                 id=str(user_id),
                 email=f"concurrent.user.{i}@test.com",
                 name=f"Concurrent User {i}",
-                created_at=datetime.utcnow()
+                created_at=datetime.now(UTC)
             )
             
             thread = Thread(
                 id=str(thread_id),
                 user_id=str(user_id),
                 title=f"Concurrent Thread {i}",
-                created_at=datetime.utcnow()
+                created_at=datetime.now(UTC)
             )
             
             users.append(user)
@@ -238,8 +238,8 @@ class UserContextFactoryIntegrationTests(BaseIntegrationTest):
         test_session = Session(
             id=str(session_id),
             user_id=str(user_id),
-            created_at=datetime.utcnow(),
-            expires_at=datetime.utcnow() + timedelta(hours=1)
+            created_at=datetime.now(UTC),
+            expires_at=datetime.now(UTC) + timedelta(hours=1)
         )
         
         db.add_all([test_user, test_thread, test_session])

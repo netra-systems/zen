@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,12 +23,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 SQLAlchemy Pool Critical Failures E2E Tests
 
 Business Value Justification (BVJ):
@@ -97,7 +84,7 @@ class SQLAlchemyPoolCriticalFailuresTests:
         """Create authenticated test user for E2E scenarios."""
         # Create test user with real authentication
         user_data = await create_test_user(
-            email="sqlalchemy.pool.test@netra.ai",
+            email="sqlalchemy.pool.test@netrasystems.ai",
             name="SQLAlchemy Pool Test User",
             subscription="enterprise"
         )
@@ -278,9 +265,9 @@ class SQLAlchemyPoolCriticalFailuresTests:
                         f"Error should indicate session/database issue. Got: {response_data}"
                     )
             
-            except (websockets.exceptions.ConnectionClosed, 
-                   websockets.exceptions.InvalidStatusCode,
-                   websockets.exceptions.WebSocketException,
+            except (websockets.ConnectionClosed, 
+                   websockets.InvalidStatusCode,
+                   websockets.WebSocketException,
                    OSError) as e:
                 # Connection failure is expected due to session creation failure
                 logger.info(f"WebSocket connection failed as expected: {e}")
@@ -315,7 +302,7 @@ class SQLAlchemyPoolCriticalFailuresTests:
             for i in range(count):
                 try:
                     user = await create_test_user(
-                        email=f"concurrent.pool.test.{i}@netra.ai",
+                        email=f"concurrent.pool.test.{i}@netrasystems.ai",
                         name=f"Concurrent Pool Test User {i}",
                         subscription="basic"
                     )

@@ -4,12 +4,12 @@ Issue #1196 Phase 2 - SSOT ExecutionEngine Consolidation
 
 PURPOSE:
 - Validate Golden Path stability during ExecutionEngine consolidation
-- Test critical user flow: WebSocket → Agent → ExecutionEngine → Response
+- Test critical user flow: WebSocket -> Agent -> ExecutionEngine -> Response
 - Ensure no business logic regressions during SSOT migration
 - Use real services (no docker dependency)
 
-CRITICAL FLOW: User login → Chat → Agent execution → AI response
-Business Impact: $500K+ ARR depends on this flow working consistently
+CRITICAL FLOW: User login -> Chat -> Agent execution -> AI response
+Business Impact: 500K+ ARR depends on this flow working consistently
 """
 
 import pytest
@@ -107,7 +107,7 @@ class TestExecutionEngineGoldenPathStability(SSotAsyncTestCase):
             execution_time = time.perf_counter() - start_time
             self.performance_metrics["canonical_execution_time"] = execution_time
 
-            print(f"✅ Canonical Golden Path: {execution_time:.3f}s")
+            print(f"CHECK Canonical Golden Path: {execution_time:.3f}s")
 
         except Exception as e:
             pytest.fail(f"Canonical ExecutionEngine Golden Path failed: {str(e)}")
@@ -138,7 +138,7 @@ class TestExecutionEngineGoldenPathStability(SSotAsyncTestCase):
                     "execution_time": None,
                     "websocket_events": []
                 }
-                print(f"❌ Import failed: {e}")
+                print(f"X Import failed: {e}")
                 continue
 
             if import_works:
@@ -162,7 +162,7 @@ class TestExecutionEngineGoldenPathStability(SSotAsyncTestCase):
                         "status": execution_result.get("status") if execution_result else "failed"
                     }
 
-                    print(f"✅ Fragmented execution: {execution_time:.3f}s")
+                    print(f"CHECK Fragmented execution: {execution_time:.3f}s")
 
                 except Exception as e:
                     execution_time = time.perf_counter() - start_time
@@ -172,7 +172,7 @@ class TestExecutionEngineGoldenPathStability(SSotAsyncTestCase):
                         "execution_time": execution_time,
                         "error": str(e)
                     }
-                    print(f"❌ Execution failed: {e}")
+                    print(f"X Execution failed: {e}")
 
         # Analyze fragmentation impact
         self._analyze_fragmentation_impact(fragmentation_results)
@@ -217,7 +217,7 @@ class TestExecutionEngineGoldenPathStability(SSotAsyncTestCase):
         print(f"Failed executions: {len(failed_executions)}")
 
         for user_id, error in failed_executions:
-            print(f"❌ {user_id}: {error}")
+            print(f"X {user_id}: {error}")
 
         # Validate user isolation maintained
         assert len(successful_executions) >= 2, \
@@ -365,7 +365,7 @@ class TestExecutionEngineGoldenPathStability(SSotAsyncTestCase):
 
         Validates that WebSocket events are properly emitted during agent execution
         """
-        # This test specifically validates the WebSocket → ExecutionEngine integration
+        # This test specifically validates the WebSocket -> ExecutionEngine integration
         # which is critical for the Golden Path user experience
 
         websocket_mock = self._create_websocket_mock()
@@ -412,7 +412,7 @@ class TestExecutionEngineGoldenPathStability(SSotAsyncTestCase):
 
         print(f"\n=== WebSocket-ExecutionEngine Coordination ===")
         for step, result in step_results.items():
-            status = "✅" if result == "success" else "❌"
+            status = "CHECK" if result == "success" else "X"
             print(f"{status} {step}: {result}")
 
         assert len(failed_steps) == 0, \

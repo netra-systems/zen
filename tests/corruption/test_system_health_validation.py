@@ -458,7 +458,7 @@ class SystemHealthValidationTests:
 
         print(f"CI files status:")
         for file_info in status.get('ci_files_status', []):
-            print(f"  {file_info['file']}: {'✓' if file_info['exists'] else '✗'}")
+            print(f"  {file_info['file']}: {'CHECK' if file_info['exists'] else '✗'}")
 
         # CI readiness assertions
         assert status['pytest_available'], "Pytest not available - CI will fail"
@@ -564,7 +564,7 @@ class SystemHealthValidationTests:
 
         print(f"\nReadiness criteria:")
         for criterion, passed in readiness_criteria.items():
-            status = "✓ PASS" if passed else "✗ FAIL"
+            status = "CHECK PASS" if passed else "✗ FAIL"
             print(f"  {criterion}: {status}")
 
         deployment_ready = readiness_score >= 80

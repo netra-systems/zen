@@ -103,23 +103,26 @@ class SequentialStrategyHandler(ExecutionStrategyHandler):
     
     async def _notify_phase_start(self, phase: ExecutionPhase, context: 'ExecutionContext') -> None:
         """Notify phase start."""
-        if hasattr(context, 'websocket_manager') and context.websocket_manager:
-            await context.websocket_manager.send_tool_executing(
-                context.run_id, context.agent_name, phase.name, {"phase": phase.name}
+        # SSOT MIGRATION: Use websocket_bridge instead of direct websocket_manager
+        if hasattr(context, 'websocket_bridge') and context.websocket_bridge:
+            await context.websocket_bridge.notify_tool_executing(
+                context, context.agent_name, phase.name, {"phase": phase.name}
             )
     
     async def _notify_phase_complete(self, phase: ExecutionPhase, context: 'ExecutionContext') -> None:
         """Notify phase completion."""
-        if hasattr(context, 'websocket_manager') and context.websocket_manager:
-            await context.websocket_manager.send_tool_completed(
-                context.run_id, context.agent_name, phase.name, {"phase": phase.name}
+        # SSOT MIGRATION: Use websocket_bridge instead of direct websocket_manager
+        if hasattr(context, 'websocket_bridge') and context.websocket_bridge:
+            await context.websocket_bridge.notify_tool_completed(
+                context, context.agent_name, phase.name, {"phase": phase.name}
             )
     
     async def _notify_phase_error(self, phase: ExecutionPhase, context: 'ExecutionContext', error: Exception) -> None:
         """Notify phase error."""
-        if hasattr(context, 'websocket_manager') and context.websocket_manager:
-            await context.websocket_manager.send_agent_error(
-                context.run_id, context.agent_name, f"Phase {phase.name} failed: {str(error)}"
+        # SSOT MIGRATION: Use websocket_bridge instead of direct websocket_manager
+        if hasattr(context, 'websocket_bridge') and context.websocket_bridge:
+            await context.websocket_bridge.notify_error(
+                context, context.agent_name, f"Phase {phase.name} failed: {str(error)}"
             )
 
 
@@ -162,24 +165,27 @@ class PipelineStrategyHandler(ExecutionStrategyHandler):
     
     async def _notify_phase_start(self, phase: ExecutionPhase, context: 'ExecutionContext') -> None:
         """Notify phase start."""
-        if hasattr(context, 'websocket_manager') and context.websocket_manager:
-            await context.websocket_manager.send_tool_executing(
-                context.run_id, context.agent_name, phase.name, 
+        # SSOT MIGRATION: Use websocket_bridge instead of direct websocket_manager
+        if hasattr(context, 'websocket_bridge') and context.websocket_bridge:
+            await context.websocket_bridge.notify_tool_executing(
+                context, context.agent_name, phase.name,
                 {"phase": phase.name, "dependencies": phase.dependencies}
             )
     
     async def _notify_phase_complete(self, phase: ExecutionPhase, context: 'ExecutionContext') -> None:
         """Notify phase completion."""
-        if hasattr(context, 'websocket_manager') and context.websocket_manager:
-            await context.websocket_manager.send_tool_completed(
-                context.run_id, context.agent_name, phase.name, {"phase": phase.name}
+        # SSOT MIGRATION: Use websocket_bridge instead of direct websocket_manager
+        if hasattr(context, 'websocket_bridge') and context.websocket_bridge:
+            await context.websocket_bridge.notify_tool_completed(
+                context, context.agent_name, phase.name, {"phase": phase.name}
             )
     
     async def _notify_phase_error(self, phase: ExecutionPhase, context: 'ExecutionContext', error: Exception) -> None:
         """Notify phase error."""
-        if hasattr(context, 'websocket_manager') and context.websocket_manager:
-            await context.websocket_manager.send_agent_error(
-                context.run_id, context.agent_name, f"Phase {phase.name} failed: {str(error)}"
+        # SSOT MIGRATION: Use websocket_bridge instead of direct websocket_manager
+        if hasattr(context, 'websocket_bridge') and context.websocket_bridge:
+            await context.websocket_bridge.notify_error(
+                context, context.agent_name, f"Phase {phase.name} failed: {str(error)}"
             )
 
 
@@ -242,24 +248,27 @@ class ParallelStrategyHandler(ExecutionStrategyHandler):
     
     async def _notify_phase_start(self, phase: ExecutionPhase, context: 'ExecutionContext') -> None:
         """Notify phase start."""
-        if hasattr(context, 'websocket_manager') and context.websocket_manager:
-            await context.websocket_manager.send_tool_executing(
-                context.run_id, context.agent_name, phase.name, 
+        # SSOT MIGRATION: Use websocket_bridge instead of direct websocket_manager
+        if hasattr(context, 'websocket_bridge') and context.websocket_bridge:
+            await context.websocket_bridge.notify_tool_executing(
+                context, context.agent_name, phase.name,
                 {"phase": phase.name, "parallel": True}
             )
     
     async def _notify_phase_complete(self, phase: ExecutionPhase, context: 'ExecutionContext') -> None:
         """Notify phase completion."""
-        if hasattr(context, 'websocket_manager') and context.websocket_manager:
-            await context.websocket_manager.send_tool_completed(
-                context.run_id, context.agent_name, phase.name, {"phase": phase.name}
+        # SSOT MIGRATION: Use websocket_bridge instead of direct websocket_manager
+        if hasattr(context, 'websocket_bridge') and context.websocket_bridge:
+            await context.websocket_bridge.notify_tool_completed(
+                context, context.agent_name, phase.name, {"phase": phase.name}
             )
     
     async def _notify_phase_error(self, phase: ExecutionPhase, context: 'ExecutionContext', error: Exception) -> None:
         """Notify phase error."""
-        if hasattr(context, 'websocket_manager') and context.websocket_manager:
-            await context.websocket_manager.send_agent_error(
-                context.run_id, context.agent_name, f"Phase {phase.name} failed: {str(error)}"
+        # SSOT MIGRATION: Use websocket_bridge instead of direct websocket_manager
+        if hasattr(context, 'websocket_bridge') and context.websocket_bridge:
+            await context.websocket_bridge.notify_error(
+                context, context.agent_name, f"Phase {phase.name} failed: {str(error)}"
             )
 
 

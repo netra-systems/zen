@@ -1,394 +1,342 @@
 # Netra Apex AI Optimization Platform
 
-🎯 **System Health Score: 95% (EXCELLENT)** | **Status: Enterprise Ready** | **Branch: develop-long-lived** | **Last Updated: September 15, 2024**
+> **Status:** Active Development Beta | **Current Version:** 1.0.0 | **SSOT Architecture Compliance:** 98.7%
 
-> **Multi-Agent AI Optimization Platform** - Reduce AI/LLM costs by 30-70% through intelligent model routing, caching, and optimization strategies. Complete enterprise-grade user isolation with factory-based architecture.
+Netra Apex is a comprehensive AI optimization platform designed to capture value from customer AI spend through multi-agent AI collaboration. The platform delivers intelligent AI infrastructure optimization, real-time chat-based agent interactions, and advanced analytics to help organizations optimize their AI operations.
 
-**Quick Navigation:** [Quick Start](#-quick-start) | [Architecture](#-architecture-overview) | [Testing](#-testing) | [Monitoring](#-monitoring--health) | [Documentation](#-documentation) | [Support](#-support--development)
-
-## 🚀 Recent Major Achievements
-
-### Recent Infrastructure Achievements (2024)
-
-**🏆 Enterprise-Grade User Isolation Complete**
-- **✅ Issue #1116:** SSOT Agent Instance Factory Migration - Enterprise-grade user isolation with singleton elimination
-- **✅ Issue #1107:** Phase 2 SSOT Mock Factory validation - Comprehensive validation suite implementation
-- **✅ Issue #1101:** SSOT WebSocket Bridge Migration - Complete SSOT routing patterns with audit
-- **✅ Issue #667:** Configuration Manager SSOT - Unified imports eliminating race conditions
-
-**🏆 Testing & Quality Infrastructure**
-- **✅ Issue #714 & #762:** BaseAgent (92%+) and WebSocket Bridge (57%+) test coverage achieved
-- **✅ Issue #870:** Agent Integration Test Suite - Foundation established with clear expansion roadmap
-- **✅ Issue #953:** Security vulnerability testing - Comprehensive user isolation validation
-- **✅ Mission Critical Tests:** 169+ tests protecting $500K+ ARR business functionality
-
-**🏆 System Reliability & Performance**
-- **✅ SSOT Compliance:** 87.2% achieved with major singleton violations resolved
-- **✅ Golden Path Operational:** End-to-end user flow validated through staging environment
-- **✅ WebSocket Events:** 100% delivery guarantee with silent failure prevention
-- **✅ Issue #420:** Docker Infrastructure strategically resolved via staging validation
-
-**🏆 Unified Validation System (UVS)**
-- **Streamlined Architecture** - 2-agent triage model with intelligent data sufficiency states
-- **Data Intelligence Agent** - Primary agent handling 80% of requests with progressive data gathering
-- **Adaptive Workflows** - Insufficient → Minimal → Sufficient → Optimal data handling
-- **Simplified Hierarchy** - Reduced from 3 triage agents to 1 unified intelligent agent
-
-## 📊 Business Context
-
-### Value Proposition
-
-**Transform Your AI Operations** - Netra Apex delivers measurable AI optimization across enterprise, mid-market, and growth companies:
-
-🚀 **Immediate Impact**
-- **30-70% Cost Reduction** - Intelligent model routing and optimization strategies
-- **40-60% Performance Boost** - Advanced caching and batching for faster response times  
-- **10x Scalability** - Efficient resource management enabling exponential growth
-- **Progressive Value** - Deliver 40-60% optimization even with incomplete data
-
-🎯 **Multi-Agent Intelligence**  
-- **Adaptive Workflows** - Dynamic optimization based on data completeness and business context
-- **Real-time Optimization** - Continuous learning and adaptation to your AI usage patterns
-- **Enterprise Security** - Complete user isolation with factory-based architecture
-
-### Customer Segments & Data Handling
-
-| Segment | Data Completeness | Value Delivery Strategy |
-|---------|------------------|------------------------|
-| **Free** | <40% (Insufficient) | Education + Quick templates + Value demonstration |
-| **Early** | 40-79% (Partial) | Immediate wins + Progressive optimization + Data collection |
-| **Mid** | 60-85% (Mostly complete) | Phased implementation + Quality preservation |
-| **Enterprise** | 80-100% (Sufficient) | Full optimization + Compliance focus + Custom strategies |
-
-### Adaptive Workflow Architecture
-
-The platform implements **adaptive workflows** based on data completeness:
-
-1. **Sufficient Data (≥80%)**: Full optimization workflow with high confidence
-2. **Partial Data (40-79%)**: Modified workflow with caveats, immediate value, and progressive enhancement
-3. **Insufficient Data (<40%)**: Focus on education, data collection, and value demonstration
-
-See [Orchestration Data Handling Patterns](./reports/analysis/ORCHESTRATION_DATA_HANDLING_PATTERNS.md) for comprehensive patterns and examples.
-See [Netra Optimization Breakdown](./reports/analysis/NETRA_OPTIMIZATION_BREAKDOWN.md) for detailed system optimization architecture (AI-specific vs general).
-
-### Key Business Metrics
-
-- **Conversion Rate**: Users providing data after initial insufficient data scenario
-- **Value Delivery Rate**: Successful optimizations despite incomplete data
-- **Confidence Accuracy**: Correlation between confidence scores and actual outcomes
-- **Time to Value**: <24 hours for initial recommendations, 1-3 weeks for full implementation
+**🎯 Golden Path Priority:** User login → AI responses (90% of platform value delivered through chat)
 
 ## 🏗️ Architecture Overview
 
-📖 [Documentation Index](./docs/index.md)
+Netra Apex follows a microservice architecture with SSOT (Single Source of Truth) compliance:
 
-### 📚 Key Architecture Documents
+- **Backend Service** (`netra_backend/`) - Core API, WebSocket handling, and agent orchestration
+- **Authentication Service** (`auth_service/`) - JWT-based authentication and session management  
+- **Frontend** (`frontend/`) - Next.js React application with real-time WebSocket integration
+- **Shared Libraries** (`shared/`) - Common utilities and SSOT configurations
 
-- **[🚀 Golden Path User Flow](./docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md)** - **MISSION CRITICAL**: Complete user journey analysis from connection to response delivery, including race condition fixes and WebSocket event requirements ($500K+ ARR dependency)
-- **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - **CRITICAL**: Complete guide to the new Factory-based user isolation architecture with execution engines and WebSocket event emitters
-- [WebSocket Modernization Report](./reports/archived/WEBSOCKET_MODERNIZATION_REPORT.md) - Details of WebSocket isolation implementation
-- [Tool Dispatcher Migration Guide](./reports/archived/TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Migration from singleton to request-scoped tool dispatchers
-
-## 🎯 Core System Design
-
-**Enterprise-Grade Multi-User AI Platform** - Netra Apex implements a sophisticated **SSOT Factory-based architecture** ensuring complete user isolation and enterprise security:
-
-✨ **Factory-Based User Isolation** - Complete separation of concurrent user sessions
-🏗️ **Request-Scoped Architecture** - Every request gets isolated execution context  
-🔒 **Enterprise Security** - Zero shared state between users with comprehensive boundary enforcement
-⚡ **High Performance** - Optimized for concurrent multi-user AI workloads
-
-See **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** for detailed implementation diagrams.
-
-### Key Components
-
-#### 1. SSOT Agent Instance Factory Pattern
-- `SSOT Agent Factory` - Complete SSOT-compliant factory-based agent creation with user isolation (Issue #1116)
-- `ExecutionEngineFactory` - Creates per-request execution engines
-- `WebSocketBridgeFactory` - Creates per-user WebSocket emitters with SSOT routing
-- `ToolExecutorFactory` - Creates isolated tool dispatchers
-
-#### 2. Complete User Isolation
-- `UserExecutionContext` - Complete request isolation with SSOT factory patterns
-- `IsolatedExecutionEngine` - Per-request execution with no shared state
-- `UserWebSocketEmitter` - User-specific event delivery with SSOT compliance
-- `SSOT Agent Instances` - Factory-created agents with complete user isolation
-
-#### 3. Enhanced Resource Management
-- Per-user semaphores (max 5 concurrent executions)
-- Memory thresholds (1024MB limit)
-- Automatic cleanup and lifecycle management
-- System stability monitoring for SSOT factory migration
+### Core Infrastructure
+- **3-Tier Data Persistence:** Redis (hot cache) → PostgreSQL (warm storage) → ClickHouse (analytics)
+- **Real-time Communication:** WebSocket-based agent progress tracking and transparency
+- **Multi-User Isolation:** Factory-based execution contexts ensuring complete user separation
 
 ## 🚀 Quick Start
 
-### System Status Overview
-- **Production Readiness:** ✅ ENTERPRISE READY (Minimal Risk) - All critical systems validated for deployment with complete SSOT factory patterns
-- **SSOT Compliance:** 87.2% Real System (285 violations in 118 files - Major singleton violations resolved)
-- **Infrastructure Health:** All core services 99.9% uptime  
-- **Golden Path Status:** ✅ FULLY OPERATIONAL via staging validation with complete SSOT factory user isolation
-- **SSOT Agent Factory:** ✅ PHASE 1 COMPLETE - Issue #1116 complete migration from singleton to factory patterns with system stability validation
-- **Mock Factory SSOT:** ✅ PHASE 2 COMPLETE - Comprehensive validation suite implementation (Issue #1107)
-- **WebSocket Bridge:** ✅ ENHANCED - Complete SSOT message routing migration with comprehensive audit
-- **WebSocket Events:** ✅ 100% delivery guarantee with silent failure prevention and enhanced SSOT routing
-- **Agent Test Coverage:** BaseAgent 92%+ success, WebSocket Bridge 57%+ success, Agent Integration 50%+ success
-- **Security Testing:** ✅ ENHANCED - Comprehensive user isolation vulnerability validation complete
-- **E2E Testing Infrastructure:** ✅ COMPREHENSIVE - Agent golden path smoke tests and security validation complete
-- **Current Branch:** develop-long-lived (main deployment branch)
-
 ### Prerequisites
 
-**Core Requirements:**
-- **Python 3.11+** - Main backend runtime
-- **Node.js 18+** - Frontend development  
-- **gcloud CLI** - GCP deployment and staging demos
-
-**Infrastructure (Choose One):**
-- **Staging Environment** ⭐ **(Recommended)** - Use GCP staging for validation
-- **Local Docker** - Full local development with Docker Compose
-- **Hybrid Setup** - Local development with cloud services
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/netra-systems/netra-apex.git
-cd netra-apex
-
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Set up environment variables (check docs for current env setup)
-# See docs/STAGING_DEMO_SETUP.md for complete environment configuration
-
-# Start the application (Staging recommended for validation)
-# Option 1: Quick demo setup
-python scripts/staging_demo_setup.py --frontend gcp
-
-# Option 2: Docker development (local)
-docker-compose up
-
-# Option 3: Individual services
-python scripts/launch_backend.py
-python scripts/launch_auth_service.py
-npm --prefix frontend run dev
-```
-
-### 🚀 Quick Demo Launch
-
-For a quick staging demo with automatic setup:
-
-```bash
-# Using Claude Code command (recommended)
-/run-demo
-
-# Or using the Python script directly
-python scripts/staging_demo_setup.py --frontend gcp  # Use GCP frontend
-python scripts/staging_demo_setup.py --frontend localhost  # Use local frontend
-```
-
-This command handles all setup including:
-- GCP authentication
-- Environment configuration
-- Secret Manager access verification
-- Service health checks
-- Automatic browser launch
-
-See [Staging Demo Setup Guide](./docs/STAGING_DEMO_SETUP.md) for detailed instructions.
-
-**Note:** With Issue #420 resolution, staging environment provides complete validation coverage as alternative to local Docker setup.
-
-### 🔄 Current System Status (2024)
-- **System Health:** 95% (EXCELLENT) - All critical infrastructure operational and validated
-- **Enterprise Architecture:** Complete SSOT agent factory migration with multi-user isolation
-- **Testing Coverage:** Comprehensive validation suites protecting $500K+ ARR functionality
-- **Security Posture:** Enhanced user isolation with comprehensive vulnerability testing
-- **Golden Path:** Fully operational end-to-end user flow through staging validation
-- **Production Readiness:** Enterprise-ready with minimal operational risk
-- **Development Branch:** develop-long-lived (main development branch)
-
-## 📖 Documentation
-
-### 🚀 Essential Reading
-- **[📖 Documentation Index](./docs/index.md)** - **START HERE**: Complete documentation navigator with essential reading order
-- **[🚀 Golden Path User Flow](./docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md)** - **MISSION CRITICAL**: Complete user journey analysis with critical issue identification and business impact ($500K+ ARR)
-- **[📁 Project Instructions (CLAUDE.md)](./CLAUDE.md)** - **ULTRA CRITICAL**: Essential project context, development guidelines, and business mandate
-
-### Architecture & Design
-- **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and user isolation architecture
-- **[UVS Triage Architecture Transition](./docs/UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** - NEW: Unified Validation System with data sufficiency states
-- **[Frontend Architecture Diagrams](./frontend/docs/FRONTEND_ARCHITECTURE_DIAGRAMS.md)** - Complete frontend architecture with loading flows, WebSocket events, and state management
-- [Agent System Architecture](./docs/AGENT_SYSTEM_ARCHITECTURE.md) - Agent execution pipeline
-- [Agent Architecture Diagrams](./docs/agent_architecture_mermaid.md) - Visual architecture guides
-
-### Migration Guides
-- [Tool Dispatcher Migration](./reports/archived/TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Migrate from singleton to request-scoped
-- [WebSocket Modernization](./reports/archived/WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation patterns
-
-### Critical Reports
-- [Critical Security Implementation](./reports/archived/CRITICAL_SECURITY_IMPLEMENTATION_SUMMARY.md)
-- [Phase 0 Completion Report](./reports/archived/PHASE_0_COMPLETION_REPORT.md)
-
-## 🏛️ System Architecture
-
-The system follows a multi-tier architecture with complete user isolation:
-
-```
-┌─────────────────┐
-│   Frontend UI   │
-├─────────────────┤
-│   API Gateway   │
-├─────────────────┤
-│ Factory Layer   │ ← Creates isolated instances per request
-├─────────────────┤
-│ Execution Layer │ ← User-specific execution contexts
-├─────────────────┤
-│ Infrastructure  │ ← Shared, immutable resources
-└─────────────────┘
-```
-
-For detailed architecture diagrams and explanations, see **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)**.
-
-## 🔒 Security
-
-The system implements multiple security boundaries:
-
-1. **Request Isolation** - Each request gets its own execution context
-2. **User Isolation** - Complete separation between concurrent users
-3. **Resource Limits** - Per-user semaphores and memory limits
-4. **Permission Layers** - Tool execution permission checking
-5. **Secure Cleanup** - Automatic resource cleanup on request completion
-
-## 🧪 Testing
-
-### Unified Test Runner (SSOT)
-```bash
-# Mission Critical Tests (MUST PASS)
-python tests/mission_critical/test_websocket_agent_events_suite.py
-python tests/mission_critical/test_no_ssot_violations.py
-python tests/mission_critical/test_orchestration_integration.py
-
-# Unified Test Runner - All Categories
-python tests/unified_test_runner.py --real-services
-python tests/unified_test_runner.py --category integration --no-coverage --fast-fail
-python tests/unified_test_runner.py --categories smoke unit integration api --real-llm --env staging
-```
-
-### Test Infrastructure Status
-- **Mission Critical:** 169 tests protecting core business functionality ($500K+ ARR) ✅
-- **Integration Tests:** 761+ tests with enhanced coverage, plus 4 new agent integration suites ✅
-- **E2E Tests:** 1,570+ tests with comprehensive end-to-end validation ✅
-- **Backend Unit Tests:** 11,325+ tests with 95%+ coverage ✅
-- **Agent Test Suites:** BaseAgent (92%+ success), WebSocket Bridge (57%+ success), Agent Integration (50%+ success) ✅
-- **Security Test Suites:** Comprehensive user isolation vulnerability testing complete ✅
-- **Test Collection:** >99.9% success rate across 10,975+ test files
-
-See [`TEST_EXECUTION_GUIDE.md`](./docs/testing/TEST_EXECUTION_GUIDE.md) for comprehensive testing methodology.
-
-## 📊 Monitoring & Health
-
-### Real-time System Health  
-- **Overall System Health Score:** 95% (EXCELLENT)
-- **Service Availability:** 99.9% uptime across all core services
-- **SSOT Agent Factory:** Issue #1116 complete migration with system stability validation
-- **Mock Factory SSOT:** Phase 2 complete with comprehensive validation suite implementation
-- **WebSocket Health:** 100% event delivery with silent failure prevention and SSOT routing
-- **WebSocket Bridge:** Complete SSOT message routing migration with comprehensive audit
-- **SSOT Compliance:** 87.2% real system with 285 targeted violations (0 critical violations)
-- **Security Posture:** Enhanced with comprehensive user isolation testing and complete factory-based isolation
-- **E2E Testing:** Comprehensive agent golden path smoke tests and security validation infrastructure
-
-### Comprehensive Metrics
-- **SSOT Agent Factory Metrics** - Complete user isolation with factory-based agent creation and lifecycle management
-- **ExecutionEngineFactory Metrics** - Engine creation, active count, cleanup stats
-- **UserExecutionContext Metrics** - Per-request execution tracking with enhanced isolation
-- **WebSocketBridge Metrics** - Event delivery and connection health with SSOT routing
-- **Resource Monitoring** - Memory/CPU tracking with automatic throttling
-- **Configuration Manager SSOT** - Unified imports and compatibility tracking
-- **System Stability Monitoring** - Complete validation tracking for SSOT factory migration
-
-Access metrics endpoint: `GET /api/metrics`
-Health status: `GET /health` (includes WebSocket monitor status)
-
-## 🤝 Contributing
-
-Please read our contributing guidelines before submitting PRs.
+- **Python 3.9+** (Backend services)
+- **Node.js 18+** (Frontend - current: Next.js 14.2.18)
+- **Docker & Docker Compose** (Development environment)
+- **PostgreSQL 15+** (Primary database)
+- **Redis 7+** (Caching and session storage)
+- **ClickHouse 25.7+** (Analytics database)
 
 ### Development Setup
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Ensure all tests pass
-5. Submit a pull request
+1. **Clone and Environment Setup**
+   ```bash
+   git clone <repository-url>
+   cd netra-apex
+   # Configure environment variables based on your target environment
+   ```
 
-### Code Style
+2. **Backend Dependencies**
+   ```bash
+   # Install Python dependencies (see requirements.txt for complete list)
+   pip install -r requirements.txt
+   
+   # Run database migrations
+   python -m alembic upgrade head
+   ```
 
-- Follow PEP 8 for Python code
-- Use type hints for all functions
-- Document all public APIs
-- Write comprehensive tests
+3. **Frontend Setup**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev  # Starts on http://localhost:3000
+   ```
 
-## 📚 Additional Resources
+4. **Docker Development Environment (Recommended)**
+   ```bash
+   # Start all services with health checks
+   docker-compose -f docker/docker-compose.alpine-dev.yml up -d
+   
+   # Verify services are healthy
+   docker-compose ps
+   ```
+
+5. **Testing Infrastructure**
+   ```bash
+   # Quick system validation
+   python3 tests/unified_test_runner.py --execution-mode development --category smoke
+   
+   # Full development test suite
+   python3 tests/unified_test_runner.py --execution-mode development --real-services
+   ```
+
+### Testing & Validation
+
+The project uses a comprehensive SSOT (Single Source of Truth) testing framework with 21 test categories:
+
+```bash
+# Quick smoke tests (1 minute)
+python3 tests/unified_test_runner.py --execution-mode development --category smoke
+
+# Mission-critical business functionality (8 minutes)
+python3 tests/unified_test_runner.py --execution-mode development --category mission_critical
+
+# Golden path user flow validation (15 minutes)
+python3 tests/unified_test_runner.py --execution-mode development --category golden_path_e2e --real-services
+
+# Integration tests with real services (10 minutes)
+python3 tests/unified_test_runner.py --execution-mode development --category integration --real-services
+
+# List all available test categories
+python3 tests/unified_test_runner.py --list-categories
+```
+
+**Frontend Testing:**
+```bash
+cd frontend
+npm run test:unit           # Unit tests
+npm run test:integration    # Integration tests with mocked services
+npm run test:real           # Tests with real backend services
+npm run test:cypress        # E2E tests with Cypress
+```
+
+## 🎯 Core Features
+
+### 🤖 Multi-Agent AI System
+The platform's primary value delivery mechanism through intelligent agent collaboration:
+
+- **Supervisor Agent** - Central orchestration coordinating sub-agent workflows
+- **Data Helper Agent** - Analyzes data requirements and availability for optimization
+- **Triage Agent** - Intelligent request routing with data sufficiency evaluation  
+- **APEX Optimizer Agent** - AI infrastructure cost and performance optimization
+- **Factory-Based Isolation** - Complete separation of user execution contexts
+
+### 💬 Real-time Chat Interface (90% of Platform Value)
+Delivers substantive AI interactions through transparent, progressive agent execution:
+
+- **WebSocket Events** - Five critical events for user transparency:
+  - `agent_started` - User sees AI engagement begins
+  - `agent_thinking` - Real-time reasoning updates  
+  - `tool_executing` - Tool usage transparency
+  - `tool_completed` - Tool results delivery
+  - `agent_completed` - Final response ready
+- **Multi-User Support** - Concurrent isolated user sessions
+- **Progress Tracking** - Real-time agent workflow visibility
+
+### 📊 Advanced Analytics & Performance
+- **3-Tier Persistence** - Redis (hot) → PostgreSQL (warm) → ClickHouse (analytics)
+- **Cost Optimization** - AI infrastructure spend analysis and recommendations
+- **Usage Analytics** - Platform adoption and effectiveness metrics
+- **Custom Dashboards** - Configurable business intelligence views
+
+### 🔐 Enterprise Authentication & Security
+- **JWT-Based Authentication** - Secure token-based user validation
+- **OAuth Integration** - Third-party authentication provider support
+- **Session Management** - Redis-backed secure session handling
+- **AuthTicketManager** - Advanced authentication ticket system with secure token generation
+
+## 🔧 Configuration & Environment Management
+
+The platform uses SSOT-compliant environment management through `IsolatedEnvironment`:
+
+### Environment Configurations
+- **Development:** `.env` (local development)
+- **Testing:** `.env.test.local` (test environment) 
+- **Staging:** `.env.staging.tests` (staging environment)
+- **Production:** GCP Secret Manager with secure secret loading
+
+### Critical Configuration Areas
+- **Database Connections** - PostgreSQL, Redis, ClickHouse with SSL and VPC connector support
+- **Authentication** - JWT_SECRET_KEY, OAuth credentials, session management
+- **Service Endpoints** - CORS settings, WebSocket endpoints, load balancer configuration
+- **Feature Flags** - Demo mode, optimization settings, WebSocket authentication
+
+### Staging Domain Configuration (Current)
+**CRITICAL:** Always use current staging domains:
+- **Backend/Auth:** https://staging.netrasystems.ai
+- **Frontend:** https://staging.netrasystems.ai  
+- **WebSocket:** wss://api-staging.netrasystems.ai
+
+❌ **DEPRECATED:** *.staging.netrasystems.ai URLs (SSL certificate failures)
+
+## 🚀 Deployment
+
+### Google Cloud Platform (Primary)
+
+The platform deploys to GCP with Cloud Run, VPC connectors, and load balancers:
+
+```bash
+# Deploy to staging with local build
+python3 scripts/deploy_to_gcp.py --project netra-staging --build-local
+
+# Deploy with comprehensive health checks
+python3 scripts/deploy_to_gcp.py --project netra-staging --run-checks
+
+# Production deployment (requires approval)
+python3 scripts/deploy_to_gcp.py --project netra-production --run-checks
+```
+
+### Infrastructure Requirements
+- **VPC Connector** - `staging-connector` with all-traffic egress for database access
+- **SSL Certificates** - Valid for `*.netrasystems.ai` domains
+- **Load Balancer** - Health checks configured for extended startup times (600s database timeout)
+- **Secret Manager** - Secure credential management with service account validation
+
+### Deployment Validation
+```bash
+# Pre-deployment system audit
+python3 scripts/pre_deployment_audit.py
+
+# Post-deployment validation
+python3 tests/unified_test_runner.py --execution-mode development --category post_deployment
+```
+
+## 🧪 Development Guidelines
+
+### SSOT Architecture Standards (98.7% Compliance)
+- **SSOT Compliance** - Mandatory Single Source of Truth patterns across all modules
+- **Absolute Imports Only** - No relative imports anywhere in the codebase
+- **Service Independence** - Complete isolation between microservices
+- **Factory Pattern** - User execution contexts for multi-user isolation
+
+### Testing Philosophy
+- **Real Services First** - No mocks in integration/E2E tests (use real databases, services)
+- **Mission-Critical Coverage** - 21 test categories protecting $500K+ ARR functionality
+- **WebSocket Event Validation** - All 5 critical events must be tested and delivered
+- **Golden Path Testing** - Complete user journey validation (login → AI responses)
+
+### Key Development Commands
+
+```bash
+# SSOT architecture compliance audit (target: >87.5%)
+python3 scripts/check_architecture_compliance.py
+
+# String literals validation (prevent config drift)
+python3 scripts/query_string_literals.py validate "your_string"
+
+# Mission-critical WebSocket events validation
+python3 tests/mission_critical/test_websocket_agent_events_suite.py
+
+# Complete system health check
+python3 scripts/pre_deployment_audit.py
+```
+
+### Development Priorities
+1. **Golden Path First** - User login → AI responses (90% of business value)
+2. **SSOT Compliance** - Maintain architectural integrity
+3. **Real Testing** - Validate with actual services, not mocks
+4. **Business Value Focus** - Every feature must serve customer AI optimization needs
+
+## 📊 System Health & Monitoring
+
+### Real-time Health Monitoring
+- **Service Health Endpoints** - `/health` on all services (backend:8000, auth:8081, frontend:3000)
+- **WebSocket Event Monitor** - Real-time connection health and event delivery tracking
+- **3-Tier Database Health** - PostgreSQL/Redis/ClickHouse connectivity validation
+- **SSOT Architecture Compliance** - Currently at 98.7% (target: >87.5%)
+
+### Current System Status
+**Golden Path Status:** ✅ Architecturally Ready | ❌ Requires Infrastructure Fixes
+
+Key metrics tracked:
+- **Mission-Critical Tests** - 21 categories protecting core functionality
+- **WebSocket Events** - 5 critical events delivery validation
+- **Multi-User Isolation** - Factory-based execution context integrity
+- **Authentication Flow** - JWT/OAuth integration health
+
+### Monitoring Commands
+```bash
+# Check current system health
+python3 tests/unified_test_runner.py --execution-mode development --category smoke
+
+# Monitor WebSocket events
+python3 tests/mission_critical/test_websocket_agent_events_suite.py
+
+# Architecture compliance audit
+python3 scripts/check_architecture_compliance.py
+```
+
+## 🤝 Contributing
+
+**Active Development Beta** - Focus on mission-critical functionality and SSOT compliance.
+
+### Contribution Priorities
+1. **Golden Path First** - User login → AI responses (90% of platform value)
+2. **SSOT Compliance** - Maintain 98.7% architecture compliance (no SSOT violations)
+3. **Real Service Testing** - Use actual databases/services, no mocks in integration tests
+4. **Business Value Focus** - Features must serve customer AI optimization needs
+
+### Development Workflow
+```bash
+# Before making changes - check system health
+python3 tests/unified_test_runner.py --execution-mode development --category smoke
+
+# After changes - validate SSOT compliance
+python3 scripts/check_architecture_compliance.py
+
+# Before commit - run mission-critical tests
+python3 tests/unified_test_runner.py --execution-mode development --category mission_critical
+```
+
+### Key Requirements
+- All changes must pass mission-critical test suite
+- WebSocket events must deliver all 5 critical events
+- No new SSOT violations introduced
+- Factory pattern isolation maintained for multi-user scenarios
+
+## 📚 Documentation & Resources
 
 ### Core Documentation
-- **[📖 Documentation Index](./docs/index.md)** - Complete documentation navigator with essential reading order
-- **[Agent System Architecture](./docs/AGENT_SYSTEM_ARCHITECTURE.md)** - Complete agent execution pipeline
-- **[Frontend Architecture Diagrams](./frontend/docs/FRONTEND_ARCHITECTURE_DIAGRAMS.md)** - Frontend architecture and WebSocket events
-- **[Agent Architecture Diagrams](./docs/agent_architecture_mermaid.md)** - Visual architecture guides
-- **[3-Tier Persistence Architecture](./docs/3tier_persistence_architecture.md)** - Redis/PostgreSQL/ClickHouse data flow
+- **Golden Path Flow** - `docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md` - Complete user journey analysis
+- **System Status** - `reports/MASTER_WIP_STATUS.md` - Current system health and issues
+- **Architecture Guide** - `CLAUDE.md` - Comprehensive development rules and patterns
+- **Test Execution** - `reports/TEST_EXECUTION_GUIDE.md` - Complete testing methodology
 
-### System Status & Compliance
-- **[Master WIP Status](./reports/MASTER_WIP_STATUS.md)** - Real-time system health and metrics
-- **[SSOT Import Registry](./docs/SSOT_IMPORT_REGISTRY.md)** - Authoritative import reference
-- **[Definition of Done Checklist](./reports/DEFINITION_OF_DONE_CHECKLIST.md)** - Comprehensive validation checklist
-- **[Test Execution Guide](./docs/testing/TEST_EXECUTION_GUIDE.md)** - Complete testing methodology
+### API & Development
+- **Runtime API Docs** - Available at service health endpoints
+- **SSOT Import Registry** - `docs/SSOT_IMPORT_REGISTRY.md` - Authoritative import reference
+- **Definition of Done** - `reports/DEFINITION_OF_DONE_CHECKLIST.md` - Module completion checklists
 
-### Key Architectural Achievements
-- **Issue #1116:** Enterprise-grade user isolation with complete singleton elimination
-- **Issue #1107:** Comprehensive validation suite implementation for mock factory patterns
-- **Issue #1101:** SSOT WebSocket bridge migration with comprehensive routing audit
-- **Issue #667:** Unified configuration imports eliminating race conditions
-- **Issue #714 & #762:** Achieved 92%+ BaseAgent and 57%+ WebSocket Bridge test coverage
-- **Issue #420:** Strategic Docker infrastructure resolution via staging validation
-- **Issue #870:** Agent integration test suite foundation with clear expansion roadmap
-- **Issue #953:** Enhanced security testing with comprehensive user isolation validation
-- **SSOT Compliance:** 87.2% achieved across production codebase with major violations resolved
-- **Golden Path Validation:** Complete end-to-end user flow operational through staging environment
+## 🔍 Troubleshooting
 
-## 📝 License
+### Common Issues & Solutions
 
-This project is proprietary and confidential.
+**WebSocket Connection Failures:**
+- Verify staging domains: `wss://api-staging.netrasystems.ai` (not *.staging.netrasystems.ai)
+- Check VPC connector and load balancer configuration
+- Validate all 5 WebSocket events are being sent
 
-## 🆘 Support & Development
+**Authentication Issues:**
+- Use `JWT_SECRET_KEY` (not `JWT_SECRET`) 
+- Verify OAuth ports: 3000, 8000, 8001, 8081
+- Check AuthTicketManager configuration
 
-For questions or issues:
-- **START HERE:** Review **[Golden Path User Flow](./docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md)** for mission-critical user journey analysis
-- Check **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** for factory patterns and isolation architecture
-- Review **[SSOT Import Registry](./docs/SSOT_IMPORT_REGISTRY.md)** for authoritative import mappings
-- Consult **[Master WIP Status](./reports/MASTER_WIP_STATUS.md)** for current system health and compliance metrics
-- Review existing GitHub issues and documentation index
-- Contact the development team for architecture or deployment questions
+**Database Connectivity:**
+- Ensure VPC connector configured for Cloud Run
+- Validate PostgreSQL/Redis/ClickHouse endpoints
+- Check 600s timeout configuration
 
-### Development Resources
-- **[📋 Definition of Done Checklist](./reports/DEFINITION_OF_DONE_CHECKLIST.md)** - Comprehensive validation for all changes
-- **[📖 Test Execution Guide](./docs/testing/TEST_EXECUTION_GUIDE.md)** - Complete testing methodology and patterns
-- **[⚡ Claude Code Command Index](./docs/COMMAND_INDEX.md)** - Access all 36 development commands via `/` slash commands in Claude Code
-- **[📁 Project Instructions (CLAUDE.md)](./CLAUDE.md)** - Essential project context and development guidelines
+**Test Infrastructure:**
+- Use `python3 tests/unified_test_runner.py --real-services` for accurate testing
+- Never use mocks in integration/E2E tests
+- Validate mission-critical tests pass
+
+## 📞 Support & Contact
+
+**Development Support:**
+- **Primary Documentation** - Check `docs/` and `reports/` directories first
+- **System Issues** - Review `reports/MASTER_WIP_STATUS.md` for known issues
+- **GitHub Issues** - For bug reports and feature requests (follow GitHub style guide)
+
+**Business Contact:**
+- **Email** - dev@netrasystems.ai
+- **Focus** - AI infrastructure optimization for enterprise customers
 
 ---
 
-## ⚠️ Important Notes
-
-**CRITICAL DOCUMENTS**: Always refer to these authoritative guides when working with the system:
-
-- **[🚀 Golden Path User Flow](./docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md)** - Mission-critical user journey analysis ($500K+ ARR)
-- **[🏗️ User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and isolation architecture  
-- **[📁 Project Instructions (CLAUDE.md)](./CLAUDE.md)** - Essential project context and development guidelines
-- **[📖 Documentation Index](./docs/index.md)** - Complete navigation with essential reading order
-
-These documents contain the authoritative guides for the system's business value delivery, isolation patterns, and development processes.
+**Netra Apex** - Capturing value from customer AI spend through multi-agent collaboration  
+**Version:** 1.0.0 | **SSOT Compliance:** 98.7% | **Golden Path:** User login → AI responses

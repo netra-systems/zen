@@ -15,7 +15,7 @@ import sys
 import time
 import uuid
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Set, Tuple
 import hashlib
@@ -113,7 +113,7 @@ class WebSocketRegressionTester:
         suite_results = {
             "test_suite": "websocket_regression_prevention",
             "environment": self.environment,
-            "start_time": datetime.utcnow().isoformat(),
+            "start_time": datetime.now(UTC).isoformat(),
             "tests": {},
             "summary": {}
         }
@@ -171,7 +171,7 @@ class WebSocketRegressionTester:
         total_tests = passed_tests + failed_tests
         success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
         
-        suite_results["end_time"] = datetime.utcnow().isoformat()
+        suite_results["end_time"] = datetime.now(UTC).isoformat()
         suite_results["summary"] = {
             "total_tests": total_tests,
             "passed_tests": passed_tests,
@@ -274,7 +274,7 @@ class WebSocketRegressionTester:
                         test_result["details"]["websocket_auth_success"] = False
                         test_result["details"]["unexpected_message"] = welcome_data
                         
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 if e.code == 1008:  # Authentication error
                     test_result["error"] = f"WebSocket authentication failed with JWT secret mismatch: {e}"
                     return test_result
@@ -326,7 +326,7 @@ class WebSocketRegressionTester:
                     # Send a test message to ensure full connection works
                     test_message = {
                         "type": "ping",
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                     
                     await websocket.send(json.dumps(test_message))
@@ -336,7 +336,7 @@ class WebSocketRegressionTester:
                     test_result["details"]["message_exchange_successful"] = True
                     test_result["details"]["response_type"] = response_data.get("type")
                     
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 if e.code == 403 or "403" in str(e):
                     test_result["error"] = f"WebSocket handshake returned 403 Forbidden (REGRESSION): {e}"
                     return test_result
@@ -455,7 +455,7 @@ class WebSocketRegressionTester:
                         # Send heartbeat
                         heartbeat_msg = {
                             "type": "ping",
-                            "timestamp": datetime.utcnow().isoformat(),
+                            "timestamp": datetime.now(UTC).isoformat(),
                             "sequence": heartbeat_count
                         }
                         
@@ -476,7 +476,7 @@ class WebSocketRegressionTester:
                         # Timeout waiting for response - might indicate load balancer issue
                         test_result["details"]["timeout_during_heartbeat"] = True
                         break
-                    except websockets.exceptions.ConnectionClosed as e:
+                    except websockets.ConnectionClosed as e:
                         # Connection closed unexpectedly - potential load balancer timeout
                         test_result["details"]["unexpected_connection_close"] = True
                         test_result["details"]["close_code"] = e.code
@@ -509,7 +509,7 @@ class WebSocketRegressionTester:
             test_result["passed"] = True
             test_result["message"] = "Load balancer timeout regression prevented"
             
-        except websockets.exceptions.InvalidHandshake as e:
+        except websockets.InvalidHandshake as e:
             test_result["error"] = f"WebSocket handshake failed (possible load balancer issue): {e}"
         except Exception as e:
             test_result["error"] = f"Load balancer timeout test failed: {e}"
@@ -665,7 +665,7 @@ class WebSocketRegressionTester:
                         
                         received_events.append({
                             "type": event_type,
-                            "timestamp": datetime.utcnow().isoformat(),
+                            "timestamp": datetime.now(UTC).isoformat(),
                             "data": event_data
                         })
                         

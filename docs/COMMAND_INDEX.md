@@ -346,7 +346,7 @@ This index catalogues all 39 custom Claude Code slash commands available for the
 ```bash
 /audit-gcp-logs                       # All services, last hour
 /audit-gcp-logs backend-staging 24    # Backend last 24 hours
-/audit-gcp-logs auth-staging 3        # Auth last 3 hours
+/audit-gcp-logs auth 3        # Auth last 3 hours
 ```
 
 ---
@@ -822,9 +822,10 @@ All test commands enforce the **NO MOCKS** policy from CLAUDE.md:
 - **[Golden Path User Flow Analysis](./GOLDEN_PATH_USER_FLOW_COMPLETE.md)** 🚀 - Critical user journey analysis ($500K+ ARR dependency)
 
 ### Claude Code Automation & Orchestration
-- **[Claude Instance Orchestrator](../README-claude-orchestrator.md)** 🤖 - **NEW** - Multi-instance Claude Code automation with SDK features
-- **[Claude Orchestration Plan](../claude-code-instances-plan.md)** 📋 - Architecture design and implementation strategy for parallel Claude execution
-- **[Claude Instance Orchestrator Script](../scripts/claude-instance-orchestrator.py)** ⚙️ - Python orchestrator for running multiple Claude Code instances concurrently
+- **[Zen Orchestrator Service](../zen/README.md)** 🎛️ - **STANDALONE SERVICE** - Multi-instance Claude Code orchestration with scheduling, monitoring, and metrics
+- **[Orchestrator Documentation Hub](../zen/docs/)** 📖 - Service overview, quick start, and usage patterns
+- **[Orchestrator Script](../zen/zen_orchestrator.py)** ⚙️ - Main orchestrator implementation with advanced features
+- **[CloudSQL Integration](../scripts/ORCHESTRATOR_CLOUDSQL_INTEGRATION.md)** 💾 - Database persistence and metrics tracking
 
 ### Cross-Referenced Documentation
 - **[Documentation Index](./index.md)** 📖 - Master documentation navigation hub (Updated 2025-09-15)
@@ -903,7 +904,7 @@ All test commands enforce the **NO MOCKS** policy from CLAUDE.md:
 
 ---
 
-## 🕐 Time Expectations (Updated 2025-09-15)
+## 🕐 Time Expectations (Updated 2025-09-17)
 
 | Duration | Commands | Purpose |
 |----------|----------|---------|
@@ -939,4 +940,4 @@ All test commands enforce the **NO MOCKS** policy from CLAUDE.md:
 
 ---
 
-*Last Updated: 2025-09-15 | Commands: 39 | Categories: 6 | Mission Critical Commands: 8 | Repository Maintenance Commands: 6 | System Health: 95% EXCELLENT - Issue #1116 SSOT Agent Factory Migration Complete, Enterprise User Isolation Implemented, System Stability Validated*
+*Last Updated: 2025-09-17 | Commands: 39 | Categories: 6 | Mission Critical Commands: 8 | Repository Maintenance Commands: 6 | System Health: ⚠️ CRITICAL INFRASTRUCTURE GAPS - Excellent SSOT Architecture (98.7%) but Auth/Backend Services Unavailable*

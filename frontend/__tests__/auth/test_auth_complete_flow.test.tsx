@@ -28,7 +28,7 @@ import { unifiedAuthService } from '@/auth/unified-auth-service';
 import { useAuthStore } from '@/store/authStore';
 import { WebSocketService } from '@/services/webSocketService';
 import { User } from '@/types';
-import { jwtDecode } from 'jwt-decode';
+// jwt-decode import removed - JWT authentication removed
 
 // Mock external dependencies but keep internal auth logic real
 jest.mock('@/auth/unified-auth-service');
@@ -42,7 +42,7 @@ jest.mock('@/services/webSocketService', () => ({
     isConnected: jest.fn().mockReturnValue(false)
   }))
 }));
-jest.mock('jwt-decode');
+// jwt-decode mock removed - JWT authentication removed
 jest.mock('@/lib/logger', () => ({
   logger: {
     info: jest.fn(),

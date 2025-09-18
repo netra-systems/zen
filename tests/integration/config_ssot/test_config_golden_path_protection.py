@@ -1,17 +1,17 @@
 """
 Integration Tests for Golden Path Configuration Protection - Issue #667
 
-EXPECTED TO FAIL - Protects $500K+ ARR Golden Path Functionality
+EXPECTED TO FAIL - Protects 500K+ ARR Golden Path Functionality
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal
-- Business Goal: Revenue Protection - Maintain $500K+ ARR user flow
+- Business Goal: Revenue Protection - Maintain 500K+ ARR user flow
 - Value Impact: Ensures configuration consistency doesn't break core user journey
 - Strategic Impact: Protects critical business functionality during SSOT consolidation
 
 PURPOSE: These tests are EXPECTED TO FAIL until Issue #667 is resolved.
 They demonstrate how configuration manager SSOT violations break the Golden Path:
-User Login → Send Message → Agent Response → WebSocket Events → Complete Chat Flow
+User Login -> Send Message -> Agent Response -> WebSocket Events -> Complete Chat Flow
 
 Test Strategy:
 1. Test complete user authentication flow with different config managers
@@ -198,7 +198,7 @@ class ConfigGoldenPathProtectionTests(BaseIntegrationTest):
                 f"Authentication configuration inconsistencies between managers break the Golden Path user flow. "
                 f"Users cannot reliably log in when different configuration managers are used. "
                 f"Full auth flow configurations: {auth_flow_configs}. "
-                f"This directly affects $500K+ ARR by preventing user access to AI chat functionality."
+                f"This directly affects 500K+ ARR by preventing user access to AI chat functionality."
             )
 
     def test_websocket_config_consistency_for_chat_violation(self):
@@ -299,7 +299,7 @@ class ConfigGoldenPathProtectionTests(BaseIntegrationTest):
                 f"WebSocket configuration inconsistencies between managers break real-time chat functionality. "
                 f"Users cannot receive agent responses or see real-time progress updates. "
                 f"Full WebSocket configurations: {websocket_configs}. "
-                f"This directly affects the core value proposition and $500K+ ARR revenue."
+                f"This directly affects the core value proposition and 500K+ ARR revenue."
             )
 
     def test_llm_service_config_consistency_violation(self):
@@ -400,7 +400,7 @@ class ConfigGoldenPathProtectionTests(BaseIntegrationTest):
                 f"LLM service configuration inconsistencies between managers break AI agent functionality. "
                 f"Users cannot receive intelligent responses or AI-powered insights. "
                 f"Full LLM configurations: {llm_configs}. "
-                f"This breaks the core AI value proposition and affects $500K+ ARR revenue stream."
+                f"This breaks the core AI value proposition and affects 500K+ ARR revenue stream."
             )
 
     def test_end_to_end_golden_path_config_protection_violation(self):
@@ -409,7 +409,7 @@ class ConfigGoldenPathProtectionTests(BaseIntegrationTest):
 
         This test simulates the complete Golden Path user journey and demonstrates
         how configuration manager SSOT violations break the end-to-end flow:
-        Login → WebSocket Connect → Send Message → Agent Response → Success
+        Login -> WebSocket Connect -> Send Message -> Agent Response -> Success
         """
         if len(self.config_managers) < 2:
             pytest.skip("Need at least 2 configuration managers for end-to-end testing")
@@ -497,9 +497,9 @@ class ConfigGoldenPathProtectionTests(BaseIntegrationTest):
         # CRITICAL ASSERTION: Should fail if Golden Path is broken or inconsistent
         assert len(golden_path_failures) == 0, (
             f"GOLDEN PATH CONFIGURATION FAILURES DETECTED: {golden_path_failures}. "
-            f"The complete Golden Path user flow (Login → WebSocket → Agent Response) "
+            f"The complete Golden Path user flow (Login -> WebSocket -> Agent Response) "
             f"fails or behaves inconsistently depending on which configuration manager is used. "
-            f"This creates unpredictable user experience and directly threatens $500K+ ARR. "
+            f"This creates unpredictable user experience and directly threatens 500K+ ARR. "
             f"Golden Path requires consistent configuration across all managers to ensure "
             f"reliable user access to AI chat functionality."
         )

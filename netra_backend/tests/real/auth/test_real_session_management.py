@@ -18,7 +18,7 @@ import asyncio
 import json
 import secrets
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List
 from unittest.mock import patch, MagicMock
 import pytest
@@ -99,8 +99,8 @@ class RealSessionManagementTests:
 
     def generate_user_session_data(self, user_id: int, **kwargs) -> Dict[str, Any]:
         """Generate user session data structure."""
-        now = datetime.utcnow()
-        return {'session_id': self.generate_session_id(), 'user_id': user_id, 'email': kwargs.get('email', f'user{user_id}@netra.ai'), 'full_name': kwargs.get('full_name', f'Test User {user_id}'), 'created_at': now.isoformat(), 'last_activity': now.isoformat(), 'expires_at': (now + timedelta(hours=24)).isoformat(), 'ip_address': kwargs.get('ip_address', '127.0.0.1'), 'user_agent': kwargs.get('user_agent', 'pytest-session-test'), 'is_active': True, 'permissions': kwargs.get('permissions', ['read']), 'oauth_provider': kwargs.get('oauth_provider', 'google')}
+        now = datetime.now(UTC)
+        return {'session_id': self.generate_session_id(), 'user_id': user_id, 'email': kwargs.get('email', f'user{user_id}@netrasystems.ai'), 'full_name': kwargs.get('full_name', f'Test User {user_id}'), 'created_at': now.isoformat(), 'last_activity': now.isoformat(), 'expires_at': (now + timedelta(hours=24)).isoformat(), 'ip_address': kwargs.get('ip_address', '127.0.0.1'), 'user_agent': kwargs.get('user_agent', 'pytest-session-test'), 'is_active': True, 'permissions': kwargs.get('permissions', ['read']), 'oauth_provider': kwargs.get('oauth_provider', 'google')}
 
     @pytest.mark.asyncio
     async def test_session_creation_and_storage(self, redis_client, real_db_session):
@@ -175,7 +175,7 @@ class RealSessionManagementTests:
             await redis_client.setex(cache_key, CacheConstants.DEFAULT_TOKEN_CACHE_TTL, json.dumps(session_data))
             await asyncio.sleep(1)
             updated_data = session_data.copy()
-            updated_data['last_activity'] = datetime.utcnow().isoformat()
+            updated_data['last_activity'] = datetime.now(UTC).isoformat()
             updated_data['activity_count'] = updated_data.get('activity_count', 0) + 1
             await redis_client.setex(cache_key, CacheConstants.DEFAULT_TOKEN_CACHE_TTL, json.dumps(updated_data))
             cached_data = await redis_client.get(cache_key)
@@ -219,7 +219,7 @@ class RealSessionManagementTests:
     @pytest.mark.asyncio
     async def test_session_user_isolation(self, redis_client):
         """Test session isolation between different users."""
-        users = [{'user_id': 11111, 'email': 'user1@netra.ai'}, {'user_id': 22222, 'email': 'user2@netra.ai'}, {'user_id': 33333, 'email': 'user3@netra.ai'}]
+        users = [{'user_id': 11111, 'email': 'user1@netrasystems.ai'}, {'user_id': 22222, 'email': 'user2@netrasystems.ai'}, {'user_id': 33333, 'email': 'user3@netrasystems.ai'}]
         sessions = []
         cache_keys = []
         try:
@@ -267,8 +267,8 @@ class RealSessionManagementTests:
     @pytest.mark.asyncio
     async def test_session_security_boundaries(self, redis_client):
         """Test session security boundaries and access control."""
-        admin_session = self.generate_user_session_data(99999, email='admin@netra.ai', permissions=['read', 'write', 'admin', 'delete'])
-        user_session = self.generate_user_session_data(88888, email='user@netra.ai', permissions=['read'])
+        admin_session = self.generate_user_session_data(99999, email='admin@netrasystems.ai', permissions=['read', 'write', 'admin', 'delete'])
+        user_session = self.generate_user_session_data(88888, email='user@netrasystems.ai', permissions=['read'])
         admin_cache_key = f"{CacheConstants.USER_TOKEN_PREFIX}{admin_session['session_id']}"
         user_cache_key = f"{CacheConstants.USER_TOKEN_PREFIX}{user_session['session_id']}"
         try:

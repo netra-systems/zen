@@ -4,7 +4,7 @@ Monitors performance metrics and triggers alerts based on thresholds.
 """
 
 from typing import Any, Dict, List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import asyncio
 
 from netra_backend.app.logging_config import central_logger
@@ -68,7 +68,7 @@ class PerformanceAlertManager:
         """Record performance metrics and check for alert conditions."""
         metrics_with_timestamp = {
             **metrics,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(UTC)
         }
         
         self._performance_history.append(metrics_with_timestamp)
@@ -99,7 +99,7 @@ class PerformanceAlertManager:
     
     def _is_in_cooldown(self, rule_id: str) -> bool:
         """Check if rule is in cooldown period."""
-        cutoff_time = datetime.utcnow() - timedelta(seconds=self._alert_cooldown_seconds)
+        cutoff_time = datetime.now(UTC) - timedelta(seconds=self._alert_cooldown_seconds)
         
         for alert in self._active_alerts:
             if (alert.rule_id == rule_id and 
@@ -133,7 +133,7 @@ class PerformanceAlertManager:
             title=rule.name,
             message=self._generate_alert_message(rule, metrics),
             level=rule.level,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             agent_name=metrics.get("agent_name"),
             metric_name=rule.rule_id,
             current_value=self._extract_metric_value(rule, metrics),
@@ -176,7 +176,7 @@ class PerformanceAlertManager:
     
     async def get_performance_summary(self, time_window_minutes: int = 60) -> Dict[str, Any]:
         """Get performance summary for specified time window."""
-        cutoff_time = datetime.utcnow() - timedelta(minutes=time_window_minutes)
+        cutoff_time = datetime.now(UTC) - timedelta(minutes=time_window_minutes)
         recent_metrics = [
             m for m in self._performance_history 
             if m.get("timestamp", datetime.min) > cutoff_time

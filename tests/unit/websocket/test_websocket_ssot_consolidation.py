@@ -2,7 +2,7 @@
 Issue #1069: WebSocket SSOT Consolidation Critical Infrastructure Gap Testing
 
 Business Value Justification (BVJ):
-- Segment: Platform/Enterprise - Real-time communication infrastructure critical for $500K+ ARR
+- Segment: Platform/Enterprise - Real-time communication infrastructure critical for 500K+ ARR
 - Business Goal: System Stability - Prevent WebSocket SSOT violations affecting chat functionality
 - Value Impact: Ensures WebSocket manager classes follow SSOT patterns for reliable real-time communication
 - Strategic Impact: Foundation for scalable multi-user chat and real-time customer value delivery
@@ -23,7 +23,7 @@ Test Coverage:
 ARCHITECTURE ALIGNMENT:
 - Tests validate WebSocket Manager SSOT consolidation requirements
 - Demonstrates WebSocket infrastructure fragmentation issues
-- Shows $500K+ ARR chat functionality dependency on SSOT WebSocket patterns
+- Shows 500K+ ARR chat functionality dependency on SSOT WebSocket patterns
 - Validates production WebSocket infrastructure SSOT compliance requirements
 """
 import ast

@@ -17,10 +17,11 @@ from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timedelta
 import traceback
+from sqlalchemy import text
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class HealthStatus(Enum):
@@ -252,7 +253,7 @@ class HealthMonitor:
             # Try to get a session
             async with get_db_session() as session:
                 # Try a simple query
-                result = await session.execute("SELECT 1")
+                result = await session.execute(text("SELECT 1"))
                 if result:
                     return HealthStatus.HEALTHY, "Database responsive", {}
             

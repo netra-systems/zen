@@ -91,7 +91,7 @@ class AgentRegistrySSotViolationsTests(SSotAsyncTestCase):
                            "Basic registry should now have user isolation via SSOT consolidation")
             self.assertTrue(hasattr(advanced_registry, 'get_user_session'))
 
-            print("✅ SSOT CONSOLIDATION SUCCESS: Both AgentRegistry classes now have identical capabilities")
+            print("CHECK SSOT CONSOLIDATION SUCCESS: Both AgentRegistry classes now have identical capabilities")
 
         except ImportError as e:
             self.fail(f"Could not import both AgentRegistry classes: {e}")
@@ -138,7 +138,7 @@ class AgentRegistrySSotViolationsTests(SSotAsyncTestCase):
             self.assertEqual(len(basic_has_isolation), len(advanced_has_isolation),
                            "Both registries should have identical capabilities after SSOT consolidation")
 
-            print(f"✅ SSOT SUCCESS: Both registries have {len(basic_has_isolation)} user isolation methods")
+            print(f"CHECK SSOT SUCCESS: Both registries have {len(basic_has_isolation)} user isolation methods")
             print(f"🎉 CAPABILITY PARITY: {basic_has_isolation}")
 
         except Exception as e:
@@ -316,7 +316,7 @@ class AgentRegistrySSotViolationsTests(SSotAsyncTestCase):
             self.assertIn('UniversalRegistry', basic_parent_names,
                          "Basic registry should now inherit from UniversalRegistry via SSOT consolidation")
 
-            print("✅ SSOT INHERITANCE SUCCESS: Both registries now share UniversalRegistry foundation")
+            print("CHECK SSOT INHERITANCE SUCCESS: Both registries now share UniversalRegistry foundation")
 
         except Exception as e:
             self.fail(f"Inheritance hierarchy test failed: {e}")
@@ -426,7 +426,7 @@ class AgentRegistrySSotViolationsTests(SSotAsyncTestCase):
 
             print("🚨 CRITICAL: GOLDEN PATH SSOT VIOLATION DETECTED")
             print("💰 BUSINESS IMPACT: Basic registry cannot support $500K+ ARR chat functionality")
-            print("🎯 GOLDEN PATH BLOCKED: User login → AI response flow compromised")
+            print("🎯 GOLDEN PATH BLOCKED: User login -> AI response flow compromised")
 
         except Exception as e:
             self.fail(f"Golden Path compatibility test failed: {e}")

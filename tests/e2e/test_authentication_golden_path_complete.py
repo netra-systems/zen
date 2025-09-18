@@ -15,26 +15,7 @@ def lazy_import(module_path: str, component: str = None):
                 _lazy_imports[module_path] = module
         except ImportError as e:
             print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
-    if module_path not in _lazy_imports:
-        try:
-            module = __import__(module_path, fromlist=[component] if component else [])
-            if component:
-                _lazy_imports[module_path] = getattr(module, component)
-            else:
-                _lazy_imports[module_path] = module
-        except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
+    return _lazy_imports.get(module_path)
 
 """
 Test Complete Authentication Golden Path
@@ -231,7 +212,7 @@ class AuthenticationGoldenPathCompleteTests(BaseE2ETest):
                     except asyncio.TimeoutError:
                         pytest.fail("WebSocket response timeout - session validation may have failed")
                     
-            except websockets.exceptions.ConnectionClosed as e:
+            except websockets.ConnectionClosed as e:
                 if e.code == 1008:  # Policy violation
                     pytest.fail(" FAIL:  CRITICAL: WebSocket authentication failed - likely due to session validation failure")
                 else:

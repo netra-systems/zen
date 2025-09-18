@@ -13,9 +13,9 @@ from netra_backend.app.agents.supervisor.observability_flow_builders import (
 )
 from netra_backend.app.agents.supervisor.observability_todo_tracker import TodoTracker
 from netra_backend.app.core.serialization.unified_json_handler import backend_json_handler
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class SupervisorObservabilityLogger:

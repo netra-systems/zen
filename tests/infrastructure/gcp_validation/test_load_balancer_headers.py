@@ -70,8 +70,8 @@ class GCPLoadBalancerHeaderForwardingTests(SSotBaseTestCase):
         cls.gcp_project = 'netra-staging'
         cls.load_balancer_ip = None
         cls.backend_service_url = None
-        cls.staging_urls = {'frontend': 'https://staging.netra.ai', 'backend': 'https://api-staging.netra.ai', 'websocket': 'wss://api-staging.netra.ai/ws', 'health': 'https://api-staging.netra.ai/health'}
-        cls.test_headers = {'authorization': 'Bearer test.jwt.token.12345', 'x-user-id': 'test-user-123', 'x-auth-degraded': 'true', 'x-emergency-access': 'true', 'x-demo-mode': '1', 'x-custom-auth': 'custom-auth-value', 'origin': 'https://staging.netra.ai', 'user-agent': 'AuthPermissiveness/1.0 Test Client'}
+        cls.staging_urls = {'frontend': 'https://staging.netrasystems.ai', 'backend': 'https://api.staging.netrasystems.ai', 'websocket': 'wss://api.staging.netrasystems.ai/ws', 'health': 'https://api.staging.netrasystems.ai/health'}
+        cls.test_headers = {'authorization': 'Bearer test.jwt.token.12345', 'x-user-id': 'test-user-123', 'x-auth-degraded': 'true', 'x-emergency-access': 'true', 'x-demo-mode': '1', 'x-custom-auth': 'custom-auth-value', 'origin': 'https://staging.netrasystems.ai', 'user-agent': 'AuthPermissiveness/1.0 Test Client'}
         cls.expected_lb_config = {'url_map_name': 'netra-staging-url-map', 'backend_service_name': 'netra-staging-backend', 'websocket_path_rules': ['/ws', '/websocket'], 'header_forwarding_rules': ['authorization', 'x-user-id', 'x-auth-*', 'x-emergency-*', 'x-demo-*']}
 
     async def asyncSetUp(self):
@@ -94,7 +94,7 @@ class GCPLoadBalancerHeaderForwardingTests(SSotBaseTestCase):
         Test that GCP Load Balancer strips Authorization header - EXPECTED FAILURE.
         
         This test proves the root cause of 1011 WebSocket errors:
-        Frontend sends Authorization header → Load Balancer strips it → Backend fails auth
+        Frontend sends Authorization header -> Load Balancer strips it -> Backend fails auth
         """
         backend_url = self.staging_urls['backend']
         direct_backend_headers = await self._test_direct_backend_headers()
@@ -104,7 +104,7 @@ class GCPLoadBalancerHeaderForwardingTests(SSotBaseTestCase):
             lb_has_auth = 'authorization' in lb_backend_headers
             self.assertTrue(direct_has_auth, 'Direct backend should receive Authorization header')
             self.assertFalse(lb_has_auth, 'Load Balancer should strip Authorization header - this proves the issue')
-            self.logger.info(f'✅ Confirmed header stripping: Direct={direct_has_auth}, LB={lb_has_auth}')
+            self.logger.info(f'CHECK Confirmed header stripping: Direct={direct_has_auth}, LB={lb_has_auth}')
         else:
             auth_header_forwarded = await self._verify_auth_header_forwarding()
             self.assertFalse(auth_header_forwarded, 'Authorization header should NOT be forwarded (proves the issue)')
@@ -121,16 +121,16 @@ class GCPLoadBalancerHeaderForwardingTests(SSotBaseTestCase):
         try:
             async with websockets.connect(websocket_url, extra_headers=auth_headers, timeout=10.0) as websocket:
                 self.fail('WebSocket connection succeeded - headers may be forwarded correctly')
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             if e.code == 1011:
-                self.logger.info(f'✅ WebSocket 1011 error confirms header stripping: {e}')
+                self.logger.info(f'CHECK WebSocket 1011 error confirms header stripping: {e}')
                 self.assertTrue(True, '1011 error confirms authentication headers are stripped')
             else:
                 self.logger.warning(f'Unexpected WebSocket error code: {e.code}')
         except Exception as e:
             error_message = str(e).lower()
             if any((indicator in error_message for indicator in ['auth', 'unauthorized', 'forbidden'])):
-                self.logger.info(f'✅ WebSocket auth error confirms header stripping: {e}')
+                self.logger.info(f'CHECK WebSocket auth error confirms header stripping: {e}')
                 self.assertTrue(True, 'Auth error confirms headers are stripped')
             else:
                 self.logger.warning(f'Unexpected WebSocket error: {e}')
@@ -150,7 +150,7 @@ class GCPLoadBalancerHeaderForwardingTests(SSotBaseTestCase):
             self.assertFalse(has_auth_forwarding, 'Load Balancer should NOT have auth header forwarding (proves config issue)')
             self.assertFalse(has_websocket_rules, 'Load Balancer should NOT have WebSocket header rules (proves config issue)')
             self.assertFalse(has_custom_header_rules, 'Load Balancer should NOT have custom header forwarding (proves config issue)')
-            self.logger.info(f'✅ Terraform config missing required rules: auth={has_auth_forwarding}, ws={has_websocket_rules}, custom={has_custom_header_rules}')
+            self.logger.info(f'CHECK Terraform config missing required rules: auth={has_auth_forwarding}, ws={has_websocket_rules}, custom={has_custom_header_rules}')
         else:
             self.skipTest('Could not retrieve Load Balancer configuration for testing')
 
@@ -169,7 +169,7 @@ class GCPLoadBalancerHeaderForwardingTests(SSotBaseTestCase):
             self.assertTrue(preserves_host_header, 'Host header should be preserved')
             self.assertFalse(forwards_auth_headers, 'Auth headers should NOT be forwarded (proves config issue)')
             self.assertFalse(supports_websocket, 'WebSocket support should NOT be properly configured (proves issue)')
-            self.logger.info(f'✅ Backend service config issues: host={preserves_host_header}, auth={forwards_auth_headers}, ws={supports_websocket}')
+            self.logger.info(f'CHECK Backend service config issues: host={preserves_host_header}, auth={forwards_auth_headers}, ws={supports_websocket}')
         else:
             self.skipTest('Could not retrieve Backend Service configuration for testing')
 
@@ -189,9 +189,9 @@ class GCPLoadBalancerHeaderForwardingTests(SSotBaseTestCase):
         headers_with_auth = health_with_auth.get('headers_received', {})
         self.logger.info(f'Health check headers - No auth: {len(headers_no_auth)}, With auth: {len(headers_with_auth)}')
         if len(headers_with_auth) > len(headers_no_auth):
-            self.logger.info('✅ Some headers forwarded to health endpoint')
+            self.logger.info('CHECK Some headers forwarded to health endpoint')
         else:
-            self.logger.info('✅ Headers stripped even for health endpoint')
+            self.logger.info('CHECK Headers stripped even for health endpoint')
 
     async def test_custom_auth_header_forwarding(self):
         """
@@ -213,9 +213,9 @@ class GCPLoadBalancerHeaderForwardingTests(SSotBaseTestCase):
             total_count = len(custom_headers)
             self.assertLess(forwarded_count, total_count, f'Expected some custom headers stripped, but {forwarded_count}/{total_count} forwarded: {forwarded_headers}')
             if forwarded_count == 0:
-                self.logger.info('✅ All custom auth headers stripped (proves the issue)')
+                self.logger.info('CHECK All custom auth headers stripped (proves the issue)')
             else:
-                self.logger.info(f'✅ Partial custom header stripping: {forwarded_count}/{total_count} forwarded')
+                self.logger.info(f'CHECK Partial custom header stripping: {forwarded_count}/{total_count} forwarded')
         else:
             self.logger.warning('Could not test custom header forwarding - request failed')
 
@@ -235,7 +235,7 @@ class GCPLoadBalancerHeaderForwardingTests(SSotBaseTestCase):
             except Exception as e:
                 path_results[path_name] = {'success': False, 'error': str(e)}
         header_preservation_analysis = self._analyze_header_preservation_patterns(path_results)
-        self.logger.info(f'✅ Network path header analysis: {json.dumps(header_preservation_analysis, indent=2)}')
+        self.logger.info(f'CHECK Network path header analysis: {json.dumps(header_preservation_analysis, indent=2)}')
         stripping_points = header_preservation_analysis.get('stripping_points', [])
         self.assertGreater(len(stripping_points), 0, 'Should identify at least one header stripping point')
         lb_strips_headers = any(('load balancer' in point.lower() for point in stripping_points))
@@ -440,7 +440,7 @@ class TerraformConfigurationValidationTests(SSotBaseTestCase):
             if not os.path.exists(terraform_file):
                 missing_files.append(terraform_file)
         if missing_files:
-            self.logger.info(f'✅ Missing Terraform files (expected): {missing_files}')
+            self.logger.info(f'CHECK Missing Terraform files (expected): {missing_files}')
         else:
             self.logger.info('All expected Terraform files found')
 
@@ -473,7 +473,7 @@ class TerraformConfigurationValidationTests(SSotBaseTestCase):
                 self.logger.warning(f'Could not read Terraform file {tf_file}: {e}')
         self.assertFalse(header_forwarding_found, 'Header forwarding rules should NOT be found in Terraform config (proves issue)')
         self.assertFalse(websocket_rules_found, 'WebSocket rules should NOT be found in Terraform config (proves issue)')
-        self.logger.info(f'✅ Terraform config analysis: headers={header_forwarding_found}, websocket={websocket_rules_found}')
+        self.logger.info(f'CHECK Terraform config analysis: headers={header_forwarding_found}, websocket={websocket_rules_found}')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

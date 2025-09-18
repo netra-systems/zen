@@ -17,7 +17,7 @@ Business Impact: Prevents $500K+ ARR Golden Path failures by ensuring all
 services receive proper environment context instead of localhost defaults.
 """
 
-from .cloud_environment_detector import (
+from netra_backend.app.core.environment_context.cloud_environment_detector import (
     CloudEnvironmentDetector,
     EnvironmentContext,
     EnvironmentType,
@@ -26,7 +26,7 @@ from .cloud_environment_detector import (
     detect_current_environment
 )
 
-from .environment_context_service import (
+from netra_backend.app.core.environment_context.environment_context_service import (
     EnvironmentContextService,
     EnvironmentAware,
     ServiceConfiguration,

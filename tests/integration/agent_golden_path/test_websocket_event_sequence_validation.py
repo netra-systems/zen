@@ -5,7 +5,7 @@ Business Value Justification:
 - Segment: All tiers - Real-time user experience foundation
 - Business Goal: Validate proper real-time communication and user experience
 - Value Impact: Ensures users receive proper progress feedback during agent processing
-- Revenue Impact: Prevents user abandonment due to poor real-time experience ($500K+ ARR protection)
+- Revenue Impact: Prevents user abandonment due to poor real-time experience (500K+ ARR protection)
 
 PURPOSE:
 This integration test validates that all 5 critical WebSocket events are delivered
@@ -396,7 +396,7 @@ class WebSocketEventSequenceValidationTests(SSotAsyncTestCase):
             self.timeout = 45.0
         else:
             self.test_env = "test"
-            self.websocket_url = self.env.get("TEST_WEBSOCKET_URL", "ws://localhost:8002/ws")
+            self.websocket_url = self.env.get("TEST_WEBSOCKET_URL", "ws://localhost:8000/ws")
             self.timeout = 30.0
             
         self.e2e_helper = E2EWebSocketAuthHelper(environment=self.test_env)
@@ -426,7 +426,7 @@ class WebSocketEventSequenceValidationTests(SSotAsyncTestCase):
         
         BVJ: This test ensures users receive proper real-time feedback during
         agent processing, preventing user abandonment and supporting the 
-        $500K+ ARR user experience.
+        500K+ ARR user experience.
         """
         test_start_time = time.time()
         print(f"[EVENT SEQUENCE] Starting critical event sequence validation test")

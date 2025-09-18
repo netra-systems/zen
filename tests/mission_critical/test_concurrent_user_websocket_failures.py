@@ -3,7 +3,7 @@
 FAILING TEST: Concurrent User WebSocket Isolation Violation - Issue #680
 
 This test REPRODUCES the 0% concurrent user success rate by proving SSOT violations exist.
-Business Impact: $500K+ ARR at risk from WebSocket cross-contamination
+Business Impact: 500K+ ARR at risk from WebSocket cross-contamination
 
 Test Strategy:
 - Start 2 concurrent users with WebSocket connections  

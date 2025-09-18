@@ -4,10 +4,12 @@
 #
 # Performance Improvements:
 # - Backend: 2GB → 512MB memory (75% reduction)
-# - Auth: 512MB → 256MB memory (50% reduction)  
+# - Auth: 512MB → 256MB memory (50% reduction)
 # - Frontend: 1GB → 512MB memory (50% reduction)
 # - Total: 3.5GB → 1.28GB (63% reduction)
 #
+
+version: '3.8'
 # Usage:
 #   docker-compose -f docker-compose.staging.alpine.yml up -d
 #   docker-compose -f docker-compose.staging.alpine.yml down
@@ -131,7 +133,7 @@ services:
         - BUILD_ENV=staging
       cache_from:
         - python:3.11-alpine3.19
-    image: netra-auth-staging:alpine
+    image: netra-auth:alpine
     environment:
       # Core Environment
       ENVIRONMENT: staging

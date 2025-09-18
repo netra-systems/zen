@@ -102,8 +102,8 @@ except ImportError:
         return UnifiedToolDispatcher(*args, **kwargs)
 
 # Module-level logger for test compatibility
-import logging
-logger = logging.getLogger(__name__)
+from shared.logging.unified_logging_ssot import get_logger
+logger = get_logger(__name__)
 
 # Import core tool models (SSOT for tool execution results)
 from netra_backend.app.core.tool_models import ToolExecutionResult, UnifiedTool

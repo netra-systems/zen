@@ -5,7 +5,7 @@ CRITICAL MISSION: Create integration tests for WebSocket connection validation
 using real WebSocket connections to staging GCP environment.
 
 PROBLEM: WebSocket URL environment variable duplication causing connection failures
-BUSINESS IMPACT: $500K+ ARR Golden Path chat functionality at risk from connection issues
+BUSINESS IMPACT: 500K+ ARR Golden Path chat functionality at risk from connection issues
 
 TEST DESIGN:
 - Real WebSocket connections to staging GCP environment  
@@ -194,12 +194,12 @@ class WebSocketSSOTConnectionValidationTests(SSotAsyncTestCase):
                     return {'status': 'success', 'message': f'WebSocket connection successful: {response}', 'test_name': test_name, 'response': response}
                 except asyncio.TimeoutError:
                     return {'status': 'success', 'message': 'WebSocket connection established (no response within timeout)', 'test_name': test_name}
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             if '403' in str(e) or '401' in str(e):
                 return {'status': 'auth_required', 'message': f'WebSocket connection requires authentication: {e}', 'test_name': test_name}
             else:
                 return {'status': 'error', 'message': f'WebSocket connection closed: {e}', 'test_name': test_name}
-        except websockets.exceptions.WebSocketException as e:
+        except websockets.WebSocketException as e:
             if '403' in str(e) or '401' in str(e):
                 return {'status': 'auth_required', 'message': f'WebSocket authentication required: {e}', 'test_name': test_name}
             else:

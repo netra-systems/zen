@@ -16,7 +16,7 @@ Success Rate Target: 100% of this test suite (contributes to overall 20% success
 Business Value Justification:
 - Segment: Test Infrastructure
 - Business Goal: Validate canonical factory patterns work correctly
-- Value Impact: Ensure $500K+ ARR Golden Path functionality preserved
+- Value Impact: Ensure 500K+ ARR Golden Path functionality preserved
 - Strategic Impact: Prove SSOT consolidation maintains business value
 """
 

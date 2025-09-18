@@ -578,9 +578,7 @@ class AuthServiceStartupE2ETests(BaseE2ETest):
         
         # At least 70% of WebSocket connections should succeed (lower bar due to connection complexity)
         ws_success_rate = len(websocket_results) / websocket_test_count if websocket_test_count > 0 else 1.0
-        assert ws_success_rate >= 0.7, f"At least 70% of concurrent WebSocket connections should succeed (got {ws_success_rate:.1%})"
-        
-        logger.info(f" PASS:  Concurrent WebSocket connections: {len(websocket_results)}/{websocket_test_count} succeeded")
+        assert ws_success_rate >= 0.7, f"At least 70% of concurrent WebSocket connections should succeed (got {ws_success_rate:.1%})"" PASS:  Concurrent WebSocket connections: {len(websocket_results)}/{websocket_test_count} succeeded")
         logger.info(" CELEBRATION:  Concurrent users authentication E2E test after startup PASSED")
     
     @pytest.mark.e2e

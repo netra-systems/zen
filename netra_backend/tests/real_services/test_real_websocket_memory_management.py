@@ -152,7 +152,7 @@ class RealWebSocketClient:
                 data = json.loads(message)
                 self.messages_received.append(data)
                 self.bytes_received += len(message)
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pass
         except Exception as e:
             logger.error(f'Receiver error: {e}')

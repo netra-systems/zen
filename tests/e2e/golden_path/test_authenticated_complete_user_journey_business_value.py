@@ -11,7 +11,7 @@ Phase 1 Objective: Authentication Compliance Validation
 - PROOF that tests fail without authentication
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise) - $500K+ ARR protection
+- Segment: All (Free, Early, Mid, Enterprise) - 500K+ ARR protection
 - Business Goal: Validate complete authenticated golden path user journey
 - Value Impact: Ensures authenticated users receive AI cost optimization insights
 - Strategic Impact: Protects primary revenue flow through authenticated business journey
@@ -87,8 +87,10 @@ class AuthenticatedCompleteUserJourneyBusinessValueTests(SSotAsyncTestCase):
         self._user_context = None
     
     @pytest.fixture(autouse=True)
-    async def auto_async_setup(self):
+    async def auto_async_setup(self, real_services_fixture):
         """Auto-executed async setup fixture - CRITICAL FIX for Issue #764."""
+        # Store real services fixture for use in test methods
+        self._real_services_fixture = real_services_fixture
         await self.async_setup_method()
         
     async def async_setup_method(self, method=None):
@@ -115,7 +117,7 @@ class AuthenticatedCompleteUserJourneyBusinessValueTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(90)  # Allow time for authenticated flows
     @pytest.mark.asyncio
-    async def test_complete_authenticated_user_journey_with_business_value(self, real_services_fixture):
+    async def test_complete_authenticated_user_journey_with_business_value(self):
         """
         PHASE 1 CRITICAL: Complete authenticated user journey with business value delivery.
         
@@ -394,10 +396,10 @@ class AuthenticatedCompleteUserJourneyBusinessValueTests(SSotAsyncTestCase):
         print(f"   [U+1F4B0] Authenticated business value: DELIVERED")
         print(f"   [U+23F1][U+FE0F]  Total authenticated time: {total_execution_time:.2f}s")
         print(f"   [U+1F6E1][U+FE0F]  Authentication bypass prevention: CONFIRMED")
-        print(f"   [U+1F4C8] $500K+ ARR protection: VALIDATED")
+        print(f"   [U+1F4C8] 500K+ ARR protection: VALIDATED")
 
     @pytest.mark.asyncio
-    async def test_authentication_failure_prevention(self, real_services_fixture):
+    async def test_authentication_failure_prevention(self):
         """
         PHASE 1 CRITICAL: Verify that operations fail without authentication.
         

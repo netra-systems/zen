@@ -5,7 +5,7 @@ CRITICAL WEBSOCKET TESTS: These tests demonstrate WebSocket-specific authenticat
 fragmentation by showing inconsistent protocol handling across different
 WebSocket authentication implementations.
 
-Business Impact: $500K+ ARR - WebSocket auth failures directly block chat functionality
+Business Impact: 500K+ ARR - WebSocket auth failures directly block chat functionality
 Technical Impact: Shows fragmented WebSocket authentication protocols and handshakes
 
 TEST STRATEGY: Non-docker integration tests focusing on WebSocket protocol-level
@@ -26,7 +26,7 @@ import json
 from typing import Dict, Any, Optional, List, Union
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 # SSOT WebSocket test infrastructure
 from test_framework.ssot.base_integration_test import BaseIntegrationTest
@@ -66,8 +66,8 @@ class WebSocketAuthProtocolFragmentationTests(BaseIntegrationTest):
         # JWT payload for WebSocket testing
         self.ws_jwt_payload = {
             **self.test_user,
-            "iat": int(datetime.utcnow().timestamp()),
-            "exp": int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
+            "iat": int(datetime.now(UTC).timestamp()),
+            "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp()),
             "scope": "websocket"
         }
 

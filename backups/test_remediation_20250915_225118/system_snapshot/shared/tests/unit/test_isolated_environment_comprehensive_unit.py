@@ -1,0 +1,916 @@
+"""
+ULTRA COMPREHENSIVE Unit Tests for IsolatedEnvironment - MOST CRITICAL SSOT CLASS
+Business Value Justification (BVJ):
+- Segment: Platform/Internal - FOUNDATION INFRASTRUCTURE
+- Business Goal: ZERO-FAILURE environment management across ALL services 
+- Value Impact: 100% system stability - ALL services depend on this SINGLE SOURCE OF TRUTH
+- Strategic Impact: Platform exists or fails based on this module working correctly
+
+CRITICAL MISSION: This is the MOST IMPORTANT module in the entire platform.
+Every service, every test, every configuration depends on IsolatedEnvironment.
+ANY bug in this class cascades to COMPLETE SYSTEM FAILURE.
+
+Testing Coverage Goals:
+[U+2713] 100% line coverage - Every single line must be tested
+[U+2713] 100% branch coverage - Every conditional path must be validated  
+[U+2713] 100% business logic coverage - Every business scenario must pass
+[U+2713] Performance critical paths - Validated with benchmarks
+[U+2713] Thread safety under heavy load - Concurrent access validation
+[U+2713] Error handling - All failure modes tested
+[U+2713] Windows compatibility - UTF-8 encoding support
+[U+2713] Multi-user system support - Service independence verified
+
+ULTRA CRITICAL IMPORTANCE: 
+- Singleton pattern MUST be thread-safe under ALL conditions
+- Environment isolation MUST prevent configuration drift 
+- Source tracking MUST work for debugging production issues
+- Sensitive value masking MUST protect secrets in logs
+- Test context detection MUST work for proper test isolation
+- File loading MUST handle all .env file formats correctly
+- Database URL sanitization MUST preserve credentials integrity
+- Shell expansion MUST be secure and controllable
+- All convenience functions MUST maintain backward compatibility
+- Performance MUST scale to 10K+ environment variables
+"""
+import pytest
+import os
+import threading
+import time
+import tempfile
+import subprocess
+import concurrent.futures
+import logging
+from pathlib import Path
+from typing import Dict, List, Optional, Any, Set, Callable, Union
+from unittest.mock import patch, Mock, MagicMock
+from dataclasses import dataclass, field
+import sys
+import re
+from urllib.parse import urlparse
+from shared.isolated_environment import IsolatedEnvironment, get_env, ValidationResult, _mask_sensitive_value, setenv, getenv, delenv, get_subprocess_env, load_secrets, SecretLoader, EnvironmentValidator, get_environment_manager
+from test_framework.isolated_environment_fixtures import STANDARD_TEST_CONFIG
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+class TestIsolatedEnvironmentSingletonAdvanced:
+    """Advanced singleton pattern testing - MISSION CRITICAL for platform stability."""
+
+    def test_singleton_memory_consistency(self):
+        """Test singleton maintains consistent memory address across all access patterns."""
+        instance_direct = IsolatedEnvironment()
+        instance_class_method = IsolatedEnvironment.get_instance()
+        instance_function = get_env()
+        memory_id = id(instance_direct)
+        assert id(instance_class_method) == memory_id, f'Class method returned different instance: {id(instance_class_method)} vs {memory_id}'
+        assert id(instance_function) == memory_id, f'Function returned different instance: {id(instance_function)} vs {memory_id}'
+        assert instance_direct is instance_class_method is instance_function, 'Singleton identity violation'
+
+    def test_singleton_double_initialization_protection(self):
+        """Test singleton prevents double initialization of internal state."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        env.set('DOUBLE_INIT_TEST', 'original', 'test_init')
+        original_value = env.get('DOUBLE_INIT_TEST')
+        env.__init__()
+        preserved_value = env.get('DOUBLE_INIT_TEST')
+        assert preserved_value == original_value, 'Double initialization corrupted state'
+        assert env.is_isolated(), 'Isolation state lost during re-initialization'
+        env.reset()
+
+    def test_singleton_thread_safety_stress_test(self):
+        """Stress test singleton under extreme concurrent access - PERFORMANCE CRITICAL."""
+        instances = []
+        exceptions = []
+
+        def high_frequency_access():
+            """Rapidly access singleton multiple ways."""
+            try:
+                for _ in range(100):
+                    instance1 = IsolatedEnvironment()
+                    instance2 = get_env()
+                    instance3 = IsolatedEnvironment.get_instance()
+                    if not instance1 is instance2 is instance3:
+                        raise ValueError(f'Singleton violation in thread {threading.current_thread().name}')
+                    instances.append(instance1)
+            except Exception as e:
+                exceptions.append(f'Thread {threading.current_thread().name}: {str(e)}')
+        threads = []
+        for i in range(20):
+            thread = threading.Thread(target=high_frequency_access, name=f'stress_{i}')
+            threads.append(thread)
+        start_time = time.time()
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join(timeout=10.0)
+            if thread.is_alive():
+                raise AssertionError(f"Thread {thread.name} didn't complete - possible deadlock")
+        end_time = time.time()
+        if exceptions:
+            raise AssertionError(f'Thread safety violations: {exceptions}')
+        elapsed = end_time - start_time
+        if elapsed > 5.0:
+            raise AssertionError(f'Singleton access too slow under load: {elapsed:.2f}s')
+        if instances:
+            first_instance = instances[0]
+            different_instances = [id(inst) for inst in instances if inst is not first_instance]
+            if different_instances:
+                raise AssertionError(f'Found {len(different_instances)} different instances during stress test')
+
+class TestIsolatedEnvironmentBusinessLogicValidation:
+    """Test business logic that powers platform stability - REVENUE IMPACT."""
+
+    def test_configuration_drift_prevention(self):
+        """Test core business value - preventing configuration drift across services."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        env.set('DATABASE_URL', 'postgresql://service-a-config', 'service_a')
+        env.set('API_ENDPOINT', 'https://service-a.api.com', 'service_a')
+        service_b_env = get_env()
+        service_b_env.set('DATABASE_URL', 'postgresql://service-b-config', 'service_b')
+        current_db_url = env.get('DATABASE_URL')
+        assert current_db_url == 'postgresql://service-b-config', 'Configuration not updated'
+        source = env.get_variable_source('DATABASE_URL')
+        assert source == 'service_b', 'Source tracking failed - critical for debugging config issues'
+        assert env.get('API_ENDPOINT') == 'https://service-a.api.com', 'Unrelated config affected'
+        env.reset()
+
+    def test_service_independence_validation(self):
+        """Test that services maintain independence through isolation - ARCHITECTURE CRITICAL."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        services_config = {'netra_backend': {'SERVICE_NAME': 'netra_backend', 'PORT': '8000', 'DATABASE_URL': 'postgresql://backend:pass@localhost:5434/backend_db'}, 'auth_service': {'SERVICE_NAME': 'auth_service', 'PORT': '8081', 'DATABASE_URL': 'postgresql://auth:pass@localhost:5434/auth_db'}, 'analytics_service': {'SERVICE_NAME': 'analytics_service', 'PORT': '8002', 'DATABASE_URL': 'clickhouse://analytics:pass@localhost:8123/analytics_db'}}
+        for service_name, config in services_config.items():
+            for key, value in config.items():
+                env.set(key, value, source=service_name)
+        assert env.get('SERVICE_NAME') == 'analytics_service', 'Service configuration not applied'
+        assert env.get('PORT') == '8002', 'Port configuration not applied'
+        service_name_source = env.get_variable_source('SERVICE_NAME')
+        port_source = env.get_variable_source('PORT')
+        database_source = env.get_variable_source('DATABASE_URL')
+        assert service_name_source == 'analytics_service', 'Service name source tracking failed'
+        assert port_source == 'analytics_service', 'Port source tracking failed'
+        assert database_source == 'analytics_service', 'Database source tracking failed'
+        env.reset()
+
+    def test_multi_user_context_isolation(self):
+        """Test multi-user system requirements - USER ISOLATION CRITICAL."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        user_contexts = {'user_123': {'USER_ID': '123', 'API_QUOTA': '1000', 'SUBSCRIPTION_TIER': 'enterprise'}, 'user_456': {'USER_ID': '456', 'API_QUOTA': '100', 'SUBSCRIPTION_TIER': 'free'}}
+        for user_id, context in user_contexts.items():
+            env.clear()
+            for key, value in context.items():
+                env.set(key, value, source=f'user_context_{user_id}')
+            assert env.get('USER_ID') == context['USER_ID'], f'User ID isolation failed for {user_id}'
+            assert env.get('API_QUOTA') == context['API_QUOTA'], f'API quota isolation failed for {user_id}'
+            other_user_id = '123' if user_id == 'user_456' else '456'
+            if other_user_id in ['123', '456']:
+                other_context = user_contexts.get(f'user_{other_user_id}')
+                if other_context and env.get('USER_ID') == other_context['USER_ID']:
+                    raise AssertionError(f"Context bleed detected: {user_id} has {other_user_id}'s context")
+        env.reset()
+
+    def test_secret_management_business_logic(self):
+        """Test secret management critical for security - SECURITY BUSINESS VALUE."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        sensitive_secrets = {'JWT_SECRET_KEY': 'super-secret-jwt-key-32-characters-long', 'ANTHROPIC_API_KEY': 'sk-ant-1234567890abcdef', 'DATABASE_PASSWORD': 'ultra-secure-db-password-123', 'OAUTH_CLIENT_SECRET': 'oauth-secret-abcdef123456', 'FERNET_KEY': 'encryption-key-for-fernet-32-bytes-long=='}
+        for key, secret_value in sensitive_secrets.items():
+            env.set(key, secret_value, 'security_test')
+            retrieved = env.get(key)
+            assert retrieved == secret_value, f'Secret {key} corrupted during storage'
+            masked = _mask_sensitive_value(key, secret_value)
+            assert masked != secret_value, f'Secret {key} not masked'
+            assert len(masked) < len(secret_value), f'Masked value {key} not shortened'
+            assert masked.endswith('***'), f'Masked value {key} missing *** suffix'
+        env.reset()
+
+class TestIsolatedEnvironmentPerformanceCriticalPaths:
+    """Performance testing for critical paths - SCALABILITY REQUIREMENTS."""
+
+    def test_high_volume_variable_management(self):
+        """Test handling thousands of variables - ENTERPRISE SCALE."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        num_vars = 5000
+        large_dataset = {f'VAR_{i:04d}': f'value_{i}' for i in range(num_vars)}
+        start_time = time.time()
+        results = env.update(large_dataset, 'performance_test')
+        set_time = time.time() - start_time
+        success_count = sum((1 for success in results.values() if success))
+        assert success_count == num_vars, f'Only {success_count}/{num_vars} variables set successfully'
+        assert set_time < 3.0, f'Bulk set operation too slow: {set_time:.2f}s for {num_vars} variables'
+        start_time = time.time()
+        for i in range(num_vars):
+            value = env.get(f'VAR_{i:04d}')
+            assert value == f'value_{i}', f'Variable VAR_{i:04d} corrupted'
+        get_time = time.time() - start_time
+        assert get_time < 2.0, f'Bulk get operations too slow: {get_time:.2f}s for {num_vars} variables'
+        start_time = time.time()
+        all_vars = env.get_all()
+        get_all_time = time.time() - start_time
+        assert len(all_vars) >= num_vars, f'get_all() returned insufficient variables'
+        assert get_all_time < 1.0, f'get_all() too slow: {get_all_time:.2f}s for {num_vars} variables'
+        env.reset()
+
+    def test_concurrent_performance_under_load(self):
+        """Test performance under concurrent load - PRODUCTION SIMULATION."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        operations_completed = {'set': 0, 'get': 0, 'delete': 0}
+        errors = []
+
+        def concurrent_worker(worker_id: int):
+            """Worker thread performing mixed operations."""
+            try:
+                for i in range(50):
+                    var_name = f'WORKER_{worker_id}_VAR_{i}'
+                    result = env.set(var_name, f'worker_{worker_id}_value_{i}', f'worker_{worker_id}')
+                    if result:
+                        operations_completed['set'] += 1
+                    value = env.get(var_name)
+                    if value == f'worker_{worker_id}_value_{i}':
+                        operations_completed['get'] += 1
+                    if env.delete(var_name, f'worker_{worker_id}'):
+                        operations_completed['delete'] += 1
+            except Exception as e:
+                errors.append(f'Worker {worker_id}: {str(e)}')
+        workers = []
+        num_workers = 10
+        start_time = time.time()
+        for i in range(num_workers):
+            worker = threading.Thread(target=concurrent_worker, args=(i,))
+            workers.append(worker)
+            worker.start()
+        for worker in workers:
+            worker.join(timeout=10.0)
+            if worker.is_alive():
+                raise AssertionError('Worker thread timed out - possible deadlock')
+        end_time = time.time()
+        total_time = end_time - start_time
+        if errors:
+            raise AssertionError(f'Concurrent operation errors: {errors}')
+        expected_ops = num_workers * 50
+        assert operations_completed['set'] == expected_ops, f"Set operations: {operations_completed['set']}/{expected_ops}"
+        assert operations_completed['get'] == expected_ops, f"Get operations: {operations_completed['get']}/{expected_ops}"
+        assert operations_completed['delete'] == expected_ops, f"Delete operations: {operations_completed['delete']}/{expected_ops}"
+        total_operations = sum(operations_completed.values())
+        ops_per_second = total_operations / total_time
+        assert ops_per_second > 500, f'Performance too low: {ops_per_second:.2f} ops/sec'
+        env.reset()
+
+class TestIsolatedEnvironmentErrorHandlingComprehensive:
+    """Comprehensive error handling tests - FAULT TOLERANCE CRITICAL."""
+
+    def test_invalid_input_handling_comprehensive(self):
+        """Test handling of all invalid input types."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        invalid_inputs = [None, 123, 123.45, True, False, [], {}, set(), object()]
+        for i, invalid_input in enumerate(invalid_inputs):
+            var_name = f'INVALID_INPUT_{i}'
+            result = env.set(var_name, invalid_input, 'invalid_input_test')
+            assert result is True, f'Failed to handle invalid input {type(invalid_input)}'
+            retrieved = env.get(var_name)
+            assert isinstance(retrieved, str), f'Invalid input not converted to string: {type(retrieved)}'
+            assert retrieved == str(invalid_input), f'String conversion incorrect for {type(invalid_input)}'
+        env.reset()
+
+    def test_extreme_value_handling(self):
+        """Test handling of extreme values - EDGE CASE COVERAGE."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        very_long_value = 'x' * 10000
+        env.set('VERY_LONG_VAR', very_long_value, 'extreme_test')
+        retrieved = env.get('VERY_LONG_VAR')
+        assert retrieved == very_long_value, 'Very long value corrupted'
+        env.set('EMPTY_VAR', '', 'extreme_test')
+        assert env.get('EMPTY_VAR') == '', 'Empty string not preserved'
+        whitespace_value = '   \t\n\r   '
+        env.set('WHITESPACE_VAR', whitespace_value, 'extreme_test')
+        retrieved_whitespace = env.get('WHITESPACE_VAR')
+        assert '   ' in retrieved_whitespace, 'Space characters should be preserved'
+        assert len(retrieved_whitespace.strip()) == 0, 'Should only contain whitespace after sanitization'
+        special_chars = '!@#$%^&*()_+-=[]{}|;\':",./<>?~`'
+        env.set('SPECIAL_CHARS_VAR', special_chars, 'extreme_test')
+        assert env.get('SPECIAL_CHARS_VAR') == special_chars, 'Special characters corrupted'
+        unicode_value = 'Hello [U+4E16][U+754C] [U+1F30D] caf[U+00E9] na[U+00EF]ve r[U+00E9]sum[U+00E9]'
+        env.set('UNICODE_VAR', unicode_value, 'extreme_test')
+        assert env.get('UNICODE_VAR') == unicode_value, 'Unicode characters corrupted'
+        env.reset()
+
+    def test_file_loading_error_scenarios(self):
+        """Test all file loading error scenarios - FILE HANDLING ROBUSTNESS."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        loaded_count, errors = env.load_from_file('/definitely/does/not/exist.env')
+        assert loaded_count == 0, 'Non-existent file should load 0 variables'
+        assert len(errors) > 0, 'Non-existent file should produce error'
+        assert 'not found' in errors[0].lower(), 'Error should mention file not found'
+        with patch('builtins.open', side_effect=PermissionError('Access denied')):
+            loaded_count, errors = env.load_from_file('fake_file.env')
+            assert loaded_count == 0, 'Permission denied should load 0 variables'
+            assert len(errors) > 0, 'Permission denied should produce error'
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False, encoding='utf-8') as f:
+            f.write('VALID_VAR=valid_value\n')
+            f.write('INVALID_LINE_1\n')
+            f.write('=NO_KEY_NAME\n')
+            f.write('ANOTHER_VALID=another_value\n')
+            f.write('INVALID_LINE_2=value=with=multiple=equals\n')
+            corrupted_file = f.name
+        try:
+            loaded_count, errors = env.load_from_file(corrupted_file)
+            assert loaded_count >= 3, f'Should load at least valid lines, got {loaded_count}'
+            assert len(errors) >= 2, f'Should report errors for invalid lines, got {len(errors)}'
+            assert env.get('VALID_VAR') == 'valid_value', 'Valid variable not loaded'
+            assert env.get('ANOTHER_VALID') == 'another_value', 'Another valid variable not loaded'
+            assert env.get('INVALID_LINE_2') == 'value=with=multiple=equals', 'Multiple equals not handled'
+        finally:
+            try:
+                os.unlink(corrupted_file)
+            except (OSError, PermissionError):
+                pass
+        env.reset()
+
+    def test_callback_error_resilience(self):
+        """Test system resilience to callback failures - CALLBACK SAFETY."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+
+        def callback_exception(key, old_val, new_val):
+            raise Exception('Callback intentional failure')
+
+        def callback_type_error(key, old_val, new_val):
+            raise TypeError('Type error in callback')
+
+        def callback_runtime_error(key, old_val, new_val):
+            raise RuntimeError('Runtime error in callback')
+
+        def callback_success(key, old_val, new_val):
+            self.callback_success_calls.append((key, old_val, new_val))
+        self.callback_success_calls = []
+        env.add_change_callback(callback_exception)
+        env.add_change_callback(callback_type_error)
+        env.add_change_callback(callback_runtime_error)
+        env.add_change_callback(callback_success)
+        result = env.set('CALLBACK_ERROR_TEST', 'test_value', 'error_test')
+        assert result is True, 'Variable setting failed due to callback errors'
+        assert env.get('CALLBACK_ERROR_TEST') == 'test_value', 'Variable value corrupted by callback errors'
+        assert len(self.callback_success_calls) == 1, 'Successful callback not called'
+        assert self.callback_success_calls[0] == ('CALLBACK_ERROR_TEST', None, 'test_value'), 'Callback parameters incorrect'
+        result = env.set('CALLBACK_ERROR_TEST', 'updated_value', 'error_test')
+        assert result is True, 'Variable update failed due to callback errors'
+        assert env.get('CALLBACK_ERROR_TEST') == 'updated_value', 'Variable update corrupted by callback errors'
+        result = env.delete('CALLBACK_ERROR_TEST', 'error_test')
+        assert result is True, 'Variable deletion failed due to callback errors'
+        assert env.get('CALLBACK_ERROR_TEST') is None, 'Variable not deleted due to callback errors'
+        env.reset()
+
+class TestIsolatedEnvironmentSecurityValidation:
+    """Security validation tests - SECURITY BUSINESS VALUE."""
+
+    def test_sensitive_value_masking_comprehensive(self):
+        """Comprehensive test of sensitive value masking patterns."""
+        sensitive_patterns = ['password', 'secret', 'key', 'token', 'auth', 'credential', 'private', 'cert', 'api_key', 'jwt', 'oauth', 'fernet']
+        for pattern in sensitive_patterns:
+            masked = _mask_sensitive_value(pattern, 'sensitive_value_123')
+            assert masked == 'sen***', f'Lowercase pattern {pattern} not masked correctly'
+            masked = _mask_sensitive_value(pattern.upper(), 'SENSITIVE_VALUE_123')
+            assert masked == 'SEN***', f'Uppercase pattern {pattern} not masked correctly'
+            mixed_pattern = pattern.capitalize()
+            masked = _mask_sensitive_value(mixed_pattern, 'MixedValue123')
+            assert masked == 'Mix***', f'Mixed case pattern {pattern} not masked correctly'
+            compound_key = f'APP_{pattern.upper()}_PROD'
+            masked = _mask_sensitive_value(compound_key, 'compound_sensitive_value')
+            assert masked == 'com***', f'Compound key {compound_key} not masked correctly'
+
+    def test_database_url_credential_protection(self):
+        """Test database URL credential protection during sanitization."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        test_urls = ['postgresql://user:p@ssw0rd!@localhost:5432/dbname', 'postgresql://user:p%40ss%21w0rd@localhost:5432/dbname', 'mysql://user:complex$password@host.com:3306/database?ssl=true', 'clickhouse://user:click@house#pass@clickhouse.example.com:8123/analytics', 'redis://user:redis$pass!@redis.com:6379/0']
+        for i, test_url in enumerate(test_urls):
+            var_name = f'DATABASE_URL_{i}'
+            env.set(var_name, test_url, 'security_test')
+            retrieved_url = env.get(var_name)
+            original_parsed = urlparse(test_url)
+            retrieved_parsed = urlparse(retrieved_url)
+            assert original_parsed.scheme == retrieved_parsed.scheme, f'URL scheme corrupted for {test_url}'
+            assert original_parsed.hostname == retrieved_parsed.hostname, f'Hostname corrupted for {test_url}'
+            assert original_parsed.port == retrieved_parsed.port, f'Port corrupted for {test_url}'
+            assert original_parsed.path == retrieved_parsed.path, f'Path corrupted for {test_url}'
+            assert original_parsed.password == retrieved_parsed.password, f'Password corrupted for {test_url}'
+            assert original_parsed.username == retrieved_parsed.username, f'Username corrupted for {test_url}'
+        env.reset()
+
+    def test_control_character_sanitization(self):
+        """Test removal of control characters for security."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        control_chars = ['\x00', '\x01', '\x02', '\x1f', '\x7f', '\r', '\n', '\t']
+        for i, control_char in enumerate(control_chars):
+            test_value = f'before{control_char}after'
+            var_name = f'CONTROL_CHAR_TEST_{i}'
+            env.set(var_name, test_value, 'security_test')
+            sanitized_value = env.get(var_name)
+            assert control_char not in sanitized_value, f'Control character {repr(control_char)} not removed'
+            assert sanitized_value == 'beforeafter', f'Text corrupted during sanitization of {repr(control_char)}'
+        env.reset()
+
+class TestIsolatedEnvironmentValidationComprehensive:
+    """Comprehensive validation testing - DATA INTEGRITY CRITICAL."""
+
+    def test_validation_result_dataclass_comprehensive(self):
+        """Test ValidationResult dataclass with all field combinations."""
+        result = ValidationResult(is_valid=True, errors=['error1', 'error2'], warnings=['warning1'], missing_optional=['optional1', 'optional2'])
+        assert result.is_valid is True
+        assert result.errors == ['error1', 'error2']
+        assert result.warnings == ['warning1']
+        assert result.missing_optional == ['optional1', 'optional2']
+        assert result.fallback_applied == []
+        assert result.suggestions == []
+        assert result.missing_optional_by_category == {}
+        result_custom = ValidationResult(is_valid=False, errors=['critical_error'], warnings=[], missing_optional=[], fallback_applied=['fallback1'], suggestions=['suggestion1', 'suggestion2'], missing_optional_by_category={'db': ['db_opt1'], 'api': ['api_opt1']})
+        assert result_custom.fallback_applied == ['fallback1']
+        assert result_custom.suggestions == ['suggestion1', 'suggestion2']
+        assert result_custom.missing_optional_by_category == {'db': ['db_opt1'], 'api': ['api_opt1']}
+
+    def test_staging_database_validation_comprehensive(self):
+        """Comprehensive staging database validation with all edge cases."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        valid_config = {'ENVIRONMENT': 'staging', 'POSTGRES_HOST': 'staging-db.example.com', 'POSTGRES_USER': 'postgres', 'POSTGRES_PASSWORD': 'secure_staging_password_with_32_chars', 'POSTGRES_DB': 'netra_staging'}
+        env.update(valid_config, 'validation_test')
+        result = env.validate_staging_database_credentials()
+        assert result['valid'] is True, f'Valid config should pass validation: {result}'
+        assert len(result['issues']) == 0, f"Valid config should have no issues: {result['issues']}"
+        invalid_scenarios = [{'POSTGRES_HOST': 'localhost', 'expected_issue': 'localhost'}, {'POSTGRES_USER': 'user_pr-4', 'expected_issue': 'Invalid POSTGRES_USER'}, {'POSTGRES_PASSWORD': 'weak', 'expected_issue': 'too short'}, {'POSTGRES_PASSWORD': 'password', 'expected_issue': 'using insecure default'}, {'POSTGRES_PASSWORD': '123456', 'expected_issue': 'using insecure default'}, {'POSTGRES_PASSWORD': 'admin', 'expected_issue': 'using insecure default'}, {'POSTGRES_PASSWORD': 'wrong_password', 'expected_issue': 'using insecure default'}, {'POSTGRES_PASSWORD': '12345678', 'expected_issue': 'needs complexity'}]
+        for scenario in invalid_scenarios:
+            env.update(valid_config, 'validation_test')
+            for key, value in scenario.items():
+                if key != 'expected_issue':
+                    env.set(key, value, 'validation_test')
+            result = env.validate_staging_database_credentials()
+            assert result['valid'] is False, f'Invalid scenario should fail validation: {scenario}'
+            assert len(result['issues']) > 0, f'Invalid scenario should have issues: {scenario}'
+            issues_text = ' '.join(result['issues']).lower()
+            expected_issue = scenario['expected_issue'].lower()
+            assert expected_issue in issues_text, f"Expected issue '{expected_issue}' not found in: {result['issues']}"
+        env.clear()
+        env.set('ENVIRONMENT', 'production', 'validation_test')
+        result = env.validate_staging_database_credentials()
+        assert len(result['warnings']) > 0, 'Non-staging environment should produce warnings'
+        assert 'staging' in ' '.join(result['warnings']).lower(), 'Warning should mention staging'
+        env.reset()
+
+    def test_environment_detection_normalization(self):
+        """Test environment name detection and normalization logic."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        environment_mappings = [('development', 'development'), ('dev', 'development'), ('local', 'development'), ('', 'development'), (None, 'development'), ('test', 'test'), ('testing', 'test'), ('staging', 'staging'), ('production', 'production'), ('prod', 'production'), ('unknown_env', 'development'), ('invalid', 'development')]
+        for env_value, expected_name in environment_mappings:
+            if env_value is not None:
+                env.set('ENVIRONMENT', env_value, 'environment_test')
+            else:
+                env.delete('ENVIRONMENT', 'environment_test')
+            detected_name = env.get_environment_name()
+            assert detected_name == expected_name, f"Environment '{env_value}' should map to '{expected_name}', got '{detected_name}'"
+            expected_is_dev = expected_name == 'development'
+            expected_is_test = expected_name == 'test'
+            expected_is_staging = expected_name == 'staging'
+            expected_is_prod = expected_name == 'production'
+            assert env.is_development() == expected_is_dev, f'is_development() failed for {env_value}'
+            assert env.is_test() == expected_is_test, f'is_test() failed for {env_value}'
+            assert env.is_staging() == expected_is_staging, f'is_staging() failed for {env_value}'
+            assert env.is_production() == expected_is_prod, f'is_production() failed for {env_value}'
+        env.reset()
+
+class TestIsolatedEnvironmentShellExpansionComprehensive:
+    """Comprehensive shell expansion testing - SECURITY AND FUNCTIONALITY."""
+
+    def test_shell_expansion_patterns_comprehensive(self):
+        """Test all shell expansion patterns and security measures."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        shell_patterns = ["$(echo 'hello')", "`echo 'hello'`", '${HOME}/path', '$(whoami)', '`date`', "prefix_$(echo 'middle')_suffix", "multiple_$(echo 'first')_and_$(echo 'second')"]
+        for pattern in shell_patterns:
+            env.set('SHELL_TEST', pattern, 'shell_expansion_test')
+            result = env.get('SHELL_TEST')
+            assert result == pattern, f'Shell expansion should be disabled in tests, but {pattern} was modified to {result}'
+        env.reset()
+
+    def test_shell_expansion_error_conditions(self):
+        """Test shell expansion error handling."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        with patch('shared.isolated_environment.subprocess.run') as mock_run:
+            from subprocess import TimeoutExpired
+            mock_run.side_effect = TimeoutExpired('test_command', 5)
+            result = env._expand_shell_commands('test_$(timeout_command)_test')
+            assert result == 'test_$(timeout_command)_test'
+        with patch('shared.isolated_environment.subprocess.run') as mock_run:
+            mock_run.return_value.returncode = 1
+            mock_run.return_value.stderr = 'Command not found'
+            result = env._expand_shell_commands('test_$(invalid_command)_test')
+            assert result == 'test_$(invalid_command)_test'
+        with patch('shared.isolated_environment.subprocess.run') as mock_run:
+            mock_run.side_effect = Exception('Subprocess error')
+            result = env._expand_shell_commands('test_$(exception_command)_test')
+            assert result == 'test_$(exception_command)_test'
+        env.reset()
+
+    def test_shell_expansion_disable_flags(self):
+        """Test shell expansion disable mechanisms."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        env.set('DISABLE_SHELL_EXPANSION', 'true', 'test_flag')
+        env.set('SHELL_DISABLED_TEST', "$(echo 'should_not_expand')", 'test')
+        result = env.get('SHELL_DISABLED_TEST')
+        assert result == "$(echo 'should_not_expand')", 'Shell expansion should be disabled by flag'
+        env.set('DISABLE_SHELL_EXPANSION', 'false', 'test_flag')
+        env.set('SHELL_ENABLED_TEST', "$(echo 'might_expand')", 'test')
+        result = env.get('SHELL_ENABLED_TEST')
+        assert result == "$(echo 'might_expand')", 'Shell expansion should still be disabled in test context'
+        env.reset()
+
+class TestIsolatedEnvironmentLegacyCompatibility:
+    """Test all legacy compatibility functions and classes."""
+
+    def test_secret_loader_comprehensive(self):
+        """Comprehensive test of SecretLoader legacy compatibility."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        loader = SecretLoader()
+        assert loader.env_manager is not None, 'SecretLoader should have default env manager'
+        custom_loader = SecretLoader(env_manager=env)
+        assert custom_loader.env_manager is env, 'SecretLoader should use custom env manager'
+        result = loader.load_secrets()
+        assert result is True, 'load_secrets should always return True'
+        set_result = loader.set_secret('SECRET_LOADER_TEST', 'secret_value', 'secret_loader_test')
+        assert set_result is True, 'set_secret should return True on success'
+        get_result = loader.get_secret('SECRET_LOADER_TEST')
+        assert get_result == 'secret_value', 'get_secret should return correct value'
+        default_result = loader.get_secret('NONEXISTENT_SECRET', 'default_secret')
+        assert default_result == 'default_secret', 'get_secret should return default for nonexistent secret'
+        none_result = loader.get_secret('ANOTHER_NONEXISTENT')
+        assert none_result is None, 'get_secret should return None when no default provided'
+        env.reset()
+
+    def test_environment_validator_comprehensive(self):
+        """Comprehensive test of EnvironmentValidator legacy compatibility."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        validator = EnvironmentValidator(enable_fallbacks=True, development_mode=True)
+        assert validator.enable_fallbacks is True, 'enable_fallbacks parameter not stored'
+        assert validator.development_mode is True, 'development_mode parameter not stored'
+        assert validator.env is not None, 'EnvironmentValidator should have env reference'
+        test_config = {'DATABASE_URL': 'postgresql://test:password@localhost:5432/testdb', 'JWT_SECRET_KEY': 'test-jwt-secret-key-with-minimum-32-characters', 'SECRET_KEY': 'test-secret-key-for-application-sessions'}
+        env.update(test_config, 'validator_test')
+        result = validator.validate_all()
+        assert isinstance(result, ValidationResult), 'validate_all should return ValidationResult'
+        assert result.is_valid is True, 'Validation should pass with valid config'
+        fallback_result = validator.validate_with_fallbacks()
+        assert isinstance(fallback_result, ValidationResult), 'validate_with_fallbacks should return ValidationResult'
+        try:
+            validator.print_validation_summary(result)
+        except Exception as e:
+            pytest.fail(f'print_validation_summary should not raise exceptions: {e}')
+        suggestions = validator.get_fix_suggestions(result)
+        assert isinstance(suggestions, list), 'get_fix_suggestions should return list'
+        env.delete('DATABASE_URL', 'validator_test')
+        failing_result = validator.validate_all()
+        assert failing_result.is_valid is False, 'Validation should fail with missing DATABASE_URL'
+        failing_suggestions = validator.get_fix_suggestions(failing_result)
+        assert isinstance(failing_suggestions, list), 'get_fix_suggestions should return list for failures'
+        assert len(failing_suggestions) > 0, 'Should provide suggestions for failures'
+        env.reset()
+
+    def test_convenience_functions_comprehensive(self):
+        """Comprehensive test of all convenience functions."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        setenv_result = setenv('CONVENIENCE_SETENV', 'setenv_value', 'convenience_test')
+        assert setenv_result is True, 'setenv should return True on success'
+        assert env.get('CONVENIENCE_SETENV') == 'setenv_value', 'setenv should set value correctly'
+        getenv_result = getenv('CONVENIENCE_SETENV')
+        assert getenv_result == 'setenv_value', 'getenv should return correct value'
+        getenv_default = getenv('NONEXISTENT_CONVENIENCE', 'default_value')
+        assert getenv_default == 'default_value', 'getenv should return default for nonexistent variable'
+        getenv_none = getenv('ANOTHER_NONEXISTENT')
+        assert getenv_none is None, 'getenv should return None when no default provided'
+        delenv_result = delenv('CONVENIENCE_SETENV')
+        assert delenv_result is True, 'delenv should return True on successful deletion'
+        assert getenv('CONVENIENCE_SETENV') is None, 'Variable should be deleted after delenv'
+        delenv_nonexistent = delenv('NEVER_EXISTED')
+        assert delenv_nonexistent is False, 'delenv should return False for nonexistent variable'
+        env.set('SUBPROCESS_CONVENIENCE', 'subprocess_value', 'convenience_test')
+        subprocess_env = get_subprocess_env({'ADDITIONAL': 'additional_value'})
+        assert isinstance(subprocess_env, dict), 'get_subprocess_env should return dict'
+        assert 'SUBPROCESS_CONVENIENCE' in subprocess_env, 'Should include existing variables'
+        assert 'ADDITIONAL' in subprocess_env, 'Should include additional variables'
+        assert subprocess_env['SUBPROCESS_CONVENIENCE'] == 'subprocess_value', 'Should have correct existing value'
+        assert subprocess_env['ADDITIONAL'] == 'additional_value', 'Should have correct additional value'
+        load_secrets_result = load_secrets()
+        assert load_secrets_result is True, 'load_secrets should always return True for compatibility'
+        env.reset()
+
+    def test_get_environment_manager_legacy(self):
+        """Test legacy get_environment_manager function."""
+        manager1 = get_environment_manager()
+        assert isinstance(manager1, IsolatedEnvironment), 'Should return IsolatedEnvironment instance'
+        manager2 = get_environment_manager(isolation_mode=True)
+        assert isinstance(manager2, IsolatedEnvironment), 'Should return IsolatedEnvironment instance'
+        assert manager2.is_isolated() is True, 'Should enable isolation when requested'
+        manager3 = get_environment_manager(isolation_mode=False)
+        assert isinstance(manager3, IsolatedEnvironment), 'Should return IsolatedEnvironment instance'
+        assert manager3.is_isolated() is False, 'Should disable isolation when requested'
+        manager4 = get_environment_manager(isolation_mode=None)
+        assert isinstance(manager4, IsolatedEnvironment), 'Should return IsolatedEnvironment instance'
+        assert manager1 is manager2 is manager3 is manager4, 'Should return same singleton instance'
+        manager1.reset()
+
+class TestIsolatedEnvironmentWindowsCompatibility:
+    """Test Windows-specific functionality - WINDOWS ENCODING SUPPORT."""
+
+    def test_utf8_encoding_support(self):
+        """Test UTF-8 encoding support for Windows compatibility."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        utf8_test_cases = [('UTF8_ENGLISH', 'Hello World', 'Basic English text'), ('UTF8_FRENCH', 'Caf[U+00E9] na[U+00EF]ve r[U+00E9]sum[U+00E9]', 'French accented characters'), ('UTF8_GERMAN', 'Gr[U+00F6][U+00DF]e Stra[U+00DF]e M[U+00E4]dchen', 'German umlauts and eszett'), ('UTF8_CHINESE', '[U+4F60][U+597D][U+4E16][U+754C]', 'Chinese characters'), ('UTF8_JAPANESE', '[U+3053][U+3093][U+306B][U+3061][U+306F][U+4E16][U+754C]', 'Japanese hiragana'), ('UTF8_KOREAN', '[U+C548][U+B155][U+D558][U+C138][U+C694] [U+C138][U+ACC4]', 'Korean hangul'), ('UTF8_EMOJI', 'Hello [U+1F30D] World [U+1F680]', 'Emoji characters'), ('UTF8_SYMBOLS', '[U+00A9][U+00AE][U+2122][U+20AC][U+00A3][U+00A5][U+00A7]', 'Various symbols'), ('UTF8_MIXED', 'Testing [U+6D4B][U+8BD5] tect [U+30C6][U+30B9][U+30C8]  FIRE: ', 'Mixed scripts and emoji')]
+        for var_name, utf8_value, description in utf8_test_cases:
+            result = env.set(var_name, utf8_value, 'utf8_test')
+            assert result is True, f'Failed to set UTF-8 value: {description}'
+            retrieved = env.get(var_name)
+            assert retrieved == utf8_value, f"UTF-8 corruption for {description}: expected '{utf8_value}', got '{retrieved}'"
+            source = env.get_variable_source(var_name)
+            assert source == 'utf8_test', f'Source tracking failed for UTF-8 variable: {description}'
+        env.reset()
+
+    def test_windows_path_handling(self):
+        """Test Windows path handling in file operations."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        if os.name == 'nt':
+            windows_paths = ['C:\\Program Files\\MyApp\\config.env', 'C:\\Users\\UserName\\Documents\\.env', '\\\\NetworkShare\\Config\\.secrets', 'D:\\Development\\Project\\.env.local']
+            for win_path in windows_paths:
+                path_obj = Path(win_path)
+                loaded_count, errors = env.load_from_file(win_path)
+                assert loaded_count == 0, f'Non-existent Windows path should load 0 variables'
+                assert len(errors) == 1, f'Non-existent Windows path should produce 1 error'
+                assert 'not found' in errors[0].lower(), f'Error should mention file not found for {win_path}'
+        env.reset()
+
+class TestIsolatedEnvironmentCoverageCompletion:
+    """Tests to ensure 100% code coverage of edge cases and rarely used paths."""
+
+    def test_module_level_singleton_consistency(self):
+        """Test module-level singleton consistency checking via get_env() function."""
+        import shared.isolated_environment as ie_module
+        original_module_instance = getattr(ie_module, '_env_instance', None)
+        original_class_instance = IsolatedEnvironment._instance
+        try:
+            fake_instance = object()
+            ie_module._env_instance = fake_instance
+            new_instance = get_env()
+            assert ie_module._env_instance is new_instance, 'Module instance should be updated for consistency'
+            assert ie_module._env_instance is IsolatedEnvironment._instance, 'Module and class instances should be consistent'
+        finally:
+            if original_module_instance:
+                ie_module._env_instance = original_module_instance
+            if original_class_instance:
+                IsolatedEnvironment._instance = original_class_instance
+
+    def test_test_context_detection_edge_cases(self):
+        """Test edge cases in test context detection."""
+        env = get_env()
+        env.reset()
+        original_modules = dict(sys.modules)
+        try:
+            mock_pytest = Mock()
+            mock_pytest.main = Mock()
+            sys.modules['pytest'] = mock_pytest
+            sys._pytest_running = True
+            assert env._is_test_context(), 'Should detect pytest with _pytest_running flag'
+            delattr(sys, '_pytest_running')
+            with patch.dict(os.environ, {'PYTEST_CURRENT_TEST': 'test::example'}):
+                assert env._is_test_context(), 'Should detect pytest via PYTEST_CURRENT_TEST'
+        finally:
+            sys.modules.clear()
+            sys.modules.update(original_modules)
+            if hasattr(sys, '_pytest_running'):
+                delattr(sys, '_pytest_running')
+        env.reset()
+
+    def test_get_test_environment_defaults_coverage(self):
+        """Test get_test_environment_defaults method coverage."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        with patch.object(env, '_is_test_context', return_value=True):
+            test_defaults = env._get_test_environment_defaults()
+            assert 'GOOGLE_OAUTH_CLIENT_ID_TEST' in test_defaults, 'OAuth test credentials missing'
+            assert 'GOOGLE_OAUTH_CLIENT_SECRET_TEST' in test_defaults, 'OAuth test credentials missing'
+            assert 'ENVIRONMENT' in test_defaults, 'Environment default missing'
+            assert test_defaults['ENVIRONMENT'] == 'test', 'Environment should default to test'
+            jwt_key = test_defaults.get('JWT_SECRET_KEY', '')
+            assert len(jwt_key) >= 32, 'JWT secret key should be at least 32 characters'
+            assert 'POSTGRES_HOST' in test_defaults, 'Database defaults missing'
+            assert 'REDIS_HOST' in test_defaults, 'Redis defaults missing'
+            env.clear()
+            oauth_client_id = env.get('GOOGLE_OAUTH_CLIENT_ID_TEST')
+            assert oauth_client_id is not None, 'Should return test default for OAuth client ID'
+            assert oauth_client_id == test_defaults['GOOGLE_OAUTH_CLIENT_ID_TEST'], 'Test default value mismatch'
+        env.reset()
+
+    def test_auto_load_env_file_scenarios(self):
+        """Test auto-load scenarios for coverage completion."""
+        env = get_env()
+        env.reset()
+        with patch.dict(os.environ, {'PYTEST_CURRENT_TEST': 'test::example'}):
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False, encoding='utf-8') as f:
+                f.write('AUTO_LOAD_PYTEST_TEST=should_not_load\n')
+                env_file = f.name
+            try:
+                env._auto_load_env_file()
+                assert env.get('AUTO_LOAD_PYTEST_TEST') is None, 'Should not auto-load during pytest'
+            finally:
+                try:
+                    os.unlink(env_file)
+                except (OSError, PermissionError):
+                    pass
+        original_cwd = os.getcwd()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            try:
+                os.chdir(temp_dir)
+                secrets_file = Path(temp_dir) / '.secrets'
+                with open(secrets_file, 'w', encoding='utf-8') as f:
+                    f.write('SECRETS_FILE_TEST=secrets_value\n')
+                with patch('sys.modules', {k: v for k, v in sys.modules.items() if k != 'pytest'}):
+                    with patch.dict(os.environ, {}, clear=False):
+                        if 'PYTEST_CURRENT_TEST' in os.environ:
+                            del os.environ['PYTEST_CURRENT_TEST']
+                        env._auto_load_env_file()
+                        assert env.get('SECRETS_FILE_TEST') == 'secrets_value', '.secrets file not loaded'
+            finally:
+                os.chdir(original_cwd)
+        env.reset()
+
+    def test_unset_variable_handling_comprehensive(self):
+        """Test explicit unset variable handling (__UNSET__ marker)."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        env.set('UNSET_MARKER_TEST', 'original_value', 'test')
+        assert env.get('UNSET_MARKER_TEST') == 'original_value', 'Variable not set initially'
+        assert env.exists('UNSET_MARKER_TEST'), 'Variable should exist initially'
+        result = env.delete('UNSET_MARKER_TEST', 'test')
+        assert result is True, 'Delete should succeed'
+        assert not env.exists('UNSET_MARKER_TEST'), 'Variable should not exist after delete'
+        assert env.get('UNSET_MARKER_TEST') is None, 'Should return None for unset variable'
+        assert env.get('UNSET_MARKER_TEST', 'default') == 'default', 'Should return default for unset variable'
+        all_vars = env.get_all()
+        assert 'UNSET_MARKER_TEST' not in all_vars, 'Unset variable should not appear in get_all()'
+        prefixed_vars = env.get_all_with_prefix('UNSET_')
+        assert 'UNSET_MARKER_TEST' not in prefixed_vars, 'Unset variable should not appear in get_all_with_prefix()'
+        env.reset()
+
+    def test_sanitization_edge_cases(self):
+        """Test edge cases in value sanitization."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        result = env._sanitize_value(None)
+        assert result == 'None', "None should be converted to string 'None'"
+        result = env._sanitize_value(123)
+        assert result == '123', 'Integer should be converted to string'
+        result = env._sanitize_value('')
+        assert result == '', 'Empty string should be preserved'
+        password_with_special = 'pass@word!#$%^&*()'
+        result = env._sanitize_password_preserving_special_chars(password_with_special)
+        assert result == password_with_special, 'Special characters in password should be preserved'
+        password_with_control = 'pass\x00word\x1f'
+        result = env._sanitize_password_preserving_special_chars(password_with_control)
+        assert result == 'password', 'Control characters should be removed from password'
+        env.reset()
+
+    def test_disabled_isolation_clear_error(self):
+        """Test that clear() raises error when isolation is disabled."""
+        env = get_env()
+        env.reset()
+        env.disable_isolation()
+        assert not env.is_isolated(), 'Isolation should be disabled'
+        with pytest.raises(RuntimeError, match='Cannot clear environment variables outside isolation mode'):
+            env.clear()
+
+    def test_reset_to_original_without_backup(self):
+        """Test reset_to_original when no original state was saved."""
+        env = get_env()
+        env.reset()
+        env._original_state = None
+        env._original_environ_backup = {}
+        try:
+            env.reset_to_original()
+        except Exception as e:
+            pytest.fail(f'reset_to_original() should handle missing original state gracefully: {e}')
+
+class TestStandardTestConfigIntegration:
+    """Test integration with SSOT test framework configuration."""
+
+    def test_standard_test_config_compatibility(self):
+        """Test compatibility with STANDARD_TEST_CONFIG from test framework."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        results = env.update(STANDARD_TEST_CONFIG, source='standard_test_config')
+        failed_vars = [var for var, success in results.items() if not success]
+        assert len(failed_vars) == 0, f'Failed to set standard test config variables: {failed_vars}'
+        assert env.get('TESTING') == 'true', 'TESTING flag not set correctly'
+        assert env.get('ENVIRONMENT') == 'test', 'ENVIRONMENT not set to test'
+        assert env.get('DATABASE_URL') is not None, 'DATABASE_URL not configured'
+        assert env.get('JWT_SECRET_KEY') is not None, 'JWT_SECRET_KEY not configured'
+        db_url = env.get('DATABASE_URL')
+        assert db_url.startswith('postgresql://'), 'Database URL should be PostgreSQL format'
+        jwt_key = env.get('JWT_SECRET_KEY')
+        assert len(jwt_key) >= 32, 'JWT secret key should be at least 32 characters'
+        result = env.validate_all()
+        assert result.is_valid, f'Standard test config should pass validation: {result.errors}'
+        env.reset()
+
+class TestComprehensiveFinalValidation:
+    """Final comprehensive validation of all functionality."""
+
+    def test_complete_business_workflow_simulation(self):
+        """Simulate complete business workflow using IsolatedEnvironment."""
+        env = get_env()
+        env.reset()
+        env.enable_isolation()
+        startup_config = {'SERVICE_NAME': 'netra_backend', 'ENVIRONMENT': 'test', 'LOG_LEVEL': 'DEBUG', 'DATABASE_URL': 'postgresql://test:test@localhost:5434/test_db', 'REDIS_URL': 'redis://localhost:6381/0', 'JWT_SECRET_KEY': 'test-jwt-secret-key-for-comprehensive-testing-32-chars', 'ANTHROPIC_API_KEY': 'sk-ant-test-key-for-comprehensive-validation'}
+        results = env.update(startup_config, source='service_startup')
+        assert all(results.values()), 'All startup configuration should be loaded successfully'
+        runtime_changes = {'LOG_LEVEL': 'INFO', 'WORKER_PROCESSES': '4', 'CACHE_TTL': '3600'}
+        for key, value in runtime_changes.items():
+            result = env.set(key, value, source='runtime_config')
+            assert result is True, f'Runtime configuration change failed for {key}'
+        user_context = {'USER_ID': 'test_user_123', 'SESSION_ID': 'session_abc456', 'API_QUOTA_REMAINING': '950'}
+        for key, value in user_context.items():
+            env.set(key, value, source='user_context')
+        all_vars = env.get_all()
+        expected_vars = set(startup_config.keys()) | set(runtime_changes.keys()) | set(user_context.keys())
+        actual_vars = set(all_vars.keys())
+        missing_vars = expected_vars - actual_vars
+        assert len(missing_vars) == 0, f'Missing expected variables: {missing_vars}'
+        for key in startup_config.keys():
+            source = env.get_variable_source(key)
+            if key in runtime_changes:
+                assert source == 'runtime_config', f'Variable {key} should have runtime_config source after override'
+            else:
+                assert source == 'service_startup', f'Variable {key} should have service_startup source'
+        runtime_sources = [env.get_variable_source(key) for key in runtime_changes.keys()]
+        assert all((source == 'runtime_config' for source in runtime_sources)), 'Runtime config source tracking failed'
+        user_sources = [env.get_variable_source(key) for key in user_context.keys()]
+        assert all((source == 'user_context' for source in user_sources)), 'User context source tracking failed'
+        subprocess_env = env.get_subprocess_env({'EXTERNAL_TOOL_CONFIG': 'enabled'})
+        assert 'SERVICE_NAME' in subprocess_env, 'Subprocess env missing service config'
+        assert 'USER_ID' in subprocess_env, 'Subprocess env missing user context'
+        assert 'EXTERNAL_TOOL_CONFIG' in subprocess_env, 'Subprocess env missing additional config'
+        debug_info = env.get_debug_info()
+        assert 'tracked_sources' in debug_info, 'Debug info should include source tracking'
+        assert debug_info['isolated_vars_count'] > 0, 'Should track number of variables'
+        protected_vars = ['SERVICE_NAME', 'ENVIRONMENT']
+        for var in protected_vars:
+            env.protect(var)
+        result = env.set('SERVICE_NAME', 'modified', 'shutdown', force=False)
+        assert result is False, 'Protected variable should not be modifiable'
+        result = env.set('SERVICE_NAME', 'modified', 'shutdown', force=True)
+        assert result is True, 'Force modification should work on protected variable'
+        final_validation = env.validate_all()
+        assert final_validation.is_valid, f'Final validation should pass: {final_validation.errors}'
+        env.reset()
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

@@ -11,7 +11,7 @@ Business Value Justification:
 - Segment: Platform/Engineering (Issue reproduction and validation)
 - Business Goal: Reproduce and document handler conflicts for resolution
 - Value Impact: Provide concrete evidence of handler conflicts breaking Golden Path
-- Revenue Impact: Protect $500K+ ARR by documenting exact failure modes
+- Revenue Impact: Protect 500K+ ARR by documenting exact failure modes
 
 🔍 These tests are DESIGNED TO FAIL to reproduce the actual issue
 """

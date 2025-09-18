@@ -9,7 +9,7 @@ Business Value Justification:
 - Segment: Platform/All (WebSocket reliability affects all users)
 - Business Goal: System Reliability & User Experience
 - Value Impact: Ensures consistent WebSocket routing and prevents connection issues
-- Strategic Impact: $500K+ ARR depends on reliable WebSocket infrastructure
+- Strategic Impact: 500K+ ARR depends on reliable WebSocket infrastructure
 """
 
 import pytest

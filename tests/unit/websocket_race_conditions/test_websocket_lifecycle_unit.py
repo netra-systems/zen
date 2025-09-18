@@ -1,7 +1,7 @@
 """
 Critical Unit Tests for WebSocket Race Condition - Business Protection Tests
 
-These tests validate the 5 identified race condition patterns that threaten $500K+ ARR chat functionality:
+These tests validate the 5 identified race condition patterns that threaten 500K+ ARR chat functionality:
 1. Connection State Race Condition - accept() timing issues
 2. MessageHandlerService Constructor Signature Mismatch 
 3. GCP Readiness Validation Failure
@@ -10,7 +10,7 @@ These tests validate the 5 identified race condition patterns that threaten $500
 
 Business Value Justification:
 1. Segment: Platform/Internal - Chat is King infrastructure protection
-2. Business Goal: Prevent $500K+ ARR loss from WebSocket failures
+2. Business Goal: Prevent 500K+ ARR loss from WebSocket failures
 3. Value Impact: Validates mission-critical WebSocket agent events deliver chat value
 4. Strategic Impact: Protects core business model dependent on reliable AI interactions
 
@@ -238,9 +238,7 @@ class GCPReadinessValidationStagingTests:
     """
     CRITICAL TEST: Validates staging-appropriate timeout values and readiness checks.
     
-    FAILURE PATTERN: "[U+1F534] GCP WebSocket readiness validation FAILED (22.01s)"
-    ROOT CAUSE: Production-grade validation inappropriate for staging environment  
-    """
+    FAILURE PATTERN: "[U+1F534] GCP WebSocket readiness validation FAILED (22.01s)""""
 
     @pytest.mark.asyncio
     async def test_gcp_readiness_validation_staging_calibration(self):

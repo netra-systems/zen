@@ -38,14 +38,15 @@ except ImportError as e:
     get_event_delivery_tracker = None
     EventPriority = None
     EventDeliveryStatus = None
-from shared.monitoring.interfaces import MonitorableComponent
+# Enhanced monitoring interface for issue #1019 integration
+from netra_backend.app.core.monitoring.base import MonitorableComponent
 
 # CRITICAL FIX: Real agent execution imports for production deployment
 # MOVED TO TYPE_CHECKING to avoid circular import
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.core.configuration.base import get_config
+from netra_backend.app.config import get_config  # SSOT UnifiedConfigManager
 
 if TYPE_CHECKING:
     from shared.monitoring.interfaces import ComponentMonitor
@@ -219,8 +220,90 @@ class AgentWebSocketBridge(MonitorableComponent):
         self._registry = None
         self._thread_registry: Optional[ThreadRunRegistry] = None
         self._health_check_task = None
+        self._connection_pool = None
+        self._health_monitor = None
         logger.debug("Dependency references initialized")
-    
+
+    def configure(self, *args, **kwargs) -> None:
+        """Configure AgentWebSocketBridge with infrastructure components.
+
+        Supports two calling patterns:
+        1. Legacy: configure(connection_pool=None, agent_registry=None, health_monitor=None)
+        2. WebSocket: configure(websocket, run_id, thread_id, user_id) - for backward compatibility
+
+        This method provides post-initialization configuration of the bridge
+        with external dependencies. It follows the same pattern as other
+        factory classes in the system.
+        """
+        # Handle positional arguments (websocket, run_id, thread_id, user_id pattern)
+        if len(args) >= 4:
+            websocket, run_id, thread_id, user_id = args[:4]
+            logger.info(f"[U+1F527] AgentWebSocketBridge configure called with WebSocket pattern: websocket={type(websocket).__name__}, run_id={run_id}, thread_id={thread_id}, user_id={user_id}")
+
+            # Store WebSocket session information for this user context
+            self._configure_websocket_session(websocket, run_id, thread_id, user_id)
+            logger.info("[U+2713] AgentWebSocketBridge WebSocket session configuration completed")
+            return
+
+        # Handle keyword arguments (standard configuration pattern)
+        connection_pool = kwargs.get('connection_pool')
+        agent_registry = kwargs.get('agent_registry')
+        health_monitor = kwargs.get('health_monitor')
+
+        if connection_pool is not None:
+            self._connection_pool = connection_pool
+            logger.info(f"[U+1F527] AgentWebSocketBridge configured with connection pool: {type(connection_pool).__name__}")
+
+        if agent_registry is not None:
+            self._registry = agent_registry
+            logger.info(f"[U+1F527] AgentWebSocketBridge configured with agent registry: {type(agent_registry).__name__}")
+
+        if health_monitor is not None:
+            self._health_monitor = health_monitor
+            logger.info(f"[U+1F527] AgentWebSocketBridge configured with health monitor: {type(health_monitor).__name__}")
+
+        logger.info("[U+2713] AgentWebSocketBridge configuration completed successfully")
+
+    def _configure_websocket_session(self, websocket, run_id: str, thread_id: str, user_id: str) -> None:
+        """Configure WebSocket session for specific user context.
+
+        Args:
+            websocket: WebSocket connection object
+            run_id: Unique run identifier
+            thread_id: Thread identifier
+            user_id: User identifier
+        """
+        # Store session configuration
+        session_data = {
+            'websocket': websocket,
+            'run_id': run_id,
+            'thread_id': thread_id,
+            'user_id': user_id,
+            'configured_at': datetime.now(timezone.utc)
+        }
+
+        # Use run_id as key for session mapping
+        if not hasattr(self, '_websocket_sessions'):
+            self._websocket_sessions = {}
+
+        self._websocket_sessions[run_id] = session_data
+        logger.debug(f"WebSocket session configured for run_id={run_id}, user_id={user_id}")
+
+        # Register the run/thread mapping if registry is available
+        if hasattr(self, '_registry') and self._registry:
+            try:
+                # Attempt to register the mapping
+                if hasattr(self._registry, 'register_run_thread_mapping'):
+                    asyncio.create_task(self._registry.register_run_thread_mapping(
+                        run_id=run_id,
+                        thread_id=thread_id,
+                        metadata={'user_id': user_id, 'configured_via': 'configure_method'}
+                    ))
+                    logger.debug(f"Run-thread mapping registered for run_id={run_id}")
+            except Exception as e:
+                logger.warning(f"Could not register run-thread mapping: {e}")
+                # Continue without failing - this is non-critical
+
     @property
     def websocket_manager(self):
         """Get the WebSocket manager for this bridge.
@@ -233,29 +316,53 @@ class AgentWebSocketBridge(MonitorableComponent):
     
     @websocket_manager.setter
     def websocket_manager(self, manager):
-        """Set websocket manager (primarily for testing scenarios).
-        
-        CRITICAL: This setter is primarily for test scenarios to inject mock managers.
-        Production code should use factory methods (create_user_emitter, create_scoped_emitter)
-        for proper user isolation and per-request instantiation patterns.
-        
+        """Set websocket manager with standardized interface validation - Issue #1176 Phase 1.
+
+        CRITICAL: Now includes standardized interface validation to prevent coordination gaps.
+        This setter validates manager interface compliance for production safety.
+
         Args:
-            manager: WebSocket manager instance or None. Must implement send_to_thread method
-                    if not None.
-                    
+            manager: WebSocket manager instance or None. Must implement standardized interface.
+
         Raises:
-            ValueError: If manager doesn't implement required interface
+            ValueError: If manager doesn't implement required standardized interface
         """
-        if manager is not None and not hasattr(manager, 'send_to_thread'):
-            raise ValueError(
-                "Invalid websocket manager - must implement send_to_thread method. "
-                "For production use, prefer factory methods for proper user isolation."
-            )
-        
+        if manager is not None:
+            # Issue #1176 Phase 1: Enhanced validation using standardized interface
+            try:
+                from netra_backend.app.websocket_core.standardized_factory_interface import (
+                    WebSocketManagerFactoryValidator
+                )
+
+                # Use factory validator for comprehensive validation if available
+                if hasattr(self, '_websocket_manager_factory') and self._websocket_manager_factory:
+                    validation_result = self._websocket_manager_factory.validate_manager_instance(manager)
+                    if not validation_result.is_production_ready:
+                        logger.warning(
+                            f"Issue #1176: WebSocket manager validation warnings: "
+                            f"{validation_result.validation_errors}"
+                        )
+                        # Don't raise error for warnings, but log for monitoring
+
+                # Basic interface requirement check
+                if not hasattr(manager, 'send_to_thread'):
+                    raise ValueError(
+                        "Invalid websocket manager - must implement send_to_thread method. "
+                        "Use standardized factory methods for proper interface compliance."
+                    )
+
+            except ImportError:
+                # Fallback validation if standardized interface not available
+                if not hasattr(manager, 'send_to_thread'):
+                    raise ValueError(
+                        "Invalid websocket manager - must implement send_to_thread method."
+                    )
+
         self._websocket_manager = manager
         logger.debug(
             f"WebSocket manager {'set' if manager else 'cleared'} "
-            f"(type: {type(manager).__name__ if manager else 'None'})"
+            f"(type: {type(manager).__name__ if manager else 'None'}) "
+            f"with Issue #1176 standardized validation"
         )
     
     @property
@@ -310,7 +417,205 @@ class AgentWebSocketBridge(MonitorableComponent):
         self._last_health_broadcast = 0.0
         self._health_broadcast_interval = 30.0  # 30 seconds
         self._last_broadcasted_state = None
-        logger.debug("Monitor observer system initialized")
+        self._monitoring_enabled = True  # Enable monitoring by default
+        self._health_notifications_sent = 0  # Track notification count
+        
+        # Enhanced for issue #1019: Auto-register with ChatEventMonitor if available
+        self._auto_register_with_chat_event_monitor()
+        
+        logger.debug("Monitor observer system initialized with ChatEventMonitor integration")
+    
+    def _auto_register_with_chat_event_monitor(self) -> None:
+        """
+        Auto-register this bridge instance with ChatEventMonitor for comprehensive monitoring.
+        
+        Implements issue #1019 requirement: Enable ChatEventMonitor to observe 
+        AgentWebSocketBridge health and operations for silent failure detection.
+        
+        CRITICAL: This registration happens per-instance (per-request) to maintain
+        proper user isolation while enabling monitoring coverage.
+        
+        Business Value: Protects $500K+ ARR by ensuring WebSocket bridge failures
+        are detected and reported through comprehensive monitoring.
+        """
+        try:
+            # Import ChatEventMonitor safely to avoid circular imports
+            from netra_backend.app.websocket_core.event_monitor import chat_event_monitor
+            
+            # Generate unique component ID for this bridge instance
+            component_id = self._generate_monitoring_component_id()
+            
+            # Register this bridge instance for monitoring
+            # Use sync method for initialization compatibility
+            if hasattr(chat_event_monitor, 'register_component'):
+                chat_event_monitor.register_component(component_id, self)
+                logger.info(
+                    f"🔍 MONITOR_INTEGRATION: AgentWebSocketBridge instance registered "
+                    f"with ChatEventMonitor (component_id={component_id})"
+                )
+            else:
+                logger.debug("ChatEventMonitor doesn't support component registration - using observer pattern only")
+            
+            # Also register ourselves as a monitor observer (reverse integration)
+            self.register_monitor_observer(chat_event_monitor)
+            
+        except Exception as e:
+            logger.warning(
+                f"⚠️ Failed to auto-register with ChatEventMonitor: {e}. "
+                f"Bridge will continue operating without monitoring integration. "
+                f"This is expected during testing or if ChatEventMonitor is unavailable."
+            )
+    
+    def _generate_monitoring_component_id(self) -> str:
+        """Generate unique component ID for monitoring registration."""
+        base_id = "agent_websocket_bridge"
+        
+        # Include user context for proper isolation
+        if self.user_context:
+            user_suffix = self.user_context.user_id[:8] if self.user_context.user_id else "unknown"
+            return f"{base_id}_user_{user_suffix}"
+        else:
+            # System-level bridge instance
+            import time
+            timestamp = int(time.time() * 1000) % 10000  # Last 4 digits of timestamp
+            return f"{base_id}_system_{timestamp}"
+    
+    def _calculate_event_emission_health(self) -> str:
+        """Calculate health status of event emission capabilities."""
+        try:
+            # Check if we have active WebSocket connections
+            if hasattr(self, '_websocket_manager') and self._websocket_manager:
+                # If we have a websocket manager, check its health
+                return "healthy"
+            elif self.user_context:
+                # Per-user bridge should be able to emit events
+                return "ready"
+            else:
+                # System bridge without active connections
+                return "standby"
+        except Exception:
+            return "degraded"
+    
+    async def _notify_health_change_if_needed(self, current_health: Dict[str, Any]) -> None:
+        """
+        Notify observers of health changes if status has changed significantly.
+        
+        Enhanced for issue #1019: Provides intelligent health change detection
+        to avoid spam while ensuring critical changes are reported.
+        """
+        try:
+            now = time.time()
+            current_state = current_health.get("state", "unknown")
+            current_healthy = current_health.get("healthy", False)
+            
+            # Check if we should broadcast based on time interval
+            time_to_broadcast = (
+                now - self._last_health_broadcast > self._health_broadcast_interval
+            )
+            
+            # Check if health status changed significantly
+            status_changed = (
+                self._last_broadcasted_state != current_state or
+                self._last_broadcasted_state is None
+            )
+            
+            # Always broadcast errors or critical state changes
+            critical_change = (
+                not current_healthy or 
+                current_state in ["error", "failed", "critical"]
+            )
+            
+            if time_to_broadcast or status_changed or critical_change:
+                await self.notify_health_change(current_health)
+                self._last_health_broadcast = now
+                self._last_broadcasted_state = current_state
+                self._health_notifications_sent += 1
+                
+                logger.debug(
+                    f"Health change notified to {len(self._monitor_observers)} observers: "
+                    f"state={current_state}, healthy={current_healthy}"
+                )
+                
+        except Exception as e:
+            logger.warning(f"Error in health change notification: {e}")
+    
+    def _is_chat_event_monitor_connected(self) -> bool:
+        """Check if ChatEventMonitor is connected as an observer."""
+        for observer in self._monitor_observers:
+            if "ChatEventMonitor" in type(observer).__name__:
+                return True
+        return False
+    
+    def _calculate_websocket_integration_health(self) -> str:
+        """Calculate overall WebSocket integration health."""
+        try:
+            if self._websocket_manager and hasattr(self, '_registry') and self._registry:
+                return "healthy"
+            elif self._websocket_manager:
+                return "degraded"
+            else:
+                return "offline"
+        except Exception:
+            return "error"
+    
+    def _assess_chat_functionality_health(self) -> str:
+        """Assess the health of chat functionality provided by this bridge."""
+        try:
+            # Check core components needed for chat
+            websocket_ok = self._websocket_manager is not None
+            registry_ok = hasattr(self, '_registry') and self._registry is not None
+            monitoring_ok = len(self._monitor_observers) > 0
+            
+            if websocket_ok and registry_ok:
+                return "optimal" if monitoring_ok else "functional"
+            elif websocket_ok or registry_ok:
+                return "degraded"
+            else:
+                return "impaired"
+        except Exception:
+            return "unknown"
+    
+    def _assess_user_experience_impact(self) -> str:
+        """Assess potential impact on user experience."""
+        try:
+            success_rate = (
+                self.metrics.successful_initializations / 
+                max(1, self.metrics.total_initializations)
+            )
+            
+            if success_rate >= 0.95:
+                return "minimal"
+            elif success_rate >= 0.85:
+                return "low"
+            elif success_rate >= 0.70:
+                return "moderate"
+            else:
+                return "high"
+        except Exception:
+            return "unknown"
+    
+    def _calculate_system_reliability_score(self) -> float:
+        """Calculate overall system reliability score (0-100)."""
+        try:
+            # Weight different factors
+            success_rate = (
+                self.metrics.successful_initializations / 
+                max(1, self.metrics.total_initializations)
+            ) * 40  # 40% weight
+            
+            recovery_rate = (
+                self.metrics.successful_recoveries /
+                max(1, self.metrics.recovery_attempts) if self.metrics.recovery_attempts > 0 else 1.0
+            ) * 30  # 30% weight
+            
+            uptime_score = min(self._calculate_uptime() / 3600, 1.0) * 20  # 20% weight (max 1 hour)
+            
+            monitoring_score = (10 if len(self._monitor_observers) > 0 else 0)  # 10% weight
+            
+            return min(100.0, success_rate + recovery_rate + uptime_score + monitoring_score)
+            
+        except Exception:
+            return 0.0
     
     def _track_event_for_tests(self, event_type: str, event_data: Dict[str, Any]) -> None:
         """Track WebSocket events for Golden Path test validation.
@@ -473,23 +778,48 @@ class AgentWebSocketBridge(MonitorableComponent):
                 )
     
     async def _initialize_websocket_manager(self) -> None:
-        """Initialize WebSocket manager with error handling and retry logic.
-        
-        CRITICAL: This now uses a placeholder manager that will be replaced
-        per-request via create_user_emitter() factory method for proper isolation.
+        """Initialize WebSocket manager with standardized factory interface - Issue #1176 Phase 1.
+
+        CRITICAL: Uses standardized factory validation to prevent coordination gaps.
+        The factory is validated for interface compliance and user isolation support.
+        Manager instances are still created per-request for proper user isolation.
         """
         import asyncio
-        
-        # SECURITY FIX: Don't use singleton - create placeholder that will be 
-        # replaced per-request through create_user_emitter() factory
-        
-        # For backward compatibility, we keep the manager reference but it will
-        # be overridden per-request to ensure user isolation
-        self._websocket_manager = None  # Will be set per-request
-        
+
+        # Issue #1176 Phase 1 Fix: Initialize standardized factory with validation
+        from netra_backend.app.websocket_core.standardized_factory_interface import (
+            get_standardized_websocket_manager_factory,
+            WebSocketManagerFactoryValidator
+        )
+
+        try:
+            # Create and validate standardized factory
+            self._websocket_manager_factory = get_standardized_websocket_manager_factory(
+                require_user_context=True
+            )
+
+            # Validate factory compliance - prevents Issue #1176 coordination gaps
+            WebSocketManagerFactoryValidator.require_factory_compliance(
+                self._websocket_manager_factory,
+                context="AgentWebSocketBridge WebSocket Factory"
+            )
+
+            logger.info(
+                "Issue #1176 Phase 1: Standardized WebSocket manager factory initialized "
+                "with interface validation and user isolation support"
+            )
+
+        except Exception as e:
+            logger.error(f"Issue #1176 Phase 1: Standardized factory initialization failed: {e}")
+            # Fallback for backward compatibility
+            self._websocket_manager_factory = None
+
+        # For backward compatibility, manager reference is still set per-request
+        self._websocket_manager = None  # Will be set per-request via factory
+
         logger.info(
-            "WebSocket manager initialization deferred - will use factory pattern "
-            "per-request via create_user_emitter() for proper user isolation"
+            "WebSocket manager factory configured for per-request creation "
+            "with standardized interface validation (Issue #1176 coordination gap prevention)"
         )
     
     async def _initialize_registry(self) -> None:
@@ -824,45 +1154,90 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         Get current health status for monitoring (MonitorableComponent interface).
         
+        Enhanced for issue #1019: Provides comprehensive health data for ChatEventMonitor
+        integration including integration health and performance indicators.
+        
         Exposes bridge health status in standardized format for external monitors.
         This method maintains full independence - bridge works without any monitors.
         
         Returns:
-            Dict containing standardized health status for monitoring
+            Dict containing enhanced health status for comprehensive monitoring
         """
         try:
             health = await self.health_check()
             
-            return {
+            # Enhanced health status with integration data
+            health_status = {
                 "healthy": health.websocket_manager_healthy and health.registry_healthy,
                 "state": health.state.value,
                 "timestamp": time.time(),
+                
+                # Core component health
                 "websocket_manager_healthy": health.websocket_manager_healthy,
                 "registry_healthy": health.registry_healthy,
                 "consecutive_failures": health.consecutive_failures,
                 "uptime_seconds": health.uptime_seconds,
                 "last_health_check": health.last_health_check.isoformat(),
                 "error_message": health.error_message,
-                "total_recoveries": health.total_recoveries
+                "total_recoveries": health.total_recoveries,
+                
+                # Enhanced integration health for ChatEventMonitor
+                "integration_health": {
+                    "chat_event_monitor_registered": len(self._monitor_observers) > 0,
+                    "monitor_observers_count": len(self._monitor_observers),
+                    "monitoring_enabled": getattr(self, '_monitoring_enabled', True),
+                    "user_context_available": self.user_context is not None,
+                    "component_id": self._generate_monitoring_component_id()
+                },
+                
+                # Performance indicators affecting health
+                "performance_indicators": {
+                    "initialization_success_rate": (
+                        self.metrics.successful_initializations / 
+                        max(self.metrics.total_initializations, 1) * 100
+                    ),
+                    "event_emission_health": self._calculate_event_emission_health(),
+                    "last_health_broadcast": self._last_health_broadcast,
+                    "health_broadcast_interval": self._health_broadcast_interval
+                }
             }
+            
+            # Trigger health change notification if status changed significantly
+            await self._notify_health_change_if_needed(health_status)
+            
+            return health_status
+            
         except Exception as e:
             logger.error(f"Error getting health status for monitoring: {e}")
-            return {
+            error_status = {
                 "healthy": False,
                 "state": "error",
                 "timestamp": time.time(),
-                "error_message": f"Health status retrieval failed: {e}"
+                "error_message": f"Health status retrieval failed: {e}",
+                "integration_health": {
+                    "chat_event_monitor_registered": False,
+                    "monitor_observers_count": 0,
+                    "monitoring_enabled": False,
+                    "error": str(e)
+                }
             }
+            
+            # Always notify of error conditions
+            await self.notify_health_change(error_status)
+            return error_status
     
     async def get_metrics(self) -> Dict[str, Any]:
         """
         Get operational metrics for analysis (MonitorableComponent interface).
         
+        Enhanced for issue #1019: Provides comprehensive metrics including
+        ChatEventMonitor integration status and monitoring health indicators.
+        
         Provides comprehensive metrics for business decisions and monitoring.
         Bridge operates fully independently without registered monitors.
         
         Returns:
-            Dict containing operational metrics
+            Dict containing enhanced operational metrics
         """
         try:
             return {
@@ -889,10 +1264,24 @@ class AgentWebSocketBridge(MonitorableComponent):
                 "current_uptime_seconds": self._calculate_uptime(),
                 "uptime_start": self.metrics.current_uptime_start.isoformat(),
                 
-                # Observer system metrics  
-                "registered_observers": len(self._monitor_observers),
-                "last_health_broadcast": self._last_health_broadcast,
-                "health_broadcast_interval": self._health_broadcast_interval,
+                # Enhanced monitoring integration metrics for ChatEventMonitor
+                "monitoring_integration": {
+                    "registered_observers": len(self._monitor_observers),
+                    "chat_event_monitor_connected": self._is_chat_event_monitor_connected(),
+                    "last_health_broadcast": self._last_health_broadcast,
+                    "health_broadcast_interval": self._health_broadcast_interval,
+                    "component_id": self._generate_monitoring_component_id(),
+                    "monitoring_enabled": getattr(self, '_monitoring_enabled', True),
+                    "health_notifications_sent": getattr(self, '_health_notifications_sent', 0)
+                },
+                
+                # Integration health metrics
+                "integration_health_metrics": {
+                    "event_emission_capability": self._calculate_event_emission_health(),
+                    "websocket_integration_health": self._calculate_websocket_integration_health(),
+                    "user_isolation_status": "enabled" if self.user_context else "system_mode",
+                    "monitoring_observer_types": [type(obs).__name__ for obs in self._monitor_observers]
+                },
                 
                 # Component availability
                 "websocket_manager_available": self._websocket_manager is not None,
@@ -900,6 +1289,13 @@ class AgentWebSocketBridge(MonitorableComponent):
                 # "orchestrator_available": self._orchestrator is not None,
                 "supervisor_available": self._supervisor is not None,
                 "registry_available": self._registry is not None,
+                
+                # Business impact metrics
+                "business_impact_indicators": {
+                    "chat_functionality_health": self._assess_chat_functionality_health(),
+                    "user_experience_impact": self._assess_user_experience_impact(),
+                    "system_reliability_score": self._calculate_system_reliability_score()
+                },
                 
                 # Timestamp
                 "metrics_timestamp": time.time()
@@ -2019,14 +2415,15 @@ class AgentWebSocketBridge(MonitorableComponent):
                 event_id = parameters.get('event_id')
             
             # Build standardized notification message with user_id for proper routing
+            # CRITICAL BUSINESS FIX: tool_name must be at top level for tool transparency
             notification = {
                 "type": "tool_executing",
                 "run_id": run_id,
                 "user_id": effective_user_context.user_id,  # PHASE 1 FIX: Include user_id for routing
                 "agent_name": effective_agent_name,
+                "tool_name": tool_name,  # BUSINESS CRITICAL: Tool transparency - moved to top level
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "data": {
-                    "tool_name": tool_name,
                     "parameters": self._sanitize_parameters(parameters) if parameters else {},
                     "status": "executing",
                     "message": f"{effective_agent_name} is using {tool_name}"
@@ -2133,6 +2530,10 @@ class AgentWebSocketBridge(MonitorableComponent):
         
         CRYSTAL CLEAR EMISSION PATH: Agent  ->  Bridge  ->  WebSocket Manager  ->  User Chat
         
+        Event Structure (FIX #935):
+            - Top-level 'results' field: Contains sanitized tool execution results
+            - Nested 'data.result' field: Backward compatibility (same as top-level)
+            
         Args:
             run_id: Unique execution identifier for routing
             agent_name: Name of the agent that executed the tool
@@ -2165,15 +2566,18 @@ class AgentWebSocketBridge(MonitorableComponent):
                 event_id = result.get('event_id')
             
             # Build standardized notification message with user_id for proper routing
+            # CRITICAL BUSINESS FIX: tool_name must be at top level for tool transparency (matches tool_executing fix)
+            sanitized_result = self._sanitize_result(result) if result else {}
             notification = {
                 "type": "tool_completed",
                 "run_id": run_id,
                 "user_id": effective_user_context.user_id,  # PHASE 1 FIX: Include user_id for routing
                 "agent_name": effective_agent_name,
+                "tool_name": tool_name,  # BUSINESS CRITICAL: Tool transparency - moved to top level (Issue #1039 consistency)
                 "timestamp": datetime.now(timezone.utc).isoformat(),
+                "results": sanitized_result,  # FIX #935: Add top-level results field
                 "data": {
-                    "tool_name": tool_name,
-                    "result": self._sanitize_result(result) if result else {},
+                    "result": sanitized_result,  # Keep nested result for backward compatibility
                     "execution_time_ms": execution_time_ms,
                     "status": "completed",
                     "message": f"{effective_agent_name} completed {tool_name}"

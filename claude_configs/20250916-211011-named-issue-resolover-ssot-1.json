@@ -1,0 +1,24 @@
+{
+  "instances": [
+    {
+      "command": "/gitissueprogressorv4 959",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv4 925",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv4 885",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv4 839",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json"
+    }
+  ]
+}

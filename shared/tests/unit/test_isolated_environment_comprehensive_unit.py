@@ -401,7 +401,7 @@ class TestIsolatedEnvironmentSecurityValidation:
         env = get_env()
         env.reset()
         env.enable_isolation()
-        test_urls = ['postgresql://user:p@ssw0rd!@localhost:5432/dbname', 'postgresql://user:p%40ss%21w0rd@localhost:5432/dbname', 'mysql://user:complex$password@host.com:3306/database?ssl=true', 'clickhouse://user:click@house#pass@clickhouse.example.com:8123/analytics', 'redis://user:redis$pass!@redis.com:6379/0']
+        test_urls = ['postgresql://user:p@ssw0rd!@localhost:5432/dbname', 'postgresql://user:p%40ss%21w0rd@localhost:5432/dbname', 'postgresql://user:complex$password@host.com:5432/database?ssl=true', 'clickhouse://user:click@house#pass@clickhouse.example.com:8123/analytics', 'redis://user:redis$pass!@redis.com:6379/0']
         for i, test_url in enumerate(test_urls):
             var_name = f'DATABASE_URL_{i}'
             env.set(var_name, test_url, 'security_test')

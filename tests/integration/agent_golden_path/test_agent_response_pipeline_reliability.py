@@ -62,14 +62,14 @@ class AgentResponsePipelineReliabilityTests(SSotAsyncTestCase):
         self.logger.info(f'  Overall success rate: {overall_success_rate * 100:.1f}%')
         self.logger.info(f'  Average response time: {average_response_time:.2f}s')
         for result in pipeline_results:
-            status = '✅' if result['success'] else '❌'
+            status = 'CHECK' if result['success'] else 'X'
             success_rate = result['success_rate'] * 100
             response_time = result['average_response_time']
             self.logger.info(f"  {status} {result['scenario_name']}: {success_rate:.1f}% success, {response_time:.2f}s avg response")
         min_required_success_rate = 0.75
         max_acceptable_response_time = 12.0
         if overall_success and overall_success_rate >= min_required_success_rate and (average_response_time <= max_acceptable_response_time):
-            self.logger.info(f'✅ GOLDEN PATH PROTECTED: Agent response pipeline reliability maintained')
+            self.logger.info(f'CHECK GOLDEN PATH PROTECTED: Agent response pipeline reliability maintained')
             self.logger.info(f'   Success Rate: {overall_success_rate * 100:.1f}%')
             self.logger.info(f'   Response Time: {average_response_time:.2f}s')
         else:
@@ -297,11 +297,11 @@ class AgentResponsePipelineReliabilityTests(SSotAsyncTestCase):
                 overall_recovery_success = False
         self.logger.info('Pipeline error recovery reliability analysis:')
         for result in recovery_results:
-            status = '✅' if result['success'] else '❌'
+            status = 'CHECK' if result['success'] else 'X'
             recovery_rate = result['recovery_rate'] * 100
             self.logger.info(f"  {status} {result['scenario_name']}: {recovery_rate:.1f}% recovery rate")
         if overall_recovery_success:
-            self.logger.info('✅ GOLDEN PATH PROTECTED: Pipeline error recovery reliability maintained')
+            self.logger.info('CHECK GOLDEN PATH PROTECTED: Pipeline error recovery reliability maintained')
         else:
             failed_scenarios = [r['scenario_name'] for r in recovery_results if not r['success']]
             self.fail(f'GOLDEN PATH VIOLATION: Pipeline error recovery reliability compromised in scenarios: {failed_scenarios}. This indicates MessageRouter SSOT changes are affecting error recovery capabilities, critical for maintaining service reliability during Golden Path operations.')

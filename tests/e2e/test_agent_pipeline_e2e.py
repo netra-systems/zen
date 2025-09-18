@@ -8,7 +8,7 @@ Business Value Justification:
 - Segment: ALL segments (Free, Early, Mid, Enterprise, Platform/Internal)  
 - Business Goal: Platform Stability & Revenue Assurance
 - Value Impact: Validates 90% of chat value delivery pipeline
-- Strategic/Revenue Impact: Protects $500K+ ARR by ensuring agent execution reliability
+- Strategic/Revenue Impact: Protects 500K+ ARR by ensuring agent execution reliability
 
 This test suite validates:
 1. 15+ different agent types in the pipeline

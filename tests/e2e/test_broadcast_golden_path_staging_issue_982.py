@@ -6,7 +6,7 @@ with real agent event delivery through broadcast function implementations.
 
 Business Value Justification:
 - Segment: Platform/Golden Path
-- Business Goal: $500K+ ARR Protection through Golden Path reliability
+- Business Goal: 500K+ ARR Protection through Golden Path reliability
 - Value Impact: Ensure end-to-end agent event delivery works in staging
 - Strategic Impact: Validate complete user journey with real WebSocket events
 
@@ -149,7 +149,7 @@ class StagingWebSocketClient:
                 except asyncio.TimeoutError:
                     # Continue listening, this is normal
                     continue
-                except websockets.exceptions.ConnectionClosed:
+                except websockets.ConnectionClosed:
                     logger.warning("WebSocket connection closed during event listening")
                     break
 
@@ -356,10 +356,10 @@ class GoldenPathBroadcastStagingTests(SSotAsyncTestCase):
             self.fail(f"GOLDEN PATH BROADCAST VIOLATION: {total_failures} issues detected in staging. "
                      f"Failed tests: {len(failed_tests)}, Consistency issues: {len(consistency_issues)}. "
                      f"Details: {error_details}. "
-                     f"Golden Path agent event delivery is inconsistent, blocking $500K+ ARR user experience. "
+                     f"Golden Path agent event delivery is inconsistent, blocking 500K+ ARR user experience. "
                      f"SSOT remediation required for reliable broadcast functionality.")
         else:
-            logger.info("✓ Golden Path agent event delivery consistency validated")
+            logger.info("CHECK Golden Path agent event delivery consistency validated")
 
     async def test_concurrent_user_broadcast_isolation_staging(self):
         """
@@ -489,7 +489,7 @@ class GoldenPathBroadcastStagingTests(SSotAsyncTestCase):
                          f"Cross-user event leakage violates security requirements and blocks enterprise deployment. "
                          f"SSOT remediation required for secure user isolation.")
             else:
-                logger.info("✓ Concurrent user broadcast isolation validated")
+                logger.info("CHECK Concurrent user broadcast isolation validated")
 
         finally:
             # Cleanup: disconnect all clients
@@ -641,7 +641,7 @@ class GoldenPathBroadcastStagingTests(SSotAsyncTestCase):
                              f"Performance degradation affects user experience and system scalability. "
                              f"SSOT remediation required for consistent broadcast performance.")
                 else:
-                    logger.info("✓ Broadcast performance under load validated")
+                    logger.info("CHECK Broadcast performance under load validated")
 
             else:
                 self.fail("BROADCAST LOAD TEST FAILURE: No successful requests completed. "

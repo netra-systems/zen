@@ -2,7 +2,7 @@
 Issue #1142: Golden Path Startup Contamination Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Enterprise - Core golden path reliability for $500K+ ARR
+- Segment: Platform/Enterprise - Core golden path reliability for 500K+ ARR
 - Business Goal: Golden Path Stability - Remove startup contamination blocking user flow
 - Value Impact: Ensures golden path works correctly without startup singleton interference
 - Strategic Impact: Enables production deployment with reliable multi-user golden path
@@ -24,7 +24,7 @@ Test Coverage:
 ARCHITECTURE ALIGNMENT:
 - Tests prove startup contamination violates golden path requirements
 - Validates end-to-end impact of startup singleton on user experience
-- Demonstrates business impact of startup contamination on $500K+ ARR
+- Demonstrates business impact of startup contamination on 500K+ ARR
 - Shows complete golden path failure scenarios from startup patterns
 """
 

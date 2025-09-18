@@ -191,9 +191,9 @@ class Issue631TestRunner:
             
             success = result.returncode == 0
             if success:
-                logger.info(f"✅ {test_name} PASSED")
+                logger.info(f"CHECK {test_name} PASSED")
             else:
-                logger.error(f"❌ {test_name} FAILED (exit code: {result.returncode})")
+                logger.error(f"X {test_name} FAILED (exit code: {result.returncode})")
             
             return success
             
@@ -211,7 +211,7 @@ class Issue631TestRunner:
         passed_categories = sum(1 for success in results.values() if success)
         
         for category, success in results.items():
-            status = "✅ PASSED" if success else "❌ FAILED"
+            status = "CHECK PASSED" if success else "X FAILED"
             logger.info(f"{category.upper()} Tests: {status}")
         
         logger.info(f"\nOverall: {passed_categories}/{total_categories} test categories passed")
@@ -219,7 +219,7 @@ class Issue631TestRunner:
         if passed_categories == total_categories:
             logger.info("🎉 All tests passed - Issue #631 appears to be RESOLVED!")
         else:
-            logger.info("⚠️  Some tests failed - Issue #631 still exists and needs fixing")
+            logger.info("WARNING️  Some tests failed - Issue #631 still exists and needs fixing")
             logger.info("\nNext Steps:")
             logger.info("1. Fix AUTH_SERVICE_URL configuration in backend")
             logger.info("2. Ensure backend can communicate with auth service")

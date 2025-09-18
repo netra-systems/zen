@@ -36,7 +36,7 @@ class ServiceConfigurationIndependenceTests:
                         backend_config_operations.append(f'{attr_name}: {type(attr).__name__}')
                 except Exception as e:
                     backend_config_operations.append(f'{attr_name}(): error - {e}')
-            print(f'✅ Backend service config operations: {backend_config_operations}')
+            print(f'CHECK Backend service config operations: {backend_config_operations}')
         except ImportError as e:
             pytest.fail(f'Backend cannot integrate with canonical configuration: {e}')
 
@@ -58,7 +58,7 @@ class ServiceConfigurationIndependenceTests:
             except Exception:
                 continue
         assert len(auth_backend_imports) == 0, f'Auth service improperly imports backend configuration: {auth_backend_imports}. Service independence violated.'
-        print(f'✅ Auth service maintains configuration independence')
+        print(f'CHECK Auth service maintains configuration independence')
 
     def test_frontend_service_config_independence(self):
         """SHOULD PASS: Frontend service maintains configuration independence"""
@@ -77,7 +77,7 @@ class ServiceConfigurationIndependenceTests:
             except Exception:
                 continue
         assert len(frontend_backend_imports) == 0, f'Frontend improperly imports backend configuration: {frontend_backend_imports}'
-        print(f'✅ Frontend maintains configuration independence with {len(existing_config_files)} config files')
+        print(f'CHECK Frontend maintains configuration independence with {len(existing_config_files)} config files')
 
     def test_shared_utilities_config_access_pattern(self):
         """SHOULD PASS: Shared utilities use proper configuration patterns"""
@@ -97,9 +97,9 @@ class ServiceConfigurationIndependenceTests:
                 continue
         excessive_config_imports = len(shared_config_imports) > 3
         if excessive_config_imports:
-            print(f'⚠️ Shared utilities have many config imports: {shared_config_imports}')
+            print(f'WARNING️ Shared utilities have many config imports: {shared_config_imports}')
         else:
-            print(f'✅ Shared utilities have minimal config dependencies: {shared_config_imports}')
+            print(f'CHECK Shared utilities have minimal config dependencies: {shared_config_imports}')
         if len(shared_direct_env_access) > 0:
             print(f'ℹ️ Shared utilities with direct env access: {shared_direct_env_access}')
 
@@ -111,7 +111,7 @@ class ServiceConfigurationIndependenceTests:
             config_manager = UnifiedConfigManager()
             db_config_methods = [method for method in dir(config_manager) if 'database' in method.lower() or 'db' in method.lower()]
             if len(db_config_methods) > 0:
-                print(f'✅ Database configuration methods available: {db_config_methods}')
+                print(f'CHECK Database configuration methods available: {db_config_methods}')
                 db_config_results = {}
                 for method_name in db_config_methods:
                     try:
@@ -125,7 +125,7 @@ class ServiceConfigurationIndependenceTests:
                         db_config_results[method_name] = f'error: {str(e)[:50]}'
                 accessible_db_configs = sum((1 for result in db_config_results.values() if result in ['accessible', 'property']))
                 assert accessible_db_configs >= 1, f'Database configuration not accessible: {db_config_results}'
-                print(f'✅ {accessible_db_configs}/{len(db_config_results)} database configs accessible')
+                print(f'CHECK {accessible_db_configs}/{len(db_config_results)} database configs accessible')
             else:
                 print('ℹ️ No explicit database configuration methods found')
         except ImportError as e:
@@ -139,7 +139,7 @@ class ServiceConfigurationIndependenceTests:
             config_manager = UnifiedConfigManager()
             websocket_config_methods = [method for method in dir(config_manager) if any((ws_term in method.lower() for ws_term in ['websocket', 'ws', 'cors', 'origin']))]
             if len(websocket_config_methods) > 0:
-                print(f'✅ WebSocket configuration methods: {websocket_config_methods}')
+                print(f'CHECK WebSocket configuration methods: {websocket_config_methods}')
                 ws_config_results = {}
                 for method_name in websocket_config_methods:
                     try:
@@ -153,7 +153,7 @@ class ServiceConfigurationIndependenceTests:
                         ws_config_results[method_name] = f'error: {str(e)[:50]}'
                 successful_ws_configs = sum((1 for result in ws_config_results.values() if result in ['success', 'property']))
                 assert successful_ws_configs >= len(websocket_config_methods) * 0.8, f'WebSocket configuration failing during migration - GOLDEN PATH RISK: {ws_config_results}. This threatens $500K+ ARR.'
-                print(f'✅ WebSocket config migration safe: {successful_ws_configs}/{len(websocket_config_methods)} configs working')
+                print(f'CHECK WebSocket config migration safe: {successful_ws_configs}/{len(websocket_config_methods)} configs working')
             else:
                 print('ℹ️ No explicit WebSocket configuration methods found - checking general config')
                 general_methods = [method for method in dir(config_manager) if not method.startswith('_') and callable(getattr(config_manager, method))]
@@ -184,7 +184,7 @@ class CrossServiceCommunicationTests:
                         environment_compatibility_results[method_name] = f'incompatible: {str(e)[:30]}'
                 compatible_methods = sum((1 for result in environment_compatibility_results.values() if result == 'compatible'))
                 assert compatible_methods >= 1, f'Configuration incompatible with test environment: {environment_compatibility_results}'
-                print(f'✅ Configuration environment compatibility: {compatible_methods}/{len(environment_compatibility_results)} methods compatible')
+                print(f'CHECK Configuration environment compatibility: {compatible_methods}/{len(environment_compatibility_results)} methods compatible')
             except ImportError as e:
                 pytest.fail(f'Cannot test environment consistency: {e}')
 if __name__ == '__main__':

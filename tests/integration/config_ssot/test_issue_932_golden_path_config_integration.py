@@ -3,14 +3,14 @@ INTEGRATION TEST: Golden Path Configuration Integration - Issue #932
 
 Business Value Justification (BVJ):
 - Segment: Enterprise/Mid-Market - Core User Journey
-- Business Goal: Protect $500K+ ARR by ensuring Golden Path user flow works reliably
-- Value Impact: Critical configuration management for user login → AI response flow
+- Business Goal: Protect 500K+ ARR by ensuring Golden Path user flow works reliably
+- Value Impact: Critical configuration management for user login -> AI response flow
 - Strategic Impact: Validates SSOT configuration supports end-to-end business functionality
 
 CRITICAL MISSION: Issue #932 Configuration Manager Broken Import Crisis (P0 SSOT violation)
 
 This test suite validates that configuration management works correctly throughout
-the Golden Path user flow: User Login → WebSocket Connection → Agent Execution → AI Response
+the Golden Path user flow: User Login -> WebSocket Connection -> Agent Execution -> AI Response
 
 Golden Path Configuration Dependencies:
 1. Authentication service configuration for user login
@@ -449,7 +449,7 @@ class Issue932GoldenPathConfigIntegrationTests(SSotAsyncTestCase, unittest.TestC
         CRITICAL TEST: End-to-end Golden Path configuration validation.
         
         Tests that all configuration components work together to support
-        the complete Golden Path: User Login → WebSocket → Agent → AI Response.
+        the complete Golden Path: User Login -> WebSocket -> Agent -> AI Response.
         """
         self.record_metric("test_category", "golden_path_e2e_config")
         

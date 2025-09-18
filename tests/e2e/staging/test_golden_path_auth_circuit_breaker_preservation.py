@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,19 +23,14 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 Test Golden Path Authentication Flow Circuit Breaker Preservation
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: User Experience & System Availability
 - Value Impact: CRITICAL - Ensure user login works during/after SSOT migration
-- Strategic Impact: $500K+ ARR dependency - Golden Path user flow must remain intact
+- Strategic Impact: 500K+ ARR dependency - Golden Path user flow must remain intact
 
 This E2E test validates that the SSOT migration preserves Golden Path functionality:
 1. User authentication flow remains working during circuit breaker SSOT migration
@@ -100,7 +87,7 @@ class GoldenPathAuthCircuitBreakerPreservationTests(SSotAsyncTestCase):
         staging_frontend_url = env.get("STAGING_FRONTEND_URL", "https://app.staging.netrasystems.ai")
         
         # Create test user credentials (use staging test account)
-        test_user_email = env.get("E2E_TEST_USER_EMAIL", "e2e.test.user@netra.ai")
+        test_user_email = env.get("E2E_TEST_USER_EMAIL", "e2e.test.user@netrasystems.ai")
         test_user_password = env.get("E2E_TEST_USER_PASSWORD", "test_password_123")
         
         if not test_user_email or not test_user_password:
@@ -254,7 +241,7 @@ class GoldenPathAuthCircuitBreakerPreservationTests(SSotAsyncTestCase):
                 return {
                     "valid": True,
                     "user_id": "recovered_user_123",
-                    "email": "recovery.test@netra.ai",
+                    "email": "recovery.test@netrasystems.ai",
                     "token": "recovered_token"
                 }
         
@@ -309,7 +296,7 @@ class GoldenPathAuthCircuitBreakerPreservationTests(SSotAsyncTestCase):
             return {
                 "valid": True,
                 "user_id": "perf_test_user",
-                "email": "perf.test@netra.ai"
+                "email": "perf.test@netrasystems.ai"
             }
         
         # Measure performance over multiple calls
@@ -368,7 +355,7 @@ class GoldenPathAuthCircuitBreakerPreservationTests(SSotAsyncTestCase):
                 return {
                     "valid": True,
                     "user_id": f"user_{call_count}",
-                    "email": f"user{call_count}@netra.ai"
+                    "email": f"user{call_count}@netrasystems.ai"
                 }
         
         # Track results over multiple calls

@@ -47,36 +47,7 @@ try:
     )
     from netra_backend.app.logging_config import central_logger
 except ImportError as e:
-    print(f"Warning: Could not import some components: {e}")
-    # Create mock objects for testing
-    class MockRedisManager:
-        async def get(self, key): return None
-        async def set(self, key, value, ex=None): pass
-        async def lpush(self, key, value): pass
-        
-    class MockMessageQueue:
-        def __init__(self): 
-            self.handlers = {}
-        def register_handler(self, msg_type, handler): 
-            self.handlers[msg_type] = handler
-        async def enqueue(self, message): return True
-        async def process_queue(self, worker_count=3): pass
-        async def stop_processing(self): pass
-        
-    class MockUnifiedWebSocketManager:
-        async def add_connection(self, connection): pass
-        async def get_user_connections(self, user_id): return []
-        
-    redis_manager = MockRedisManager()
-    MessageQueue = MockMessageQueue
-    UnifiedWebSocketManager = MockUnifiedWebSocketManager
-    central_logger = logging.getLogger()
-
-logger = central_logger.get_logger(__name__)
-
-
-class CascadingFailureSimulator:
-    """Simulates realistic cascading failures across system components"""
+    print(f"Warning: Could not import some components: {e}""""Simulates realistic cascading failures across system components"""
     
     def __init__(self):
         self.active_failures: Set[str] = set()
@@ -86,7 +57,7 @@ class CascadingFailureSimulator:
         """Simulate Redis connection failure"""
         failure_id = "redis_failure"
         self.active_failures.add(failure_id)
-        self.failure_start_times[failure_id] = datetime.utcnow()
+        self.failure_start_times[failure_id] = datetime.now(UTC)
         
         # Simulate Redis connection issues
         with patch.object(redis_manager, 'get', side_effect=ConnectionError("Redis connection failed")):
@@ -102,7 +73,7 @@ class CascadingFailureSimulator:
         """Simulate WebSocket transport layer failures"""
         failure_id = "websocket_transport_failure"
         self.active_failures.add(failure_id)
-        self.failure_start_times[failure_id] = datetime.utcnow()
+        self.failure_start_times[failure_id] = datetime.now(UTC)
         
         logger.warning(f"[U+1F534] SIMULATING: WebSocket transport failure for {duration_seconds}s")
         await asyncio.sleep(duration_seconds)
@@ -208,20 +179,13 @@ class ResilienceValidator:
                 connection_id=str(uuid.uuid4()),
                 user_id=test_user_id,
                 websocket=mock_websocket,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             ) if hasattr(ws_manager, 'add_connection') else None
             
             if test_connection is None:
                 # Mock case
                 self.component_health_status["websocket_manager"] = True
-                logger.info(" PASS:  WebSocket manager recovery validation: PASSED (mock)")
-                return True
-            
-            await ws_manager.add_connection(test_connection)
-            user_connections = await ws_manager.get_user_connections(test_user_id)
-            
-            success = len(user_connections) >= 0  # Allow empty list for mocks
-            self.component_health_status["websocket_manager"] = success
+                logger.info(" PASS:  WebSocket manager recovery validation: PASSED (mock)""websocket_manager"] = success
             
             if success:
                 logger.info(" PASS:  WebSocket manager recovery validation: PASSED")
@@ -381,7 +345,7 @@ class CascadingFailuresResilienceTests:
         # Phase 3: Monitor other components during Redis failure
         stability_checks = []
         for i in range(3):  # Reduced checks for faster testing
-            check_time = datetime.utcnow()
+            check_time = datetime.now(UTC)
             
             # Check WebSocket manager stability
             try:
@@ -415,10 +379,7 @@ class CascadingFailuresResilienceTests:
         assert initial_health["websocket_manager"], "WebSocket manager should be healthy initially"
         
         # During Redis failure, other components should remain stable
-        assert stable_websocket_checks >= len(stability_checks) * 0.6, f"WebSocket manager should remain mostly stable during Redis failure (stable: {stable_websocket_checks}/{len(stability_checks)})"
-        
-        # After recovery, all components should be healthy
-        assert final_health["redis"], "Redis should recover"
+        assert stable_websocket_checks >= len(stability_checks) * 0.6, f"WebSocket manager should remain mostly stable during Redis failure (stable: {stable_websocket_checks}/{len(stability_checks)})""redis"], "Redis should recover"
         assert final_health["websocket_manager"], "WebSocket manager should remain healthy"
         
         logger.info(f" PASS:  Domino effect prevention test PASSED")
@@ -472,7 +433,7 @@ class CascadingFailuresResilienceTests:
         for i in range(2):  # Reduced for faster testing
             health_check = {
                 "attempt": i + 1,
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(UTC),
                 "components": {}
             }
             

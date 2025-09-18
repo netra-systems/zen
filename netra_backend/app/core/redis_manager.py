@@ -35,9 +35,9 @@ except ImportError:
     SSotRedisManager = None
     ssot_redis_manager = None
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 # Issue deprecation warning
 warnings.warn(
@@ -293,12 +293,19 @@ if SSOT_AVAILABLE:
     redis_manager = ssot_redis_manager
     logger.info("Using SSOT Redis manager for global compatibility instance")
 else:
-    # Fallback compatibility wrapper
-    redis_manager = RedisManager()
-    logger.warning("SSOT Redis manager not available - using compatibility fallback")
+    # SSOT pattern: Import from canonical location
+    from netra_backend.app.redis_manager import redis_manager as canonical_redis_manager
+    redis_manager = canonical_redis_manager
+    logger.warning("SSOT Redis manager not available - using canonical import")
+
+# Deployment compatibility function
+def get_redis_manager():
+    """Deployment compatibility function for get_redis_manager imports."""
+    return redis_manager
 
 __all__ = [
     "RedisManager",
-    "RedisConfig", 
-    "redis_manager"
+    "RedisConfig",
+    "redis_manager",
+    "get_redis_manager"  # Deployment compatibility
 ]

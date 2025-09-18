@@ -413,7 +413,7 @@ class AppConfig(BaseModel):
     testing: Optional[str] = Field(default=None, description="Testing flag for environment detection")
     
     # Auth service configuration
-    auth_service_url: str = Field(default="http://127.0.0.1:8081", description="Auth service URL")
+    auth_service_url: str = Field(default="http://localhost:8081", description="Auth service URL (internal service port)")
     auth_service_enabled: str = Field(default="true", description="Auth service enabled flag")
     auth_fast_test_mode: str = Field(default="false", description="Auth fast test mode flag")
     auth_cache_ttl_seconds: str = Field(default="300", description="Auth cache TTL in seconds")
@@ -444,15 +444,15 @@ class AppConfig(BaseModel):
     
     # PostgreSQL Database Configuration (consolidated from postgres_config.py)
     db_pool_size: int = Field(default=20, description="Database connection pool size")
-    db_max_overflow: int = Field(default=30, description="Maximum overflow connections")
+    db_max_overflow: int = Field(default=25, description="Maximum overflow connections - Issue #1278: Reduced from 30 to 25 for optimal resource balance")
     db_pool_timeout: int = Field(default=30, description="Pool timeout in seconds")
     db_pool_recycle: int = Field(default=1800, description="Recycle connections every N seconds")
     db_pool_pre_ping: bool = Field(default=True, description="Test connections before using")
     db_echo: bool = Field(default=False, description="Echo SQL statements")
     db_echo_pool: bool = Field(default=False, description="Echo connection pool events")
     db_max_connections: int = Field(default=100, description="Hard limit on total connections")
-    db_connection_timeout: int = Field(default=10, description="Connection establishment timeout")
-    db_statement_timeout: int = Field(default=30000, description="Max statement execution time in ms")
+    db_connection_timeout: int = Field(default=30, description="Issue #1278: Connection establishment timeout for Cloud Run")
+    db_statement_timeout: int = Field(default=120000, description="Issue #1278: Max statement execution time in ms (120s for Cloud Run)")
     db_enable_read_write_split: bool = Field(default=False, description="Enable read/write splitting")
     db_read_url: Optional[str] = Field(default=None, description="Read database URL")
     db_write_url: Optional[str] = Field(default=None, description="Write database URL")
@@ -810,19 +810,29 @@ class DevelopmentConfig(AppConfig):
         client_id="",  # Populated by SecretReference: google-client-id
         client_secret="",  # Populated by SecretReference: google-client-secret
         authorized_redirect_uris=[
+            # Backend service ports (internal: 8000, external: varies)
             "http://localhost:8000/auth/callback",
-            "http://localhost:8081/auth/callback",
-            "http://localhost:8002/auth/callback",
-            "http://localhost:8003/auth/callback",
-            "http://localhost:8080/auth/callback",
             "http://127.0.0.1:8000/auth/callback",
-            "http://127.0.0.1:8001/auth/callback",
+            # Auth service ports (internal: 8081, external: varies)
+            "http://localhost:8081/auth/callback",
+            "http://127.0.0.1:8081/auth/callback",
+            # External development ports (docker-compose mappings)
+            "http://localhost:8002/auth/callback",  # Backend external (alpine-test)
+            "http://localhost:8003/auth/callback",  # Auth external (alpine-dev)
+            "http://localhost:8083/auth/callback",  # Auth external (alpine-test)
             "http://127.0.0.1:8002/auth/callback",
             "http://127.0.0.1:8003/auth/callback",
-            "http://127.0.0.1:8080/auth/callback",
+            "http://127.0.0.1:8083/auth/callback",
+            # Frontend ports (internal: 3000, external: varies)
             "http://localhost:3000/auth/callback",
             "http://localhost:3001/auth/callback",
-            "http://localhost:3002/auth/callback"
+            "http://localhost:3002/auth/callback",  # Frontend external (alpine-test)
+            "http://127.0.0.1:3000/auth/callback",
+            "http://127.0.0.1:3001/auth/callback",
+            "http://127.0.0.1:3002/auth/callback",
+            # Legacy ports for backward compatibility
+            "http://localhost:8080/auth/callback",
+            "http://127.0.0.1:8080/auth/callback"
         ]
     )
     
@@ -841,12 +851,15 @@ class DevelopmentConfig(AppConfig):
         self._configure_service_flags(data, service_modes)
         self._log_service_configuration(service_modes)
         
+        # Load critical secrets from environment for development
+        self._load_secrets_from_environment(data)
+
         # Load API keys from environment for development
         self._load_api_keys_from_environment(env, data)
-        
+
         # Load Sentry configuration from environment for development
         self._load_sentry_config_from_environment(env, data)
-        
+
         super().__init__(**data)
     
     def _load_database_url_from_unified_config(self, data: dict) -> None:
@@ -904,6 +917,40 @@ class DevelopmentConfig(AppConfig):
         """Deprecated: Mock mode is not supported in development."""
         # Mock mode is only for specific testing cases, not for development
         pass
+
+    def _load_secrets_from_environment(self, data: dict) -> None:
+        """Load critical secrets from environment variables for development.
+
+        This ensures SECRET_KEY, SERVICE_SECRET, JWT_SECRET_KEY, and other critical
+        secrets are loaded from environment variables for development.
+        """
+        from shared.isolated_environment import get_env
+        import logging
+
+        logger = logging.getLogger(__name__)
+        env = get_env()
+
+        # Load critical secrets that may come from environment or config files
+        critical_secrets = [
+            ('SERVICE_SECRET', 'service_secret'),
+            ('SERVICE_ID', 'service_id'),
+            ('JWT_SECRET_KEY', 'jwt_secret_key'),
+            ('SECRET_KEY', 'secret_key'),
+            ('FERNET_KEY', 'fernet_key'),
+        ]
+
+        for env_name, config_name in critical_secrets:
+            # Use get() method which IsolatedEnvironment supports
+            env_value = env.get(env_name)
+            # CRITICAL FIX: Always override with env value if present, even if data has None
+            if env_value:
+                data[config_name] = env_value
+                logger.info(f"Development: Loaded {env_name} from environment")
+
+        # Log what's loaded for debugging
+        logger.info(f"Development: SECRET_KEY configured: {bool(data.get('secret_key'))}")
+        logger.info(f"Development: SERVICE_SECRET configured: {bool(data.get('service_secret'))}")
+        logger.info(f"Development: JWT_SECRET_KEY configured: {bool(data.get('jwt_secret_key'))}")
     
     def _load_api_keys_from_environment(self, env, data: dict) -> None:
         """Load API keys and service URLs from environment variables for development."""
@@ -1302,12 +1349,13 @@ class StagingConfig(AppConfig):
     debug: bool = False
     log_level: str = "INFO"
     
-    # CRITICAL FIX: Override localhost defaults with proper staging URLs  
+    # CRITICAL FIX: Override localhost defaults with proper staging URLs using SSOT configuration
     # This fixes validation failures where StagingConfig inherits localhost URLs from AppConfig
     # Issue resolved: Configuration validation failed for environment 'staging'
-    frontend_url: str = "https://app.staging.netrasystems.ai"
-    api_base_url: str = "https://api.staging.netrasystems.ai" 
-    auth_service_url: str = "https://auth.staging.netrasystems.ai"
+    # CRITICAL DOMAIN CONFIGURATION UPDATE (Issue #1278): Use SSOT staging domains
+    frontend_url: str = "https://staging.netrasystems.ai"    # SSOT from shared.constants.staging_domains
+    api_base_url: str = "https://api.staging.netrasystems.ai"  # SSOT from shared.constants.staging_domains
+    auth_service_url: str = "https://staging.netrasystems.ai"  # SSOT from shared.constants.staging_domains
     
     # Staging telemetry settings
     otel_enabled: str = "true"

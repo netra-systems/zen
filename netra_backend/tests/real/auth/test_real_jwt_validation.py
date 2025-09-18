@@ -16,7 +16,7 @@ CRITICAL: Uses real Docker services - NO MOCKS for security validation.
 import asyncio
 import json
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional
 from unittest.mock import patch
 import pytest
@@ -82,8 +82,8 @@ class RealJWTValidationTests:
     @pytest.fixture
     def valid_jwt_payload(self) -> Dict[str, Any]:
         """Create valid JWT payload for testing."""
-        now = datetime.utcnow()
-        return {JWTConstants.SUBJECT: 'test_user_123', JWTConstants.EMAIL: 'test@netra.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(minutes=30)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'user_id': 123, 'permissions': ['read', 'write']}
+        now = datetime.now(UTC)
+        return {JWTConstants.SUBJECT: 'test_user_123', JWTConstants.EMAIL: 'test@netrasystems.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(minutes=30)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'user_id': 123, 'permissions': ['read', 'write']}
 
     def create_jwt_token(self, payload: Dict[str, Any], secret: str, algorithm: str=JWTConstants.HS256_ALGORITHM) -> str:
         """Create JWT token with given payload and secret."""
@@ -96,7 +96,7 @@ class RealJWTValidationTests:
         try:
             decoded = jwt.decode(token, jwt_secret_key, algorithms=[JWTConstants.HS256_ALGORITHM])
             assert decoded[JWTConstants.SUBJECT] == 'test_user_123'
-            assert decoded[JWTConstants.EMAIL] == 'test@netra.ai'
+            assert decoded[JWTConstants.EMAIL] == 'test@netrasystems.ai'
             assert decoded[JWTConstants.ISSUER] == JWTConstants.NETRA_AUTH_SERVICE
             assert 'user_id' in decoded
             assert 'permissions' in decoded
@@ -107,8 +107,8 @@ class RealJWTValidationTests:
     @pytest.mark.asyncio
     async def test_expired_jwt_token_rejection(self, jwt_secret_key: str):
         """Test rejection of expired JWT tokens."""
-        expired_time = datetime.utcnow() - timedelta(hours=1)
-        expired_payload = {JWTConstants.SUBJECT: 'test_user_expired', JWTConstants.EMAIL: 'expired@netra.ai', JWTConstants.ISSUED_AT: int(expired_time.timestamp()), JWTConstants.EXPIRES_AT: int(expired_time.timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE}
+        expired_time = datetime.now(UTC) - timedelta(hours=1)
+        expired_payload = {JWTConstants.SUBJECT: 'test_user_expired', JWTConstants.EMAIL: 'expired@netrasystems.ai', JWTConstants.ISSUED_AT: int(expired_time.timestamp()), JWTConstants.EXPIRES_AT: int(expired_time.timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE}
         expired_token = self.create_jwt_token(expired_payload, jwt_secret_key)
         with pytest.raises(jwt.ExpiredSignatureError):
             jwt.decode(expired_token, jwt_secret_key, algorithms=[JWTConstants.HS256_ALGORITHM])
@@ -138,7 +138,7 @@ class RealJWTValidationTests:
     @pytest.mark.asyncio
     async def test_jwt_token_missing_required_claims(self, jwt_secret_key: str):
         """Test rejection of JWT tokens missing required claims."""
-        incomplete_payload = {JWTConstants.EMAIL: 'incomplete@netra.ai', JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp())}
+        incomplete_payload = {JWTConstants.EMAIL: 'incomplete@netrasystems.ai', JWTConstants.ISSUED_AT: int(datetime.now(UTC).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) + timedelta(minutes=30)).timestamp())}
         incomplete_token = self.create_jwt_token(incomplete_payload, jwt_secret_key)
         decoded = jwt.decode(incomplete_token, jwt_secret_key, algorithms=[JWTConstants.HS256_ALGORITHM])
         assert JWTConstants.SUBJECT not in decoded
@@ -156,8 +156,8 @@ class RealJWTValidationTests:
     @pytest.mark.asyncio
     async def test_jwt_token_user_context_isolation(self, jwt_secret_key: str):
         """Test JWT token user context isolation between different users."""
-        user1_payload = {JWTConstants.SUBJECT: 'user_1', JWTConstants.EMAIL: 'user1@netra.ai', JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp()), 'user_id': 1, 'permissions': ['read']}
-        user2_payload = {JWTConstants.SUBJECT: 'user_2', JWTConstants.EMAIL: 'user2@netra.ai', JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp()), 'user_id': 2, 'permissions': ['read', 'write', 'admin']}
+        user1_payload = {JWTConstants.SUBJECT: 'user_1', JWTConstants.EMAIL: 'user1@netrasystems.ai', JWTConstants.ISSUED_AT: int(datetime.now(UTC).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) + timedelta(minutes=30)).timestamp()), 'user_id': 1, 'permissions': ['read']}
+        user2_payload = {JWTConstants.SUBJECT: 'user_2', JWTConstants.EMAIL: 'user2@netrasystems.ai', JWTConstants.ISSUED_AT: int(datetime.now(UTC).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) + timedelta(minutes=30)).timestamp()), 'user_id': 2, 'permissions': ['read', 'write', 'admin']}
         user1_token = self.create_jwt_token(user1_payload, jwt_secret_key)
         user2_token = self.create_jwt_token(user2_payload, jwt_secret_key)
         user1_decoded = jwt.decode(user1_token, jwt_secret_key, algorithms=[JWTConstants.HS256_ALGORITHM])
@@ -170,8 +170,8 @@ class RealJWTValidationTests:
     @pytest.mark.asyncio
     async def test_jwt_token_permission_validation(self, jwt_secret_key: str):
         """Test JWT token permission validation and enforcement."""
-        admin_payload = {JWTConstants.SUBJECT: 'admin_user', JWTConstants.EMAIL: 'admin@netra.ai', JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp()), 'user_id': 999, 'permissions': ['read', 'write', 'admin', 'delete']}
-        readonly_payload = {JWTConstants.SUBJECT: 'readonly_user', JWTConstants.EMAIL: 'readonly@netra.ai', JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp()), 'user_id': 100, 'permissions': ['read']}
+        admin_payload = {JWTConstants.SUBJECT: 'admin_user', JWTConstants.EMAIL: 'admin@netrasystems.ai', JWTConstants.ISSUED_AT: int(datetime.now(UTC).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) + timedelta(minutes=30)).timestamp()), 'user_id': 999, 'permissions': ['read', 'write', 'admin', 'delete']}
+        readonly_payload = {JWTConstants.SUBJECT: 'readonly_user', JWTConstants.EMAIL: 'readonly@netrasystems.ai', JWTConstants.ISSUED_AT: int(datetime.now(UTC).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) + timedelta(minutes=30)).timestamp()), 'user_id': 100, 'permissions': ['read']}
         admin_token = self.create_jwt_token(admin_payload, jwt_secret_key)
         readonly_token = self.create_jwt_token(readonly_payload, jwt_secret_key)
         admin_decoded = jwt.decode(admin_token, jwt_secret_key, algorithms=[JWTConstants.HS256_ALGORITHM])
@@ -186,8 +186,8 @@ class RealJWTValidationTests:
     @pytest.mark.asyncio
     async def test_jwt_token_refresh_mechanism(self, jwt_secret_key: str, real_db_session):
         """Test JWT token refresh mechanism with real database."""
-        access_payload = {JWTConstants.SUBJECT: 'refresh_test_user', JWTConstants.EMAIL: 'refresh@netra.ai', JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=5)).timestamp()), 'token_type': JWTConstants.ACCESS_TOKEN_TYPE, 'user_id': 456}
-        refresh_payload = {JWTConstants.SUBJECT: 'refresh_test_user', JWTConstants.EMAIL: 'refresh@netra.ai', JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(days=7)).timestamp()), 'token_type': JWTConstants.REFRESH_TOKEN_TYPE, 'user_id': 456}
+        access_payload = {JWTConstants.SUBJECT: 'refresh_test_user', JWTConstants.EMAIL: 'refresh@netrasystems.ai', JWTConstants.ISSUED_AT: int(datetime.now(UTC).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) + timedelta(minutes=5)).timestamp()), 'token_type': JWTConstants.ACCESS_TOKEN_TYPE, 'user_id': 456}
+        refresh_payload = {JWTConstants.SUBJECT: 'refresh_test_user', JWTConstants.EMAIL: 'refresh@netrasystems.ai', JWTConstants.ISSUED_AT: int(datetime.now(UTC).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) + timedelta(days=7)).timestamp()), 'token_type': JWTConstants.REFRESH_TOKEN_TYPE, 'user_id': 456}
         access_token = self.create_jwt_token(access_payload, jwt_secret_key)
         refresh_token = self.create_jwt_token(refresh_payload, jwt_secret_key)
         access_decoded = jwt.decode(access_token, jwt_secret_key, algorithms=[JWTConstants.HS256_ALGORITHM])
@@ -201,7 +201,7 @@ class RealJWTValidationTests:
     @pytest.mark.asyncio
     async def test_jwt_token_api_endpoint_integration(self, async_client: AsyncClient, jwt_secret_key: str):
         """Test JWT token validation in real API endpoints."""
-        api_payload = {JWTConstants.SUBJECT: 'api_test_user', JWTConstants.EMAIL: 'apitest@netra.ai', JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'user_id': 789, 'permissions': ['read', 'write']}
+        api_payload = {JWTConstants.SUBJECT: 'api_test_user', JWTConstants.EMAIL: 'apitest@netrasystems.ai', JWTConstants.ISSUED_AT: int(datetime.now(UTC).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) + timedelta(minutes=30)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'user_id': 789, 'permissions': ['read', 'write']}
         valid_token = self.create_jwt_token(api_payload, jwt_secret_key)
         headers = {HeaderConstants.AUTHORIZATION: f'{HeaderConstants.BEARER_PREFIX}{valid_token}', HeaderConstants.CONTENT_TYPE: HeaderConstants.APPLICATION_JSON}
         try:

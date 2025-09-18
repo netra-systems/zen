@@ -3,7 +3,7 @@
 import psutil
 import asyncio
 from typing import Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 
 
 class SystemResourceMonitor:
@@ -52,7 +52,7 @@ class SystemResourceMonitor:
     async def collect_all_metrics(self) -> Dict[str, Any]:
         """Collect all system metrics."""
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "cpu": {
                 "usage_percent": self.get_cpu_usage(),
                 "count": psutil.cpu_count()
@@ -107,5 +107,5 @@ class HealthMonitor:
             "status": health_status,
             "issues": issues,
             "metrics": metrics,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }

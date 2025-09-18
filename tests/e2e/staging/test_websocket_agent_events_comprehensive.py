@@ -4,7 +4,7 @@ WebSocket Agent Events Comprehensive E2E Tests for Staging
 Business Value Justification (BVJ):
 - Segment: Platform/Internal + All Customer Tiers
 - Business Goal: Ensure mission-critical WebSocket event delivery for real-time AI value
-- Value Impact: Enables $500K+ ARR through transparent AI agent execution visibility
+- Value Impact: Enables 500K+ ARR through transparent AI agent execution visibility
 - Strategic/Revenue Impact: Prevents customer churn from poor real-time experience
 
 This test suite validates ALL 5 required WebSocket events for agent execution:
@@ -93,7 +93,7 @@ class WebSocketAgentEventsComprehensiveTests(BaseE2ETest):
         assert self.staging_config.validate_configuration(), 'Staging configuration invalid'
         self.test_users = []
         for i in range(5):
-            user_context = await create_authenticated_user_context(user_email=f'e2e_ws_events_test_{i}_{int(time.time())}@staging.netra.ai', environment='staging', permissions=['read', 'write', 'execute_agents', 'websocket_connect'])
+            user_context = await create_authenticated_user_context(user_email=f'e2e_ws_events_test_{i}_{int(time.time())}@staging.netrasystems.ai', environment='staging', permissions=['read', 'write', 'execute_agents', 'websocket_connect'])
             self.test_users.append(user_context)
         self.event_sequences: Dict[str, WebSocketEventSequence] = {}
         self.logger.info(f' PASS:  WebSocket testing environment setup complete - {len(self.test_users)} authenticated users')
@@ -102,7 +102,7 @@ class WebSocketAgentEventsComprehensiveTests(BaseE2ETest):
         """
         Test that ALL 5 required WebSocket events are delivered for agent execution.
         
-        BVJ: Validates core $500K+ ARR real-time AI transparency value proposition
+        BVJ: Validates core 500K+ ARR real-time AI transparency value proposition
         MISSION CRITICAL: These events enable substantive chat interactions
         """
         user_context = self.test_users[0]

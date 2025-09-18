@@ -7,7 +7,7 @@ Targets adapter pattern, event delegation, and agent-websocket coordination.
 Business Value Justification:
 - Segment: Platform/Internal
 - Business Goal: Development Velocity & Risk Reduction
-- Value Impact: Protects $500K+ ARR WebSocket event adapter functionality
+- Value Impact: Protects 500K+ ARR WebSocket event adapter functionality
 - Strategic Impact: Comprehensive coverage for agent WebSocket event emission
 
 Coverage Focus:
@@ -26,7 +26,7 @@ import unittest
 from unittest.mock import Mock, AsyncMock, patch, MagicMock, call
 from typing import Dict, Any, Optional, List
 import time
-from datetime import datetime
+from datetime import datetime, UTC
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
@@ -42,7 +42,7 @@ class MockAgentWebSocketBridge:
 
     async def emit_agent_event(self, event_type: str, data: Dict[str, Any], run_id: str, user_context=None, agent_name: str=None):
         """Mock event emission."""
-        event = {'event_type': event_type, 'data': data, 'run_id': run_id, 'agent_name': agent_name, 'user_context': user_context, 'timestamp': datetime.utcnow().isoformat()}
+        event = {'event_type': event_type, 'data': data, 'run_id': run_id, 'agent_name': agent_name, 'user_context': user_context, 'timestamp': datetime.now(UTC).isoformat()}
         self.events_received.append(event)
         return True
 

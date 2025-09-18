@@ -15,7 +15,7 @@ import uuid
 import hashlib
 import httpx
 from typing import Dict, Any, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from tests.e2e.staging_test_config import get_staging_config
 
@@ -71,7 +71,7 @@ class MediumLowStorageTests:
                     test_message = {
                         "content": "Test message for storage validation",
                         "thread_id": str(uuid.uuid4()),
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(UTC).isoformat(),
                         "metadata": {
                             "test": True,
                             "tokens": 8
@@ -365,8 +365,8 @@ class MediumLowStorageTests:
         """Test #75: File download"""
         file_download = {
             "file_id": str(uuid.uuid4()),
-            "download_url": f"https://storage.netra.ai/files/{uuid.uuid4()}",
-            "expires_at": (datetime.utcnow() + timedelta(hours=1)).isoformat(),
+            "download_url": f"https://storage.netrasystems.ai/files/{uuid.uuid4()}",
+            "expires_at": (datetime.now(UTC) + timedelta(hours=1)).isoformat(),
             "access_control": {
                 "owner": "user_123",
                 "shared_with": ["user_456"],
@@ -382,7 +382,7 @@ class MediumLowStorageTests:
         
         # Verify expiry is in future
         expires = datetime.fromisoformat(file_download["expires_at"])
-        assert expires > datetime.utcnow()
+        assert expires > datetime.now(UTC)
 
 @pytest.mark.e2e
 class MediumLowDataOpsTests:
@@ -436,7 +436,7 @@ class MediumLowDataOpsTests:
         """Test #78: Automated backups"""
         backup = {
             "backup_id": str(uuid.uuid4()),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "type": "incremental",  # full, incremental, differential
             "size_mb": 500,
             "duration_seconds": 120,
@@ -457,7 +457,7 @@ class MediumLowDataOpsTests:
         restore = {
             "restore_id": str(uuid.uuid4()),
             "backup_id": str(uuid.uuid4()),
-            "restore_point": datetime.utcnow().isoformat(),
+            "restore_point": datetime.now(UTC).isoformat(),
             "status": "completed",
             "records_restored": 5000,
             "duration_seconds": 300,
@@ -518,11 +518,11 @@ class MediumLowComplianceTests:
         deletion_request = {
             "request_id": str(uuid.uuid4()),
             "user_id": "test_user",
-            "requested_at": datetime.utcnow().isoformat(),
+            "requested_at": datetime.now(UTC).isoformat(),
             "deletion_scope": ["messages", "threads", "profile", "files"],
             "status": "completed",
             "deleted_records": 1500,
-            "completion_time": (datetime.utcnow() + timedelta(hours=24)).isoformat(),
+            "completion_time": (datetime.now(UTC) + timedelta(hours=24)).isoformat(),
             "gdpr_compliant": True,
             "confirmation_sent": True
         }
@@ -543,8 +543,8 @@ class MediumLowComplianceTests:
             "query": "data analysis",
             "filters": {
                 "user_id": "test_user",
-                "date_from": (datetime.utcnow() - timedelta(days=30)).isoformat(),
-                "date_to": datetime.utcnow().isoformat(),
+                "date_from": (datetime.now(UTC) - timedelta(days=30)).isoformat(),
+                "date_to": datetime.now(UTC).isoformat(),
                 "thread_ids": [str(uuid.uuid4())],
                 "has_attachments": False
             },

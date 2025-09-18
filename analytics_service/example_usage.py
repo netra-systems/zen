@@ -6,7 +6,7 @@ with batch processing, error handling, and report generation.
 
 import asyncio
 import logging
-from datetime import datetime, date
+from datetime import datetime, date, UTC
 from uuid import uuid4
 
 from analytics_service.analytics_core import (
@@ -62,7 +62,7 @@ async def process_sample_events(processor):
     # Create sample chat interaction event
     chat_event = FrontendEvent(
         event_id=uuid4(),
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(UTC),
         user_id="user_123",
         session_id="session_456",
         event_type=EventType.CHAT_INTERACTION,
@@ -90,7 +90,7 @@ async def process_sample_events(processor):
     # Create sample feature usage event
     feature_event = FrontendEvent(
         event_id=uuid4(),
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(UTC),
         user_id="user_123",
         session_id="session_456",
         event_type=EventType.FEATURE_USAGE,
@@ -112,7 +112,7 @@ async def process_sample_events(processor):
     # Create sample performance metric event
     performance_event = FrontendEvent(
         event_id=uuid4(),
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(UTC),
         user_id="user_123",
         session_id="session_456",
         event_type=EventType.PERFORMANCE_METRIC,

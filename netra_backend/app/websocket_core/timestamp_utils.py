@@ -14,9 +14,10 @@ and convert to Unix timestamp floats as expected by WebSocketMessage model.
 import time
 from datetime import datetime, timezone
 from typing import Union, Optional
-import logging
 
-logger = logging.getLogger(__name__)
+from shared.logging.unified_logging_ssot import get_logger
+
+logger = get_logger(__name__)
 
 
 def convert_to_unix_timestamp(timestamp_input: Union[str, int, float, datetime, None]) -> float:

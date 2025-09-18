@@ -4,7 +4,7 @@ test_websocket_dual_pattern_golden_path_impact.py
 
 Issue #1144 WebSocket Factory Dual Pattern Detection - Golden Path Impact
 
-PURPOSE: FAILING TESTS to validate Golden Path user login → AI response flow
+PURPOSE: FAILING TESTS to validate Golden Path user login -> AI response flow
 These tests should FAIL initially to prove dual pattern impacts on Golden Path.
 
 CRITICAL: These tests are designed to FAIL and demonstrate Golden Path degradation.
@@ -34,7 +34,7 @@ class WebSocketDualPatternGoldenPathImpactTests(SSotBaseTestCase):
         self.enterprise_compliance_failures = []
 
     def simulate_golden_path_user_flow(self, user_id: str) -> Dict[str, Any]:
-        """Simulate complete Golden Path: user login → AI response"""
+        """Simulate complete Golden Path: user login -> AI response"""
         flow_result = {
             'user_id': user_id,
             'stages': {

@@ -281,11 +281,12 @@ def configure_gcp_staging_environment():
     # Redis configuration for staging
     env.set("REDIS_HOST", "redis-staging", source="gcp_staging_config")
     
-    # Actual Staging URLs
-    staging_url = env.get("STAGING_URL", "https://app.staging.netrasystems.ai")
+    # CRITICAL DOMAIN CONFIGURATION UPDATE (Issue #1278): Use correct staging URLs
+    # Use SSOT staging domains instead of deprecated *.staging.netrasystems.ai
+    staging_url = env.get("STAGING_URL", "https://staging.netrasystems.ai")
     staging_api_url = env.get("STAGING_API_URL", "https://api.staging.netrasystems.ai")
-    staging_auth_url = env.get("STAGING_AUTH_URL", "https://auth.staging.netrasystems.ai")
-    staging_frontend_url = env.get("STAGING_FRONTEND_URL", "https://app.staging.netrasystems.ai")
+    staging_auth_url = env.get("STAGING_AUTH_URL", "https://staging.netrasystems.ai")
+    staging_frontend_url = env.get("STAGING_FRONTEND_URL", "https://staging.netrasystems.ai")
     
     env.set("STAGING_URL", staging_url, source="gcp_staging_config")
     env.set("STAGING_API_URL", staging_api_url, source="gcp_staging_config")
@@ -298,7 +299,7 @@ def configure_gcp_staging_environment():
     env.set("AUTH_BASE_URL", staging_auth_url, source="gcp_staging_config")
     env.set("FRONTEND_URL", staging_frontend_url, source="gcp_staging_config")
     
-    # WebSocket URL
+    # WebSocket URL - CRITICAL: Use correct staging domain
     env.set("WS_BASE_URL", env.get("WS_BASE_URL", "wss://api.staging.netrasystems.ai/ws"), source="gcp_staging_config")
     
     # Enable observability

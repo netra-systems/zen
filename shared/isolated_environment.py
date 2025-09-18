@@ -708,6 +708,44 @@ class IsolatedEnvironment:
                     self._env_cache[key] = None
                     return default
     
+    def get_env(self) -> 'IsolatedEnvironment':
+        """
+        Backward compatibility method for tests that call self.env.get_env().
+        
+        This method returns self to maintain compatibility with old test patterns
+        that used self.env.get_env().get(key) instead of self.env.get(key).
+        
+        Returns:
+            self: The same IsolatedEnvironment instance
+        """
+        return self
+    
+    def set_env(self, key: str, value: str, source: str = "unknown") -> bool:
+        """
+        Backward compatibility method for tests that call self.env.set_env().
+        
+        Args:
+            key: Environment variable name
+            value: Environment variable value
+            source: Source of the variable (for debugging)
+            
+        Returns:
+            True if variable was set successfully
+        """
+        return self.set(key, value, source)
+    
+    def unset_env(self, key: str) -> bool:
+        """
+        Backward compatibility method for tests that call self.env.unset_env().
+        
+        Args:
+            key: Environment variable name to remove
+            
+        Returns:
+            True if variable was removed successfully
+        """
+        return self.delete(key, source="test_unset")
+    
     def set(self, key: str, value: str, source: str = "unknown", force: bool = False) -> bool:
         """
         Set an environment variable with source tracking.
@@ -1294,8 +1332,77 @@ class IsolatedEnvironment:
         return self.get_environment_name() == "production"
     
     def is_staging(self) -> bool:
-        """Check if running in staging environment."""
-        return self.get_environment_name() == "staging"
+        """
+        Check if running in staging environment with enhanced detection.
+
+        Uses multiple indicators to robustly detect staging environment:
+        1. Standard environment detection via get_environment_name()
+        2. URL pattern detection (*.netrasystems.ai domains)
+        3. Service name patterns
+        4. GCP project markers
+        """
+        # Primary check via standard environment detection
+        if self.get_environment_name() == "staging":
+            return True
+
+        # Enhanced staging detection for E2E test robustness
+        return self._detect_staging_environment_enhanced()
+
+    def _detect_staging_environment_enhanced(self) -> bool:
+        """
+        Enhanced staging environment detection for test framework robustness.
+
+        This method provides additional staging detection logic beyond the standard
+        get_environment_name() method to handle edge cases in E2E testing.
+
+        ISSUE #1278 Remediation: Improve staging environment detection robustness
+        for E2E test failures caused by environment misidentification.
+        """
+        # Check for staging URL patterns (domain standardization fix)
+        staging_url_indicators = [
+            "staging.netrasystems.ai",
+            "api-staging.netrasystems.ai",
+            "auth-staging.netrasystems.ai",  # Legacy pattern support
+            "api-staging.netrasystems.ai",   # Legacy pattern support
+            "app.staging.netrasystems.ai"    # Legacy pattern support
+        ]
+
+        # Check various URL environment variables for staging patterns
+        url_vars = [
+            "API_BASE_URL", "NETRA_BACKEND_URL", "AUTH_SERVICE_URL",
+            "FRONTEND_URL", "NETRA_API_URL", "WEBSOCKET_URL", "WS_BASE_URL"
+        ]
+
+        for var in url_vars:
+            url_value = self.get(var, "")
+            if any(indicator in url_value for indicator in staging_url_indicators):
+                return True
+
+        # Check for staging-specific environment markers
+        staging_markers = [
+            ("STAGING_ENV", ["true", "1", "staging"]),
+            ("USE_STAGING_SERVICES", ["true", "1"]),
+            ("INTEGRATION_TEST_MODE", ["staging"]),
+            ("TEST_ENVIRONMENT", ["staging"]),
+        ]
+
+        for var, values in staging_markers:
+            env_value = self.get(var, "").lower()
+            if env_value in values:
+                return True
+
+        # Check GCP project patterns that might indicate staging
+        gcp_indicators = [
+            self.get("GCP_PROJECT_ID", ""),
+            self.get("GOOGLE_CLOUD_PROJECT", ""),
+            self.get("K_SERVICE", "")
+        ]
+
+        for indicator in gcp_indicators:
+            if indicator and ("staging" in indicator.lower() or "stage" in indicator.lower()):
+                return True
+
+        return False
     
     def is_development(self) -> bool:
         """Check if running in development environment."""
@@ -1803,7 +1910,7 @@ class EnvironmentValidator:
         # Check for incorrect staging patterns
         incorrect_patterns = [
             ("localhost", "Localhost URLs not allowed in staging"),
-            ("staging.netrasystems.ai", "Should use api.staging.netrasystems.ai subdomain"),
+            ("staging.netrasystems.ai", "Should use api-staging.netrasystems.ai subdomain"),
             ("http://", "Should use HTTPS in staging")
         ]
         

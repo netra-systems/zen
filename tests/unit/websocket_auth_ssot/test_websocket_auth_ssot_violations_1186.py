@@ -10,7 +10,7 @@ Expected Behavior: These tests SHOULD FAIL to demonstrate:
 4. Fragmented authentication validation logic
 
 Business Impact: These violations block proper WebSocket authentication SSOT
-consolidation and create security vulnerabilities affecting $500K+ ARR Golden Path.
+consolidation and create security vulnerabilities affecting 500K+ ARR Golden Path.
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
@@ -55,7 +55,7 @@ class TestWebSocketAuthenticationSSOTViolations(unittest.TestCase):
         self.assertEqual(
             len(bypass_violations),
             0,
-            f"❌ EXPECTED FAILURE: Found {len(bypass_violations)} WebSocket authentication bypass mechanisms. "
+            f"X EXPECTED FAILURE: Found {len(bypass_violations)} WebSocket authentication bypass mechanisms. "
             f"These create security vulnerabilities and violate SSOT authentication principles:\n"
             + '\n'.join([f"  - {path}: {mechanism}" for path, mechanism in bypass_violations[:10]])
             + (f"\n  ... and {len(bypass_violations) - 10} more" if len(bypass_violations) > 10 else "")
@@ -75,7 +75,7 @@ class TestWebSocketAuthenticationSSOTViolations(unittest.TestCase):
         self.assertLessEqual(
             len(fallback_fragmentation),
             1,
-            f"❌ EXPECTED FAILURE: Found {len(fallback_fragmentation)} different auth fallback implementations. "
+            f"X EXPECTED FAILURE: Found {len(fallback_fragmentation)} different auth fallback implementations. "
             f"SSOT requires exactly 1 unified authentication path. Found implementations:\n"
             + '\n'.join([f"  - {path}: {implementation}" for path, implementation in fallback_fragmentation])
         )
@@ -94,7 +94,7 @@ class TestWebSocketAuthenticationSSOTViolations(unittest.TestCase):
         self.assertEqual(
             len(token_validation_inconsistencies),
             0,
-            f"❌ EXPECTED FAILURE: Found {len(token_validation_inconsistencies)} token validation inconsistencies. "
+            f"X EXPECTED FAILURE: Found {len(token_validation_inconsistencies)} token validation inconsistencies. "
             f"These prevent unified WebSocket authentication and create security gaps:\n"
             + '\n'.join([f"  - {pattern}: used in {count} files" for pattern, count in token_validation_inconsistencies.items()])
         )
@@ -113,7 +113,7 @@ class TestWebSocketAuthenticationSSOTViolations(unittest.TestCase):
         self.assertEqual(
             len(permissiveness_violations),
             0,
-            f"❌ EXPECTED FAILURE: Found {len(permissiveness_violations)} auth permissiveness violations. "
+            f"X EXPECTED FAILURE: Found {len(permissiveness_violations)} auth permissiveness violations. "
             f"These create security vulnerabilities by allowing unauthorized access:\n"
             + '\n'.join([f"  - {path}: {violation}" for path, violation in permissiveness_violations[:5]])
             + (f"\n  ... and {len(permissiveness_violations) - 5} more" if len(permissiveness_violations) > 5 else "")
@@ -133,7 +133,7 @@ class TestWebSocketAuthenticationSSOTViolations(unittest.TestCase):
         self.assertEqual(
             len(ssot_violations),
             0,
-            f"❌ EXPECTED FAILURE: Found {len(ssot_violations)} SSOT violations in unified WebSocket auth. "
+            f"X EXPECTED FAILURE: Found {len(ssot_violations)} SSOT violations in unified WebSocket auth. "
             f"These prevent proper authentication consolidation:\n"
             + '\n'.join([f"  - {violation_type}: {details}" for violation_type, details in ssot_violations])
         )
@@ -353,7 +353,7 @@ class TestWebSocketAuthSSOTMetrics(unittest.TestCase):
         self.assertEqual(
             violation_count,
             target_violations,
-            f"❌ EXPECTED FAILURE: Found {violation_count} WebSocket auth violations. "
+            f"X EXPECTED FAILURE: Found {violation_count} WebSocket auth violations. "
             f"Issue #1186 Phase 4 identified 58 violations requiring remediation. "
             f"Target: {target_violations} violations (complete SSOT compliance)."
         )
@@ -380,7 +380,7 @@ class TestWebSocketAuthSSOTMetrics(unittest.TestCase):
             self.assertEqual(
                 actual_value,
                 expected_value,
-                f"❌ EXPECTED FAILURE: {metric} = {actual_value}, expected {expected_value}. "
+                f"X EXPECTED FAILURE: {metric} = {actual_value}, expected {expected_value}. "
                 f"This indicates incomplete WebSocket auth SSOT consolidation."
             )
 
@@ -411,13 +411,7 @@ class TestWebSocketAuthSSOTMetrics(unittest.TestCase):
                 violation_count += len(token_inconsistencies) - 1
 
         except Exception as e:
-            print(f"Warning: Error counting violations: {e}")
-            violation_count = -1  # Indicate measurement error
-
-        return violation_count
-
-    def _measure_auth_consolidation_progress(self) -> Dict[str, int]:
-        """Measure authentication consolidation progress"""
+            print(f"Warning: Error counting violations: {e}""""Measure authentication consolidation progress"""
         metrics = {}
 
         test_instance = TestWebSocketAuthenticationSSOTViolations()
@@ -441,16 +435,9 @@ class TestWebSocketAuthSSOTMetrics(unittest.TestCase):
             metrics['permissiveness_violations'] = len(permissive_violations)
 
         except Exception as e:
-            print(f"Warning: Error measuring consolidation progress: {e}")
-            metrics = {'error': -1}
-
-        return metrics
-
-
-if __name__ == '__main__':
-    print("🚨 Issue #1186 WebSocket Authentication SSOT Violations - Detection Tests")
+            print(f"Warning: Error measuring consolidation progress: {e}""🚨 Issue #1186 WebSocket Authentication SSOT Violations - Detection Tests")
     print("=" * 80)
-    print("⚠️  WARNING: These tests are DESIGNED TO FAIL to demonstrate current violations")
+    print("WARNING️  WARNING: These tests are DESIGNED TO FAIL to demonstrate current violations")
     print("📊 Expected: Test failures exposing 58 WebSocket auth violations from Issue #1186")
     print("🎯 Goal: Baseline measurement before WebSocket auth SSOT consolidation")
     print("🔒 Focus: Authentication bypass mechanisms, fallback fragmentation, SSOT violations")

@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Segment: Platform/Internal
 - Business Goal: Prevent WebSocket race conditions in production deployment
 - Value Impact: Protects Golden Path reliability during connection lifecycle events
-- Revenue Impact: Prevents chat disruption that affects $500K+ ARR
+- Revenue Impact: Prevents chat disruption that affects 500K+ ARR
 
 TEST STRATEGY:
 Integration-level tests that reproduce race conditions between:

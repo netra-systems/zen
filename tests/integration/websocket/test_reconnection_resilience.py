@@ -128,8 +128,8 @@ class ReconnectionResilienceTests(BaseIntegrationTest):
         # Base auth config for reconnection testing
         self.auth_config = E2EAuthConfig(
             auth_service_url="http://localhost:8083",
-            backend_url="http://localhost:8002",
-            websocket_url="ws://localhost:8002/ws",
+            backend_url="http://localhost:8000",
+            websocket_url="ws://localhost:8000/ws",
             test_user_email=f"reconnection_test_{self.test_session_id}@example.com",
             timeout=25.0  # Longer timeout for reconnection scenarios
         )

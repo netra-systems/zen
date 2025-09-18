@@ -48,8 +48,8 @@ GCP Project: netra-staging
 ### Service Endpoints
 ```
 Backend API: https://netra-backend-staging-[hash].run.app
-Auth Service: https://auth-staging-[hash].run.app
-Frontend: https://staging.netra.ai
+Auth Service: https://auth-[hash].run.app
+Frontend: https://staging.netrasystems.ai
 WebSocket: wss://netra-backend-staging-[hash].run.app/ws
 ```
 

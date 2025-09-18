@@ -12,9 +12,9 @@ from fastapi import Request, WebSocket
 from starlette.middleware.cors import CORSMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 # WebSocket CORS now uses unified configuration from shared/cors_config_builder.py
 # No need for separate WebSocket origin management
@@ -389,7 +389,7 @@ def _extract_origin_from_websocket(websocket: WebSocket) -> Optional[str]:
             logger.warning(f"Multiple different origin headers found: {origin_headers}")
             # In development, use the first one but log the issue
             # In production, this should be more strict
-            from netra_backend.app.core.configuration.base import get_unified_config
+            from netra_backend.app.config import get_config as get_unified_config
             try:
                 config = get_unified_config()
                 if getattr(config, 'environment', 'production').lower() == 'development':
@@ -412,7 +412,7 @@ def _extract_origin_from_websocket(websocket: WebSocket) -> Optional[str]:
 def get_environment_origins() -> List[str]:
     """Get allowed origins based on environment using unified CORS configuration."""
     try:
-        from netra_backend.app.core.configuration.base import get_unified_config
+        from netra_backend.app.config import get_config as get_unified_config
         config = get_unified_config()
         env = getattr(config, 'environment', 'development').lower()
         logger.info(f"WebSocket CORS: Using config environment: '{env}'")
@@ -560,7 +560,7 @@ def get_websocket_cors_handler(environment: Optional[str] = None) -> WebSocketCO
     # Detect environment with explicit logging
     if environment is None:
         try:
-            from netra_backend.app.core.configuration.base import get_unified_config
+            from netra_backend.app.config import get_config as get_unified_config
             config = get_unified_config()
             environment = getattr(config, 'environment', 'development').lower()
             logger.info(f"WebSocket CORS: Detected environment from config: '{environment}'")

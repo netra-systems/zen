@@ -8,7 +8,7 @@ Based on Five Whys analysis: Environment-specific behavior creates different aut
 that aren't cleanly separated, causing staging vs development auth issues.
 
 BUSINESS IMPACT: 
-- Protects $500K+ ARR Golden Path user workflow from auth cross-contamination
+- Protects 500K+ ARR Golden Path user workflow from auth cross-contamination
 - Ensures staging environment properly isolates from development/production auth patterns  
 - Validates enterprise security requirements for environment separation
 - Prevents auth token cross-environment vulnerabilities
@@ -49,7 +49,7 @@ class EnvironmentAuthSeparationTests(SSotAsyncTestCase):
         
         if self.current_env == "staging":
             self.auth_base_url = "https://auth.staging.netrasystems.ai"
-            self.backend_url = "https://backend.staging.netrasystems.ai" 
+            self.backend_url = "https://api.staging.netrasystems.ai" 
             self.expected_env_marker = "staging"
         elif self.current_env == "development":
             self.auth_base_url = "http://localhost:8081"
@@ -153,7 +153,7 @@ class EnvironmentAuthSeparationTests(SSotAsyncTestCase):
             pytest.fail(
                 f"Staging auth flow not properly separated from development:\n" + 
                 "\n".join(f"  - {diff}" for diff in environment_differences) +
-                f"\n\nBusiness Impact: Auth cross-contamination risk for $500K+ ARR Golden Path"
+                f"\n\nBusiness Impact: Auth cross-contamination risk for 500K+ ARR Golden Path"
             )
             
         self.record_success("staging_auth_flow_environment_separation_validated")

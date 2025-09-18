@@ -10,14 +10,14 @@ Business Value Justification (BVJ):
 - Strategic Impact: Foundation for secure authentication workflows
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
 
 from shared.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import EnvironmentDetector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class OAuthConfigGenerator:
@@ -30,7 +30,7 @@ class OAuthConfigGenerator:
         
         # Dynamically set redirect URI based on environment
         dev_redirect_uri = self.env.get('OAUTH_REDIRECT_URI', 'http://localhost:3000/auth/callback')
-        prod_redirect_uri = self.env.get('OAUTH_REDIRECT_URI', 'https://app.netra.ai/auth/callback')
+        prod_redirect_uri = self.env.get('OAUTH_REDIRECT_URI', 'https://app.netrasystems.ai/auth/callback')
         
         self.env_configs = {
             'development': {
@@ -51,7 +51,7 @@ class OAuthConfigGenerator:
                 'google': {
                     'client_id': self.env.get('GOOGLE_OAUTH_CLIENT_ID_STAGING', 'staging-google-client-id'),
                     'client_secret': self.env.get('GOOGLE_OAUTH_CLIENT_SECRET_STAGING', 'staging-google-client-secret'),
-                    'redirect_uri': self.env.get('OAUTH_REDIRECT_URI', 'https://app.staging.netra.ai/auth/callback')
+                    'redirect_uri': self.env.get('OAUTH_REDIRECT_URI', 'https://app.staging.netrasystems.ai/auth/callback')
                 }
             }
         }
@@ -166,7 +166,7 @@ def load_auth_security_config() -> AuthClientSecurityConfig:
     
     config = AuthClientSecurityConfig(
         service_secret=env.get("SERVICE_SECRET"),
-        jwt_secret=env.get("JWT_SECRET_KEY"),
+        jwt_secret=None,  # JWT operations delegated to auth service - SSOT compliance
         encryption_key=env.get("FERNET_KEY"),
         require_https=env.get("REQUIRE_HTTPS", "false").lower() == "true",
         token_validation_enabled=env.get("TOKEN_VALIDATION_ENABLED", "true").lower() == "true",

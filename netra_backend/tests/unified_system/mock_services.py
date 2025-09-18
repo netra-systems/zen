@@ -216,7 +216,7 @@ class MockWebSocketServer:
         for connection in self._connections:
             try:
                 await connection.send(message)
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 disconnected.add(connection)
         
         # Remove disconnected connections

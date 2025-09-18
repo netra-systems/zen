@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise/Platform - Mission-critical production scenarios
 - Business Goal: Production Reliability - Validate real-world timeout constraints  
 - Value Impact: Ensures enterprise customers can complete complex analytical workflows
-- Revenue Impact: Protects $500K+ ARR from enterprise timeout-related churn
+- Revenue Impact: Protects 500K+ ARR from enterprise timeout-related churn
 
 CRITICAL ISSUE #341:
 Current problem: 60s timeout constraints cause failures in production for complex workflows
@@ -30,7 +30,7 @@ from dataclasses import dataclass, field
 from urllib.parse import urljoin
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.timeout_configuration import get_websocket_recv_timeout, get_agent_execution_timeout, get_timeout_config, reset_timeout_manager
-STAGING_BASE_URL = 'https://api-staging.netra.dev'
+STAGING_BASE_URL = 'https://api.staging.netra.dev'
 STAGING_WS_URL = 'wss://ws-staging.netra.dev'
 
 @dataclass
@@ -145,7 +145,7 @@ class EnterpriseStreamingTimeoutsTests(SSotAsyncTestCase):
                     except asyncio.TimeoutError:
                         coordination_errors.append({'type': 'websocket_recv_timeout', 'elapsed': time.time() - start_time, 'timeout_limit': staging_websocket_timeout})
                         break
-                    except websockets.exceptions.ConnectionClosed:
+                    except websockets.ConnectionClosed:
                         coordination_errors.append({'type': 'websocket_connection_closed', 'elapsed': time.time() - start_time})
                         break
         except Exception as e:

@@ -624,7 +624,7 @@ class StagingAuthManager:
         timestamp = str(int(time.time()))
         
         return {
-            "email": f"test_user_{timestamp}@staging.netra.ai",
+            "email": f"test_user_{timestamp}@staging.netrasystems.ai",
             "password": f"TestPass_{timestamp}!",
             "first_name": "Test",
             "last_name": f"User_{timestamp[-4:]}"
@@ -1140,7 +1140,7 @@ def handle_staging_network_errors(func: Callable) -> Callable:
                     f"Staging HTTP error ({response.status_code}): {response.text}"
                 ) from e
         
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             raise StagingConnectivityError(
                 f"Staging WebSocket connection closed unexpectedly: {e}"
             ) from e

@@ -1,0 +1,89 @@
+"""
+Backend Unit Test Base - SSOT Compliant Test Foundation
+
+This module provides SSOT compliant base test classes for backend unit tests.
+All backend unit tests should inherit from BaseUnitTest to ensure consistency 
+with the SSOT testing framework.
+
+Business Value: Platform/Internal - System Stability & Development Velocity
+Ensures all backend unit tests follow SSOT patterns and provide consistent 
+test infrastructure.
+
+CRITICAL: This imports from test_framework.ssot.base_test_case which is the
+canonical SSOT base test implementation per CLAUDE.md requirements.
+"""
+
+import pytest
+from sqlalchemy import Column, Integer
+from netra_backend.app.db.base import Base
+from test_framework.database.test_database_manager import DatabaseTestManager
+from shared.isolated_environment import IsolatedEnvironment
+
+# Import SSOT Base Test Classes
+from test_framework.ssot.base_test_case import (
+    SSotBaseTestCase,
+    SSotAsyncTestCase,
+    BaseTestCase,
+    AsyncTestCase,
+    BaseIntegrationTest
+)
+
+# Backend-specific aliases for SSOT compliance
+BaseUnitTest = SSotBaseTestCase  # The missing class that was being imported
+BackendBaseTest = SSotBaseTestCase
+BackendAsyncTest = SSotAsyncTestCase
+
+class BaseTests:
+    """Test suite for Base"""
+    
+    @pytest.fixture
+    def instance(self):
+        """Use real service instance."""
+        # TODO: Initialize real service
+        """Create test instance"""
+        return Base()
+    
+    def test_initialization(self, instance):
+        """Test proper initialization"""
+        assert instance is not None
+        # Add initialization assertions
+    
+    def test_core_functionality(self, instance):
+        """Test Base class is SQLAlchemy DeclarativeBase"""
+        from sqlalchemy.orm import DeclarativeBase
+        # Verify it's a SQLAlchemy base class
+        assert Base.__bases__[0] == DeclarativeBase
+        assert hasattr(Base, 'metadata')
+    
+    def test_error_handling(self):
+        """Test that Base class can be used for model creation"""
+        # Test that we can create a model from Base
+        class ModelTests(Base):
+            __tablename__ = 'test_model'
+            id = Column(Integer, primary_key=True)
+        
+        assert hasattr(ModelTests, '__tablename__')
+        assert ModelTests.__tablename__ == 'test_model'
+    
+    def test_edge_cases(self, instance):
+        """Test boundary conditions"""
+        # Test with None, empty, extreme values
+        pass
+    
+    def test_validation(self, instance):
+        """Test input validation"""
+        # Test validation logic
+        pass
+
+# Export all SSOT base test classes for backend unit tests
+__all__ = [
+    'BaseUnitTest',  # The missing class
+    'BackendBaseTest',
+    'BackendAsyncTest', 
+    'SSotBaseTestCase',
+    'SSotAsyncTestCase',
+    'BaseTestCase',
+    'AsyncTestCase',
+    'BaseIntegrationTest',
+    'BaseTests'
+]

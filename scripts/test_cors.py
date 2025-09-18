@@ -173,7 +173,7 @@ class CORSTester:
                     "note": "Connection successful, no response to test message (expected)"
                 }
                 
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             return {
                 "success": False,
                 "connection_successful": False,

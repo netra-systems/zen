@@ -22,13 +22,16 @@ Business Value:
 import warnings
 import inspect
 
-# ISSUE #1236 FIX: Simple and reliable warning system
+# ISSUE #1090 PHASE 3 FIX: Targeted deprecation warning system
 def _check_direct_import_and_warn():
     """
     Check if this module is being imported directly and warn appropriately.
     
-    ISSUE #1236 FIX: This approach detects when someone imports from this __init__.py
-    versus importing from a specific submodule. It only warns for direct imports.
+    ISSUE #1090 FIX: This targeted approach distinguishes between:
+    1. Direct imports from websocket_core.__init__ (SHOULD warn)
+    2. Specific module imports like event_validator.UnifiedEventValidator (should NOT warn)
+    
+    The key distinction is whether the import line contains the specific submodule path.
     """
     import traceback
     
@@ -43,19 +46,20 @@ def _check_direct_import_and_warn():
             
         # Read the source line to check the import pattern
         try:
-            with open(frame.filename, 'r') as f:
+            with open(frame.filename, 'r', encoding='utf-8', errors='ignore') as f:
                 lines = f.readlines()
                 if frame.lineno <= len(lines):
                     line = lines[frame.lineno - 1].strip()
                     
-                    # Check if this is a direct import from websocket_core (should warn)
-                    # vs a specific module import (should not warn)
+                    # ISSUE #1090 FIX: Only warn for DIRECT imports from websocket_core 
+                    # Do NOT warn for specific module imports
                     if 'from netra_backend.app.websocket_core import' in line:
-                        # Check if it's a direct import (should warn) vs specific module import (should not warn)
-                        if not any(submodule in line for submodule in [
+                        # Check if this is a specific module import (should NOT warn)
+                        # Example: from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator
+                        specific_module_patterns = [
                             'websocket_core.websocket_manager',
                             'websocket_core.event_validator',
-                            'websocket_core.unified_emitter',
+                            'websocket_core.unified_emitter', 
                             'websocket_core.handlers',
                             'websocket_core.types',
                             'websocket_core.utils',
@@ -66,17 +70,24 @@ def _check_direct_import_and_warn():
                             'websocket_core.protocols',
                             'websocket_core.race_condition_prevention',
                             'websocket_core.connection_state_machine',
-                            'websocket_core.message_queue'
-                        ]):
-                            # This is a direct import - issue warning
-                            warnings.warn(
-                                f"ISSUE #1144: Direct import from 'netra_backend.app.websocket_core' is deprecated. "
-                                f"Use specific module imports like 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager'. "
-                                f"This import path will be removed in Phase 2 of SSOT consolidation.",
-                                DeprecationWarning,
-                                stacklevel=2
-                            )
-                            return
+                            'websocket_core.message_queue',
+                            'websocket_core.canonical_import_patterns',
+                            'websocket_core.unified_manager'
+                        ]
+                        
+                        # If line contains a specific module path, do NOT warn
+                        if any(pattern in line for pattern in specific_module_patterns):
+                            return  # This is a legitimate specific import - no warning
+                        
+                        # This is a direct import from __init__.py - issue targeted warning
+                        warnings.warn(
+                            f"ISSUE #1144: Direct import from 'netra_backend.app.websocket_core' is deprecated. "
+                            f"Use specific module imports like 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'. "
+                            f"This import path will be removed in Phase 2 of SSOT consolidation.",
+                            DeprecationWarning,
+                            stacklevel=2
+                        )
+                        return
         except (IOError, IndexError, OSError):
             # If we can't read the file, skip this frame
             continue
@@ -84,7 +95,7 @@ def _check_direct_import_and_warn():
         # Only check the first non-internal frame
         break
 
-# Call the warning check - this will only warn for direct imports
+# Call the warning check - now properly targeted for Issue #1090
 _check_direct_import_and_warn()
 
 # ISSUE #1176 PHASE 2 REMEDIATION: SSOT Canonical Import Consolidation
@@ -92,7 +103,7 @@ _check_direct_import_and_warn()
 # DECISION: Remove __init__.py exports to force consistent direct imports from specific modules
 
 # DEPRECATION NOTICE: __init__.py imports are deprecated in favor of direct module imports
-# Use: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+# Use: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 # Use: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 import warnings
 
@@ -101,7 +112,7 @@ def _emit_deprecation_warning():
     warnings.warn(
         "ISSUE #1176 Phase 2: Importing from websocket_core.__init__ is deprecated. "
         "Use direct imports from specific modules: "
-        "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
+        "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
         DeprecationWarning,
         stacklevel=3
     )
@@ -114,10 +125,19 @@ def _emit_deprecation_warning():
 
 # Minimal imports for critical backward compatibility only
 try:
-    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
     from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
+
+    # REMEDIATION: Add missing exports for test compatibility (Issue #1176 Phase 2 Fix)
+    from netra_backend.app.websocket_core.types import create_server_message, create_error_message
+
+    # ISSUE #1286 FIX: Add missing get_websocket_manager export for test compatibility
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+
+    # ISSUE #1286 FIX: Add missing create_test_user_context export for test compatibility
+    from netra_backend.app.websocket_core.websocket_manager import create_test_user_context
 except ImportError as e:
     # FAIL FAST: Critical WebSocket components must be available
     raise ImportError(
@@ -125,9 +145,43 @@ except ImportError as e:
         f"This indicates a dependency issue that must be resolved."
     ) from e
 
+# REMEDIATION: Optional imports for test compatibility (may not exist in all environments)
+try:
+    from netra_backend.app.websocket_core.connection_state_machine import ConnectionStateMachine
+except ImportError:
+    ConnectionStateMachine = None
+
+try:
+    from netra_backend.app.websocket_core.message_queue import MessageQueue
+except ImportError:
+    MessageQueue = None
+
+try:
+    from netra_backend.app.websocket_core.websocket_manager import websocket_manager
+except ImportError:
+    websocket_manager = None
+
+# ISSUE #1176 PHASE 2 REMEDIATION: Add missing get_connection_monitor for test compatibility
+try:
+    from netra_backend.app.websocket_core.utils import get_connection_monitor
+except ImportError:
+    get_connection_monitor = None
+
+# REMEDIATION: Add missing WebSocketHeartbeat export for test compatibility
+try:
+    from netra_backend.app.websocket_core.utils import WebSocketHeartbeat
+except ImportError:
+    WebSocketHeartbeat = None
+
+# ISSUE #1176 PHASE 2 REMEDIATION: Add missing get_websocket_manager for test compatibility
+try:
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+except ImportError:
+    get_websocket_manager = None
+
 # SSOT COMPLIANCE: Factory pattern eliminated - use direct WebSocketManager import
 # from netra_backend.app.websocket_core.websocket_manager_factory import (
-#     WebSocketManagerFactory,
+#     WebSocketManagerFactory,  # REMOVED: Issue #1098 - Use get_websocket_manager() instead
 #     IsolatedWebSocketManager,
 #     get_websocket_manager_factory,
 #     create_websocket_manager
@@ -237,6 +291,16 @@ __all__ = [
     "UnifiedWebSocketEmitter",    # CANONICAL: unified_emitter.py
     "WebSocketManagerProtocol",   # CANONICAL: protocols.py
 
+    # REMEDIATION: Critical missing exports for test compatibility (Issue #1176 Phase 2 Fix)
+    "create_server_message",      # CANONICAL: types.py
+    "create_error_message",       # CANONICAL: types.py
+
+    # ISSUE #1286 FIX: Add missing get_websocket_manager export for test compatibility
+    "get_websocket_manager",      # CANONICAL: websocket_manager.py
+
+    # ISSUE #1286 FIX: Add missing create_test_user_context export for test compatibility
+    "create_test_user_context",   # CANONICAL: websocket_manager.py
+
     # Backward compatibility only - prefer direct imports
     "create_websocket_manager",
 
@@ -245,6 +309,9 @@ __all__ = [
 
     # Constants
     "CRITICAL_EVENTS",
+    
+    # GOLDEN PATH PHASE 3: Mission critical test compatibility
+    "get_websocket_manager",
 
     # NOTE: All other exports removed to eliminate import path fragmentation
     # COORDINATION FIX: Use direct imports for all other components:
@@ -256,8 +323,29 @@ __all__ = [
     # etc.
 ]
 
+# REMEDIATION: Conditionally add optional exports if available
+# These components may not exist in all environments
+_optional_exports = []
+if ConnectionStateMachine is not None:
+    _optional_exports.append("ConnectionStateMachine")
+if MessageQueue is not None:
+    _optional_exports.append("MessageQueue")
+if websocket_manager is not None:
+    _optional_exports.append("websocket_manager")
+if get_connection_monitor is not None:
+    _optional_exports.append("get_connection_monitor")
+if get_websocket_manager is not None:
+    _optional_exports.append("get_websocket_manager")
+if WebSocketHeartbeat is not None:
+    _optional_exports.append("WebSocketHeartbeat")
+
+__all__.extend(_optional_exports)
+
+
+# GOLDEN PATH PHASE 3 FIX: Export get_websocket_manager for mission critical tests
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # Log consolidation
-from netra_backend.app.logging_config import central_logger
-logger = central_logger.get_logger(__name__)
+from shared.logging.unified_logging_ssot import get_logger
+logger = get_logger(__name__)
 logger.info("WebSocket SSOT loaded - CRITICAL SECURITY MIGRATION: Factory pattern available, singleton vulnerabilities mitigated")

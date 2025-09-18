@@ -43,7 +43,7 @@ import uuid
 import weakref
 import gc
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Set, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from contextlib import asynccontextmanager
@@ -438,7 +438,7 @@ class ThreadIdConsistencyComprehensiveTests(SSotAsyncTestCase):
             connection_id=connection_id,
             user_id=user_id,
             websocket=test_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={}
         )
 

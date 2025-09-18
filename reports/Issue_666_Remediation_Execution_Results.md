@@ -57,7 +57,7 @@
 
 **Discovery Results:**
 1. **Staging Environment Analysis:**
-   - 🔍 **Current State:** staging.netra.ai domain not resolving
+   - 🔍 **Current State:** staging.netrasystems.ai domain not resolving
    - 🔍 **GCP Cloud Run:** netra-staging.a.run.app returning 404 errors
    - 🔍 **Service Discovery:** Staging deployment requires refresh/redeployment
 

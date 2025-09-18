@@ -4,7 +4,7 @@ E2E Staging Tests for Issue #1087: E2E OAuth Bypass Key Golden Path Validation
 Tests complete Golden Path authentication flow in real staging GCP environment.
 Validates end-to-end user authentication flow with E2E bypass key configuration.
 
-Business Value: Restores $500K+ ARR Golden Path authentication functionality.
+Business Value: Restores 500K+ ARR Golden Path authentication functionality.
 """
 
 import pytest
@@ -26,8 +26,8 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
 
         # Staging URLs - must use canonical staging URLs per CLAUDE.md
         self.staging_auth_url = "https://auth.staging.netrasystems.ai"
-        self.staging_backend_url = "https://backend.staging.netrasystems.ai"
-        self.staging_websocket_url = "wss://backend.staging.netrasystems.ai/ws"
+        self.staging_backend_url = "https://api.staging.netrasystems.ai"
+        self.staging_websocket_url = "wss://api.staging.netrasystems.ai/ws"
 
         self.test_user_email = f"e2e_golden_path_issue_1087_{self.generate_test_id()}@example.com"
         self.timeout = 30.0  # 30 second timeout for staging operations
@@ -38,10 +38,10 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
     async def test_golden_path_authentication_with_bypass_key(self):
         """Test complete Golden Path authentication flow with E2E bypass key.
 
-        CRITICAL BUSINESS VALUE: Validates $500K+ ARR Golden Path restoration.
-        Tests complete auth flow: bypass key → JWT token → WebSocket connection.
+        CRITICAL BUSINESS VALUE: Validates 500K+ ARR Golden Path restoration.
+        Tests complete auth flow: bypass key -> JWT token -> WebSocket connection.
 
-        Expected: FAIL initially → PASS after configuration fix
+        Expected: FAIL initially -> PASS after configuration fix
         """
         print("\n🚀 GOLDEN PATH E2E TEST: Complete authentication flow")
         print(f"Test User: {self.test_user_email}")
@@ -51,7 +51,7 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
             # Step 1: Attempt E2E bypass key authentication
             bypass_key = self.env.get("E2E_OAUTH_SIMULATION_KEY")
             if not bypass_key:
-                print("⚠️  WARNING: E2E_OAUTH_SIMULATION_KEY not found in environment")
+                print("WARNING️  WARNING: E2E_OAUTH_SIMULATION_KEY not found in environment")
                 print("   Attempting to test against staging configuration...")
 
             # Prepare E2E authentication request
@@ -97,7 +97,7 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
                                     f"ISSUE #1087 GOLDEN PATH BLOCKED: "
                                     f"E2E bypass key authentication failed in staging. "
                                     f"Status: {response.status}, Response: {response_text}. "
-                                    f"This completely blocks $500K+ ARR Golden Path functionality. "
+                                    f"This completely blocks 500K+ ARR Golden Path functionality. "
                                     f"Configuration fix required for E2E_OAUTH_SIMULATION_KEY."
                                 )
 
@@ -118,7 +118,7 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
 
                             assert access_token, f"No access token in response: {auth_result}"
 
-                            print(f"✅ GOLDEN PATH RESTORED: E2E authentication successful")
+                            print(f"CHECK GOLDEN PATH RESTORED: E2E authentication successful")
                             print(f"   Access Token: {access_token[:20]}...")
 
                             # Step 3: Test authenticated WebSocket connection
@@ -155,7 +155,7 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
                 close_timeout=10
             ) as websocket:
 
-                print("   ✅ WebSocket connection established successfully")
+                print("   CHECK WebSocket connection established successfully")
 
                 # Test basic WebSocket functionality
                 test_message = {
@@ -174,11 +174,10 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
                         timeout=10.0
                     )
                     print(f"   📥 WebSocket response received: {response[:100]}...")
-                    print("   ✅ GOLDEN PATH WEBSOCKET: Authenticated connection working")
+                    print("   CHECK GOLDEN PATH WEBSOCKET: Authenticated connection working")
 
                 except asyncio.TimeoutError:
-                    print("   ⚠️  WebSocket response timeout (may be normal for test message)")
-                    print("   ✅ GOLDEN PATH WEBSOCKET: Connection established successfully")
+                    print("   WARNING️  WebSocket response timeout (may be normal for test message)""   CHECK GOLDEN PATH WEBSOCKET: Connection established successfully")
 
         except websockets.ConnectionClosed as e:
             pytest.fail(f"WebSocket connection closed unexpectedly: {e}")
@@ -194,7 +193,7 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
         Tests that WebSocket connections can be established after successful
         E2E bypass key authentication.
 
-        Expected: FAIL initially → PASS after configuration fix
+        Expected: FAIL initially -> PASS after configuration fix
         """
         print("\n🔗 WEBSOCKET E2E TEST: Authenticated connection")
 
@@ -210,7 +209,7 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
         Validates that agents can execute and return substantive responses
         after successful E2E bypass key authentication.
 
-        Expected: FAIL initially → PASS after configuration fix
+        Expected: FAIL initially -> PASS after configuration fix
         """
         print("\n🤖 AGENT EXECUTION E2E TEST: Authenticated agent pipeline")
         print("   Testing complete agent workflow with E2E authentication")
@@ -252,7 +251,7 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
 
                     if response.status == 200:
                         result = await response.json()
-                        print(f"   ✅ AGENT EXECUTION SUCCESSFUL: {result.get('status', 'Unknown')}")
+                        print(f"   CHECK AGENT EXECUTION SUCCESSFUL: {result.get('status', 'Unknown')}")
                         print("   🚀 GOLDEN PATH AGENT PIPELINE: Working end-to-end")
 
                         # Validate substantive response (not just technical success)
@@ -310,7 +309,7 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
         INFRASTRUCTURE VALIDATION: Verifies bypass key is properly configured
         in staging environment through both environment variable and Secret Manager.
 
-        Expected: FAIL initially → PASS after configuration fix
+        Expected: FAIL initially -> PASS after configuration fix
         """
         print("\n⚙️  INFRASTRUCTURE TEST: Staging bypass key configuration")
 
@@ -319,7 +318,7 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
 
             # Test 1: Environment variable configuration
             env_bypass_key = self.env.get("E2E_OAUTH_SIMULATION_KEY")
-            print(f"   Environment Variable (E2E_OAUTH_SIMULATION_KEY): {'✅ SET' if env_bypass_key else '❌ NOT SET'}")
+            print(f"   Environment Variable (E2E_OAUTH_SIMULATION_KEY): {'CHECK SET' if env_bypass_key else 'X NOT SET'}")
 
             if env_bypass_key:
                 print(f"   Key length: {len(env_bypass_key)} characters")
@@ -327,14 +326,14 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
             # Test 2: AuthSecretLoader configuration method
             try:
                 configured_key = AuthSecretLoader.get_E2E_OAUTH_SIMULATION_KEY()
-                print(f"   AuthSecretLoader result: {'✅ CONFIGURED' if configured_key else '❌ NOT CONFIGURED'}")
+                print(f"   AuthSecretLoader result: {'CHECK CONFIGURED' if configured_key else 'X NOT CONFIGURED'}")
 
                 if configured_key:
                     print(f"   Configured key length: {len(configured_key)} characters")
                     assert len(configured_key) > 10, "Bypass key should be sufficiently long for security"
 
             except Exception as e:
-                print(f"   ❌ AuthSecretLoader error: {e}")
+                print(f"   X AuthSecretLoader error: {e}")
                 configured_key = None
 
             # Test 3: Overall configuration status
@@ -354,7 +353,7 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
                 )
 
             else:
-                print("✅ CONFIGURATION SUCCESS: E2E bypass key properly configured")
+                print("CHECK CONFIGURATION SUCCESS: E2E bypass key properly configured")
                 print("   🚀 Infrastructure ready for Golden Path authentication")
 
                 # Test configuration with actual auth endpoint
@@ -390,7 +389,7 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
                 ) as response:
 
                     if response.status == 200:
-                        print("   ✅ Bypass key validation successful with auth endpoint")
+                        print("   CHECK Bypass key validation successful with auth endpoint")
                         result = await response.json()
                         assert result.get('access_token'), "Should receive access token"
 
@@ -413,4 +412,4 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
     def get_current_timestamp(self) -> str:
         """Get current timestamp for test messages."""
         import datetime
-        return datetime.datetime.utcnow().isoformat() + "Z"
+        return datetime.datetime.now(UTC).isoformat() + "Z"

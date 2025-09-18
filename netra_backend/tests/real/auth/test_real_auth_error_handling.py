@@ -17,7 +17,7 @@ failures when authentication components encounter errors.
 import asyncio
 import json
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List
 from unittest.mock import patch, MagicMock
 import pytest
@@ -80,26 +80,26 @@ class RealAuthErrorHandlingTests:
 
     def create_token_with_wrong_secret(self) -> str:
         """Create JWT token with wrong secret for testing."""
-        payload = {JWTConstants.SUBJECT: 'test_user', JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp())}
+        payload = {JWTConstants.SUBJECT: 'test_user', JWTConstants.ISSUED_AT: int(datetime.now(UTC).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) + timedelta(minutes=30)).timestamp())}
         return jwt.encode(payload, 'wrong_secret_key', algorithm=JWTConstants.HS256_ALGORITHM)
 
     def create_expired_token(self) -> str:
         """Create expired JWT token for testing."""
-        expired_time = datetime.utcnow() - timedelta(hours=1)
+        expired_time = datetime.now(UTC) - timedelta(hours=1)
         payload = {JWTConstants.SUBJECT: 'expired_user', JWTConstants.ISSUED_AT: int(expired_time.timestamp()), JWTConstants.EXPIRES_AT: int(expired_time.timestamp())}
         secret = env.get_env_var(JWTConstants.JWT_SECRET_KEY, 'test_secret')
         return jwt.encode(payload, secret, algorithm=JWTConstants.HS256_ALGORITHM)
 
     def create_future_token(self) -> str:
         """Create JWT token issued in the future for testing."""
-        future_time = datetime.utcnow() + timedelta(hours=1)
+        future_time = datetime.now(UTC) + timedelta(hours=1)
         payload = {JWTConstants.SUBJECT: 'future_user', JWTConstants.ISSUED_AT: int(future_time.timestamp()), JWTConstants.EXPIRES_AT: int((future_time + timedelta(hours=1)).timestamp())}
         secret = env.get_env_var(JWTConstants.JWT_SECRET_KEY, 'test_secret')
         return jwt.encode(payload, secret, algorithm=JWTConstants.HS256_ALGORITHM)
 
     def create_token_missing_claims(self) -> str:
         """Create JWT token missing required claims for testing."""
-        payload = {JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp())}
+        payload = {JWTConstants.ISSUED_AT: int(datetime.now(UTC).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) + timedelta(minutes=30)).timestamp())}
         secret = env.get_env_var(JWTConstants.JWT_SECRET_KEY, 'test_secret')
         return jwt.encode(payload, secret, algorithm=JWTConstants.HS256_ALGORITHM)
 
@@ -190,7 +190,7 @@ class RealAuthErrorHandlingTests:
             user_message = scenario['user_message']
             expected_status = scenario['status_code']
             print(f' SEARCH:  Testing OAuth error scenario: {scenario_name}')
-            oauth_error_response = {'error': error_code, 'error_description': user_message, 'status_code': expected_status, 'user_friendly': True, 'retry_after': 60 if error_code == 'rate_limited' else None, 'support_contact': 'support@netra.ai' if error_code == 'invalid_credentials' else None}
+            oauth_error_response = {'error': error_code, 'error_description': user_message, 'status_code': expected_status, 'user_friendly': True, 'retry_after': 60 if error_code == 'rate_limited' else None, 'support_contact': 'support@netrasystems.ai' if error_code == 'invalid_credentials' else None}
             assert oauth_error_response['error'] == error_code
             assert len(oauth_error_response['error_description']) > 0
             assert oauth_error_response['user_friendly'] is True
@@ -212,7 +212,7 @@ class RealAuthErrorHandlingTests:
             expected_status = scenario['status_code']
             security_alert = scenario.get('security_alert', False)
             print(f' SEARCH:  Testing permission error scenario: {scenario_name}')
-            permission_error = {'error': AuthErrorConstants.FORBIDDEN, 'message': self.get_permission_error_message(scenario_name), 'status_code': expected_status, 'resource': resource, 'user_permissions': user_permissions, 'required_permissions': scenario.get('required_permissions', []), 'security_logged': security_alert, 'timestamp': datetime.utcnow().isoformat()}
+            permission_error = {'error': AuthErrorConstants.FORBIDDEN, 'message': self.get_permission_error_message(scenario_name), 'status_code': expected_status, 'resource': resource, 'user_permissions': user_permissions, 'required_permissions': scenario.get('required_permissions', []), 'security_logged': security_alert, 'timestamp': datetime.now(UTC).isoformat()}
             assert permission_error['status_code'] in [401, 403, 404]
             assert len(permission_error['message']) > 0
             assert permission_error['resource'] == resource
@@ -239,7 +239,7 @@ class RealAuthErrorHandlingTests:
             retry_after = scenario['retry_after']
             message = scenario['message']
             print(f' SEARCH:  Testing rate limit error scenario: {scenario_name}')
-            rate_limit_error = {'error': 'rate_limit_exceeded', 'message': message, 'status_code': 429, 'limit_type': limit_type, 'limit': limit, 'window': window, 'retry_after': retry_after, 'reset_time': (datetime.utcnow() + timedelta(seconds=retry_after)).isoformat(), 'headers': {'Retry-After': str(retry_after), 'X-RateLimit-Limit': str(limit), 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': str(int(datetime.utcnow().timestamp()) + retry_after)}}
+            rate_limit_error = {'error': 'rate_limit_exceeded', 'message': message, 'status_code': 429, 'limit_type': limit_type, 'limit': limit, 'window': window, 'retry_after': retry_after, 'reset_time': (datetime.now(UTC) + timedelta(seconds=retry_after)).isoformat(), 'headers': {'Retry-After': str(retry_after), 'X-RateLimit-Limit': str(limit), 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': str(int(datetime.now(UTC).timestamp()) + retry_after)}}
             assert rate_limit_error['status_code'] == 429
             assert rate_limit_error['retry_after'] > 0
             assert 'Retry-After' in rate_limit_error['headers']
@@ -264,7 +264,7 @@ class RealAuthErrorHandlingTests:
             available_features = scenario['available_features']
             recovery_action = scenario['recovery_action']
             print(f'[U+1F527] Testing system recovery scenario: {description}')
-            recovery_response = {'system_status': 'degraded', 'scenario': scenario_name, 'description': description, 'degraded_features': degraded_features, 'available_features': available_features, 'recovery_action': recovery_action, 'estimated_recovery_time': '5-15 minutes', 'status_page': 'https://status.netra.ai', 'user_message': self.get_system_recovery_message(scenario_name)}
+            recovery_response = {'system_status': 'degraded', 'scenario': scenario_name, 'description': description, 'degraded_features': degraded_features, 'available_features': available_features, 'recovery_action': recovery_action, 'estimated_recovery_time': '5-15 minutes', 'status_page': 'https://status.netrasystems.ai', 'user_message': self.get_system_recovery_message(scenario_name)}
             assert recovery_response['system_status'] == 'degraded'
             assert len(recovery_response['available_features']) > 0
             assert len(recovery_response['user_message']) > 0

@@ -33,20 +33,30 @@ from fastapi import HTTPException, WebSocket
 
 from netra_backend.app.clients.auth_client_core import (
     AuthServiceClient,
-    AuthServiceError, 
+    AuthServiceError,
     AuthServiceConnectionError,
     AuthServiceNotAvailableError,
     AuthServiceValidationError,
     validate_jwt_format
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_logging
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
-# REMOVED DUPLICATE: Use SSOT function from websocket_core.utils
+def _safe_websocket_state_for_logging(state) -> str:
+    """
+    Safely convert WebSocketState enum to string for logging.
+
+    Local implementation to avoid circular imports with websocket_core.utils.
+    """
+    try:
+        if hasattr(state, 'value'):
+            return str(state.value)
+        return str(state)
+    except Exception:
+        return "unknown_state"
 
 
 class AuthResult:

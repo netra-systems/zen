@@ -59,7 +59,7 @@ WebSocket connections to staging environment (`wss://api.staging.netrasystems.ai
 **Evidence**:
 - Staging test users must exist in staging database: `staging-e2e-user-001`, `staging-e2e-user-002`, `staging-e2e-user-003`
 - JWT secret resolution follows unified path: `JWT_SECRET_STAGING` → `JWT_SECRET_KEY` → fallbacks
-- Previous SERVICE_ID mismatch was fixed (`netra-backend` vs `netra-auth-staging-1757260376`)
+- Previous SERVICE_ID mismatch was fixed (`netra-backend` vs `netra-auth-1757260376`)
 - WebSocket authentication extracts user context then validates against database
 
 **Key Insight**: Authentication has two layers - JWT validation AND database user validation.

@@ -22,7 +22,7 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, Optional, List
@@ -30,12 +30,12 @@ from typing import Dict, Any, Optional, List
 from fastapi import APIRouter, HTTPException, Query, Depends
 from pydantic import BaseModel
 
-from netra_backend.app.core.config import get_config
+from netra_backend.app.config import get_config  # SSOT UnifiedConfigManager
 from shared.isolated_environment import get_env
 from shared.database_url_builder import DatabaseURLBuilder
 from netra_backend.app.db.database_manager import get_database_manager
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Health check router
 health_router = APIRouter(prefix="/health", tags=["health"])

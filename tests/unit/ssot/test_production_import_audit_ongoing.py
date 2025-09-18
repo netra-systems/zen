@@ -230,13 +230,13 @@ class ProductionImportAuditOngoingTests(SSotBaseTestCase):
     def _generate_audit_report(self, scan_results: Dict[str, List[Dict[str, Any]]]) -> str:
         """Generate detailed audit report"""
         if not scan_results:
-            return '✅ NO VIOLATIONS FOUND - Production code is SSOT compliant'
+            return 'CHECK NO VIOLATIONS FOUND - Production code is SSOT compliant'
         report_lines = ['🚨 SSOT IMPORT AUDIT REPORT', '=' * 50, f'Total files with violations: {len(scan_results)}', '']
         for file_path, violations in scan_results.items():
             report_lines.append(f'📄 {file_path}')
             report_lines.append(f'   Violations: {len(violations)}')
             for violation in violations:
-                report_lines.append(f"   ⚠️  Line {violation['line']}: {violation['violation_type']}")
+                report_lines.append(f"   WARNING️  Line {violation['line']}: {violation['violation_type']}")
                 report_lines.append(f"      Content: {violation['content']}")
             report_lines.append('')
         return '\n'.join(report_lines)

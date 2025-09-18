@@ -4,14 +4,14 @@ Handles HTTP requests to external APIs with retry logic, rate limiting, and erro
 """
 
 import asyncio
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Dict, Any, Optional, List, Union
 from dataclasses import dataclass
 from enum import Enum
 import aiohttp
 import time
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class HTTPError(Exception):

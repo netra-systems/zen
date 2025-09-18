@@ -72,10 +72,15 @@ from netra_backend.app.services.user_execution_context import AgentExecutionCont
 # WebSocket Agent Bridge (CRITICAL - VERIFIED 2025-09-11)
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 
-# WebSocket Manager (CRITICAL - UPDATED 2025-09-14 - Issue #1182 Phase 1 Complete)
+# WebSocket Manager (CRITICAL - UPDATED 2025-09-15 - Issue #1098 SSOT Implementation)
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection, WebSocketManagerMode
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerFactory  # CONSOLIDATED: No longer separate module
+
+# WebSocket SSOT Interface (NEW - Issue #1098 Phase 1 - 2025-09-15)
+from netra_backend.app.websocket_core.ssot_interface import WebSocketNotificationInterface, SSotWebSocketBridge
+from netra_backend.app.websocket_core.ssot_interface import create_ssot_websocket_bridge  # ✅ CANONICAL: Factory function
+from netra_backend.app.websocket_core.migration_utility import MigrationUtility, create_migration_utility  # Migration support
 
 # Request Scoped Execution (VERIFIED 2025-09-11)
 from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
@@ -140,7 +145,7 @@ from netra_backend.app.agents.state import DeepAgentState
 
 # Specialized Agents (Requires Verification)
 from netra_backend.app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent  # ❓
-from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearcherAgent  # ❓
+from netra_backend.app.agents.supply_researcher import SupplyResearcherAgent  # ✅
 ```
 
 #### ❌ BROKEN IMPORTS (Do Not Use):

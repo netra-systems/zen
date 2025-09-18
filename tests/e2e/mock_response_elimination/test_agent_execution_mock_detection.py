@@ -2,7 +2,7 @@
 Agent Execution Mock Response Detection Tests
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise) - $500K+ ARR at risk
+- Segment: All (Free, Early, Mid, Enterprise) - 500K+ ARR at risk
 - Business Goal: Ensure 100% authentic AI responses for agent execution
 - Value Impact: Prevent customer churn from receiving inauthentic AI responses
 - Strategic Impact: Core platform credibility depends on authentic agent interactions
@@ -44,7 +44,7 @@ class AgentExecutionMockDetectionTests(BaseE2ETest):
         """
         FAILING TEST: Proves ModelCascade fallback reaches users.
         
-        Business Value: Enterprise users ($50K+ ARR) must not receive 
+        Business Value: Enterprise users (50K+ ARR) must not receive 
         generic fallback responses during optimization queries.
         
         Expected Failure: Currently returns 
@@ -98,7 +98,7 @@ class AgentExecutionMockDetectionTests(BaseE2ETest):
         """
         FAILING TEST: Proves execution agent returns templated fallback.
         
-        Business Value: Mid-tier users ($10K+ ARR) expect real AI processing,
+        Business Value: Mid-tier users (10K+ ARR) expect real AI processing,
         not templated responses.
         
         Expected Failure: Currently returns 
@@ -141,7 +141,7 @@ class AgentExecutionMockDetectionTests(BaseE2ETest):
         """
         FAILING TEST: Enterprise customers can receive mock responses.
         
-        Business Value: $500K+ ARR customers must NEVER receive inauthentic
+        Business Value: 500K+ ARR customers must NEVER receive inauthentic
         responses that could damage trust and cause churn.
         
         This test simulates a high-value enterprise customer scenario

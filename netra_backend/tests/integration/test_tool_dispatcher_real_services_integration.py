@@ -23,7 +23,7 @@ import pytest
 import asyncio
 import uuid
 from typing import Dict, Any, List
-from datetime import datetime
+from datetime import datetime, UTC
 
 from langchain_core.tools import BaseTool
 
@@ -58,7 +58,7 @@ class DatabaseAnalyzerTool(BaseTool):
             return {
                 "query_executed": query,
                 "status": "success",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
         except Exception as e:
             return {"error": str(e), "status": "failed"}
@@ -77,7 +77,7 @@ class DatabaseAnalyzerTool(BaseTool):
                 "query_executed": query,
                 "result": dict(row) if row else None,
                 "status": "success",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
         except Exception as e:
             return {"error": str(e), "status": "failed"}

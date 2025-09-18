@@ -2,10 +2,10 @@
 Mission Critical Test: Concurrent User Isolation Violation Proof
 
 This test is designed to FAIL initially, proving that WebSocket SSOT violations
-cause 0% success rate for concurrent users - blocking $500K+ ARR.
+cause 0% success rate for concurrent users - blocking 500K+ ARR.
 
 Business Impact:
-- $500K+ ARR at immediate risk from non-functional concurrent chat
+- 500K+ ARR at immediate risk from non-functional concurrent chat
 - 90% of platform value blocked (chat is core business)
 - 0% concurrent user success rate due to shared state violations
 
@@ -41,7 +41,7 @@ class ConcurrentUserIsolationTests(SSotAsyncTestCase):
     CRITICAL: This test proves concurrent user isolation violations.
 
     EXPECTED RESULT: FAIL - proving 0% concurrent user success rate
-    BUSINESS IMPACT: $500K+ ARR blocked by WebSocket SSOT violations
+    BUSINESS IMPACT: 500K+ ARR blocked by WebSocket SSOT violations
     """
 
     def setup_method(self):
@@ -58,7 +58,7 @@ class ConcurrentUserIsolationTests(SSotAsyncTestCase):
         CRITICAL BUSINESS TEST: Prove concurrent user isolation violations
 
         Expected Result: FAIL - Cross-contamination between users detected
-        Business Impact: $500K+ ARR - chat functionality completely broken for concurrent users
+        Business Impact: 500K+ ARR - chat functionality completely broken for concurrent users
         """
         if not all([UnifiedWebSocketManager, ExecutionEngine, UserExecutionContext]):
             pytest.skip("SSOT imports not available - expected during migration")
@@ -99,7 +99,7 @@ class ConcurrentUserIsolationTests(SSotAsyncTestCase):
 
         # Overall concurrent success rate
         self.concurrent_success_rate = (user1_success + user2_success) / 2
-        assert self.concurrent_success_rate == 1.0, f"BUSINESS CRITICAL: Concurrent success rate: {self.concurrent_success_rate}% - $500K+ ARR at risk"
+        assert self.concurrent_success_rate == 1.0, f"BUSINESS CRITICAL: Concurrent success rate: {self.concurrent_success_rate}% - 500K+ ARR at risk"
 
     async def _create_user_context(self, user_id: str) -> UserExecutionContext:
         """Create isolated user execution context."""

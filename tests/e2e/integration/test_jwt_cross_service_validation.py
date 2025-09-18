@@ -148,7 +148,7 @@ class CrossServiceJWTValidator:
                         except Exception:
                             pass
                         return {'success': True, 'connected': True, 'response_received': False, 'user_id': user_id, 'duration': self.performance.get_duration(start_time), 'service': 'websocket'}
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 return {'success': True, 'connected': False, 'reason': 'connection_rejected', 'duration': self.performance.get_duration(start_time), 'service': 'websocket'}
             except Exception as e:
                 if '401' in str(e) or 'Unauthorized' in str(e):

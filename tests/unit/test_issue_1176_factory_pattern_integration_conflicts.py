@@ -18,7 +18,7 @@ Business Value Justification:
 - Segment: Platform/Internal
 - Business Goal: Stability & SSOT Compliance
 - Value Impact: Ensures factory patterns integrate correctly across components
-- Strategic Impact: Protects $500K+ ARR by preventing factory integration failures
+- Strategic Impact: Protects 500K+ ARR by preventing factory integration failures
 """
 
 import pytest

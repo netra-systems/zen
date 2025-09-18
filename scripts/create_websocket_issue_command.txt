@@ -1,0 +1,22 @@
+## GitHub Issue Creation Command
+
+Run this command to create the critical WebSocket Manager issue:
+
+```bash
+gh issue create \
+  --title "P0 CRITICAL: WebSocket Manager Emergency Cleanup Failure Blocking Golden Path User Flow" \
+  --label "P0,critical,golden-path,websocket,user-flow,chat-functionality,actively-being-worked-on,agent-session-20250916_090806" \
+  --body-file websocket_emergency_cleanup_issue.md
+```
+
+## Alternative Manual Creation
+
+If the CLI command doesn't work, create the issue manually on GitHub:
+
+1. Go to: https://github.com/netra-systems/netra-apex/issues/new
+2. Title: "P0 CRITICAL: WebSocket Manager Emergency Cleanup Failure Blocking Golden Path User Flow"
+3. Labels: P0, critical, golden-path, websocket, user-flow, chat-functionality, actively-being-worked-on, agent-session-20250916_090806
+4. Body: Copy content from websocket_emergency_cleanup_issue.md
+
+## Expected Issue Number
+The issue will be assigned the next available issue number. After creation, update any workflows with this number.

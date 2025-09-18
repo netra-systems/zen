@@ -16,7 +16,6 @@ from unittest.mock import AsyncMock, MagicMock
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from httpx import AsyncClient, ASGITransport
-import jwt
 
 from netra_backend.app.main import create_app
 from netra_backend.app.logging_config import central_logger

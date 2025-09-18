@@ -262,7 +262,7 @@ class BroadcastFunctionSSotComplianceTests(SSotBaseTestCase):
             print("\nDebug: Checking specific target files:")
             for file_path in target_files:
                 if file_path.exists():
-                    print(f"  ✓ {file_path} exists")
+                    print(f"  CHECK {file_path} exists")
                     try:
                         with open(file_path, 'r', encoding='utf-8') as f:
                             content = f.read()
@@ -439,7 +439,7 @@ class BroadcastFunctionSSotComplianceTests(SSotBaseTestCase):
             self.fail(f"Canonical function missing required parameters: {missing_params}. "
                      f"Current parameters: {canonical_func.parameters}")
 
-        print("✓ Canonical broadcast function validation complete")
+        print("CHECK Canonical broadcast function validation complete")
 
     def _normalize_signature(self, parameters: List[str]) -> str:
         """Normalize function signature for comparison."""
@@ -617,7 +617,7 @@ class BroadcastFunctionDiscoveryTests(SSotBaseTestCase):
 
         # ASSERTION: Should detect multiple import paths (SSOT violation)
         if len(import_modules) <= 2:  # Allow some flexibility for test imports
-            print("✓ Reasonable number of import patterns found")
+            print("CHECK Reasonable number of import patterns found")
         else:
             self.fail(f"IMPORT PATH VIOLATION: Found {len(import_modules)} different import patterns "
                      f"for broadcast functionality. Multiple import paths indicate SSOT violation. "

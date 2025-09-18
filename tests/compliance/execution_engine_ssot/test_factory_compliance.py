@@ -4,7 +4,7 @@ PURPOSE: Validate all factories create UserExecutionEngine instances only
 SHOULD FAIL NOW: Factories create different engine types
 SHOULD PASS AFTER: All factories create UserExecutionEngine
 
-Business Value: Prevents $500K+ ARR factory-based user isolation bypass
+Business Value: Prevents 500K+ ARR factory-based user isolation bypass
 """
 
 import ast
@@ -58,7 +58,7 @@ class FactoryComplianceTests(SSotBaseTestCase):
         self.assertGreater(
             total_factories,
             1,  # Should have more than one factory (VIOLATION)
-            f"❌ SSOT VIOLATION: Found {total_factories} factory classes. "
+            f"X SSOT VIOLATION: Found {total_factories} factory classes. "
             "Only one SSOT ExecutionEngineFactory should exist."
         )
 
@@ -75,14 +75,14 @@ class FactoryComplianceTests(SSotBaseTestCase):
                 rel_path = file_path.relative_to(self.project_root)
                 print(f"   📁 {rel_path}:")
                 for violation in violations:
-                    print(f"      ❌ {violation}")
+                    print(f"      X {violation}")
                     violation_count += 1
 
         # TEST SHOULD FAIL NOW - Return type violations detected
         self.assertGreater(
             violation_count,
             0,
-            f"❌ SSOT VIOLATION: Found {violation_count} factory return type violations. "
+            f"X SSOT VIOLATION: Found {violation_count} factory return type violations. "
             f"All factories must return {self.ssot_execution_engine} instances."
         )
 
@@ -99,14 +99,14 @@ class FactoryComplianceTests(SSotBaseTestCase):
                 rel_path = file_path.relative_to(self.project_root)
                 print(f"   📁 {rel_path}:")
                 for violation in violations:
-                    print(f"      ❌ {violation}")
+                    print(f"      X {violation}")
                     violation_count += 1
 
         # TEST SHOULD FAIL NOW - Instantiation violations detected
         self.assertGreater(
             violation_count,
             0,
-            f"❌ SSOT VIOLATION: Found {violation_count} factory instantiation violations. "
+            f"X SSOT VIOLATION: Found {violation_count} factory instantiation violations. "
             "Factories must only instantiate SSOT execution engines."
         )
 
@@ -120,13 +120,13 @@ class FactoryComplianceTests(SSotBaseTestCase):
         if interface_violations:
             print("   Interface Violations:")
             for violation in interface_violations:
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - Interface violations detected
         self.assertGreater(
             len(interface_violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(interface_violations)} factory interface violations. "
+            f"X SSOT VIOLATION: Found {len(interface_violations)} factory interface violations. "
             "All factories must follow SSOT interface patterns."
         )
 
@@ -143,14 +143,14 @@ class FactoryComplianceTests(SSotBaseTestCase):
                 rel_path = file_path.relative_to(self.project_root)
                 print(f"   📁 {rel_path}:")
                 for violation in violations:
-                    print(f"      ❌ {violation}")
+                    print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - Dependency injection violations detected
         total_violations = sum(len(violations) for violations in dependency_violations.values())
         self.assertGreater(
             total_violations,
             0,
-            f"❌ SSOT VIOLATION: Found {total_violations} dependency injection violations. "
+            f"X SSOT VIOLATION: Found {total_violations} dependency injection violations. "
             "Factories must inject SSOT execution engines only."
         )
 

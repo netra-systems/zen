@@ -5,7 +5,7 @@ This test suite addresses the critical coverage gap identified in Issue #872
 for agent execution engine factory patterns, focusing on per-user isolation,
 resource management, and proper factory instantiation for multi-tenant scenarios.
 
-Business Value: Platform/Internal - Protects $500K+ ARR multi-user functionality
+Business Value: Platform/Internal - Protects 500K+ ARR multi-user functionality
 by ensuring proper user isolation, preventing memory leaks, and maintaining
 scalable execution patterns across concurrent agent operations.
 

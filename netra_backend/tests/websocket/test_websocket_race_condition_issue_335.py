@@ -15,7 +15,7 @@ Expected Behavior:
 - Initial tests should FAIL, demonstrating the race condition exists
 - After implementing the fix, tests should PASS
 
-Business Value: $500K+ ARR depends on reliable WebSocket communication
+Business Value: 500K+ ARR depends on reliable WebSocket communication
 """
 
 import asyncio

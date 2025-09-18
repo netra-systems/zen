@@ -5,7 +5,7 @@ Business Value Justification:
 - Segment: Platform/Internal
 - Business Goal: Critical Production Issue Resolution
 - Value Impact: Reproduces exact production failure scenario causing 100% WebSocket failure rate
-- Strategic Impact: Prevents $500K+ ARR loss from complete WebSocket service outage
+- Strategic Impact: Prevents 500K+ ARR loss from complete WebSocket service outage
 
 CRITICAL MISSION: Reproduce the EXACT WebSocket 1011 internal server error that is
 causing 100% failure rate on agent message processing in staging and production.

@@ -8,7 +8,7 @@ UserExecutionEngine instances and properly accepts UserExecutionContext paramete
 Uses REAL database connections (NO Docker required).
 
 BUSINESS IMPACT:
-- $500K+ ARR protected by ensuring consistent UserExecutionEngine creation
+- 500K+ ARR protected by ensuring consistent UserExecutionEngine creation
 - Factory interface consistency enables reliable multi-user execution
 - Proper UserExecutionContext handling ensures user isolation
 - Consistent factory behavior prevents AI response delivery failures
@@ -122,7 +122,7 @@ class UserExecutionEngineFactoryConsistency884Tests(SSotAsyncTestCase):
             raise AssertionError(
                 f"CRITICAL: Factory import failed: {e}. "
                 f"This indicates factory consolidation issues that prevent "
-                f"consistent UserExecutionEngine creation for $500K+ ARR Golden Path."
+                f"consistent UserExecutionEngine creation for 500K+ ARR Golden Path."
             )
         
         # Create test UserExecutionContext instances

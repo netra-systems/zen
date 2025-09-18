@@ -216,20 +216,14 @@ class StagingConfigurationValidator:
     
     def _validate_auth_config(self) -> None:
         """Validate authentication configuration."""
-        jwt_secret = self._env.get('JWT_SECRET_KEY', '')
+        # JWT validation removed - JWT operations delegated to auth service (SSOT compliance)
         service_secret = self._env.get('SERVICE_SECRET', '')
-        
-        # Check JWT secret strength
-        if jwt_secret and len(jwt_secret) < 32:
-            self._errors.append(f"JWT_SECRET_KEY is too short ({len(jwt_secret)} chars), minimum 32 required")
-        
-        # Check service secret strength  
+
+        # Check service secret strength
         if service_secret and len(service_secret) < 32:
             self._errors.append(f"SERVICE_SECRET is too short ({len(service_secret)} chars), minimum 32 required")
-        
-        # Ensure secrets are different
-        if jwt_secret and service_secret and jwt_secret == service_secret:
-            self._errors.append("JWT_SECRET_KEY and SERVICE_SECRET must be different")
+
+        # JWT vs SERVICE_SECRET comparison removed - JWT operations delegated to auth service (SSOT compliance)
     
     def _validate_gcp_config(self) -> None:
         """Validate GCP-specific configuration."""

@@ -106,7 +106,7 @@ class Issue860WebSocketInfrastructureFailuresTests(BaseIntegrationTest):
             ])
         ]
 
-        print(f"✓ Detected {len(windows_connection_errors)} Windows connection errors")
+        print(f"CHECK Detected {len(windows_connection_errors)} Windows connection errors")
         assert len(windows_connection_errors) > 0, \
             "Expected Windows connection errors for Issue #860 reproduction"
 
@@ -156,7 +156,7 @@ class Issue860WebSocketInfrastructureFailuresTests(BaseIntegrationTest):
         assert len(winerror_connections) > 0, \
             f"Expected WinError 1225 pattern, got: {failed_connections}"
 
-        print(f"✓ Reproduced {len(winerror_connections)} WinError 1225 WebSocket failures")
+        print(f"CHECK Reproduced {len(winerror_connections)} WinError 1225 WebSocket failures")
 
     async def _attempt_websocket_connection(self, url):
         """Attempt WebSocket connection and capture detailed error information."""
@@ -180,7 +180,7 @@ class Issue860WebSocketInfrastructureFailuresTests(BaseIntegrationTest):
                 "error_type": "TimeoutError"
             }
 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             return {
                 "url": url,
                 "status": "connection_closed",
@@ -280,7 +280,7 @@ class Issue860WebSocketInfrastructureFailuresTests(BaseIntegrationTest):
             ])
         ]
 
-        print(f"✓ Windows discovery errors: {windows_discovery_errors}")
+        print(f"CHECK Windows discovery errors: {windows_discovery_errors}")
 
     @pytest.mark.integration
     
@@ -369,7 +369,7 @@ class Issue860WebSocketInfrastructureFailuresTests(BaseIntegrationTest):
         assert len(initialization_failures) > 0, \
             f"Expected WebSocket factory initialization failures: {factory_test_results}"
 
-        print(f"✓ WebSocket factory failures: {initialization_failures}")
+        print(f"CHECK WebSocket factory failures: {initialization_failures}")
 
     @pytest.mark.integration
     
@@ -416,7 +416,7 @@ class Issue860WebSocketInfrastructureFailuresTests(BaseIntegrationTest):
             assert result["windows_errors"] > 0, \
                 f"Expected Windows errors in {step_name} step"
 
-        print(f"✓ Reproduced complete Issue #860 failure pattern across all steps")
+        print(f"CHECK Reproduced complete Issue #860 failure pattern across all steps")
 
     async def _test_health_check_failures(self):
         """Test health check failures."""

@@ -93,8 +93,9 @@ class UserRedisClient:
                 return
             
             try:
-                # Create isolated Redis manager for this user
-                self._manager = RedisManager(test_mode=False)
+                # Use SSOT Redis manager instead of direct instantiation
+                from netra_backend.app.redis_manager import redis_manager
+                self._manager = redis_manager
                 
                 # Initialize the connection
                 await self._manager.connect()

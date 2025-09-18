@@ -91,12 +91,12 @@ class MigrationPerformanceImpactTests(SSotAsyncTestCase):
             unique_session_ids = set(generated_session_ids)
             uniqueness_rate = len(unique_session_ids) / len(generated_session_ids)
             assert uniqueness_rate == 1.0, f'SESSION ID UNIQUENESS FAILURE: {len(unique_session_ids)}/{len(generated_session_ids)} unique IDs ({uniqueness_rate:.3f} rate). ID collisions detected at scale.'
-            print(f'\n✅ SESSION ID GENERATION PERFORMANCE SUCCESS:')
-            print(f'   ✓ Operations/sec: {performance_metrics.operations_per_second:.0f}')
-            print(f'   ✓ Memory Usage: {performance_metrics.memory_usage_mb:.1f}MB')
-            print(f'   ✓ Avg Latency: {performance_metrics.avg_time * 1000:.2f}ms')
-            print(f'   ✓ Success Rate: {performance_metrics.success_rate:.3f}')
-            print(f'   ✓ Uniqueness Rate: {uniqueness_rate:.3f}')
+            print(f'\nCHECK SESSION ID GENERATION PERFORMANCE SUCCESS:')
+            print(f'   CHECK Operations/sec: {performance_metrics.operations_per_second:.0f}')
+            print(f'   CHECK Memory Usage: {performance_metrics.memory_usage_mb:.1f}MB')
+            print(f'   CHECK Avg Latency: {performance_metrics.avg_time * 1000:.2f}ms')
+            print(f'   CHECK Success Rate: {performance_metrics.success_rate:.3f}')
+            print(f'   CHECK Uniqueness Rate: {uniqueness_rate:.3f}')
             print(f'   Status: Session ID generation performance validated')
         except Exception as e:
             pytest.fail(f'SESSION ID PERFORMANCE CRITICAL FAILURE: {e}')
@@ -175,14 +175,14 @@ class MigrationPerformanceImpactTests(SSotAsyncTestCase):
             assert uniqueness_rate == 1.0, f'CONCURRENT UNIQUENESS FAILURE: {len(unique_ids)}/{len(all_generated_ids)} unique IDs ({uniqueness_rate:.3f} rate). Race conditions causing ID collisions.'
             expected_memory_per_thread = memory_usage / num_threads
             assert expected_memory_per_thread <= 5.0, f'CONCURRENT MEMORY SCALING FAILURE: {expected_memory_per_thread:.1f}MB per thread, exceeds 5MB limit. Memory usage not scaling efficiently.'
-            print(f'\n✅ CONCURRENT ID GENERATION PERFORMANCE SUCCESS:')
-            print(f'   ✓ Threads: {num_threads}')
-            print(f'   ✓ Total Operations: {total_operations}')
-            print(f'   ✓ Overall Ops/sec: {concurrent_performance_metrics.operations_per_second:.0f}')
-            print(f'   ✓ Thread Success Rate: {thread_success_rate:.3f}')
-            print(f'   ✓ ID Uniqueness Rate: {uniqueness_rate:.3f}')
-            print(f'   ✓ Memory Usage: {memory_usage:.1f}MB ({expected_memory_per_thread:.1f}MB/thread)')
-            print(f'   ✓ Avg Latency: {concurrent_performance_metrics.avg_time * 1000:.2f}ms')
+            print(f'\nCHECK CONCURRENT ID GENERATION PERFORMANCE SUCCESS:')
+            print(f'   CHECK Threads: {num_threads}')
+            print(f'   CHECK Total Operations: {total_operations}')
+            print(f'   CHECK Overall Ops/sec: {concurrent_performance_metrics.operations_per_second:.0f}')
+            print(f'   CHECK Thread Success Rate: {thread_success_rate:.3f}')
+            print(f'   CHECK ID Uniqueness Rate: {uniqueness_rate:.3f}')
+            print(f'   CHECK Memory Usage: {memory_usage:.1f}MB ({expected_memory_per_thread:.1f}MB/thread)')
+            print(f'   CHECK Avg Latency: {concurrent_performance_metrics.avg_time * 1000:.2f}ms')
             print(f'   Status: Concurrent ID generation performance validated')
         except Exception as e:
             pytest.fail(f'CONCURRENT PERFORMANCE CRITICAL FAILURE: {e}')
@@ -257,15 +257,15 @@ class MigrationPerformanceImpactTests(SSotAsyncTestCase):
             uuid_baseline_memory_usage = uuid_baseline_memory_after - uuid_baseline_memory_before
             ssot_vs_uuid_memory_ratio = baseline_memory_usage / uuid_baseline_memory_usage if uuid_baseline_memory_usage > 0 else 1
             assert ssot_vs_uuid_memory_ratio <= 3.0, f'SSOT MEMORY EFFICIENCY FAILURE: SSOT uses {ssot_vs_uuid_memory_ratio:.2f}x more memory than UUID. SSOT: {baseline_memory_usage:.1f}MB, UUID: {uuid_baseline_memory_usage:.1f}MB'
-            print(f'\n✅ MEMORY EFFICIENCY POST-MIGRATION SUCCESS:')
-            print(f'   ✓ Baseline Operations: {baseline_operations}')
-            print(f'   ✓ Extended Operations: {extended_operations}')
-            print(f'   ✓ Baseline Memory Usage: {baseline_memory_usage:.1f}MB')
-            print(f'   ✓ Extended Memory Usage: {extended_memory_usage:.1f}MB')
-            print(f'   ✓ Memory Scaling Ratio: {memory_scaling_ratio:.2f}')
-            print(f'   ✓ GC Effectiveness: {gc_effectiveness:.1f}MB freed')
-            print(f'   ✓ Memory Cleanup Efficiency: {memory_cleanup_efficiency:.3f}')
-            print(f'   ✓ SSOT vs UUID Memory Ratio: {ssot_vs_uuid_memory_ratio:.2f}')
+            print(f'\nCHECK MEMORY EFFICIENCY POST-MIGRATION SUCCESS:')
+            print(f'   CHECK Baseline Operations: {baseline_operations}')
+            print(f'   CHECK Extended Operations: {extended_operations}')
+            print(f'   CHECK Baseline Memory Usage: {baseline_memory_usage:.1f}MB')
+            print(f'   CHECK Extended Memory Usage: {extended_memory_usage:.1f}MB')
+            print(f'   CHECK Memory Scaling Ratio: {memory_scaling_ratio:.2f}')
+            print(f'   CHECK GC Effectiveness: {gc_effectiveness:.1f}MB freed')
+            print(f'   CHECK Memory Cleanup Efficiency: {memory_cleanup_efficiency:.3f}')
+            print(f'   CHECK SSOT vs UUID Memory Ratio: {ssot_vs_uuid_memory_ratio:.2f}')
             print(f'   Status: Memory efficiency validated for SSOT ID generation')
         except Exception as e:
             pytest.fail(f'MEMORY EFFICIENCY CRITICAL FAILURE: {e}')
@@ -348,12 +348,12 @@ class MigrationPerformanceImpactTests(SSotAsyncTestCase):
             mean_latencies = [result['mean_latency'] for result in load_test_results]
             latency_variation = max(mean_latencies) / min(mean_latencies)
             assert latency_variation <= 2.0, f'LOAD-DEPENDENT LATENCY FAILURE: Latency varies by {latency_variation:.2f}x across load levels. Max: {max(mean_latencies):.2f}ms, Min: {min(mean_latencies):.2f}ms. Indicates performance degradation under load.'
-            print(f'\n✅ LATENCY IMPACT ANALYSIS SUCCESS:')
-            print(f"   ✓ UUID Baseline: {uuid_analysis['mean']:.2f}ms mean, {uuid_analysis['p95']:.2f}ms p95")
+            print(f'\nCHECK LATENCY IMPACT ANALYSIS SUCCESS:')
+            print(f"   CHECK UUID Baseline: {uuid_analysis['mean']:.2f}ms mean, {uuid_analysis['p95']:.2f}ms p95")
             for i, analysis in enumerate(ssot_analyses):
                 ratio = analysis['mean'] / uuid_analysis['mean']
-                print(f"   ✓ SSOT {ssot_names[i]}: {analysis['mean']:.2f}ms mean ({ratio:.1f}x), {analysis['p95']:.2f}ms p95, {analysis['p99']:.2f}ms p99")
-            print(f'   ✓ Load Stability: {latency_variation:.2f}x variation across load levels')
+                print(f"   CHECK SSOT {ssot_names[i]}: {analysis['mean']:.2f}ms mean ({ratio:.1f}x), {analysis['p95']:.2f}ms p95, {analysis['p99']:.2f}ms p99")
+            print(f'   CHECK Load Stability: {latency_variation:.2f}x variation across load levels')
             print(f'   Status: Latency impact analysis validated for SSOT ID generation')
         except Exception as e:
             pytest.fail(f'LATENCY IMPACT CRITICAL FAILURE: {e}')

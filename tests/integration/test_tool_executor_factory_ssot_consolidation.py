@@ -3,7 +3,7 @@ Integration Tests: ToolExecutorFactory SSOT Consolidation Validation
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - Core Infrastructure  
-- Business Goal: Ensure reliable tool execution for $500K+ ARR chat functionality
+- Business Goal: Ensure reliable tool execution for 500K+ ARR chat functionality
 - Value Impact: Validate single execution path with consistent WebSocket events
 - Strategic Impact: Prove golden path user flow works end-to-end after consolidation
 

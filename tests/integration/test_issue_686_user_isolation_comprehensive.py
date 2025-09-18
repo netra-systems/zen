@@ -79,7 +79,7 @@ class Issue686UserIsolationComprehensiveTests(SSotAsyncTestCase):
         causes users to see other users' data, breaking $500K+ ARR chat functionality.
 
         EXPECTED FAILURE: User contexts bleed during full Golden Path execution.
-        PASSES AFTER: Complete isolation from WebSocket → Agent → Response delivery.
+        PASSES AFTER: Complete isolation from WebSocket -> Agent -> Response delivery.
         """
         # Create multiple test users for concurrent testing
         num_concurrent_users = 3

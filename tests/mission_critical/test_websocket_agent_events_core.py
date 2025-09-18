@@ -5,7 +5,7 @@ BUSINESS VALUE JUSTIFICATION (BVJ):
 - Segment: ALL (Free, Early, Mid, Enterprise)  
 - Business Goal: Ensure core chat functionality delivers real-time value
 - Value Impact: Without ALL 5 WebSocket events, chat has ZERO business value
-- Strategic Impact: $500K+ ARR at risk if this fails - DEPLOYMENT BLOCKER
+- Strategic Impact: 500K+ ARR at risk if this fails - DEPLOYMENT BLOCKER
 
 This test validates the MOST CRITICAL functionality of the Netra AI Platform:
 1. ALL 5 WebSocket events MUST be sent during agent execution
@@ -254,7 +254,7 @@ class WebSocketAgentEventsCoreTests:
         """
         CRITICAL TEST: Verify ALL 5 WebSocket events are sent during agent execution.
         
-        This test validates the core chat functionality that enables $500K+ ARR.
+        This test validates the core chat functionality that enables 500K+ ARR.
         If this test fails, the chat system delivers ZERO business value.
         
         Required Events:
@@ -290,7 +290,7 @@ class WebSocketAgentEventsCoreTests:
             failure_msg = (
                 f"[U+1F4A5] MISSION CRITICAL FAILURE: Missing WebSocket events {missing_events}. "
                 f"Chat system has ZERO business value without these events! "
-                f"This is a $500K+ ARR risk. DEPLOYMENT BLOCKED."
+                f"This is a 500K+ ARR risk. DEPLOYMENT BLOCKED."
             )
             logger.error(failure_msg)
             pytest.fail(failure_msg)
@@ -762,7 +762,7 @@ if __name__ == "__main__":
     import sys
     
     logger.info("[U+1F680] Running P0 Mission Critical WebSocket Event Tests")
-    logger.info("[U+1F4B0] Business Impact: $500K+ ARR depends on these tests passing")
+    logger.info("[U+1F4B0] Business Impact: 500K+ ARR depends on these tests passing")
     logger.warning(" WARNING: [U+FE0F]  If these tests fail, DEPLOYMENT IS BLOCKED")
     
     # Run with verbose output and fail fast
@@ -774,6 +774,6 @@ if __name__ == "__main__":
         logger.success(" PASS:  ALL MISSION CRITICAL TESTS PASSED - DEPLOYMENT APPROVED")
     else:
         logger.error("[U+1F4A5] MISSION CRITICAL TESTS FAILED - DEPLOYMENT BLOCKED")
-        logger.error(" ALERT:  Chat functionality is broken - $500K+ ARR at risk")
+        logger.error(" ALERT:  Chat functionality is broken - 500K+ ARR at risk")
         
     sys.exit(exit_code)

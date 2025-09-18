@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "netra-apex"
 version = "1.0.0"
 description = "Netra Apex AI Optimization Platform"
-authors = [{name = "Netra Systems", email = "dev@netra.ai"}]
+authors = [{name = "Netra Systems", email = "dev@netrasystems.ai"}]
 license = {text = "Proprietary"}
 requires-python = ">=3.9"
 dependencies = []
@@ -131,6 +131,11 @@ markers = [
     "regression: Regression prevention tests",
     "regression_prevention: Regression prevention validation tests",
     "architecture: Architecture compliance tests",
+    "configuration_validation: Configuration validation tests",
+    "ssot_compliance: SSOT compliance validation tests", 
+    "environment_validation: Environment validation tests",
+    "revenue_protection: Revenue protection tests",
+    "central_validator: Central validator tests",
     "issue_1099: Issue #1099 WebSocket message handler migration tests",
     "factory_patterns: Handler factory pattern tests",
     "import_paths: Import path resolution tests",
@@ -152,6 +157,8 @@ markers = [
     "agent_execution: Agent execution tests",
     "agent_execution_order: Agent execution order validation tests",
     "business_critical: Business-critical functionality tests", 
+    "golden_path_protection: Golden Path revenue protection tests",
+    "revenue_critical: Tests protecting revenue streams",
     "ssot_delegation: Single Source of Truth delegation tests",
     "execution_tracking: Execution tracking tests",
     "critical_type_safety: Critical type safety tests",
@@ -513,6 +520,9 @@ markers = [
     "priority_p1: Priority P1 tests",
     "production: Production tests",
     "production_simulation: Production simulation tests",
+    "simulation: Infrastructure simulation tests",
+    "issue_1278: Issue #1278 specific tests",
+    "expected_failure: Tests expected to fail during validation",
     "production_validation: Production validation tests",
     "pytest_fixtures: Pytest fixture tests",
     "race_condition: Race condition tests",
@@ -659,6 +669,7 @@ markers = [
     "tool_handoffs: Tool execution handoff between agents",
     "tool_timeout: Tool execution timeout handling tests",
     "tool_execution: Tool execution tests",
+    "tools: Tool-related tests and integrations",
     "issue_463: Issue #463 specific tests",
     "issue_465: Issue #465 specific tests",
     "issue_426_cluster: Issue #426 cluster specific tests",

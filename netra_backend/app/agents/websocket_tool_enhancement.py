@@ -5,10 +5,10 @@ This module provides functions to enhance tool dispatchers with WebSocket notifi
 Created to fix missing imports in e2e tests.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Any, Optional
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def enhance_tool_dispatcher_with_notifications(tool_dispatcher: Any, websocket_manager: Any) -> None:

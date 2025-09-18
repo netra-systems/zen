@@ -846,7 +846,7 @@ kubectl rollout restart deployment/netra-backend
 kubectl rollout restart deployment/auth-service
 
 # STEP 3: Verify legacy functionality
-curl -X GET https://api.staging.netra.ai/health/websocket
+curl -X GET https://api.staging.netrasystems.ai/health/websocket
 # Expected: 200 OK with legacy=true status
 ```
 

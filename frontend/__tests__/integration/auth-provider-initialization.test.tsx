@@ -83,15 +83,12 @@ jest.mock('@/store/unified-chat', () => ({
   }
 }));
 
-// Mock JWT decode
-jest.mock('jwt-decode', () => ({
-  jwtDecode: jest.fn(),
-}));
+// jwt-decode mock removed - JWT authentication removed from WebSocket service
 
 const mockUnifiedAuthService = unifiedAuthService as jest.Mocked<typeof unifiedAuthService>;
 const mockLogger = logger as jest.Mocked<typeof logger>;
 const mockMonitorAuthState = monitorAuthState as jest.MockedFunction<typeof monitorAuthState>;
-const mockJwtDecode = require('jwt-decode').jwtDecode as jest.MockedFunction<any>;
+// mockJwtDecode removed - JWT authentication removed
 
 // Mock localStorage with all methods
 const mockLocalStorage = {
@@ -181,7 +178,7 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
     mockUnifiedAuthService.getToken.mockReset();
     mockUnifiedAuthService.needsRefresh.mockReset();
     mockUnifiedAuthService.getDevLogoutFlag.mockReset();
-    mockJwtDecode.mockReset();
+    // JWT decode mock reset removed - JWT authentication removed
     
     // Reset monitoring and logging mocks
     mockMonitorAuthState.mockReset();
@@ -195,7 +192,7 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
     mockUnifiedAuthService.getToken.mockReturnValue(null);
     mockUnifiedAuthService.needsRefresh.mockReturnValue(false);
     mockUnifiedAuthService.getDevLogoutFlag.mockReturnValue(false);
-    mockJwtDecode.mockReturnValue(mockUser);
+    // JWT decode mock removed - using ticket authentication instead
   });
 
   afterEach(() => {
@@ -218,7 +215,7 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
     mockUnifiedAuthService.getToken.mockReset();
     mockUnifiedAuthService.needsRefresh.mockReset();
     mockUnifiedAuthService.getDevLogoutFlag.mockReset();
-    mockJwtDecode.mockReset();
+    // JWT decode mock reset removed - JWT authentication removed
     
     // Reset logger and monitor mocks completely  
     mockLogger.debug.mockReset();
@@ -252,7 +249,7 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
       });
       
       mockUnifiedAuthService.getToken.mockReturnValue(validToken);
-      mockJwtDecode.mockReturnValue(mockUser);
+      // JWT decode mock removed - using ticket authentication instead
       mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
 
       // Now render the AuthProvider - it should find the token and set user
@@ -316,7 +313,7 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
         return null;
       });
       mockUnifiedAuthService.getToken.mockReturnValue(validToken);
-      mockJwtDecode.mockReturnValue(mockUser);
+      // JWT decode mock removed - using ticket authentication instead
       mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
 
       render(
@@ -352,7 +349,7 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
         return null;
       });
       mockUnifiedAuthService.getToken.mockReturnValue(validToken);
-      mockJwtDecode.mockReturnValue(mockUser);
+      // JWT decode mock removed - using ticket authentication instead
       mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
 
       render(
@@ -426,8 +423,8 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
       mockUnifiedAuthService.getToken.mockReturnValue(null);
       mockUnifiedAuthService.getAuthConfig.mockReset();
       mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
-      mockJwtDecode.mockReset();
-      mockJwtDecode.mockReturnValue(null);
+      // JWT decode mock reset removed - JWT authentication removed
+      // JWT decode mock removed - using ticket authentication instead
 
       const { container } = render(
         <AuthProvider>

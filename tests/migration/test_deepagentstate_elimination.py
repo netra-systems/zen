@@ -61,7 +61,7 @@ class DeepAgentStateEliminationTests(unittest.TestCase):
         if violations:
             violation_summary = self._generate_import_violation_summary(violations)
             self.fail(
-                f"❌ BASELINE VIOLATION: Found DeepAgentState imports in {len(violations)} production files.\n"
+                f"X BASELINE VIOLATION: Found DeepAgentState imports in {len(violations)} production files.\n"
                 f"This test is designed to fail initially to establish baseline.\n"
                 f"Expected after migration: 0 violations\n"
                 f"Current violations:\n{violation_summary}"
@@ -83,7 +83,7 @@ class DeepAgentStateEliminationTests(unittest.TestCase):
         
         if class_definitions:
             self.fail(
-                f"❌ BASELINE VIOLATION: Found DeepAgentState class definitions in {len(class_definitions)} files.\n"
+                f"X BASELINE VIOLATION: Found DeepAgentState class definitions in {len(class_definitions)} files.\n"
                 f"Definitions found in: {list(class_definitions.keys())}\n"
                 f"Expected after migration: 0 class definitions"
             )
@@ -104,7 +104,7 @@ class DeepAgentStateEliminationTests(unittest.TestCase):
         if type_annotations:
             violation_summary = self._generate_annotation_violation_summary(type_annotations)
             self.fail(
-                f"❌ BASELINE VIOLATION: Found DeepAgentState type annotations in {len(type_annotations)} files.\n"
+                f"X BASELINE VIOLATION: Found DeepAgentState type annotations in {len(type_annotations)} files.\n"
                 f"Expected after migration: 0 type annotations\n"
                 f"Current violations:\n{violation_summary}"
             )
@@ -125,7 +125,7 @@ class DeepAgentStateEliminationTests(unittest.TestCase):
         if instantiations:
             violation_summary = self._generate_instantiation_violation_summary(instantiations)
             self.fail(
-                f"❌ BASELINE VIOLATION: Found DeepAgentState instantiations in {len(instantiations)} files.\n"
+                f"X BASELINE VIOLATION: Found DeepAgentState instantiations in {len(instantiations)} files.\n"
                 f"Expected after migration: 0 instantiations\n"
                 f"Current violations:\n{violation_summary}"
             )
@@ -150,7 +150,7 @@ class DeepAgentStateEliminationTests(unittest.TestCase):
         
         if existing_adapters:
             self.fail(
-                f"❌ BASELINE VIOLATION: Migration adapters still exist.\n"
+                f"X BASELINE VIOLATION: Migration adapters still exist.\n"
                 f"Found: {[str(f) for f in existing_adapters]}\n"
                 f"Expected after migration: All migration adapters removed"
             )
@@ -171,7 +171,7 @@ class DeepAgentStateEliminationTests(unittest.TestCase):
         if agents_with_deepagentstate:
             violation_summary = self._generate_agent_violation_summary(agents_with_deepagentstate)
             self.fail(
-                f"❌ BASELINE VIOLATION: Found {len(agents_with_deepagentstate)} agents using DeepAgentState.\n"
+                f"X BASELINE VIOLATION: Found {len(agents_with_deepagentstate)} agents using DeepAgentState.\n"
                 f"Expected after migration: 0 agents using DeepAgentState\n"
                 f"Current violations:\n{violation_summary}"
             )
@@ -220,7 +220,7 @@ class DeepAgentStateEliminationTests(unittest.TestCase):
             
         if total_references > 0:
             self.fail(
-                f"❌ BASELINE VIOLATION: Found {total_references} DeepAgentState references in {files_with_references} files.\n"
+                f"X BASELINE VIOLATION: Found {total_references} DeepAgentState references in {files_with_references} files.\n"
                 f"This establishes the baseline before migration.\n"
                 f"Expected after migration: 0 references in 0 files"
             )

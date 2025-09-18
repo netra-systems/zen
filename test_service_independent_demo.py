@@ -11,6 +11,7 @@ import logging
 import sys
 import time
 from pathlib import Path
+from sqlalchemy import text
 
 # Add project root to Python path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -110,7 +111,7 @@ async def demonstrate_validated_mocks():
     # Test database mock
     logger.info("Testing database mock...")
     session = await database_mock.get_session()
-    result = await session.execute("SELECT 1")
+    result = await session.execute(text("SELECT 1"))
     logger.info(f"Database mock query result: {result is not None}")
     await session.close()
     

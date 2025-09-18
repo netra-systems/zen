@@ -8,8 +8,8 @@ EXPECTED BEHAVIOR: These tests SHOULD PASS when SSOT consolidation is complete.
 Currently may fail due to the registry duplication issue.
 
 Business Impact:
-- Protects Golden Path user flow: Users login → get AI responses
-- Ensures $500K+ ARR chat functionality reliability
+- Protects Golden Path user flow: Users login -> get AI responses
+- Ensures 500K+ ARR chat functionality reliability
 - Validates enterprise-grade multi-user isolation
 - Confirms WebSocket event delivery consistency
 

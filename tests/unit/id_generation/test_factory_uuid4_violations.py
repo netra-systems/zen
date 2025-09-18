@@ -10,7 +10,7 @@ Target Violations:
 - clickhouse_factory.py:522 uses uuid4().hex[:8] instead of UnifiedIdGenerator
 - Factory client ID generation bypassing SSOT patterns
 
-Business Value Protection: $500K+ ARR Golden Path database connectivity
+Business Value Protection: 500K+ ARR Golden Path database connectivity
 """
 import pytest
 import uuid

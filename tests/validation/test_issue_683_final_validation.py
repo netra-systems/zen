@@ -46,7 +46,7 @@ class Issue683FinalValidationTests:
         assert len(auth_critical) > 0, 'Auth should have critical secrets'
         jwt_mapping = SecretConfig.get_gsm_mapping('JWT_SECRET_KEY')
         assert jwt_mapping is not None, 'JWT_SECRET_KEY should have GSM mapping'
-        logger.info('✅ SecretConfig class is operational and working correctly')
+        logger.info('CHECK SecretConfig class is operational and working correctly')
 
     def test_deployment_fragment_generation_working(self):
         """
@@ -59,14 +59,14 @@ class Issue683FinalValidationTests:
             backend_fragment = SecretConfig.generate_deployment_command_fragment('backend', 'staging')
             assert backend_fragment.startswith('--set-secrets'), 'Fragment should start with --set-secrets'
             assert len(backend_fragment) > 50, 'Fragment should contain actual mappings'
-            logger.info(f'✅ Backend deployment fragment generated: {len(backend_fragment)} chars')
+            logger.info(f'CHECK Backend deployment fragment generated: {len(backend_fragment)} chars')
         except Exception as e:
             pytest.fail(f'Backend deployment fragment generation failed: {e}')
         try:
             auth_fragment = SecretConfig.generate_deployment_command_fragment('auth', 'staging')
             assert auth_fragment.startswith('--set-secrets'), 'Auth fragment should start with --set-secrets'
             assert len(auth_fragment) > 50, 'Auth fragment should contain actual mappings'
-            logger.info(f'✅ Auth deployment fragment generated: {len(auth_fragment)} chars')
+            logger.info(f'CHECK Auth deployment fragment generated: {len(auth_fragment)} chars')
         except Exception as e:
             pytest.fail(f'Auth deployment fragment generation failed: {e}')
 
@@ -84,10 +84,10 @@ class Issue683FinalValidationTests:
             assert 'secret_count' in validation_result, 'Should include secret count'
             secret_count = validation_result['secret_count']
             assert secret_count > 0, f'Should find secrets in staging (found {secret_count})'
-            logger.info(f'✅ GSM integration working: {secret_count} secrets accessible')
+            logger.info(f'CHECK GSM integration working: {secret_count} secrets accessible')
         else:
             error_msg = validation_result.get('error', 'Unknown error')
-            logger.warning(f'⚠️ GSM access failed (environment issue): {error_msg}')
+            logger.warning(f'WARNING️ GSM access failed (environment issue): {error_msg}')
             assert 'error' in validation_result, 'Failed validation should include error details'
 
     def test_secret_injection_bridge_architecture_complete(self):
@@ -113,7 +113,7 @@ class Issue683FinalValidationTests:
             backend_secrets_string = SecretConfig.generate_secrets_string('backend')
             assert len(backend_secrets_string) > 100, 'Secrets string should be substantial'
             assert 'JWT_SECRET_KEY=' in backend_secrets_string, 'Should include JWT mapping'
-            logger.info('✅ Secret injection bridge architecture is complete and functional')
+            logger.info('CHECK Secret injection bridge architecture is complete and functional')
         except Exception as e:
             pytest.fail(f'Secret injection bridge architecture test failed: {e}')
 
@@ -134,13 +134,13 @@ class Issue683FinalValidationTests:
             deployment_fragment = backend_result['deployment_fragment']
             if deployment_fragment:
                 assert '--set-secrets' in deployment_fragment, 'Fragment should contain --set-secrets'
-                logger.info(f'✅ Backend deployment fragment ready: {len(deployment_fragment)} chars')
+                logger.info(f'CHECK Backend deployment fragment ready: {len(deployment_fragment)} chars')
             auth_result = SecretConfig.validate_deployment_readiness('auth', 'netra-staging')
             assert isinstance(auth_result, dict), 'Auth should return validation result dictionary'
             assert 'deployment_ready' in auth_result, 'Auth should include deployment readiness status'
-            logger.info('✅ Staging environment configuration validation is resolved')
+            logger.info('CHECK Staging environment configuration validation is resolved')
         except Exception as e:
-            logger.warning(f'⚠️ Staging validation encountered environment issue: {e}')
+            logger.warning(f'WARNING️ Staging validation encountered environment issue: {e}')
             assert True, 'Secret injection bridge architecture is implemented correctly'
 
     def test_issue_683_business_value_protected(self):
@@ -156,7 +156,7 @@ class Issue683FinalValidationTests:
             assert len(backend_secrets) > 50, 'Backend secrets string should be substantial'
             auth_secrets = get_auth_secrets_string()
             assert len(auth_secrets) > 50, 'Auth secrets string should be substantial'
-            logger.info('✅ Core business functionality (secrets generation) working')
+            logger.info('CHECK Core business functionality (secrets generation) working')
         except Exception as e:
             pytest.fail(f'Core business functionality test failed: {e}')
         critical_backend = SecretConfig.CRITICAL_SECRETS.get('backend', [])
@@ -166,7 +166,7 @@ class Issue683FinalValidationTests:
             backend_has = critical_secret in critical_backend
             auth_has = critical_secret in critical_auth
             assert backend_has or auth_has, f'Critical secret {critical_secret} should be defined'
-        logger.info('✅ Business value ($500K+ ARR staging pipeline) protected')
+        logger.info('CHECK Business value ($500K+ ARR staging pipeline) protected')
 
     def test_issue_683_completion_criteria_met(self):
         """
@@ -179,21 +179,21 @@ class Issue683FinalValidationTests:
             from deployment.secrets_config import SecretConfig
             backend_secrets = SecretConfig.get_all_service_secrets('backend')
             assert len(backend_secrets) > 0
-            completion_criteria_passed.append('✅ SecretConfig class implemented and functional')
+            completion_criteria_passed.append('CHECK SecretConfig class implemented and functional')
         except Exception as e:
             pytest.fail(f'Completion criterion 1 failed: {e}')
         try:
             from deployment.secrets_config import get_staging_secret, validate_gsm_access
             assert callable(get_staging_secret)
             assert callable(validate_gsm_access)
-            completion_criteria_passed.append('✅ GSM integration bridge exists')
+            completion_criteria_passed.append('CHECK GSM integration bridge exists')
         except Exception as e:
             pytest.fail(f'Completion criterion 2 failed: {e}')
         try:
             from deployment.secrets_config import SecretConfig
             backend_fragment = SecretConfig.generate_deployment_command_fragment('backend')
             assert '--set-secrets' in backend_fragment
-            completion_criteria_passed.append('✅ Deployment fragments generate correctly')
+            completion_criteria_passed.append('CHECK Deployment fragments generate correctly')
         except Exception as e:
             pytest.fail(f'Completion criterion 3 failed: {e}')
         try:
@@ -201,7 +201,7 @@ class Issue683FinalValidationTests:
             critical_secrets = SecretConfig.CRITICAL_SECRETS
             assert 'backend' in critical_secrets
             assert 'auth' in critical_secrets
-            completion_criteria_passed.append('✅ Critical secret validation implemented')
+            completion_criteria_passed.append('CHECK Critical secret validation implemented')
         except Exception as e:
             pytest.fail(f'Completion criterion 4 failed: {e}')
         logger.info('🎯 Issue #683 Completion Criteria Summary:')

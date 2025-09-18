@@ -2,7 +2,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 '\nIntegration test for the refresh endpoint - tests the actual implementation\n'
 import pytest
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from fastapi.testclient import TestClient
 import jwt as pyjwt
 from test_framework.database.test_database_manager import DatabaseTestManager as DatabaseTestManager
@@ -31,7 +31,7 @@ class RefreshEndpointIntegrationTests:
             """Test refresh with a mocked valid token"""
             pass
             with patch('auth_service.auth_core.routes.auth_routes.jwt_manager') as mock_jwt:
-                mock_jwt.decode_token.return_value = {'sub': 'test@example.com', 'user_id': '123', 'exp': (datetime.utcnow() + timedelta(hours=1)).timestamp(), 'type': 'refresh'}
+                mock_jwt.decode_token.return_value = {'sub': 'test@example.com', 'user_id': '123', 'exp': (datetime.now(UTC) + timedelta(hours=1)).timestamp(), 'type': 'refresh'}
                 mock_jwt.generate_tokens.return_value = {'access_token': 'new_access_token', 'refresh_token': 'new_refresh_token', 'expires_in': 3600}
                 mock_jwt.is_token_blacklisted = AsyncMock(return_value=False)
                 with patch('auth_service.auth_core.routes.auth_routes.get_db_session') as mock_db:

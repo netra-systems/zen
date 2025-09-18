@@ -94,14 +94,14 @@ class AgentRegistryNameConsistencyIntegrationTests(SSotAsyncTestCase):
         
         for agent_name in expected_core_agents:
             if agent_name in registered_names:
-                print(f"✅ Core agent '{agent_name}' is properly registered")
+                print(f"CHECK Core agent '{agent_name}' is properly registered")
                 
                 # Test that we can get registry reference (even if factory returns None)
                 registry_has_agent = self.registry.has(agent_name)
                 self.assertTrue(registry_has_agent,
                                f"Registry should recognize agent name '{agent_name}'")
             else:
-                print(f"❌ Core agent '{agent_name}' is missing from registry")
+                print(f"X Core agent '{agent_name}' is missing from registry")
                 self.fail(f"Expected core agent '{agent_name}' not found in registry")
         
         # Test that problematic names are NOT registered
@@ -114,7 +114,7 @@ class AgentRegistryNameConsistencyIntegrationTests(SSotAsyncTestCase):
             registry_has_problem = self.registry.has(problem_name)
             self.assertFalse(registry_has_problem,
                             f"Registry should not recognize problematic name '{problem_name}'")
-            print(f"✅ Confirmed '{problem_name}' is not registered (as expected)")
+            print(f"CHECK Confirmed '{problem_name}' is not registered (as expected)")
     
     async def test_agent_creation_workflow_with_correct_names(self):
         """Test 2: Validate agent creation workflow works with correctly registered names."""
@@ -134,7 +134,7 @@ class AgentRegistryNameConsistencyIntegrationTests(SSotAsyncTestCase):
                 )
                 
                 if agent is not None:
-                    print(f"✅ Successfully created '{agent_name}' agent for user {user_context.user_id}")
+                    print(f"CHECK Successfully created '{agent_name}' agent for user {user_context.user_id}")
                     
                     # Verify agent is stored in user session
                     user_agent = await self.registry.get_user_agent(
@@ -143,13 +143,13 @@ class AgentRegistryNameConsistencyIntegrationTests(SSotAsyncTestCase):
                     self.assertIsNotNone(user_agent,
                                        f"Agent '{agent_name}' should be retrievable from user session")
                 else:
-                    print(f"⚠️ Agent '{agent_name}' creation returned None (may be factory pattern limitation)")
+                    print(f"WARNING️ Agent '{agent_name}' creation returned None (may be factory pattern limitation)")
                     # Even if None, the registry should recognize the name
                     self.assertTrue(self.registry.has(agent_name),
                                   f"Registry should at least recognize '{agent_name}'")
                 
             except Exception as e:
-                print(f"❌ Failed to create '{agent_name}' agent: {e}")
+                print(f"X Failed to create '{agent_name}' agent: {e}")
                 # This test should not fail for correct names
                 self.fail(f"Agent creation failed for correct name '{agent_name}': {e}")
     
@@ -176,7 +176,7 @@ class AgentRegistryNameConsistencyIntegrationTests(SSotAsyncTestCase):
                 if agent is not None:
                     self.fail(f"Expected agent creation to fail for incorrect name '{incorrect_name}', but got: {agent}")
             
-            print(f"✅ Confirmed agent creation properly failed for incorrect name '{incorrect_name}'")
+            print(f"CHECK Confirmed agent creation properly failed for incorrect name '{incorrect_name}'")
             print(f"   Error: {context.exception}")
             
             # Verify the incorrect name is not in registry
@@ -212,14 +212,14 @@ class AgentRegistryNameConsistencyIntegrationTests(SSotAsyncTestCase):
                     
                     if agent is not None or self.registry.has(agent_name):
                         user_results["successful_agents"].append(agent_name)
-                        print(f"  ✅ '{agent_name}' workflow step successful")
+                        print(f"  CHECK '{agent_name}' workflow step successful")
                     else:
                         user_results["failed_agents"].append(agent_name)
-                        print(f"  ❌ '{agent_name}' workflow step failed")
+                        print(f"  X '{agent_name}' workflow step failed")
                         
                 except Exception as e:
                     user_results["failed_agents"].append(agent_name)
-                    print(f"  ❌ '{agent_name}' workflow step failed: {e}")
+                    print(f"  X '{agent_name}' workflow step failed: {e}")
             
             # Get user session health
             user_session = await self.registry.get_user_session(user_context.user_id)
@@ -346,10 +346,10 @@ class AgentRegistryRealServiceIntegrationTests(SSotAsyncTestCase):
             self.assertTrue(session_metrics.get("has_websocket_bridge", False),
                            "User session should have WebSocket bridge for agent events")
             
-            print("✅ WebSocket integration works with correct agent naming")
+            print("CHECK WebSocket integration works with correct agent naming")
             
         except Exception as e:
-            print(f"❌ WebSocket integration test failed: {e}")
+            print(f"X WebSocket integration test failed: {e}")
             # This might fail due to factory patterns, but naming should be consistent
             
             # At minimum, registry should recognize the correct name

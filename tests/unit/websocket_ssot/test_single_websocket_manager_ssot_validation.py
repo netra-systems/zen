@@ -87,7 +87,7 @@ class SingleWebSocketManagerSsotValidationTests(SSotBaseTestCase):
         unique_class_ids = set(id(cls) for cls in manager_classes.values())
         
         if len(unique_class_ids) > 1:
-            logger.error("❌ SSOT VIOLATION: Multiple distinct WebSocket manager implementations detected!")
+            logger.error("X SSOT VIOLATION: Multiple distinct WebSocket manager implementations detected!")
             
             # Detailed analysis of the violation
             class_id_mapping = {id(cls): (name, cls) for name, cls in manager_classes.items()}
@@ -102,14 +102,14 @@ class SingleWebSocketManagerSsotValidationTests(SSotBaseTestCase):
                 f"continuing user isolation failures and affecting $500K+ ARR chat reliability."
             )
         
-        logger.info("✅ SSOT COMPLIANCE: All WebSocket manager references point to single implementation")
+        logger.info("CHECK SSOT COMPLIANCE: All WebSocket manager references point to single implementation")
         
         # CRITICAL SSOT TEST 2: Verify the single implementation is the intended SSOT class
         ssot_implementation = list(manager_classes.values())[0]  # All should be the same
         
         # The SSOT should be UnifiedWebSocketManager (the actual implementation)
         if ssot_implementation.__name__ != 'UnifiedWebSocketManager':
-            logger.error(f"❌ SSOT IMPLEMENTATION ERROR: Expected 'UnifiedWebSocketManager', got '{ssot_implementation.__name__}'")
+            logger.error(f"X SSOT IMPLEMENTATION ERROR: Expected 'UnifiedWebSocketManager', got '{ssot_implementation.__name__}'")
             pytest.fail(
                 f"INCORRECT SSOT IMPLEMENTATION: All references resolve to '{ssot_implementation.__name__}' "
                 f"instead of 'UnifiedWebSocketManager'. "
@@ -117,12 +117,12 @@ class SingleWebSocketManagerSsotValidationTests(SSotBaseTestCase):
                 f"Business Impact: Wrong implementation as SSOT may not have full feature set."
             )
         
-        logger.info(f"✅ CORRECT SSOT IMPLEMENTATION: All references resolve to {ssot_implementation.__name__}")
+        logger.info(f"CHECK CORRECT SSOT IMPLEMENTATION: All references resolve to {ssot_implementation.__name__}")
         
         # CRITICAL SSOT TEST 3: Verify aliases are properly configured
         self._validate_alias_configuration(manager_classes)
         
-        logger.info("✅ SSOT VALIDATION PASSED: Single WebSocket manager implementation confirmed")
+        logger.info("CHECK SSOT VALIDATION PASSED: Single WebSocket manager implementation confirmed")
     
     def _validate_alias_configuration(self, manager_classes: Dict[str, type]):
         """Validate that aliases are properly configured and documented."""
@@ -140,9 +140,9 @@ class SingleWebSocketManagerSsotValidationTests(SSotBaseTestCase):
                         f"SSOT Requirement: All aliases must reference the same object. "
                         f"Business Impact: Improper aliasing maintains fragmentation issues."
                     )
-                    logger.info(f"✅ {alias_name} properly aliases UnifiedWebSocketManager")
+                    logger.info(f"CHECK {alias_name} properly aliases UnifiedWebSocketManager")
                 except AssertionError as e:
-                    logger.error(f"❌ ALIAS CONFIGURATION FAILURE: {e}")
+                    logger.error(f"X ALIAS CONFIGURATION FAILURE: {e}")
                     raise
     
     def test_websocket_manager_module_consolidation(self):
@@ -193,7 +193,7 @@ class SingleWebSocketManagerSsotValidationTests(SSotBaseTestCase):
             module_info = modules_info[module_name]
             
             if 'WebSocketManager' not in module_info['exports']:
-                logger.warning(f"⚠️ {module_name} does not export WebSocketManager in __all__")
+                logger.warning(f"WARNING️ {module_name} does not export WebSocketManager in __all__")
             
             if not hasattr(module_info['module'], 'WebSocketManager'):
                 pytest.fail(
@@ -202,7 +202,7 @@ class SingleWebSocketManagerSsotValidationTests(SSotBaseTestCase):
                     f"Business Impact: Backward compatibility broken, existing imports will fail."
                 )
         
-        logger.info("✅ Module consolidation structure validated successfully")
+        logger.info("CHECK Module consolidation structure validated successfully")
     
     def test_websocket_manager_interface_completeness(self):
         """
@@ -246,12 +246,12 @@ class SingleWebSocketManagerSsotValidationTests(SSotBaseTestCase):
                 method = getattr(WebSocketManager, method_name)
                 if callable(method):
                     present_methods.append(method_name)
-                    logger.debug(f"✅ Method present: {method_name}")
+                    logger.debug(f"CHECK Method present: {method_name}")
                 else:
-                    logger.warning(f"⚠️ Attribute {method_name} exists but is not callable")
+                    logger.warning(f"WARNING️ Attribute {method_name} exists but is not callable")
             else:
                 missing_methods.append(method_name)
-                logger.debug(f"❌ Method missing: {method_name}")
+                logger.debug(f"X Method missing: {method_name}")
         
         # Validate required methods are present
         missing_required = [m for m in missing_methods if m in required_methods]
@@ -266,11 +266,11 @@ class SingleWebSocketManagerSsotValidationTests(SSotBaseTestCase):
         # Report on enhanced methods (optional but good for feature completeness)
         missing_enhanced = [m for m in missing_methods if m in enhanced_methods]
         if missing_enhanced:
-            logger.warning(f"⚠️ Missing enhanced methods: {missing_enhanced}")
+            logger.warning(f"WARNING️ Missing enhanced methods: {missing_enhanced}")
             logger.info("These methods may be implemented differently or not required for current SSOT")
         
-        logger.info(f"✅ Interface validation complete: {len(present_methods)}/{len(all_expected_methods)} methods available")
-        logger.info(f"Required methods: {len([m for m in present_methods if m in required_methods])}/{len(required_methods)} ✅")
+        logger.info(f"CHECK Interface validation complete: {len(present_methods)}/{len(all_expected_methods)} methods available")
+        logger.info(f"Required methods: {len([m for m in present_methods if m in required_methods])}/{len(required_methods)} CHECK")
     
     def test_websocket_manager_instantiation_consistency(self):
         """
@@ -308,10 +308,10 @@ class SingleWebSocketManagerSsotValidationTests(SSotBaseTestCase):
                 )
                 instances.append((path_name, instance))
                 instantiation_results[path_name] = 'SUCCESS'
-                logger.info(f"✅ {path_name} instantiation successful: {type(instance)}")
+                logger.info(f"CHECK {path_name} instantiation successful: {type(instance)}")
             except Exception as e:
                 instantiation_results[path_name] = f'FAILED: {e}'
-                logger.error(f"❌ {path_name} instantiation failed: {e}")
+                logger.error(f"X {path_name} instantiation failed: {e}")
         
         # CRITICAL SSOT TEST: All paths should instantiate successfully
         failed_instantiations = [path for path, result in instantiation_results.items() if 'FAILED' in result]
@@ -336,7 +336,7 @@ class SingleWebSocketManagerSsotValidationTests(SSotBaseTestCase):
                         f"Business Impact: Type inconsistencies break polymorphism and integration."
                     )
         
-        logger.info("✅ WebSocket manager instantiation consistency validated")
+        logger.info("CHECK WebSocket manager instantiation consistency validated")
 
     def teardown_method(self, method):
         """Clean up test environment."""

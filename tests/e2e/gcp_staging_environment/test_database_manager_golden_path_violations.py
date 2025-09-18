@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """E2E STAGING: DatabaseManager Golden Path Violation Detection
 
-BUSINESS VALUE: $500K+ ARR - End-to-end database functionality for Golden Path
+BUSINESS VALUE: 500K+ ARR - End-to-end database functionality for Golden Path
 
 DESIGNED TO FAIL when:
 1. Golden Path database operations fail

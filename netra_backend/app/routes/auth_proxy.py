@@ -3,7 +3,7 @@ Auth proxy routes - Forward auth requests to auth service.
 This provides backward compatibility for tests while maintaining auth service separation.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Any, Dict
 
 import httpx
@@ -12,7 +12,7 @@ from fastapi import APIRouter, HTTPException, Request
 from netra_backend.app.clients.auth_client_core import auth_client
 from shared.isolated_environment import get_env
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 router = APIRouter(prefix="/api/v1/auth", tags=["auth-proxy"])
 
 # Additional router for backward compatibility with tests expecting /auth/config
@@ -398,3 +398,151 @@ async def login_user_compat(request: Request):
 async def register_user_compat(request: Request):
     """Register user - compatibility endpoint for tests expecting /auth/register."""
     return await register_user(request)
+
+
+@router.post("/generate-ticket")
+async def generate_ticket(request: Request):
+    """
+    Generate authentication ticket for temporary access.
+    
+    ISSUE #1296 Phase 2: Creates secure, time-limited tickets for authentication
+    workflows without exposing long-lived credentials.
+    
+    Requires:
+    - Valid JWT token in Authorization header
+    - Optional: ttl_seconds, single_use, permissions, metadata in request body
+    
+    Returns:
+    - ticket_id: Unique ticket identifier
+    - expires_at: Ticket expiration timestamp
+    - user_id: User the ticket was generated for
+    """
+    try:
+        # Get JWT token from Authorization header
+        auth_header = request.headers.get("authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            logger.warning("Ticket generation attempted without valid Authorization header")
+            raise HTTPException(
+                status_code=401,
+                detail="Authorization header with Bearer token required"
+            )
+        
+        jwt_token = auth_header[7:]  # Remove "Bearer " prefix
+        
+        # Validate JWT token first using auth client
+        try:
+            validation_result = await auth_client.validate_token_jwt(jwt_token)
+            if not validation_result or not validation_result.get('valid'):
+                logger.warning("Ticket generation attempted with invalid JWT token")
+                raise HTTPException(
+                    status_code=401,
+                    detail="Invalid or expired JWT token"
+                )
+            
+            user_id = validation_result.get('user_id')
+            email = validation_result.get('email')
+            user_permissions = validation_result.get('permissions', [])
+            
+            if not user_id or not email:
+                logger.error("JWT token validation succeeded but missing user_id or email")
+                raise HTTPException(
+                    status_code=401,
+                    detail="Invalid token data - missing user information"
+                )
+                
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"JWT token validation failed during ticket generation: {e}")
+            raise HTTPException(
+                status_code=401,
+                detail="Token validation failed"
+            )
+        
+        # Parse request body for optional parameters
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}  # Use defaults if no valid JSON body
+        
+        # Extract optional parameters with defaults
+        ttl_seconds = body.get('ttl_seconds')
+        single_use = body.get('single_use', True)
+        permissions = body.get('permissions') or user_permissions  # Use user's permissions as default
+        metadata = body.get('metadata', {})
+        
+        # Validate ttl_seconds if provided
+        if ttl_seconds is not None:
+            try:
+                ttl_seconds = int(ttl_seconds)
+                if ttl_seconds <= 0:
+                    raise ValueError("TTL must be positive")
+                if ttl_seconds > 3600:  # 1 hour max from AuthTicketManager
+                    logger.warning(f"TTL {ttl_seconds}s exceeds maximum, will be capped at 3600s")
+            except (ValueError, TypeError) as e:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Invalid ttl_seconds: {str(e)}"
+                )
+        
+        # Generate ticket using AuthTicketManager
+        try:
+            from netra_backend.app.websocket_core.unified_auth_ssot import ticket_manager
+            
+            ticket = await ticket_manager.generate_ticket(
+                user_id=user_id,
+                email=email,
+                permissions=permissions,
+                ttl_seconds=ttl_seconds,
+                single_use=single_use,
+                metadata=metadata
+            )
+            
+            logger.info(f"Successfully generated auth ticket {ticket.ticket_id} for user {user_id}")
+            
+            # Return ticket information
+            return {
+                "ticket_id": ticket.ticket_id,
+                "user_id": ticket.user_id,
+                "email": ticket.email,
+                "permissions": ticket.permissions,
+                "expires_at": ticket.expires_at,
+                "created_at": ticket.created_at,
+                "single_use": ticket.single_use,
+                "ttl_seconds": int(ticket.expires_at - ticket.created_at) if ticket.expires_at and ticket.created_at else None,
+                "metadata": ticket.metadata
+            }
+            
+        except ValueError as e:
+            logger.error(f"Ticket generation validation error: {e}")
+            raise HTTPException(
+                status_code=422,
+                detail=str(e)
+            )
+        except RuntimeError as e:
+            logger.error(f"Ticket generation storage error: {e}")
+            raise HTTPException(
+                status_code=503,
+                detail="Ticket storage failed - service temporarily unavailable"
+            )
+        except Exception as e:
+            logger.error(f"Unexpected error during ticket generation: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail="Ticket generation failed"
+            )
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error in generate_ticket endpoint: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error during ticket generation"
+        )
+
+
+@compat_router.post("/generate-ticket")
+async def generate_ticket_compat(request: Request):
+    """Generate authentication ticket - compatibility endpoint for tests expecting /auth/generate-ticket."""
+    return await generate_ticket(request)

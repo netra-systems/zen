@@ -111,7 +111,7 @@ class Issue1098LegacyWebSocketFactoryDemonstrationTest(SSotBaseTestCase):
                 "LEGACY BUG: Event missing user_id - BREAKS user isolation")
             
         except AssertionError as e:
-            logger.error(f"✅ EXPECTED FAILURE DEMONSTRATED: {e}")
+            logger.error(f"CHECK EXPECTED FAILURE DEMONSTRATED: {e}")
             logger.error("This shows why legacy factory BLOCKS AI response delivery!")
             
         try:
@@ -119,7 +119,7 @@ class Issue1098LegacyWebSocketFactoryDemonstrationTest(SSotBaseTestCase):
                 "LEGACY BUG: Event missing timestamp - NO time tracking")
                 
         except AssertionError as e:
-            logger.error(f"✅ EXPECTED FAILURE DEMONSTRATED: {e}")
+            logger.error(f"CHECK EXPECTED FAILURE DEMONSTRATED: {e}")
             
         try:
             self.assertEqual(len(expected_agent_started_event.keys()), 
@@ -128,7 +128,7 @@ class Issue1098LegacyWebSocketFactoryDemonstrationTest(SSotBaseTestCase):
                 f"required {len(expected_agent_started_event.keys())} fields")
                 
         except AssertionError as e:
-            logger.error(f"✅ EXPECTED FAILURE DEMONSTRATED: {e}")
+            logger.error(f"CHECK EXPECTED FAILURE DEMONSTRATED: {e}")
             logger.error(f"Legacy events have {len(legacy_style_event.keys())} fields but need {len(expected_agent_started_event.keys())}")
         
         # Final demonstration: This test is SUPPOSED TO FAIL
@@ -162,7 +162,7 @@ class Issue1098LegacyWebSocketFactoryDemonstrationTest(SSotBaseTestCase):
             self.assertGreater(len(ssot_warnings), 0,
                 "Should have warnings about SSOT consolidation")
                 
-        logger.info("✅ CONFIRMED: Legacy factory properly warns about deprecation")
+        logger.info("CHECK CONFIRMED: Legacy factory properly warns about deprecation")
 
 
 if __name__ == '__main__':

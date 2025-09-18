@@ -4,7 +4,7 @@ Agent Reconnection State Manager - E2E Testing Helper
 Handles WebSocket reconnection scenarios while preserving agent execution state.
 Tests business-critical functionality: session continuity during network interruptions.
 
-Business Value: Protects $500K+ ARR by ensuring chat sessions survive connection drops.
+Business Value: Protects 500K+ ARR by ensuring chat sessions survive connection drops.
 """
 
 import asyncio

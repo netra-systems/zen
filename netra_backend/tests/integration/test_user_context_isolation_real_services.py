@@ -24,7 +24,7 @@ import asyncio
 import uuid
 import json
 from typing import Dict, Any, List
-from datetime import datetime
+from datetime import datetime, UTC
 
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext, 
@@ -91,7 +91,7 @@ class UserContextIsolationRealServicesTests:
                         "user_id": user1_context.user_id,
                         "account_id": user1_sensitive_data["account_id"],
                         "sensitive_data": json.dumps(user1_sensitive_data),
-                        "created_at": datetime.utcnow()
+                        "created_at": datetime.now(UTC)
                     })
                     
                     # Simulate processing time where data is vulnerable
@@ -106,7 +106,7 @@ class UserContextIsolationRealServicesTests:
                     
                     await db_session.execute(update_query, {
                         "user_id": user1_context.user_id,
-                        "timestamp": datetime.utcnow()
+                        "timestamp": datetime.now(UTC)
                     })
                     
                     # Query user1 data to verify isolation
@@ -146,7 +146,7 @@ class UserContextIsolationRealServicesTests:
                         "user_id": user2_context.user_id,
                         "account_id": user2_sensitive_data["account_id"],
                         "sensitive_data": json.dumps(user2_sensitive_data),
-                        "created_at": datetime.utcnow()
+                        "created_at": datetime.now(UTC)
                     })
                     
                     # Simulate processing time where data is vulnerable

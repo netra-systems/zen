@@ -19,7 +19,7 @@ Business Value Justification:
 - Segment: Platform/Internal  
 - Business Goal: System Stability & SSOT Compliance
 - Value Impact: Ensures factory patterns work together across component boundaries
-- Strategic Impact: Protects $500K+ ARR by preventing integration cascade failures
+- Strategic Impact: Protects 500K+ ARR by preventing integration cascade failures
 """
 
 import pytest

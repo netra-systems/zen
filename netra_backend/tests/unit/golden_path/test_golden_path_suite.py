@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,12 +23,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 Golden Path Unit Test Suite Runner
 
 Comprehensive test suite runner for all golden path unit tests.
@@ -106,11 +93,18 @@ def validate_test_module_structure(module_name: str) -> Dict[str, Any]:
         for attr_name in dir(module):
             attr = getattr(module, attr_name)
             
-            # Check for test classes
-            if (isinstance(attr, type) and 
-                attr_name.startswith('Test') and 
-                hasattr(attr, '__module__') and 
-                attr.__module__ == module_name):
+            # Check for test classes (support multiple naming patterns)
+            is_test_class = (
+                isinstance(attr, type) and
+                (attr_name.startswith('Test') or
+                 attr_name.endswith('Tests') or
+                 attr_name.endswith('Test') or
+                 'Test' in attr_name) and
+                hasattr(attr, '__module__') and
+                attr.__module__ == module_name
+            )
+
+            if is_test_class:
                 
                 validation_results["test_classes"].append(attr_name)
                 

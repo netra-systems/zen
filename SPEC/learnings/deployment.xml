@@ -636,7 +636,7 @@ frontend/cypress
         <description>Create and map SERVICE_SECRET and SERVICE_ID secrets in GCP Secret Manager</description>
         <implementation>
           <step>Generate secure SERVICE_SECRET: openssl rand -hex 32</step>
-          <step>Create SERVICE_ID with timestamp: netra-auth-staging-$(date +%s)</step>
+          <step>Create SERVICE_ID with timestamp: netra-auth-$(date +%s)</step>
           <step>Add secrets to GCP Secret Manager:
             - gcloud secrets create service-secret-staging --data-file=-
             - gcloud secrets create service-id-staging --data-file=-

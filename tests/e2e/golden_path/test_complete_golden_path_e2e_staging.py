@@ -28,14 +28,14 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-'\nComprehensive E2E Golden Path Tests for Staging Environment\n\nBusiness Value Justification (BVJ):\n- Segment: All (Free, Early, Mid, Enterprise)\n- Business Goal: Validate complete "users login  ->  get AI responses" flow protecting $500K+ ARR\n- Value Impact: Ensures end-to-end chat functionality works in production-like environment\n- Strategic Impact: Validates 90% of platform value through complete user journey\n\nThis test suite validates the complete golden path user journey in staging:\n1. User authentication and WebSocket connection establishment\n2. Chat message submission and agent execution initiation\n3. Real-time WebSocket event delivery during agent execution\n4. All 5 critical WebSocket events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)\n5. Final AI response delivery with actionable insights\n6. Multi-user concurrent execution isolation\n7. Performance SLAs and error handling\n8. Integration with real GCP staging infrastructure\n\nKey Coverage Areas:\n- Complete end-to-end user journey validation\n- Real WebSocket connections with GCP staging\n- Actual agent execution with LLM integration\n- Real-time event streaming validation\n- Multi-user isolation and concurrency\n- Performance and SLA compliance\n- Error handling and recovery scenarios\n- Production-like infrastructure validation\n'
+'\nComprehensive E2E Golden Path Tests for Staging Environment\n\nBusiness Value Justification (BVJ):\n- Segment: All (Free, Early, Mid, Enterprise)\n- Business Goal: Validate complete "users login  ->  get AI responses" flow protecting 500K+ ARR\n- Value Impact: Ensures end-to-end chat functionality works in production-like environment\n- Strategic Impact: Validates 90% of platform value through complete user journey\n\nThis test suite validates the complete golden path user journey in staging:\n1. User authentication and WebSocket connection establishment\n2. Chat message submission and agent execution initiation\n3. Real-time WebSocket event delivery during agent execution\n4. All 5 critical WebSocket events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)\n5. Final AI response delivery with actionable insights\n6. Multi-user concurrent execution isolation\n7. Performance SLAs and error handling\n8. Integration with real GCP staging infrastructure\n\nKey Coverage Areas:\n- Complete end-to-end user journey validation\n- Real WebSocket connections with GCP staging\n- Actual agent execution with LLM integration\n- Real-time event streaming validation\n- Multi-user isolation and concurrency\n- Performance and SLA compliance\n- Error handling and recovery scenarios\n- Production-like infrastructure validation\n'
 import asyncio
 import json
 import pytest
 import time
 import uuid
 import websockets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional, Set
 from unittest.mock import AsyncMock, patch
 from websockets import ConnectionClosed, WebSocketException
@@ -66,7 +66,7 @@ class CompleteGoldenPathE2EStagingTests(SSotAsyncTestCase):
         if missing_config:
             logger.warning(f'Missing staging configuration: {missing_config}')
             self.staging_config.update(self._apply_environment_fallbacks())
-        self.test_users = [{'email': get_env().get('TEST_USER_EMAIL', 'test@netra.ai'), 'password': get_env().get('TEST_USER_PASSWORD', 'test_password'), 'user_id': None, 'jwt_token': None}]
+        self.test_users = [{'email': get_env().get('TEST_USER_EMAIL', 'test@netrasystems.ai'), 'password': get_env().get('TEST_USER_PASSWORD', 'test_password'), 'user_id': None, 'jwt_token': None}]
         self.captured_events: List[Dict[str, Any]] = []
         self.websocket_connections: List[websockets.ServerConnection] = []
         self.performance_metrics: List[Dict[str, Any]] = []
@@ -89,9 +89,9 @@ class CompleteGoldenPathE2EStagingTests(SSotAsyncTestCase):
         if not staging_config['base_url']:
             # Use canonical staging domains as specified in CLAUDE.md
             staging_config.update({
-                'base_url': 'https://backend.staging.netrasystems.ai',
-                'websocket_url': 'wss://backend.staging.netrasystems.ai/ws',
-                'api_url': 'https://backend.staging.netrasystems.ai/api',
+                'base_url': 'https://api.staging.netrasystems.ai',
+                'websocket_url': 'wss://api.staging.netrasystems.ai/ws',
+                'api_url': 'https://api.staging.netrasystems.ai/api',
                 'auth_url': 'https://auth.staging.netrasystems.ai'
             })
             logger.info('Using canonical staging.netrasystems.ai domains')
@@ -103,7 +103,7 @@ class CompleteGoldenPathE2EStagingTests(SSotAsyncTestCase):
         Addresses Issue #677: Graceful degradation for missing configuration.
         """
         fallback_config = {}
-        staging_domains = ['backend.staging.netrasystems.ai', 'localhost:8000', '127.0.0.1:8000']
+        staging_domains = ['api.staging.netrasystems.ai', 'localhost:8000', '127.0.0.1:8000']
         for domain in staging_domains:
             try:
                 if 'localhost' in domain or '127.0.0.1' in domain:
@@ -121,7 +121,7 @@ class CompleteGoldenPathE2EStagingTests(SSotAsyncTestCase):
                 logger.debug(f'Fallback domain {domain} not available: {e}')
                 continue
         if not fallback_config:
-            fallback_config = {'base_url': 'https://backend.staging.netrasystems.ai', 'websocket_url': 'wss://backend.staging.netrasystems.ai/ws', 'api_url': 'https://backend.staging.netrasystems.ai/api', 'auth_url': 'https://auth.staging.netrasystems.ai'}
+            fallback_config = {'base_url': 'https://api.staging.netrasystems.ai', 'websocket_url': 'wss://api.staging.netrasystems.ai/ws', 'api_url': 'https://api.staging.netrasystems.ai/api', 'auth_url': 'https://auth.staging.netrasystems.ai'}
             logger.warning('Using ultimate fallback configuration - may not be reachable')
         return fallback_config
 
@@ -200,7 +200,7 @@ class CompleteGoldenPathE2EStagingTests(SSotAsyncTestCase):
             logger.error(f' FAIL:  Failed to connect to staging WebSocket: {e}')
             pytest.skip(f'Staging WebSocket connection failed: {e}')
         logger.info('[U+1F680] Phase 2: Chat Message Submission')
-        chat_message = {'type': 'user_message', 'text': 'Analyze my cloud infrastructure costs and provide optimization recommendations with estimated savings', 'thread_id': str(uuid.uuid4()), 'timestamp': datetime.utcnow().isoformat()}
+        chat_message = {'type': 'user_message', 'text': 'Analyze my cloud infrastructure costs and provide optimization recommendations with estimated savings', 'thread_id': str(uuid.uuid4()), 'timestamp': datetime.now(UTC).isoformat()}
         message_send_time = time.time()
         await websocket.send(json.dumps(chat_message))
         logger.info(' PASS:  Chat message sent to staging')
@@ -224,7 +224,7 @@ class CompleteGoldenPathE2EStagingTests(SSotAsyncTestCase):
                     try:
                         event_data = json.loads(raw_event)
                         event_type = event_data.get('type')
-                        events_received.append({'type': event_type, 'data': event_data.get('data', {}), 'timestamp': datetime.utcnow(), 'receive_time': event_receive_time, 'latency_from_start': event_receive_time - message_send_time})
+                        events_received.append({'type': event_type, 'data': event_data.get('data', {}), 'timestamp': datetime.now(UTC), 'receive_time': event_receive_time, 'latency_from_start': event_receive_time - message_send_time})
                         if event_type in required_events:
                             required_events[event_type] = True
                             logger.info(f' PASS:  Received critical event: {event_type}')
@@ -286,7 +286,7 @@ class CompleteGoldenPathE2EStagingTests(SSotAsyncTestCase):
         num_concurrent_users = 3
         concurrent_users = []
         for i in range(num_concurrent_users):
-            user_context = {'user_index': i, 'email': f'test_user_{i}@staging.netra.ai', 'jwt_token': f'mock_jwt_token_user_{i}', 'user_id': str(uuid.uuid4()), 'thread_id': str(uuid.uuid4())}
+            user_context = {'user_index': i, 'email': f'test_user_{i}@staging.netrasystems.ai', 'jwt_token': f'mock_jwt_token_user_{i}', 'user_id': str(uuid.uuid4()), 'thread_id': str(uuid.uuid4())}
             concurrent_users.append(user_context)
 
         async def single_user_journey(user_context: Dict[str, Any]) -> Dict[str, Any]:
@@ -327,9 +327,9 @@ class CompleteGoldenPathE2EStagingTests(SSotAsyncTestCase):
         logger.info(f'🔍 CONCURRENCY DEBUGGING: {len(successful_journeys)}/{len(results)} journeys successful')
         for i, result in enumerate(results):
             if isinstance(result, dict) and (not result.get('success', True)):
-                logger.error(f"❌ Journey {i} failed: {result.get('error', 'Unknown error')}")
+                logger.error(f"X Journey {i} failed: {result.get('error', 'Unknown error')}")
             elif isinstance(result, dict) and result.get('success', False):
-                logger.info(f"✅ Journey {i} succeeded: {result.get('events_received', 0)} events")
+                logger.info(f"CHECK Journey {i} succeeded: {result.get('events_received', 0)} events")
         assert success_rate >= 0.5, f'Concurrent success rate too low: {success_rate:.2%}'
         assert concurrent_total_time < 60.0, f'Concurrent execution too slow: {concurrent_total_time:.2f}s'
         for result in successful_journeys:

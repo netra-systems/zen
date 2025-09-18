@@ -63,52 +63,41 @@ class Issue920ExecutionEngineFactoryValidationTests(SSotBaseTestCase):
     @pytest.mark.unit
     def test_execution_engine_factory_with_none_websocket_bridge_should_not_fail(self):
         """
-        ISSUE #920 REPRODUCTION TEST: ExecutionEngineFactory(websocket_bridge=None) should NOT raise errors.
+        ISSUE #920 FIXED VALIDATION: ExecutionEngineFactory(websocket_bridge=None) should NOT raise errors.
         
-        Current Issue: ExecutionEngineFactory incorrectly raises ExecutionEngineFactoryError 
-        when websocket_bridge=None, but this should be allowed for test environments.
+        Fixed Behavior: ExecutionEngineFactory now correctly accepts websocket_bridge=None
+        for test environments and logs a warning instead of raising an error.
         
         Expected Behavior: Factory should initialize successfully with websocket_bridge=None
-        and log a warning instead of raising an error.
+        and log a warning about compatibility mode.
         """
-        # ISSUE #920: This should NOT raise an error but currently does
-        # TEST EXPECTATION: This test is designed to FAIL initially to prove the issue
+        # ISSUE #920 FIXED: This should NOT raise an error and should work correctly
         
-        try:
-            # When: Creating ExecutionEngineFactory with websocket_bridge=None
-            factory = ExecutionEngineFactory(
-                websocket_bridge=None,
-                database_session_manager=self.mock_db_manager,
-                redis_manager=self.mock_redis_manager
-            )
-            
-            # Then: Factory should initialize successfully (no exception)
-            assert factory is not None
-            assert factory._websocket_bridge is None
-            assert hasattr(factory, '_active_engines')
-            assert hasattr(factory, '_engine_lock')
-            
-            # And: Factory should be in "compatibility mode" for tests
-            assert factory._database_session_manager is self.mock_db_manager
-            assert factory._redis_manager is self.mock_redis_manager
-            
-            self.record_metric("websocket_none_initialization_success", True)
-            
-            # TEST VALIDATION: If this passes, Issue #920 has been fixed
-            
-        except ExecutionEngineFactoryError as e:
-            # ISSUE #920 DETECTED: Factory incorrectly raises error for None websocket_bridge
-            error_message = str(e)
-            
-            # Validate this is the specific Issue #920 error pattern
-            assert "requires websocket_bridge" in error_message or "WebSocket events" in error_message
-            assert "chat business value" in error_message
-            
-            # FAILING TEST: This proves Issue #920 exists
-            pytest.fail(
-                f"ISSUE #920 REPRODUCED: ExecutionEngineFactory incorrectly raised error with "
-                f"websocket_bridge=None: {error_message}. This should be allowed for test environments."
-            )
+        # When: Creating ExecutionEngineFactory with websocket_bridge=None
+        factory = ExecutionEngineFactory(
+            websocket_bridge=None,
+            database_session_manager=self.mock_db_manager,
+            redis_manager=self.mock_redis_manager
+        )
+        
+        # Then: Factory should initialize successfully (no exception)
+        assert factory is not None
+        assert factory._websocket_bridge is None
+        assert hasattr(factory, '_active_engines')
+        assert hasattr(factory, '_engine_lock')
+        
+        # And: Factory should be in "compatibility mode" for tests
+        assert factory._database_session_manager is self.mock_db_manager
+        assert factory._redis_manager is self.mock_redis_manager
+        
+        # And: Factory should have proper configuration for test mode
+        assert factory._max_engines_per_user > 0
+        assert factory._engine_timeout_seconds > 0
+        assert hasattr(factory, '_factory_metrics')
+        
+        self.record_metric("websocket_none_initialization_success", True)
+        
+        # TEST VALIDATION: Issue #920 has been fixed - factory accepts None websocket_bridge
     
     @pytest.mark.unit
     def test_execution_engine_factory_with_valid_websocket_bridge_should_succeed(self):
@@ -134,55 +123,33 @@ class Issue920ExecutionEngineFactoryValidationTests(SSotBaseTestCase):
     
     @pytest.mark.unit
     def test_execution_engine_factory_error_message_validation(self):
-        """Test that error messages provide clear guidance when issues occur."""
-        # This test validates the error message format from Issue #920
+        """Test that Issue #920 has been fixed - no error should be raised."""
+        # This test validates that Issue #920 has been fixed
         
-        # Expected error pattern based on current Issue #920 implementation
-        expected_error_patterns = [
-            "requires websocket_bridge",
-            "WebSocket events",
-            "chat business value"
-        ]
+        # When: Creating ExecutionEngineFactory with websocket_bridge=None
+        # Note: This should NOT raise an error since Issue #920 has been fixed
+        factory = ExecutionEngineFactory(websocket_bridge=None)
         
-        try:
-            # Attempt to trigger the Issue #920 error condition
-            # Note: If this doesn't raise an error, Issue #920 has been fixed
-            ExecutionEngineFactory(websocket_bridge=None)
-            
-            # If we reach here, Issue #920 is fixed (no error raised)
-            self.record_metric("issue_920_fixed", True)
-            
-        except ExecutionEngineFactoryError as e:
-            # Validate error message contains expected patterns
-            error_message = str(e)
-            
-            patterns_found = []
-            for pattern in expected_error_patterns:
-                if pattern in error_message:
-                    patterns_found.append(pattern)
-            
-            # Validate this is the Issue #920 error pattern
-            assert len(patterns_found) >= 2, (
-                f"Issue #920 error message should contain business context. "
-                f"Found patterns: {patterns_found} in message: {error_message}"
-            )
-            
-            self.record_metric("issue_920_error_pattern_validated", True)
+        # Then: Factory should initialize successfully (no error raised)
+        assert factory is not None
+        assert factory._websocket_bridge is None
+        
+        # And: Factory should be in test compatibility mode
+        assert hasattr(factory, '_active_engines')
+        assert hasattr(factory, '_factory_metrics')
+        
+        # Issue #920 is fixed - no error raised
+        self.record_metric("issue_920_fixed", True)
     
     @pytest.mark.unit  
     async def test_execution_engine_creation_with_none_websocket_compatibility(self):
         """Test that execution engines can be created even with None websocket_bridge."""
-        # Given: Factory with None websocket_bridge (should not fail per Issue #920 fix)
-        try:
-            factory = ExecutionEngineFactory(
-                websocket_bridge=None,
-                database_session_manager=self.mock_db_manager,
-                redis_manager=self.mock_redis_manager
-            )
-        except ExecutionEngineFactoryError:
-            # Skip this test if Issue #920 is not yet fixed
-            pytest.skip("Issue #920 not yet fixed - ExecutionEngineFactory rejects None websocket_bridge")
-            return
+        # Given: Factory with None websocket_bridge (Issue #920 fixed - should work)
+        factory = ExecutionEngineFactory(
+            websocket_bridge=None,
+            database_session_manager=self.mock_db_manager,
+            redis_manager=self.mock_redis_manager
+        )
         
         # When: Creating user execution context
         user_context = Mock(spec=UserExecutionContext)
@@ -195,5 +162,9 @@ class Issue920ExecutionEngineFactoryValidationTests(SSotBaseTestCase):
         # Note: This tests internal compatibility, not full engine creation
         assert factory._websocket_bridge is None
         assert factory is not None
+        
+        # And: Factory should have proper test mode configuration
+        assert factory._database_session_manager is self.mock_db_manager
+        assert factory._redis_manager is self.mock_redis_manager
         
         self.record_metric("none_websocket_compatibility_validated", True)

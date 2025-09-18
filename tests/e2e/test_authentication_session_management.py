@@ -175,15 +175,9 @@ class AuthenticationSessionManagementTests(SSotBaseTestCase):
                         continue
                 
                 if not auth_confirmed:
-                    print(f" WARNING: [U+FE0F] WebSocket authentication could not be confirmed (no agent response)")
-                
-        except websockets.exceptions.InvalidStatus as e:
-            if e.status_code == 401:
-                pytest.fail(f"WebSocket authentication failed: {e}")
+                    print(f" WARNING: [U+FE0F] WebSocket authentication could not be confirmed (no agent response)""WebSocket authentication failed: {e}")
             else:
-                print(f" WARNING: [U+FE0F] WebSocket connection failed: {e} (may be infrastructure issue)")
-        except Exception as e:
-            print(f" WARNING: [U+FE0F] WebSocket test failed: {e}")
+                print(f" WARNING: [U+FE0F] WebSocket connection failed: {e} (may be infrastructure issue)"" WARNING: [U+FE0F] WebSocket test failed: {e}")
         
         # Test token validation endpoint (if available)
         auth_service_url = "http://localhost:8081"  # Auth service
@@ -566,11 +560,9 @@ class AuthenticationSessionManagementTests(SSotBaseTestCase):
                 except asyncio.TimeoutError:
                     print(f" PASS:  Unauthenticated request timed out (likely rejected)")
                     
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             if e.status_code == 401:
-                print(f" PASS:  Unauthenticated WebSocket connection properly rejected (401)")
-            else:
-                print(f" WARNING: [U+FE0F] WebSocket connection failed with status {e.status_code}")
+                print(f" PASS:  Unauthenticated WebSocket connection properly rejected (401)"" WARNING: [U+FE0F] WebSocket connection failed with status {e.status_code}")
         except Exception as e:
             print(f" WARNING: [U+FE0F] Unauthenticated WebSocket test failed: {e}")
         
@@ -610,7 +602,7 @@ class AuthenticationSessionManagementTests(SSotBaseTestCase):
                     except asyncio.TimeoutError:
                         print(f" PASS:  Invalid token #{i+1} timed out (likely rejected)")
                         
-            except websockets.exceptions.InvalidStatus as e:
+            except websockets.InvalidStatus as e:
                 if e.status_code == 401:
                     print(f" PASS:  Invalid token #{i+1} properly rejected at connection (401)")
                 else:
@@ -655,7 +647,7 @@ class AuthenticationSessionManagementTests(SSotBaseTestCase):
                 except asyncio.TimeoutError:
                     print(f" PASS:  Expired token timed out (likely rejected)")
                     
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             if e.status_code == 401:
                 print(f" PASS:  Expired token properly rejected at connection (401)")
             else:
@@ -704,7 +696,7 @@ class AuthenticationSessionManagementTests(SSotBaseTestCase):
                 except asyncio.TimeoutError:
                     print(f" PASS:  Limited permissions request timed out (likely rejected)")
                     
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             if e.status_code == 403:
                 print(f" PASS:  Limited permissions properly rejected (403)")
             elif e.status_code == 401:
@@ -858,9 +850,7 @@ class AuthenticationSessionManagementTests(SSotBaseTestCase):
                     
                     if event['type'] in ['agent_started', 'agent_completed']:
                         websocket_results["auth_working"] = True
-                        print(f"   WebSocket: Authentication successful ({event['type']})")
-                    elif event['type'] == 'error':
-                        websocket_results["error"] = event.get('message', 'WebSocket auth error')
+                        print(f"   WebSocket: Authentication successful ({event['type']})""error"] = event.get('message', 'WebSocket auth error')
                         print(f"   WebSocket: Authentication failed - {websocket_results['error']}")
                     else:
                         print(f"   WebSocket: Unexpected response - {event['type']}")

@@ -3,13 +3,13 @@ Test Suite: Agent Instance Factory User Isolation - Critical Security Vulnerabil
 
 PURPOSE: Prove singleton pattern in AgentInstanceFactory creates user isolation vulnerabilities
 ISSUE: #1116 - AgentInstanceFactory singleton pattern enables cross-user context contamination
-CRITICAL MISSION: Implement failing tests that expose $500K+ ARR security vulnerabilities
+CRITICAL MISSION: Implement failing tests that expose 500K+ ARR security vulnerabilities
 
 EXPECTED BEHAVIOR:
 - BEFORE REMEDIATION: All tests should FAIL (proving security vulnerabilities exist)
 - AFTER REMEDIATION: All tests should PASS (proving user isolation achieved)
 
-Business Value: Enterprise/Platform - $500K+ ARR protection through complete user isolation
+Business Value: Enterprise/Platform - 500K+ ARR protection through complete user isolation
 Security Impact: Prevents cross-user data leakage, HIPAA/SOC2/SEC compliance violations
 
 CRITICAL SECURITY SCENARIOS TESTED:
@@ -53,7 +53,7 @@ class AgentInstanceFactoryUserIsolationTests(SSotAsyncTestCase):
     5. Database sessions leak between users through singleton state (ENTERPRISE RISK)
     
     CRITICAL: These tests should FAIL before remediation and PASS after SSOT per-request pattern.
-    Each failure represents a real security vulnerability affecting $500K+ ARR enterprise customers.
+    Each failure represents a real security vulnerability affecting 500K+ ARR enterprise customers.
     """
 
     def setup_method(self, method):
@@ -91,7 +91,7 @@ class AgentInstanceFactoryUserIsolationTests(SSotAsyncTestCase):
         SECURITY VIOLATION: The singleton pattern causes the same factory instance
         to be shared across multiple user requests, creating cross-user contamination risk.
         
-        BUSINESS IMPACT: $500K+ ARR enterprise customers require complete user isolation
+        BUSINESS IMPACT: 500K+ ARR enterprise customers require complete user isolation
         for HIPAA, SOC2, and SEC compliance. Shared state violates these requirements.
         
         EXPECTED: FAIL before remediation (proving security violation exists)
@@ -110,7 +110,7 @@ class AgentInstanceFactoryUserIsolationTests(SSotAsyncTestCase):
             "CRITICAL SECURITY VIOLATION: Same factory instance shared between users. "
             "This enables cross-user contamination and violates enterprise security requirements. "
             f"User A Factory ID: {id(factory_user_a)}, User B Factory ID: {id(factory_user_b)}. "
-            "BUSINESS IMPACT: $500K+ ARR at risk from data leakage incidents."
+            "BUSINESS IMPACT: 500K+ ARR at risk from data leakage incidents."
         )
         
         # SECURITY VIOLATION ASSERTION: Global singleton state persists
@@ -225,7 +225,7 @@ class AgentInstanceFactoryUserIsolationTests(SSotAsyncTestCase):
                 f"CRITICAL DATA LEAKAGE: User {user_id} can access other users' sensitive data. "
                 f"Exposed data: {other_user_sensitive_data}. "
                 "COMPLIANCE VIOLATION: This violates HIPAA, SOC2, PCI-DSS, and SEC requirements. "
-                "BUSINESS IMPACT: $500K+ ARR enterprise customers cannot tolerate data exposure."
+                "BUSINESS IMPACT: 500K+ ARR enterprise customers cannot tolerate data exposure."
             )
 
     def test_websocket_event_cross_user_contamination_real_time_risk(self):
@@ -411,7 +411,7 @@ class AgentInstanceFactoryUserIsolationTests(SSotAsyncTestCase):
             f"CRITICAL DATA EXPOSURE: User {user2_id} can access user {user1_id}'s "
             f"sensitive database queries: '{exposed_query}'. "
             "COMPLIANCE VIOLATION: Cross-user database access violates enterprise security. "
-            "BUSINESS IMPACT: $500K+ ARR customers require complete database isolation."
+            "BUSINESS IMPACT: 500K+ ARR customers require complete database isolation."
         )
 
     def test_agent_state_persistence_memory_leak_security_risk(self):
@@ -487,7 +487,7 @@ class AgentInstanceFactoryUserIsolationTests(SSotAsyncTestCase):
             f"STRATEGIC DATA EXPOSURE: User {user2_id} can access VIP customer's "
             f"strategic analysis: {exposed_context}. "
             "BUSINESS INTELLIGENCE LEAK: Competitor acquisition strategies exposed. "
-            "ENTERPRISE IMPACT: $500K+ ARR VIP customers require absolute memory isolation."
+            "ENTERPRISE IMPACT: 500K+ ARR VIP customers require absolute memory isolation."
         )
         
         # EXECUTION MEMORY VIOLATION: Last execution context accessible
@@ -509,7 +509,7 @@ class AgentInstanceFactoryUserIsolationTests(SSotAsyncTestCase):
         This test explicitly forces the singleton pattern to demonstrate the exact
         vulnerability that would occur if the singleton pattern is used in production.
         
-        BUSINESS IMPACT: $500K+ ARR enterprise customers require absolute isolation.
+        BUSINESS IMPACT: 500K+ ARR enterprise customers require absolute isolation.
         This test proves why singleton patterns are a security vulnerability.
         
         EXPECTED: FAIL (proving vulnerability exists when singleton pattern is used)
@@ -643,7 +643,7 @@ class AgentInstanceFactoryUserIsolationTests(SSotAsyncTestCase):
         SECURITY REQUIREMENT: Multi-user systems require per-request isolation to prevent
         cross-user contamination. Singleton pattern violates this fundamental requirement.
         
-        ENTERPRISE ARCHITECTURE: $500K+ ARR customers require architectural patterns that
+        ENTERPRISE ARCHITECTURE: 500K+ ARR customers require architectural patterns that
         guarantee complete user isolation at the request level for regulatory compliance.
         
         EXPECTED: FAIL before remediation (proving singleton violates isolation)

@@ -1,7 +1,7 @@
 """
 Issue #1264: Database Configuration Validation Tests
 
-CRITICAL P0 ISSUE: Staging Cloud SQL instance misconfigured as MySQL instead of PostgreSQL
+CRITICAL P0 ISSUE: Staging Cloud SQL instance PostgreSQL configuration issues
 
 This test suite validates the database configuration problem and any fixes.
 Tests are designed to FAIL initially (demonstrating the problem) and PASS after infrastructure fix.
@@ -54,8 +54,6 @@ class DatabaseConfigurationTester:
         
         if url.startswith('postgresql'):
             return "POSTGRESQL"
-        elif url.startswith('mysql'):
-            return "MYSQL"
         elif url.startswith('sqlite'):
             return "SQLITE"
         else:
@@ -125,9 +123,9 @@ class TestDatabaseConfigurationValidation:
     
     def test_staging_postgresql_url_generation(self):
         """
-        CRITICAL TEST: Validate staging URLs are generated as PostgreSQL, not MySQL.
+        CRITICAL TEST: Validate staging URLs are generated as PostgreSQL.
         
-        This test should PASS after infrastructure fix (Cloud SQL configured as PostgreSQL).
+        This test should PASS after infrastructure fix (Cloud SQL configured properly).
         Before fix, this may FAIL if URLs are incorrectly generated.
         """
         tester = DatabaseConfigurationTester()
@@ -157,7 +155,7 @@ class TestDatabaseConfigurationValidation:
                 f"DATABASE CONFIGURATION ERROR: URLs not generated as PostgreSQL. "
                 f"Staging URL type: {result['staging_url_type']}, "
                 f"Staging sync URL type: {result['staging_sync_url_type']}. "
-                f"This indicates the Cloud SQL instance may be misconfigured as MySQL instead of PostgreSQL."
+                f"This indicates the Cloud SQL instance may have PostgreSQL configuration problems."
             )
             
             # CRITICAL ASSERTION: URLs must be generated
@@ -360,8 +358,8 @@ class TestDatabaseConnectivityValidation:
                 await asyncio.sleep(0.1)  # Mock connection time
                 
                 # For demonstration, simulate different scenarios:
-                # - If MySQL configured: would timeout after 8+ seconds
-                # - If PostgreSQL configured: should connect quickly
+                # - If PostgreSQL misconfigured: would timeout after 8+ seconds
+                # - If PostgreSQL configured properly: should connect quickly
                 
                 connection_time = time.time() - start_time
                 
@@ -370,7 +368,7 @@ class TestDatabaseConnectivityValidation:
                 # CRITICAL ASSERTION: Connection should not take 8+ seconds
                 assert connection_time < 8.0, (
                     f"DATABASE TIMEOUT DETECTED: Connection took {connection_time:.2f} seconds. "
-                    f"This may indicate the Cloud SQL instance is misconfigured as MySQL instead of PostgreSQL, "
+                    f"This may indicate the Cloud SQL instance has PostgreSQL configuration problems, "
                     f"causing connection timeouts when trying to connect with PostgreSQL drivers."
                 )
                 
@@ -386,7 +384,7 @@ class TestDatabaseConnectivityValidation:
                 if "timeout" in connection_error.lower():
                     pytest.fail(
                         f"CONNECTION TIMEOUT FAILURE: {connection_error}. "
-                        f"This may indicate MySQL/PostgreSQL configuration mismatch."
+                        f"This may indicate PostgreSQL configuration problems."
                     )
                 elif "authentication" in connection_error.lower():
                     print("Authentication error - may be expected in test environment")
@@ -453,10 +451,10 @@ class TestDatabaseURLBuilderValidation:
     
     def test_mysql_vs_postgresql_port_detection(self):
         """
-        UNIT TEST: Detect MySQL vs PostgreSQL port configuration.
+        UNIT TEST: Detect PostgreSQL port configuration.
         
-        This test validates that the system properly distinguishes between
-        MySQL (port 3306/3307) and PostgreSQL (port 5432) configurations.
+        This test validates that the system properly uses
+        PostgreSQL port 5432 configurations.
         """
         tester = DatabaseConfigurationTester()
         
@@ -472,15 +470,15 @@ class TestDatabaseURLBuilderValidation:
         print(f"PostgreSQL URL: {DatabaseURLBuilder.mask_url_for_logging(postgres_url)}")
         print(f"PostgreSQL Port: {tester.extract_port_from_url(postgres_url)}")
         
-        # Test MySQL port (incorrect - should be flagged)
-        mysql_env = tester.create_staging_environment()
-        mysql_env['POSTGRES_PORT'] = '3306'  # MySQL port in PostgreSQL config
+        # Test non-standard port (should be flagged as potentially problematic)
+        nonstandard_env = tester.create_staging_environment()
+        nonstandard_env['POSTGRES_PORT'] = '3306'  # Non-standard port in PostgreSQL config
         
-        builder_mysql = DatabaseURLBuilder(mysql_env)
-        mysql_url = builder_mysql.staging.auto_url
+        builder_nonstandard = DatabaseURLBuilder(nonstandard_env)
+        nonstandard_url = builder_nonstandard.staging.auto_url
         
-        print(f"MySQL-port URL: {DatabaseURLBuilder.mask_url_for_logging(mysql_url)}")
-        print(f"MySQL Port: {tester.extract_port_from_url(mysql_url)}")
+        print(f"Non-standard port URL: {DatabaseURLBuilder.mask_url_for_logging(nonstandard_url)}")
+        print(f"Non-standard Port: {tester.extract_port_from_url(nonstandard_url)}")
         
         # Validate PostgreSQL configuration
         postgres_port = tester.extract_port_from_url(postgres_url)
@@ -488,10 +486,10 @@ class TestDatabaseURLBuilderValidation:
             f"PostgreSQL configuration must use port 5432, got {postgres_port}"
         )
         
-        # Detect MySQL port misconfiguration
-        mysql_port = tester.extract_port_from_url(mysql_url)
-        if mysql_port == "3306":
-            print(f"⚠️  CONFIGURATION WARNING: MySQL port 3306 detected in PostgreSQL configuration")
+        # Detect non-standard port configuration
+        nonstandard_port = tester.extract_port_from_url(nonstandard_url)
+        if nonstandard_port == "3306":
+            print(f"⚠️  CONFIGURATION WARNING: Non-standard port 3306 detected in PostgreSQL configuration")
             print(f"   This may indicate database instance misconfiguration")
         
         print(f"✓ Port detection working correctly")
@@ -577,7 +575,7 @@ if __name__ == "__main__":
     print("ISSUE #1264: DATABASE CONFIGURATION VALIDATION TESTS")
     print("=" * 70)
     print("Testing database configuration for PostgreSQL vs MySQL detection")
-    print("Expected to FAIL if Cloud SQL is misconfigured as MySQL")
+    print("Expected to FAIL if Cloud SQL has PostgreSQL configuration issues")
     print("Expected to PASS after infrastructure fix")
     print("=" * 70)
     
@@ -608,7 +606,7 @@ if __name__ == "__main__":
         print(f"   {e}")
         print("\n" + "=" * 70)
         print("TEST FAILURE - This confirms Issue #1264 database configuration problem")
-        print("Infrastructure fix required: Configure Cloud SQL as PostgreSQL")
+        print("Infrastructure fix required: Fix Cloud SQL PostgreSQL configuration")
         print("=" * 70)
         sys.exit(1)
         

@@ -7,7 +7,7 @@ This validates that authenticated users maintain their session state for seamles
 Business Value Justification (BVJ):
 - Segment: ALL authenticated users (Free, Early, Mid, Enterprise) 
 - Business Goal: Reduce Re-authentication Friction - Seamless user experience
-- Value Impact: $150K+ ARR - Poor session UX = 25% user drop-off per session
+- Value Impact: 150K+ ARR - Poor session UX = 25% user drop-off per session
 - Strategic Impact: User Retention - Persistent sessions enable longer engagement
 
 SESSION PERSISTENCE JOURNEY:
@@ -325,7 +325,7 @@ class AuthSessionPersistenceTests(BaseE2ETest):
                             self.validator.record_session_event('timeout_not_detected', {'token_still_valid': True})
                     except asyncio.TimeoutError:
                         self.validator.record_session_event('timeout_no_response', {'connection_dropped': True})
-            except websockets.exceptions.ConnectionClosed as e:
+            except websockets.ConnectionClosed as e:
                 self.validator.record_session_event('timeout_connection_closed', {'graceful_closure': True, 'close_code': e.code if hasattr(e, 'code') else None})
             except Exception as e:
                 self.validator.record_session_event('timeout_error', {'error': str(e)})

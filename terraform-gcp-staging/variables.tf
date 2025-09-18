@@ -247,11 +247,17 @@ variable "session_affinity_ttl_sec" {
   default     = 86400 # CRITICAL FIX: Increase to 24 hours
 }
 
-# WebSocket Configuration
+# WebSocket Configuration - Issue #1300: Enhanced WebSocket authentication monitoring
 variable "websocket_timeout_sec" {
-  description = "WebSocket connection timeout in seconds for long-lived connections"
+  description = "WebSocket connection timeout in seconds for long-lived connections with authentication monitoring"
   type        = number
-  default     = 86400 # 24 hours for WebSocket connections
+  default     = 86400 # 24 hours for WebSocket connections (authentication monitoring compatible)
+}
+
+variable "websocket_auth_monitoring_timeout_sec" {
+  description = "WebSocket authentication monitoring specific timeout (minimum 600s for proper auth checks)"
+  type        = number
+  default     = 600 # 10 minutes minimum for authentication monitoring operations
 }
 
 variable "force_https_enabled" {

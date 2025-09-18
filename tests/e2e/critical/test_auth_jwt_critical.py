@@ -39,7 +39,7 @@ E2EServiceValidator.enforce_real_services()
 class RealAuthServiceClient:
     """Real HTTP client for auth service - NO MOCKS"""
     
-    def __init__(self, auth_url: str = "http://localhost:8081"):
+    def __init__(self, auth_url: str = "http://localhost:8080"):
         self.auth_url = auth_url.rstrip('/')
         self.client = httpx.AsyncClient(timeout=30.0)
         
@@ -65,7 +65,7 @@ class RealAuthServiceClient:
             data = response.json()
             return {
                 "success": True,
-                "token": data.get("token"),
+                "token": data.get("access_token"),
                 "user_id": user_id,
                 "expires_in": data.get("expires_in", expiry_seconds)
             }
@@ -110,8 +110,29 @@ class RealAuthServiceClient:
         try:
             response = await self.client.get(f"{self.auth_url}/auth/health")
             return response.status_code == 200
-        except:
+        except Exception as e:
+            print(f"Auth service health check failed: {e}")
             return False
+            
+    async def check_service_availability(self) -> Dict[str, Any]:
+        """Pre-flight check to ensure auth service is available before testing"""
+        try:
+            response = await self.client.get(f"{self.auth_url}/auth/health")
+            if response.status_code == 200:
+                return {"available": True, "status": "healthy"}
+            else:
+                return {
+                    "available": False, 
+                    "status": f"unhealthy (status {response.status_code})",
+                    "url": self.auth_url
+                }
+        except Exception as e:
+            return {
+                "available": False,
+                "status": f"connection_failed: {str(e)}",
+                "url": self.auth_url,
+                "error_type": type(e).__name__
+            }
 
 
 class RealBackendServiceClient:
@@ -169,6 +190,12 @@ class CriticalJWTAuthenticationTests:
         """Start real services and wait for health"""
         await self.services_manager.start_all_services(skip_frontend=True)
         
+        # Pre-flight service availability check
+        async with RealAuthServiceClient() as auth_client:
+            availability = await auth_client.check_service_availability()
+            if not availability['available']:
+                raise RuntimeError(f"Auth service not available: {availability['status']} at {availability['url']}")
+        
         # Wait for services to be ready with retries
         max_retries = 30  # 30 seconds total wait time
         retry_count = 0
@@ -187,7 +214,7 @@ class CriticalJWTAuthenticationTests:
             await asyncio.sleep(1.0)
         
         if retry_count >= max_retries:
-            raise RuntimeError("Services failed to start after 30 seconds")
+            raise RuntimeError("Services failed to start after 30 seconds. Auth service might be on wrong port or misconfigured.")
         
     def teardown_method(self):
         """Cleanup"""
@@ -287,6 +314,12 @@ class CriticalAuthenticationFlowTests:
         """Start real services and wait for health"""
         await self.services_manager.start_all_services(skip_frontend=True)
         
+        # Pre-flight service availability check
+        async with RealAuthServiceClient() as auth_client:
+            availability = await auth_client.check_service_availability()
+            if not availability['available']:
+                raise RuntimeError(f"Auth service not available: {availability['status']} at {availability['url']}")
+        
         # Wait for services to be ready with retries
         max_retries = 30  # 30 seconds total wait time
         retry_count = 0
@@ -305,7 +338,7 @@ class CriticalAuthenticationFlowTests:
             await asyncio.sleep(1.0)
         
         if retry_count >= max_retries:
-            raise RuntimeError("Services failed to start after 30 seconds")
+            raise RuntimeError("Services failed to start after 30 seconds. Auth service might be on wrong port or misconfigured.")
         
     def teardown_method(self):
         """Cleanup"""  

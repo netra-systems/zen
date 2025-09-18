@@ -4,7 +4,7 @@ Authentication Fragmentation GCP Staging E2E Tests - Issue #1060
 CRITICAL E2E TESTS: These tests demonstrate authentication fragmentation in the
 actual GCP staging environment, proving the issue exists in real deployment conditions.
 
-Business Impact: $500K+ ARR - Staging environment auth failures block production deployment
+Business Impact: 500K+ ARR - Staging environment auth failures block production deployment
 Technical Impact: Real-world authentication fragmentation evidence in cloud environment
 
 TEST STRATEGY: E2E tests against GCP staging environment to validate authentication
@@ -26,7 +26,7 @@ import time
 from typing import Dict, Any, Optional, List
 from unittest.mock import patch
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 # SSOT E2E test infrastructure for staging
 from test_framework.ssot.base_integration_test import BaseIntegrationTest
@@ -410,8 +410,8 @@ class AuthFragmentationStagingE2ETests(BaseIntegrationTest):
                     "user_id": user_data["user_id"],
                     "email": user_data["email"],
                     "permissions": user_data["expected_permissions"],
-                    "iat": int(datetime.utcnow().timestamp()),
-                    "exp": int((datetime.utcnow() + timedelta(hours=1)).timestamp())
+                    "iat": int(datetime.now(UTC).timestamp()),
+                    "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp())
                 },
                 "staging-secret",  # In real staging, this would be the actual secret
                 algorithm="HS256"

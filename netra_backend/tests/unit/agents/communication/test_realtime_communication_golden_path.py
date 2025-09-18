@@ -5,7 +5,7 @@ Business Value Justification:
 - Segment: Platform/Core Business Logic
 - Business Goal: Real-time User Experience & Communication Reliability
 - Value Impact: Validates real-time communication infrastructure for agent golden path
-- Strategic Impact: Ensures reliable real-time feedback for $500K+ ARR chat functionality
+- Strategic Impact: Ensures reliable real-time feedback for 500K+ ARR chat functionality
 
 Test Coverage Focus:
 - WebSocket connection stability and health monitoring

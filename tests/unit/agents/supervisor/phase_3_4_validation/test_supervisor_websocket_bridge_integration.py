@@ -114,7 +114,7 @@ class SupervisorWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
         self.assertTrue(hasattr(supervisor, 'websocket_bridge'),
             "CRITICAL FAILURE: Supervisor missing websocket_bridge attribute")
         
-        logger.info("✅ WebSocket bridge dependency injection validated")
+        logger.info("CHECK WebSocket bridge dependency injection validated")
         
     async def test_supervisor_critical_websocket_events_integration(self):
         """
@@ -167,7 +167,7 @@ class SupervisorWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
         bridge.notify_tool_completed.assert_called_once()
         bridge.notify_agent_completed.assert_called_once()
         
-        logger.info("✅ Critical WebSocket events integration validated")
+        logger.info("CHECK Critical WebSocket events integration validated")
         
     async def test_supervisor_websocket_context_isolation(self):
         """
@@ -226,7 +226,7 @@ class SupervisorWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
         bridge_1.notify_agent_started.assert_called_once_with("User 1 agent started")
         bridge_2.notify_agent_started.assert_called_once_with("User 2 agent started")
         
-        logger.info("✅ WebSocket context isolation validated")
+        logger.info("CHECK WebSocket context isolation validated")
         
     async def test_websocket_scoped_supervisor_factory_integration(self):
         """
@@ -273,7 +273,7 @@ class SupervisorWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
             self.assertIsNotNone(supervisor.websocket_bridge,
                 "CRITICAL FAILURE: Factory-created supervisor missing WebSocket bridge")
         
-        logger.info("✅ WebSocket scoped supervisor factory integration validated")
+        logger.info("CHECK WebSocket scoped supervisor factory integration validated")
         
     async def test_supervisor_websocket_bridge_error_handling(self):
         """
@@ -282,7 +282,7 @@ class SupervisorWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
         EXPECTED BEHAVIOR: This test should FAIL initially if supervisor doesn't
         properly handle WebSocket bridge errors without crashing.
         """
-        logger.info("⚠️ Testing supervisor WebSocket bridge error handling")
+        logger.info("WARNING️ Testing supervisor WebSocket bridge error handling")
         
         # Create bridge that raises errors
         error_bridge = self.mock_factory.create_mock(AgentWebSocketBridge)
@@ -303,7 +303,7 @@ class SupervisorWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
         except Exception as e:
             # Error should be handled appropriately
             self.assertIn("Bridge connection lost", str(e))
-            logger.info(f"✓ Bridge error properly raised: {e}")
+            logger.info(f"CHECK Bridge error properly raised: {e}")
         
         # CRITICAL: Supervisor should still be functional despite bridge errors
         self.assertIsNotNone(supervisor._llm_manager,
@@ -312,7 +312,7 @@ class SupervisorWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
         self.assertIsNotNone(supervisor.agent_factory,
             "CRITICAL FAILURE: Agent factory affected by bridge error")
         
-        logger.info("✅ WebSocket bridge error handling validated")
+        logger.info("CHECK WebSocket bridge error handling validated")
         
     async def test_supervisor_bridge_lifecycle_management(self):
         """
@@ -350,7 +350,7 @@ class SupervisorWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
             await bridge.notify_agent_started("Lifecycle test message")
             bridge.notify_agent_started.assert_called_once()
         
-        logger.info("✅ WebSocket bridge lifecycle management validated")
+        logger.info("CHECK WebSocket bridge lifecycle management validated")
         
     def test_supervisor_websocket_bridge_optional_handling(self):
         """
@@ -383,13 +383,13 @@ class SupervisorWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
         self.assertEqual(supervisor.name, "Supervisor",
             "CRITICAL FAILURE: Basic supervisor properties broken without bridge")
         
-        logger.info("✅ Optional WebSocket bridge handling validated")
+        logger.info("CHECK Optional WebSocket bridge handling validated")
 
 
 # Execute tests if run directly
 if __name__ == "__main__":
     logger.info("🚀 Starting Phase 3.4 Supervisor WebSocket Bridge Integration Tests")
-    logger.info("⚠️  EXPECTED: Tests may FAIL initially - this validates proper test behavior")
+    logger.info("WARNING️  EXPECTED: Tests may FAIL initially - this validates proper test behavior")
     logger.info("🎯 Focus: Critical WebSocket events supporting 90% of platform business value")
     
     # Run with asyncio

@@ -2,13 +2,13 @@
 E2E tests for mission-critical Docker bypass mechanisms - NO DOCKER BUILDS REQUIRED
 
 Purpose: Validate staging fallback mechanisms when Docker Alpine builds fail
-Issue: #1082 - Docker Alpine build infrastructure failure (escalated P2→P1)
+Issue: #1082 - Docker Alpine build infrastructure failure (escalated P2->P1)
 Approach: Staging environment validation and fallback testing, no container operations
 
 MISSION CRITICAL: These tests must validate the staging bypass strategy
 WITHOUT requiring Docker to be running or functional.
 
-Business Impact: $500K+ ARR Golden Path depends on reliable fallback mechanisms
+Business Impact: 500K+ ARR Golden Path depends on reliable fallback mechanisms
 Critical Context: Issue #420 strategic resolution - staging validation as Docker fallback
 
 Test Strategy: These tests are designed to FAIL initially to prove staging bypass needs work
@@ -37,7 +37,7 @@ class MissionCriticalDockerBypassTests(SSotBaseTestCase):
 
         # Staging environment URLs (canonical fallback)
         cls.staging_urls = {
-            'backend': 'https://backend.staging.netrasystems.ai',
+            'backend': 'https://api.staging.netrasystems.ai',
             'auth': 'https://auth.staging.netrasystems.ai',
             'frontend': 'https://staging.netrasystems.ai'
         }
@@ -114,13 +114,13 @@ class MissionCriticalDockerBypassTests(SSotBaseTestCase):
         Test that staging WebSocket functionality works without Docker
 
         Issue: #1082 - Mission-critical WebSocket tests blocked by Docker failures
-        Business Impact: $500K+ ARR WebSocket functionality validation
+        Business Impact: 500K+ ARR WebSocket functionality validation
         Difficulty: High (20 minutes)
         Expected: FAIL initially - WebSocket fallback mechanism not properly implemented
         """
         websocket_fallback_issues = []
 
-        staging_websocket_url = f"wss://backend.staging.netrasystems.ai{self.critical_endpoints['websocket_endpoint']}"
+        staging_websocket_url = f"wss://api.staging.netrasystems.ai{self.critical_endpoints['websocket_endpoint']}"
 
         try:
             # Mock WebSocket connection testing (actual WebSocket would need real infrastructure)
@@ -199,7 +199,7 @@ class MissionCriticalDockerBypassTests(SSotBaseTestCase):
         Test that mission-critical tests can execute without Docker infrastructure
 
         Issue: #1082 - Mission-critical tests timeout due to Docker failures
-        Business Impact: $500K+ ARR Golden Path validation blocked
+        Business Impact: 500K+ ARR Golden Path validation blocked
         Difficulty: High (25 minutes)
         Expected: FAIL initially - Mission-critical tests not designed for Docker-independent execution
         """
@@ -317,7 +317,7 @@ class MissionCriticalDockerBypassTests(SSotBaseTestCase):
             ],
             'cors_configuration': [
                 'https://staging.netrasystems.ai',
-                'wss://backend.staging.netrasystems.ai'
+                'wss://api.staging.netrasystems.ai'
             ]
         }
 
@@ -428,7 +428,7 @@ class MissionCriticalDockerBypassTests(SSotBaseTestCase):
                         'backend.alpine.Dockerfile:69'
                     ],
                     'staging_fallback_procedures': [
-                        'https://backend.staging.netrasystems.ai',
+                        'https://api.staging.netrasystems.ai',
                         'WebSocket bypass',
                         'mission-critical test execution'
                     ],

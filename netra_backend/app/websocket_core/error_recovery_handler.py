@@ -24,11 +24,11 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union, Callable
 from uuid import uuid4
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.schemas.startup_types import ErrorType as BaseErrorType
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 # =============================================================================
@@ -346,18 +346,21 @@ class WebSocketErrorRecoveryHandler:
         self,
         config: Dict[str, Any],
         websocket_manager: Any,
-        message_buffer: Any
+        message_buffer: Any,
+        user_friendly_error_mapper: Any = None
     ):
         """Initialize WebSocket error recovery handler.
-        
+
         Args:
             config: Recovery configuration parameters
             websocket_manager: WebSocket connection manager
             message_buffer: Message buffer for replay functionality
+            user_friendly_error_mapper: Optional UserFriendlyErrorMapper for user-facing error messages
         """
         self.config = config
         self.websocket_manager = websocket_manager
         self.message_buffer = message_buffer
+        self.user_friendly_error_mapper = user_friendly_error_mapper
         
         # Initialize circuit breaker
         self.circuit_breaker = CircuitBreaker(
@@ -380,7 +383,8 @@ class WebSocketErrorRecoveryHandler:
         logger.info("WebSocketErrorRecoveryHandler initialized with config", extra={
             "circuit_breaker_enabled": config.get("circuit_breaker_enabled", True),
             "max_retry_attempts": config.get("max_retry_attempts", 3),
-            "enable_graceful_degradation": config.get("enable_graceful_degradation", True)
+            "enable_graceful_degradation": config.get("enable_graceful_degradation", True),
+            "user_friendly_errors_enabled": user_friendly_error_mapper is not None
         })
     
     async def handle_error(self, error_context: WebSocketErrorContext) -> RecoveryResult:
@@ -682,6 +686,35 @@ class WebSocketErrorRecoveryHandler:
         
         # Would implement connection isolation logic here
         logger.warning(f"Cascade prevention activated for error: {error_context.error_type}")
+
+    def get_user_friendly_error_message(self, error_context: WebSocketErrorContext) -> Optional[Any]:
+        """Generate user-friendly error message if mapper is available.
+
+        Args:
+            error_context: WebSocket error context
+
+        Returns:
+            UserFriendlyErrorMessage if mapper is available, None otherwise
+        """
+        if not self.user_friendly_error_mapper:
+            return None
+
+        try:
+            # Convert WebSocket error context to dict for mapping
+            error_dict = {
+                'error_type': error_context.error_type,
+                'error_message': error_context.error_message,
+                'timestamp': error_context.timestamp,
+                'user_id': getattr(error_context, 'user_id', None),
+                'connection_id': getattr(error_context, 'connection_id', None),
+                'retry_count': getattr(error_context, 'retry_count', 0),
+            }
+
+            return self.user_friendly_error_mapper.map_error(error_dict)
+
+        except Exception as e:
+            logger.error(f"Failed to generate user-friendly error message: {e}")
+            return None
     
     async def generate_recovery_report(self, time_period_hours: int = 24) -> ErrorRecoveryReport:
         """Generate comprehensive error recovery report."""
@@ -728,7 +761,7 @@ class WebSocketErrorRecoveryHandler:
 
 # Import existing components for compatibility
 from netra_backend.app.websocket_core.recovery import ErrorRecoveryHandler
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
 # Create backward compatibility aliases
 WebSocketRecoveryManager = UnifiedWebSocketManager

@@ -138,24 +138,31 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       webSocketService.onStatusChange = handleStatusChange;
       webSocketService.onMessage = handleMessage;
       
+      // Get authentication configuration with ticket support
+      const authConfig = unifiedAuthService.getWebSocketAuthConfig();
+      
       // Connect to WebSocket using secure endpoint
       const baseWsUrl = appConfig.wsUrl || `${appConfig.apiUrl.replace(/^http/, 'ws')}/ws`;
       const wsUrl = webSocketService.getSecureUrl(baseWsUrl);
       
       logger.debug('[WebSocketProvider] Establishing secure WebSocket connection', {
         baseWsUrl: baseWsUrl,
-        finalWsUrl: wsUrl.replace(/jwt\.[^&]+/, 'jwt.***'), // Hide token in logs
+        finalWsUrl: wsUrl.replace(/jwt\.[^&]+/, 'jwt.***').replace(/ticket\.[^&]+/, 'ticket.***'), // Hide auth in logs
         hasToken: !!currentToken,
         tokenLength: currentToken ? currentToken.length : 0,
         isSecure: !isDevelopment || !!currentToken,
         isDevelopment,
-        authMethod: currentToken ? 'subprotocol' : 'none',
+        authMethod: authConfig.useTicketAuth ? 'ticket' : (currentToken ? 'jwt' : 'none'),
         configWsUrl: appConfig.wsUrl,
         configApiUrl: appConfig.apiUrl
       });
       
       webSocketService.connect(wsUrl, {
         token: currentToken || undefined,
+        // Ticket authentication support
+        getTicket: authConfig.getTicket,
+        useTicketAuth: authConfig.useTicketAuth,
+        clearTicketCache: () => unifiedAuthService.clearTicketCache(),
         refreshToken: async () => {
           try {
             // Use the unified auth service for token refresh
@@ -214,10 +221,16 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           
           // Handle different error types
           if (error.type === 'auth') {
+            // Clear ticket cache on auth errors to force refresh
+            unifiedAuthService.clearTicketCache();
+            
             if (error.code === 1008) {
               if (error.message.includes('Security violation')) {
                 logger.error('WebSocket security violation - using deprecated authentication method');
                 // This is a critical security issue - don't retry
+              } else if (error.message.includes('ticket')) {
+                logger.warn('WebSocket ticket authentication failed - may need refresh');
+                // Ticket refresh might help here
               } else {
                 logger.warn('WebSocket authentication failed - token may be expired or invalid');
                 // Token refresh might help here
@@ -225,7 +238,11 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
             } else {
               logger.warn('WebSocket authentication error', undefined, {
                 component: 'WebSocketProvider',
-                metadata: { code: error.code, message: error.message }
+                metadata: { 
+                  code: error.code, 
+                  message: error.message,
+                  authMethod: authConfig.useTicketAuth ? 'ticket' : 'jwt'
+                }
               });
             }
           }
@@ -233,6 +250,9 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         onReconnect: () => {
           logger.debug('[WebSocketProvider] WebSocket reconnecting with fresh authentication');
           connectionStateRef.current = 'connecting';
+          
+          // Clear ticket cache to ensure fresh authentication on reconnect
+          unifiedAuthService.clearTicketCache();
         },
         heartbeatInterval: getEnvironmentHeartbeatInterval(), // Environment-aware heartbeat interval
         rateLimit: {

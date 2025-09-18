@@ -94,7 +94,7 @@ class Issue508WebSocketASGIMiddlewareIntegrationTests(SSotAsyncTestCase):
         """
         Integration test for complete ASGI scope processing chain
         
-        Tests the flow: ASGI scope → middleware → WebSocket handler → bug location
+        Tests the flow: ASGI scope -> middleware -> WebSocket handler -> bug location
         """
 
         async def mock_asgi_app(scope: Scope, receive: Receive, send: Send):

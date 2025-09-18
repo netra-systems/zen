@@ -4,7 +4,7 @@
 GitHub Issue: #960 WebSocket Manager SSOT fragmentation crisis
 
 THIS TEST VALIDATES CONSISTENT EVENT DELIVERY ACROSS WEBSOCKET IMPLEMENTATIONS.
-Business Value: $500K+ ARR - Validates event delivery consistency for Golden Path
+Business Value: 500K+ ARR - Validates event delivery consistency for Golden Path
 
 PURPOSE:
 - Test validates consistent event delivery across all WebSocket implementations
@@ -163,7 +163,7 @@ class WebSocketEventDeliveryConsistencyTests(SSotBaseTestCase):
                         logger.error(f"  Failed events: {list(events_failed.keys())}")
 
                 except Exception as e:
-                    logger.warning(f"⚠️ Could not test event delivery for {manager_name}: {e}")
+                    logger.warning(f"WARNING️ Could not test event delivery for {manager_name}: {e}")
                     event_delivery_violations.append({
                         'manager_name': manager_name,
                         'violation_type': 'manager_setup_failure',
@@ -376,7 +376,7 @@ class WebSocketEventDeliveryConsistencyTests(SSotBaseTestCase):
                         logger.error(f"  Failed deliveries: {reliability_results['failed_deliveries']}")
 
                 except Exception as e:
-                    logger.warning(f"⚠️ Could not test reliability for {manager_name}: {e}")
+                    logger.warning(f"WARNING️ Could not test reliability for {manager_name}: {e}")
                     reliability_violations.append({
                         'manager_name': manager_name,
                         'violation_type': 'reliability_test_failure',
@@ -416,12 +416,12 @@ class WebSocketEventDeliveryConsistencyTests(SSotBaseTestCase):
 
                         manager_key = f"{module_path}.{function_name}"
                         self.websocket_managers[manager_key] = manager
-                        logger.info(f"✓ Loaded WebSocket manager: {manager_key}")
+                        logger.info(f"CHECK Loaded WebSocket manager: {manager_key}")
                     except Exception as e:
-                        logger.warning(f"⚠️ Could not create manager from {module_path}.{function_name}: {e}")
+                        logger.warning(f"WARNING️ Could not create manager from {module_path}.{function_name}: {e}")
                         self.websocket_managers[f"{module_path}.{function_name}"] = None
             except ImportError as e:
-                logger.warning(f"⚠️ Could not import {module_path}: {e}")
+                logger.warning(f"WARNING️ Could not import {module_path}: {e}")
 
     async def _test_event_delivery(self, manager, event_type, event_data, user_context):
         """Test event delivery through a WebSocket manager."""
@@ -478,7 +478,7 @@ class WebSocketEventDeliveryConsistencyTests(SSotBaseTestCase):
                 logger.error(f"🚨 TOTAL EVENT DELIVERY VIOLATIONS: {total_violations}")
                 logger.error("💡 Event delivery consolidation required for SSOT compliance")
             else:
-                logger.info("✅ No event delivery violations detected - delivery is consistent")
+                logger.info("CHECK No event delivery violations detected - delivery is consistent")
 
         super().teardown_method(method)
 

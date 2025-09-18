@@ -16,7 +16,7 @@ Test Coverage:
 import pytest
 import asyncio
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
@@ -72,7 +72,7 @@ class ExecutionContextPersistenceRealServicesTests:
             "thread_id": context.thread_id,
             "user_id": context.user_id,
             "correlation_id": context.correlation_id,
-            "created_at": datetime.utcnow()
+            "created_at": datetime.now(UTC)
         })
     
     async def _retrieve_context_from_database(self, db_session, run_id):

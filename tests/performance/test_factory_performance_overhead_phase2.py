@@ -8,7 +8,7 @@ justification for factory removal vs preservation decisions. Essential factories
 with acceptable overhead should be preserved, over-engineered factories with
 high overhead should be removed.
 
-Business Impact: $500K+ ARR protection through performance optimization
+Business Impact: 500K+ ARR protection through performance optimization
 Performance Goal: >15% improvement in object creation speed
 
 These tests measure actual performance to guide cleanup decisions.
@@ -310,11 +310,11 @@ class FactoryPerformanceOverheadPhase2Tests(SSotBaseTestCase):
                     'overhead_percent': overhead,
                     'recommendation': 'REMOVE - Excessive performance overhead'
                 })
-                print(f"     ❌ OVER-ENGINEERED: {overhead:.1f}% overhead exceeds {self.performance_thresholds['unacceptable_overhead_percent']}% limit")
+                print(f"     X OVER-ENGINEERED: {overhead:.1f}% overhead exceeds {self.performance_thresholds['unacceptable_overhead_percent']}% limit")
 
             elif overhead > self.performance_thresholds['acceptable_overhead_percent']:
                 if 'isolation' in pattern_name or 'essential' in analysis['verdict']:
-                    print(f"     ✅ ACCEPTABLE: Business value justifies {overhead:.1f}% overhead")
+                    print(f"     CHECK ACCEPTABLE: Business value justifies {overhead:.1f}% overhead")
                 else:
                     over_engineered_violations.append({
                         'pattern': pattern_name,
@@ -333,7 +333,7 @@ class FactoryPerformanceOverheadPhase2Tests(SSotBaseTestCase):
         self.assertLessEqual(
             len(over_engineered_violations),
             1,
-            f"❌ FACTORY PERFORMANCE VIOLATIONS: Found {len(over_engineered_violations)} factories with excessive performance overhead. "
+            f"X FACTORY PERFORMANCE VIOLATIONS: Found {len(over_engineered_violations)} factories with excessive performance overhead. "
             f"Expected ≤1 for performance-optimized architecture. "
             f"Factories with >{self.performance_thresholds['unacceptable_overhead_percent']}% overhead should be removed."
         )
@@ -411,9 +411,9 @@ class FactoryPerformanceOverheadPhase2Tests(SSotBaseTestCase):
                     'memory_overhead_percent': overhead_percent,
                     'per_instance_kb': per_instance_kb
                 })
-                print(f"     ❌ EXCESSIVE MEMORY: {overhead_percent:.1f}% overhead")
+                print(f"     X EXCESSIVE MEMORY: {overhead_percent:.1f}% overhead")
             else:
-                print(f"     ✅ ACCEPTABLE MEMORY: {overhead_percent:.1f}% overhead")
+                print(f"     CHECK ACCEPTABLE MEMORY: {overhead_percent:.1f}% overhead")
 
         print(f"\n🚨 MEMORY-BASED REMOVAL RECOMMENDATIONS:")
         for violation in memory_violations:
@@ -426,7 +426,7 @@ class FactoryPerformanceOverheadPhase2Tests(SSotBaseTestCase):
         self.assertLessEqual(
             len(memory_violations),
             1,
-            f"❌ FACTORY MEMORY VIOLATIONS: Found {len(memory_violations)} factories with excessive memory overhead. "
+            f"X FACTORY MEMORY VIOLATIONS: Found {len(memory_violations)} factories with excessive memory overhead. "
             f"Expected ≤1 for memory-efficient architecture. "
             f"Factories using >2x baseline memory should be reviewed for removal."
         )
@@ -459,7 +459,7 @@ class FactoryPerformanceOverheadPhase2Tests(SSotBaseTestCase):
                         result = future.result(timeout=5)
                         results.append(result)
                     except Exception as e:
-                        print(f"     ⚠️  Concurrent creation failed: {e}")
+                        print(f"     WARNING️  Concurrent creation failed: {e}")
 
             end_time = time.perf_counter()
             return {
@@ -491,7 +491,7 @@ class FactoryPerformanceOverheadPhase2Tests(SSotBaseTestCase):
 
                 print(f"\n  🏭 {pattern_name.replace('_', ' ').title()}:")
                 print(f"     ⏱️  Average per user: {avg_time*1000:.2f}ms")
-                print(f"     ✅ Success rate: {success_rate:.1f}%")
+                print(f"     CHECK Success rate: {success_rate:.1f}%")
                 print(f"     📊 Total time: {concurrent_result['total_time']:.2f}s")
 
                 if pattern_name == 'direct_instantiation':
@@ -502,16 +502,16 @@ class FactoryPerformanceOverheadPhase2Tests(SSotBaseTestCase):
                     overhead = ((avg_time - baseline_concurrent_time) / baseline_concurrent_time) * 100
 
                     if success_rate < 95:
-                        print(f"     ❌ CONCURRENCY ISSUE: {success_rate:.1f}% success rate")
+                        print(f"     X CONCURRENCY ISSUE: {success_rate:.1f}% success rate")
                     elif overhead > self.performance_thresholds['concurrent_performance_degradation_limit']:
-                        print(f"     ⚠️  HIGH OVERHEAD: {overhead:.1f}% degradation under load")
+                        print(f"     WARNING️  HIGH OVERHEAD: {overhead:.1f}% degradation under load")
                     elif 'isolation' in pattern_name:
-                        print(f"     ✅ ACCEPTABLE: {overhead:.1f}% overhead justified for user isolation")
+                        print(f"     CHECK ACCEPTABLE: {overhead:.1f}% overhead justified for user isolation")
                     else:
-                        print(f"     ✅ GOOD: {overhead:.1f}% overhead under concurrent load")
+                        print(f"     CHECK GOOD: {overhead:.1f}% overhead under concurrent load")
 
             except Exception as e:
-                print(f"     ❌ FAILED: Concurrent test failed - {e}")
+                print(f"     X FAILED: Concurrent test failed - {e}")
                 concurrent_performance[pattern_name] = {'error': str(e)}
 
         # Analyze results for business impact
@@ -523,14 +523,14 @@ class FactoryPerformanceOverheadPhase2Tests(SSotBaseTestCase):
             user_isolation_success_rate = (user_isolation_success / user_isolation_requested) * 100
 
             print(f"\n💼 BUSINESS CRITICAL ANALYSIS:")
-            print(f"  🛡️  User Isolation Factory (CRITICAL for $500K+ ARR):")
-            print(f"     ✅ Success rate: {user_isolation_success_rate:.1f}%")
+            print(f"  🛡️  User Isolation Factory (CRITICAL for 500K+ ARR):")
+            print(f"     CHECK Success rate: {user_isolation_success_rate:.1f}%")
             print(f"     🎯 Business requirement: ≥95% success rate")
 
             if user_isolation_success_rate >= 95:
-                print(f"     ✅ MEETS BUSINESS REQUIREMENTS")
+                print(f"     CHECK MEETS BUSINESS REQUIREMENTS")
             else:
-                print(f"     ❌ FAILS BUSINESS REQUIREMENTS - Optimization needed")
+                print(f"     X FAILS BUSINESS REQUIREMENTS - Optimization needed")
 
         self.performance_results['concurrent_performance'] = concurrent_performance
 
@@ -545,8 +545,8 @@ class FactoryPerformanceOverheadPhase2Tests(SSotBaseTestCase):
         self.assertGreaterEqual(
             user_isolation_success_rate,
             95.0,
-            f"✅ USER ISOLATION CONCURRENT PERFORMANCE: User isolation factory achieved {user_isolation_success_rate:.1f}% success rate. "
-            f"Required ≥95% for business-critical multi-user functionality ($500K+ ARR dependency)."
+            f"CHECK USER ISOLATION CONCURRENT PERFORMANCE: User isolation factory achieved {user_isolation_success_rate:.1f}% success rate. "
+            f"Required ≥95% for business-critical multi-user functionality (500K+ ARR dependency)."
         )
 
     def test_04_factory_vs_direct_performance_comparison_summary(self):
@@ -620,7 +620,7 @@ class FactoryPerformanceOverheadPhase2Tests(SSotBaseTestCase):
                 optimize_recommendations.append(pattern)
 
         print(f"\n📈 PERFORMANCE-BASED CLEANUP RECOMMENDATIONS:")
-        print(f"  ✅ PRESERVE ({len(preserve_recommendations)}): {', '.join(preserve_recommendations)}")
+        print(f"  CHECK PRESERVE ({len(preserve_recommendations)}): {', '.join(preserve_recommendations)}")
         print(f"  🗑️  REMOVE ({len(remove_recommendations)}): {', '.join(remove_recommendations)}")
         print(f"  🔧 OPTIMIZE ({len(optimize_recommendations)}): {', '.join(optimize_recommendations)}")
 
@@ -637,9 +637,9 @@ class FactoryPerformanceOverheadPhase2Tests(SSotBaseTestCase):
         print(f"  ⚡ Performance improvement: {performance_improvement:.1f}%")
 
         if performance_improvement >= 15:
-            print(f"  ✅ MEETS TARGET: {performance_improvement:.1f}% ≥ 15% improvement goal")
+            print(f"  CHECK MEETS TARGET: {performance_improvement:.1f}% ≥ 15% improvement goal")
         else:
-            print(f"  ⚠️  BELOW TARGET: {performance_improvement:.1f}% < 15% improvement goal")
+            print(f"  WARNING️  BELOW TARGET: {performance_improvement:.1f}% < 15% improvement goal")
 
         self.performance_results['summary'] = performance_summary
 
@@ -647,7 +647,7 @@ class FactoryPerformanceOverheadPhase2Tests(SSotBaseTestCase):
         self.assertGreaterEqual(
             performance_improvement,
             10.0,
-            f"✅ PERFORMANCE IMPROVEMENT PROJECTION: Factory cleanup projects {performance_improvement:.1f}% performance improvement. "
+            f"CHECK PERFORMANCE IMPROVEMENT PROJECTION: Factory cleanup projects {performance_improvement:.1f}% performance improvement. "
             f"Target ≥10% improvement to justify architectural changes."
         )
 

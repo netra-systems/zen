@@ -127,10 +127,10 @@ class UserIsolationConcurrencyIssue620Tests(BaseIntegrationTest):
         
         for profile, result, creation_time in results:
             if isinstance(result, Exception):
-                print(f"❌ User {profile.user_id} failed: {type(result).__name__}: {result}")
+                print(f"X User {profile.user_id} failed: {type(result).__name__}: {result}")
                 failed_creations.append((profile, result, creation_time))
             else:
-                print(f"✅ User {profile.user_id} succeeded: {type(result).__name__}")
+                print(f"CHECK User {profile.user_id} succeeded: {type(result).__name__}")
                 successful_creations.append((profile, result, creation_time))
         
         # Validate success rate
@@ -153,7 +153,7 @@ class UserIsolationConcurrencyIssue620Tests(BaseIntegrationTest):
         assert avg_creation_time < 1.0, f"Average engine creation should be <1s, got {avg_creation_time:.3f}s"
         assert max_creation_time < 2.0, f"Max engine creation should be <2s, got {max_creation_time:.3f}s"
         
-        print(f"✅ Concurrent engine creation: {len(successful_creations)}/{self.MAX_CONCURRENT_USERS} succeeded")
+        print(f"CHECK Concurrent engine creation: {len(successful_creations)}/{self.MAX_CONCURRENT_USERS} succeeded")
         print(f"   Success rate: {success_rate:.2%}")
         print(f"   Average creation time: {avg_creation_time:.3f}s")
         print(f"   Total time for {self.MAX_CONCURRENT_USERS} engines: {total_time:.3f}s")
@@ -320,9 +320,9 @@ class UserIsolationConcurrencyIssue620Tests(BaseIntegrationTest):
         
         assert len(set(engine_user_ids)) == num_users, "Each engine should have unique user context"
         
-        print(f"✅ User isolation validated for {num_users} concurrent executions")
+        print(f"CHECK User isolation validated for {num_users} concurrent executions")
         print(f"   Events per user: {[(uid, len(events)) for uid, events in user_events.items()]}")
-        print("✅ No cross-user data contamination detected")
+        print("CHECK No cross-user data contamination detected")
         
         return successful_executions
     
@@ -383,8 +383,8 @@ class UserIsolationConcurrencyIssue620Tests(BaseIntegrationTest):
                 assert engines[i] is not engines[j], f"Engine {i} and {j} should be different instances"
                 assert engines[i].get_user_context().user_id != engines[j].get_user_context().user_id, f"Engines should have different user IDs"
         
-        print(f"✅ Compatibility bridge maintains isolation for {num_users} engines")
-        print("✅ Each engine has unique user context and instance")
+        print(f"CHECK Compatibility bridge maintains isolation for {num_users} engines")
+        print("CHECK Each engine has unique user context and instance")
         
         return engines
     
@@ -522,10 +522,10 @@ class UserIsolationConcurrencyIssue620Tests(BaseIntegrationTest):
         events_per_second = total_events / total_time
         assert events_per_second > 10, f"Should handle >10 events/second, got {events_per_second:.1f}"
         
-        print(f"✅ WebSocket event isolation validated for {num_users} concurrent users")
+        print(f"CHECK WebSocket event isolation validated for {num_users} concurrent users")
         print(f"   Total events: {total_events} in {total_time:.3f}s ({events_per_second:.1f} events/sec)")
         print(f"   Events per user: {[(uid, len(events)) for uid, events in user_event_logs.items()]}")
-        print("✅ No cross-user event contamination detected")
+        print("CHECK No cross-user event contamination detected")
         
         return user_event_logs
     
@@ -703,11 +703,11 @@ class UserIsolationConcurrencyIssue620Tests(BaseIntegrationTest):
         intensive_success_rate = intensive_performance['successful_requests'] / intensive_performance['total_requests_attempted']
         assert intensive_success_rate > 0, "Intensive user should get some resources"
         
-        print(f"✅ Resource fairness validated across {len(normal_user_profiles)} normal + 1 intensive user")
+        print(f"CHECK Resource fairness validated across {len(normal_user_profiles)} normal + 1 intensive user")
         print(f"   Normal users average response time: {avg_normal_time:.3f}s")
         print(f"   Normal users minimum success rate: {min_normal_success_rate:.2%}")
         print(f"   Intensive user success rate: {intensive_success_rate:.2%}")
-        print("✅ Resource limits prevent user interference")
+        print("CHECK Resource limits prevent user interference")
         
         return user_performance
     
@@ -821,7 +821,7 @@ class UserIsolationConcurrencyIssue620Tests(BaseIntegrationTest):
         
         requests_per_second = total_requests / self.TEST_DURATION_SECONDS
         
-        print(f"✅ Long-running session stability validated over {self.TEST_DURATION_SECONDS}s")
+        print(f"CHECK Long-running session stability validated over {self.TEST_DURATION_SECONDS}s")
         print(f"   Total requests: {total_requests} ({requests_per_second:.1f}/sec)")
         print(f"   Success rate: {success_rate:.2%}")
         print(f"   Error rate: {error_rate:.2%}")
@@ -904,8 +904,8 @@ class ConcurrencyRegressionPreventionTests(BaseIntegrationTest):
         # Validate WebSocket bridges are separate
         assert engine1.websocket_bridge is not engine2.websocket_bridge, "WebSocket bridges should be separate"
         
-        print("✅ Memory isolation validated between users")
-        print("✅ No shared state detected")
+        print("CHECK Memory isolation validated between users")
+        print("CHECK No shared state detected")
         
         return {'engine1': engine1, 'engine2': engine2}
 
@@ -920,52 +920,52 @@ if __name__ == "__main__":
         try:
             # Test concurrent engine creation
             engines = await test_instance.test_concurrent_user_execution_engine_creation()
-            print(f"✅ Concurrent engine creation test: {len(engines)} engines created")
+            print(f"CHECK Concurrent engine creation test: {len(engines)} engines created")
             
         except Exception as e:
-            print(f"⚠️  Concurrent engine creation test failed: {e}")
+            print(f"WARNING️  Concurrent engine creation test failed: {e}")
         
         try:
             # Test concurrent executions with isolation
             executions = await test_instance.test_concurrent_agent_execution_with_user_isolation()
-            print(f"✅ Concurrent execution isolation test: {len(executions)} executions validated")
+            print(f"CHECK Concurrent execution isolation test: {len(executions)} executions validated")
             
         except Exception as e:
-            print(f"⚠️  Concurrent execution test failed: {e}")
+            print(f"WARNING️  Concurrent execution test failed: {e}")
         
         try:
             # Test compatibility bridge isolation
             bridge_engines = await test_instance.test_compatibility_bridge_user_isolation()
-            print(f"✅ Compatibility bridge isolation test: {len(bridge_engines)} engines validated")
+            print(f"CHECK Compatibility bridge isolation test: {len(bridge_engines)} engines validated")
             
         except Exception as e:
-            print(f"⚠️  Compatibility bridge test failed: {e}")
+            print(f"WARNING️  Compatibility bridge test failed: {e}")
         
         try:
             # Test WebSocket event isolation
             event_logs = await test_instance.test_concurrent_websocket_event_isolation()
             total_events = sum(len(events) for events in event_logs.values())
-            print(f"✅ WebSocket event isolation test: {total_events} events across users")
+            print(f"CHECK WebSocket event isolation test: {total_events} events across users")
             
         except Exception as e:
-            print(f"⚠️  WebSocket event isolation test failed: {e}")
+            print(f"WARNING️  WebSocket event isolation test failed: {e}")
         
         try:
             # Test memory isolation
             regression_test = ConcurrencyRegressionPreventionTests()
             memory_result = await regression_test.test_memory_isolation_between_users()
-            print("✅ Memory isolation test passed")
+            print("CHECK Memory isolation test passed")
             
         except Exception as e:
-            print(f"⚠️  Memory isolation test failed: {e}")
+            print(f"WARNING️  Memory isolation test failed: {e}")
         
         print("\n" + "="*80)
         print("📊 USER ISOLATION & CONCURRENCY TEST SUMMARY")
         print("="*80)
-        print("✅ User isolation and concurrency test suite created and functional")
-        print("✅ Tests cover concurrent engine creation, execution isolation, WebSocket isolation")
-        print("✅ Compatibility bridge isolation and resource fairness tested")
-        print("✅ Memory isolation and regression prevention covered")
+        print("CHECK User isolation and concurrency test suite created and functional")
+        print("CHECK Tests cover concurrent engine creation, execution isolation, WebSocket isolation")
+        print("CHECK Compatibility bridge isolation and resource fairness tested")
+        print("CHECK Memory isolation and regression prevention covered")
         print("📈 Ready to validate multi-user platform stability for Issue #620")
         
     if __name__ == "__main__":

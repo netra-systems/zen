@@ -17,7 +17,7 @@ import asyncio
 import uuid
 import pytest
 import json
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 from contextlib import asynccontextmanager
@@ -32,7 +32,7 @@ from shared.types.core_types import (
 )
 
 # Message routing components
-from netra_backend.app.services.websocket.quality_message_router import QualityMessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter as QualityMessageRouter
 from netra_backend.app.services.websocket.quality_metrics_handler import QualityMetricsHandler
 from netra_backend.app.services.websocket.quality_validation_handler import QualityValidationHandler
 from netra_backend.app.services.message_handlers import MessageHandlerService
@@ -78,7 +78,7 @@ class MessageRoutingIntegrationTests(BaseIntegrationTest):
             "thread_id": str(thread_id),
             "websocket_id": str(websocket_id),
             "content": "Please analyze my data and provide optimization recommendations",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "request_id": str(uuid.uuid4())
         }
         
@@ -210,7 +210,7 @@ class MessageRoutingIntegrationTests(BaseIntegrationTest):
                 "current_value": 0.65,
                 "threshold": 0.80,
                 "message": "Response accuracy below threshold",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             },
             {
                 "type": "quality_report", 
@@ -227,7 +227,7 @@ class MessageRoutingIntegrationTests(BaseIntegrationTest):
                     "Consider providing more specific examples",
                     "Response time is within acceptable range"
                 ],
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             },
             {
                 "type": "quality_validation",
@@ -241,7 +241,7 @@ class MessageRoutingIntegrationTests(BaseIntegrationTest):
                     "completeness_check": False
                 },
                 "flagged_issues": ["incomplete_analysis"],
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
         ]
         

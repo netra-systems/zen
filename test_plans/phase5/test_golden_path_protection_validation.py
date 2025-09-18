@@ -1,6 +1,6 @@
 """
 Test Plan: Golden Path Protection Validation
-Issue #245 - Protect $500K+ ARR business value during deployment consolidation
+Issue #245 - Protect 500K+ ARR business value during deployment consolidation
 
 GOLDEN PATH: Users login  ->  AI responses (90% of platform value)
 
@@ -52,7 +52,7 @@ class TestGoldenPathProtectionValidation:
     @pytest.fixture
     def staging_environment_config(self):
         """Staging environment configuration for Golden Path testing."""
-        return {'auth_url': 'https://api-staging.netra.app', 'api_url': 'https://api-staging.netra.app', 'websocket_url': 'wss://api-staging.netra.app', 'frontend_url': 'https://staging.netra.app', 'environment': 'staging'}
+        return {'auth_url': 'https://staging.netrasystems.ai', 'api_url': 'https://staging.netrasystems.ai', 'websocket_url': 'wss://api.staging.netrasystems.ai', 'frontend_url': 'https://staging.netrasystems.ai', 'environment': 'staging'}
 
     @pytest.fixture
     def test_user_credentials(self):

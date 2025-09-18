@@ -9,7 +9,7 @@ EXPECTED BEHAVIOR:
 - BEFORE REMEDIATION: Tests should FAIL (proving security vulnerabilities exist)  
 - AFTER REMEDIATION: Tests should PASS (proving user isolation achieved)
 
-Business Value: Enterprise/Platform - $500K+ ARR protection through complete user isolation
+Business Value: Enterprise/Platform - 500K+ ARR protection through complete user isolation
 Security Impact: Prevents cross-user data leakage, HIPAA/SOC2/SEC compliance violations
 
 INTEGRATION TEST SCOPE:
@@ -111,7 +111,7 @@ class AgentFactoryUserIsolationIntegrationTests(SSotAsyncTestCase):
         can cause User A's real-time agent updates to be delivered to User B's browser.
         
         SECURITY VIOLATION: Real WebSocket events contaminated between users in production
-        BUSINESS IMPACT: $500K+ ARR customers receive other customers' sensitive data
+        BUSINESS IMPACT: 500K+ ARR customers receive other customers' sensitive data
         
         EXPECTED: FAIL before remediation (proving real WebSocket contamination occurs)
         EXPECTED: PASS after remediation (proving WebSocket isolation achieved)
@@ -275,7 +275,7 @@ class AgentFactoryUserIsolationIntegrationTests(SSotAsyncTestCase):
         can cause User A's database context to persist and be accessible to User B.
         
         SECURITY VIOLATION: Real database sessions shared between users in production
-        BUSINESS IMPACT: $500K+ ARR customer data exposed through persistent DB sessions
+        BUSINESS IMPACT: 500K+ ARR customer data exposed through persistent DB sessions
         
         EXPECTED: FAIL before remediation (proving real database contamination occurs) 
         EXPECTED: PASS after remediation (proving database session isolation achieved)
@@ -438,7 +438,7 @@ class AgentFactoryUserIsolationIntegrationTests(SSotAsyncTestCase):
         that singleton factory causes agent execution state to persist across users.
         
         SECURITY VIOLATION: Real agent execution contexts shared between users
-        BUSINESS IMPACT: $500K+ ARR customer AI processing results exposed to competitors
+        BUSINESS IMPACT: 500K+ ARR customer AI processing results exposed to competitors
         
         EXPECTED: FAIL before remediation (proving real agent context contamination)
         EXPECTED: PASS after remediation (proving agent execution isolation achieved) 

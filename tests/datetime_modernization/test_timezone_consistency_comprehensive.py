@@ -563,7 +563,7 @@ class TimezoneConsistencyTest(SSotAsyncTestCase):
         """
         IMPACT TEST: Simulate the impact of datetime modernization on system consistency.
         
-        Tests what would happen if all datetime.utcnow() calls were modernized.
+        Tests what would happen if all datetime.now(UTC) calls were modernized.
         """
         # Simulate before and after modernization
         legacy_system = self._simulate_legacy_datetime_system()
@@ -627,7 +627,7 @@ class TimezoneConsistencyTest(SSotAsyncTestCase):
         
         self.logger.info("\nCONSISTENCY IMPROVEMENTS:")
         for component, data in impact_analysis['consistency_improvements'].items():
-            self.logger.info(f"  {component}: {data['legacy_score']:.2f} → {data['modern_score']:.2f} ({data['improvement']:+.3f})")
+            self.logger.info(f"  {component}: {data['legacy_score']:.2f} -> {data['modern_score']:.2f} ({data['improvement']:+.3f})")
         
         self.logger.info("\nBREAKING CHANGE RISKS:")
         for break_type, data in impact_analysis['breaking_changes'].items():

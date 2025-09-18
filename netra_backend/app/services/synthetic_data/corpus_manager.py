@@ -1,3 +1,4 @@
+from netra_backend.app.logging_config import central_logger
 """
 Corpus management for synthetic data generation
 """

@@ -77,7 +77,7 @@ class ServiceSecretValidationFailuresTests(BaseIntegrationTest):
                 assert result["authenticated"] is False, "Authentication should fail with mismatched SERVICE_SECRET"
                 assert result["error"] == "invalid_service_secret", f"Expected invalid_service_secret error, got: {result.get('error')}"
 
-                logger.error(f"✅ REPRODUCTION SUCCESS: 403 authentication failure reproduced")
+                logger.error(f"CHECK REPRODUCTION SUCCESS: 403 authentication failure reproduced")
                 logger.error(f"   Error: {result['error']}")
                 logger.error(f"   This matches production pattern: service:netra-backend authentication failure")
 
@@ -111,7 +111,7 @@ class ServiceSecretValidationFailuresTests(BaseIntegrationTest):
             assert result["authenticated"] is False, "Authentication should fail when SERVICE_SECRET is missing"
             assert "service_secret_not_configured" in result.get("error", ""), f"Expected service_secret_not_configured error, got: {result.get('error')}"
 
-            logger.error(f"✅ REPRODUCTION SUCCESS: Missing SERVICE_SECRET authentication failure")
+            logger.error(f"CHECK REPRODUCTION SUCCESS: Missing SERVICE_SECRET authentication failure")
             logger.error(f"   Error: {result['error']}")
 
     @pytest.mark.unit
@@ -135,7 +135,7 @@ class ServiceSecretValidationFailuresTests(BaseIntegrationTest):
             with pytest.raises(AuthServiceValidationError):
                 await auth_client.validate_token(test_token)
 
-            logger.error("✅ REPRODUCTION SUCCESS: JWT validation failure with invalid service token")
+            logger.error("CHECK REPRODUCTION SUCCESS: JWT validation failure with invalid service token")
 
     @pytest.mark.unit
     async def test_gcp_auth_context_middleware_service_request_rejection(self):
@@ -173,7 +173,7 @@ class ServiceSecretValidationFailuresTests(BaseIntegrationTest):
         assert exc_info.value.status_code == 403, f"Expected 403 error, got: {exc_info.value.status_code}"
         assert "Not authenticated" in str(exc_info.value.detail), f"Expected 'Not authenticated' in error, got: {exc_info.value.detail}"
 
-        logger.error("✅ REPRODUCTION SUCCESS: GCP auth context middleware rejection")
+        logger.error("CHECK REPRODUCTION SUCCESS: GCP auth context middleware rejection")
         logger.error(f"   Status: {exc_info.value.status_code}")
         logger.error(f"   Detail: {exc_info.value.detail}")
         logger.error("   This matches production pattern: 403: Not authenticated")
@@ -203,7 +203,7 @@ class AuthClientServiceHeaderGenerationTests(BaseIntegrationTest):
             if "X-Service-Secret" in headers:
                 assert headers["X-Service-Secret"] is None or headers["X-Service-Secret"] == "", "Service secret header should be empty when SECRET_SECRET is missing"
 
-            logger.error("✅ REPRODUCTION SUCCESS: Service auth headers with missing SERVICE_SECRET")
+            logger.error("CHECK REPRODUCTION SUCCESS: Service auth headers with missing SERVICE_SECRET")
             logger.error(f"   Headers: {list(headers.keys())}")
 
     @pytest.mark.unit
@@ -234,7 +234,7 @@ class AuthClientServiceHeaderGenerationTests(BaseIntegrationTest):
                 # This should cause signature mismatch
                 assert backend_signature != auth_service_secret, "Signature mismatch should occur with different secrets"
 
-                logger.error("✅ REPRODUCTION SUCCESS: API signature mismatch reproduced")
+                logger.error("CHECK REPRODUCTION SUCCESS: API signature mismatch reproduced")
                 logger.error("   Backend and auth service using different SERVICE_SECRET values")
 
 

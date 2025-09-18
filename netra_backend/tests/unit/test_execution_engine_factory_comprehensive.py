@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - **Segment:** Platform/Enterprise (multi-tenant infrastructure)
 - **Goal:** Stability and scalability of core execution infrastructure
 - **Value Impact:** Ensures reliable user isolation and resource management
-- **Revenue Impact:** Protects $500K+ ARR by enabling secure multi-tenant execution
+- **Revenue Impact:** Protects 500K+ ARR by enabling secure multi-tenant execution
 
 This test suite validates the ExecutionEngineFactory SSOT implementation with focus on:
 1. Factory pattern implementation and lifecycle management

@@ -31,7 +31,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Tuple, Any, Set
 from unittest.mock import patch
 import pytest
@@ -93,7 +93,7 @@ class ServiceDiscoveryEngine:
             status="unknown",
             response_time_ms=0.0,
             error_rate_percent=0.0,
-            last_check_timestamp=datetime.utcnow()
+            last_check_timestamp=datetime.now(UTC)
         )
         self.service_dependencies[service_name] = dependencies or []
         self.health_check_intervals[service_name] = health_check_interval
@@ -130,7 +130,7 @@ class ServiceDiscoveryEngine:
             status=status,
             response_time_ms=response_time,
             error_rate_percent=error_rate,
-            last_check_timestamp=datetime.utcnow()
+            last_check_timestamp=datetime.now(UTC)
         )
         
         # Check dependencies
@@ -177,7 +177,7 @@ class ServiceDiscoveryEngine:
                 breaker["failure_count"] = 0
         else:
             breaker["failure_count"] += 1
-            breaker["last_failure"] = datetime.utcnow()
+            breaker["last_failure"] = datetime.now(UTC)
             
             if breaker["failure_count"] >= 5:
                 breaker["state"] = "open"
@@ -204,7 +204,7 @@ class InterServiceCommunicationAnalyzer:
             self.communication_patterns[comm_key] = []
         
         attempt_record = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "success": success,
             "latency_ms": latency_ms,
             "error_details": error_details or {}
@@ -335,7 +335,7 @@ class DatabaseConnectionPoolAnalyzer:
             return
         
         event_record = {
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(UTC),
             "event_type": event_type,  # "acquire", "release", "timeout", "exhausted"
             "active_connections": active_connections,
             "idle_connections": idle_connections,
@@ -354,7 +354,7 @@ class DatabaseConnectionPoolAnalyzer:
         # Record exhaustion events
         if event_type in ["timeout", "exhausted"] or waiting_requests > 0:
             exhaustion_record = {
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(UTC),
                 "severity": "critical" if event_type == "exhausted" else "warning",
                 "waiting_requests": waiting_requests,
                 "estimated_impact": waiting_requests * 2  # Estimated affected operations
@@ -599,7 +599,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
         
         # Store communication analysis in real database
         communication_record = {
-            "analysis_timestamp": datetime.utcnow().isoformat(),
+            "analysis_timestamp": datetime.now(UTC).isoformat(),
             "communication_patterns": len(self.communication_analyzer.communication_patterns),
             "detected_storms": len(retry_storms),
             "health_assessments": {
@@ -657,7 +657,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
         
         # Store pool analysis in real database
         pool_record = {
-            "analysis_timestamp": datetime.utcnow().isoformat(),
+            "analysis_timestamp": datetime.now(UTC).isoformat(),
             "database": "main_db",
             "health_status": pool_health["status"],
             "utilization": pool_health["current_utilization"],
@@ -684,7 +684,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
             target_service="database",
             error_type="authentication_failure",
             error_message="JWT validation failed: token expired",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             correlation_id=str(uuid.uuid4()),
             impact_severity="critical",
             affected_users=5000,
@@ -723,7 +723,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
             "impact_severity": auth_failure_scenario.impact_severity,
             "affected_users": auth_failure_scenario.affected_users,
             "downstream_effects_count": len(auth_failure_scenario.downstream_effects),
-            "analysis_timestamp": datetime.utcnow().isoformat(),
+            "analysis_timestamp": datetime.now(UTC).isoformat(),
             "circuit_breaker_state": circuit_breaker_state["state"]
         }
         
@@ -746,7 +746,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
             target_service="backend_api",
             error_type="websocket_integration_failure",
             error_message="WebSocket handshake failed: backend API unavailable",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             correlation_id=str(uuid.uuid4()),
             request_trace_id=f"trace_{uuid.uuid4()}",
             impact_severity="high",
@@ -791,7 +791,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
             "health_status": websocket_health.get("status", "unknown"),
             "affected_users": websocket_error.affected_users,
             "recovery_suggestions_count": len(websocket_error.recovery_suggestions),
-            "analysis_timestamp": datetime.utcnow().isoformat()
+            "analysis_timestamp": datetime.now(UTC).isoformat()
         }
         
         await self._store_websocket_analysis(services, websocket_record)
@@ -813,7 +813,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
             target_service="external_llm_api",
             error_type="external_api_failure",
             error_message="OpenAI API rate limit exceeded: 429 Too Many Requests",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             correlation_id=str(uuid.uuid4()),
             impact_severity="medium",
             affected_users=1000,
@@ -860,7 +860,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
             "circuit_breaker_state": api_circuit_breaker["state"],
             "fallback_strategy": api_failure_analysis["fallback_strategy"],
             "affected_users": external_api_error.affected_users,
-            "analysis_timestamp": datetime.utcnow().isoformat()
+            "analysis_timestamp": datetime.now(UTC).isoformat()
         }
         
         await self._store_external_api_analysis(services, external_api_record)
@@ -883,7 +883,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
                 target_service="database",
                 error_type="network_timeout",
                 error_message="Connection timeout after 30s",
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 correlation_id="network_issue_001",
                 impact_severity="high"
             ),
@@ -893,7 +893,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
                 target_service="redis",
                 error_type="network_timeout", 
                 error_message="Redis connection timeout after 5s",
-                timestamp=datetime.utcnow() + timedelta(seconds=5),
+                timestamp=datetime.now(UTC) + timedelta(seconds=5),
                 correlation_id="network_issue_001",  # Same correlation ID
                 impact_severity="high"
             ),
@@ -903,7 +903,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
                 target_service="backend_api",
                 error_type="network_timeout",
                 error_message="HTTP request timeout after 10s",
-                timestamp=datetime.utcnow() + timedelta(seconds=10),
+                timestamp=datetime.now(UTC) + timedelta(seconds=10),
                 correlation_id="network_issue_001",  # Same correlation ID
                 impact_severity="high"
             )
@@ -945,7 +945,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
             "affected_services": correlation_analysis["affected_service_count"],
             "root_cause_type": likely_root_cause["cause_type"],
             "root_cause_confidence": likely_root_cause["confidence_score"],
-            "analysis_timestamp": datetime.utcnow().isoformat()
+            "analysis_timestamp": datetime.now(UTC).isoformat()
         }
         
         await self._store_networking_analysis(services, networking_record)
@@ -967,7 +967,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
             target_service="backend_api_instance_2",
             error_type="routing_failure", 
             error_message="Health check failed: instance not responding",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             correlation_id=str(uuid.uuid4()),
             impact_severity="medium",
             affected_users=500,
@@ -1010,7 +1010,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
             "routing_effectiveness": routing_effectiveness,
             "healthy_instances_count": len(lb_analysis["healthy_instances"]),
             "unhealthy_instances_count": len(lb_analysis["unhealthy_instances"]),
-            "analysis_timestamp": datetime.utcnow().isoformat()
+            "analysis_timestamp": datetime.now(UTC).isoformat()
         }
         
         await self._store_load_balancer_analysis(services, lb_record)
@@ -1033,7 +1033,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
                 target_service="configuration_service",
                 error_type="configuration_mismatch",
                 error_message="JWT secret mismatch: signature verification failed", 
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 correlation_id="config_drift_001",
                 impact_severity="critical",
                 metadata={
@@ -1048,7 +1048,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
                 target_service="database",
                 error_type="configuration_mismatch", 
                 error_message="Database connection string mismatch: host not found",
-                timestamp=datetime.utcnow() + timedelta(seconds=30),
+                timestamp=datetime.now(UTC) + timedelta(seconds=30),
                 correlation_id="config_drift_001",
                 impact_severity="critical",
                 metadata={
@@ -1094,7 +1094,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
             "severity_level": severity["level"],
             "security_impact": severity["security_impact"],
             "availability_impact": severity["availability_impact"],
-            "analysis_timestamp": datetime.utcnow().isoformat()
+            "analysis_timestamp": datetime.now(UTC).isoformat()
         }
         
         await self._store_configuration_drift_analysis(services, drift_record)
@@ -1201,7 +1201,7 @@ class GCPServiceIntegrationErrorsTests(SSotAsyncTestCase):
             {
                 "instance_id": failing_instance,
                 "consecutive_failures": error.metadata.get("consecutive_failures", 3),
-                "last_successful_health_check": (datetime.utcnow() - timedelta(minutes=5)).isoformat()
+                "last_successful_health_check": (datetime.now(UTC) - timedelta(minutes=5)).isoformat()
             }
         ]
         

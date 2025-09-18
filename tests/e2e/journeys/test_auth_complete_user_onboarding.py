@@ -7,7 +7,7 @@ This validates the ENTIRE authentication flow that new users experience.
 Business Value Justification (BVJ):
 - Segment: Free tier + Paid conversions - New user acquisition funnel
 - Business Goal: Maximize User Onboarding Success - Reduce friction to first value
-- Value Impact: $200K+ ARR - 30% improvement in onboarding = 30% more revenue
+- Value Impact: 200K+ ARR - 30% improvement in onboarding = 30% more revenue
 - Strategic Impact: Growth Engine - Onboarding success drives organic expansion
 
 COMPLETE USER JOURNEY:
@@ -206,7 +206,7 @@ class CompleteUserOnboardingJourneyTests(BaseE2ETest):
                     except asyncio.TimeoutError:
                         self.validator.record_step('first_agent_response_completed', 'failed', {'timeout': True, 'responses_received': len(agent_responses)})
                         logger.warning(f'Agent response timeout after {response_timeout}s')
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 self.validator.record_step('chat_access_completed', 'failed', {'websocket_error': str(e)})
                 pytest.fail(f'USER JOURNEY FAILURE: WebSocket connection failed - {str(e)}')
             except Exception as e:
@@ -317,7 +317,7 @@ class OnboardingEdgeCasesTests(BaseE2ETest):
                 async with websockets.connect(websocket_url, additional_headers=self.ws_auth_helper.get_websocket_headers(user_token), open_timeout=1.0) as websocket:
                     await websocket.send(json.dumps({'type': 'ping'}))
                     await asyncio.wait_for(websocket.recv(), timeout=1.0)
-            except (asyncio.TimeoutError, websockets.exceptions.ConnectionClosed):
+            except (asyncio.TimeoutError, websockets.ConnectionClosed):
                 await asyncio.sleep(0.5)
                 async with websockets.connect(websocket_url, additional_headers=self.ws_auth_helper.get_websocket_headers(user_token), open_timeout=5.0) as websocket:
                     recovery_message = {'type': 'connection_recovery', 'user_email': user_email}

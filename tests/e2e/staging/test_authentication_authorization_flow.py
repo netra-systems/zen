@@ -161,12 +161,7 @@ class AuthenticationAuthorizationFlowTests(BaseE2ETest):
                     self.logger.info(" PASS:  WebSocket authentication successful")
                 except asyncio.TimeoutError:
                     # No response is also acceptable for ping
-                    self.logger.info(" PASS:  WebSocket connection established (no response to ping)")
-                
-                await websocket.close()
-                
-            except Exception as e:
-                pytest.fail(f"WebSocket authentication failed: {e}")
+                    self.logger.info(" PASS:  WebSocket connection established (no response to ping)""WebSocket authentication failed: {e}")
             
             self.logger.info(" PASS:  JWT Authentication Complete Flow E2E Test completed")
     

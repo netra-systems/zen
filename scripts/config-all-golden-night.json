@@ -2,142 +2,142 @@
   "instances": [
     {
       "command": "/clear-old-issue-locks",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
-      "command": "/clear-old-issue-locks",
-      "permission_mode": "acceptEdits",
+      "command": "/runtests agents, e2e gcp",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 golden path phase 2",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 golden path phase 3",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 golden path phase 3",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 golden path phase 4",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 golden path phase 5",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 p0",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/runtests agents, e2e gcp",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/runtests goldenpath, unit",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/runtests goldenpath, e2e",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 most important",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 critical",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 p0",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 goldenpath blocking",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 ssot",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 agents",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
       {
       "command": "/gitissueprogressorv3 tests",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 long standing issues",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/ultimate-test-deploy-loop",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gcploggardener",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/runtests goldenpath, integration",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 ssot remove legacy",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
       {
       "command": "/gitissueprogressorv3 upgrade legacy to ssot",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 goldenpath",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv3 goldenpath p1",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/runtests agents, e2e gcp",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/runtests agents, e2e gcp",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     }
   ]

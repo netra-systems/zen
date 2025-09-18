@@ -25,7 +25,7 @@ class WebSocketTestHelper:
 """
 MISSION CRITICAL: Memory Leak Detection and Prevention Tests
 
-Business Value: Prevents $300K+ ARR loss from memory-related service outages  
+Business Value: Prevents 300K+ ARR loss from memory-related service outages  
 Critical Requirements:
 - Memory usage must remain stable over extended operations (24+ hours)
 - Memory leaks must be detected before reaching 1GB increase
@@ -58,7 +58,8 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Set, Any, Optional, Callable, Union, Tuple
 import tempfile
-import resource
+# Use cross-platform resource compatibility for Windows/Unix support
+from shared.resource_compat import getrusage, getrlimit, setrlimit, RLIMIT_AS, RLIMIT_RSS, RUSAGE_SELF
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -1170,7 +1171,7 @@ class AuthenticationFlowMemoryManagementTests:
                 
                 # 1. SIGNUP FLOW
                 signup_data = {
-                    "email": f"{user_id}@netra.ai",
+                    "email": f"{user_id}@netrasystems.ai",
                     "password": "SecurePass123!",
                     "full_name": f"Memory Test User {i}",
                     "company": "Netra Memory Testing",
@@ -1494,7 +1495,7 @@ class AuthenticationFlowMemoryManagementTests:
                 # OAuth initiation
                 oauth_request = {
                     "provider": provider,
-                    "redirect_uri": f"https://netra.ai/auth/{provider}/callback",
+                    "redirect_uri": f"https://netrasystems.ai/auth/{provider}/callback",
                     "state": f"{provider}_state_{i}_{uuid.uuid4()}",
                     "user_id": f"oauth_user_{provider}_{i}"
                 }

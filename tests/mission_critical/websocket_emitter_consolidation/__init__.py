@@ -4,7 +4,7 @@ WebSocket Emitter Consolidation Test Suite
 This module contains mission-critical tests for validating WebSocket event emitter consolidation
 to resolve Issue #200: Multiple WebSocket event emitters causing race conditions.
 
-Business Impact: Protects $500K+ ARR from event delivery failures and race conditions.
+Business Impact: Protects 500K+ ARR from event delivery failures and race conditions.
 
 Test Phases:
 1. Phase 1 (Pre-Consolidation): Tests that MUST FAIL to prove current issues exist

@@ -292,12 +292,7 @@ class DataPipelinePersistenceTests(BaseE2ETest):
                     response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                     self.logger.info(" PASS:  WebSocket environment configuration working")
                 except asyncio.TimeoutError:
-                    self.logger.info(" PASS:  WebSocket connection established (no response expected)")
-                
-                await websocket.close()
-                
-            except Exception as e:
-                self.logger.warning(f" WARNING: [U+FE0F] WebSocket environment test failed: {e}")
+                    self.logger.info(" PASS:  WebSocket connection established (no response expected)"" WARNING: [U+FE0F] WebSocket environment test failed: {e}")
             
             # Step 3: Validate staging-specific authentication configuration
             auth_headers = {"Authorization": f"Bearer {token}"}

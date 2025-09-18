@@ -394,9 +394,7 @@ class FactoryInitializationIntegrationTests(BaseIntegrationTest):
                     logger.info(f"Manager state update method not available: {e}")
             
             factory_time = time.time() - start_time
-            assert factory_time < 6.0, f"WebSocket factory creation took {factory_time:.2f}s (expected < 6s)"
-            
-            logger.info(f" PASS:  WebSocket manager factory completed in {factory_time:.2f}s")
+            assert factory_time < 6.0, f"WebSocket factory creation took {factory_time:.2f}s (expected < 6s)"" PASS:  WebSocket manager factory completed in {factory_time:.2f}s")
             
         except Exception as e:
             pytest.fail(f"WebSocket manager factory failed: {str(e)}")
@@ -727,11 +725,7 @@ class FactoryInitializationIntegrationTests(BaseIntegrationTest):
                     self.created_websocket_managers.append(ws_manager)
                 
                 # WebSocket manager creation should be reasonably fast
-                assert factory_duration < 4.0, f"WebSocket factory {i} took {factory_duration:.2f}s (expected < 4s)"
-                
-            except Exception as e:
-                factory_duration = time.time() - factory_start
-                performance_results["websocket_factory"].append(factory_duration)
+                assert factory_duration < 4.0, f"WebSocket factory {i} took {factory_duration:.2f}s (expected < 4s)""websocket_factory"].append(factory_duration)
                 logger.warning(f"WebSocket factory {i} failed in {factory_duration:.2f}s: {e}")
         
         # Calculate performance statistics

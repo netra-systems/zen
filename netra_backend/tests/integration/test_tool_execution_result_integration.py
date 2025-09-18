@@ -22,7 +22,7 @@ import json
 import uuid
 import time
 from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
@@ -172,7 +172,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         """, execution_id, user_id, tool_name, tool_execution_data["execution_status"],
             tool_execution_data["execution_time"], json.dumps(tool_execution_data["results"]),
-            tool_execution_data["business_value"], json.dumps(tool_execution_data["metadata"]), datetime.utcnow())
+            tool_execution_data["business_value"], json.dumps(tool_execution_data["metadata"]), datetime.now(UTC))
         
         # Validate tool execution
         execution_validation = await validator.validate_tool_execution_completeness(tool_execution_data)
@@ -238,7 +238,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
                               tool_integrated, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """, report_id, user_id, execution_id, integrated_report["title"], json.dumps(integrated_report),
-            tool_execution_data["business_value"], True, datetime.utcnow())
+            tool_execution_data["business_value"], True, datetime.now(UTC))
         
         # Verify integration was successful
         integration_query = """
@@ -372,7 +372,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             """, execution_id, user_id, tool_config["name"], "completed", execution_time,
                 json.dumps(tool_results), business_value, tool_config["purpose"],
-                json.dumps(tool_execution["metadata"]), datetime.utcnow())
+                json.dumps(tool_execution["metadata"]), datetime.now(UTC))
             
             # Validate individual tool execution
             execution_validation = await validator.validate_tool_execution_completeness(tool_execution)
@@ -447,7 +447,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """, report_id, user_id, comprehensive_report["title"], json.dumps(comprehensive_report),
             combined_integration["multi_tool_synthesis"]["combined_business_value"] / len(tool_execution_results),
-            True, len(tool_execution_results), datetime.utcnow())
+            True, len(tool_execution_results), datetime.now(UTC))
         
         # Store tool combination record
         combination_id = UnifiedIdGenerator.generate_base_id("tool_combination")
@@ -455,7 +455,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
             INSERT INTO tool_combinations (id, user_id, report_id, tools_executed, combination_summary, created_at)
             VALUES ($1, $2, $3, $4, $5, $6)
         """, combination_id, user_id, report_id, json.dumps([tool["tool_name"] for tool in tool_execution_results]),
-            json.dumps(combined_integration["multi_tool_synthesis"]), datetime.utcnow())
+            json.dumps(combined_integration["multi_tool_synthesis"]), datetime.now(UTC))
         
         # Verify multi-tool integration
         multi_tool_query = """
@@ -535,7 +535,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             """, execution_id, user_id, scenario["name"], scenario["status"], scenario["execution_time"],
                 json.dumps(results_to_store), scenario["business_value"], 
-                scenario.get("error"), datetime.utcnow())
+                scenario.get("error"), datetime.now(UTC))
             
             tool_results.append({
                 "execution_id": execution_id,
@@ -619,7 +619,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
         """, report_id, user_id, failure_resilient_report["title"], json.dumps(failure_resilient_report),
             sum(tool["business_value"] for tool in tool_results) / len(tool_results),  # Average including failed tools
             True, partial_integration["execution_summary"]["tools_succeeded"], 
-            partial_integration["execution_summary"]["tools_failed"], datetime.utcnow())
+            partial_integration["execution_summary"]["tools_failed"], datetime.now(UTC))
         
         # Verify failure handling
         failure_handling_query = """
@@ -735,7 +735,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
                                           results, business_value, performance_metrics, created_at)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             """, execution_id, user_id, tool_config["name"], "completed", actual_duration,
-                json.dumps(results), 8.0, json.dumps(performance_metrics), datetime.utcnow())
+                json.dumps(results), 8.0, json.dumps(performance_metrics), datetime.now(UTC))
             
             # Store detailed performance monitoring
             perf_monitor_id = UnifiedIdGenerator.generate_base_id(f"perf_monitor_{tool_config['name']}")
@@ -747,7 +747,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
             """, perf_monitor_id, execution_id, tool_config["name"], tool_config["expected_duration"],
                 actual_duration, memory_usage_mb, cpu_usage_percent,
                 "excellent" if performance_metrics["performance_ratio"] <= 1.1 else "good" if performance_metrics["performance_ratio"] <= 1.3 else "needs_improvement",
-                datetime.utcnow())
+                datetime.now(UTC))
             
             performance_results.append({
                 "tool_name": tool_config["name"],
@@ -821,7 +821,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, title, content, business_value_score, performance_monitoring, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
         """, report_id, user_id, performance_report["title"], json.dumps(performance_report),
-            8.5, True, datetime.utcnow())
+            8.5, True, datetime.now(UTC))
         
         # Store performance benchmark data
         benchmark_id = UnifiedIdGenerator.generate_base_id("performance_benchmark")
@@ -830,7 +830,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
                                                    average_performance_ratio, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
         """, benchmark_id, user_id, report_id, json.dumps(performance_analysis),
-            len(performance_results), performance_analysis["average_performance_ratio"], datetime.utcnow())
+            len(performance_results), performance_analysis["average_performance_ratio"], datetime.now(UTC))
         
         # Validate performance monitoring effectiveness
         perf_monitoring_query = """
@@ -913,7 +913,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
                                       results, business_value, cache_key, cache_hit, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         """, first_execution_id, user_id, cacheable_tool["name"], "completed", first_execution_time,
-            json.dumps(first_execution_results), 8.0, cache_key, False, datetime.utcnow())
+            json.dumps(first_execution_results), 8.0, cache_key, False, datetime.now(UTC))
         
         # Cache the results (simulate Redis caching)
         if real_services_fixture.get("redis"):
@@ -931,7 +931,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """, cache_entry_id, user_id, cacheable_tool["name"], cache_key,
             json.dumps(first_execution_results["aggregated_data"]), first_execution_id,
-            datetime.utcnow() + timedelta(hours=1), datetime.utcnow())
+            datetime.now(UTC) + timedelta(hours=1), datetime.now(UTC))
         
         # Second execution (cache hit - fast retrieval)
         second_execution_id = UnifiedIdGenerator.generate_base_id("second_exec")
@@ -973,7 +973,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
                                       results, business_value, cache_key, cache_hit, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         """, second_execution_id, user_id, cacheable_tool["name"], "completed", second_execution_time,
-            json.dumps(second_execution_results), 8.0, cache_key, cache_hit, datetime.utcnow())
+            json.dumps(second_execution_results), 8.0, cache_key, cache_hit, datetime.now(UTC))
         
         # Analyze caching effectiveness
         caching_analysis = {
@@ -1033,7 +1033,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, title, content, business_value_score, caching_analysis, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
         """, report_id, user_id, caching_report["title"], json.dumps(caching_report),
-            8.5, True, datetime.utcnow())
+            8.5, True, datetime.now(UTC))
         
         # Store cache performance metrics
         cache_perf_id = UnifiedIdGenerator.generate_base_id("cache_performance")
@@ -1042,7 +1042,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
                                                  second_execution_time, cache_hit, performance_improvement, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """, cache_perf_id, user_id, cache_key, first_execution_time, second_execution_time,
-            cache_hit, caching_analysis["performance_improvement_percent"], datetime.utcnow())
+            cache_hit, caching_analysis["performance_improvement_percent"], datetime.now(UTC))
         
         # Validate caching effectiveness
         cache_validation_query = """
@@ -1154,7 +1154,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
                                                           compliance_level, regulatory_frameworks)
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 """, audit_event_id, execution_id, user_id, tool_config["name"],
-                    event["event_type"], json.dumps(event["details"]), datetime.utcnow(),
+                    event["event_type"], json.dumps(event["details"]), datetime.now(UTC),
                     tool_config["compliance_level"], json.dumps(tool_config["regulatory_frameworks"]))
                 
                 audit_event_ids.append(audit_event_id)
@@ -1175,7 +1175,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
             """, execution_id, user_id, tool_config["name"], "completed", 18.5,
                 json.dumps(tool_results), 8.0, tool_config["compliance_level"],
                 tool_config["data_classification"], json.dumps(tool_config["regulatory_frameworks"]),
-                True, datetime.utcnow())
+                True, datetime.now(UTC))
             
             audit_records.append({
                 "execution_id": execution_id,
@@ -1254,7 +1254,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
                               regulatory_frameworks, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """, report_id, user_id, compliance_audit_report["title"], json.dumps(compliance_audit_report),
-            9.0, True, json.dumps(compliance_summary["regulatory_frameworks_covered"]), datetime.utcnow())
+            9.0, True, json.dumps(compliance_summary["regulatory_frameworks_covered"]), datetime.now(UTC))
         
         # Store detailed compliance metrics
         compliance_metrics_id = UnifiedIdGenerator.generate_base_id("compliance_metrics")
@@ -1265,7 +1265,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """, compliance_metrics_id, user_id, report_id, compliance_summary["total_tool_executions"],
             compliance_summary["total_audit_events"], 
-            json.dumps(compliance_summary["regulatory_frameworks_covered"]), 100.0, datetime.utcnow())
+            json.dumps(compliance_summary["regulatory_frameworks_covered"]), 100.0, datetime.now(UTC))
         
         # Validate compliance audit effectiveness
         compliance_validation_query = """
@@ -1367,7 +1367,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
                                               results, business_value, resource_metrics, scaling_tier, created_at)
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
                 """, execution_id, user_id, tool_name, "completed", execution_time,
-                    json.dumps(tool_results), 7.5, json.dumps(resource_metrics), resource_tier, datetime.utcnow())
+                    json.dumps(tool_results), 7.5, json.dumps(resource_metrics), resource_tier, datetime.now(UTC))
                 
                 return {
                     "execution_id": execution_id,
@@ -1417,7 +1417,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
             """, scaling_scenario_id, user_id, scenario["concurrent_tools"], scenario["resource_tier"],
                 scaling_analysis["success_rate"], scaling_analysis["total_memory_usage_mb"],
                 scaling_analysis["average_cpu_usage_percent"], scaling_analysis["scenario_wall_time"],
-                json.dumps(scaling_analysis), datetime.utcnow())
+                json.dumps(scaling_analysis), datetime.now(UTC))
             
             scaling_results.append(scaling_analysis)
         
@@ -1483,7 +1483,7 @@ class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
                               max_concurrent_tools, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """, report_id, user_id, scaling_report["title"], json.dumps(scaling_report),
-            8.5, True, scaling_summary["max_concurrent_tools"], datetime.utcnow())
+            8.5, True, scaling_summary["max_concurrent_tools"], datetime.now(UTC))
         
         # Validate scaling effectiveness
         scaling_validation = {

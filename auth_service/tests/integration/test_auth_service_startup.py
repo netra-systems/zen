@@ -15,7 +15,7 @@ import asyncio
 import json
 import pytest
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Dict, Any, Optional
 from contextlib import asynccontextmanager
 import aiohttp
@@ -212,7 +212,7 @@ class AuthServiceStartupTests(BaseIntegrationTest):
             # Test auth-specific Redis operations
             session_stored = await auth_redis_manager.store_session(
                 "startup_test_session", 
-                {"user_id": "test", "created_at": datetime.utcnow().isoformat()},
+                {"user_id": "test", "created_at": datetime.now(UTC).isoformat()},
                 ttl_seconds=300
             )
             assert session_stored, "Should be able to store auth session in Redis"

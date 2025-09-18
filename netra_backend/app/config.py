@@ -21,36 +21,211 @@ See: app/auth_integration/CRITICAL_AUTH_ARCHITECTURE.md
 Eliminates 110+ file duplications and ensures Enterprise reliability.
 """
 
-# NEW: Import unified configuration system
-from netra_backend.app.core.configuration.base import (
-    config_manager as unified_config_manager,
+# SSOT CONFIGURATION SYSTEM - CRITICAL: This is the ONLY source for configuration access
+from netra_backend.app.core.configuration.loader import ConfigurationLoader
+from netra_backend.app.core.configuration.validator import ConfigurationValidator
+from netra_backend.app.core.environment_constants import EnvironmentDetector
+from netra_backend.app.schemas.config import (
+    AppConfig,
+    DevelopmentConfig,
+    NetraTestingConfig,
+    ProductionConfig,
+    StagingConfig,
 )
-from netra_backend.app.core.configuration.base import (
-    get_unified_config,
-    reload_unified_config,
-    validate_config_integrity,
-)
-from netra_backend.app.schemas.config import AppConfig
+from functools import lru_cache
+from typing import Any, Dict, Optional
+
+
+class UnifiedConfigManager:
+    """Unified Configuration Manager - SSOT for all configuration access.
+
+    This class serves as the single source of truth for configuration
+    management throughout the application.
+    """
+
+    def __init__(self):
+        """Initialize the unified configuration manager."""
+        self._logger = None  # Lazy loaded to break circular dependency
+        self._loader = ConfigurationLoader()
+        self._validator = ConfigurationValidator()
+        self._config_cache: Optional[AppConfig] = None
+        self._environment: Optional[str] = None
+
+    def _get_logger(self):
+        """Lazy load logger to prevent circular dependency."""
+        if self._logger is None:
+            try:
+                from shared.logging.unified_logging_ssot import get_logger
+                self._logger = get_logger(__name__)
+            except ImportError:
+                from shared.logging.unified_logging_ssot import get_logger
+                self._logger = get_logger(__name__)
+        return self._logger
+
+    def get_config(self, key: str = None, default: Any = None) -> AppConfig:
+        """Get the unified application configuration."""
+        if key is not None:
+            return self.get_config_value(key, default)
+
+        current_environment = self._get_environment()
+        is_test_environment = current_environment == "testing"
+
+        if self._config_cache is None or is_test_environment:
+            config = self._create_config_for_environment(current_environment)
+            validation_result = self._validator.validate_complete_config(config)
+
+            if not validation_result.is_valid:
+                self._get_logger().error(f"Configuration validation failed for {current_environment}")
+
+            if not is_test_environment:
+                self._config_cache = config
+                return config
+            else:
+                return config
+
+        return self._config_cache
+
+    def _get_environment(self) -> str:
+        """Get the current environment."""
+        if self._environment is None:
+            self._environment = EnvironmentDetector.get_environment()
+        return self._environment
+
+    def _create_config_for_environment(self, environment: str) -> AppConfig:
+        """Create configuration instance for the specified environment."""
+        config_classes = {
+            "development": DevelopmentConfig,
+            "staging": StagingConfig,
+            "production": ProductionConfig,
+            "testing": NetraTestingConfig,
+        }
+
+        config_class = config_classes.get(environment, DevelopmentConfig)
+        try:
+            config = config_class()
+
+            # Load SERVICE_SECRET from environment if not set
+            if not config.service_secret:
+                try:
+                    from shared.isolated_environment import IsolatedEnvironment
+                    env = IsolatedEnvironment()
+                    service_secret = env.get('SERVICE_SECRET')
+
+                    validation_mode = env.get('SERVICE_SECRET_VALIDATION_MODE', 'strict').lower()
+                    if environment == "staging" and validation_mode == "lenient":
+                        if not service_secret:
+                            service_secret = 'staging-development-service-secret-2025'
+
+                    if service_secret:
+                        config.service_secret = service_secret.strip()
+                except Exception as e:
+                    self._get_logger().error(f"Failed to load SERVICE_SECRET: {e}")
+
+            return config
+        except Exception as e:
+            self._get_logger().error(f"Failed to create config for {environment}: {e}")
+            return AppConfig(environment=environment)
+
+    def get_config_value(self, key: str, default: Any = None) -> Any:
+        """Get a specific configuration value by key path."""
+        try:
+            config = self.get_config()
+            keys = key.split('.')
+            value = config
+
+            for k in keys:
+                if hasattr(value, k):
+                    value = getattr(value, k)
+                elif isinstance(value, dict) and k in value:
+                    value = value[k]
+                else:
+                    return default
+            return value
+        except Exception:
+            return default
+
+    def cache(self, key: str, ttl: int = 3600) -> Any:
+        """Cache configuration value with TTL support.
+        
+        Args:
+            key: Configuration key path to cache
+            ttl: Time to live in seconds (default: 3600)
+            
+        Returns:
+            Cached configuration value
+        """
+        try:
+            # For now, implement basic caching using the existing config cache
+            # In future, could be enhanced with Redis or advanced TTL mechanisms
+            value = self.get_config_value(key)
+            
+            # Log cache access for monitoring (if logger available)
+            try:
+                logger = self._get_logger()
+                logger.debug(f"Configuration cache access: {key}")
+            except Exception:
+                pass  # Silent fallback if logging not available
+                
+            return value
+        except Exception as e:
+            # Log cache error but return None for graceful degradation
+            try:
+                logger = self._get_logger()
+                logger.error(f"Configuration cache error for key {key}: {e}")
+            except Exception:
+                pass
+            return None
+
+    def bulk_get(self, keys: list) -> dict:
+        """Get multiple configuration values efficiently.
+        
+        Args:
+            keys: List of configuration key paths
+            
+        Returns:
+            Dictionary mapping keys to their values
+        """
+        result = {}
+        for key in keys:
+            result[key] = self.get_config_value(key)
+        return result
+
+
+# Global configuration manager instance
+config_manager = UnifiedConfigManager()
 
 
 # PRIMARY: Unified configuration access (PREFERRED)
 def get_config() -> AppConfig:
     """Get the unified application configuration.
-    
+
     **PREFERRED METHOD**: Use this for all new code.
     Single source of truth for Enterprise reliability.
     """
-    return get_unified_config()
+    return config_manager.get_config()
 
 def reload_config(force: bool = False) -> None:
     """Reload the unified configuration (hot-reload capability)."""
-    reload_unified_config(force=force)
+    if force:
+        config_manager._config_cache = None
+        config_manager._environment = None
 
 def validate_configuration() -> tuple[bool, list]:
     """Validate configuration integrity for Enterprise customers."""
-    return validate_config_integrity()
+    try:
+        config = config_manager.get_config()
+        validation_result = config_manager._validator.validate_complete_config(config)
+        return (validation_result.is_valid, validation_result.errors if hasattr(validation_result, 'errors') else [])
+    except Exception as e:
+        return (False, [str(e)])
 
-config_manager = unified_config_manager
+def cache_config_value(key: str, ttl: int = 3600) -> Any:
+    """Cache configuration value with TTL support.
+
+    This function provides access to the configuration manager's cache method
+    for tests and other code that needs caching functionality.
+    """
+    return config_manager.cache(key, ttl)
 
 # BACKWARD COMPATIBILITY ALIASES
 Config = AppConfig

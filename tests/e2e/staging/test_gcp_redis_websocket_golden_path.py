@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,16 +23,11 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""GCP Redis WebSocket Golden Path E2E Tests
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""GCP Redis WebSocket Golden Path E2E Tests
 
 MISSION CRITICAL: These tests validate Redis-WebSocket integration
 on GCP staging environment to prevent WebSocket 1011 errors
-and $500K+ ARR chat functionality failures.
+and 500K+ ARR chat functionality failures.
 
 Business Value Justification (BVJ):
 - Segment: Platform/Production
@@ -159,7 +146,7 @@ class GCPRedisWebSocketGoldenPathTests(SSotAsyncTestCase):
             f"  - Redis correlation: {error_prevention_results['redis_correlation']}\n" +
             f"  - Error patterns: {error_prevention_results['error_patterns']}\n" +
             f"  - Infrastructure health: {error_prevention_results['infrastructure_health']}\n" +
-            "\n\nWebSocket 1011 errors block $500K+ ARR chat functionality."
+            "\n\nWebSocket 1011 errors block 500K+ ARR chat functionality."
         )
     
     async def test_gcp_redis_websocket_chat_functionality_end_to_end(self):

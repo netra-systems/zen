@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: Early/Mid/Enterprise - All paid tiers
 - Business Goal: Validate end-to-end AI agent value delivery in staging
 - Value Impact: Ensures customers receive complete AI-powered cost optimization 
-- Strategic/Revenue Impact: $500K+ ARR protected - Prevents staging deployment failures
+- Strategic/Revenue Impact: 500K+ ARR protected - Prevents staging deployment failures
 
 This test suite validates complete agent workflows with REAL authentication and services:
 1. Real WebSocket connections with JWT authentication
@@ -62,7 +62,7 @@ class CompleteAgentWorkflowsStagingTests(BaseE2ETest):
         assert self.staging_config.validate_configuration(), 'Staging configuration invalid'
         self.test_users = []
         for i in range(3):
-            user_context = await create_authenticated_user_context(user_email=f'e2e_agent_test_{i}_{int(time.time())}@staging.netra.ai', environment='staging', permissions=['read', 'write', 'execute_agents'])
+            user_context = await create_authenticated_user_context(user_email=f'e2e_agent_test_{i}_{int(time.time())}@staging.netrasystems.ai', environment='staging', permissions=['read', 'write', 'execute_agents'])
             self.test_users.append(user_context)
         self.logger.info(f' PASS:  Staging environment setup complete - {len(self.test_users)} authenticated users')
 
@@ -292,7 +292,7 @@ class CompleteAgentWorkflowsStagingTests(BaseE2ETest):
         """
         Test that agent execution delivers measurable business value metrics.
         
-        BVJ: Validates $500K+ ARR value proposition - Quantifiable business impact
+        BVJ: Validates 500K+ ARR value proposition - Quantifiable business impact
         Ensures agents deliver concrete, measurable business outcomes
         """
         user_context = self.test_users[0]

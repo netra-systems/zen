@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,12 +23,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 E2E Tests for Golden Path Infrastructure Validation on GCP Staging
 
 Purpose: Validate complete Golden Path infrastructure works end-to-end on staging
@@ -438,13 +425,13 @@ class GoldenPathInfrastructureValidationTests:
                     "error": "WebSocket ping timeout - no response received"
                 }
                 
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             return {
                 "connected": False,
                 "error": f"WebSocket connection closed: {str(e)}",
                 "connection_code": getattr(e, 'code', None)
             }
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             return {
                 "connected": False,
                 "error": f"WebSocket invalid status: {str(e)}",
@@ -580,7 +567,7 @@ class GoldenPathInfrastructureValidationTests:
                 "response": json.loads(response)
             }
             
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             return {
                 "successful": False,
                 "error": f"Connection closed: {str(e)}",

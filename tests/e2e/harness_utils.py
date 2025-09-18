@@ -244,8 +244,8 @@ class TestHarnessContext:
             "email": user["email"],
             "role": user["role"],
             "tier": user["tier"],
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),
-            "iat": datetime.datetime.utcnow(),
+            "exp": datetime.datetime.now(UTC) + datetime.timedelta(hours=1),
+            "iat": datetime.datetime.now(UTC),
             "context_id": self.context_id
         }
 
@@ -718,7 +718,7 @@ class TestClient:
     - Segment: Internal/Platform stability
     - Business Goal: Enable reliable E2E HTTP test communication
     - Value Impact: Provides complete HTTP client for testing auth/backend endpoints
-    - Revenue Impact: Protects test reliability and deployment quality ($500K+ ARR)
+    - Revenue Impact: Protects test reliability and deployment quality (500K+ ARR)
 
     CLAUDE.md Compliant:
     - Uses real HTTP connections (no mocks in production)
@@ -900,7 +900,7 @@ class MinimalHarnessContext:
     - Segment: Internal/Platform stability
     - Business Goal: Enable E2E test context with HTTP clients
     - Value Impact: Provides configured clients for auth/backend testing
-    - Revenue Impact: Protects test infrastructure reliability ($500K+ ARR)
+    - Revenue Impact: Protects test infrastructure reliability (500K+ ARR)
 
     CLAUDE.md Compliant:
     - Real HTTP clients (no mocks)
@@ -987,7 +987,7 @@ async def create_minimal_harness(test_name: str) -> 'TestHarnessContext':
     - Segment: Internal/Platform stability
     - Business Goal: Enable E2E test harness infrastructure
     - Value Impact: Complete harness creation for E2E testing scenarios
-    - Revenue Impact: Protects test reliability and system validation ($500K+ ARR)
+    - Revenue Impact: Protects test reliability and system validation (500K+ ARR)
     """
     # Create a TestHarnessContext instance
     harness = TestHarnessContext(test_name, seed_data=False)

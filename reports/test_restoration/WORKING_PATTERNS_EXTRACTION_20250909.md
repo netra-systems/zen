@@ -215,7 +215,7 @@ async def create_authenticated_test_user():
     
     # Use demo mode for simplified testing (DEMO_MODE=1)
     user = await auth_helper.create_authenticated_user(
-        email=f"test-user-{uuid.uuid4().hex[:8]}@demo.netra.ai",
+        email=f"test-user-{uuid.uuid4().hex[:8]}@demo.netrasystems.ai",
         name="WebSocket Test User",
         use_demo_mode=True  # Leverages recent demo mode enhancements
     )

@@ -3,7 +3,7 @@ Test Event Source Validation Fails With Duplicates - PHASE 1: PRE-CONSOLIDATION
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - Critical Infrastructure Validation
-- Business Goal: Revenue Protection - Prove event source confusion loses $500K+ ARR
+- Business Goal: Revenue Protection - Prove event source confusion loses 500K+ ARR
 - Value Impact: Demonstrates that duplicate emitters cause event misrouting/confusion
 - Strategic Impact: Validates that multiple event sources violate SSOT principles
 

@@ -26,7 +26,7 @@ import pytest
 import asyncio
 import time
 import jwt
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from unittest import mock
 import uuid
 from contextlib import asynccontextmanager
@@ -73,7 +73,7 @@ class Phase2TokenLifecycleIntegrationTests:
 
     def _create_test_jwt_token(self, user_id: str, expires_in_seconds: int) -> str:
         """Create JWT token for Phase 2 testing."""
-        payload = {'sub': user_id, 'user_id': user_id, 'email': f'test+{user_id[:8]}@netra.com', 'exp': datetime.utcnow() + timedelta(seconds=expires_in_seconds), 'iat': datetime.utcnow(), 'iss': 'netra-phase2-test', 'permissions': ['execute_agents', 'websocket_access']}
+        payload = {'sub': user_id, 'user_id': user_id, 'email': f'test+{user_id[:8]}@netra.com', 'exp': datetime.now(UTC) + timedelta(seconds=expires_in_seconds), 'iat': datetime.now(UTC), 'iss': 'netra-phase2-test', 'permissions': ['execute_agents', 'websocket_access']}
         return jwt.encode(payload, self.jwt_secret, algorithm='HS256')
 
     def _create_test_user_context(self, user_id: str) -> UserExecutionContext:
@@ -219,11 +219,11 @@ class Phase2TokenLifecycleIntegrationTests:
                 if current_token is not None:
                     execution_result['status'] = 'SUCCESS'
                     execution_result['message'] = f'Agent context created successfully at t={interval}s'
-                    print(f'   ✅ SUCCESS: Agent context creation at t={interval}s')
+                    print(f'   CHECK SUCCESS: Agent context creation at t={interval}s')
                 else:
                     execution_result['status'] = 'FAILED'
                     execution_result['message'] = f'Agent context creation failed - no valid token at t={interval}s'
-                    print(f'   ❌ FAILED: Agent context creation at t={interval}s')
+                    print(f'   X FAILED: Agent context creation at t={interval}s')
                 agent_execution_results.append(execution_result)
                 metrics = execution_result['lifecycle_metrics']
                 print(f"      Lifecycle state: {metrics.get('lifecycle_state', 'unknown')}")
@@ -241,10 +241,10 @@ class Phase2TokenLifecycleIntegrationTests:
             final_metrics = lifecycle_manager.get_connection_metrics(connection_id)
             assert final_metrics['refresh_count'] > 0, f"Expected token refreshes during test, but refresh_count = {final_metrics['refresh_count']}. Phase 2 background refresh is not working."
             print(f'\n[SUCCESS] PHASE 2 TOKEN LIFECYCLE FIX VALIDATED:')
-            print(f'   ✅ Agent execution success rate: {success_rate:.1%}')
-            print(f"   ✅ Token refresh count: {final_metrics['refresh_count']}")
-            print(f'   ✅ Connection maintained throughout session')
-            print(f'   ✅ No JWT expiry failures breaking chat mid-conversation')
+            print(f'   CHECK Agent execution success rate: {success_rate:.1%}')
+            print(f"   CHECK Token refresh count: {final_metrics['refresh_count']}")
+            print(f'   CHECK Connection maintained throughout session')
+            print(f'   CHECK No JWT expiry failures breaking chat mid-conversation')
             print(f'   🎯 BUSINESS IMPACT: $500K+ ARR Golden Path protected')
             await lifecycle_manager.unregister_connection(connection_id)
 

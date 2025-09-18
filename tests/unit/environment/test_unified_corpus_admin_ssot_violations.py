@@ -168,7 +168,7 @@ class UnifiedCorpusAdminSSOTViolationsTests(BaseUnitTest):
                 
         except Exception as e:
             # Document exception as part of violation impact
-            print(f"⚠️  Exception during UnifiedCorpusAdmin violation test: {str(e)}")
+            print(f"WARNING️  Exception during UnifiedCorpusAdmin violation test: {str(e)}")
             raise
         finally:
             env.disable_isolation()

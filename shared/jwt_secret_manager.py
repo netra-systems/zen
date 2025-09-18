@@ -49,11 +49,10 @@ class JWTSecretManager:
         CRITICAL: This is the SINGLE SOURCE OF TRUTH for JWT secret resolution.
         All services MUST use this method to ensure consistency.
         
-        Priority order (consistent across ALL services):
-        1. Environment-specific JWT_SECRET_{ENVIRONMENT} (e.g., JWT_SECRET_STAGING)  
-        2. Generic JWT_SECRET_KEY
-        3. Legacy JWT_SECRET
-        4. Environment-specific fallbacks (dev/test only)
+        Priority order (SSOT-compliant, consistent across ALL services):
+        1. JWT_SECRET_KEY (SSOT CANONICAL - preferred for all environments)
+        2. Environment-specific JWT_SECRET_{ENVIRONMENT} (DEPRECATED - migration only)
+        3. Development/test fallbacks (dev/test only)
         
         Returns:
             JWT secret string for token signing/validation
@@ -79,45 +78,33 @@ class JWTSecretManager:
             # Minimum secret length - very lenient in test contexts for validation testing
             min_secret_length = 4 if is_testing_context else 32
             
-            # CRITICAL FIX: Unified secret resolution with staging override
-            if environment == "staging":
-                # STAGING: Use explicit staging secret hierarchy with proper validation
-                staging_secrets = [
-                    "JWT_SECRET_STAGING",
-                    "JWT_SECRET_KEY", 
-                    "JWT_SECRET"
-                ]
-                
-                for secret_key in staging_secrets:
-                    jwt_secret = env.get(secret_key)
-                    if jwt_secret and len(jwt_secret.strip()) >= min_secret_length:
-                        logger.info(f"STAGING JWT SECRET: Using {secret_key} (length: {len(jwt_secret.strip())})")
-                        self._cached_secret = jwt_secret.strip()
-                        return self._cached_secret
-                
-                # STAGING FALLBACK: Use unified secret from secrets manager if available
-                try:
-                    from deployment.secrets_config import get_staging_secret
-                    staging_secret = get_staging_secret("JWT_SECRET")
-                    if staging_secret and len(staging_secret) >= min_secret_length:
-                        logger.info("STAGING JWT SECRET: Using deployment secrets manager")
-                        self._cached_secret = staging_secret
-                        return self._cached_secret
-                except ImportError:
-                    logger.warning("Deployment secrets manager not available for staging")
-            
-            # 1. Try environment-specific secret first (ALL environments including staging)
-            env_specific_key = f"JWT_SECRET_{environment.upper()}"
-            jwt_secret = env.get(env_specific_key)
-            
-            # CRITICAL FIX: Always use environment-specific secret if provided and valid
+            # SSOT PRIORITY 1: Try JWT_SECRET_KEY first (canonical SSOT name)
+            jwt_secret = env.get("JWT_SECRET_KEY")
             if jwt_secret and len(jwt_secret.strip()) >= min_secret_length:
-                logger.info(f"Using environment-specific JWT secret: {env_specific_key} (length: {len(jwt_secret.strip())})")
+                logger.info(f"Using SSOT canonical JWT secret: JWT_SECRET_KEY (length: {len(jwt_secret.strip())})")
                 self._cached_secret = jwt_secret.strip()
                 return self._cached_secret
             
-            # 2. Try generic JWT_SECRET_KEY (second priority)
-            jwt_secret = env.get("JWT_SECRET_KEY")
+            # SSOT PRIORITY 2: Try environment-specific secret as DEPRECATED fallback
+            env_specific_key = f"JWT_SECRET_{environment.upper()}"
+            jwt_secret = env.get(env_specific_key)
+            
+            if jwt_secret and len(jwt_secret.strip()) >= min_secret_length:
+                logger.warning(f"Using DEPRECATED environment-specific JWT secret: {env_specific_key} - migrate to JWT_SECRET_KEY")
+                self._cached_secret = jwt_secret.strip()
+                return self._cached_secret
+            
+            # SSOT PRIORITY 3: Try deployment secrets manager for staging/production
+            if environment in ["staging", "production"]:
+                try:
+                    from deployment.secrets_config import get_staging_secret
+                    staging_secret = get_staging_secret("JWT_SECRET_KEY")
+                    if staging_secret and len(staging_secret) >= min_secret_length:
+                        logger.info("Using deployment secrets manager for JWT_SECRET_KEY")
+                        self._cached_secret = staging_secret
+                        return self._cached_secret
+                except ImportError:
+                    logger.warning("Deployment secrets manager not available")
             
             # In testing context, check if JWT_SECRET_KEY is a default test value that should be ignored
             if is_testing_context and jwt_secret:
@@ -157,7 +144,7 @@ class JWTSecretManager:
                 
             # 6. Hard failure for staging/production environments (non-test contexts)
             if environment in ["staging", "production"]:
-                expected_vars = [env_specific_key, "JWT_SECRET_KEY", "JWT_SECRET"]
+                expected_vars = [env_specific_key, "JWT_SECRET_KEY"]
                 logger.critical(f"JWT secret not configured for {environment} environment")
                 logger.critical(f"Expected one of: {expected_vars}")
                 logger.critical("This will cause WebSocket 403 authentication failures")
@@ -397,9 +384,8 @@ class JWTSecretManager:
             "environment_specific_key": env_specific_key,
             "has_env_specific": bool(env.get(env_specific_key)),
             "has_generic_key": bool(env.get("JWT_SECRET_KEY")),
-            "has_legacy_key": bool(env.get("JWT_SECRET")),
             "available_keys": [
-                key for key in [env_specific_key, "JWT_SECRET_KEY", "JWT_SECRET"]
+                key for key in [env_specific_key, "JWT_SECRET_KEY"]
                 if env.get(key)
             ],
             "algorithm": self.get_jwt_algorithm()

@@ -31,7 +31,7 @@ import json
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Tuple, Callable
 from unittest.mock import patch, MagicMock
 import statistics
@@ -58,7 +58,7 @@ class LoggingSSOTPerformanceTests(SSotBaseTestCase):
     def _capture_baseline_metrics(self) -> Dict:
         """Capture baseline system metrics."""
         process = psutil.Process()
-        return {'cpu_percent': process.cpu_percent(), 'memory_rss': process.memory_info().rss, 'memory_vms': process.memory_info().vms, 'thread_count': process.num_threads(), 'open_files': len(process.open_files()) if hasattr(process, 'open_files') else 0, 'timestamp': datetime.utcnow()}
+        return {'cpu_percent': process.cpu_percent(), 'memory_rss': process.memory_info().rss, 'memory_vms': process.memory_info().vms, 'thread_count': process.num_threads(), 'open_files': len(process.open_files()) if hasattr(process, 'open_files') else 0, 'timestamp': datetime.now(UTC)}
 
     @contextmanager
     def performance_monitor(self, test_name: str):

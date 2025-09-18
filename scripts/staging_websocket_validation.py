@@ -9,7 +9,7 @@ Tests staging environment for WebSocket Error 1011 and validates golden path fun
 import asyncio
 import json
 import time
-from datetime import datetime
+from datetime import datetime, UTC
 import websockets
 import httpx
 import sys
@@ -31,7 +31,7 @@ class StagingWebSocketValidator:
             "websocket_validation": {},
             "golden_path_validation": {},
             "error_1011_check": {},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
 
     async def validate_service_health(self) -> Dict[str, Any]:
@@ -102,7 +102,7 @@ class StagingWebSocketValidator:
                 test_message = {
                     "type": "test",
                     "message": "WebSocket Error 1011 validation test",
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 
                 await websocket.send(json.dumps(test_message))
@@ -115,7 +115,7 @@ class StagingWebSocketValidator:
                 except asyncio.TimeoutError:
                     logger.info("[U+23F1][U+FE0F] No response within 5 seconds (expected for test message)")
 
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             websocket_results["close_code"] = e.code
             websocket_results["close_reason"] = e.reason
             websocket_results["errors"].append(f"Connection closed: {e.code} - {e.reason}")

@@ -43,7 +43,7 @@ class ServiceAuthConfig:
     service_secret: str
     environment: ServiceEnvironment
     auth_service_url: str
-    jwt_secret_key: str
+    # jwt_secret_key removed - JWT operations delegated to auth service (SSOT compliance)
     status: ServiceAuthStatus = ServiceAuthStatus.VALID
     validation_errors: list = None
 
@@ -61,7 +61,7 @@ class ServiceAuthManager:
         base_vars = {
             "SERVICE_ID": "Service identifier for inter-service auth",
             "SERVICE_SECRET": "Service secret for authentication",
-            "JWT_SECRET_KEY": "JWT signing key",
+            # JWT_SECRET_KEY removed - JWT operations delegated to auth service (SSOT compliance)
         }
         
         if self.environment in [ServiceEnvironment.STAGING, ServiceEnvironment.PRODUCTION]:
@@ -92,15 +92,21 @@ class ServiceAuthManager:
     def _create_backend_service_config(self) -> Optional[ServiceAuthConfig]:
         """Create backend service authentication configuration."""
         try:
-            # Get environment variables
+            # Get environment variables - strip whitespace to handle newline issues (Issue #1313)
             service_id = os.getenv("SERVICE_ID")
+            if service_id:
+                service_id = service_id.strip()  # Strip whitespace/newlines
             service_secret = os.getenv("SERVICE_SECRET")
-            jwt_secret_key = os.getenv("JWT_SECRET_KEY")
+            if service_secret:
+                service_secret = service_secret.strip()  # Strip whitespace/newlines
+            # jwt_secret_key removed - JWT operations delegated to auth service (SSOT compliance)
             auth_service_url = os.getenv("AUTH_SERVICE_URL", "")
-            
+            if auth_service_url:
+                auth_service_url = auth_service_url.strip()  # Strip whitespace/newlines
+
             # Validate required fields
             validation_errors = []
-            
+
             if not service_id:
                 validation_errors.append("SERVICE_ID environment variable not set")
             elif not self._validate_service_id(service_id):
@@ -111,10 +117,7 @@ class ServiceAuthManager:
             elif len(service_secret) < 32:
                 validation_errors.append("SERVICE_SECRET must be at least 32 characters")
             
-            if not jwt_secret_key:
-                validation_errors.append("JWT_SECRET_KEY environment variable not set")
-            elif len(jwt_secret_key) < 32:
-                validation_errors.append("JWT_SECRET_KEY must be at least 32 characters")
+            # JWT validation removed - JWT operations delegated to auth service (SSOT compliance)
             
             if self.environment in [ServiceEnvironment.STAGING, ServiceEnvironment.PRODUCTION]:
                 if not auth_service_url:
@@ -131,7 +134,7 @@ class ServiceAuthManager:
                 service_secret=service_secret or "",
                 environment=self.environment,
                 auth_service_url=auth_service_url,
-                jwt_secret_key=jwt_secret_key or "",
+                # jwt_secret_key removed - JWT operations delegated to auth service (SSOT compliance)
                 status=status,
                 validation_errors=validation_errors
             )
@@ -240,7 +243,7 @@ class ServiceAuthManager:
             
             # Issue #1278: Check for problematic SERVICE_ID patterns
             problematic_patterns = [
-                "netra-auth-staging-1757260376",  # Known bad pattern from Issue #1278
+                "netra-auth-1757260376",  # Known bad pattern from Issue #1278
                 "auth-service",                   # Wrong service type
             ]
             
@@ -268,7 +271,8 @@ class ServiceAuthManager:
         if self.environment == ServiceEnvironment.STAGING:
             valid_staging_patterns = [
                 "http://auth:8081",                    # Docker compose internal
-                "https://netra-auth-staging",          # GCP Cloud Run
+                "https://netra-auth",                  # GCP Cloud Run
+                "https://auth.staging.netrasystems.ai", # Staging domain (Issue #1313)
                 "http://localhost:8081",               # Local testing
             ]
             
@@ -332,7 +336,7 @@ class ServiceAuthManager:
         
         # Known problematic patterns that should be fixed
         problematic_fixes = {
-            "netra-auth-staging-1757260376": "netra-backend",
+            "netra-auth-1757260376": "netra-backend",
             "auth-service": "netra-backend",
             "netra-auth": "netra-backend"
         }

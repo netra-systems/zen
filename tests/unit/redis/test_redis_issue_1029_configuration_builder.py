@@ -76,10 +76,10 @@ class RedisIssue1029ConfigurationBuilderTests(SSotBaseTestCase):
             config_builder = self._create_mock_configuration_builder(env)
             built_config = config_builder.build_redis_config()
             print(f'📍 Built Redis Config: {built_config}')
-            assert 'localhost' not in built_config.get('host', '').lower(), f"❌ ISSUE #1029 CONFIRMED: Configuration builder defaulted to localhost: {built_config.get('host')}. In GCP staging, builder should prioritize Memory Store endpoint: 10.45.240.3!"
+            assert 'localhost' not in built_config.get('host', '').lower(), f"X ISSUE #1029 CONFIRMED: Configuration builder defaulted to localhost: {built_config.get('host')}. In GCP staging, builder should prioritize Memory Store endpoint: 10.45.240.3!"
             expected_host = '10.45.240.3'
             actual_host = built_config.get('host')
-            assert actual_host == expected_host, f'❌ ISSUE #1029 CONFIRMED: Configuration builder used wrong host: {actual_host}. Expected GCP Memory Store host: {expected_host}. Incorrect host configuration causes Redis connectivity failures!'
+            assert actual_host == expected_host, f'X ISSUE #1029 CONFIRMED: Configuration builder used wrong host: {actual_host}. Expected GCP Memory Store host: {expected_host}. Incorrect host configuration causes Redis connectivity failures!'
 
     @pytest.mark.unit
     @pytest.mark.redis
@@ -105,13 +105,13 @@ class RedisIssue1029ConfigurationBuilderTests(SSotBaseTestCase):
             config_builder = self._create_mock_configuration_builder(env)
             vpc_validation_result = config_builder.validate_vpc_connector()
             print(f'📍 VPC Validation Result: {vpc_validation_result}')
-            assert vpc_validation_result['is_valid'], f"❌ ISSUE #1029 CONFIRMED: VPC connector validation failed: {vpc_validation_result['error']}. Configuration builder must validate VPC connector for GCP Memory Store access!"
+            assert vpc_validation_result['is_valid'], f"X ISSUE #1029 CONFIRMED: VPC connector validation failed: {vpc_validation_result['error']}. Configuration builder must validate VPC connector for GCP Memory Store access!"
             project_validation_result = config_builder.validate_gcp_project()
             print(f'📍 GCP Project Validation Result: {project_validation_result}')
-            assert project_validation_result['is_valid'], f"❌ ISSUE #1029 CONFIRMED: GCP project validation failed: {project_validation_result['error']}. Configuration builder must validate GCP project for proper Secret Manager and Memory Store access!"
+            assert project_validation_result['is_valid'], f"X ISSUE #1029 CONFIRMED: GCP project validation failed: {project_validation_result['error']}. Configuration builder must validate GCP project for proper Secret Manager and Memory Store access!"
             ip_validation_result = config_builder.validate_internal_ip()
             print(f'📍 Internal IP Validation Result: {ip_validation_result}')
-            assert ip_validation_result['is_valid'], f"❌ ISSUE #1029 CONFIRMED: Internal IP validation failed: {ip_validation_result['error']}. Configuration builder must validate GCP Memory Store internal IP format!"
+            assert ip_validation_result['is_valid'], f"X ISSUE #1029 CONFIRMED: Internal IP validation failed: {ip_validation_result['error']}. Configuration builder must validate GCP Memory Store internal IP format!"
 
     @pytest.mark.unit
     @pytest.mark.redis
@@ -137,10 +137,10 @@ class RedisIssue1029ConfigurationBuilderTests(SSotBaseTestCase):
             gcp_builder = self._create_mock_configuration_builder(gcp_env)
             is_gcp_detected = gcp_builder.is_gcp_environment()
             print(f'📍 GCP Environment Detected: {is_gcp_detected}')
-            assert is_gcp_detected, f"❌ ISSUE #1029 CONFIRMED: Configuration builder failed to detect GCP environment. Environment: {gcp_env.get('ENVIRONMENT')}, Project: {gcp_env.get('GCP_PROJECT_ID')}. Proper environment detection is required for correct Redis configuration!"
+            assert is_gcp_detected, f"X ISSUE #1029 CONFIRMED: Configuration builder failed to detect GCP environment. Environment: {gcp_env.get('ENVIRONMENT')}, Project: {gcp_env.get('GCP_PROJECT_ID')}. Proper environment detection is required for correct Redis configuration!"
             localhost_allowed = gcp_builder.is_localhost_allowed()
             print(f'📍 Localhost Allowed in GCP: {localhost_allowed}')
-            assert not localhost_allowed, f'❌ ISSUE #1029 CONFIRMED: Configuration builder allows localhost in GCP environment. Localhost should be blocked in GCP environments to prevent connectivity failures!'
+            assert not localhost_allowed, f'X ISSUE #1029 CONFIRMED: Configuration builder allows localhost in GCP environment. Localhost should be blocked in GCP environments to prevent connectivity failures!'
         with patch.dict(os.environ, self.local_dev_config):
             local_env = IsolatedEnvironment()
             local_builder = self._create_mock_configuration_builder(local_env)
@@ -175,12 +175,12 @@ class RedisIssue1029ConfigurationBuilderTests(SSotBaseTestCase):
             builder = self._create_mock_configuration_builder(env)
             secret_manager_available = builder.is_secret_manager_available()
             print(f'📍 Secret Manager Available: {secret_manager_available}')
-            assert secret_manager_available, f'❌ ISSUE #1029 CONFIRMED: Configuration builder cannot detect Secret Manager availability. Secret Manager integration is required for secure Redis credential management in GCP!'
+            assert secret_manager_available, f'X ISSUE #1029 CONFIRMED: Configuration builder cannot detect Secret Manager availability. Secret Manager integration is required for secure Redis credential management in GCP!'
             if secret_manager_available:
                 secret_config = builder.build_secret_manager_config()
                 print(f'📍 Secret Manager Config: {secret_config}')
-                assert 'project_id' in secret_config, f'❌ ISSUE #1029 CONFIRMED: Secret Manager config missing project_id: {secret_config}. Proper project configuration is required for Secret Manager access!'
-                assert secret_config['project_id'] == 'netra-staging', f"❌ ISSUE #1029 CONFIRMED: Secret Manager config has wrong project: {secret_config['project_id']}. Expected 'netra-staging' for staging environment!"
+                assert 'project_id' in secret_config, f'X ISSUE #1029 CONFIRMED: Secret Manager config missing project_id: {secret_config}. Proper project configuration is required for Secret Manager access!'
+                assert secret_config['project_id'] == 'netra-staging', f"X ISSUE #1029 CONFIRMED: Secret Manager config has wrong project: {secret_config['project_id']}. Expected 'netra-staging' for staging environment!"
 
     def _create_mock_configuration_builder(self, env: IsolatedEnvironment):
         """Create a mock configuration builder that simulates the real builder behavior."""

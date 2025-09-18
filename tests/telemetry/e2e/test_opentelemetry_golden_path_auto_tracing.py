@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,12 +23,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 E2E Tests for OpenTelemetry Automatic Tracing on Golden Path User Flow
 
 FOCUS: Automatic instrumentation only - validates that OpenTelemetry automatically
@@ -45,7 +32,7 @@ traces the complete user journey from frontend connection through agent executio
 Tests the Golden Path user flow with automatic tracing enabled, ensuring that
 all critical business events are automatically captured without manual instrumentation.
 
-Business Value: Enterprise/Platform - Complete observability of $500K+ ARR chat functionality
+Business Value: Enterprise/Platform - Complete observability of 500K+ ARR chat functionality
 Tests MUST FAIL before auto-instrumentation is configured, PASS after setup.
 
 CRITICAL: Uses REAL SERVICES - WebSocket, FastAPI, database connections.

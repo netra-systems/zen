@@ -9,7 +9,8 @@ from pathlib import Path
 def cleanup_remaining_mocks():
     """Clean up remaining mock references."""
     
-    base_dir = Path('/Users/anthony/Documents/GitHub/netra-apex')
+    project_root = Path(__file__).parent.parent
+    base_dir = project_root
     
     # Files with remaining issues
     remaining_files = [

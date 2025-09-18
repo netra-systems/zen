@@ -1,14 +1,19 @@
 """
+
 Issue #601 Targeted Fix Validation
 
 This test specifically targets the exact hanging issue and validates the proposed fix
 without running the full startup infrastructure that causes deadlocks.
 
-Business Value: $500K+ ARR platform reliability protection
+Business Value: 500K+  ARR platform reliability protection
 Issue: test_startup_memory_leak_prevention hangs at orchestrator.initialize_system()
+"""
+
 Root Cause: _run_comprehensive_validation() calls service dependency validation with circular imports
 Solution: Strategic mocking of validation while preserving memory leak detection
-"""
+"
+""
+
 
 import asyncio
 import gc
@@ -22,27 +27,30 @@ from fastapi import FastAPI
 
 
 class Issue601TargetedFixTests:
-    """Targeted test for Issue #601 hang fix."""
+    "Targeted test for Issue #601 hang fix."
 
     def setup_method(self):
-        """Set up minimal test environment."""
+        "Set up minimal test environment."
         # Start memory tracking
         tracemalloc.start()
         self.initial_memory = psutil.Process().memory_info().rss
 
     def teardown_method(self):
-        """Clean up test environment."""
+        "Clean up test environment."
         tracemalloc.stop()
         gc.collect()
 
     @pytest.mark.asyncio
     async def test_issue_601_hang_fix_with_complete_mocking(self):
         """
+    ""
+
         Test Issue #601 fix by completely mocking the hanging import chain.
         
         This test validates that strategic mocking prevents hangs while preserving
         the ability to detect memory leaks.
-        """
+        "
+        "
         # Mock the problematic imports that cause deadlocks
         mock_modules = {
             'netra_backend.app.core.startup_validation': MagicMock(),
@@ -53,8 +61,8 @@ class Issue601TargetedFixTests:
         
         # Create mock functions for the problematic validation methods
         async def mock_validate_startup(app):
-            """Mock validation that doesn't hang."""
-            await asyncio.sleep(0.01)  # Minimal delay
+            Mock validation that doesn't hang.""'
+            await asyncio.sleep(0.1)  # Minimal delay
             return True
 
         # Setup mock return values
@@ -71,21 +79,21 @@ class Issue601TargetedFixTests:
             try:
                 from netra_backend.app.smd import StartupOrchestrator, DeterministicStartupError
             except ImportError:
-                pytest.skip("StartupOrchestrator not available")
+                pytest.skip(StartupOrchestrator not available)
 
             app = FastAPI()
             app.state = MagicMock()
             orchestrator = StartupOrchestrator(app)
 
-            # ✅ CRITICAL FIX: Mock ALL the problematic methods that cause hanging
+            # CHECK CRITICAL FIX: Mock ALL the problematic methods that cause hanging
             # This is the strategic mocking approach for Issue #601
             async def quick_mock_phase():
-                await asyncio.sleep(0.001)
+                await asyncio.sleep(0.1)
 
             async def mock_validation_that_prevents_hang():
-                """Mock the specific validation method that hangs."""
+                "Mock the specific validation method that hangs."
                 app.state.startup_complete = True
-                await asyncio.sleep(0.001)
+                await asyncio.sleep(0.1)
                 return True
 
             # Mock ALL startup phases to be lightweight
@@ -97,7 +105,7 @@ class Issue601TargetedFixTests:
             orchestrator._phase6_websocket_setup = quick_mock_phase
             orchestrator._phase7_finalization = quick_mock_phase
 
-            # ✅ THE CRITICAL FIX: Mock the validation methods that cause deadlock
+            # CHECK THE CRITICAL FIX: Mock the validation methods that cause deadlock
             orchestrator._run_comprehensive_validation = mock_validation_that_prevents_hang
             orchestrator._run_critical_path_validation = quick_mock_phase
             orchestrator._validate_database_schema = quick_mock_phase
@@ -113,21 +121,24 @@ class Issue601TargetedFixTests:
                 duration = end_time - start_time
                 
                 # Validate successful execution
-                assert duration < 2.0, f"Startup took too long: {duration}s - fix not working"
-                assert app.state.startup_complete, "Startup completion flag not set"
+                assert duration < 2.0, "fStartup took too long: {duration}s - fix not working"
+                assert app.state.startup_complete, Startup completion flag not set"
+                assert app.state.startup_complete, Startup completion flag not set""
+
                 
-                print(f"Issue #601 Fix Validated - Duration: {duration:.3f}s")
+                print(f"Issue #601 Fix Validated - Duration: {duration:.""3f""}s))"
                 
             except asyncio.TimeoutError:
-                pytest.fail("ISSUE #601 NOT FIXED: Test still hangs despite comprehensive mocking")
+                pytest.fail(ISSUE #601 NOT FIXED: Test still hangs despite comprehensive mocking)
 
     @pytest.mark.asyncio
     async def test_memory_leak_detection_with_issue_601_fix(self):
-        """
+    """
+
         Test that memory leak detection still works with Issue #601 fix applied.
         
-        This validates that the strategic mocking doesn't break memory leak detection.
-        """
+        This validates that the strategic mocking doesn't break memory leak detection.'
+        
         memory_measurements = []
         
         # Mock the problematic modules to prevent import deadlocks
@@ -139,7 +150,7 @@ class Issue601TargetedFixTests:
         }
         
         async def mock_validate_startup(app):
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(0.1)
             return True
 
         mock_modules['netra_backend.app.core.startup_validation'].validate_startup = mock_validate_startup
@@ -154,7 +165,7 @@ class Issue601TargetedFixTests:
             try:
                 from netra_backend.app.smd import StartupOrchestrator
             except ImportError:
-                pytest.skip("StartupOrchestrator not available")
+                pytest.skip(StartupOrchestrator not available")"
 
             # Run multiple startup cycles to test memory behavior
             for cycle in range(5):
@@ -165,13 +176,13 @@ class Issue601TargetedFixTests:
                 # Apply the Issue #601 fix mocking
                 async def lightweight_phase_with_memory_allocation():
                     # Simulate some memory allocation that should be cleaned up
-                    temp_data = [0] * 5000  # 5KB allocation
-                    await asyncio.sleep(0.001)
+                    temp_data = [0] * 5000  # ""5KB"" allocation
+                    await asyncio.sleep(0.1)
                     del temp_data  # Explicit cleanup
 
                 async def mock_validation():
                     app.state.startup_complete = True
-                    await asyncio.sleep(0.001)
+                    await asyncio.sleep(0.1)
 
                 # Apply strategic mocking (the Issue #601 fix)
                 orchestrator._phase1_foundation = lightweight_phase_with_memory_allocation
@@ -203,25 +214,30 @@ class Issue601TargetedFixTests:
             # Validate memory leak behavior
             if len(memory_measurements) >= 2:
                 total_increase = memory_measurements[-1] - memory_measurements[0]
-                max_allowed_increase = 30 * 1024 * 1024  # 30MB reasonable for 5 cycles
+                max_allowed_increase = 30 * 1024 * 1024  # ""30MB"" reasonable for 5 cycles
                 
                 assert total_increase < max_allowed_increase, \
-                    f"Memory leak detected even with fix: {total_increase / 1024 / 1024:.2f}MB increase"
+                    fMemory leak detected even with fix: {total_increase / 1024 / 1024:.""2f""}MB increase
                 
-                print(f"Memory leak detection working with Issue #601 fix - Increase: {total_increase / 1024 / 1024:.2f}MB")
+                print(fMemory leak detection working with Issue #601 fix - Increase: {total_increase / 1024 / 1024:.2f}MB)"
+                print(fMemory leak detection working with Issue #601 fix - Increase: {total_increase / 1024 / 1024:."2f"}MB)""
+
 
     @pytest.mark.asyncio 
     async def test_reproduce_original_hanging_scenario(self):
         """
+    ""
+
         Test that reproduces the original hanging scenario to prove the issue exists.
         
         This test should timeout, proving that without the fix, the system hangs.
-        """
-        # Don't mock the problematic modules - let them cause hangs
+        "
+        "
+        # Don't mock the problematic modules - let them cause hangs'
         try:
             from netra_backend.app.smd import StartupOrchestrator
         except ImportError:
-            pytest.skip("StartupOrchestrator not available")
+            pytest.skip(StartupOrchestrator not available")"
 
         app = FastAPI()
         app.state = MagicMock()
@@ -230,7 +246,7 @@ class Issue601TargetedFixTests:
         # Mock only the lightweight phases but NOT the validation methods
         # This should cause the original hang
         async def lightweight_phase():
-            await asyncio.sleep(0.001)
+            await asyncio.sleep(0.1)
 
         orchestrator._phase1_foundation = lightweight_phase
         orchestrator._phase2_core_services = lightweight_phase
@@ -240,7 +256,7 @@ class Issue601TargetedFixTests:
         orchestrator._phase6_websocket_setup = lightweight_phase
         orchestrator._phase7_finalization = lightweight_phase
 
-        # DON'T mock the validation methods - they should cause hangs:
+        # DON'T mock the validation methods - they should cause hangs:'
         # - _run_comprehensive_validation (NOT mocked - should hang)
         # - _run_critical_path_validation (NOT mocked)
         # - _validate_database_schema (NOT mocked)
@@ -252,29 +268,29 @@ class Issue601TargetedFixTests:
             await asyncio.wait_for(orchestrator.initialize_system(), timeout=2.0)
         
         duration = time.time() - start_time
-        assert duration >= 1.8, f"Should have timed out, but completed in {duration}s"
+        assert duration >= 1.8, "fShould have timed out, but completed in {duration}s"
         
-        print(f"Original hang scenario reproduced - timed out after {duration:.3f}s")
+        print(fOriginal hang scenario reproduced - timed out after {duration:.""3f""}s")"
 
 
 @pytest.mark.asyncio
 async def test_validate_pytest_collection_issue_601():
-    """
+
     Test that validates pytest can collect this test without hanging.
     
-    This is a meta-test to ensure the test file itself doesn't cause collection issues.
-    """
+    This is a meta-test to ensure the test file itself doesn't cause collection issues.'
+    ""
     # Simple validation that collection works
     assert True, "Pytest collection working for Issue #601 tests"
-    print("Pytest collection validation passed")
+    print(Pytest collection validation passed")"
 
 
 # Direct execution for quick validation
-if __name__ == "__main__":
+if __name__ == __main__:
     import unittest
     
-    print("Issue #601 Targeted Fix Validation")
-    print("=" * 50)
+    print(Issue #601 Targeted Fix Validation")"
+    print(= * 50)
     
     # Run the specific tests
     suite = unittest.TestLoader().loadTestsFromTestCase(Issue601TargetedFixTests)
@@ -282,10 +298,11 @@ if __name__ == "__main__":
     result = runner.run(suite)
     
     if result.wasSuccessful():
-        print("✅ Issue #601 targeted fix validation PASSED")
-        print("✅ Strategic mocking approach works")
-        print("✅ Memory leak detection preserved")
+        print("CHECK Issue #601 targeted fix validation PASSED)"
+        print(CHECK Strategic mocking approach works)"
+        print(CHECK Strategic mocking approach works)"
+        print("CHECK Memory leak detection preserved)"
     else:
-        print("❌ Issue #601 targeted fix validation FAILED")
+        print(X Issue #601 targeted fix validation FAILED")"
         for test, error in result.failures + result.errors:
-            print(f"  - {test}: {error[:200]}...")
+            print(f"  - {test}: {error[:200]}..."")"

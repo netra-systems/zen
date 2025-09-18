@@ -37,6 +37,23 @@ if not _env.get("GOOGLE_OAUTH_CLIENT_ID_TEST"):
 if not _env.get("GOOGLE_OAUTH_CLIENT_SECRET_TEST"):
     _env.set("GOOGLE_OAUTH_CLIENT_SECRET_TEST", "test-oauth-client-secret-for-automated-testing", source="main_conftest_oauth_fix")
 
+# CRITICAL FIX: Sync IsolatedEnvironment variables to os.environ for tests
+# This addresses the discrepancy where IsolatedEnvironment has values but os.environ doesn't
+_critical_env_vars = [
+    "JWT_SECRET_KEY", "SERVICE_SECRET", "AUTH_SERVICE_URL", 
+    "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_USER", "POSTGRES_PASSWORD",
+    "REDIS_HOST", "REDIS_PORT", "GOOGLE_OAUTH_CLIENT_ID_TEST", "GOOGLE_OAUTH_CLIENT_SECRET_TEST"
+]
+
+for var_name in _critical_env_vars:
+    isolated_value = _env.get(var_name)
+    if isolated_value and not os.environ.get(var_name):
+        os.environ[var_name] = isolated_value
+        print(f"[CONFTEST] Synced {var_name} from IsolatedEnvironment to os.environ")
+
+# JWT_SECRET REMOVED: No longer supporting legacy JWT_SECRET variable
+# All code must use JWT_SECRET_KEY for consistency
+
 # Import mock fixtures (lightweight, good for most unit tests)
 from tests.conftest_mocks import *
 
@@ -53,6 +70,20 @@ try:
     real_services = real_services_fixture
 except ImportError:
     # Real services fixtures not available
+    pass
+
+# Import isolated environment fixtures for Issue #1197 - fixture discovery
+# CRITICAL: Import directly from fixtures module to ensure pytest discovers them
+try:
+    from test_framework.isolated_environment_fixtures import (
+        isolated_env,
+        test_env,
+        staging_env,
+        production_env,
+        isolated_env_fixture  # Alias for backward compatibility
+    )
+except ImportError:
+    # IsolatedEnvironment fixtures not available
     pass
 
 # Import no-docker mode plugin for integration test management

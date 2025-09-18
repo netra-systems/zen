@@ -10,7 +10,7 @@ EXPECTED BEHAVIOR:
 - AFTER SSOT MIGRATION: Per-request tests PASS (proving SSOT compliance)
 - MIGRATION COMPATIBILITY: Both patterns work during transition period
 
-Business Value: Enterprise/Platform - $500K+ ARR protection through SSOT compliance
+Business Value: Enterprise/Platform - 500K+ ARR protection through SSOT compliance
 Migration Impact: Validates safe transition from singleton to SSOT per-request pattern
 
 SSOT COMPLIANCE SCENARIOS TESTED:
@@ -54,7 +54,7 @@ class AgentInstanceFactorySSotMigrationTests(SSotAsyncTestCase):
     5. SSOT architecture enables regulatory compliance (ENTERPRISE READY)
     
     CRITICAL: These tests validate the SSOT solution and prove migration success.
-    SSOT compliance directly enables $500K+ ARR enterprise customer security requirements.
+    SSOT compliance directly enables 500K+ ARR enterprise customer security requirements.
     """
 
     def setup_method(self, method):
@@ -89,7 +89,7 @@ class AgentInstanceFactorySSotMigrationTests(SSotAsyncTestCase):
         SSOT SOLUTION: Each request gets its own factory instance with complete isolation,
         eliminating the security vulnerabilities created by the singleton pattern.
         
-        BUSINESS IMPACT: SSOT compliance enables $500K+ ARR enterprise deployment
+        BUSINESS IMPACT: SSOT compliance enables 500K+ ARR enterprise deployment
         with complete regulatory compliance (HIPAA, SOC2, PCI-DSS, SEC).
         
         EXPECTED: PASS after SSOT migration (proving isolation achieved)
@@ -306,7 +306,7 @@ class AgentInstanceFactorySSotMigrationTests(SSotAsyncTestCase):
         """
         SSOT PERFORMANCE TEST: Validate SSOT pattern meets enterprise scalability.
         
-        ENTERPRISE REQUIREMENTS: $500K+ ARR customers require high-performance
+        ENTERPRISE REQUIREMENTS: 500K+ ARR customers require high-performance
         multi-user concurrent access with complete isolation.
         
         SCALABILITY VALIDATION: SSOT per-request pattern must handle concurrent
@@ -600,5 +600,5 @@ class AgentInstanceFactorySSotMigrationTests(SSotAsyncTestCase):
         assert critical_success, (
             f"SSOT MIGRATION COMPLETE: All critical validations passed. "
             f"Enterprise security requirements achieved. "
-            f"$500K+ ARR customers protected through SSOT compliance."
+            f"500K+ ARR customers protected through SSOT compliance."
         )

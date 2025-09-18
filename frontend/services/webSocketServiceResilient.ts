@@ -72,6 +72,9 @@ interface WebSocketOptionsResilient {
   rateLimit?: RateLimitConfig;
   token?: string;
   refreshToken?: () => Promise<string | null>;
+  // Ticket authentication support
+  getTicket?: () => Promise<{ success: boolean; ticket?: { ticket: string; expires_at: number }; error?: string }>;
+  useTicketAuth?: boolean;
   compression?: string[];
   circuitBreaker?: CircuitBreakerConfig;
   queueConfig?: QueueConfig;
@@ -159,6 +162,11 @@ class ResilientWebSocketService {
   private tokenRefreshTimer: NodeJS.Timeout | null = null;
   private currentToken: string | null = null;
   private isRefreshingToken: boolean = false;
+  
+  // Ticket authentication support
+  private currentTicket: string | null = null;
+  private ticketExpiry: number | null = null;
+  private isRefreshingTicket: boolean = false;
   
   // Connection lifecycle
   private connectionId: string = '';
@@ -558,10 +566,16 @@ class ResilientWebSocketService {
     
     this.isInitialized = true;
     this.restoreSessionState();
-    this.establishConnection();
+    // Note: establishConnection is async but we don't await here to maintain non-blocking behavior
+    this.establishConnection().catch(error => {
+      logger.error('Failed to establish connection during connect', error as Error, {
+        component: 'ResilientWebSocketService',
+        action: 'connect_async_error'
+      });
+    });
   }
 
-  private establishConnection(): void {
+  private async establishConnection(): Promise<void> {
     if (!this.shouldAllowConnection()) {
       logger.warn('Connection blocked by circuit breaker', {
         component: 'ResilientWebSocketService',
@@ -579,11 +593,8 @@ class ResilientWebSocketService {
       this.connectionId = `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       this.connectionStartTime = Date.now();
       
-      // Add authentication if token provided
-      let finalUrl = this.url;
-      if (this.options.token) {
-        finalUrl = this.addTokenToUrl(finalUrl, this.options.token);
-      }
+      // Prepare authenticated URL (supports both ticket and JWT)
+      const finalUrl = await this.prepareAuthenticatedUrl(this.url);
       
       this.ws = new WebSocket(finalUrl);
       this.setupEventHandlers();
@@ -594,7 +605,8 @@ class ResilientWebSocketService {
         action: 'connect',
         metadata: {
           connectionId: this.connectionId,
-          attempt: this.reconnectAttempts
+          attempt: this.reconnectAttempts,
+          authMethod: this.currentTicket ? 'ticket' : (this.options.token ? 'jwt' : 'none')
         }
       });
       
@@ -833,14 +845,21 @@ class ResilientWebSocketService {
     
     const reconnectDelay = delay || this.calculateRetryDelay();
     
-    this.reconnectTimer = setTimeout(() => {
+    this.reconnectTimer = setTimeout(async () => {
       this.isReconnecting = false;
       
       if (this.options.onReconnect) {
         this.options.onReconnect();
       }
       
-      this.establishConnection();
+      try {
+        await this.establishConnection();
+      } catch (error) {
+        logger.error('Failed to establish connection during reconnect', error as Error, {
+          component: 'ResilientWebSocketService',
+          action: 'reconnect_async_error'
+        });
+      }
     }, reconnectDelay);
   }
 
@@ -855,6 +874,72 @@ class ResilientWebSocketService {
   private addTokenToUrl(url: string, token: string): string {
     const separator = url.includes('?') ? '&' : '?';
     return `${url}${separator}jwt=${token}`;
+  }
+
+  private addTicketToUrl(url: string, ticket: string): string {
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}ticket=${ticket}`;
+  }
+
+  private async prepareAuthenticatedUrl(baseUrl: string): Promise<string> {
+    // Try ticket authentication first if enabled
+    if (this.options.useTicketAuth && this.options.getTicket) {
+      try {
+        logger.debug('Attempting ticket authentication for WebSocket', {
+          component: 'ResilientWebSocketService',
+          action: 'prepareAuthenticatedUrl'
+        });
+
+        const ticketResult = await this.options.getTicket();
+        
+        if (ticketResult.success && ticketResult.ticket) {
+          this.currentTicket = ticketResult.ticket.ticket;
+          this.ticketExpiry = ticketResult.ticket.expires_at;
+          
+          logger.debug('Using ticket authentication for WebSocket connection', {
+            component: 'ResilientWebSocketService',
+            action: 'prepareAuthenticatedUrl',
+            metadata: {
+              ticketLength: this.currentTicket.length,
+              expiresAt: new Date(this.ticketExpiry).toISOString()
+            }
+          });
+          
+          return this.addTicketToUrl(baseUrl, this.currentTicket);
+        } else {
+          logger.warn('Ticket authentication failed, falling back to JWT', {
+            component: 'ResilientWebSocketService',
+            action: 'prepareAuthenticatedUrl',
+            metadata: {
+              error: ticketResult.error
+            }
+          });
+        }
+      } catch (error) {
+        logger.error('Ticket authentication error, falling back to JWT', error as Error, {
+          component: 'ResilientWebSocketService',
+          action: 'prepareAuthenticatedUrl'
+        });
+      }
+    }
+
+    // Fallback to JWT token authentication
+    if (this.options.token) {
+      logger.debug('Using JWT authentication for WebSocket connection', {
+        component: 'ResilientWebSocketService',
+        action: 'prepareAuthenticatedUrl'
+      });
+      
+      return this.addTokenToUrl(baseUrl, this.options.token);
+    }
+
+    // No authentication available
+    logger.debug('No authentication method available, using base URL', {
+      component: 'ResilientWebSocketService',
+      action: 'prepareAuthenticatedUrl'
+    });
+    
+    return baseUrl;
   }
 
   private sendInternal(
@@ -959,6 +1044,10 @@ class ResilientWebSocketService {
   public async updateToken(token: string): Promise<void> {
     this.currentToken = token;
     
+    // Clear any cached ticket since we have a new token
+    this.currentTicket = null;
+    this.ticketExpiry = null;
+    
     // Reconnect with new token if connected
     if (this.isConnected()) {
       this.disconnect();
@@ -967,12 +1056,98 @@ class ResilientWebSocketService {
     }
   }
 
-  // Get secure URL helper
+  /**
+   * Refresh WebSocket ticket if it's close to expiry
+   */
+  public async refreshTicketIfNeeded(): Promise<boolean> {
+    if (!this.options.useTicketAuth || !this.options.getTicket) {
+      return false;
+    }
+
+    const refreshThreshold = 60000; // Refresh 1 minute before expiry
+    const needsRefresh = !this.currentTicket || 
+                        !this.ticketExpiry || 
+                        (this.ticketExpiry - Date.now()) < refreshThreshold;
+
+    if (!needsRefresh) {
+      return true; // Current ticket is still valid
+    }
+
+    if (this.isRefreshingTicket) {
+      logger.debug('Ticket refresh already in progress', {
+        component: 'ResilientWebSocketService',
+        action: 'refreshTicketIfNeeded'
+      });
+      return false;
+    }
+
+    this.isRefreshingTicket = true;
+
+    try {
+      logger.debug('Refreshing WebSocket ticket', {
+        component: 'ResilientWebSocketService',
+        action: 'refreshTicketIfNeeded',
+        metadata: {
+          currentTicketExpiry: this.ticketExpiry ? new Date(this.ticketExpiry).toISOString() : null
+        }
+      });
+
+      const ticketResult = await this.options.getTicket();
+      
+      if (ticketResult.success && ticketResult.ticket) {
+        this.currentTicket = ticketResult.ticket.ticket;
+        this.ticketExpiry = ticketResult.ticket.expires_at;
+        
+        logger.debug('WebSocket ticket refreshed successfully', {
+          component: 'ResilientWebSocketService',
+          action: 'refreshTicketIfNeeded',
+          metadata: {
+            newTicketExpiry: new Date(this.ticketExpiry).toISOString()
+          }
+        });
+        
+        return true;
+      } else {
+        logger.warn('Failed to refresh WebSocket ticket', {
+          component: 'ResilientWebSocketService',
+          action: 'refreshTicketIfNeeded',
+          metadata: {
+            error: ticketResult.error
+          }
+        });
+        
+        return false;
+      }
+    } catch (error) {
+      logger.error('Error refreshing WebSocket ticket', error as Error, {
+        component: 'ResilientWebSocketService',
+        action: 'refreshTicketIfNeeded'
+      });
+      
+      return false;
+    } finally {
+      this.isRefreshingTicket = false;
+    }
+  }
+
+  // Get secure URL helper (synchronous version using cached ticket)
   public getSecureUrl(baseUrl: string): string {
+    // Prefer ticket authentication if available and not expired
+    if (this.currentTicket && this.ticketExpiry && this.ticketExpiry > Date.now()) {
+      return this.addTicketToUrl(baseUrl, this.currentTicket);
+    }
+    
+    // Fallback to JWT token
     if (this.options.token) {
       return this.addTokenToUrl(baseUrl, this.options.token);
     }
+    
     return baseUrl;
+  }
+
+  // Async version for cases where ticket refresh is needed
+  public async getSecureUrlAsync(baseUrl: string): Promise<string> {
+    return await this.prepareAuthenticatedUrl(baseUrl);
   }
 }
 

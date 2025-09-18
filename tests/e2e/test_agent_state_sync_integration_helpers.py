@@ -4,7 +4,7 @@ Business Value Justification (BVJ):
 - Segment: ALL (Free  ->  Enterprise) 
 - Business Goal: Ensure agent state synchronization maintains chat reliability
 - Value Impact: Validates multi-agent workflows deliver consistent AI responses
-- Revenue Impact: Protects $500K+ ARR by preventing agent state corruption
+- Revenue Impact: Protects 500K+ ARR by preventing agent state corruption
 
 This test suite validates CRITICAL agent state synchronization functionality that
 enables reliable multi-agent chat workflows. Tests cover:

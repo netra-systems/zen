@@ -149,7 +149,40 @@ Use the test gardner command if test collection issues.
 - **Type Safety:** Follow `SPEC/type_safety.xml`
 - **Environment:** Use `IsolatedEnvironment` for all env access
 - **Configuration:** Follow `@configuration_architecture.md`
-- **Compliance:** Run `python scripts/check_architecture_compliance.py`
+- **Compliance:** Enhanced CI/CD integration with automated threshold checking
+
+### 2.3.1. Enhanced SSOT Compliance Automation (Issue #1204)
+**MISSION CRITICAL:** Automated compliance gates to maintain 90%+ SSOT compliance
+
+**Core Commands:**
+```bash
+# Local development - CI mode with thresholds
+python scripts/check_architecture_compliance.py --ci-mode --threshold=90 --critical-threshold=0 --error-threshold=5 --warning-threshold=20
+
+# Generate JSON report for CI/CD consumption
+python scripts/check_architecture_compliance.py --ci-mode --json-output=compliance-report.json --fail-on-violation
+
+# Legacy mode (still available)
+python scripts/check_architecture_compliance.py
+```
+
+**CI/CD Integration:**
+- **GitHub Actions:** Enhanced workflow `enhanced-ssot-compliance.yml` runs on all PRs
+- **Automatic Blocking:** PRs with critical violations are automatically blocked
+- **Threshold Enforcement:** Configurable thresholds for critical/error/warning violations
+- **Exit Codes:** 0=Pass, 1=SSOT violations, 2=Critical security issues
+
+**Key Features:**
+- Real-time violation reporting with actionable fixes
+- Severity-based threshold checking (critical/high/medium/low)
+- Enhanced JSON output for CI/CD systems
+- Automated PR labeling and comments
+- Business impact assessment for each violation type
+
+**Compliance Thresholds:**
+- **Production (main):** Critical=0, Error=0, Warning=5 (Strict mode)
+- **Development (develop-long-lived):** Critical=0, Error=3, Warning=15 (Standard mode)
+- **Feature branches:** Critical=0, Error=5, Warning=20 (Permissive mode)
 
 ### 2.4. Strategic Trade-offs
 Propose trade-offs with BVJ justification, risk assessment, and debt mitigation plan.
@@ -359,8 +392,21 @@ SEE GIT ISSUES, GIT PRs.
 - ONLY use safe opreations, never filter branch etc.
 
 ### Deploy and staging
-Always must use https://auth.staging.netrasystems.ai
-and the other canonical *.staging.netrasystems.ai URLS. NEVER the cloud run urls.
+**CRITICAL DOMAIN CONFIGURATION UPDATE (Issue #1278):**
+Always must use the current staging domains (*.netrasystems.ai):
+- Backend/Auth: https://staging.netrasystems.ai
+- Frontend: https://staging.netrasystems.ai  
+- WebSocket: wss://api-staging.netrasystems.ai
+
+**DEPRECATED - DO NOT USE:** *.staging.netrasystems.ai URLs (causes SSL certificate failures)
+**NEVER USE:** Direct Cloud Run URLs (bypasses load balancer and SSL)
+
+**INFRASTRUCTURE REQUIREMENTS:**
+- VPC Connector: staging-connector with all-traffic egress
+- Database Timeout: 600s (addresses Issues #1263, #1278)
+- SSL Certificates: Must be valid for *.netrasystems.ai domains
+- Load Balancer: Health checks configured for extended startup times
+- Monitoring: GCP error reporter exports validated (P0 fix)
 
 **FINAL REMINDER:** 
 - **GOLDEN PATH PRIORITY:** Users login → get AI responses

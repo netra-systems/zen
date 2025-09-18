@@ -77,7 +77,7 @@ class TestSingletonViolationElimination(unittest.TestCase):
         self.assertEqual(
             len(singleton_patterns),
             0,
-            f"❌ EXPECTED FAILURE: Found {len(singleton_patterns)} singleton patterns. "
+            f"X EXPECTED FAILURE: Found {len(singleton_patterns)} singleton patterns. "
             f"Issue #1186 Phase 4 identified 8 remaining singleton violations requiring elimination:\n"
             + '\n'.join([f"  - {path}: {pattern}" for path, pattern in singleton_patterns[:8]])
             + (f"\n  ... and {len(singleton_patterns) - 8} more" if len(singleton_patterns) > 8 else "")
@@ -97,7 +97,7 @@ class TestSingletonViolationElimination(unittest.TestCase):
         self.assertEqual(
             len(isolation_violations),
             0,
-            f"❌ INSTANCE ISOLATION FAILURE: Found {len(isolation_violations)} isolation violations. "
+            f"X INSTANCE ISOLATION FAILURE: Found {len(isolation_violations)} isolation violations. "
             f"These prevent proper user isolation required for enterprise deployment:\n"
             + '\n'.join([f"  - {violation}" for violation in isolation_violations])
         )
@@ -116,7 +116,7 @@ class TestSingletonViolationElimination(unittest.TestCase):
         self.assertEqual(
             len(factory_violations),
             0,
-            f"❌ FACTORY COMPLIANCE FAILURE: Found {len(factory_violations)} factory pattern violations. "
+            f"X FACTORY COMPLIANCE FAILURE: Found {len(factory_violations)} factory pattern violations. "
             f"These indicate direct instantiation bypassing factory patterns:\n"
             + '\n'.join([f"  - {violation}" for violation in factory_violations])
         )
@@ -135,7 +135,7 @@ class TestSingletonViolationElimination(unittest.TestCase):
         self.assertEqual(
             len(global_instances),
             0,
-            f"❌ EXPECTED FAILURE: Found {len(global_instances)} global UserExecutionEngine instances. "
+            f"X EXPECTED FAILURE: Found {len(global_instances)} global UserExecutionEngine instances. "
             f"These create singleton-like behavior and prevent user isolation:\n"
             + '\n'.join([f"  - {path}: {instance}" for path, instance in global_instances])
         )
@@ -154,7 +154,7 @@ class TestSingletonViolationElimination(unittest.TestCase):
         self.assertEqual(
             len(shared_state_violations),
             0,
-            f"❌ SHARED STATE FAILURE: Found {len(shared_state_violations)} shared state violations. "
+            f"X SHARED STATE FAILURE: Found {len(shared_state_violations)} shared state violations. "
             f"These create cross-user contamination risks:\n"
             + '\n'.join([f"  - {violation}" for violation in shared_state_violations])
         )
@@ -462,7 +462,7 @@ class TestSingletonViolationMetrics(unittest.TestCase):
         self.assertEqual(
             violation_count,
             target_violations,
-            f"❌ EXPECTED FAILURE: Found {violation_count} singleton violations. "
+            f"X EXPECTED FAILURE: Found {violation_count} singleton violations. "
             f"Issue #1186 Phase 4 identified 8 remaining singleton violations requiring elimination. "
             f"Target: {target_violations} violations (complete singleton elimination)."
         )
@@ -490,7 +490,7 @@ class TestSingletonViolationMetrics(unittest.TestCase):
             self.assertEqual(
                 actual_value,
                 expected_value,
-                f"❌ USER ISOLATION FAILURE: {metric} = {actual_value}, expected {expected_value}. "
+                f"X USER ISOLATION FAILURE: {metric} = {actual_value}, expected {expected_value}. "
                 f"Issue #1186 Phase 4 requires complete user isolation for enterprise security."
             )
 
@@ -561,7 +561,7 @@ class TestSingletonViolationMetrics(unittest.TestCase):
 if __name__ == '__main__':
     print("🚨 Issue #1186 Singleton Violation Elimination - Validation Tests")
     print("=" * 80)
-    print("⚠️  WARNING: Some tests are DESIGNED TO FAIL to demonstrate remaining violations")
+    print("WARNING️  WARNING: Some tests are DESIGNED TO FAIL to demonstrate remaining violations")
     print("📊 Expected: Test failures exposing 8 remaining singleton violations from Issue #1186")
     print("🎯 Goal: Complete elimination of singleton patterns for enterprise user isolation")
     print("🔒 Impact: Enables secure multi-tenant production deployment")

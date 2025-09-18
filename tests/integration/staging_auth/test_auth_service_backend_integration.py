@@ -1,7 +1,7 @@
 """
 SSOT Auth Service Backend Integration Test - ISSUE #814
 
-PURPOSE: Integration test validating auth service → backend delegation in staging environment
+PURPOSE: Integration test validating auth service -> backend delegation in staging environment
 EXPECTED: PASS after SSOT remediation - validates staging auth integration
 TARGET: Backend authentication integration delegates to auth service in staging
 
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.integration
 class AuthServiceBackendIntegrationTests(SSotAsyncTestCase):
     """
-    Integration test validating auth service → backend delegation in staging environment.
+    Integration test validating auth service -> backend delegation in staging environment.
     Tests real service integration without Docker dependencies.
     """
 
@@ -28,7 +28,7 @@ class AuthServiceBackendIntegrationTests(SSotAsyncTestCase):
     async def asyncSetUpClass(cls):
         """Setup staging integration test environment"""
         await super().asyncSetUpClass()
-        cls.staging_auth_service_url = os.getenv('STAGING_AUTH_SERVICE_URL', 'https://auth-staging.netra-apex.com')
+        cls.staging_auth_service_url = os.getenv('STAGING_AUTH_SERVICE_URL', 'https://auth.netra-apex.com')
         cls.staging_backend_url = os.getenv('STAGING_BACKEND_URL', 'https://backend-staging.netra-apex.com')
         cls.staging_test_email = 'staging-integration@example.com'
         cls.staging_test_password = 'StagingInt123!'

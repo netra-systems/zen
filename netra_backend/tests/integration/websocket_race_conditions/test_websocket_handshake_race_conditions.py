@@ -3,7 +3,7 @@ WebSocket Handshake Race Conditions Integration Tests - SSOT Implementation
 
 Business Value Justification (BVJ):
 - Segment: All tiers (Free, Early, Mid, Enterprise)
-- Business Goal: Eliminate race conditions that break chat functionality ($500K+ ARR impact)
+- Business Goal: Eliminate race conditions that break chat functionality (500K+ ARR impact)
 - Value Impact: Prevents 1011 WebSocket errors and connection failures in Cloud Run environments
 - Strategic Impact: Ensures reliable chat experience that drives our primary business value delivery
 

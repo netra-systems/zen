@@ -4,7 +4,7 @@ Test Issue #1181 Business Value Protection E2E
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Revenue Protection During Infrastructure Changes
-- Value Impact: Ensure $500K+ ARR chat functionality remains fully operational
+- Value Impact: Ensure 500K+ ARR chat functionality remains fully operational
 - Strategic Impact: Protect core platform value delivery during MessageRouter consolidation
 
 This E2E test validates that MessageRouter consolidation maintains the business-critical
@@ -32,7 +32,7 @@ class Issue1181BusinessValueProtectionE2ETests(BaseE2ETest):
     @pytest.mark.mission_critical
     async def test_500k_arr_chat_functionality_preservation(self):
         """
-        Test that $500K+ ARR chat functionality is preserved during consolidation.
+        Test that 500K+ ARR chat functionality is preserved during consolidation.
         
         This is the MISSION CRITICAL test that validates the core business value
         delivery mechanism remains intact through infrastructure changes.
@@ -306,7 +306,7 @@ class Issue1181BusinessValueProtectionE2ETests(BaseE2ETest):
         # Note: Quality features may still be inaccessible until consolidation fixes dependency issues
         accessible_features = [r for r in quality_accessibility_results if r["accessible"]]
         if len(accessible_features) == 0:
-            print(f"⚠️ Quality features currently inaccessible - expected until consolidation complete")
+            print(f"WARNING️ Quality features currently inaccessible - expected until consolidation complete")
 
     async def _test_tier_revenue_protection(self, config: Dict[str, str], scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Test revenue protection for a specific customer tier."""
@@ -550,7 +550,7 @@ class Issue1181BusinessValueProtectionE2ETests(BaseE2ETest):
         
         for result in results:
             tier = result["tier"]
-            status = "✅ PROTECTED" if result["protection_successful"] else "❌ AT RISK"
+            status = "CHECK PROTECTED" if result["protection_successful"] else "X AT RISK"
             print(f"{status} {tier.title()} Tier Revenue")
             
             if not result["protection_successful"]:
@@ -562,7 +562,7 @@ class Issue1181BusinessValueProtectionE2ETests(BaseE2ETest):
         
         for result in results:
             agent = result["agent"]
-            status = "✅ DELIVERING VALUE" if result["value_delivered"] else "❌ VALUE AT RISK"
+            status = "CHECK DELIVERING VALUE" if result["value_delivered"] else "X VALUE AT RISK"
             print(f"{status} {agent.title()}")
             
             if result["value_delivered"] and "result" in result:
@@ -575,7 +575,7 @@ class Issue1181BusinessValueProtectionE2ETests(BaseE2ETest):
         
         for result in results:
             scenario = result["scenario"]
-            status = "✅ ACCEPTABLE" if result["performance_acceptable"] else "❌ DEGRADED"
+            status = "CHECK ACCEPTABLE" if result["performance_acceptable"] else "X DEGRADED"
             print(f"{status} {scenario.replace('_', ' ').title()}")
             
             if result["performance_acceptable"] and "result" in result:
@@ -588,7 +588,7 @@ class Issue1181BusinessValueProtectionE2ETests(BaseE2ETest):
         
         for result in results:
             feature = result["feature"]
-            status = "✅ ACCESSIBLE" if result["accessible"] else "❌ INACCESSIBLE"
+            status = "CHECK ACCESSIBLE" if result["accessible"] else "X INACCESSIBLE"
             print(f"{status} {feature.replace('_', ' ').title()}")
             
             if not result["accessible"]:

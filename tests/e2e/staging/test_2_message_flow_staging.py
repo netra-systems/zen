@@ -166,7 +166,7 @@ class MessageFlowStagingTests(StagingTestBase):
                     
                     # Small delay between messages
                     await asyncio.sleep(0.5)
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             # Auth failure is expected and proves staging requires auth
             if "403" in str(e) or "401" in str(e):
                 auth_error_detected = True
@@ -327,7 +327,7 @@ class MessageFlowStagingTests(StagingTestBase):
                 if error_response.get("type") == "error":
                     websocket_errors.append(error_response)
                     print(f"[INFO] WebSocket error response: {error_response.get('message', '')}")
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             # Auth error is expected and proves staging auth works
             if "403" in str(e) or "401" in str(e):
                 websocket_auth_tested = True

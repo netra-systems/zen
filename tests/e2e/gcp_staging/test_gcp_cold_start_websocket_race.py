@@ -7,7 +7,7 @@ that causes 1011 WebSocket errors during service initialization.
 Business Value Justification (BVJ):
 - Segment: Platform/All Users
 - Business Goal: Platform Stability & Revenue Protection  
-- Value Impact: Ensures $500K+ ARR dependent on reliable WebSocket connections
+- Value Impact: Ensures 500K+ ARR dependent on reliable WebSocket connections
 - Strategic Impact: Validates Golden Path works during GCP cold start scenarios
 
 Test Strategy:
@@ -158,7 +158,7 @@ class GCPColdStartWebSocketRaceTests(BaseE2ETest):
                             "response_type": response_data.get("type", "unknown")
                         })
                         
-                        self.logger.info(f"✅ WebSocket connection {attempt + 1} succeeded during cold start")
+                        self.logger.info(f"CHECK WebSocket connection {attempt + 1} succeeded during cold start")
                         
                     except asyncio.TimeoutError:
                         connection_attempts.append({
@@ -168,9 +168,9 @@ class GCPColdStartWebSocketRaceTests(BaseE2ETest):
                             "response_type": "timeout"
                         })
                         
-                        self.logger.warning(f"⚠️ WebSocket connection {attempt + 1} established but no response")
+                        self.logger.warning(f"WARNING️ WebSocket connection {attempt + 1} established but no response")
                         
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 if e.code == 1011:  # The specific error code we're testing for
                     websocket_errors.append({
                         "attempt": attempt + 1,
@@ -186,7 +186,7 @@ class GCPColdStartWebSocketRaceTests(BaseE2ETest):
                         "error_reason": e.reason,
                         "duration": time.time() - attempt_start
                     })
-                    self.logger.error(f"❌ WebSocket error {e.code} in attempt {attempt + 1}: {e.reason}")
+                    self.logger.error(f"X WebSocket error {e.code} in attempt {attempt + 1}: {e.reason}")
                 
             except Exception as e:
                 websocket_errors.append({
@@ -195,7 +195,7 @@ class GCPColdStartWebSocketRaceTests(BaseE2ETest):
                     "error_reason": str(e),
                     "duration": time.time() - attempt_start
                 })
-                self.logger.error(f"❌ WebSocket connection attempt {attempt + 1} failed: {e}")
+                self.logger.error(f"X WebSocket connection attempt {attempt + 1} failed: {e}")
             
             # Wait between attempts
             await asyncio.sleep(0.5)
@@ -319,11 +319,11 @@ class GCPColdStartWebSocketRaceTests(BaseE2ETest):
                     # Should have some kind of response content
                     assert len(str(result)) > 10, "Agent should provide substantive response content"
                 
-                self.logger.info("✅ Golden Path succeeded during cold start scenario")
+                self.logger.info("CHECK Golden Path succeeded during cold start scenario")
                 
         except Exception as e:
             golden_path_elapsed = time.time() - golden_path_start
-            self.logger.error(f"❌ Golden Path failed during cold start: {e} (after {golden_path_elapsed:.2f}s)")
+            self.logger.error(f"X Golden Path failed during cold start: {e} (after {golden_path_elapsed:.2f}s)")
             
             # Golden Path failure is critical - should not happen after race condition fix
             pytest.fail(f"Golden Path failed during cold start scenario: {e}")
@@ -396,7 +396,7 @@ class GCPColdStartWebSocketRaceTests(BaseE2ETest):
             
             assert has_startup_info, f"Health endpoint should include startup information, got: {sample_health.keys()}"
             
-            self.logger.info("✅ Startup monitoring information available in health endpoint")
+            self.logger.info("CHECK Startup monitoring information available in health endpoint")
     
     @pytest.mark.asyncio
     async def test_race_condition_recovery_scenarios(self):
@@ -452,11 +452,11 @@ class GCPColdStartWebSocketRaceTests(BaseE2ETest):
                 response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                 recovery_connection_result = {"success": True, "response": response}
                 
-                self.logger.info("✅ Recovery connection succeeded after cold start stabilization")
+                self.logger.info("CHECK Recovery connection succeeded after cold start stabilization")
                 
         except Exception as e:
             recovery_connection_result = {"success": False, "error": str(e)}
-            self.logger.error(f"❌ Recovery connection failed: {e}")
+            self.logger.error(f"X Recovery connection failed: {e}")
         
         # Assertions for recovery
         assert recovery_connection_result is not None, "Should attempt recovery connection"
@@ -554,7 +554,7 @@ class WebSocketStabilityMetricsTests:
         
         # Log any errors for debugging
         if failed_connections:
-            logger.warning("❌ Failed connection details:")
+            logger.warning("X Failed connection details:")
             for failed in failed_connections:
                 logger.warning(f"   Iteration {failed['iteration']}: {failed['error']}")
         
@@ -572,4 +572,4 @@ class WebSocketStabilityMetricsTests:
             f"No race condition errors should occur, found: {race_condition_errors}"
         )
         
-        logger.info("✅ WebSocket stability metrics within acceptable ranges")
+        logger.info("CHECK WebSocket stability metrics within acceptable ranges")

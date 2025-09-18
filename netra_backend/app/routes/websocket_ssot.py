@@ -66,10 +66,7 @@ from netra_backend.app.services.monitoring.gcp_error_reporter import gcp_reporta
 
 # WebSocket core components (unified across all patterns)
 # PHASE 1 FIX: Import from canonical SSOT sources instead of __init__.py to prevent circular references
-from netra_backend.app.websocket_core.canonical_import_patterns import (
-    WebSocketManager,
-    get_websocket_manager,
-)
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 # ISSUE #1144 FIX: Use specific module imports instead of deprecated __init__.py imports
 from netra_backend.app.websocket_core.handlers import (
     MessageRouter,
@@ -92,9 +89,10 @@ from netra_backend.app.websocket_core.unified_jwt_protocol_handler import (
 )
 
 # Authentication and security (SSOT for all patterns)
-from netra_backend.app.websocket_core.unified_websocket_auth import (
-    get_websocket_authenticator,
-    authenticate_websocket_ssot
+# ISSUE #1176 REMEDIATION: Use new SSOT authentication
+from netra_backend.app.websocket_core.unified_auth_ssot import (
+    authenticate_websocket as authenticate_websocket_ssot,
+    WebSocketAuthResult
 )
 
 # PERMISSIVE AUTH REMEDIATION: Import auth permissiveness and circuit breaker
@@ -148,7 +146,8 @@ from netra_backend.app.core.timeout_configuration import (
     TimeoutTier
 )
 from shared.isolated_environment import get_env
-from netra_backend.app.auth_integration.auth import get_current_user
+# SSOT REMEDIATION: Use auth service instead of auth_integration wrapper
+# Removed deprecated auth_integration import
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 # Startup phase validation for Phase 2 remediation
@@ -170,16 +169,25 @@ async def get_current_user_401(credentials: HTTPAuthorizationCredentials = Depen
     
     # Delegate to the real auth system
     from netra_backend.app.dependencies import get_request_scoped_db_session as get_db
-    from netra_backend.app.auth_integration.auth import _validate_token_with_auth_service, _get_user_from_database
-    
+    # SSOT COMPLIANCE: Use auth integration module instead of direct auth service import
+    from netra_backend.app.auth_integration.auth import _validate_token_with_auth_service
+    from netra_backend.app.services.user_service import user_service
+
     try:
         # Get a database session
         db_gen = get_db()
         db = await db_gen.__anext__()
         try:
             token = credentials.credentials
+            # SSOT COMPLIANCE: Use SSOT auth integration instead of direct service import
             validation_result = await _validate_token_with_auth_service(token)
-            user = await _get_user_from_database(db, validation_result)
+            
+            # Extract user_id from validation result and get user from database
+            user_id = validation_result.get('user_id')
+            if not user_id:
+                raise HTTPException(status_code=401, detail="Invalid token: missing user_id")
+            
+            user = await user_service.get(db, id=user_id)
             
             # SECURITY: Store JWT validation result on user object for admin functions
             if hasattr(user, '__dict__'):
@@ -860,6 +868,42 @@ class WebSocketSSOTRouter:
             logger.info(f" SEARCH:  AUTH SUCCESS CONTEXT: {json.dumps(auth_success_context, indent=2)}")
             logger.info(f"[MAIN MODE] Authentication success: user={user_id[:8] if user_id else 'unknown'}")
             
+            # ISSUE #1061 FIX: Initialize connection state machine with proper state transitions
+            # This ensures proper WebSocket connection lifecycle: CONNECTING -> ACCEPTED -> AUTHENTICATED -> READY
+            try:
+                from netra_backend.app.websocket_core.connection_state_machine import (
+                    get_connection_state_registry,
+                    ApplicationConnectionState
+                )
+                
+                # Get the state machine registry and register this connection
+                registry = get_connection_state_registry()
+                state_machine = registry.register_connection(connection_id, user_id)
+                
+                # Transition through proper states: ACCEPTED (transport ready) -> AUTHENTICATED (auth complete)
+                state_machine.transition_to(
+                    ApplicationConnectionState.ACCEPTED,
+                    reason="WebSocket transport accepted",
+                    metadata={"connection_id": connection_id, "timestamp": datetime.now(timezone.utc).isoformat()}
+                )
+                
+                state_machine.transition_to(
+                    ApplicationConnectionState.AUTHENTICATED,
+                    reason="User authentication completed",
+                    metadata={
+                        "connection_id": connection_id, 
+                        "user_id": user_id[:8] + "..." if user_id else "unknown",
+                        "auth_method": getattr(auth_result, 'auth_method', 'unknown'),
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }
+                )
+                
+                logger.info(f"[ISSUE #1061 FIX] Connection {connection_id} transitioned through ACCEPTED -> AUTHENTICATED states")
+                
+            except Exception as state_error:
+                logger.warning(f"[ISSUE #1061] Failed to initialize state machine for {connection_id}: {state_error}")
+                # Continue with connection - state machine is for lifecycle tracking, not critical for basic operation
+            
             # Step 3: Create WebSocket Manager (with emergency fallback)
             logger.info(f"[U+1F527] GOLDEN PATH MANAGER: Creating WebSocket manager for user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
             
@@ -892,6 +936,39 @@ class WebSocketSSOTRouter:
             
             # Step 5: Agent registration and handler setup
             await self._setup_agent_handlers(ws_manager, user_context)
+            
+            # ISSUE #1061 FIX: Complete state machine transitions to PROCESSING_READY
+            # This ensures the connection is fully ready for message processing
+            try:
+                if 'state_machine' in locals():
+                    # Transition to SERVICES_READY (all required services initialized)
+                    state_machine.transition_to(
+                        ApplicationConnectionState.SERVICES_READY,
+                        reason="WebSocket manager and agent handlers initialized",
+                        metadata={
+                            "connection_id": connection_id,
+                            "user_id": user_id[:8] + "..." if user_id else "unknown",
+                            "timestamp": datetime.now(timezone.utc).isoformat()
+                        }
+                    )
+                    
+                    # Transition to PROCESSING_READY (fully operational for message processing)
+                    state_machine.transition_to(
+                        ApplicationConnectionState.PROCESSING_READY,
+                        reason="Connection fully operational for message processing",
+                        metadata={
+                            "connection_id": connection_id,
+                            "user_id": user_id[:8] + "..." if user_id else "unknown",
+                            "golden_path_events": ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"],
+                            "timestamp": datetime.now(timezone.utc).isoformat()
+                        }
+                    )
+                    
+                    logger.info(f"[ISSUE #1061 FIX] Connection {connection_id} reached PROCESSING_READY state - ready for messages")
+                    
+            except Exception as final_state_error:
+                logger.warning(f"[ISSUE #1061] Failed to complete state transitions for {connection_id}: {final_state_error}")
+                # Continue - connection is functional even without perfect state tracking
             
             # Step 6: Send connection success with all 5 critical events capability
             success_message = create_server_message({
@@ -1332,6 +1409,48 @@ class WebSocketSSOTRouter:
                 
                 # Receive message with coordinated timeout
                 try:
+                    # CRITICAL FIX FOR ISSUE #1061: Enhanced handshake completion validation
+                    # Ensure WebSocket accept() has fully completed before attempting receive operations
+                    # This prevents "WebSocket is not connected. Need to call 'accept' first" errors
+                    max_handshake_wait = 3.0  # Maximum time to wait for handshake completion
+                    handshake_wait_start = time.time()
+                    
+                    while time.time() - handshake_wait_start < max_handshake_wait:
+                        try:
+                            # Test if WebSocket is ready for receive operations by checking internal state
+                            # This is more robust than just checking WebSocket state enums
+                            if hasattr(websocket, 'receive') and callable(websocket.receive):
+                                # Try a lightweight operation to verify accept() completion
+                                # Use a very short timeout to detect if accept() is complete
+                                test_ready = True
+                                try:
+                                    # Check if the websocket's internal receive queue is properly initialized
+                                    # by attempting to get the current state without actually receiving
+                                    if hasattr(websocket, 'client_state') and websocket.client_state != WebSocketState.CONNECTED:
+                                        test_ready = False
+                                    elif hasattr(websocket, 'application_state') and websocket.application_state != WebSocketState.CONNECTED:
+                                        test_ready = False
+                                except Exception:
+                                    test_ready = False
+                                
+                                if test_ready:
+                                    logger.debug(f"WebSocket handshake completion validated for connection {connection_id} after {time.time() - handshake_wait_start:.3f}s")
+                                    break
+                            
+                            # If not ready, wait a short time before retrying
+                            await asyncio.sleep(0.01)  # 10ms incremental check
+                            
+                        except Exception as handshake_check_error:
+                            logger.debug(f"Handshake completion check failed: {handshake_check_error}")
+                            await asyncio.sleep(0.01)
+                    else:
+                        # Handshake completion timeout - log and continue with more lenient validation
+                        logger.warning(f"WebSocket handshake completion timeout after {max_handshake_wait}s for connection {connection_id}")
+                        # Apply additional validation using the existing function with retry logic
+                        if not is_websocket_connected_and_ready(websocket, connection_id):
+                            logger.error(f"WebSocket not ready after handshake timeout for connection {connection_id}")
+                            break
+                    
                     receive_start = time.time()
                     raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=websocket_timeout)
                     receive_duration = time.time() - receive_start
@@ -1527,6 +1646,40 @@ class WebSocketSSOTRouter:
                     break
 
                 try:
+                    # CRITICAL FIX FOR ISSUE #1061: Enhanced handshake completion validation for factory mode
+                    # Ensure WebSocket accept() has fully completed before attempting receive operations
+                    max_handshake_wait = 3.0  # Maximum time to wait for handshake completion
+                    handshake_wait_start = time.time()
+                    
+                    while time.time() - handshake_wait_start < max_handshake_wait:
+                        try:
+                            # Test if WebSocket is ready for receive operations
+                            if hasattr(websocket, 'receive') and callable(websocket.receive):
+                                test_ready = True
+                                try:
+                                    if hasattr(websocket, 'client_state') and websocket.client_state != WebSocketState.CONNECTED:
+                                        test_ready = False
+                                    elif hasattr(websocket, 'application_state') and websocket.application_state != WebSocketState.CONNECTED:
+                                        test_ready = False
+                                except Exception:
+                                    test_ready = False
+                                
+                                if test_ready:
+                                    logger.debug(f"[FACTORY MODE] WebSocket handshake completion validated for user {user_id[:8]} after {time.time() - handshake_wait_start:.3f}s")
+                                    break
+                            
+                            await asyncio.sleep(0.01)  # 10ms incremental check
+                            
+                        except Exception as handshake_check_error:
+                            logger.debug(f"[FACTORY MODE] Handshake completion check failed: {handshake_check_error}")
+                            await asyncio.sleep(0.01)
+                    else:
+                        # Handshake completion timeout - log and continue with existing validation
+                        logger.warning(f"[FACTORY MODE] WebSocket handshake completion timeout after {max_handshake_wait}s for user {user_id[:8]}")
+                        if not is_websocket_connected_and_ready(websocket, connection_id):
+                            logger.error(f"[FACTORY MODE] WebSocket not ready after handshake timeout for user {user_id[:8]}")
+                            break
+                    
                     raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=websocket_timeout)
                     message_data = json.loads(raw_message)
 
@@ -1692,13 +1845,23 @@ class WebSocketSSOTRouter:
     
     # Health and configuration endpoints
     async def websocket_health_check(self):
-        """WebSocket health check endpoint."""
+        """WebSocket health check endpoint with comprehensive service availability."""
         try:
             # SSOT PATTERN: Direct manager access for health checks (no user context required)
             manager = get_websocket_manager(user_context=None)
-            manager = get_websocket_manager(user_context=None)
+
+            # ISSUE #895 IMPLEMENTATION: Add service availability checks
+            from netra_backend.app.websocket_core.service_availability_manager import get_service_availability_manager
+
+            service_manager = get_service_availability_manager()
+            service_health_report = await service_manager.get_health_report()
+
+            # Determine overall status based on service availability
+            allow_connections, denial_reason = service_manager.should_allow_websocket_connection()
+            overall_status = "healthy" if allow_connections else "degraded"
+
             health_status = {
-                "status": "healthy",
+                "status": overall_status,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "mode": "ssot_consolidated",
                 "components": {
@@ -1710,9 +1873,18 @@ class WebSocketSSOTRouter:
                     "competing_routes_eliminated": 4,
                     "ssot_compliance": True,
                     "modes_supported": ["main", "factory", "isolated", "legacy"]
+                },
+                "service_availability": {
+                    "allow_websocket_connections": allow_connections,
+                    "denial_reason": denial_reason,
+                    "overall_service_status": service_health_report["overall_status"],
+                    "critical_services": service_health_report["critical_services"],
+                    "optional_services": service_health_report["optional_services"],
+                    "summary": service_health_report["summary"],
+                    "last_check": service_health_report["last_check"]
                 }
             }
-            
+
             return health_status
         except Exception as e:
             logger.error(f"Health check failed: {e}")

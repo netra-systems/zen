@@ -23,7 +23,7 @@ import asyncio
 import json
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Dict, Set, Optional, Any, Callable
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
@@ -42,7 +42,7 @@ class EmbeddedWebSocketConnection:
         self.websocket = websocket
         self.user_id = user_id or f"test_user_{int(time.time())}"
         self.connection_id = f"embedded_{self.user_id}_{int(time.time())}"
-        self.connected_at = datetime.utcnow()
+        self.connected_at = datetime.now(UTC)
         self.message_count = 0
         
     async def send_message(self, message: Dict[str, Any]) -> bool:

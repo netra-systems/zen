@@ -20,7 +20,7 @@ Tests cover:
 import pytest
 import asyncio
 from unittest.mock import patch, MagicMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment, get_env
@@ -42,7 +42,7 @@ class CircuitBreakerRelaxedTests(SSotAsyncTestCase):
         """Setup for circuit breaker tests."""
         super().setup_method(method)
         self.env = IsolatedEnvironment()
-        self.original_demo_mode = self.env.get_env().get("DEMO_MODE", "false")
+        self.original_demo_mode = self.get_env_var("DEMO_MODE", "false")
         
         # Get circuit breaker for testing
         self.circuit_breaker = get_circuit_breaker("auth_service")
@@ -114,7 +114,7 @@ class CircuitBreakerRelaxedTests(SSotAsyncTestCase):
         await self._force_circuit_open(demo_mode=True)
         
         # Record open time
-        open_time = datetime.utcnow()
+        open_time = datetime.now(UTC)
         
         # Act & Assert - This will fail because shorter timeout isn't implemented
         with pytest.raises(CircuitBreakerOpen, match="Still in timeout period"):
@@ -126,7 +126,7 @@ class CircuitBreakerRelaxedTests(SSotAsyncTestCase):
             
             # Should succeed in demo mode after 35 seconds
             assert result.success is True
-            elapsed = datetime.utcnow() - open_time
+            elapsed = datetime.now(UTC) - open_time
             assert elapsed.seconds <= 35
 
     @pytest.mark.asyncio

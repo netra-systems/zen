@@ -3,14 +3,14 @@ Golden Path WebSocket Authentication Integration Tests - NO DOCKER
 Issue #843 - [test-coverage] 75% coverage | goldenpath e2e
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise) - $500K+ ARR Protection
+- Segment: All (Free, Early, Mid, Enterprise) - 500K+ ARR Protection
 - Business Goal: Secure WebSocket authentication enables AI chat golden path
 - Value Impact: Users can securely connect and maintain sessions for AI interactions
 - Strategic Impact: Core authentication infrastructure protecting revenue-generating functionality
 
 CRITICAL: These tests validate golden path WebSocket authentication using REAL services.
 NO DOCKER DEPENDENCIES - Tests run on GCP staging environment with real services.
-Tests focus on core business-critical authentication flows that protect $500K+ ARR.
+Tests focus on core business-critical authentication flows that protect 500K+ ARR.
 
 Test Coverage Focus:
 - WebSocket connection with real JWT authentication
@@ -59,7 +59,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
     """
     Golden Path WebSocket Authentication Integration Tests - NO DOCKER
     
-    These tests validate the core authentication flows that enable the $500K+ ARR
+    These tests validate the core authentication flows that enable the 500K+ ARR
     golden path user experience. All tests use real services and avoid Docker 
     dependencies to ensure compatibility with GCP staging environments.
     """
@@ -87,7 +87,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
         """Create JWT token for golden path authentication testing."""
         payload = {
             "user_id": user_id,
-            "email": f"{user_id}@goldenpath.netra.ai",
+            "email": f"{user_id}@goldenpath.netrasystems.ai",
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(minutes=expires_in_minutes),
             "scope": "websocket_access golden_path",
@@ -101,7 +101,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
         """Create expired JWT token for security testing."""
         payload = {
             "user_id": user_id,
-            "email": f"{user_id}@goldenpath.netra.ai",
+            "email": f"{user_id}@goldenpath.netrasystems.ai",
             "iat": datetime.now(timezone.utc) - timedelta(minutes=120),
             "exp": datetime.now(timezone.utc) - timedelta(minutes=60),
             "scope": "websocket_access"
@@ -119,7 +119,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
         # Real authentication headers
         mock_websocket.request_headers = {
             'authorization': f'Bearer {token}',
-            'origin': 'https://app.netra.ai',
+            'origin': 'https://app.netrasystems.ai',
             'user-agent': 'Golden-Path-Integration-Test/1.0',
             'sec-websocket-protocol': 'netra-chat-v1'
         }
@@ -154,7 +154,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
         """
         Test JWT authentication for golden path users with real services.
         
-        Business Value: Core authentication enables $500K+ ARR AI chat functionality.
+        Business Value: Core authentication enables 500K+ ARR AI chat functionality.
         This test protects the primary revenue-generating user flow.
         """
         # Create user ID for golden path testing
@@ -221,7 +221,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
             self.record_metric("golden_path_auth_success", True)
             self.record_metric("connection_count", len(active_connections))
             
-            self.logger.info(f"✅ PASS: Golden path JWT authentication successful for user {golden_user_id}")
+            self.logger.info(f"CHECK PASS: Golden path JWT authentication successful for user {golden_user_id}")
             
         finally:
             await websocket_manager.shutdown()
@@ -233,7 +233,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
         """
         Test security boundaries when authentication fails.
         
-        Business Value: Protects $500K+ ARR platform from unauthorized access
+        Business Value: Protects 500K+ ARR platform from unauthorized access
         and ensures security compliance for enterprise customers.
         """
         malicious_user_id = f"malicious_{self.test_user_id_base}"
@@ -296,7 +296,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
             self.record_metric("security_attacks_blocked", len(attack_vectors))
             self.record_metric("system_recovery_successful", True)
             
-            self.logger.info("✅ PASS: Authentication security boundaries verified - system protected")
+            self.logger.info("CHECK PASS: Authentication security boundaries verified - system protected")
             
         finally:
             await websocket_manager.shutdown()
@@ -382,7 +382,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
             self.record_metric("session_messages_sent", 4)  # 1 start + 3 followup
             self.record_metric("session_cleanup_successful", True)
             
-            self.logger.info("✅ PASS: WebSocket session management successful without Docker")
+            self.logger.info("CHECK PASS: WebSocket session management successful without Docker")
             
         finally:
             await websocket_manager.shutdown()
@@ -409,9 +409,9 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
             
             # Test valid origins
             valid_origins = [
-                'https://app.netra.ai',
-                'https://staging.netra.ai',
-                'https://dashboard.netra.ai'
+                'https://app.netrasystems.ai',
+                'https://staging.netrasystems.ai',
+                'https://dashboard.netrasystems.ai'
             ]
             
             for origin in valid_origins:
@@ -458,7 +458,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
                     # Clean up for next test
                     await websocket_manager.remove_connection(connection_info.connection_id)
                 
-                self.logger.info(f"✅ Valid origin '{origin}' handled correctly")
+                self.logger.info(f"CHECK Valid origin '{origin}' handled correctly")
             
             # Test invalid origins (should be blocked)
             invalid_origins = [
@@ -475,9 +475,9 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
                 
                 # Simulate CORS origin validation
                 is_origin_allowed = invalid_origin in [
-                    'https://app.netra.ai',
-                    'https://staging.netra.ai', 
-                    'https://dashboard.netra.ai'
+                    'https://app.netrasystems.ai',
+                    'https://staging.netrasystems.ai', 
+                    'https://dashboard.netrasystems.ai'
                 ]
                 
                 self.assertFalse(is_origin_allowed, f"Invalid origin '{invalid_origin}' should be blocked")
@@ -487,7 +487,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
             self.record_metric("valid_origins_tested", len(valid_origins))
             self.record_metric("invalid_origins_blocked", len(invalid_origins))
             
-            self.logger.info("✅ PASS: CORS validation working in staging environment")
+            self.logger.info("CHECK PASS: CORS validation working in staging environment")
             
         finally:
             await websocket_manager.shutdown()
@@ -604,7 +604,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
             self.record_metric("timeout_cleanup_successful", True)
             self.record_metric("reconnection_successful", True)
             
-            self.logger.info("✅ PASS: Authentication timeout and cleanup handling successful")
+            self.logger.info("CHECK PASS: Authentication timeout and cleanup handling successful")
             
         finally:
             await websocket_manager.shutdown()

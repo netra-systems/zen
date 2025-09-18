@@ -264,7 +264,7 @@ class CompleteWebSocketAuthenticationJourneysTests:
                         assert recovery_result.get('user_id') == test_user.user_id
                         successful_recovery = True
                         break
-                except websockets.exceptions.ConnectionClosedError:
+                except websockets.ConnectionClosedError:
                     continue
                 except Exception as e:
                     print(f"Scenario {scenario['name']} failed: {e}")

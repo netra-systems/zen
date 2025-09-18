@@ -16,24 +16,6 @@ def lazy_import(module_path: str, component: str = None):
         except ImportError as e:
             print(f"Warning: Failed to lazy load {module_path}: {e}")
             _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
-    if module_path not in _lazy_imports:
-        try:
-            module = __import__(module_path, fromlist=[component] if component else [])
-            if component:
-                _lazy_imports[module_path] = getattr(module, component)
-            else:
-                _lazy_imports[module_path] = module
-        except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
     return _lazy_imports[module_path]
 
 """
@@ -41,12 +23,12 @@ Mission Critical Test Suite for 5 WebSocket Events - Business Value Protection
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - These events drive all customer value
-- Business Goal: Protect $500K+ ARR through reliable WebSocket event delivery
+- Business Goal: Protect 500K+ ARR through reliable WebSocket event delivery
 - Value Impact: These 5 events deliver 90% of platform business value through real-time chat
 - Strategic Impact: MISSION CRITICAL - Foundation of entire AI chat experience
 
 This mission-critical test suite validates the 5 WebSocket events that drive the entire
-business model and protect $500K+ ARR:
+business model and protect 500K+ ARR:
 
 THE 5 CRITICAL WEBSOCKET EVENTS:
 1. agent_started - User sees agent began processing (builds confidence)
@@ -316,7 +298,7 @@ class RealWebSocketEventTester:
                     
                     logger.info(f"Received critical event: {event_data.get('type')}")
                     
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 logger.info("Event testing WebSocket client disconnected")
                 
         self.server = await websockets.serve(event_handler, "localhost", self.port or 0)
@@ -352,7 +334,7 @@ class RealWebSocketEventTester:
                     'timestamp': datetime.now(timezone.utc),
                     'business_value': self.event_validator.validate_event_business_value(event_data)
                 })
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             self.connected = False
         except Exception as e:
             logger.error(f"Error listening for events: {e}")
@@ -413,7 +395,7 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         """
         MISSION CRITICAL: Test all 5 critical events deliver complete business journey.
         
-        Business Value: $500K+ ARR depends on complete event delivery driving user confidence.
+        Business Value: 500K+ ARR depends on complete event delivery driving user confidence.
         Can Fail: If any event is missing, user experience breaks and churn increases.
         """
         # Connect real WebSocket client to receive events

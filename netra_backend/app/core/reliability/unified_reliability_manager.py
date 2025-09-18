@@ -12,7 +12,7 @@ Business Value:
 from typing import Dict, Any, Optional, List, Callable, Awaitable, TypeVar, Generic
 from enum import Enum
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import asyncio
 import logging
 import time
@@ -284,7 +284,7 @@ class UnifiedReliabilityManager:
         if service_name in self._health_status:
             self._health_status[service_name].update({
                 "status": "healthy",
-                "last_check": datetime.utcnow(),
+                "last_check": datetime.now(UTC),
                 "consecutive_failures": 0,
             })
     
@@ -294,7 +294,7 @@ class UnifiedReliabilityManager:
             current = self._health_status[service_name]
             current.update({
                 "status": "unhealthy",
-                "last_check": datetime.utcnow(),
+                "last_check": datetime.now(UTC),
                 "consecutive_failures": current.get("consecutive_failures", 0) + 1,
             })
         
@@ -319,7 +319,7 @@ class UnifiedReliabilityManager:
             "circuit_breaker": circuit_breaker.get_status(),
             "failure_stats": self._failure_stats.get(service_name, {}),
             "config": self._domain_configs.get(service_name, ReliabilityConfig()).to_dict(),
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(UTC),
         }
     
     async def get_system_health(self) -> Dict[str, Any]:
@@ -346,7 +346,7 @@ class UnifiedReliabilityManager:
             "unhealthy_services": total_services - healthy_services,
             "health_percentage": (healthy_services / max(total_services, 1)) * 100,
             "services": service_healths,
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(UTC),
         }
     
     def get_reliability_config(self, service_name: str) -> Optional[ReliabilityConfig]:

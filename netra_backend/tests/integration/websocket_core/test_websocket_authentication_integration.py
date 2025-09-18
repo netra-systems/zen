@@ -5,7 +5,7 @@ Integration Tests for WebSocket Authentication and Session Management
 MISSION CRITICAL: WebSocket authentication integration for secure chat.
 Tests real WebSocket authentication flows with agent event delivery.
 
-Business Value: $500K+ ARR - Secure multi-user chat authentication
+Business Value: 500K+ ARR - Secure multi-user chat authentication
 - Tests WebSocket authentication with real auth flows
 - Validates session management for authenticated WebSocket connections
 - Ensures secure agent event delivery with proper user verification
@@ -17,7 +17,7 @@ import jwt
 import pytest
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any, Optional
 from unittest.mock import MagicMock, patch
 
@@ -66,8 +66,8 @@ def create_test_jwt_token(user_id: str, jwt_secret: str, expires_in_minutes: int
     """Create test JWT token for WebSocket authentication."""
     payload = {
         "user_id": user_id,
-        "exp": datetime.utcnow() + timedelta(minutes=expires_in_minutes),
-        "iat": datetime.utcnow(),
+        "exp": datetime.now(UTC) + timedelta(minutes=expires_in_minutes),
+        "iat": datetime.now(UTC),
         "sub": user_id,
         "websocket_access": True,
         "chat_enabled": True

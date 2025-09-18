@@ -23,7 +23,7 @@ Test Coverage Areas:
 import asyncio
 import pytest
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any
 
@@ -297,7 +297,7 @@ class WebSocketManagerComprehensiveTests:
             connection_id="bad-conn",
             user_id=user_context.user_id,
             websocket=None,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         manager._connections["bad-conn"] = bad_connection
         manager._connection_ids.add("bad-conn")
@@ -613,7 +613,7 @@ class WebSocketManagerComprehensiveTests:
             connection_id=str(connection_id),  # Convert to string for compatibility
             user_id=user_context.user_id,
             websocket=mock_websocket,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         
         # Test get_connection_id_by_websocket returns typed ID
@@ -682,7 +682,7 @@ class WebSocketManagerComprehensiveTests:
                 connection_id=f"conn-{i}",
                 user_id=user_context.user_id,
                 websocket=AsyncMock(),
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             )
             connections.append(conn)
         

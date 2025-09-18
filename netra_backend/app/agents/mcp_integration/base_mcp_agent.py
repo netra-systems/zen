@@ -17,7 +17,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.base.interface import (
     ExecutionContext,
     ExecutionResult,
@@ -171,10 +171,14 @@ class BaseMCPAgent(ABC):
     
     def _setup_execution_engine(self) -> None:
         """Setup execution engine with reliability components."""
-        self.execution_engine = BaseExecutionEngine(
-            reliability_manager=self.reliability_manager,
-            monitor=self.monitor
-        )
+        # TODO: UserExecutionEngine requires UserExecutionContext - temporary placeholder
+        # self.execution_engine = UserExecutionEngine(
+        #     context=user_context,  # Needs UserExecutionContext
+        #     agent_factory=agent_factory,  # Needs AgentInstanceFactory
+        #     websocket_emitter=websocket_emitter  # Needs UserWebSocketEmitter
+        # )
+        # For now, keeping None until full user context migration is complete
+        self.execution_engine = None
     
     async def execute_with_mcp_patterns(self, context: ExecutionContext) -> MCPExecutionResult:
         """Execute with full MCP patterns and monitoring."""

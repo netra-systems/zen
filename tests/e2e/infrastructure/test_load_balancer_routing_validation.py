@@ -357,7 +357,7 @@ class LoadBalancerRoutingValidationTests(SSotBaseTestCase):
                         'connection_established': True,
                         'error': None
                     }
-            except websockets.exceptions.InvalidStatusCode as e:
+            except websockets.InvalidStatusCode as e:
                 # Check if it's a proper WebSocket upgrade rejection
                 if e.status_code in [400, 401, 403, 426]:  # Expected for unauthenticated requests
                     return {

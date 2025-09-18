@@ -90,10 +90,7 @@ class WebSocketPerformancePostDeploymentTests:
             
             # Look for signs that the new deployment is active
             if "netra-backend-staging" not in str(revision):
-                print(f" WARNING: [U+FE0F]  Warning: Deployment revision may not reflect recent changes: {revision}")
-            
-        except requests.exceptions.RequestException as e:
-            pytest.fail(f"DEPLOYMENT GAP: Cannot connect to staging backend: {e}")
+                print(f" WARNING: [U+FE0F]  Warning: Deployment revision may not reflect recent changes: {revision}""DEPLOYMENT GAP: Cannot connect to staging backend: {e}")
     
     def test_websocket_connection_environment_readiness(self):
         """INTEGRATION: Test that staging environment is ready for WebSocket connections"""

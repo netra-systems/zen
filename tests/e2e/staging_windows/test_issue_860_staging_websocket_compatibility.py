@@ -77,7 +77,7 @@ class Issue860StagingWebSocketCompatibilityTests(BaseE2ETest):
                     # Wait for response
                     response = await websocket.recv()
 
-                    print(f"✓ Staging WebSocket connection successful from Windows")
+                    print(f"CHECK Staging WebSocket connection successful from Windows")
                     print(f"  URL: {websocket_url}")
                     print(f"  Response: {response}")
 
@@ -88,7 +88,7 @@ class Issue860StagingWebSocketCompatibilityTests(BaseE2ETest):
         except asyncio.TimeoutError:
             pytest.fail(f"Staging WebSocket connection timed out: {websocket_url}")
 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             pytest.fail(f"Staging WebSocket connection closed: {e}")
 
         except Exception as e:
@@ -108,7 +108,7 @@ class Issue860StagingWebSocketCompatibilityTests(BaseE2ETest):
         assert not local_connection_result["success"], \
             f"Expected local connection to fail for Issue #860 reproduction: {local_connection_result}"
 
-        print(f"✓ Confirmed local WebSocket failure: {local_connection_result['error']}")
+        print(f"CHECK Confirmed local WebSocket failure: {local_connection_result['error']}")
 
         # Step 2: Test staging fallback works
         staging_connection_result = await self._test_staging_websocket_connection()
@@ -116,7 +116,7 @@ class Issue860StagingWebSocketCompatibilityTests(BaseE2ETest):
         assert staging_connection_result["success"], \
             f"Expected staging connection to succeed: {staging_connection_result}"
 
-        print(f"✓ Confirmed staging WebSocket success: {staging_connection_result}")
+        print(f"CHECK Confirmed staging WebSocket success: {staging_connection_result}")
 
         # Step 3: Validate fallback mechanism
         fallback_test_result = {
@@ -129,7 +129,7 @@ class Issue860StagingWebSocketCompatibilityTests(BaseE2ETest):
         assert fallback_test_result["staging_succeeded"], "Staging connection should succeed"
         assert fallback_test_result["fallback_viable"], "Fallback should be viable"
 
-        print(f"✓ Issue #860 fallback mechanism validated: {fallback_test_result}")
+        print(f"CHECK Issue #860 fallback mechanism validated: {fallback_test_result}")
 
     async def _test_local_websocket_connection(self):
         """Test local WebSocket connection (should fail for Issue #860)."""
@@ -238,7 +238,7 @@ class Issue860StagingWebSocketCompatibilityTests(BaseE2ETest):
         assert len(healthy_services) > 0, \
             f"Expected at least one healthy staging service: {health_results}"
 
-        print(f"✓ Staging services healthy from Windows: {healthy_services}")
+        print(f"CHECK Staging services healthy from Windows: {healthy_services}")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -344,7 +344,7 @@ class Issue860StagingWebSocketCompatibilityTests(BaseE2ETest):
                     except asyncio.TimeoutError:
                         auth_test_results["response"] = "No response (expected for auth test)"
 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             auth_test_results["connection_error"] = f"Connection closed: {e}"
             # Connection closed might be expected for auth failure
             if e.code in [1011, 1008]:  # Internal error or policy violation
@@ -359,7 +359,7 @@ class Issue860StagingWebSocketCompatibilityTests(BaseE2ETest):
         assert auth_test_results["connection_established"], \
             f"Expected WebSocket connection to establish: {auth_test_results}"
 
-        print(f"✓ WebSocket authentication flow tested from Windows")
+        print(f"CHECK WebSocket authentication flow tested from Windows")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -403,7 +403,7 @@ class Issue860StagingWebSocketCompatibilityTests(BaseE2ETest):
             assert validation_result, \
                 f"Issue #860 resolution validation failed at: {validation_key}"
 
-        print(f"✓ Complete Issue #860 resolution validated successfully")
+        print(f"CHECK Complete Issue #860 resolution validated successfully")
 
         # Return summary for reporting
         return {

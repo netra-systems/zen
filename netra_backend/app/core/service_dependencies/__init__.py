@@ -23,10 +23,10 @@ Usage:
 """
 
 # Main service dependency checker
-from .service_dependency_checker import ServiceDependencyChecker
+from netra_backend.app.core.service_dependencies.service_dependency_checker import ServiceDependencyChecker
 
 # Core models and types
-from .models import (
+from netra_backend.app.core.service_dependencies.models import (
     # Service types and enums
     ServiceType,
     DependencyRelation,
@@ -49,18 +49,18 @@ from .models import (
 )
 
 # Specialized validators and components
-from .health_check_validator import HealthCheckValidator
-from .retry_mechanism import RetryMechanism
-from .dependency_graph_resolver import DependencyGraphResolver
-from .golden_path_validator import (
+from netra_backend.app.core.service_dependencies.health_check_validator import HealthCheckValidator
+from netra_backend.app.core.service_dependencies.retry_mechanism import RetryMechanism
+from netra_backend.app.core.service_dependencies.dependency_graph_resolver import DependencyGraphResolver
+from netra_backend.app.core.service_dependencies.golden_path_validator import (
     GoldenPathValidator, 
     GoldenPathValidationResult
 )
-from .startup_orchestrator import (
+from netra_backend.app.core.service_dependencies.startup_orchestrator import (
     StartupOrchestrator,
     StartupOrchestrationResult
 )
-from .integration_manager import IntegrationManager
+from netra_backend.app.core.service_dependencies.integration_manager import IntegrationManager
 
 # Export all key components
 __all__ = [

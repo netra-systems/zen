@@ -1,5 +1,5 @@
 """
-Test auth service → backend JWT validation flow integration
+Test auth service -> backend JWT validation flow integration
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)  

@@ -87,7 +87,7 @@ gcloud run deploy netra-backend-staging \
 **STEP 2: Update Auth Service**  
 ```bash
 # Deploy auth service with missing critical secrets
-gcloud run deploy netra-auth-staging \
+gcloud run deploy netra-auth \
     --project=netra-staging \
     --region=us-central1 \
     --image=gcr.io/netra-staging/netra-auth:latest \
@@ -347,12 +347,12 @@ gcloud run services update-traffic netra-backend-staging \
 # Same for auth service
 PREV_AUTH_REVISION=$(gcloud run revisions list \
     --project=netra-staging \
-    --service=netra-auth-staging \
+    --service=netra-auth \
     --region=us-central1 \
     --limit=2 \
     --format="value(metadata.name)" | tail -n1)
 
-gcloud run services update-traffic netra-auth-staging \
+gcloud run services update-traffic netra-auth \
     --project=netra-staging \
     --region=us-central1 \
     --to-revisions=$PREV_AUTH_REVISION=100

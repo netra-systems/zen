@@ -158,10 +158,7 @@ class WebSocketErrorEventDeliveryTests(SSotBaseTestCase):
                 await websocket_connection._add_mock_responses()
                 connection_established = True
                 
-            assert connection_established, "Could not establish WebSocket connection (real or mock)"
-            
-            # Test 2: Validate all required WebSocket events can be delivered
-            print("\n[U+1F4E1] Test 2: Required WebSocket Events Delivery")
+            assert connection_established, "Could not establish WebSocket connection (real or mock)""\n[U+1F4E1] Test 2: Required WebSocket Events Delivery")
             
             events_delivered = []
             

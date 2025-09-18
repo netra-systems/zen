@@ -9,7 +9,7 @@ Business Value Justification:
 - Segment: All (Complete user journey validation)
 - Business Goal: Business Continuity & System Reliability
 - Value Impact: Ensures migration maintains full chat functionality
-- Strategic Impact: $500K+ ARR depends on reliable end-to-end WebSocket workflows
+- Strategic Impact: 500K+ ARR depends on reliable end-to-end WebSocket workflows
 """
 
 import pytest
@@ -36,7 +36,7 @@ class UnifiedIdManagerWebSocketE2ETests(SSotBaseTestCase):
         """Set up E2E test environment."""
         super().setup_method(method)
         self.id_manager = UnifiedIDManager()
-        self.staging_base_url = "wss://backend.staging.netrasystems.ai"
+        self.staging_base_url = "wss://api.staging.netrasystems.ai"
         self.business_critical_events = [
             "agent_started",
             "agent_thinking",

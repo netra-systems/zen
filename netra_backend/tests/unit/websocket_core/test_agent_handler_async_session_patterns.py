@@ -27,6 +27,7 @@ import pytest
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from unittest.mock import AsyncMock, MagicMock, patch
+from sqlalchemy import text
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -85,7 +86,7 @@ class AgentHandlerAsyncSessionPatternsTests(SSotBaseTestCase):
         async_context_manager = self.mock_async_generator_context_manager()
         with pytest.raises(TypeError) as exc_info:
             async for session in async_context_manager:
-                await session.execute('SELECT 1')
+                await session.execute(text('SELECT 1'))
                 break
         error_message = str(exc_info.value)
         assert "'async for' requires an object with __aiter__ method" in error_message
@@ -107,7 +108,7 @@ class AgentHandlerAsyncSessionPatternsTests(SSotBaseTestCase):
         async_context_manager = self.mock_async_generator_context_manager()
         try:
             async with async_context_manager as session:
-                await session.execute('SELECT 1')
+                await session.execute(text('SELECT 1'))
                 await session.commit()
                 assert session.execute.called
                 assert session.commit.called

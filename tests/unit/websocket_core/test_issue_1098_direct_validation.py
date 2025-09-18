@@ -72,7 +72,7 @@ class Issue1098LegacyWebSocketFactoryProblemsTests(unittest.TestCase):
         for field in required_fields:
             if field not in legacy_event_structure:
                 missing_fields.append(field)
-                logger.error(f"❌ LEGACY BUG: Missing field '{field}' breaks Golden Path")
+                logger.error(f"X LEGACY BUG: Missing field '{field}' breaks Golden Path")
         
         # Demonstrate the problem  
         self.assertEqual(len(missing_fields), 0,
@@ -101,7 +101,7 @@ class Issue1098LegacyWebSocketFactoryProblemsTests(unittest.TestCase):
             self.assertGreater(len(ssot_mentions), 0,
                 "Should warn about SSOT consolidation")
                 
-            logger.info("✅ CONFIRMED: Legacy factory properly warns about deprecation")
+            logger.info("CHECK CONFIRMED: Legacy factory properly warns about deprecation")
     
 
 if __name__ == '__main__':

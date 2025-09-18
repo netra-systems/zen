@@ -37,7 +37,7 @@ class ToolExecutionUserExperienceE2ETest:
         cls.backend_url = cls.env.get('STAGING_BACKEND_URL', 'https://netra-staging-backend-service.run.app')
         cls.websocket_url = cls.env.get('STAGING_WEBSOCKET_URL', 'wss://netra-staging-backend-service.run.app/ws')
         cls.auth_url = cls.env.get('STAGING_AUTH_URL', 'https://netra-staging-auth-service.run.app')
-        cls.test_user_email = cls.env.get('STAGING_TEST_USER_EMAIL', 'test@netra.ai')
+        cls.test_user_email = cls.env.get('STAGING_TEST_USER_EMAIL', 'test@netrasystems.ai')
         cls.test_user_password = cls.env.get('STAGING_TEST_USER_PASSWORD', 'test123')
         logger.info(f'[U+1F310] E2E Testing against staging: {cls.backend_url}')
 
@@ -196,7 +196,7 @@ class ToolExecutionUserExperienceE2ETest:
                 async for message in websocket:
                     event_data = json.loads(message)
                     received_events.append({'event': event_data, 'received_at': datetime.now(timezone.utc)})
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 connection_health['connected'] = False
                 connection_health['reconnections'] += 1
                 logger.warning('WebSocket connection lost during long operation')

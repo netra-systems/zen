@@ -9,7 +9,7 @@ Business Value: Prevents OAuth security breaches worth $500K+ per incident.
 
 import pytest
 from unittest.mock import MagicMock, AsyncMock, Mock, patch
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager as DatabaseTestManager
 # Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
@@ -84,8 +84,8 @@ class OAuthSecurityVulnerabilitiesTests:
         """Test redirect URI validation prevents open redirects."""
         # Valid redirect URIs should pass
         valid_uris = [
-            "https://app.netra.ai/auth/callback",
-            "https://app.staging.netra.ai/auth/callback",
+            "https://app.netrasystems.ai/auth/callback",
+            "https://app.staging.netrasystems.ai/auth/callback",
             "http://localhost:3000/auth/callback"
         ]
         
@@ -99,7 +99,7 @@ class OAuthSecurityVulnerabilitiesTests:
             "http://attacker.com/steal-tokens",
             "javascript:alert('xss')",
             "data:text/html,<script>alert('xss')</script>",
-            "https://app.netra.ai.evil.com/callback"  # Subdomain attack
+            "https://app.netrasystems.ai.evil.com/callback"  # Subdomain attack
         ]
         
         for uri in malicious_uris:

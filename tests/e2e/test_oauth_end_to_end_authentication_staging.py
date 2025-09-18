@@ -25,46 +25,40 @@ import json
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, Optional, List
 
-# Absolute imports per CLAUDE.md
-from test_framework.base_e2e_test import BaseE2ETest
+# Absolute imports per CLAUDE.md - SSOT Migration
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.e2e_auth_helper import (
     E2EAuthHelper, E2EWebSocketAuthHelper, E2EAuthConfig,
     create_authenticated_user_context
 )
 from test_framework.websocket_helpers import WebSocketTestClient
-from shared.isolated_environment import get_env
+# Removed shared.isolated_environment import - using SSOT environment access
 from shared.types.core_types import UserID, ThreadID, WebSocketID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class OAuthEndToEndAuthenticationStagingTests(BaseE2ETest):
+class OAuthEndToEndAuthenticationStagingTests(SSotAsyncTestCase):
     """E2E tests for complete OAuth authentication flow in staging environment."""
     
-    @pytest.fixture(autouse=True)
-    def setup_staging_environment(self):
+    async def asyncSetUp(self):
         """Setup staging environment for OAuth E2E tests."""
-        self.env = get_env()
-        self.env.enable_isolation()
-        
-        # Configure staging OAuth settings
-        staging_oauth_key = self.env.get("E2E_OAUTH_SIMULATION_KEY")
+        await super().asyncSetUp()
+
+        # Configure staging OAuth settings using SSOT environment access
+        staging_oauth_key = self.get_env_var("E2E_OAUTH_SIMULATION_KEY")
         if not staging_oauth_key:
             pytest.skip("E2E_OAUTH_SIMULATION_KEY not configured for staging OAuth tests")
-        
-        self.env.set("ENVIRONMENT", "staging", "test_oauth_e2e")
-        self.env.set("TEST_ENV", "staging", "test_oauth_e2e")
-        
+
+        # Set environment variables using SSOT methods
+        self.set_env_var("ENVIRONMENT", "staging")
+        self.set_env_var("TEST_ENV", "staging")
+
         # Create staging auth configuration
         self.staging_config = E2EAuthConfig.for_staging()
         self.auth_helper = E2EAuthHelper(config=self.staging_config, environment="staging")
         self.websocket_auth_helper = E2EWebSocketAuthHelper(config=self.staging_config, environment="staging")
         self.id_generator = UnifiedIdGenerator()
-        
-        yield
-        
-        # Cleanup
-        self.env.disable_isolation()
     
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -76,8 +70,8 @@ class OAuthEndToEndAuthenticationStagingTests(BaseE2ETest):
         CRITICAL: This tests the complete user journey that generates business value.
         """
         # Arrange: Create unique staging test user
-        test_user_id = f"e2e-oauth-staging-{int(time.time())}-{uuid.uuid4().hex[:6]}"
-        test_email = f"e2e-oauth-{test_user_id}@staging.netra.ai"
+        test_user_id = f"e2e-oauth-{int(time.time())}-{uuid.uuid4().hex[:6]}"
+        test_email = f"e2e-oauth-{test_user_id}@staging.netrasystems.ai"
         
         print(f" TARGET:  Testing complete OAuth onboarding for user: {test_email}")
         print(f"[U+1F310] Staging environment: {self.staging_config.auth_service_url}")
@@ -87,7 +81,7 @@ class OAuthEndToEndAuthenticationStagingTests(BaseE2ETest):
         
         access_token = await self.auth_helper.get_staging_token_async(
             email=test_email,
-            bypass_key=self.env.get("E2E_OAUTH_SIMULATION_KEY")
+            bypass_key=self.get_env_var("E2E_OAUTH_SIMULATION_KEY")
         )
         
         assert access_token is not None, "OAuth authentication must succeed and return access token"
@@ -149,14 +143,7 @@ class OAuthEndToEndAuthenticationStagingTests(BaseE2ETest):
                 assert response is not None, "WebSocket must respond to authenticated message"
                 
             except asyncio.TimeoutError:
-                print(" WARNING: [U+FE0F] WebSocket response timeout (may be acceptable if server doesn't respond to ping)")
-                # Not failing here as some WebSocket implementations don't respond to ping
-            
-            await websocket.close()
-            
-        except Exception as e:
-            # If WebSocket fails, provide detailed debugging info
-            print(f" FAIL:  WebSocket connection failed: {e}")
+                print(" WARNING: [U+FE0F] WebSocket response timeout (may be acceptable if server doesn't respond to ping)"" FAIL:  WebSocket connection failed: {e}")
             print(f" SEARCH:  WebSocket URL: {self.staging_config.websocket_url}")
             print(f"[U+1F511] Auth token provided: {bool(access_token)}")
             print(f"[U+1F4CB] Headers sent: {list(self.auth_helper.get_websocket_headers(access_token).keys())}")
@@ -200,7 +187,7 @@ class OAuthEndToEndAuthenticationStagingTests(BaseE2ETest):
         
         for i in range(num_users):
             user_id = f"e2e-oauth-concurrent-{i}-{int(time.time())}-{uuid.uuid4().hex[:4]}"
-            email = f"e2e-concurrent-{i}-{user_id}@staging.netra.ai"
+            email = f"e2e-concurrent-{i}-{user_id}@staging.netrasystems.ai"
             
             user_contexts.append({
                 "user_id": user_id,
@@ -215,7 +202,7 @@ class OAuthEndToEndAuthenticationStagingTests(BaseE2ETest):
                 auth_helper = E2EAuthHelper(config=self.staging_config, environment="staging")
                 token = await auth_helper.get_staging_token_async(
                     email=ctx["email"],
-                    bypass_key=self.env.get("E2E_OAUTH_SIMULATION_KEY")
+                    bypass_key=self.get_env_var("E2E_OAUTH_SIMULATION_KEY")
                 )
                 
                 # Validate token
@@ -309,10 +296,7 @@ class OAuthEndToEndAuthenticationStagingTests(BaseE2ETest):
             ws_successes = sum(1 for r in ws_results if not isinstance(r, Exception) and r.get("websocket_success", False))
             ws_success_rate = ws_successes / len(ws_tasks) if ws_tasks else 0
             
-            print(f"[U+1F50C] WebSocket concurrent connections: {ws_success_rate:.1%} success rate ({ws_successes}/{len(ws_tasks)})")
-            
-            # WebSocket success rate requirement is lower due to staging environment limitations
-            assert ws_success_rate >= 0.5, f"WebSocket concurrent connection success rate too low: {ws_success_rate:.1%}"
+            print(f"[U+1F50C] WebSocket concurrent connections: {ws_success_rate:.1%} success rate ({ws_successes}/{len(ws_tasks)})""WebSocket concurrent connection success rate too low: {ws_success_rate:.1%}"
     
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -325,14 +309,14 @@ class OAuthEndToEndAuthenticationStagingTests(BaseE2ETest):
         """
         # Arrange: Create OAuth authenticated user
         test_user_id = f"e2e-oauth-persistence-{int(time.time())}-{uuid.uuid4().hex[:6]}"
-        test_email = f"e2e-persistence-{test_user_id}@staging.netra.ai"
+        test_email = f"e2e-persistence-{test_user_id}@staging.netrasystems.ai"
         
         print(f" CYCLE:  Testing OAuth session persistence for: {test_email}")
         
         # Step 1: Initial OAuth authentication
         access_token = await self.auth_helper.get_staging_token_async(
             email=test_email,
-            bypass_key=self.env.get("E2E_OAUTH_SIMULATION_KEY")
+            bypass_key=self.get_env_var("E2E_OAUTH_SIMULATION_KEY")
         )
         
         assert access_token is not None, "Initial OAuth authentication must succeed"

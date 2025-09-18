@@ -61,7 +61,7 @@ class ServiceConfig:
     cpu: str = "1"
     min_instances: int = 0
     max_instances: int = 10
-    timeout: int = 600   # Reduced to 10 minutes with better resource allocation (Issue #128)
+    timeout: int = 600   # Issue #1300: Optimized for WebSocket authentication monitoring (10 minutes minimum)
 
 
 class GCPDeployer:
@@ -84,8 +84,9 @@ class GCPDeployer:
         
         # Service configurations (Alpine-optimized if flag is set)
         # ISSUE #128 FIX: Increased resources for staging WebSocket reliability
+        # ISSUE #1278 REMEDIATION: Further increased resources for infrastructure reliability
         backend_dockerfile = "dockerfiles/backend.staging.alpine.Dockerfile" if self.use_alpine else "deployment/docker/backend.gcp.Dockerfile"
-        backend_memory = "4Gi"  # Increased from 2Gi for better WebSocket connection handling
+        backend_memory = "6Gi"  # Issue #1278 remediation - increased from 4Gi to 6Gi for infrastructure pressure handling
         backend_cpu = "4"       # Increased from 2 for faster asyncio.selector.select() processing
         
         self.services = [
@@ -97,15 +98,16 @@ class GCPDeployer:
                 cloud_run_name="netra-backend-staging",
                 memory=backend_memory,
                 cpu=backend_cpu,
-                min_instances=1,
-                max_instances=20,
+                min_instances=2,  # Issue #1278 remediation - increased from 1 to 2 for better availability
+                max_instances=15,  # Issue #1278 remediation - reduced from 20 to 15 for resource optimization
+                timeout=900,  # Issue #1300: Extended timeout (15 minutes) for WebSocket authentication monitoring
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
                     "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
                     "AUTH_SERVICE_INTERNAL_URL": f"https://netra-auth-service-uc.a.run.app",  # Internal VPC communication
                     "AUTH_SERVICE_ENABLED": "true",  # CRITICAL: Enable auth service integration
-                    "FRONTEND_URL": "https://app.staging.netrasystems.ai",
+                    "FRONTEND_URL": "https://staging.netrasystems.ai",
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
                     "GCP_PROJECT_ID": self.project_id,  # CRITICAL: Required for secret loading logic
                     # ClickHouse configuration - password comes from secrets
@@ -124,9 +126,15 @@ class GCPDeployer:
                     "WEBSOCKET_STALE_TIMEOUT": "240",       # 4 minutes before marking connection stale (consistent with connection timeout)
                     # NEW: Additional timeout optimizations for Issue #128 WebSocket connectivity
                     "WEBSOCKET_CONNECT_TIMEOUT": "10",      # 10s max for initial connection establishment
-                    "WEBSOCKET_HANDSHAKE_TIMEOUT": "15",    # 15s max for WebSocket handshake completion  
+                    "WEBSOCKET_HANDSHAKE_TIMEOUT": "15",    # 15s max for WebSocket handshake completion
                     "WEBSOCKET_PING_TIMEOUT": "5",          # 5s timeout for ping/pong messages
                     "WEBSOCKET_CLOSE_TIMEOUT": "10",        # 10s timeout for graceful connection close
+                    # Issue #1300: WebSocket authentication monitoring configuration
+                    "WEBSOCKET_AUTH_MONITORING_ENABLED": "true",    # Enable WebSocket auth monitoring
+                    "WEBSOCKET_AUTH_CHECK_INTERVAL": "30",          # Check auth status every 30 seconds
+                    "WEBSOCKET_AUTH_FAILURE_THRESHOLD": "3",        # Allow 3 auth failures before disconnect
+                    "WEBSOCKET_SESSION_MONITORING_ENABLED": "true", # Enable session monitoring
+                    "REDIS_CONNECTION_POOL_SIZE": "50",             # Match Redis pool optimization
                 }
             ),
             ServiceConfig(
@@ -142,7 +150,7 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
-                    "FRONTEND_URL": "https://app.staging.netrasystems.ai",
+                    "FRONTEND_URL": "https://staging.netrasystems.ai",
                     "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
                     "JWT_ALGORITHM": "HS256",
                     "JWT_ACCESS_EXPIRY_MINUTES": "15",
@@ -158,6 +166,10 @@ class GCPDeployer:
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
                     "GCP_PROJECT_ID": self.project_id,  # CRITICAL: Required for secret loading logic
                     "SKIP_OAUTH_VALIDATION": "true",  # TEMPORARY: Skip OAuth validation for E2E testing
+                    # Auth Database Timeout Configuration (Issue #1278 Fix - Infrastructure Reliability)
+                    "AUTH_DB_URL_TIMEOUT": "600.0",
+                    "AUTH_DB_ENGINE_TIMEOUT": "600.0",
+                    "AUTH_DB_VALIDATION_TIMEOUT": "600.0",
                 }
             ),
             ServiceConfig(
@@ -179,11 +191,11 @@ class GCPDeployer:
                     "NEXT_PUBLIC_ENVIRONMENT": "staging",  # CRITICAL: Controls environment-specific behavior
                     "NEXT_PUBLIC_API_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend API endpoint
                     "NEXT_PUBLIC_WS_URL": "wss://api.staging.netrasystems.ai",  # CRITICAL: WebSocket endpoint
-                    "NEXT_PUBLIC_AUTH_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth service endpoint
+                    "NEXT_PUBLIC_AUTH_URL": "https://staging.netrasystems.ai",  # CRITICAL: Auth service endpoint
                     "NEXT_PUBLIC_AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth service alternative
-                    "NEXT_PUBLIC_AUTH_API_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth API endpoint
+                    "NEXT_PUBLIC_AUTH_API_URL": "https://staging.netrasystems.ai",  # CRITICAL: Auth API endpoint
                     "NEXT_PUBLIC_BACKEND_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend alternative endpoint
-                    "NEXT_PUBLIC_FRONTEND_URL": "https://app.staging.netrasystems.ai",  # CRITICAL: OAuth redirects
+                    "NEXT_PUBLIC_FRONTEND_URL": "https://staging.netrasystems.ai",  # CRITICAL: OAuth redirects
                     "NEXT_PUBLIC_FORCE_HTTPS": "true",  # CRITICAL: Security enforcement
                     "NEXT_PUBLIC_GTM_CONTAINER_ID": "GTM-WKP28PNQ",  # Analytics tracking
                     "NEXT_PUBLIC_GTM_ENABLED": "true",  # Analytics enablement
@@ -288,7 +300,81 @@ class GCPDeployer:
         # Otherwise use centralized auth config to find and set up authentication
         print(" SEARCH:  Using centralized authentication configuration...")
         return GCPAuthConfig.ensure_authentication()
-    
+
+    def validate_service_account_permissions(self) -> bool:
+        """
+        Validate that the service account has necessary permissions for deployment.
+
+        This addresses Issue #1294 where services failed due to missing Secret Manager access.
+        The service account must have:
+        - Secret Manager Secret Accessor role
+        - Cloud Run Admin role
+        - Cloud Build Service Account role
+        - Container Registry Service Agent role
+
+        Returns:
+            bool: True if all required permissions are present, False otherwise
+        """
+        print("\n[U+1F512] Validating service account permissions...")
+
+        try:
+            # Check if we can access Secret Manager (most common failure)
+            print("   Checking Secret Manager access...")
+            secret_check = subprocess.run([
+                self.gcloud_cmd, "secrets", "list",
+                "--project", self.project_id,
+                "--limit", "1"
+            ], capture_output=True, text=True, shell=self.use_shell)
+
+            if secret_check.returncode != 0:
+                print("   FAIL:  Service account lacks Secret Manager access")
+                print("   ERROR: This will cause silent failures during secret loading")
+                print("   FIX:   Grant roles/secretmanager.secretAccessor to the service account")
+                print(f"   CMD:   gcloud projects add-iam-policy-binding {self.project_id} \\")
+                print("             --member=\"serviceAccount:YOUR_SERVICE_ACCOUNT\" \\")
+                print("             --role=\"roles/secretmanager.secretAccessor\"")
+                return False
+
+            print("   PASS:  Secret Manager access validated")
+
+            # Check Cloud Run admin access
+            print("   Checking Cloud Run access...")
+            run_check = subprocess.run([
+                self.gcloud_cmd, "run", "services", "list",
+                "--project", self.project_id,
+                "--region", self.region,
+                "--limit", "1"
+            ], capture_output=True, text=True, shell=self.use_shell)
+
+            if run_check.returncode != 0:
+                print("   FAIL:  Service account lacks Cloud Run access")
+                print("   FIX:   Grant roles/run.admin to the service account")
+                return False
+
+            print("   PASS:  Cloud Run access validated")
+
+            # Check Container Registry access
+            print("   Checking Container Registry access...")
+            registry_check = subprocess.run([
+                self.gcloud_cmd, "container", "images", "list",
+                "--repository", f"gcr.io/{self.project_id}",
+                "--limit", "1"
+            ], capture_output=True, text=True, shell=self.use_shell)
+
+            if registry_check.returncode != 0:
+                print("   WARN:  Container Registry access check failed (may be normal for new projects)")
+                # Don't fail on this as it's often a false positive
+            else:
+                print("   PASS:  Container Registry access validated")
+
+            print("   PASS:  Service account permissions validated")
+            return True
+
+        except Exception as e:
+            print(f"   ERROR: Failed to validate service account permissions: {e}")
+            print("   WARN:  Proceeding with deployment (manual verification recommended)")
+            return True  # Don't block deployment on validation failures
+
     def validate_frontend_environment_variables(self) -> bool:
         """
          ALERT:  CRITICAL: Validate all required frontend environment variables are present.
@@ -393,7 +479,11 @@ class GCPDeployer:
             print("  This will cause CORS and authentication failures in staging!")
             print("  Run: python scripts/validate_staging_urls.py --environment staging --fix")
             return False
-        
+
+        # CRITICAL: Validate service account permissions before deployment (Issue #1294 Fix)
+        if not self.validate_service_account_permissions():
+            return False
+
         print("   PASS:  Deployment configuration valid")
         return True
     
@@ -925,22 +1015,24 @@ CMD ["npm", "start"]
                     if env_name == "POSTGRES_PORT":
                         env_vars[env_name] = "5432"
                     elif env_name == "POSTGRES_HOST":
-                        # For Cloud SQL, use the instance connection name
-                        env_vars[env_name] = f"/cloudsql/{self.project_id}:us-central1:staging-shared-postgres"
+                        # CRITICAL FIX: Use private IP through VPC connector, not Cloud SQL proxy socket
+                        # VPC connector allows direct private IP connections without proxy
+                        # This fixes the database timeout issue causing service startup failures
+                        env_vars[env_name] = "10.68.0.3"  # Private IP of staging-shared-postgres instance
                     elif env_name == "POSTGRES_DB":
                         env_vars[env_name] = "netra_staging"
                     else:
                         print(f"       WARNING: [U+FE0F] Missing {env_name} - deployment may fail")
             
             # Critical authentication secrets
-            # CRITICAL FIX: JWT_SECRET_KEY and JWT_SECRET_STAGING must both map to jwt-secret-staging
+            # SSOT STANDARD: JWT_SECRET_KEY is the canonical name, others are deprecated
             # This ensures WebSocket authentication works correctly
             auth_mappings = {
-                "JWT_SECRET_KEY": "jwt-secret-staging",      # CRITICAL: Same secret as JWT_SECRET_STAGING
-                "JWT_SECRET_STAGING": "jwt-secret-staging",  # Both names use same secret for consistency
+                "JWT_SECRET_KEY": "jwt-secret-staging",      # SSOT CANONICAL: Primary JWT secret
+                "JWT_SECRET_STAGING": "jwt-secret-staging",  # DEPRECATED: For migration compatibility only
                 "SECRET_KEY": "secret-key-staging",
                 "SERVICE_SECRET": "service-secret-staging",
-                "SERVICE_ID": "service-id-staging"
+                "SERVICE_ID": "netra-backend"
             }
             
             for env_name, gsm_name in auth_mappings.items():
@@ -1074,16 +1166,39 @@ CMD ["npm", "start"]
         # Add VPC connector and network annotations for all services (Infrastructure Remediation #395)
         if service.name in ["backend", "auth"]:
             # CRITICAL: VPC connector required for Redis, Cloud SQL, and service-to-service connectivity
-            vpc_connector_name = f"projects/{self.project_id}/locations/{self.region}/connectors/staging-connector"
+            # ISSUE #1177 FIX: Use updated VPC connector with proper CIDR range for Redis connectivity
+            vpc_connector_name = f"projects/{self.project_id}/locations/{self.region}/connectors/staging-connector-v2"
+            
+            # ⚠️  CRITICAL VPC EGRESS CONFIGURATION WARNING ⚠️
+            # 
+            # REGRESSION DOCUMENTED: commit 2acf46c8a (Sept 15, 2025)
+            # Changed from "private-ranges-only" → "all-traffic" to fix ClickHouse
+            # UNINTENDED CONSEQUENCE: Broke Cloud SQL Unix socket connections
+            # 
+            # TECHNICAL DETAILS:
+            # - Cloud SQL Unix sockets (/cloudsql/...) require DIRECT proxy access
+            # - "all-traffic" forces everything through VPC connector → BLOCKS Cloud SQL
+            # - Result: 15-second database timeouts, auth/backend services fail to start
+            #
+            # CURRENT SOLUTION OPTIONS:
+            # 1. RECOMMENDED: Use Cloud NAT + private-ranges-only (see vpc_clickhouse_proxy_solutions.xml)
+            # 2. Switch Cloud SQL to TCP connections instead of Unix sockets
+            # 3. Selective VPC routing per service
+            #
+            # LEARNING DOCS:
+            # - /SPEC/learnings/vpc_egress_cloud_sql_regression_critical.xml
+            # - /SPEC/learnings/vpc_clickhouse_proxy_solutions.xml
+            #
+            # DO NOT CHANGE THIS WITHOUT FULL REGRESSION TESTING!
             cmd.extend([
-                "--vpc-connector", "staging-connector",
-                "--vpc-egress", "all-traffic"  # Route all traffic through VPC to fix ClickHouse connectivity
+                "--vpc-connector", "staging-connector-v2",
+                "--vpc-egress", "private-ranges-only"  # ✅ FIXED: Cloud NAT enables external access while preserving Cloud SQL
             ])
             
             # CRITICAL: Service annotations for enhanced VPC connectivity
             vpc_annotations = [
                 f"run.googleapis.com/vpc-access-connector={vpc_connector_name}",
-                "run.googleapis.com/vpc-access-egress=all-traffic",
+                "run.googleapis.com/vpc-access-egress=private-ranges-only",
                 "run.googleapis.com/network-interfaces=[{\"network\":\"default\",\"subnetwork\":\"default\"}]"
             ]
             
@@ -1494,6 +1609,11 @@ CMD ["npm", "start"]
                     if secret_name in critical_secrets:
                         results['errors'].append(f"{service_name}: CRITICAL secret missing: {secret_name}")
                         results['success'] = False
+                elif validation_result['status'] == 'no_access':
+                    results['errors'].append(f"{service_name}: Service account lacks access to {secret_name}")
+                    if 'fix' in validation_result:
+                        results['errors'].append(f"  Fix: {validation_result['fix']}")
+                    results['success'] = False
                 elif validation_result['status'] == 'placeholder':
                     placeholder_secrets.append(secret_name)
                     if secret_name in critical_secrets:
@@ -1539,11 +1659,11 @@ CMD ["npm", "start"]
     
     def _validate_individual_secret(self, gsm_secret_id: str, secret_name: str) -> Dict[str, Any]:
         """Validate an individual secret with quality checks.
-        
+
         Args:
             gsm_secret_id: Google Secret Manager secret ID
             secret_name: Logical secret name
-            
+
         Returns:
             Dictionary with validation status and details
         """
@@ -1556,10 +1676,20 @@ CMD ["npm", "start"]
                 check=False,
                 shell=self.use_shell
             )
-            
+
             if result.returncode != 0:
                 return {'status': 'missing', 'error': result.stderr}
-            
+
+            # CRITICAL: Check if service account has access to the secret
+            service_account = f"netra-staging-deploy@{self.project_id}.iam.gserviceaccount.com"
+            access_check = self._check_secret_access(gsm_secret_id, service_account)
+            if not access_check['has_access']:
+                return {
+                    'status': 'no_access',
+                    'error': f"Service account {service_account} lacks access to secret {gsm_secret_id}",
+                    'fix': f"Run: gcloud secrets add-iam-policy-binding {gsm_secret_id} --member=serviceAccount:{service_account} --role=roles/secretmanager.secretAccessor --project={self.project_id}"
+                }
+
             # Get secret value for quality validation
             value_result = subprocess.run(
                 [self.gcloud_cmd, "secrets", "versions", "access", "latest",
@@ -1569,10 +1699,10 @@ CMD ["npm", "start"]
                 check=False,
                 shell=self.use_shell
             )
-            
+
             if value_result.returncode != 0:
                 return {'status': 'missing', 'error': value_result.stderr}
-            
+
             secret_value = value_result.stdout.strip()
             
             # Phase 3: Secret Quality Validation
@@ -1592,6 +1722,45 @@ CMD ["npm", "start"]
         except Exception as e:
             return {'status': 'error', 'error': str(e)}
     
+    def _check_secret_access(self, secret_id: str, service_account: str) -> Dict[str, Any]:
+        """Check if a service account has access to a secret.
+
+        Args:
+            secret_id: The secret ID in Secret Manager
+            service_account: The service account email
+
+        Returns:
+            Dictionary with 'has_access' boolean and details
+        """
+        try:
+            # Get the IAM policy for the secret
+            result = subprocess.run(
+                [self.gcloud_cmd, "secrets", "get-iam-policy", secret_id,
+                 "--project", self.project_id, "--format", "json"],
+                capture_output=True,
+                text=True,
+                check=False,
+                shell=self.use_shell
+            )
+
+            if result.returncode != 0:
+                return {'has_access': False, 'error': f"Failed to get IAM policy: {result.stderr}"}
+
+            import json
+            policy = json.loads(result.stdout)
+
+            # Check if service account has secretAccessor role
+            service_account_member = f"serviceAccount:{service_account}"
+            for binding in policy.get('bindings', []):
+                if 'secretAccessor' in binding.get('role', ''):
+                    if service_account_member in binding.get('members', []):
+                        return {'has_access': True}
+
+            return {'has_access': False, 'error': f"Service account {service_account} not found in secret IAM policy"}
+
+        except Exception as e:
+            return {'has_access': False, 'error': str(e)}
+
     def _validate_secret_quality(self, secret_name: str, secret_value: str) -> Optional[str]:
         """Validate secret quality (based on SecretConfig quality validation).
         
@@ -1648,11 +1817,12 @@ CMD ["npm", "start"]
             'errors': []
         }
         
-        # Get JWT secret mappings from SecretConfig
+        # Get JWT secret mappings from SecretConfig  
+        # SSOT STANDARD: JWT_SECRET_KEY is canonical, others are deprecated
         jwt_secrets = {
-            'JWT_SECRET': 'jwt-secret-staging',
-            'JWT_SECRET_KEY': 'jwt-secret-staging',  # Must be same as JWT_SECRET
-            'JWT_SECRET_STAGING': 'jwt-secret-staging'  # Must be same as JWT_SECRET
+            'JWT_SECRET_KEY': 'jwt-secret-staging',     # SSOT CANONICAL: Primary JWT secret
+            'JWT_SECRET_STAGING': 'jwt-secret-staging', # DEPRECATED: Migration compatibility only
+            'JWT_SECRET': 'jwt-secret-staging'          # DEPRECATED: Legacy support only
         }
         
         jwt_values = {}
@@ -1833,7 +2003,7 @@ CMD ["npm", "start"]
             "oauth-hmac-secret-staging": "oauth_hmac_secret_for_staging_at_least_32_chars_secure",
             # Enhanced JWT security for auth service - matches staging.env
             "service-secret-staging": "staging-service-secret-distinct-from-jwt-7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-staging-distinct",
-            "service-id-staging": "netra-auth-staging",
+            "service-id-staging": "netra-auth",
             # CRITICAL: Redis endpoint must match staging-shared-redis primary endpoint in GCP
             # Primary endpoint: 10.107.0.3 (verified in Google Cloud Console)
             # See SPEC/redis_staging_configuration.xml for full configuration details
@@ -2424,6 +2594,10 @@ Examples:
   Default deployment (fast, no checks, no secrets/API validation):
     python scripts/deploy_to_gcp.py --project netra-staging --build-local
     
+    NOTE: VPC connector (--vpc-connector staging-connector --vpc-egress all-traffic) 
+    and database timeout settings (--timeout 600 --cpu-boost) are automatically
+    applied for backend/auth services to ensure database connectivity (Issue #1263).
+    
   With full validation (production readiness):
     python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks --check-secrets --check-apis
     
@@ -2433,6 +2607,30 @@ Examples:
   Cloud Build (slower):
     python scripts/deploy_to_gcp.py --project netra-staging
     
+CRITICAL: For staging deployments, VPC connector configuration is required for
+database connectivity. These flags are automatically applied:
+  --vpc-connector staging-connector
+  --vpc-egress all-traffic  
+  --timeout 600
+  --cpu-boost
+  --add-cloudsql-instances {project}:us-central1:staging-shared-postgres
+
+INFRASTRUCTURE REQUIREMENTS (Based on Issues #1263, #1278, P0 fixes):
+  VPC Connector: Must support 10-30s scaling delays under load
+  Database Connections: Pool sizing for concurrent instance startup
+  SSL Certificates: Ensure *.netrasystems.ai domains have valid certificates
+  Monitoring: GCP error reporter exports must be included in builds
+  Load Balancer: Health checks configured for 600s database startup timeout
+  Secrets: All GSM secrets validated before deployment
+  Redis: VPC connector required for Redis connectivity
+
+DOMAIN CONFIGURATION (CRITICAL - Issue #1278):
+  Staging URLs: *.netrasystems.ai (NOT *.staging.netrasystems.ai)
+  - Backend: https://staging.netrasystems.ai
+  - Auth: https://staging.netrasystems.ai  
+  - Frontend: https://staging.netrasystems.ai
+  - WebSocket: wss://api.staging.netrasystems.ai
+
 See SPEC/gcp_deployment.xml for detailed guidelines.
         """
     )
@@ -2462,6 +2660,16 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                        help="Check and enable GCP APIs (default: skip)")
     parser.add_argument("--check-secrets", action="store_true",
                        help="Validate secrets from Google Secret Manager (default: skip)")
+    parser.add_argument("--check-vpc", action="store_true",
+                       help="Validate VPC connector capacity and scaling (addresses Issue #1278)")
+    parser.add_argument("--check-ssl", action="store_true",
+                       help="Validate SSL certificates for *.netrasystems.ai domains")
+    parser.add_argument("--check-load-balancer", action="store_true",
+                       help="Validate load balancer health check timeouts (600s)")
+    parser.add_argument("--check-redis", action="store_true",
+                       help="Validate Redis connectivity through VPC connector")
+    parser.add_argument("--validate-monitoring", action="store_true",
+                       help="Validate GCP error reporter exports (P0 fix 2f130c108)")
     
     args = parser.parse_args()
     

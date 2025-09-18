@@ -95,9 +95,9 @@ class DeprecationRegressionPreventionTests(SSotBaseTestCase):
             
             if not exempted:
                 filtered_violations.append(violation)
-                print(f"  ❌ {violation['file']}:{violation['line']} - {violation['pattern']}")
+                print(f"  X {violation['file']}:{violation['line']} - {violation['pattern']}")
             else:
-                print(f"  ⚠️  EXEMPTED: {violation['file']}:{violation['line']}")
+                print(f"  WARNING️  EXEMPTED: {violation['file']}:{violation['line']}")
         
         # REGRESSION TEST: Should have NO violations after migration
         self.assertEqual(
@@ -157,10 +157,10 @@ class DeprecationRegressionPreventionTests(SSotBaseTestCase):
             
             if has_canonical:
                 canonical_usage += 1
-                print(f"  ✓ {file_relative} - Uses canonical imports")
+                print(f"  CHECK {file_relative} - Uses canonical imports")
             elif has_deprecated:
                 deprecated_usage += 1
-                print(f"  ❌ {file_relative} - Uses deprecated imports")
+                print(f"  X {file_relative} - Uses deprecated imports")
         
         total_files = canonical_usage + deprecated_usage
         canonical_rate = canonical_usage / total_files if total_files > 0 else 1.0
@@ -205,7 +205,7 @@ class DeprecationRegressionPreventionTests(SSotBaseTestCase):
         print(f"  Duplicate managers: {len(duplicate_managers)}")
         
         for duplicate in duplicate_managers:
-            print(f"    ❌ Duplicate: {duplicate['file']}")
+            print(f"    X Duplicate: {duplicate['file']}")
             ssot_violations.append({
                 'type': 'duplicate_manager',
                 'file': duplicate['file'],
@@ -248,11 +248,11 @@ class DeprecationRegressionPreventionTests(SSotBaseTestCase):
             
             if result['has_warnings']:
                 warnings_detected.extend(result['warnings'])
-                print(f"  ❌ Warnings detected: {len(result['warnings'])}")
+                print(f"  X Warnings detected: {len(result['warnings'])}")
                 for warning in result['warnings']:
                     print(f"    - {warning}")
             else:
-                print(f"  ✓ No warnings")
+                print(f"  CHECK No warnings")
         
         # REGRESSION TEST: Should have no ISSUE #1144 warnings after migration
         issue_1144_warnings = [
@@ -294,9 +294,9 @@ class DeprecationRegressionPreventionTests(SSotBaseTestCase):
                 
                 file_relative = str(file_path).replace(str(self.project_root) + '/', '')
                 if compliance['compliant']:
-                    print(f"  ✓ {file_relative} - Template compliant")
+                    print(f"  CHECK {file_relative} - Template compliant")
                 else:
-                    print(f"  ❌ {file_relative} - Template violations: {compliance['violations']}")
+                    print(f"  X {file_relative} - Template violations: {compliance['violations']}")
         
         # Calculate compliance rate
         compliant_files = sum(1 for c in template_compliance if c['compliant'])
@@ -331,7 +331,7 @@ class DeprecationRegressionPreventionTests(SSotBaseTestCase):
                                 'type': scan_type
                             })
             except Exception as e:
-                print(f"⚠️  Could not scan {py_file}: {e}")
+                print(f"WARNING️  Could not scan {py_file}: {e}")
         
         return violations
     
@@ -364,7 +364,7 @@ class DeprecationRegressionPreventionTests(SSotBaseTestCase):
                     })
                     
             except Exception as e:
-                print(f"⚠️  Could not scan {py_file}: {e}")
+                print(f"WARNING️  Could not scan {py_file}: {e}")
         
         return websocket_files
     

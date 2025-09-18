@@ -3,14 +3,14 @@
 Issue #802 SSOT Chat Migration Test Plan - Golden Path Preservation Validation
 
 This test validates that Issue #565 ExecutionEngine migration preserves the Golden Path:
-1. Complete user login → chat → AI response flow remains functional
+1. Complete user login -> chat -> AI response flow remains functional
 2. WebSocket events deliver real-time updates throughout user journey
 3. Agent execution provides meaningful AI responses to user requests
 4. Multi-user concurrent usage works without interference
 5. Chat business value delivery (90% of platform value) is maintained
 
 Business Value: Free/Early/Mid/Enterprise - User Experience & Revenue Protection
-Protects the $500K+ ARR Golden Path user flow that delivers substantive AI-powered
+Protects the 500K+ ARR Golden Path user flow that delivers substantive AI-powered
 chat functionality serving as 90% of the platform's business value.
 
 CRITICAL: These are end-to-end tests that validate the complete user experience
@@ -40,7 +40,7 @@ class Issue565GoldenPathPreservationTests(SSotAsyncTestCase):
     """
     End-to-end test suite validating Golden Path preservation in ExecutionEngine migration.
 
-    Tests the complete user journey: login → chat request → AI processing → response,
+    Tests the complete user journey: login -> chat request -> AI processing -> response,
     ensuring that Issue #565 migration maintains the business-critical user experience.
     """
 
@@ -83,13 +83,7 @@ class Issue565GoldenPathPreservationTests(SSotAsyncTestCase):
                 if engine.is_active():
                     await engine.cleanup()
             except Exception as e:
-                print(f"Warning: Engine cleanup failed: {e}")
-
-        self.created_engines.clear()
-        await super().teardown_method(method)
-
-    def create_golden_path_user_context(self, user_profile: Dict[str, Any]) -> UserExecutionContext:
-        """Create UserExecutionContext for Golden Path user persona."""
+                print(f"Warning: Engine cleanup failed: {e}""""Create UserExecutionContext for Golden Path user persona."""
         return UserExecutionContext(
             user_id=user_profile['user_id'],
             thread_id=f"thread_{user_profile['user_id']}",
@@ -184,7 +178,7 @@ class Issue565GoldenPathPreservationTests(SSotAsyncTestCase):
 
     async def test_golden_path_complete_user_flow(self):
         """
-        Test complete Golden Path user flow: login → chat → AI response.
+        Test complete Golden Path user flow: login -> chat -> AI response.
 
         CRITICAL: This validates the end-to-end user experience that delivers
         90% of platform business value through meaningful AI interactions.

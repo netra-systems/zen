@@ -7,7 +7,7 @@ These tests validate WebSocket behavior in actual GCP Cloud Run staging environm
 
 Business Value Justification:
 1. Segment: Platform/Internal - Chat is King staging environment protection
-2. Business Goal: Prevent $500K+ ARR loss from staging WebSocket failures affecting production confidence
+2. Business Goal: Prevent 500K+ ARR loss from staging WebSocket failures affecting production confidence
 3. Value Impact: Validates mission-critical chat functionality works in production-like GCP environment
 4. Strategic Impact: Ensures staging environment mirrors production WebSocket behavior
 
@@ -116,7 +116,7 @@ class RealGCPWebSocketConnectionLifecycleTests:
                 response = await asyncio.wait_for(websocket_conn.recv(), timeout=10.0)
                 print(f' PASS:  Connection survived {idle_duration}s idle period')
                 connection_survived_idle = True
-            except (asyncio.TimeoutError, websockets.exceptions.ConnectionClosed) as e:
+            except (asyncio.TimeoutError, websockets.ConnectionClosed) as e:
                 print(f' FAIL:  Connection lost during idle period: {e}')
                 connection_survived_idle = False
             await websocket_conn.close()

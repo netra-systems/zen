@@ -4,13 +4,13 @@ E2E Tests: Golden Path Auth Delegation
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)  
 - Business Goal: Ensure complete auth flow works with delegation
-- Value Impact: $500K+ ARR Golden Path functionality protected
+- Value Impact: 500K+ ARR Golden Path functionality protected
 - Strategic Impact: Core user authentication experience
 
 This test suite validates the complete Golden Path user flow with auth service
 delegation using the staging GCP environment:
 
-1. Users login → get AI responses (complete end-to-end flow)
+1. Users login -> get AI responses (complete end-to-end flow)
 2. WebSocket authentication using delegated auth patterns
 3. Agent execution working with delegated authentication
 4. Multi-user isolation maintained with delegation
@@ -202,7 +202,7 @@ class GoldenPathAuthDelegationTests(BaseE2ETest):
                         # Timeout is OK - the important thing is auth worked
                         pass
                         
-            except websockets.exceptions.ConnectionClosed as e:
+            except websockets.ConnectionClosed as e:
                 if "401" in str(e) or "Unauthorized" in str(e):
                     pytest.fail("WebSocket auth delegation failed - authentication rejected")
                 else:
@@ -521,7 +521,7 @@ class GoldenPathAuthDelegationTests(BaseE2ETest):
             if "agent_completed" in event_types:
                 self.logger.info("Complete WebSocket event flow confirmed with delegated auth")
             
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             if "401" in str(e):
                 pytest.fail("WebSocket events failed due to auth delegation issue")
             else:

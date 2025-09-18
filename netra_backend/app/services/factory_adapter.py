@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as IsolatedExecutionEngine
-    from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, UserWebSocketEmitter
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, AgentWebSocketBridge
     from netra_backend.app.agents.execution_engine_interface import IExecutionEngine
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -125,7 +125,7 @@ class FactoryAdapter:
     
     def __init__(self, 
                  execution_engine_factory: 'ExecutionEngineFactory',
-                 websocket_bridge_factory: 'WebSocketBridgeFactory',
+                 websocket_bridge_factory: 'AgentWebSocketBridge',
                  config: Optional[AdapterConfig] = None):
         
         self.config = config or AdapterConfig.from_env()
@@ -338,7 +338,7 @@ class FactoryAdapter:
     async def get_websocket_bridge(self, 
                                  request_context: Optional[Dict[str, Any]] = None,
                                  route_path: Optional[str] = None,
-                                 **legacy_kwargs) -> Union['UserWebSocketEmitter', 'AgentWebSocketBridge']:
+                                 **legacy_kwargs) -> Union['AgentWebSocketBridge', 'AgentWebSocketBridge']:
         """
         Get WebSocket bridge - factory or legacy based on configuration.
         
@@ -348,7 +348,7 @@ class FactoryAdapter:
             **legacy_kwargs: Legacy parameters for backward compatibility
             
         Returns:
-            Either UserWebSocketEmitter (factory) or AgentWebSocketBridge (legacy)
+            Either AgentWebSocketBridge (factory) or AgentWebSocketBridge (legacy)
         """
         start_time = time.time()
         
@@ -365,7 +365,7 @@ class FactoryAdapter:
             # Update metrics
             await self._update_metrics('websocket_bridge', time.time() - start_time, use_factory if 'use_factory' in locals() else False)
             
-    async def _get_factory_websocket_bridge(self, request_context: Dict[str, Any]) -> 'UserWebSocketEmitter':
+    async def _get_factory_websocket_bridge(self, request_context: Dict[str, Any]) -> 'AgentWebSocketBridge':
         """Get WebSocket bridge using factory pattern."""
         start_time = time.time()
         

@@ -11,9 +11,9 @@ import asyncio
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MetricType(Enum):

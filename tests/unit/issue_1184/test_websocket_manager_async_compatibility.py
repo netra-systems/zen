@@ -2,8 +2,8 @@
 Unit tests to reproduce Issue 1184 async/await compatibility issues.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Mission Critical Infrastructure
-- Business Goal: Restore $500K+ ARR WebSocket chat functionality reliability
+- Segment: ALL (Free -> Enterprise) - Mission Critical Infrastructure
+- Business Goal: Restore 500K+ ARR WebSocket chat functionality reliability
 - Value Impact: Prevents WebSocket infrastructure failures that block Golden Path user flow
 - Strategic Impact: Ensures staging environment accurately validates production deployments
 
@@ -35,17 +35,17 @@ class TestWebSocketAsyncCompatibility(SSotAsyncTestCase):
         # This should work (synchronous call)
         manager_sync = get_websocket_manager(user_context=user_context)
         assert manager_sync is not None
-        logger.info(f"✅ Synchronous WebSocket manager creation works: {type(manager_sync)}")
+        logger.info(f"CHECK Synchronous WebSocket manager creation works: {type(manager_sync)}")
 
         # This should FAIL with TypeError initially - demonstrates the exact issue
         # Many places in codebase incorrectly await this synchronous function
         try:
             manager_async = await get_websocket_manager(user_context=user_context)
-            logger.error("❌ Unexpected: await on synchronous function did not fail")
+            logger.error("X Unexpected: await on synchronous function did not fail")
             # If this doesn't fail, it means the function signature changed or there's wrapping
             assert False, "Expected TypeError when awaiting synchronous get_websocket_manager()"
         except TypeError as e:
-            logger.info(f"✅ Expected TypeError when awaiting synchronous function: {e}")
+            logger.info(f"CHECK Expected TypeError when awaiting synchronous function: {e}")
             assert "can't be used in 'await' expression" in str(e) or "object is not awaitable" in str(e)
 
     @pytest.mark.issue_1184
@@ -61,7 +61,7 @@ class TestWebSocketAsyncCompatibility(SSotAsyncTestCase):
         # This should work (proper async call)
         manager_async = await get_websocket_manager_async(user_context=user_context)
         assert manager_async is not None
-        logger.info(f"✅ Asynchronous WebSocket manager creation works: {type(manager_async)}")
+        logger.info(f"CHECK Asynchronous WebSocket manager creation works: {type(manager_async)}")
 
         # Verify it returns the same type as the sync version
         manager_sync = get_websocket_manager(user_context=user_context)
@@ -71,7 +71,7 @@ class TestWebSocketAsyncCompatibility(SSotAsyncTestCase):
         manager_async_2 = await get_websocket_manager_async(user_context=user_context)
         assert manager_async is manager_async_2, "Should return same instance from registry"
 
-        logger.info("✅ Async WebSocket manager creation test passed")
+        logger.info("CHECK Async WebSocket manager creation test passed")
 
     @pytest.mark.issue_1184
     async def test_websocket_manager_initialization_timing(self):
@@ -99,7 +99,7 @@ class TestWebSocketAsyncCompatibility(SSotAsyncTestCase):
         manager2 = get_websocket_manager(user_context=user_context)
         assert manager is manager2, "Should be same instance per user (singleton per user)"
 
-        logger.info(f"✅ WebSocket manager initialization timing validated: {creation_time:.4f}s")
+        logger.info(f"CHECK WebSocket manager initialization timing validated: {creation_time:.4f}s")
 
     @pytest.mark.issue_1184
     async def test_websocket_manager_concurrent_access(self):
@@ -151,7 +151,7 @@ class TestWebSocketAsyncCompatibility(SSotAsyncTestCase):
         assert manager3 is not None, "Manager 3 should exist despite incorrect usage"
         assert manager4 is not None, "Manager 4 should exist despite incorrect usage"
 
-        logger.info("✅ Concurrent access test completed - proper vs incorrect usage demonstrated")
+        logger.info("CHECK Concurrent access test completed - proper vs incorrect usage demonstrated")
 
     @pytest.mark.issue_1184
     @pytest.mark.mission_critical
@@ -159,7 +159,7 @@ class TestWebSocketAsyncCompatibility(SSotAsyncTestCase):
         """
         MISSION CRITICAL: Validate WebSocket manager supports business value.
 
-        This test ensures the WebSocket infrastructure critical to $500K+ ARR is working.
+        This test ensures the WebSocket infrastructure critical to 500K+ ARR is working.
         """
         # Simulate business scenario - multiple users accessing chat simultaneously
         business_users = [
@@ -193,4 +193,4 @@ class TestWebSocketAsyncCompatibility(SSotAsyncTestCase):
             assert hasattr(manager, 'emit_event') or hasattr(manager, 'send_event') or hasattr(manager, '_connections'), \
                 "Manager missing event emission capability (needed for chat)"
 
-        logger.info("✅ WebSocket manager business value protection validated for all user tiers")
+        logger.info("CHECK WebSocket manager business value protection validated for all user tiers")

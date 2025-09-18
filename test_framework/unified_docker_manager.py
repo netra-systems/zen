@@ -1325,7 +1325,19 @@ class UnifiedDockerManager:
     
     def _get_compose_file(self) -> str:
         """Get appropriate docker-compose file based on Alpine setting and environment type"""
-        # SSOT Docker Configuration - NO FALLBACKS
+        
+        # Priority 1: Check for explicit environment variable override
+        env = get_env()
+        explicit_compose_path = env.get("DOCKER_COMPOSE_PATH")
+        if explicit_compose_path:
+            compose_path = Path(explicit_compose_path)
+            if compose_path.exists():
+                _get_logger().info(f"Using explicit Docker compose file from DOCKER_COMPOSE_PATH: {compose_path}")
+                return str(compose_path)
+            else:
+                _get_logger().warning(f"DOCKER_COMPOSE_PATH specified but file not found: {compose_path}")
+        
+        # Priority 2: SSOT Docker Configuration - NO FALLBACKS
         # Based on docker/DOCKER_SSOT_MATRIX.md
         if self.environment_type == EnvironmentType.DEVELOPMENT:
             # LOCAL DEVELOPMENT: Use EXACTLY docker-compose.yml
@@ -2693,9 +2705,9 @@ class UnifiedDockerManager:
                 _get_logger().debug(f" PASS:  WebSocket health check succeeded: {ws_url}")
                 return True
                 
-        except (websockets.exceptions.ConnectionClosed,
-                websockets.exceptions.InvalidStatusCode,
-                websockets.exceptions.InvalidHandshake,
+        except (websockets.ConnectionClosed,
+                websockets.InvalidStatusCode,
+                websockets.InvalidHandshake,
                 asyncio.TimeoutError,
                 OSError) as e:
             _get_logger().debug(f" FAIL:  WebSocket health check failed for {ws_url}: {e}")

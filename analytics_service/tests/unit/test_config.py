@@ -472,11 +472,11 @@ class AnalyticsConfigTests:
         import analytics_service.analytics_core.config as config_module
 
         config_module._config = None
-        os.environ["ANALYTICS_CORS_ORIGINS"] = "http://localhost:3000,https://app.netra.ai,https://api.netra.ai"
+        os.environ["ANALYTICS_CORS_ORIGINS"] = "http://localhost:3000,https://app.netrasystems.ai,https://api.netrasystems.ai"
 
         try:
             config = AnalyticsConfig()
-            expected_origins = ["http://localhost:3000", "https://app.netra.ai", "https://api.netra.ai"]
+            expected_origins = ["http://localhost:3000", "https://app.netrasystems.ai", "https://api.netrasystems.ai"]
             assert config.cors_origins == expected_origins
         finally:
             os.environ.pop("ANALYTICS_CORS_ORIGINS", None)

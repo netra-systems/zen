@@ -29,12 +29,12 @@ from netra_backend.app.core.agent_execution_tracker import (
     initialize_tracker as _ssot_initialize_tracker,
     shutdown_tracker as _ssot_shutdown_tracker
 )
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 import warnings
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 # BACKWARD COMPATIBILITY ALIAS: ExecutionState -> SSOT ExecutionState
 # The SSOT implementation has 9 states (vs 6 here) for comprehensive tracking
@@ -121,27 +121,62 @@ class ExecutionTracker(_SSOT_AgentExecutionTracker):
         """Setter for backward compatibility (no-op)."""
         pass
 
-    def complete_execution(self, execution_id: str, success: bool = True, error: Optional[str] = None) -> bool:
+    def create_execution_id(self, agent_name: str, context: Optional[Dict[str, Any]] = None) -> str:
+        """
+        Create a unique execution ID - Backward compatibility method.
+
+        This method provides the interface expected by legacy code while delegating
+        to the SSOT AgentExecutionTracker's create_execution_id method.
+
+        Args:
+            agent_name: Name of the agent that will be executed
+            context: Optional context information for ID generation
+
+        Returns:
+            str: Unique execution ID
+        """
+        return super().create_execution_id(agent_name, context)
+
+    def complete_execution(self, execution_id: str, success: bool = True, error: Optional[str] = None, 
+                          result: Optional[Any] = None, execution_time_ms: Optional[int] = None) -> bool:
         """
         Mark execution as completed - Backward compatibility method.
 
         This method provides the interface expected by test files while delegating
-        to the SSOT AgentExecutionTracker's update_execution_state method.
+        to the SSOT AgentExecutionTracker's complete_execution and fail_execution methods.
 
         Args:
             execution_id: The execution ID to complete
             success: Whether the execution was successful (default True)
             error: Optional error message if failed
+            result: Optional result data from the execution
+            execution_time_ms: Optional execution time in milliseconds
 
         Returns:
             bool: True if successfully updated
         """
         if success:
-            state = ExecutionState.COMPLETED
+            return super().complete_execution(execution_id, result, execution_time_ms)
         else:
-            state = ExecutionState.FAILED
+            return super().fail_execution(execution_id, error or "Unknown error")
 
-        return self.update_execution_state(execution_id, state, error)
+    def fail_execution(self, execution_id: str, error: str, 
+                      error_context: Optional[Dict[str, Any]] = None) -> bool:
+        """
+        Mark execution as failed - Backward compatibility method.
+
+        This method provides the interface expected by legacy code while delegating
+        to the SSOT AgentExecutionTracker's fail_execution method.
+
+        Args:
+            execution_id: The execution ID to fail
+            error: Error message describing the failure
+            error_context: Optional context about the error
+
+        Returns:
+            bool: True if successfully failed
+        """
+        return super().fail_execution(execution_id, error, error_context)
 
     def register_execution(self, *args, **kwargs) -> str:
         """

@@ -44,34 +44,93 @@ class AuthDatabaseConnection:
         if self._initialized:
             logger.info("Database already initialized, skipping re-initialization")
             return
-        
+
+        # SSOT Environment-based timeout configuration (Issue #1229 fix)
+        env = get_env()
+
+        # Configure timeouts based on environment and SSOT patterns
+        # CRITICAL FIX Issue #1278: Always use minimum 60s validation timeout for any cloud environment
+        # Environment detection must be robust to prevent falling back to 15s timeouts
+        environment_name = str(self.environment).lower() if self.environment else ""
+        is_staging = "staging" in environment_name or env.get("ENVIRONMENT") == "staging" or env.get("ENV") == "staging"
+        is_production = "production" in environment_name or env.get("ENVIRONMENT") == "production" or env.get("ENV") == "production"
+        is_cloud_environment = self.is_cloud_run or is_staging or is_production or env.get("GOOGLE_CLOUD_PROJECT")
+
+        if is_cloud_environment:
+            # Cloud environments need longer timeouts for VPC connectivity
+            # CRITICAL: Minimum 60s validation timeout to prevent Issue #1278 recurrence
+            url_timeout = float(env.get("AUTH_DB_URL_TIMEOUT", "15.0"))  # Increased from 10s
+            engine_timeout = float(env.get("AUTH_DB_ENGINE_TIMEOUT", "45.0"))  # Increased from 30s
+            validation_timeout = float(env.get("AUTH_DB_VALIDATION_TIMEOUT", "90.0"))  # Increased from 60s to 90s
+            logger.info(f"Auth service using CLOUD environment database timeouts (staging/production detected)")
+        else:
+            # Development environment with reasonable timeouts (but minimum 30s validation)
+            url_timeout = float(env.get("AUTH_DB_URL_TIMEOUT", "8.0"))  # Increased from 5s
+            engine_timeout = float(env.get("AUTH_DB_ENGINE_TIMEOUT", "20.0"))  # Increased from 15s
+            validation_timeout = float(env.get("AUTH_DB_VALIDATION_TIMEOUT", "30.0"))  # Increased from 15s to 30s minimum
+            logger.info(f"Auth service using DEVELOPMENT environment database timeouts")
+
+        logger.info(f"Auth service database timeouts: URL={url_timeout}s, Engine={engine_timeout}s, Validation={validation_timeout}s")
+        logger.info(f"Environment detection: name='{environment_name}', is_cloud_run={self.is_cloud_run}, is_staging={is_staging}, is_production={is_production}, cloud_project={env.get('GOOGLE_CLOUD_PROJECT')}")
+
+        # VALIDATION: Ensure we never use less than 30s validation timeout anywhere
+        if validation_timeout < 30.0:
+            logger.warning(f"Validation timeout {validation_timeout}s is too low, increasing to 30s minimum")
+            validation_timeout = 30.0
+
         # Use AuthDatabaseManager as SSOT for engine creation with timeout handling
         try:
-            # Get database URL from config with timeout
+            # Get database URL from config with environment-appropriate timeout
             from auth_service.auth_core.config import AuthConfig
             import asyncio
-            
+
             database_url = await asyncio.wait_for(
                 self._get_database_url_async(AuthConfig),
-                timeout=5.0
+                timeout=url_timeout
             )
-            
-            # Create engine with timeout-optimized settings
+
+            # Create engine with environment-appropriate timeout
             self.engine = await asyncio.wait_for(
                 self._create_async_engine_with_timeout(database_url),
-                timeout=15.0
+                timeout=engine_timeout
             )
-            
-            # Test connection early to catch authentication issues with timeout
+
+            # Test connection early to catch authentication issues with environment-appropriate timeout
             try:
                 await asyncio.wait_for(
                     self._validate_initial_connection(),
-                    timeout=15.0
+                    timeout=validation_timeout
                 )
             except asyncio.TimeoutError:
+                # CRITICAL: VPC Egress Regression Detection (Sept 15, 2025)
+                # See: SPEC/learnings/vpc_egress_cloud_sql_regression_critical.xml
+                database_url = AuthDatabaseManager.get_database_url()
+                is_cloud_sql_unix = database_url and "/cloudsql/" in database_url
+                
+                if is_cloud_sql_unix and validation_timeout >= 15:
+                    # This exact pattern indicates VPC egress all-traffic regression
+                    logger.critical(
+                        "🚨 VPC EGRESS REGRESSION DETECTED 🚨\n"
+                        f"Cloud SQL Unix socket connection timeout ({validation_timeout}s) detected!\n"
+                        f"Database URL pattern: /cloudsql/... (Unix socket)\n"
+                        f"Environment: {self.environment}\n"
+                        f"\n"
+                        f"ROOT CAUSE: VPC egress 'all-traffic' blocks Cloud SQL Unix socket connections.\n"
+                        f"Cloud SQL proxy requires DIRECT access, not through VPC connector.\n"
+                        f"\n"
+                        f"SOLUTION: Change VPC egress to 'private-ranges-only' + implement Cloud NAT\n"
+                        f"DOCUMENTATION: /SPEC/learnings/vpc_egress_cloud_sql_regression_critical.xml\n"
+                        f"LEARNING TIMELINE: /docs/infrastructure/vpc-egress-regression-timeline.md\n"
+                        f"\n"
+                        f"This issue was introduced in commit 2acf46c8a (Sept 15, 2025)\n"
+                        f"when VPC egress was changed from 'private-ranges-only' to 'all-traffic'\n"
+                        f"to fix ClickHouse connectivity but broke Cloud SQL."
+                    )
+                
                 raise RuntimeError(
-                    f"Database connection validation timeout exceeded (15s). "
-                    f"This may indicate network connectivity issues or database overload."
+                    f"Database connection validation timeout exceeded ({validation_timeout}s). "
+                    f"This may indicate network connectivity issues or database overload in {self.environment} environment."
+                    f"{' 🚨 VPC EGRESS REGRESSION SUSPECTED - Check logs above!' if is_cloud_sql_unix and validation_timeout >= 15 else ''}"
                 )
             except Exception as e:
                 # Enhanced error message for authentication failures
@@ -169,7 +228,7 @@ class AuthDatabaseConnection:
         # Only add PostgreSQL-specific connection args for PostgreSQL databases
         if not database_url.startswith('sqlite'):
             connect_args = {
-                "command_timeout": 15,  # Command timeout for PostgreSQL/asyncpg
+                "command_timeout": 30,  # Command timeout for PostgreSQL/asyncpg - aligned with backend service
                 "server_settings": {
                     "application_name": f"netra_auth_{self.environment}",
                 }

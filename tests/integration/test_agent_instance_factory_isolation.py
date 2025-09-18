@@ -232,7 +232,7 @@ class AgentInstanceFactoryIsolationTests(SSotAsyncTestCase):
                 assert resource['active'] is False
                 assert 'cleaned_at' in resource
 
-        print("✅ RESOURCE CLEANUP ISOLATION VERIFIED")
+        print("CHECK RESOURCE CLEANUP ISOLATION VERIFIED")
 
     @pytest.mark.asyncio
     async def test_websocket_isolation(self):
@@ -265,4 +265,4 @@ class AgentInstanceFactoryIsolationTests(SSotAsyncTestCase):
             assert message['user_id'] == user_id
             assert user_id in message['content']
 
-        print("✅ WEBSOCKET ISOLATION VERIFIED")
+        print("CHECK WEBSOCKET ISOLATION VERIFIED")

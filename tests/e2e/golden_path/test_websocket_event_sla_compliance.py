@@ -4,7 +4,7 @@ E2E Tests for WebSocket Event SLA Compliance
 Business Value Justification (BVJ):
 - Segment: Platform/All Users  
 - Business Goal: Ensure WebSocket event delivery meets business SLA requirements
-- Value Impact: Protects $500K+ ARR by guaranteeing real-time chat experience quality
+- Value Impact: Protects 500K+ ARR by guaranteeing real-time chat experience quality
 - Strategic Impact: Validates critical infrastructure supporting 90% of platform value
 
 This test suite validates WebSocket event SLA compliance in GCP staging:
@@ -57,7 +57,7 @@ class WebSocketEventSLAComplianceTests(BaseE2ETest):
     """
     Test WebSocket event delivery SLA compliance in GCP staging.
     
-    BUSINESS IMPACT: Protects $500K+ ARR by ensuring real-time chat quality
+    BUSINESS IMPACT: Protects 500K+ ARR by ensuring real-time chat quality
     SLA REQUIREMENTS: 
     - Connection: < 2s
     - First Event: < 5s
@@ -74,9 +74,9 @@ class WebSocketEventSLAComplianceTests(BaseE2ETest):
         self.sla_event_reliability = 100.0  # percent (all events must be delivered)
         
         # GCP staging endpoints
-        self.staging_websocket_url = "wss://staging.netra.ai/ws"
-        self.staging_auth_url = "https://auth-staging.netra.ai"
-        self.staging_api_url = "https://api-staging.netra.ai"
+        self.staging_websocket_url = "wss://staging.netrasystems.ai/ws"
+        self.staging_auth_url = "https://auth.netrasystems.ai"
+        self.staging_api_url = "https://api.staging.netrasystems.ai"
         
         # Required critical events for business value
         self.critical_events = [
@@ -473,7 +473,7 @@ class WebSocketEventSLAComplianceTests(BaseE2ETest):
             response = await client.post(
                 f"{self.staging_auth_url}/login",
                 json={
-                    "email": "test@netra.ai",
+                    "email": "test@netrasystems.ai",
                     "password": "testpassword123"
                 }
             )
@@ -524,7 +524,7 @@ class WebSocketEventSLAComplianceTests(BaseE2ETest):
                     # Continue waiting for more events
                     continue
                     
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             self.logger.warning("WebSocket connection closed during event collection")
         
         return events

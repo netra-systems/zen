@@ -119,7 +119,7 @@ class WebSocketClient:
                     # Auto-respond to heartbeats
                     await self.send_heartbeat_response()
                     
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             self.is_connected = False
         except Exception as e:
             logger.error(f"Error receiving messages: {e}")
@@ -306,7 +306,7 @@ class PresenceDetectionE2ETests:
                             self.last_heartbeat_time = time.time()
                             # NO RESPONSE
                             
-                except websockets.exceptions.ConnectionClosed as e:
+                except websockets.ConnectionClosed as e:
                     logger.info(f"Connection closed: {e.code} - {e.reason}")
                     self.is_connected = False
         

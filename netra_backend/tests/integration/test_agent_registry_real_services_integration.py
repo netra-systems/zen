@@ -22,7 +22,7 @@ import pytest
 import asyncio
 import uuid
 from typing import Dict, Any
-from datetime import datetime
+from datetime import datetime, UTC
 
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from test_framework.ssot.real_services_test_fixtures import *
@@ -194,7 +194,7 @@ class MockRegistryAgent:
         self.name = name
         self.version = version
         self.capabilities = capabilities
-        self.created_at = datetime.utcnow()
+        self.created_at = datetime.now(UTC)
     
     async def execute(self, task: str):
         """Execute mock task."""

@@ -28,6 +28,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy application code
 COPY netra_backend/ ./netra_backend/
 COPY shared/ ./shared/
+COPY auth_service/ ./auth_service/
 COPY alembic/ ./alembic/
 COPY alembic.ini ./
 
@@ -51,10 +52,11 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
 EXPOSE 8000
 
 # Command to run the application with staging-optimized settings
-CMD ["uvicorn", "netra_backend.app.main:app", \
-     "--host", "0.0.0.0", \
-     "--port", "8000", \
-     "--workers", "4", \
-     "--access-log", \
-     "--log-level", "info", \
-     "--timeout-keep-alive", "65"]
+# CRITICAL: Use gunicorn + UvicornWorker for Cloud Run stability
+CMD ["gunicorn", "netra_backend.app.main:app", \
+     "-w", "1", \
+     "-k", "uvicorn.workers.UvicornWorker", \
+     "--bind", "0.0.0.0:8000", \
+     "--timeout", "300", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-"]

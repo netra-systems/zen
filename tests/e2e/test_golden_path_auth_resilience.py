@@ -15,26 +15,7 @@ def lazy_import(module_path: str, component: str = None):
                 _lazy_imports[module_path] = module
         except ImportError as e:
             print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
-    if module_path not in _lazy_imports:
-        try:
-            module = __import__(module_path, fromlist=[component] if component else [])
-            if component:
-                _lazy_imports[module_path] = getattr(module, component)
-            else:
-                _lazy_imports[module_path] = module
-        except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
+    return _lazy_imports.get(module_path)
 
 """
 E2E tests for Golden Path auth resilience on GCP staging (Issue #395).
@@ -46,7 +27,7 @@ Key E2E Issues to Reproduce:
 1. Complete user login -> chat flow blocked by auth timeouts
 2. Real GCP Cloud Run network latency vs timeout configuration
 3. Production-like auth service interaction failures
-4. Business impact on $500K+ ARR user workflow
+4. Business impact on 500K+ ARR user workflow
 """
 
 import asyncio
@@ -118,15 +99,12 @@ class GoldenPathAuthResilienceTests(SSotAsyncTestCase):
                     loop.run_until_complete(self.auth_client._client.aclose())
             except Exception as e:
                 print(f"Warning: Could not close auth client: {e}")
-        super().teardown_method(method)
 
-    @pytest.mark.asyncio
-    @pytest.mark.e2e
-    async def test_golden_path_complete_user_flow_timeout(self):
+    async def test_complete_golden_path_user_flow_timeout_staging_gcp_reproduce(self):
         """
         E2E REPRODUCTION TEST: Complete Golden Path user flow timeout in GCP staging.
         
-        This test reproduces the complete user journey that generates $500K+ ARR:
+        This test reproduces the complete user journey that generates 500K+ ARR:
         1. User login attempt
         2. WebSocket connection establishment  
         3. Chat authentication
@@ -254,7 +232,7 @@ class GoldenPathAuthResilienceTests(SSotAsyncTestCase):
         # Business impact assertion
         if len(golden_path_metrics["failed_steps"]) >= 2:
             self.fail(f"Golden Path E2E FAILURE: {len(golden_path_metrics['failed_steps'])}/3 steps failed "
-                     f"due to auth service timeout issues. This blocks $500K+ ARR user workflow. "
+                     f"due to auth service timeout issues. This blocks 500K+ ARR user workflow. "
                      f"Failed steps: {golden_path_metrics['failed_steps']}")
 
     @pytest.mark.asyncio

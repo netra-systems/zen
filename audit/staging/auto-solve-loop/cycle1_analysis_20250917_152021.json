@@ -1,0 +1,471 @@
+{
+  "timestamp": "2025-09-17T15:20:21.169604",
+  "total_logs": 300,
+  "issues_by_severity": {
+    "ERROR": {
+      "startup": 30,
+      "database": 20,
+      "websocket": 10
+    },
+    "WARNING": {},
+    "NOTICE": {},
+    "INFO": {
+      "websocket": 5,
+      "database": 2
+    }
+  },
+  "top_errors": [],
+  "recurring_patterns": [
+    {
+      "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+      "count": 20
+    },
+    {
+      "message": "Operation: unknown, User: system, Error: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+      "count": 20
+    },
+    {
+      "message": "Application startup failed. Exiting.",
+      "count": 10
+    },
+    {
+      "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+      "count": 10
+    },
+    {
+      "message": " FAIL:  Factory initialization failed: 'AgentWebSocketBridge' object has no attribute 'configure'",
+      "count": 10
+    },
+    {
+      "message": "Thread ID mismatch: run_id 'startup-run' extracted to 'startup-run' but thread_id is 'startup-thread'. This may indicate inconsistent ID generation.",
+      "count": 9
+    },
+    {
+      "message": "run_id 'startup-run' does not follow expected format. Consider using UnifiedIDManager.generate_run_id() for consistency.",
+      "count": 9
+    },
+    {
+      "message": "Sentry SDK not available - install sentry-sdk[fastapi] to enable error tracking",
+      "count": 8
+    },
+    {
+      "message": "Legacy JWT_SECRET detected but JWT_SECRET_STAGING is properly configured. Please remove JWT_SECRET from environment variables to avoid confusion.",
+      "count": 8
+    },
+    {
+      "message": "SERVICE_ID contained whitespace - sanitized from 'netra-backend\\n' to 'netra-backend'",
+      "count": 8
+    }
+  ],
+  "service_issues": {
+    "netra-backend-staging": [
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-17T22:20:16.445287+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:20:16.445278+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:20:16.445278+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": " FAIL:  Factory initialization failed: 'AgentWebSocketBridge' object has no attribute 'configure'",
+        "timestamp": "2025-09-17T22:20:16.336984+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:20:15.542968+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:20:15.539565+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-17T22:19:59.434871+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:59.434861+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:59.434861+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": " FAIL:  Factory initialization failed: 'AgentWebSocketBridge' object has no attribute 'configure'",
+        "timestamp": "2025-09-17T22:19:59.320995+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:58.490558+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:58.486276+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-17T22:19:57.784991+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:57.784979+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:57.784979+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": " FAIL:  Factory initialization failed: 'AgentWebSocketBridge' object has no attribute 'configure'",
+        "timestamp": "2025-09-17T22:19:57.673327+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:56.932847+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:56.932309+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-17T22:19:41.052760+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:41.052639+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:41.052639+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": " FAIL:  Factory initialization failed: 'AgentWebSocketBridge' object has no attribute 'configure'",
+        "timestamp": "2025-09-17T22:19:40.936313+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:40.122074+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:40.118960+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-17T22:19:40.112286+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:40.112272+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:40.112272+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": " FAIL:  Factory initialization failed: 'AgentWebSocketBridge' object has no attribute 'configure'",
+        "timestamp": "2025-09-17T22:19:39.998801+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:39.317431+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:39.316787+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-17T22:19:23.197707+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:23.197697+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:23.197697+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": " FAIL:  Factory initialization failed: 'AgentWebSocketBridge' object has no attribute 'configure'",
+        "timestamp": "2025-09-17T22:19:23.088267+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:22.271971+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:22.225906+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-17T22:19:21.164177+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:21.164012+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:21.164012+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": " FAIL:  Factory initialization failed: 'AgentWebSocketBridge' object has no attribute 'configure'",
+        "timestamp": "2025-09-17T22:19:21.042037+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:20.217054+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:20.211219+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-17T22:19:02.346287+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:02.346276+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:02.346276+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-17T22:19:02.239815+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:02.239805+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:19:02.239805+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": " FAIL:  Factory initialization failed: 'AgentWebSocketBridge' object has no attribute 'configure'",
+        "timestamp": "2025-09-17T22:19:02.233360+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": " FAIL:  Factory initialization failed: 'AgentWebSocketBridge' object has no attribute 'configure'",
+        "timestamp": "2025-09-17T22:19:02.130252+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:01.349102+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:01.341885+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:01.273241+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:19:01.268619+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-17T22:18:44.463633+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "websocket",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:18:44.463618+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/app/netra_backend/app/smd.py\", line 380, in initialize_system\\n    await self._phase5_services_setup()\\n  File \"/app/netra_backend/app/smd.py\", line 590, i",
+        "timestamp": "2025-09-17T22:18:44.463618+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": " FAIL:  Factory initialization failed: 'AgentWebSocketBridge' object has no attribute 'configure'",
+        "timestamp": "2025-09-17T22:18:44.352809+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:18:43.504378+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database health check failed: Textual SQL expression 'SELECT 1' should be explicitly declared as text('SELECT 1')",
+        "timestamp": "2025-09-17T22:18:43.500213+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Redis connection closed",
+        "timestamp": "2025-09-17T22:20:16.437897+00:00",
+        "severity": "INFO"
+      },
+      {
+        "type": "database",
+        "message": "Redis reconnection task cancelled",
+        "timestamp": "2025-09-17T22:20:16.437696+00:00",
+        "severity": "INFO"
+      },
+      {
+        "type": "websocket",
+        "message": "WebSocket connections handled by factory pattern - individual cleanup via context",
+        "timestamp": "2025-09-17T22:20:16.437609+00:00",
+        "severity": "INFO"
+      },
+      {
+        "type": "websocket",
+        "message": "Circuit breaker websocket reset from closed to CLOSED",
+        "timestamp": "2025-09-17T22:20:16.341728+00:00",
+        "severity": "INFO"
+      },
+      {
+        "type": "websocket",
+        "message": "Circuit breaker websocket reset from closed to CLOSED",
+        "timestamp": "2025-09-17T22:20:16.341701+00:00",
+        "severity": "INFO"
+      },
+      {
+        "type": "websocket",
+        "message": "    [U+2713] WebSocketConnectionPool initialized",
+        "timestamp": "2025-09-17T22:20:16.335737+00:00",
+        "severity": "INFO"
+      },
+      {
+        "type": "websocket",
+        "message": "WebSocketConnectionPool initialized with security features",
+        "timestamp": "2025-09-17T22:20:16.335582+00:00",
+        "severity": "INFO"
+      }
+    ]
+  },
+  "http_errors": [],
+  "connection_issues": [],
+  "database_issues": [],
+  "websocket_issues": [],
+  "auth_issues": []
+}

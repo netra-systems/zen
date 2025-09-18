@@ -605,7 +605,7 @@ class UserFacingMockEliminationTests(BaseE2ETest):
                         except asyncio.TimeoutError:
                             timeout_count += 1
                             continue
-                        except websockets.exceptions.ConnectionClosed:
+                        except websockets.ConnectionClosed:
                             # Connection closing with generic message is also a mock pattern
                             ws_mock_evidence.append({
                                 "scenario": f"{scenario['name']} - Connection Closed",
@@ -798,7 +798,7 @@ class UserFacingMockEliminationTests(BaseE2ETest):
                                 "interface": "WebSocket"
                             })
                             
-                    except (asyncio.TimeoutError, websockets.exceptions.ConnectionClosed) as e:
+                    except (asyncio.TimeoutError, websockets.ConnectionClosed) as e:
                         interface_tests["WebSocket"].append({
                             "scenario": f"{scenario['name']} - WebSocket Error",
                             "detected_patterns": ["websocket_generic_error"],

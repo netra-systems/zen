@@ -123,7 +123,7 @@ class WebSocketConfig:
 @dataclass
 class NetworkMetrics:
     """Network performance and reliability metrics."""
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     active_connections: int = 0
     total_requests: int = 0
     failed_requests: int = 0
@@ -344,9 +344,9 @@ class NetworkHandler:
     def _get_effective_cors_origins(self) -> List[str]:
         """Get effective CORS origins based on environment."""
         if self.environment == "production":
-            return self.cors_config.production_origins or ["https://netra.ai"]
+            return self.cors_config.production_origins or ["https://netrasystems.ai"]
         elif self.environment == "staging":
-            return self.cors_config.staging_origins or ["https://staging.netra.ai"]
+            return self.cors_config.staging_origins or ["https://staging.netrasystems.ai"]
         else:
             return self.cors_config.development_origins
     

@@ -16,9 +16,31 @@ from netra_backend.tests.agents.test_triage_edge_performance import *
 from netra_backend.tests.agents.test_triage_entity_intent import *
 from netra_backend.tests.agents.test_triage_init_validation import *
 
-def test_architectural_compliance():
-    """Test that all functions in test modules are  <= 8 lines"""
-    assert True
+def test_triage_modules_import_successfully():
+    """Test that all triage test modules can be imported successfully."""
+    # Test: Verify triage test modules are available
+    try:
+        # These imports should not raise exceptions
+        import netra_backend.tests.agents.test_triage_caching_async
+        import netra_backend.tests.agents.test_triage_edge_performance
+        import netra_backend.tests.agents.test_triage_entity_intent
+        import netra_backend.tests.agents.test_triage_init_validation
+
+        # Verify: Modules have expected attributes
+        modules = [
+            netra_backend.tests.agents.test_triage_caching_async,
+            netra_backend.tests.agents.test_triage_edge_performance,
+            netra_backend.tests.agents.test_triage_entity_intent,
+            netra_backend.tests.agents.test_triage_init_validation
+        ]
+
+        # Basic smoke test: verify modules are loaded
+        for module in modules:
+            assert module is not None
+            assert hasattr(module, '__name__')
+
+    except ImportError as e:
+        pytest.fail(f"Critical triage test module import failed: {e}")
     if __name__ == '__main__':
         'MIGRATED: Use SSOT unified test runner'
         print('MIGRATION NOTICE: Please use SSOT unified test runner')

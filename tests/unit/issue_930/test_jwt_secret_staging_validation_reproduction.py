@@ -83,7 +83,7 @@ class JWTSecretStagingFailureReproductionTests:
                 assert "JWT_SECRET_KEY" in error_message
                 assert "WebSocket functionality" in error_message or "$50K MRR" in error_message
 
-                print(f"✓ Reproduced staging failure: {error_message}")
+                print(f"CHECK Reproduced staging failure: {error_message}")
 
     def test_staging_environment_detection_validation_failure(self):
         """
@@ -265,7 +265,7 @@ class JWTSecretStagingFailureReproductionTests:
                     # This is the expected behavior - complete failure
                     error_msg = str(e)
                     assert "JWT secret not configured for staging environment" in error_msg
-                    print(f"✓ Correctly failed service token generation: {error_msg}")
+                    print(f"CHECK Correctly failed service token generation: {error_msg}")
 
                 except Exception as e:
                     pytest.fail(
@@ -469,7 +469,7 @@ class JWTSecretManagerEnvironmentIntegrationTests:
 
             except ValueError as e:
                 # This is acceptable - fail fast during cold start
-                print(f"✓ Correctly failed during cold start: {e}")
+                print(f"CHECK Correctly failed during cold start: {e}")
 
     def test_staging_service_discovery_jwt_configuration_failure(self):
         """

@@ -134,7 +134,7 @@ class AgentWorkflowToolNotificationsTests(DockerTestBase):
                 except json.JSONDecodeError as e:
                     logger.warning(f'Failed to parse WebSocket message: {e}')
                     continue
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.info('WebSocket connection closed')
         except Exception as e:
             logger.error(f'WebSocket listening error: {e}')

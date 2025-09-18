@@ -4,7 +4,7 @@ Issue #1196 Phase 2 - ExecutionEngine Consolidation
 
 PURPOSE:
 - End-to-end validation on staging GCP environment
-- Full user flow: login → chat → agent execution → response
+- Full user flow: login -> chat -> agent execution -> response
 - Validate no business logic regressions during SSOT migration
 - Real services testing with staging environment
 
@@ -16,7 +16,7 @@ CRITICAL BUSINESS VALIDATION:
 - Overall system delivers substantive value
 
 Environment: Staging GCP (https://auth.staging.netrasystems.ai)
-Business Impact: $500K+ ARR validation
+Business Impact: 500K+ ARR validation
 """
 
 import pytest
@@ -82,7 +82,7 @@ class TestSSOTConsolidationNoRegression(SSotAsyncTestCase):
         """
         Complete E2E user journey validation
 
-        Tests: Login → Chat → Agent → Response → Logout
+        Tests: Login -> Chat -> Agent -> Response -> Logout
         Ensures SSOT consolidation doesn't break critical flows
         """
         print(f"\n=== Starting Complete User Journey Test ===")
@@ -90,12 +90,12 @@ class TestSSOTConsolidationNoRegression(SSotAsyncTestCase):
         # Phase 1: User Authentication
         auth_result = await self._test_user_authentication()
         assert auth_result["success"], f"Authentication failed: {auth_result.get('error')}"
-        print(f"✅ Authentication successful: {auth_result['user_id']}")
+        print(f"CHECK Authentication successful: {auth_result['user_id']}")
 
         # Phase 2: Chat Interface Validation
         chat_result = await self._test_chat_interface_loads()
         assert chat_result["success"], f"Chat interface failed: {chat_result.get('error')}"
-        print(f"✅ Chat interface loaded: {chat_result['load_time']:.2f}s")
+        print(f"CHECK Chat interface loaded: {chat_result['load_time']:.2f}s")
 
         # Phase 3: Agent Execution with ExecutionEngine
         for i, test_message in enumerate(self.test_messages):
@@ -108,22 +108,22 @@ class TestSSOTConsolidationNoRegression(SSotAsyncTestCase):
             assert len(agent_result["response"]) > 50, \
                 f"Response too short ({len(agent_result['response'])} chars), may indicate degraded AI quality"
 
-            print(f"✅ Agent execution {i+1} successful: {agent_result['execution_time']:.2f}s")
+            print(f"CHECK Agent execution {i+1} successful: {agent_result['execution_time']:.2f}s")
 
         # Phase 4: WebSocket Events Validation
         websocket_result = await self._validate_websocket_events()
         assert websocket_result["success"], f"WebSocket validation failed: {websocket_result.get('error')}"
-        print(f"✅ WebSocket events validated: {websocket_result['events_count']} events")
+        print(f"CHECK WebSocket events validated: {websocket_result['events_count']} events")
 
         # Phase 5: Performance Regression Check
         performance_result = await self._check_performance_regression()
         assert performance_result["success"], f"Performance regression detected: {performance_result.get('error')}"
-        print(f"✅ Performance within limits: {performance_result['summary']}")
+        print(f"CHECK Performance within limits: {performance_result['summary']}")
 
         # Phase 6: Business Value Validation
         business_result = await self._validate_business_value_delivery()
         assert business_result["success"], f"Business value validation failed: {business_result.get('error')}"
-        print(f"✅ Business value validated: {business_result['value_score']:.2f}/10")
+        print(f"CHECK Business value validated: {business_result['value_score']:.2f}/10")
 
         print(f"\n=== Complete User Journey: SUCCESS ===")
 
@@ -166,7 +166,7 @@ class TestSSOTConsolidationNoRegression(SSotAsyncTestCase):
         print(f"Failed concurrent sessions: {len(failed_sessions)}")
 
         for user_id, error in failed_sessions:
-            print(f"❌ {user_id}: {error}")
+            print(f"X {user_id}: {error}")
 
         # Validate multi-user isolation maintained
         assert len(successful_sessions) >= 2, \
@@ -177,7 +177,7 @@ class TestSSOTConsolidationNoRegression(SSotAsyncTestCase):
             assert user_id in session_result.get("context", {}).get("user_id", ""), \
                 f"User isolation broken: {user_id} result contaminated with other user data"
 
-        print(f"✅ Concurrent user isolation maintained")
+        print(f"CHECK Concurrent user isolation maintained")
 
     async def _test_user_authentication(self) -> Dict[str, Any]:
         """Test user authentication on staging environment"""
@@ -280,7 +280,7 @@ class TestSSOTConsolidationNoRegression(SSotAsyncTestCase):
                         try:
                             await asyncio.wait_for(websocket_task, timeout=30.0)
                         except asyncio.TimeoutError:
-                            print("⚠️ WebSocket monitoring timed out")
+                            print("WARNING️ WebSocket monitoring timed out")
 
                         return {
                             "success": True,

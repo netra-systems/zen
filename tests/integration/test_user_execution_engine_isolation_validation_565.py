@@ -116,7 +116,7 @@ class UserExecutionEngineIsolationValidation565Tests(SSotAsyncTestCase):
         self.assertIsNot(user1_engine, user2_engine, "User 1 and User 2 engines must be separate instances")
         self.assertIsNot(user2_engine, user3_engine, "User 2 and User 3 engines must be separate instances")
         self.assertIsNot(user1_engine, user3_engine, "User 1 and User 3 engines must be separate instances")
-        print("✅ VALIDATION 1: Separate instances created - no shared singletons")
+        print("CHECK VALIDATION 1: Separate instances created - no shared singletons")
         
         # VALIDATION 2: Context isolation maintained
         self.assertEqual(user1_engine.user_context.user_id, 'isolated_user_1_integration')
@@ -125,7 +125,7 @@ class UserExecutionEngineIsolationValidation565Tests(SSotAsyncTestCase):
         
         self.assertNotEqual(user1_engine.user_context.session_id, user2_engine.user_context.session_id)
         self.assertNotEqual(user1_engine.user_context.thread_id, user3_engine.user_context.thread_id)
-        print("✅ VALIDATION 2: Context isolation maintained - unique IDs per user")
+        print("CHECK VALIDATION 2: Context isolation maintained - unique IDs per user")
         
         # VALIDATION 3: No shared state between users
         user1_engine.execution_state = {'sensitive_data': 'user1_financial_records', 'balance': 50000}
@@ -143,7 +143,7 @@ class UserExecutionEngineIsolationValidation565Tests(SSotAsyncTestCase):
         self.assertNotIn('legal', str(user2_engine.execution_state))
         self.assertNotIn('financial', str(user3_engine.execution_state))
         self.assertNotIn('medical', str(user3_engine.execution_state))
-        print("✅ VALIDATION 3: No shared state - user data completely isolated")
+        print("CHECK VALIDATION 3: No shared state - user data completely isolated")
         
         # VALIDATION 4: Memory references are unique
         user1_id = id(user1_engine.execution_state)
@@ -153,7 +153,7 @@ class UserExecutionEngineIsolationValidation565Tests(SSotAsyncTestCase):
         self.assertNotEqual(user1_id, user2_id, "User 1 and 2 state must have different memory addresses")
         self.assertNotEqual(user2_id, user3_id, "User 2 and 3 state must have different memory addresses")
         self.assertNotEqual(user1_id, user3_id, "User 1 and 3 state must have different memory addresses")
-        print(f"✅ VALIDATION 4: Unique memory addresses - User1: {user1_id}, User2: {user2_id}, User3: {user3_id}")
+        print(f"CHECK VALIDATION 4: Unique memory addresses - User1: {user1_id}, User2: {user2_id}, User3: {user3_id}")
         
         self.test_results['isolation_validation'].append({
             'test': 'perfect_isolation',
@@ -285,7 +285,7 @@ class UserExecutionEngineIsolationValidation565Tests(SSotAsyncTestCase):
                             self.assertNotIn(sensitive_data, user2_state_str,
                                            f"User {user1_id} data found in User {user2_id} state: {sensitive_data}")
         
-        print("✅ CONCURRENT ACCESS VALIDATION: All checks passed - no contamination detected")
+        print("CHECK CONCURRENT ACCESS VALIDATION: All checks passed - no contamination detected")
         
         self.test_results['concurrent_access'].append({
             'test': 'concurrent_user_access',
@@ -393,7 +393,7 @@ class UserExecutionEngineIsolationValidation565Tests(SSotAsyncTestCase):
         self.assertGreater(recovery_percentage, 50,
                           f"Poor memory recovery. Only {recovery_percentage:.1f}% recovered")
         
-        print(f"✅ MEMORY MANAGEMENT VALIDATION: {recovery_percentage:.1f}% memory recovered")
+        print(f"CHECK MEMORY MANAGEMENT VALIDATION: {recovery_percentage:.1f}% memory recovered")
         
         self.test_results['memory_cleanup'].append({
             'test': 'memory_cleanup',
@@ -529,7 +529,7 @@ class UserExecutionEngineIsolationValidation565Tests(SSotAsyncTestCase):
         self.assertEqual(len(contamination_errors), 0,
                         f"WebSocket event contamination detected: {contamination_errors}")
         
-        print("✅ WEBSOCKET ROUTING VALIDATION: Perfect event isolation - no contamination detected")
+        print("CHECK WEBSOCKET ROUTING VALIDATION: Perfect event isolation - no contamination detected")
         
         self.test_results['websocket_routing'].append({
             'test': 'websocket_event_routing',
@@ -552,7 +552,7 @@ class UserExecutionEngineIsolationValidation565Tests(SSotAsyncTestCase):
             if results:
                 print(f"\n🔍 {category.upper().replace('_', ' ')}:")
                 for result in results:
-                    status_icon = "✅" if result['status'] == 'PASS' else "❌"
+                    status_icon = "CHECK" if result['status'] == 'PASS' else "X"
                     print(f"   {status_icon} {result['test']}: {result['status']}")
                     
                     # Print relevant metrics
@@ -581,9 +581,9 @@ if __name__ == "__main__":
     # Report final status
     if result.wasSuccessful():
         print("\n🎉 SUCCESS: UserExecutionEngine integration validation PASSED")
-        print("✅ Migration to UserExecutionEngine solves Issue #565 security vulnerabilities")
+        print("CHECK Migration to UserExecutionEngine solves Issue #565 security vulnerabilities")
     else:
-        print("\n❌ FAILURE: Integration validation failed")
+        print("\nX FAILURE: Integration validation failed")
         print(f"   - Tests run: {result.testsRun}")
         print(f"   - Failures: {len(result.failures)}")
         print(f"   - Errors: {len(result.errors)}")

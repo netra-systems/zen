@@ -65,7 +65,7 @@ from sqlalchemy import text, MetaData, Table, Column, Integer, String, DateTime,
 from sqlalchemy.sql import select, insert, update, delete
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 import uuid
 from dataclasses import dataclass
 from netra_backend.app.logging_config import central_logger
@@ -351,7 +351,7 @@ class BackendServiceIntegrationComprehensiveTests(BaseIntegrationTest):
             session_data = {
                 "user_id": context.test_user.id,
                 "thread_id": context.test_thread.id,
-                "last_activity": datetime.utcnow().isoformat(),
+                "last_activity": datetime.now(UTC).isoformat(),
                 "preferences": {
                     "theme": "dark",
                     "notifications": True,
@@ -424,7 +424,7 @@ class BackendServiceIntegrationComprehensiveTests(BaseIntegrationTest):
                 connection_id=context.user_context.websocket_connection_id,
                 user_id=context.test_user.id,
                 websocket=mock_websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={"test_connection": True}
             )
             
@@ -491,7 +491,7 @@ class BackendServiceIntegrationComprehensiveTests(BaseIntegrationTest):
                     connection_id=context.user_context.websocket_connection_id,
                     user_id=context.test_user.id,
                     websocket=mock_websocket,
-                    connected_at=datetime.utcnow()
+                    connected_at=datetime.now(UTC)
                 )
                 
                 await context.websocket_manager.add_connection(connection)
@@ -565,7 +565,7 @@ class BackendServiceIntegrationComprehensiveTests(BaseIntegrationTest):
                 connection_id=context1.user_context.websocket_connection_id,
                 user_id=context1.test_user.id,
                 websocket=mock_ws1,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={"user": "user1"}
             )
             
@@ -573,7 +573,7 @@ class BackendServiceIntegrationComprehensiveTests(BaseIntegrationTest):
                 connection_id=user_context2.websocket_connection_id,
                 user_id=user2.id,
                 websocket=mock_ws2,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={"user": "user2"}
             )
             
@@ -840,7 +840,7 @@ class BackendServiceIntegrationComprehensiveTests(BaseIntegrationTest):
                 connection_id=context.user_context.websocket_connection_id,
                 user_id=context.test_user.id,
                 websocket=mock_websocket,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             )
             
             await context.websocket_manager.add_connection(connection)
@@ -861,7 +861,7 @@ class BackendServiceIntegrationComprehensiveTests(BaseIntegrationTest):
                 await redis_client.hset(task_key, mapping={
                     "progress": str(update["progress"]),
                     "status": update["status"],
-                    "last_updated": datetime.utcnow().isoformat()
+                    "last_updated": datetime.now(UTC).isoformat()
                 })
             
             # Verify final task state
@@ -964,7 +964,7 @@ class BackendServiceIntegrationComprehensiveTests(BaseIntegrationTest):
                 connection_id=context.user_context.websocket_connection_id,
                 user_id=context.test_user.id,
                 websocket=mock_websocket,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             )
             
             await ws_manager.add_connection(connection)
@@ -1089,7 +1089,7 @@ class BackendServiceIntegrationComprehensiveTests(BaseIntegrationTest):
                     connection_id=f"test_conn_{i}",
                     user_id=f"user_{i}",
                     websocket=mock_ws,
-                    connected_at=datetime.utcnow()
+                    connected_at=datetime.now(UTC)
                 )
                 await ws_manager.add_connection(connection)
             
@@ -1132,7 +1132,7 @@ class BackendServiceIntegrationComprehensiveTests(BaseIntegrationTest):
                         metadata={
                             "agent": "cost_optimizer",
                             "execution_id": str(UnifiedIdGenerator.generate_execution_id()),
-                            "start_time": datetime.utcnow().isoformat()
+                            "start_time": datetime.now(UTC).isoformat()
                         }
                     )
                     db.add(execution_record)
@@ -1151,8 +1151,8 @@ class BackendServiceIntegrationComprehensiveTests(BaseIntegrationTest):
             session_key = f"ws_session:{context.user_context.websocket_connection_id}"
             session_data = {
                 "user_id": context.test_user.id,
-                "connected_at": datetime.utcnow().isoformat(),
-                "last_activity": datetime.utcnow().isoformat()
+                "connected_at": datetime.now(UTC).isoformat(),
+                "last_activity": datetime.now(UTC).isoformat()
             }
             
             await redis_client.hset(session_key, mapping={
@@ -1248,7 +1248,7 @@ class BackendServiceIntegrationComprehensiveTests(BaseIntegrationTest):
                     connection_id=f"cleanup_test_{i}",
                     user_id=context.test_user.id,
                     websocket=mock_ws,
-                    connected_at=datetime.utcnow(),
+                    connected_at=datetime.now(UTC),
                     metadata={"test": f"cleanup_{i}"}
                 )
                 await ws_manager.add_connection(connection)

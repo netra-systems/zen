@@ -24,7 +24,7 @@ from netra_backend.app.agents.triage.unified_triage_agent import ExtractedEntiti
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.user_execution_context import UserExecutionContext, validate_user_context
-from netra_backend.app.database.session_manager import SessionManager
+# SSOT: Removed SessionManager import - it's just a stub, real DB access via context.db_session
 
 logger = central_logger.get_logger(__name__)
 
@@ -68,8 +68,8 @@ class ToolDiscoverySubAgent(BaseAgent):
         start_time = time.time()
         
         try:
-            # Create database session manager (stub implementation)
-            session_mgr = SessionManager()
+            # SSOT: SessionManager is a stub - no actual database operations needed
+            # Real database access should use context.db_session or DatabaseManager
             
             # Validate preconditions
             if not await self._validate_preconditions(context):
@@ -83,12 +83,9 @@ class ToolDiscoverySubAgent(BaseAgent):
             await self.emit_error(f"Tool discovery failed: {str(e)}", error_type="DiscoveryError")
             raise AgentValidationError(f"Tool discovery execution failed: {str(e)}")
         finally:
-            # Ensure proper cleanup
-            try:
-                if 'session_mgr' in locals():
-                    await session_mgr.cleanup()
-            except Exception as cleanup_e:
-                logger.error(f"Session cleanup error: {cleanup_e}")
+            # SSOT: Removed cleanup call - SessionManager stub has no cleanup method
+            # Database cleanup happens automatically via context.db_session lifecycle
+            pass
     
     async def _validate_preconditions(self, context: UserExecutionContext) -> bool:
         """Validate execution preconditions for tool discovery."""

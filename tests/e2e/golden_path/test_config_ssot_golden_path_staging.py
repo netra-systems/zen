@@ -5,8 +5,8 @@ E2E TEST ON STAGING - Validates Golden Path with Consolidated Config
 
 Business Value Justification (BVJ):
 - Segment: Enterprise/Platform - Revenue Protection
-- Business Goal: Golden Path Reliability - Protect $500K+ ARR from config failures
-- Value Impact: End-to-end validation of user login → AI chat with SSOT config
+- Business Goal: Golden Path Reliability - Protect 500K+ ARR from config failures
+- Value Impact: End-to-end validation of user login -> AI chat with SSOT config
 - Strategic Impact: Proves SSOT configuration consolidation enables Golden Path success
 
 PURPOSE: E2E test on staging environment validating complete Golden Path functionality
@@ -17,10 +17,10 @@ Test Coverage:
 2. Database connectivity with SSOT database configuration
 3. WebSocket communication with SSOT WebSocket configuration
 4. LLM integration with SSOT LLM configuration
-5. End-to-end user flow: login → AI chat response
+5. End-to-end user flow: login -> AI chat response
 
 CRITICAL: This test validates that SSOT configuration consolidation maintains
-Golden Path functionality worth $500K+ ARR protection.
+Golden Path functionality worth 500K+ ARR protection.
 """
 import pytest
 import asyncio
@@ -40,12 +40,12 @@ class ConfigSSotGoldenPathStagingTests(SSotAsyncTestCase):
     @pytest.fixture(scope='class')
     def staging_config(self):
         """Staging environment configuration."""
-        return {'base_url': 'https://backend.staging.netrasystems.ai', 'frontend_url': 'https://app.staging.netrasystems.ai', 'websocket_url': 'wss://backend.staging.netrasystems.ai/ws', 'health_url': 'https://backend.staging.netrasystems.ai/health', 'timeout': 30, 'max_retries': 3}
+        return {'base_url': 'https://api.staging.netrasystems.ai', 'frontend_url': 'https://app.staging.netrasystems.ai', 'websocket_url': 'wss://api.staging.netrasystems.ai/ws', 'health_url': 'https://api.staging.netrasystems.ai/health', 'timeout': 30, 'max_retries': 3}
 
     @pytest.fixture(scope='class')
     def test_user_credentials(self):
         """Test user credentials for staging authentication."""
-        return {'email': 'test@netra.ai', 'password': 'test123'}
+        return {'email': 'test@netrasystems.ai', 'password': 'test123'}
 
     async def test_staging_config_manager_health_check(self, staging_config):
         """
@@ -139,18 +139,18 @@ class ConfigSSotGoldenPathStagingTests(SSotAsyncTestCase):
                     return True
                 except asyncio.TimeoutError:
                     return True
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             pytest.fail(f'WebSocket connection closed: {str(e)}')
-        except websockets.exceptions.InvalidURI as e:
+        except websockets.InvalidURI as e:
             pytest.fail(f'Invalid WebSocket URI: {str(e)}')
         except Exception as e:
             pytest.fail(f'WebSocket connection failed: {str(e)}')
 
     async def test_golden_path_end_to_end_user_flow(self, staging_config, test_user_credentials):
         """
-        Test complete Golden Path: user login → AI chat response.
+        Test complete Golden Path: user login -> AI chat response.
 
-        This is the critical $500K+ ARR test validating end-to-end functionality
+        This is the critical 500K+ ARR test validating end-to-end functionality
         with SSOT configuration management.
         """
         base_url = staging_config['base_url']
@@ -191,7 +191,7 @@ class ConfigSSotGoldenPathStagingTests(SSotAsyncTestCase):
                     return {'golden_path_partial': True, 'events_received': golden_path_events, 'note': 'Agent started but may not have completed'}
                 else:
                     pytest.fail(f'Golden Path failed: No agent events received. Events: {golden_path_events}')
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             pytest.fail(f'WebSocket connection closed during Golden Path test: {str(e)}')
         except Exception as e:
             pytest.fail(f'Golden Path end-to-end test failed: {str(e)}')
@@ -263,7 +263,7 @@ class GoldenPathConfigIntegrationTests:
         if not os.getenv('STAGING_ACCESS_ENABLED'):
             pytest.skip('Staging access not enabled for this test run')
         test_instance = ConfigSSotGoldenPathStagingTests()
-        staging_config = {'base_url': 'https://backend.staging.netrasystems.ai', 'websocket_url': 'wss://backend.staging.netrasystems.ai/ws', 'health_url': 'https://backend.staging.netrasystems.ai/health', 'timeout': 30}
+        staging_config = {'base_url': 'https://api.staging.netrasystems.ai', 'websocket_url': 'wss://api.staging.netrasystems.ai/ws', 'health_url': 'https://api.staging.netrasystems.ai/health', 'timeout': 30}
         test_credentials = {'email': 'test@netra.ai', 'password': 'test123'}
         try:
             result = await test_instance.test_golden_path_end_to_end_user_flow(staging_config, test_credentials)

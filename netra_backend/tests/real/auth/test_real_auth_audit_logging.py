@@ -112,13 +112,13 @@ class RealAuthAuditLoggingTests:
 
     def create_audit_event(self, event_type: AuditEventType, user_id: Optional[int]=None, severity: AuditSeverity=AuditSeverity.MEDIUM, **kwargs) -> Dict[str, Any]:
         """Create audit event record."""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         return {'event_id': secrets.token_hex(16), 'event_type': event_type.value, 'severity': severity.value, 'timestamp': now.isoformat(), 'user_id': user_id, 'session_id': kwargs.get('session_id', secrets.token_hex(8)), 'ip_address': kwargs.get('ip_address', '127.0.0.1'), 'user_agent': kwargs.get('user_agent', 'pytest-audit-test'), 'endpoint': kwargs.get('endpoint', '/auth/test'), 'method': kwargs.get('method', 'POST'), 'status_code': kwargs.get('status_code', 200), 'details': kwargs.get('details', {}), 'resource': kwargs.get('resource'), 'action': kwargs.get('action'), 'result': kwargs.get('result', 'success'), 'risk_score': kwargs.get('risk_score', 0), 'country_code': kwargs.get('country_code', 'US'), 'organization_id': kwargs.get('organization_id'), 'correlation_id': kwargs.get('correlation_id', str(secrets.token_hex(8)))}
 
     @pytest.mark.asyncio
     async def test_authentication_success_audit_logging(self, redis_client, real_db_session):
         """Test audit logging for successful authentication events."""
-        users = [{'user_id': 10001, 'email': 'user1@netra.ai', 'ip': '192.168.1.10'}, {'user_id': 10002, 'email': 'user2@netra.ai', 'ip': '192.168.1.11'}, {'user_id': 10003, 'email': 'admin@netra.ai', 'ip': '10.0.0.1'}]
+        users = [{'user_id': 10001, 'email': 'user1@netrasystems.ai', 'ip': '192.168.1.10'}, {'user_id': 10002, 'email': 'user2@netrasystems.ai', 'ip': '192.168.1.11'}, {'user_id': 10003, 'email': 'admin@netrasystems.ai', 'ip': '10.0.0.1'}]
         audit_keys = []
         try:
             for user in users:
@@ -146,7 +146,7 @@ class RealAuthAuditLoggingTests:
     @pytest.mark.asyncio
     async def test_authentication_failure_audit_logging(self, redis_client):
         """Test audit logging for failed authentication attempts."""
-        failure_scenarios = [{'user_id': None, 'email': 'nonexistent@netra.ai', 'failure_reason': 'user_not_found', 'ip': '192.168.1.100', 'severity': AuditSeverity.MEDIUM}, {'user_id': 20001, 'email': 'user@netra.ai', 'failure_reason': 'invalid_password', 'ip': '192.168.1.100', 'severity': AuditSeverity.MEDIUM, 'attempt_count': 3}, {'user_id': 20002, 'email': 'locked@netra.ai', 'failure_reason': 'account_locked', 'ip': '10.0.0.5', 'severity': AuditSeverity.HIGH, 'attempt_count': 5}, {'user_id': None, 'email': 'bot@malicious.com', 'failure_reason': 'suspicious_activity', 'ip': '203.0.113.1', 'severity': AuditSeverity.CRITICAL, 'bot_detected': True}]
+        failure_scenarios = [{'user_id': None, 'email': 'nonexistent@netrasystems.ai', 'failure_reason': 'user_not_found', 'ip': '192.168.1.100', 'severity': AuditSeverity.MEDIUM}, {'user_id': 20001, 'email': 'user@netrasystems.ai', 'failure_reason': 'invalid_password', 'ip': '192.168.1.100', 'severity': AuditSeverity.MEDIUM, 'attempt_count': 3}, {'user_id': 20002, 'email': 'locked@netrasystems.ai', 'failure_reason': 'account_locked', 'ip': '10.0.0.5', 'severity': AuditSeverity.HIGH, 'attempt_count': 5}, {'user_id': None, 'email': 'bot@malicious.com', 'failure_reason': 'suspicious_activity', 'ip': '203.0.113.1', 'severity': AuditSeverity.CRITICAL, 'bot_detected': True}]
         audit_keys = []
         try:
             for scenario in failure_scenarios:
@@ -280,7 +280,7 @@ class RealAuthAuditLoggingTests:
         audit_keys = []
         try:
             for period in time_periods:
-                event_time = datetime.utcnow() - timedelta(days=period['days_ago'])
+                event_time = datetime.now(UTC) - timedelta(days=period['days_ago'])
                 audit_event = self.create_audit_event(AuditEventType.LOGIN_SUCCESS, user_id=60000 + period['days_ago'], details={'retention_test': True, 'period_label': period['label'], 'days_ago': period['days_ago']})
                 audit_event['timestamp'] = event_time.isoformat()
                 audit_event['retention_classification'] = period['label']
@@ -288,7 +288,7 @@ class RealAuthAuditLoggingTests:
                 audit_keys.append(audit_key)
                 retention_test_events.append(audit_event)
                 await redis_client.setex(audit_key, 3600, json.dumps(audit_event))
-            compliance_report = {'report_id': secrets.token_hex(8), 'generated_at': datetime.utcnow().isoformat(), 'reporting_period': 'test_period', 'total_audit_events': len(retention_test_events), 'events_by_category': {}, 'events_by_severity': {}, 'retention_analysis': {}, 'compliance_status': {}}
+            compliance_report = {'report_id': secrets.token_hex(8), 'generated_at': datetime.now(UTC).isoformat(), 'reporting_period': 'test_period', 'total_audit_events': len(retention_test_events), 'events_by_category': {}, 'events_by_severity': {}, 'retention_analysis': {}, 'compliance_status': {}}
             for event in retention_test_events:
                 event_type = event['event_type']
                 severity = event['severity']
@@ -297,7 +297,7 @@ class RealAuthAuditLoggingTests:
                 compliance_report['events_by_severity'][severity] = compliance_report['events_by_severity'].get(severity, 0) + 1
                 compliance_report['retention_analysis'][retention_class] = compliance_report['retention_analysis'].get(retention_class, 0) + 1
             compliance_report['compliance_status'] = {'gdpr_compliant': True, 'sox_compliant': True, 'pci_compliant': True, 'hipaa_compliant': True, 'retention_policy_followed': True}
-            current_time = datetime.utcnow()
+            current_time = datetime.now(UTC)
             events_to_purge = []
             for event in retention_test_events:
                 event_time = datetime.fromisoformat(event['timestamp'])

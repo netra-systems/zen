@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Dev Login Flow</title>
+</head>
+<body>
+    <h1>Test Dev Login Flow</h1>
+    <button id="testBtn">Test Complete Login Flow</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testLoginFlow() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+            
+            try {
+                // Step 1: Get auth config
+                console.log('Getting auth config...');
+                resultDiv.innerHTML += '<p>1. Getting auth config...</p>';
+                
+                const configResponse = await fetch('http://localhost:8081/auth/config');
+                const authConfig = await configResponse.json();
+                console.log('Auth config:', authConfig);
+                
+                resultDiv.innerHTML += `<p>✅ Auth config received: development_mode = ${authConfig.development_mode}</p>`;
+                
+                // Step 2: Check if we should use dev login
+                if (authConfig.development_mode) {
+                    console.log('Development mode detected, using dev login');
+                    resultDiv.innerHTML += '<p>2. Development mode detected, using dev login...</p>';
+                    
+                    // Perform dev login
+                    const loginResponse = await fetch(authConfig.endpoints.dev_login, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: 'dev@example.com',
+                            password: 'dev'
+                        })
+                    });
+                    
+                    if (!loginResponse.ok) {
+                        throw new Error(`Dev login failed: ${loginResponse.status}`);
+                    }
+                    
+                    const loginData = await loginResponse.json();
+                    console.log('Dev login successful:', loginData);
+                    
+                    resultDiv.innerHTML += `<p>✅ Dev login successful!</p>`;
+                    resultDiv.innerHTML += `<p>Token: ${loginData.access_token.substring(0, 50)}...</p>`;
+                    resultDiv.innerHTML += `<p>User: ${JSON.stringify(loginData.user)}</p>`;
+                    
+                    // Step 3: Verify token works
+                    resultDiv.innerHTML += '<p>3. Verifying token...</p>';
+                    
+                    const verifyResponse = await fetch(authConfig.endpoints.user, {
+                        headers: {
+                            'Authorization': `Bearer ${loginData.access_token}`
+                        }
+                    });
+                    
+                    if (verifyResponse.ok) {
+                        const userData = await verifyResponse.json();
+                        resultDiv.innerHTML += `<p>✅ Token verification successful!</p>`;
+                        resultDiv.innerHTML += `<p>User data: ${JSON.stringify(userData)}</p>`;
+                    } else {
+                        resultDiv.innerHTML += `<p>❌ Token verification failed: ${verifyResponse.status}</p>`;
+                    }
+                    
+                } else {
+                    // Would redirect to OAuth
+                    console.log('Production mode, would redirect to OAuth');
+                    resultDiv.innerHTML += '<p>Production mode detected, would redirect to OAuth:</p>';
+                    resultDiv.innerHTML += `<p>${authConfig.endpoints.login}?provider=google</p>`;
+                }
+                
+                resultDiv.innerHTML += '<hr><p><strong>✅ Login flow is working correctly!</strong></p>';
+                
+            } catch (error) {
+                resultDiv.innerHTML += `<p style="color: red;">❌ ERROR: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+        
+        document.getElementById('testBtn').addEventListener('click', testLoginFlow);
+        
+        // Auto-run test on load
+        window.addEventListener('load', testLoginFlow);
+    </script>
+</body>
+</html>

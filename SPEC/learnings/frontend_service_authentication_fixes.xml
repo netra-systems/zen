@@ -228,7 +228,7 @@
             <variables>
                 <variable name="NETRA_SERVICE_ACCOUNT_TOKEN" required="true" description="JWT token for service-to-service authentication" />
                 <variable name="NETRA_API_KEY" required="false" description="Backup API key authentication" />
-                <variable name="GOOGLE_SERVICE_ACCOUNT_EMAIL" required="false" description="Service account email for GCP authentication" default="netra-frontend@staging.netra.ai" />
+                <variable name="GOOGLE_SERVICE_ACCOUNT_EMAIL" required="false" description="Service account email for GCP authentication" default="netra-frontend@staging.netrasystems.ai" />
                 <variable name="NEXT_PUBLIC_ENVIRONMENT" required="true" description="Environment detection" value="staging" />
                 <variable name="NODE_ENV" required="true" description="Node environment" value="production" />
             </variables>

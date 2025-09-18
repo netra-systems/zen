@@ -887,24 +887,33 @@ class DatabaseURLBuilder:
     def format_url_for_driver(url: str, driver: str) -> str:
         """
         Format database URL for specific driver.
-        
+
         Args:
-            url: Base PostgreSQL URL (should be normalized first)
-            driver: Target driver ('asyncpg', 'psycopg2', 'psycopg', 'base')
-            
+            url: Database URL (PostgreSQL or SQLite)
+            driver: Target driver ('asyncpg', 'psycopg2', 'psycopg', 'base', 'aiosqlite')
+
         Returns:
             URL formatted for the specific driver
         """
         if not url:
             return url
-        
-        # First normalize the URL
+
+        # Handle SQLite URLs for async operations
+        if url.startswith("sqlite://"):
+            if driver == 'asyncpg' or driver == 'aiosqlite':
+                # Convert SQLite URLs to use aiosqlite driver for async operations
+                return url.replace("sqlite://", "sqlite+aiosqlite://", 1)
+            else:
+                # Keep SQLite URL as-is for sync operations
+                return url
+
+        # For PostgreSQL URLs, first normalize the URL
         url = DatabaseURLBuilder.normalize_postgres_url(url)
-        
+
         # Remove any existing driver prefix
         if "postgresql+" in url:
             url = re.sub(r'postgresql\+[^:]+://', 'postgresql://', url)
-        
+
         # Apply the correct driver prefix
         if driver == 'asyncpg':
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
@@ -929,7 +938,7 @@ class DatabaseURLBuilder:
         elif driver == 'base':
             # Keep as postgresql:// for base/sync operations
             pass
-        
+
         return url
     
     @staticmethod

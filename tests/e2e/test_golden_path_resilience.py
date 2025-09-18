@@ -4,7 +4,7 @@ Golden Path Resilience E2E Tests - Issue #1192
 Business Value Justification (BVJ):
 - Segment: Platform (All Segments)
 - Business Goal: Revenue Protection & Service Reliability
-- Value Impact: Ensures $500K+ ARR chat functionality resilient to service failures
+- Value Impact: Ensures 500K+ ARR chat functionality resilient to service failures
 - Strategic Impact: Validates business continuity on staging GCP environment
 
 This E2E test suite validates Golden Path resilience on staging GCP deployment.
@@ -41,10 +41,10 @@ class StagingServiceFailureSimulator:
 
     def __init__(self):
         self.staging_urls = {
-            "backend": "https://backend.staging.netrasystems.ai",
+            "backend": "https://api.staging.netrasystems.ai",
             "auth": "https://auth.staging.netrasystems.ai",
-            "websocket": "wss://backend.staging.netrasystems.ai/ws",
-            "health": "https://backend.staging.netrasystems.ai/health"
+            "websocket": "wss://api.staging.netrasystems.ai/ws",
+            "health": "https://api.staging.netrasystems.ai/health"
         }
         self.simulated_failures: Dict[str, Dict] = {}
 
@@ -141,7 +141,7 @@ class StagingWebSocketClient:
 
     def __init__(self, auth_token: str):
         self.auth_token = auth_token
-        self.websocket_url = "wss://backend.staging.netrasystems.ai/ws"
+        self.websocket_url = "wss://api.staging.netrasystems.ai/ws"
         self.connection = None
         self.events_received: List[Dict] = []
 
@@ -195,7 +195,7 @@ class StagingWebSocketClient:
             except asyncio.TimeoutError:
                 # Continue waiting if overall timeout not reached
                 continue
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 break
             except Exception as e:
                 # Log error but continue

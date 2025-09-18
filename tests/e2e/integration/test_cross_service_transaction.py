@@ -141,9 +141,7 @@ class CrossServiceTransactionerTests:
                 health_status = await self.services_manager.health_status()
                 for service, status in health_status.items():
                     if not status.get("ready", True):
-                        print(f"Warning: {service} service not ready")
-            except Exception as e:
-                print(f"Warning: Service health check failed: {e}")
+                        print(f"Warning: {service} service not ready""Warning: Service health check failed: {e}")
 
     async def execute_auth_profile_update(self, user_data: dict) -> TransactionOperation:
         """Execute user profile update in Auth PostgreSQL."""

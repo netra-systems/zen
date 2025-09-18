@@ -3,7 +3,7 @@ Test WebSocket Manager Migration Safety and Backward Compatibility (Issue #824)
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise) - Migration Risk Mitigation
-- Business Goal: Protect $500K+ ARR during SSOT consolidation migration
+- Business Goal: Protect 500K+ ARR during SSOT consolidation migration
 - Value Impact: Ensures zero downtime and no breaking changes during WebSocket Manager consolidation
 - Revenue Impact: Prevents customer impact from migration-related service disruptions
 

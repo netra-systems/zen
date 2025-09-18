@@ -51,7 +51,7 @@ URL_MIGRATIONS = [
         description='Backend staging service to load balancer'
     ),
     URLMigration(
-        old_pattern=r'https://netra-auth-staging-[a-zA-Z0-9]+-[a-z]+\.a\.run\.app',
+        old_pattern=r'https://netra-auth-[a-zA-Z0-9]+-[a-z]+\.a\.run\.app',
         new_url='https://auth.staging.netrasystems.ai',
         description='Auth staging service to load balancer'
     ),

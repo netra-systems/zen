@@ -71,7 +71,7 @@ class Issue860TestRunner:
         print()
 
         if not self.is_windows:
-            print("⚠️  WARNING: Running on non-Windows platform")
+            print("WARNING️  WARNING: Running on non-Windows platform")
             print("   Issue #860 is Windows-specific, results may not be representative")
             print()
 

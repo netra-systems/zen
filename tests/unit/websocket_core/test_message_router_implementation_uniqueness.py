@@ -88,10 +88,10 @@ class MessageRouterImplementationUniquenessTests(SSotBaseTestCase):
                 self.logger.error(f'  Missing method: {missing}')
         total_violations = len(signature_mismatches) + len(missing_methods)
         if total_violations == 0:
-            self.logger.info('✅ SSOT COMPLIANCE: All MessageRouter implementations have identical interfaces')
+            self.logger.info('CHECK SSOT COMPLIANCE: All MessageRouter implementations have identical interfaces')
         else:
             violation_msg = f'SSOT VIOLATION: {total_violations} implementation differences detected'
-            self.logger.error(f'❌ {violation_msg}')
+            self.logger.error(f'X {violation_msg}')
             self.fail(f'SSOT VIOLATION: MessageRouter implementations must be identical. Found {len(signature_mismatches)} signature mismatches and {len(missing_methods)} missing methods. This proves fragmented implementations blocking Golden Path.')
 
     def test_message_router_initialization_consistency(self):
@@ -138,10 +138,10 @@ class MessageRouterImplementationUniquenessTests(SSotBaseTestCase):
             for inconsistency in inconsistencies:
                 self.logger.error(f'  Initialization inconsistency: {inconsistency}')
         if len(inconsistencies) == 0:
-            self.logger.info('✅ SSOT COMPLIANCE: All MessageRouter implementations have consistent initialization')
+            self.logger.info('CHECK SSOT COMPLIANCE: All MessageRouter implementations have consistent initialization')
         else:
             violation_msg = f'SSOT VIOLATION: {len(inconsistencies)} initialization inconsistencies detected'
-            self.logger.error(f'❌ {violation_msg}')
+            self.logger.error(f'X {violation_msg}')
             self.fail(f'SSOT VIOLATION: MessageRouter implementations must have consistent initialization. Found {len(inconsistencies)} inconsistencies proving fragmented implementations.')
 
     def test_message_router_behavioral_equivalence(self):
@@ -198,10 +198,10 @@ class MessageRouterImplementationUniquenessTests(SSotBaseTestCase):
             for difference in behavioral_differences:
                 self.logger.error(f'  Behavioral difference: {difference}')
         if len(behavioral_differences) == 0:
-            self.logger.info('✅ SSOT COMPLIANCE: All MessageRouter implementations exhibit equivalent behavior')
+            self.logger.info('CHECK SSOT COMPLIANCE: All MessageRouter implementations exhibit equivalent behavior')
         else:
             violation_msg = f'SSOT VIOLATION: {len(behavioral_differences)} behavioral differences detected'
-            self.logger.error(f'❌ {violation_msg}')
+            self.logger.error(f'X {violation_msg}')
             self.fail(f'SSOT VIOLATION: MessageRouter implementations must exhibit equivalent behavior. Found {len(behavioral_differences)} behavioral differences proving fragmentation.')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

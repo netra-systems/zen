@@ -4,7 +4,7 @@ E2E Staging Tests for Issue #1181 Golden Path Message Routing
 
 Business Value Justification:
 - Segment: Platform/Golden Path Protection
-- Business Goal: $500K+ ARR Chat Functionality Validation
+- Business Goal: 500K+ ARR Chat Functionality Validation
 - Value Impact: Ensures MessageRouter consolidation maintains Golden Path user flow
 - Strategic Impact: Validates end-to-end message routing in staging environment
 
@@ -13,8 +13,8 @@ Issue #1181 MessageRouter consolidation must not break the Golden Path user flow
 that generates 90% of platform business value. These E2E tests validate that
 message routing works correctly in the staging environment with real services.
 
-Tests verify complete user journey: login → agent request → WebSocket events → AI response,
-ensuring the consolidated MessageRouter maintains the $500K+ ARR chat functionality.
+Tests verify complete user journey: login -> agent request -> WebSocket events -> AI response,
+ensuring the consolidated MessageRouter maintains the 500K+ ARR chat functionality.
 """
 
 import asyncio
@@ -42,8 +42,8 @@ class Issue1181GoldenPathMessageRoutingStagingE2ETests(SSotAsyncTestCase):
         super().setUpClass()
         
         # Staging environment configuration
-        cls.staging_base_url = "https://backend.staging.netrasystems.ai"
-        cls.staging_ws_url = "wss://backend.staging.netrasystems.ai/ws"
+        cls.staging_base_url = "https://api.staging.netrasystems.ai"
+        cls.staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
         cls.staging_auth_url = "https://auth.staging.netrasystems.ai"
         
         # Test user credentials for staging
@@ -92,9 +92,9 @@ class Issue1181GoldenPathMessageRoutingStagingE2ETests(SSotAsyncTestCase):
         """
         GOLDEN PATH E2E TEST: Complete user flow in staging environment.
         
-        Tests the complete Golden Path: authentication → WebSocket connection → 
-        agent request → WebSocket events → AI response. This validates that 
-        MessageRouter consolidation preserves the core $500K+ ARR functionality.
+        Tests the complete Golden Path: authentication -> WebSocket connection -> 
+        agent request -> WebSocket events -> AI response. This validates that 
+        MessageRouter consolidation preserves the core 500K+ ARR functionality.
         """
         logger.info(" TESTING:  Golden Path complete user flow in staging")
         
@@ -136,12 +136,11 @@ class Issue1181GoldenPathMessageRoutingStagingE2ETests(SSotAsyncTestCase):
             )
             
             logger.info(f" SUCCESS:  Golden Path completed in {golden_path_duration:.2f}s")
-            logger.info(f"   - Authentication: ✅")
-            logger.info(f"   - WebSocket: ✅") 
-            logger.info(f"   - Message Routing: ✅")
-            logger.info(f"   - WebSocket Events: ✅ ({len(self.received_events)} events)")
-            logger.info(f"   - AI Response: ✅")
-            logger.info(f"   - Performance: ✅ ({golden_path_duration:.2f}s < {self.golden_path_timeout}s)")
+            logger.info(f"   - Authentication: CHECK")
+            logger.info(f"   - WebSocket: CHECK") 
+            logger.info(f"   - Message Routing: CHECK")
+            logger.info(f"   - WebSocket Events: CHECK ({len(self.received_events)} events)""   - AI Response: CHECK")
+            logger.info(f"   - Performance: CHECK ({golden_path_duration:.2f}s < {self.golden_path_timeout}s)")
             
         except Exception as e:
             self.fail(f"Golden Path FAILED: {e}")
@@ -256,7 +255,7 @@ class Issue1181GoldenPathMessageRoutingStagingE2ETests(SSotAsyncTestCase):
             logger.info(f"   - Success rate: {success_rate:.2%}")
             
             for result in routing_results:
-                status = "✅" if result["success"] else "❌"
+                status = "CHECK" if result["success"] else "X"
                 logger.info(f"   {status} {result['test_name']}")
             
         except Exception as e:
@@ -359,7 +358,7 @@ class Issue1181GoldenPathMessageRoutingStagingE2ETests(SSotAsyncTestCase):
             logger.info(f" SUMMARY:  Quality message routing staging fallback:")
             logger.info(f"   - Quality messages tested: {len(quality_routing_results)}")
             logger.info(f"   - Gracefully handled: {graceful_count}")
-            logger.info(f"   - Core functionality: {'✅' if core_response else '❌'}")
+            logger.info(f"   - Core functionality: {'CHECK' if core_response else 'X'}")
             
         except Exception as e:
             self.fail(f"Quality message routing staging test failed: {e}")

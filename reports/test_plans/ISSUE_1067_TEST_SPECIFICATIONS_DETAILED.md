@@ -466,7 +466,7 @@ class TestGoldenPathBusinessValueProtectionE2E(SSotAsyncTestCase):
         try:
             # Create real user and authenticate
             test_user = await auth_helper.create_test_user(
-                email="e2e-test@netra.ai",
+                email="e2e-test@netrasystems.ai",
                 subscription_tier="enterprise"
             )
 
@@ -569,7 +569,7 @@ class TestGoldenPathBusinessValueProtectionE2E(SSotAsyncTestCase):
 
                 # Create unique user
                 test_user = await auth_helper.create_test_user(
-                    email=f"concurrent-user-{user_index}@netra.ai"
+                    email=f"concurrent-user-{user_index}@netrasystems.ai"
                 )
                 auth_token = await auth_helper.get_auth_token(test_user)
 

@@ -8,7 +8,7 @@ import json
 import random
 import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Any, Dict, List, Optional, Tuple
 from shared.isolated_environment import IsolatedEnvironment
 import jwt
@@ -83,7 +83,7 @@ class ConcurrentTokenRefreshTests:
         metrics = StressTestMetrics()
         tokens = []
         for i in range(100):
-            payload = {'sub': f'user_{i}', 'email': f'user{i}@example.com', 'exp': int((datetime.utcnow() + timedelta(minutes=5)).timestamp()), 'iat': int(datetime.utcnow().timestamp())}
+            payload = {'sub': f'user_{i}', 'email': f'user{i}@example.com', 'exp': int((datetime.now(UTC) + timedelta(minutes=5)).timestamp()), 'iat': int(datetime.now(UTC).timestamp())}
             token = jwt.encode(payload, config.jwt_secret, algorithm='HS256')
             tokens.append(token)
 
@@ -93,7 +93,7 @@ class ConcurrentTokenRefreshTests:
             try:
                 await asyncio.sleep(random.uniform(0.01, 0.1))
                 decoded = jwt.decode(token, config.jwt_secret, algorithms=['HS256'], options={'verify_exp': False})
-                decoded['exp'] = int((datetime.utcnow() + timedelta(hours=1)).timestamp())
+                decoded['exp'] = int((datetime.now(UTC) + timedelta(hours=1)).timestamp())
                 decoded['refresh_count'] = decoded.get('refresh_count', 0) + 1
                 new_token = jwt.encode(decoded, config.jwt_secret, algorithm='HS256')
                 latency = time.time() - start
@@ -125,7 +125,7 @@ class ConcurrentTokenRefreshTests:
         """Test that multiple refresh attempts for same token are properly handled."""
         config = get_configuration()
         metrics = StressTestMetrics()
-        payload = {'sub': 'test_user', 'email': 'test@example.com', 'exp': int((datetime.utcnow() + timedelta(minutes=5)).timestamp()), 'iat': int(datetime.utcnow().timestamp())}
+        payload = {'sub': 'test_user', 'email': 'test@example.com', 'exp': int((datetime.now(UTC) + timedelta(minutes=5)).timestamp()), 'iat': int(datetime.now(UTC).timestamp())}
         token = jwt.encode(payload, config.jwt_secret, algorithm='HS256')
         refresh_results = []
         refresh_lock = asyncio.Lock()
@@ -139,7 +139,7 @@ class ConcurrentTokenRefreshTests:
                     return {'attempt_id': attempt_id, 'status': 'blocked', 'latency': time.time() - start}
                 await asyncio.sleep(0.1)
                 new_payload = payload.copy()
-                new_payload['exp'] = int((datetime.utcnow() + timedelta(hours=1)).timestamp())
+                new_payload['exp'] = int((datetime.now(UTC) + timedelta(hours=1)).timestamp())
                 new_payload['refresh_count'] = 1
                 new_token = jwt.encode(new_payload, config.jwt_secret, algorithm='HS256')
                 result = {'attempt_id': attempt_id, 'status': 'success', 'new_token': new_token, 'latency': time.time() - start}
@@ -168,7 +168,7 @@ class WebSocketLoadWithRefreshTests:
         metrics = StressTestMetrics()
         config = get_configuration()
         try:
-            payload = {'sub': 'stress_test_user', 'email': 'stress@example.com', 'exp': int((datetime.utcnow() + timedelta(minutes=10)).timestamp()), 'iat': int(datetime.utcnow().timestamp())}
+            payload = {'sub': 'stress_test_user', 'email': 'stress@example.com', 'exp': int((datetime.now(UTC) + timedelta(minutes=10)).timestamp()), 'iat': int(datetime.now(UTC).timestamp())}
             token = jwt.encode(payload, config.jwt_secret, algorithm='HS256')
             ws_url = f'ws://localhost:8000/ws?token={token}'
             messages_sent = 0
@@ -209,7 +209,7 @@ class WebSocketLoadWithRefreshTests:
                     for _ in range(5):
                         await asyncio.sleep(2)
                         new_payload = payload.copy()
-                        new_payload['exp'] = int((datetime.utcnow() + timedelta(hours=1)).timestamp())
+                        new_payload['exp'] = int((datetime.now(UTC) + timedelta(hours=1)).timestamp())
                         new_payload['refresh_count'] = refresh_count + 1
                         new_token = jwt.encode(new_payload, config.jwt_secret, algorithm='HS256')
                         await websocket.send(json.dumps({'type': 'token_refresh', 'old_token': current_token, 'new_token': new_token}))
@@ -240,7 +240,7 @@ class WebSocketLoadWithRefreshTests:
 
             async def manage_connection(conn_id: int):
                 """Manage a single WebSocket connection."""
-                payload = {'sub': f'user_{conn_id}', 'email': f'user{conn_id}@example.com', 'exp': int((datetime.utcnow() + timedelta(minutes=5)).timestamp()), 'iat': int(datetime.utcnow().timestamp())}
+                payload = {'sub': f'user_{conn_id}', 'email': f'user{conn_id}@example.com', 'exp': int((datetime.now(UTC) + timedelta(minutes=5)).timestamp()), 'iat': int(datetime.now(UTC).timestamp())}
                 token = jwt.encode(payload, config.jwt_secret, algorithm='HS256')
                 ws_url = f'ws://localhost:8000/ws?token={token}'
                 stats = {'conn_id': conn_id, 'messages_sent': 0, 'messages_received': 0, 'refreshes': 0, 'errors': 0}
@@ -251,7 +251,7 @@ class WebSocketLoadWithRefreshTests:
                             stats['messages_sent'] += 1
                             if i == 50:
                                 new_payload = payload.copy()
-                                new_payload['exp'] = int((datetime.utcnow() + timedelta(hours=1)).timestamp())
+                                new_payload['exp'] = int((datetime.now(UTC) + timedelta(hours=1)).timestamp())
                                 new_token = jwt.encode(new_payload, config.jwt_secret, algorithm='HS256')
                                 await websocket.send(json.dumps({'type': 'token_refresh', 'new_token': new_token}))
                                 stats['refreshes'] += 1
@@ -291,7 +291,7 @@ class TokenRefreshResilienceTests:
         """Test token refresh behavior when auth service is down."""
         metrics = StressTestMetrics()
         config = get_configuration()
-        payload = {'sub': 'resilience_test_user', 'email': 'resilience@example.com', 'exp': int((datetime.utcnow() + timedelta(minutes=1)).timestamp()), 'iat': int(datetime.utcnow().timestamp())}
+        payload = {'sub': 'resilience_test_user', 'email': 'resilience@example.com', 'exp': int((datetime.now(UTC) + timedelta(minutes=1)).timestamp()), 'iat': int(datetime.now(UTC).timestamp())}
         token = jwt.encode(payload, config.jwt_secret, algorithm='HS256')
         with patch('netra_backend.app.clients.auth_client_core.AuthServiceClient.refresh_token') as mock_refresh:
             mock_refresh.side_effect = Exception('Auth service unavailable')
@@ -331,12 +331,12 @@ class TokenRefreshResilienceTests:
             attempt_counter += 1
             if should_succeed:
                 decoded = jwt.decode(token, config.jwt_secret, algorithms=['HS256'], options={'verify_exp': False})
-                decoded['exp'] = int((datetime.utcnow() + timedelta(hours=1)).timestamp())
+                decoded['exp'] = int((datetime.now(UTC) + timedelta(hours=1)).timestamp())
                 new_token = jwt.encode(decoded, config.jwt_secret, algorithm='HS256')
                 return {'access_token': new_token}
             else:
                 raise Exception('Network timeout')
-        payload = {'sub': 'intermittent_test', 'email': 'intermittent@example.com', 'exp': int((datetime.utcnow() + timedelta(minutes=5)).timestamp()), 'iat': int(datetime.utcnow().timestamp())}
+        payload = {'sub': 'intermittent_test', 'email': 'intermittent@example.com', 'exp': int((datetime.now(UTC) + timedelta(minutes=5)).timestamp()), 'iat': int(datetime.now(UTC).timestamp())}
         token = jwt.encode(payload, config.jwt_secret, algorithm='HS256')
         results = []
         for i in range(10):

@@ -1,8 +1,8 @@
 """
 GOLDEN PATH COVERAGE: WebSocket Agent Event Integration Tests
 
-Business Impact: $500K+ ARR - Real-time chat functionality critical for user experience
-Coverage Target: Minimal → 90% for WebSocket agent event integration
+Business Impact: 500K+ ARR - Real-time chat functionality critical for user experience
+Coverage Target: Minimal -> 90% for WebSocket agent event integration
 Priority: P0 - Core chat value delivery mechanism
 
 Tests comprehensive WebSocket event integration during agent execution.
@@ -80,7 +80,7 @@ class RealWebSocketTestClient:
                     logger.debug(f"Received WebSocket message: {parsed_message.get('type', 'unknown')}")
                 except json.JSONDecodeError as e:
                     logger.warning(f'Failed to parse WebSocket message: {e}')
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.info(f'WebSocket connection closed for user {self.user_id}')
         except Exception as e:
             logger.error(f'Error in WebSocket listener for user {self.user_id}: {e}')
@@ -116,7 +116,7 @@ class WebSocketAgentEventIntegrationTests(SSotAsyncTestCase):
     """
     Comprehensive tests for WebSocket agent event integration.
 
-    Business Value: Validates real-time chat experience ($500K+ ARR protection).
+    Business Value: Validates real-time chat experience (500K+ ARR protection).
     Coverage: WebSocket agent event integration from minimal to 90%.
     """
 

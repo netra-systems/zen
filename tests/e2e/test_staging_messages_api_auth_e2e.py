@@ -5,7 +5,7 @@ End-to-end tests against staging environment to validate the 403 authentication
 errors that correlate with commit f1c251c9c JWT SSOT changes.
 
 Business Value: Platform/Critical - Chat Functionality Protection
-Validates production-like behavior for $500K+ ARR chat functionality.
+Validates production-like behavior for 500K+ ARR chat functionality.
 
 Following CLAUDE.md guidelines:
 - Tests against staging environment using real URLs
@@ -38,7 +38,7 @@ class StagingMessagesAPIAuthE2ETests(SSotAsyncTestCase):
         super().setup_method(method)
         
         # Set up staging environment URLs per CLAUDE.md requirements
-        self._env.set("STAGING_BACKEND_URL", "https://backend.staging.netrasystems.ai", "staging_e2e")
+        self._env.set("STAGING_BACKEND_URL", "https://api.staging.netrasystems.ai", "staging_e2e")
         self._env.set("STAGING_AUTH_URL", "https://auth.staging.netrasystems.ai", "staging_e2e")
         self._env.set("ENVIRONMENT", "staging", "staging_e2e")
         
@@ -376,7 +376,7 @@ class StagingMessagesAPIAuthE2ETests(SSotAsyncTestCase):
         """Clean up after each staging test."""
         # Record Issue #1234 staging test completion
         self._metrics.record_custom("staging_e2e_test_completed", True)
-        self._metrics.record_custom("staging_environment", "https://backend.staging.netrasystems.ai")
+        self._metrics.record_custom("staging_environment", "https://api.staging.netrasystems.ai")
         self._metrics.record_custom("issue_1234_commit_target", "f1c251c9c")
         
         super().teardown_method(method)

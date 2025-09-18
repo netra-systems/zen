@@ -205,12 +205,12 @@ resource "google_compute_url_map" "https_lb" {
   project         = var.project_id
 
   host_rule {
-    hosts        = ["api.staging.netrasystems.ai"]
+    hosts        = ["api-staging.netrasystems.ai"]
     path_matcher = "api-paths"
   }
 
   host_rule {
-    hosts        = ["auth.staging.netrasystems.ai"]
+    hosts        = ["auth-staging.netrasystems.ai"]
     path_matcher = "auth-paths"
   }
 
@@ -230,7 +230,8 @@ resource "google_compute_url_map" "https_lb" {
 
       route_action {
         timeout {
-          seconds = var.websocket_timeout_sec # NEW: Dedicated WebSocket timeout
+          # Issue #1300: Enhanced timeout for WebSocket authentication monitoring
+          seconds = max(var.websocket_auth_monitoring_timeout_sec, 600) # Minimum 600s for auth monitoring
         }
 
         # CRITICAL FIX: Explicit authentication header preservation for WebSocket paths

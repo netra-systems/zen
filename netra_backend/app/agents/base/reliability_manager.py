@@ -4,7 +4,7 @@ Handles circuit breakers, retry logic, and failure recovery for agent operations
 """
 
 from typing import Any, Dict, Optional, Callable, Awaitable
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import asyncio
 from enum import Enum
 
@@ -90,7 +90,7 @@ class ReliabilityManager:
         if self._circuit_state == CircuitState.OPEN:
             # Check if recovery timeout has elapsed
             if (self._last_failure_time and 
-                datetime.utcnow() - self._last_failure_time >= timedelta(seconds=self.recovery_timeout)):
+                datetime.now(UTC) - self._last_failure_time >= timedelta(seconds=self.recovery_timeout)):
                 # Move to half-open state
                 self._circuit_state = CircuitState.HALF_OPEN
                 self._half_open_call_count = 0
@@ -168,7 +168,7 @@ class ReliabilityManager:
     async def _record_failure(self, operation_name: str, error_message: str) -> None:
         """Record failed operation."""
         self._failure_count += 1
-        self._last_failure_time = datetime.utcnow()
+        self._last_failure_time = datetime.now(UTC)
         
         logger.warning(f"Recorded failure for {operation_name}: {error_message}")
         logger.debug(f"Failure count: {self._failure_count}/{self.failure_threshold}")
@@ -225,7 +225,7 @@ class ReliabilityManager:
             "can_execute": can_execute,
             "failure_count": self._failure_count,
             "successful_calls": self._successful_calls,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(UTC)
         }
     
     def get_health_status(self) -> Dict[str, Any]:
@@ -248,7 +248,7 @@ class ReliabilityManager:
             "failure_threshold": self.failure_threshold,
             "recovery_timeout": self.recovery_timeout,
             "last_failure_time": self._last_failure_time,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(UTC)
         }
     
     def reset_metrics(self) -> None:

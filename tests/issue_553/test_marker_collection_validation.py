@@ -84,7 +84,7 @@ class MarkerCollectionValidationTests:
             assert 'test_with_temp_marker_1' in result.stdout
             assert 'test_with_temp_marker_2' in result.stdout
             assert 'test_business_functionality' in result.stdout
-            print(f'✅ MARKER REGISTRATION: Programmatic registration works correctly')
+            print(f'CHECK MARKER REGISTRATION: Programmatic registration works correctly')
             print(f"Collected tests: {result.stdout.count('::test_')}")
 
     @pytest.mark.integration
@@ -114,7 +114,7 @@ class MarkerCollectionValidationTests:
             assert result.returncode == 0, f'Collection failed: {result.stderr}'
             assert collection_time < 10.0, f'Collection too slow: {collection_time:.2f}s'
             test_count = len(marker_list)
-            print(f'✅ COLLECTION PERFORMANCE:')
+            print(f'CHECK COLLECTION PERFORMANCE:')
             print(f'  Collection time: {collection_time:.3f}s')
             print(f'  Tests collected: {test_count}')
             print(f'  Markers tested: {len(marker_list)}')
@@ -147,7 +147,7 @@ class MarkerCollectionValidationTests:
             expected_tests = ['test_class_marker_inheritance', 'test_function_marker_addition', 'test_different_class_marker', 'test_multiple_function_markers', 'test_standalone_function']
             for test_name in expected_tests:
                 assert test_name in result.stdout, f'Test {test_name} not collected'
-            print(f'✅ MARKER SCOPING: All inheritance levels work correctly')
+            print(f'CHECK MARKER SCOPING: All inheritance levels work correctly')
             print(f'Tests collected: {len(expected_tests)}')
             return {'tests_collected': expected_tests, 'collection_output': result.stdout}
 
@@ -177,7 +177,7 @@ class MarkerCollectionValidationTests:
                 for test_name in expected_tests:
                     assert test_name in result.stdout, f"Test {test_name} not selected for marker '{marker_expr}'"
                 results[marker_expr] = {'expected_count': len(expected_tests), 'success': True}
-            print(f'✅ MARKER FILTERING: All filter expressions work correctly')
+            print(f'CHECK MARKER FILTERING: All filter expressions work correctly')
             print(f'Filter tests performed: {len(filter_tests)}')
             return results
 
@@ -221,13 +221,13 @@ class MarkerCollectionValidationTests:
         print(f'  Undefined markers (ISSUE #553): {len(undefined_markers)}')
         print(f'  Unused defined markers: {len(unused_markers)}')
         if undefined_markers:
-            print(f'\n❌ UNDEFINED MARKERS FOUND:')
+            print(f'\nX UNDEFINED MARKERS FOUND:')
             for marker in sorted(undefined_markers):
                 usage_count = len(marker_usage.get(marker, []))
                 print(f'    - {marker} (used in {usage_count} locations)')
             print(f'\nThis confirms Issue #553: pytest marker configuration missing markers')
         else:
-            print(f'\n✅ ALL MARKERS PROPERLY DEFINED')
+            print(f'\nCHECK ALL MARKERS PROPERLY DEFINED')
         if unused_markers:
             print(f'\n📋 UNUSED DEFINED MARKERS:')
             for marker in sorted(list(unused_markers)[:10]):

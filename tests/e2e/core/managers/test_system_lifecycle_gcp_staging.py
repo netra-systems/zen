@@ -2,7 +2,7 @@
 SystemLifecycle SSOT E2E GCP Staging Tests - Production Deployment Validation
 
 This module tests the SystemLifecycle SSOT in real GCP staging environment to validate
-production-ready deployment scenarios protecting $500K+ ARR.
+production-ready deployment scenarios protecting 500K+ ARR.
 
 Business Value Protection:
 - Zero-downtime deployment validation in Cloud Run environment

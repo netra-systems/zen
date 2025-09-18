@@ -4,7 +4,7 @@ Test User Context Factory Business Logic
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - Multi-user platform foundation
 - Business Goal: Enable secure, isolated user contexts for concurrent operations  
-- Value Impact: Context factory enables scalable multi-user platform = $500K+ ARR growth
+- Value Impact: Context factory enables scalable multi-user platform = 500K+ ARR growth
 - Strategic Impact: User isolation is mandatory for enterprise customers and compliance
 
 This test validates core user context factory algorithms that power:

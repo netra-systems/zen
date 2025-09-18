@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Segment: Platform Infrastructure
 - Business Goal: System Stability & Multi-user Support  
 - Value Impact: Fixes critical test infrastructure blocking multi-user validation
-- Strategic Impact: Enables $500K+ ARR validation for concurrent user functionality
+- Strategic Impact: Enables 500K+ ARR validation for concurrent user functionality
 
 CRITICAL: This test validates the root cause fix for Issue #674 where 80+ test files
 call UserExecutionContext.from_request() but this method doesn't exist.
@@ -208,7 +208,7 @@ class UserExecutionContextFactoryMethodsTests:
         # Simulate the fixed create_user_context method
         def create_user_context_fixed() -> UserExecutionContext:
             """Fixed version of create_user_context from failing test."""
-            return UserExecutionContext.from_request(  # ✅ FIXED: was create_for_user
+            return UserExecutionContext.from_request(  # CHECK FIXED: was create_for_user
                 user_id="test_user",
                 thread_id="test_thread",
                 run_id="test_run"

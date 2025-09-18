@@ -3,7 +3,7 @@
 Mission Critical Test Suite: Tool Dispatcher Enhancement Always Works
 
 Business Value: Platform/Internal - Tool Dispatcher SSOT Factory Pattern Compliance
-Critical for $500K+ ARR protection through proper tool dispatcher factory patterns.
+Critical for 500K+ ARR protection through proper tool dispatcher factory patterns.
 
 This test suite validates that the tool dispatcher ALWAYS uses the proper factory pattern
 with user_context for WebSocket manager integration, eliminating the "enhancement" anti-pattern.
@@ -393,21 +393,21 @@ if __name__ == "__main__":
 
         try:
             await test_instance.test_tool_dispatcher_uses_factory_pattern_not_direct_instantiation()
-            print("✅ Factory pattern validation: PASS")
+            print("CHECK Factory pattern validation: PASS")
         except Exception as e:
-            print(f"❌ Factory pattern validation: FAIL - {e}")
+            print(f"X Factory pattern validation: FAIL - {e}")
 
         try:
             await test_instance.test_websocket_manager_integration_requires_user_context()
-            print("✅ WebSocket manager integration: PASS")
+            print("CHECK WebSocket manager integration: PASS")
         except Exception as e:
-            print(f"❌ WebSocket manager integration: FAIL - {e}")
+            print(f"X WebSocket manager integration: FAIL - {e}")
 
         try:
             await test_instance.test_user_isolation_prevents_data_contamination()
-            print("✅ User isolation validation: PASS")
+            print("CHECK User isolation validation: PASS")
         except Exception as e:
-            print(f"❌ User isolation validation: FAIL - {e}")
+            print(f"X User isolation validation: FAIL - {e}")
 
         print("Tool Dispatcher Enhancement Always Works Tests Complete")
 

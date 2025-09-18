@@ -845,10 +845,7 @@ class WebSocketAgentEventsTests(BaseAgentExecutionTest):
                     "error": f"Simulated WebSocket delivery failure for {event_type}"
                 })
                 # Log the simulated failure but don't crash the agent execution
-                logger.warning(f"Simulated WebSocket delivery failure for {event_type} (test scenario)")
-                
-                # Increment failed emissions counter to match test expectations
-                self.advanced_websocket_manager.performance_metrics["failed_emissions"] += 1
+                logger.warning(f"Simulated WebSocket delivery failure for {event_type} (test scenario)""failed_emissions"] += 1
                 return False  # Return False to indicate delivery failure without crashing
             
             # Let other events succeed normally

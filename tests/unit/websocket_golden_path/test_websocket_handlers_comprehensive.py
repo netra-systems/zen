@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: Platform/Internal - Core message processing infrastructure
 - Business Goal: Message Routing Accuracy & Development Velocity
 - Value Impact: Ensures agent requests reach execution (critical for chat functionality)
-- Revenue Impact: Foundation for reliable AI agent communication ($500K+ ARR)
+- Revenue Impact: Foundation for reliable AI agent communication (500K+ ARR)
 
 CRITICAL: These tests validate message handling logic that bridges WebSocket communication
 with agent execution. Message routing failures block the entire Golden Path user flow.

@@ -18,7 +18,7 @@ Key Features:
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Optional, Dict, Any
 import uuid
 
@@ -58,8 +58,8 @@ class WebSocketContext:
     user_id: str
     thread_id: str
     run_id: str
-    connected_at: datetime = field(default_factory=datetime.utcnow)
-    last_activity: datetime = field(default_factory=datetime.utcnow)
+    connected_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    last_activity: datetime = field(default_factory=lambda: datetime.now(UTC))
     
     def __post_init__(self):
         """Post-initialization validation and logging."""
@@ -108,7 +108,7 @@ class WebSocketContext:
         Should be called whenever this connection processes a message
         or performs any activity. Useful for connection lifecycle management.
         """
-        self.last_activity = datetime.utcnow()
+        self.last_activity = datetime.now(UTC)
         logger.debug(f"Updated activity timestamp for connection {self.connection_id}")
     
     def get_connection_info(self) -> dict:
@@ -191,7 +191,7 @@ class WebSocketContext:
                 raise ValueError(f"Missing required identifiers in context {self.connection_id}")
             
             # Check connection age (warn if very old)
-            age = (datetime.utcnow() - self.connected_at).total_seconds()
+            age = (datetime.now(UTC) - self.connected_at).total_seconds()
             if age > 86400:  # 24 hours
                 logger.warning(f"WebSocket connection {self.connection_id} is very old: {age}s")
             
@@ -236,8 +236,8 @@ class WebSocketRequestContext:
     thread_id: str
     run_id: str
     connection_info: Optional[Any] = None
-    created_at: datetime = field(default_factory=datetime.utcnow)
-    last_activity: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    last_activity: datetime = field(default_factory=lambda: datetime.now(UTC))
     _attributes: Dict[str, Any] = field(default_factory=dict)
     
     def __post_init__(self):
@@ -314,7 +314,7 @@ class WebSocketRequestContext:
         Should be called whenever this context processes a message
         or performs any activity. Useful for context lifecycle management.
         """
-        self.last_activity = datetime.utcnow()
+        self.last_activity = datetime.now(UTC)
         logger.debug(f"Updated activity timestamp for context {self.run_id}")
     
     def get_context_info(self) -> dict:

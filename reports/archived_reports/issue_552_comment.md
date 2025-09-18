@@ -214,7 +214,7 @@ python -m pytest tests/integration/test_docker_api_migration_validation.py -v
 
 # 3. E2E staging tests - Prove auth service works (NO Docker required)
 export USE_STAGING_FALLBACK=true
-export STAGING_AUTH_SERVICE_URL="https://auth-service-staging.netra.ai"
+export STAGING_AUTH_SERVICE_URL="https://auth-service-staging.netrasystems.ai"
 python -m pytest tests/e2e/staging/test_auth_service_business_flows_api_fix.py -v
 ```
 

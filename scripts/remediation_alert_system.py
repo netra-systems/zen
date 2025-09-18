@@ -190,7 +190,7 @@ class RemediationAlertSystem:
                 "enabled": False,
                 "smtp_server": "localhost",
                 "smtp_port": 587,
-                "sender_email": "alerts@netra.ai",
+                "sender_email": "alerts@netrasystems.ai",
                 "recipient_list": []
             },
             "slack_settings": {

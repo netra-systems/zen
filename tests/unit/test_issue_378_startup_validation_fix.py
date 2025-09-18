@@ -143,7 +143,7 @@ class DatabaseConfigurationValidationFixTests(SSotAsyncTestCase):
             message = validation.message.lower()
             assert 'empty' in message or 'missing' in message, 'Should identify empty/missing values'
             self.logger.info(f'Configuration issues detected early: {validation.message}')
-            self.logger.info('✅ Issue #378 fix working: Configuration validation prevents auto-initialization masking')
+            self.logger.info('CHECK Issue #378 fix working: Configuration validation prevents auto-initialization masking')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

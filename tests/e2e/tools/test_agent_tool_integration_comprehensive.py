@@ -1,6 +1,6 @@
 """E2E Agent Tool Integration Comprehensive Test - GCP Staging Environment
 
-Business Value: $500K+ ARR protection through comprehensive tool validation
+Business Value: 500K+ ARR protection through comprehensive tool validation
 Critical Coverage for Issue #872: Agent tool integration and chaining
 
 REQUIREMENTS:
@@ -222,7 +222,7 @@ class AgentToolTester(SSotAsyncTestCase, StagingTestBase):
     async def setup_test_user_and_connection(self) -> bool:
         """Setup authenticated test user and WebSocket connection"""
         user_id = f"tool_test_user_{int(time.time())}_{uuid.uuid4().hex[:6]}"
-        email = f"{user_id}@tooltest.netra.ai"
+        email = f"{user_id}@tooltest.netrasystems.ai"
         
         # Create JWT token with tool execution permissions
         access_token = create_real_jwt_token(

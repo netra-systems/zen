@@ -64,7 +64,7 @@ class TestE2ETestCollectionValidation(BaseIntegrationTest):
 
         # Should have meaningful test collection
         assert "collected" in collection_summary.lower()
-        print(f"✓ E2E test collection successful: {collection_summary}")
+        print(f"CHECK E2E test collection successful: {collection_summary}")
 
     @pytest.mark.integration
     @pytest.mark.test_collection
@@ -82,7 +82,7 @@ class TestE2ETestCollectionValidation(BaseIntegrationTest):
             assert manager is not None
             assert manager.project_root is not None
             assert isinstance(manager.project_root, Path)
-            print(f"✓ RealServicesManager instantiated successfully with project_root: {manager.project_root}")
+            print(f"CHECK RealServicesManager instantiated successfully with project_root: {manager.project_root}")
 
         except Exception as e:
             pytest.fail(f"RealServicesManager instantiation failed: {e}")
@@ -112,7 +112,7 @@ class TestE2ETestCollectionValidation(BaseIntegrationTest):
         assert manager1.project_root.exists()
         assert manager2.project_root.exists()
 
-        print(f"✓ Consistent project root detection: {manager1.project_root}")
+        print(f"CHECK Consistent project root detection: {manager1.project_root}")
 
     @pytest.mark.integration
     @pytest.mark.test_collection
@@ -140,7 +140,7 @@ class TestE2ETestCollectionValidation(BaseIntegrationTest):
         for service in expected_services:
             assert service in endpoint_names, f"Missing service endpoint: {service}"
 
-        print(f"✓ E2E infrastructure initialized with {len(manager.service_endpoints)} service endpoints")
+        print(f"CHECK E2E infrastructure initialized with {len(manager.service_endpoints)} service endpoints")
 
     @pytest.mark.integration
     @pytest.mark.test_collection
@@ -176,7 +176,7 @@ class TestE2ETestCollectionValidation(BaseIntegrationTest):
         # Should be successful
         assert result.returncode == 0, f"Collection failed: {result.stderr}"
 
-        print(f"✓ E2E test collection completed in {collection_time:.2f}s")
+        print(f"CHECK E2E test collection completed in {collection_time:.2f}s")
 
     @pytest.mark.integration
     @pytest.mark.test_collection
@@ -213,9 +213,9 @@ class TestE2ETestCollectionValidation(BaseIntegrationTest):
                     pytest.fail(f"Project root detection failed for {test_file}: {result.stderr}")
                 else:
                     # Other import issues are not related to Issue #1277
-                    print(f"⚠ {test_file.name} has collection issues (not project root related)")
+                    print(f"WARNING {test_file.name} has collection issues (not project root related)")
             else:
-                print(f"✓ {test_file.name} collected successfully")
+                print(f"CHECK {test_file.name} collected successfully")
 
     @pytest.mark.integration
     @pytest.mark.test_collection
@@ -244,7 +244,7 @@ class TestE2ETestCollectionValidation(BaseIntegrationTest):
         for path in expected_paths:
             assert path.exists(), f"Expected path does not exist: {path}"
 
-        print(f"✓ All expected project paths resolved correctly from root: {project_root}")
+        print(f"CHECK All expected project paths resolved correctly from root: {project_root}")
 
     @pytest.mark.integration
     @pytest.mark.test_collection
@@ -273,7 +273,7 @@ class TestE2ETestCollectionValidation(BaseIntegrationTest):
             health_checker = AsyncHealthChecker()
             assert health_checker is not None
 
-            print("✓ All E2E infrastructure imports successful")
+            print("CHECK All E2E infrastructure imports successful")
 
         except ImportError as e:
             pytest.fail(f"E2E infrastructure import failed: {e}")
@@ -303,7 +303,7 @@ class TestE2ETestCollectionValidation(BaseIntegrationTest):
             assert endpoint.url is not None
             assert endpoint.url.startswith(("http://", "https://", "ws://", "wss://", "postgresql://"))
 
-        print(f"✓ Environment configuration successful for {environment} environment")
+        print(f"CHECK Environment configuration successful for {environment} environment")
 
 
 class TestE2ETestCollectionRegressionPrevention:
@@ -346,7 +346,7 @@ class TestE2ETestCollectionRegressionPrevention:
         assert result.returncode == 0 or "collected" in result.stdout.lower(), \
             f"Collection failed or no items collected: {result.stdout}"
 
-        print("✓ Original Issue #1277 scenario now passes - test collection successful")
+        print("CHECK Original Issue #1277 scenario now passes - test collection successful")
 
     @pytest.mark.integration
     @pytest.mark.test_collection
@@ -378,7 +378,7 @@ class TestE2ETestCollectionRegressionPrevention:
         assert detected_root == project_root
         assert (detected_root / "pyproject.toml").exists()
 
-        print("✓ Project root detection works without claude.md dependency")
+        print("CHECK Project root detection works without claude.md dependency")
 
     @pytest.mark.integration
     @pytest.mark.test_collection
@@ -422,7 +422,7 @@ class TestE2ETestCollectionRegressionPrevention:
                 if result.returncode != 0 and "Cannot detect project root" in result.stderr:
                     pytest.fail(f"Project root detection failed from {test_dir}: {result.stderr}")
 
-                print(f"✓ Test collection works from {test_dir.name}")
+                print(f"CHECK Test collection works from {test_dir.name}")
 
         finally:
             os.chdir(original_cwd)
@@ -456,7 +456,7 @@ class TestE2ETestCollectionRegressionPrevention:
             assert len(manager.service_endpoints) > 0, f"Manager {i} has no service endpoints"
             assert manager.health_checker is not None, f"Manager {i} has no health checker"
 
-        print(f"✓ {len(managers)} RealServicesManager instances all consistent")
+        print(f"CHECK {len(managers)} RealServicesManager instances all consistent")
 
     @pytest.mark.integration
     @pytest.mark.test_collection
@@ -496,6 +496,6 @@ class TestE2ETestCollectionRegressionPrevention:
             assert avg_time < 20.0, f"Average collection time {avg_time:.1f}s too slow"
             assert max_time < 30.0, f"Max collection time {max_time:.1f}s too slow"
 
-            print(f"✓ Collection performance: avg={avg_time:.2f}s, max={max_time:.2f}s")
+            print(f"CHECK Collection performance: avg={avg_time:.2f}s, max={max_time:.2f}s")
         else:
-            print("⚠ Could not measure collection performance - tests may have collection issues")
+            print("WARNING Could not measure collection performance - tests may have collection issues")

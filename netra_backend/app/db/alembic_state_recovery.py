@@ -5,7 +5,7 @@ Provides utilities to ensure Alembic migration state is healthy and recoverable.
 This module implements minimal functionality to support migration_tracker.py.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Tuple
 
 from sqlalchemy import create_engine, text
@@ -14,7 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from netra_backend.app.db.migration_utils import get_sync_database_url
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 async def ensure_migration_state_healthy(database_url: str) -> Tuple[bool, str]:

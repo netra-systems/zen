@@ -14,7 +14,7 @@ METHODOLOGY:
 - Ensure golden path tests work without Docker infrastructure
 
 BUSINESS VALUE:
-- Protects $500K+ ARR by ensuring golden path validation is accessible
+- Protects 500K+ ARR by ensuring golden path validation is accessible
 - Validates core user flow testing remains functional
 - Ensures golden path tests can run in CI/CD without Docker
 - Confirms staging environment accessibility for business critical validation
@@ -85,7 +85,7 @@ class GoldenPathTestAccessibilityTests:
         print(f'  Total tests found: {total_tests_found}')
         failed_files = [f for f, r in discovery_results.items() if not r['collection_success']]
         if failed_files:
-            print(f'\n❌ COLLECTION FAILURES:')
+            print(f'\nX COLLECTION FAILURES:')
             for file_path in failed_files[:3]:
                 error = discovery_results[file_path]['error']
                 print(f'    {file_path}: {error[:100]}...')
@@ -141,7 +141,7 @@ class GoldenPathTestAccessibilityTests:
         print(f'  Defined markers: {len(defined_markers)}')
         print(f'  Undefined golden path markers: {len(undefined_golden_markers)}')
         if undefined_golden_markers:
-            print(f'\n❌ UNDEFINED GOLDEN PATH MARKERS:')
+            print(f'\nX UNDEFINED GOLDEN PATH MARKERS:')
             for marker in sorted(undefined_golden_markers)[:10]:
                 usage_files = marker_usage.get(marker, [])
                 print(f'    - {marker} (used in {len(usage_files)} files)')
@@ -240,16 +240,16 @@ class GoldenPathTestAccessibilityTests:
         print(f'  Services tested: {len(staging_urls)}')
         print(f'  Accessible services: {accessible_services}')
         for url, result in accessibility_results.items():
-            status_icon = '✅' if result['accessible'] else '❌'
+            status_icon = 'CHECK' if result['accessible'] else 'X'
             status_code = result['status_code'] or 'N/A'
             print(f'    {status_icon} {url}: HTTP {status_code}')
             if result['error']:
                 print(f"        Error: {result['error']}")
         staging_accessible = accessible_services > 0
         if staging_accessible:
-            print(f'\n✅ STAGING ENVIRONMENT: Accessible for golden path testing')
+            print(f'\nCHECK STAGING ENVIRONMENT: Accessible for golden path testing')
         else:
-            print(f'\n⚠️ STAGING ENVIRONMENT: Limited accessibility')
+            print(f'\nWARNING️ STAGING ENVIRONMENT: Limited accessibility')
             print(f'   This may limit golden path testing capabilities')
         return {'staging_accessible': staging_accessible, 'accessible_services': accessible_services, 'total_services': len(staging_urls), 'service_results': accessibility_results}
 
@@ -261,7 +261,7 @@ class GoldenPathTestAccessibilityTests:
         BUSINESS VALUE TEST: Validate golden path tests protect business value
         
         This test ensures that the golden path testing capability protects the
-        $500K+ ARR by validating core user flows remain testable.
+        500K+ ARR by validating core user flows remain testable.
         """
         business_metrics = {'user_login_flow': {'weight': 0.3, 'accessible': False}, 'ai_response_generation': {'weight': 0.4, 'accessible': False}, 'websocket_communication': {'weight': 0.2, 'accessible': False}, 'agent_execution': {'weight': 0.1, 'accessible': False}}
         test_patterns = {'user_login_flow': ['*auth*', '*login*', '*user*flow*'], 'ai_response_generation': ['*agent*', '*llm*', '*response*', '*ai*'], 'websocket_communication': ['*websocket*', '*realtime*', '*communication*'], 'agent_execution': ['*agent*execution*', '*supervisor*', '*workflow*']}
@@ -284,7 +284,7 @@ class GoldenPathTestAccessibilityTests:
             business_metrics[metric]['accessible'] = collectible_tests > 0
             business_metrics[metric]['test_files'] = len(metric_tests)
             business_metrics[metric]['collectible_files'] = collectible_tests
-            status_icon = '✅' if business_metrics[metric]['accessible'] else '❌'
+            status_icon = 'CHECK' if business_metrics[metric]['accessible'] else 'X'
             weight_pct = business_metrics[metric]['weight'] * 100
             print(f'    {status_icon} {metric} ({weight_pct:.0f}%): {collectible_tests}/{len(metric_tests)} files accessible')
         protection_score = sum((metric['weight'] for metric in business_metrics.values() if metric['accessible'])) * 100
@@ -293,11 +293,11 @@ class GoldenPathTestAccessibilityTests:
         print(f'  Business value protection score: {protection_score:.1f}%')
         print(f'  Estimated revenue protected: ${revenue_protected:,.0f}')
         if protection_score >= 80:
-            print(f'  ✅ HIGH PROTECTION: Golden path testing protects core business value')
+            print(f'  CHECK HIGH PROTECTION: Golden path testing protects core business value')
         elif protection_score >= 60:
-            print(f'  ⚠️ MEDIUM PROTECTION: Some business areas at risk')
+            print(f'  WARNING️ MEDIUM PROTECTION: Some business areas at risk')
         else:
-            print(f'  ❌ LOW PROTECTION: Significant business value at risk')
+            print(f'  X LOW PROTECTION: Significant business value at risk')
         assert protection_score >= 50, f'Business value protection too low: {protection_score:.1f}%'
         return {'protection_score': protection_score, 'revenue_protected': revenue_protected, 'business_metrics': business_metrics}
 if __name__ == '__main__':

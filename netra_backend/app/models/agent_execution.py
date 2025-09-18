@@ -15,7 +15,7 @@ from sqlalchemy import Column, String, Text, Integer, DateTime, JSON, Float
 from sqlalchemy.sql import func
 from netra_backend.app.db.database import Base
 from typing import Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 import uuid
 
 
@@ -101,7 +101,7 @@ class AgentExecution(Base):
     def mark_started(self):
         """Mark execution as started."""
         self.status = "running"
-        self.start_time = datetime.utcnow()
+        self.start_time = datetime.now(UTC)
     
     def mark_completed(
         self,
@@ -112,7 +112,7 @@ class AgentExecution(Base):
     ):
         """Mark execution as completed."""
         self.status = "completed"
-        self.end_time = datetime.utcnow()
+        self.end_time = datetime.now(UTC)
         if self.start_time:
             self.duration_seconds = (self.end_time - self.start_time).total_seconds()
         
@@ -126,7 +126,7 @@ class AgentExecution(Base):
     def mark_failed(self, error_message: str):
         """Mark execution as failed."""
         self.status = "failed"
-        self.end_time = datetime.utcnow()
+        self.end_time = datetime.now(UTC)
         if self.start_time:
             self.duration_seconds = (self.end_time - self.start_time).total_seconds()
         

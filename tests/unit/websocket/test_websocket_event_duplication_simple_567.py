@@ -4,7 +4,7 @@ Simple Unit Test for Issue #567: WebSocket Event Duplication Prevention
 Simplified unit tests that work with current test framework to validate
 WebSocket event duplication prevention patterns.
 
-Business Impact: Protects $500K+ ARR by ensuring chat functionality reliability
+Business Impact: Protects 500K+ ARR by ensuring chat functionality reliability
 """
 
 import pytest
@@ -318,7 +318,7 @@ class WebSocketEventDuplicationSimple567Tests(unittest.TestCase):
         """
         GOLDEN PATH TEST: Validate event integrity for Golden Path user flow.
         
-        Tests that the Golden Path (login → AI responses) maintains event
+        Tests that the Golden Path (login -> AI responses) maintains event
         integrity without duplication.
         """
         

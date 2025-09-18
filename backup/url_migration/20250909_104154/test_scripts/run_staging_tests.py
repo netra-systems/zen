@@ -14,7 +14,7 @@ def setup_staging_environment():
     # Set staging environment variables
     staging_env = {
         "BACKEND_URL": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app",
-        "AUTH_SERVICE_URL": "https://netra-auth-staging-pnovr5vsba-uc.a.run.app", 
+        "AUTH_SERVICE_URL": "https://netra-auth-pnovr5vsba-uc.a.run.app", 
         "TEST_ENV": "staging",
         "USE_REAL_LLM": "true",
         "SERVICE_SECRET": "xNp9hKjT5mQ8w2fE7vR4yU3iO6aS1gL9cB0zZ8tN6wX2eR4vY7uI0pQ3s9dF5gH8",

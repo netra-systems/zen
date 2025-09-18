@@ -2,7 +2,7 @@
 E2E Tests for Issue #89 UnifiedIDManager Migration - Staging Environment Validation
 ==================================================================================
 
-Business Value Protection: $500K+ ARR (End-to-end ID consistency in production-like environment)
+Business Value Protection: 500K+ ARR (End-to-end ID consistency in production-like environment)
 Purpose: FAIL to expose end-to-end ID migration gaps in GCP staging environment
 
 This test suite is designed to FAIL during Issue #89 migration to detect:
@@ -18,10 +18,10 @@ Test Strategy:
 - Focus on business-critical workflows that generate revenue
 
 Critical E2E Workflows Under Test:
-- User registration → Authentication → Chat session → Agent execution
-- WebSocket connection → Agent streaming → Real-time updates → Session cleanup
-- Multi-user concurrent usage → Resource isolation → Performance consistency
-- Error recovery → System resilience → Data integrity
+- User registration -> Authentication -> Chat session -> Agent execution
+- WebSocket connection -> Agent streaming -> Real-time updates -> Session cleanup
+- Multi-user concurrent usage -> Resource isolation -> Performance consistency
+- Error recovery -> System resilience -> Data integrity
 
 CLAUDE.MD Compliance:
 - GCP staging environment testing only (no Docker)

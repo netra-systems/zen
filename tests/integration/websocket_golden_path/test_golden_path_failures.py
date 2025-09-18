@@ -15,15 +15,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -32,12 +24,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 Golden Path Failure Tests - Issue #186 WebSocket Manager Fragmentation
 
 Tests that prove the Golden Path (user login  ->  AI response) fails due to WebSocket manager
@@ -46,7 +33,7 @@ that the core business value delivery mechanism is broken.
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise)
-- Business Goal: Revenue Protection - Prove $500K+ ARR chat functionality is compromised
+- Business Goal: Revenue Protection - Prove 500K+ ARR chat functionality is compromised
 - Value Impact: Demonstrate that WebSocket fragmentation breaks end-to-end user experience
 - Revenue Impact: Enable systematic fix to restore core platform value delivery
 

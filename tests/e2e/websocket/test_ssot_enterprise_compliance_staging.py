@@ -3,7 +3,7 @@
 Business Value Justification (BVJ):
 - Segment: Enterprise/Government (HIPAA, SOC2, SEC compliance)
 - Business Goal: Regulatory compliance validation for enterprise sales
-- Value Impact: Enables $500K+ ARR enterprise deals requiring compliance
+- Value Impact: Enables 500K+ ARR enterprise deals requiring compliance
 - Strategic Impact: Validates SSOT meets enterprise regulatory requirements
 
 E2E staging tests for SSOT enterprise compliance:
@@ -150,11 +150,11 @@ class SSOTEnterpriseComplianceStagingTests(SSotAsyncTestCase):
         assert len(hipaa_failed_users) == 0, f'HIPAA compliance failures: {len(hipaa_failed_users)} users failed compliance'
         logger.info('🏥 HIPAA COMPLIANCE VALIDATION RESULTS:')
         for result in hipaa_compliance_results:
-            status = '✅ COMPLIANT' if result.test_passed else '❌ NON-COMPLIANT'
+            status = 'CHECK COMPLIANT' if result.test_passed else 'X NON-COMPLIANT'
             logger.info(f'   {status}: {result.scenario}')
             if result.violations:
                 for violation in result.violations:
-                    logger.info(f'      ⚠️  {violation}')
+                    logger.info(f'      WARNING️  {violation}')
         logger.info(f'🎯 HIPAA Overall Compliance: {len(hipaa_passed_users)}/{len(hipaa_compliance_results)} users compliant')
 
     @pytest.mark.asyncio
@@ -209,7 +209,7 @@ class SSOTEnterpriseComplianceStagingTests(SSotAsyncTestCase):
         assert soc2_compliance_rate >= 0.8, f'SOC2 compliance insufficient: {soc2_compliance_rate:.1%} criteria satisfied'
         logger.info('🏢 SOC2 COMPLIANCE VALIDATION RESULTS:')
         for result in soc2_compliance_results:
-            status = '✅ COMPLIANT' if result.test_passed else '❌ NON-COMPLIANT'
+            status = 'CHECK COMPLIANT' if result.test_passed else 'X NON-COMPLIANT'
             logger.info(f'   {status}: {result.scenario}')
         logger.info(f'🎯 SOC2 Overall Compliance: {len(soc2_passed_criteria)}/{len(soc2_criteria)} criteria satisfied ({soc2_compliance_rate:.1%})')
 
@@ -270,7 +270,7 @@ class SSOTEnterpriseComplianceStagingTests(SSotAsyncTestCase):
         assert sec_compliance_rate >= 0.85, f'SEC compliance insufficient: {sec_compliance_rate:.1%} regulations satisfied'
         logger.info('🏛️ SEC COMPLIANCE VALIDATION RESULTS:')
         for result in sec_compliance_results:
-            status = '✅ COMPLIANT' if result.test_passed else '❌ NON-COMPLIANT'
+            status = 'CHECK COMPLIANT' if result.test_passed else 'X NON-COMPLIANT'
             logger.info(f'   {status}: {result.scenario}')
         logger.info(f'🎯 SEC Overall Compliance: {len(sec_passed_regulations)}/{len(sec_requirements)} regulations satisfied ({sec_compliance_rate:.1%})')
 
@@ -327,12 +327,12 @@ class SSOTEnterpriseComplianceStagingTests(SSotAsyncTestCase):
         logger.info('📋 ENTERPRISE AUDIT TRAIL VALIDATION RESULTS:')
         for result in audit_validation_results:
             if result.get('audit_trail_complete'):
-                status = '✅ COMPLIANT'
+                status = 'CHECK COMPLIANT'
                 category = result['category']
                 events = f"{result['events_successful']}/{result['events_tested']}"
                 logger.info(f'   {status}: {category} - {events} events audited')
             elif 'error' in result:
-                logger.info(f"   ❌ ERROR: {result['category']} - {result['error']}")
+                logger.info(f"   X ERROR: {result['category']} - {result['error']}")
         logger.info(f'🎯 Enterprise Audit Overall: {len(successful_categories)}/{total_categories} categories compliant ({audit_compliance_rate:.1%})')
 
 @pytest.mark.enterprise_readiness
@@ -366,12 +366,12 @@ class SSOTEnterpriseReadinessValidationTests:
         enterprise_ready = len(ready_mandatory) == len(mandatory_criteria) and len(ready_high_priority) >= len(high_priority_criteria) * 0.8
         logger.info('📋 ENTERPRISE DEPLOYMENT READINESS CHECKLIST:')
         for result in readiness_results:
-            status = '✅ READY' if result['validated'] else '❌ NOT READY'
+            status = 'CHECK READY' if result['validated'] else 'X NOT READY'
             requirement = f"[{result['requirement']}]"
             segments = ', '.join(result['customer_segments'])
             logger.info(f"   {status} {requirement}: {result['description']}")
             logger.info(f'      Customer Segments: {segments}')
-        logger.info(f"🎯 ENTERPRISE READINESS: {('✅ READY' if enterprise_ready else '❌ NOT READY')}")
+        logger.info(f"🎯 ENTERPRISE READINESS: {('CHECK READY' if enterprise_ready else 'X NOT READY')}")
         logger.info(f'   📊 Mandatory criteria: {len(ready_mandatory)}/{len(mandatory_criteria)} ready')
         logger.info(f'   📊 High priority criteria: {len(ready_high_priority)}/{len(high_priority_criteria)} ready')
         total_segments = set()

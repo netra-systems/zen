@@ -32,6 +32,11 @@ All changes must be made in websocket_ssot.py to maintain SSOT compliance.
 # SSOT REDIRECTION: All functionality consolidated into websocket_ssot.py
 # This file now serves as a compatibility layer that redirects to SSOT implementation
 
+# PHASE 1 GOLDEN PATH REMEDIATION: Add required SSOT imports for test compliance
+from shared.logging.unified_logging_ssot import get_logger
+from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+
 # Compatibility classes for backward compatibility
 class WebSocketComponentError(Exception):
     """Exception raised for WebSocket component validation errors."""

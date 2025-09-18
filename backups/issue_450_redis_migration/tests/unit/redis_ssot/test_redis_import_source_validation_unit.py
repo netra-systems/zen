@@ -89,8 +89,8 @@ class TestRedisImportSourceValidation(SSotBaseTestCase):
         
         This test should FAIL showing inconsistent import patterns:
         - from netra_backend.app.redis_manager import redis_manager
-        - from netra_backend.app.db.redis_manager import RedisManager  
-        - from netra_backend.app.cache.redis_cache_manager import RedisCacheManager
+        - from netra_backend.app.redis_manager import RedisManager  
+        - from netra_backend.app.redis_manager import RedisManager as RedisCacheManager
         """
         import_patterns = self._analyze_redis_import_patterns()
         

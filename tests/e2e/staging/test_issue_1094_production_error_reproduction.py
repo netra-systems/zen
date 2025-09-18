@@ -4,7 +4,7 @@ Test Issue #1094: Production Error Reproduction in Staging Environment
 Business Value Justification (BVJ):
 - Segment: Platform/Infrastructure
 - Business Goal: Validate production TypeError exists in staging before remediation
-- Value Impact: Prevent agent stop operation failures affecting $500K+ ARR
+- Value Impact: Prevent agent stop operation failures affecting 500K+ ARR
 - Revenue Impact: Ensure reliable agent lifecycle management across environments
 
 Test Strategy:

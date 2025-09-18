@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure ExecutionEngineFactory creates proper user isolation
 - Value Impact: User isolation enables multi-tenancy and prevents data leaks
-- Strategic Impact: Critical for $500K+ ARR - multi-user system requires perfect isolation
+- Strategic Impact: Critical for 500K+ ARR - multi-user system requires perfect isolation
 
 This test validates Critical Issue #3 from Golden Path:
 "Factory Initialization Failures" - WebSocket manager factory can fail SSOT validation

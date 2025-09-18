@@ -28,136 +28,158 @@ project_root = Path(__file__).parent.parent.parent
 logger = logging.getLogger(__name__)
 
 
-# REMOVED_SYNTAX_ERROR: class TestSyntaxFix:
-    # REMOVED_SYNTAX_ERROR: """Test class for orphaned methods"""
-    # REMOVED_SYNTAX_ERROR: pass
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+    pass
 
-# REMOVED_SYNTAX_ERROR: def setup_method(self):
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: self.launcher: Optional[DevLauncher] = None
-    # REMOVED_SYNTAX_ERROR: self.config: Optional[LauncherConfig] = None
-    # REMOVED_SYNTAX_ERROR: self.start_time: Optional[float] = None
-    # REMOVED_SYNTAX_ERROR: self.service_urls: Dict[str, str] = {}
-    # REMOVED_SYNTAX_ERROR: self.console_errors: List[str] = []
-    # REMOVED_SYNTAX_ERROR: self.startup_logs: List[str] = []
-    # REMOVED_SYNTAX_ERROR: self.service_processes: Dict[str, subprocess.Popen] = {}
-    # REMOVED_SYNTAX_ERROR: self._monitoring_threads: List[threading.Thread] = []
-    # REMOVED_SYNTAX_ERROR: self._shutdown_event = threading.Event()
+    def setup_method(self):
+        pass
+        self.launcher: Optional[DevLauncher] = None
+        self.config: Optional[LauncherConfig] = None
+        self.start_time: Optional[float] = None
+        self.service_urls: Dict[str, str] = {}
+        self.console_errors: List[str] = []
+        self.startup_logs: List[str] = []
+        self.service_processes: Dict[str, subprocess.Popen] = {}
+        self._monitoring_threads: List[threading.Thread] = []
+        self._shutdown_event = threading.Event()
 
-# REMOVED_SYNTAX_ERROR: def create_test_config(self,
+        def create_test_config(self,
 backend_port: int = 8000,
 frontend_port: Optional[int] = 3000,
 skip_frontend: bool = False,
 verbose: bool = False,
-# REMOVED_SYNTAX_ERROR: parallel_startup: bool = True) -> LauncherConfig:
-    # REMOVED_SYNTAX_ERROR: """Create test configuration."""
-    # REMOVED_SYNTAX_ERROR: config = LauncherConfig()
-    # REMOVED_SYNTAX_ERROR: config.backend_port = backend_port
-    # REMOVED_SYNTAX_ERROR: config.frontend_port = frontend_port if not skip_frontend else None
-    # REMOVED_SYNTAX_ERROR: config.dynamic_ports = False
-    # REMOVED_SYNTAX_ERROR: config.no_backend_reload = True
-    # REMOVED_SYNTAX_ERROR: config.no_browser = True
-    # REMOVED_SYNTAX_ERROR: config.verbose = verbose
-    # REMOVED_SYNTAX_ERROR: config.non_interactive = True
-    # REMOVED_SYNTAX_ERROR: config.startup_mode = "minimal"
-    # REMOVED_SYNTAX_ERROR: config.no_secrets = True
-    # REMOVED_SYNTAX_ERROR: config.parallel_startup = parallel_startup
-    # REMOVED_SYNTAX_ERROR: config.project_root = project_root
-    # REMOVED_SYNTAX_ERROR: return config
+parallel_startup: bool = True) -> LauncherConfig:
+"""Create test configuration."""
+config = LauncherConfig()
+config.backend_port = backend_port
+config.frontend_port = frontend_port if not skip_frontend else None
+config.dynamic_ports = False
+config.no_backend_reload = True
+config.no_browser = True
+config.verbose = verbose
+config.non_interactive = True
+config.startup_mode = "minimal"
+config.no_secrets = True
+config.parallel_startup = parallel_startup
+config.project_root = project_root
+return config
 
-# REMOVED_SYNTAX_ERROR: def _setup_error_monitoring(self):
-    # REMOVED_SYNTAX_ERROR: """Setup monitoring for console errors and startup logs."""
+def _setup_error_monitoring(self):
+    pass
+"""Setup monitoring for console errors and startup logs."""
     # Monitor launcher logs
-    # REMOVED_SYNTAX_ERROR: if self.launcher and hasattr(self.launcher, 'log_manager'):
-        # REMOVED_SYNTAX_ERROR: log_manager = self.launcher.log_manager
+if self.launcher and hasattr(self.launcher, 'log_manager'):
+    pass
+log_manager = self.launcher.log_manager
         # Hook into log outputs to capture errors
-        # REMOVED_SYNTAX_ERROR: original_log = logger.error
+original_log = logger.error
 
-# REMOVED_SYNTAX_ERROR: def capture_error(msg, *args, **kwargs):
-    # REMOVED_SYNTAX_ERROR: self.console_errors.append(str(msg))
-    # REMOVED_SYNTAX_ERROR: return original_log(msg, *args, **kwargs)
+def capture_error(msg, *args, **kwargs):
+    pass
+self.console_errors.append(str(msg))
+return original_log(msg, *args, **kwargs)
 
-    # REMOVED_SYNTAX_ERROR: logger.error = capture_error
+logger.error = capture_error
 
-# REMOVED_SYNTAX_ERROR: def detect_console_errors(self) -> List[str]:
-    # REMOVED_SYNTAX_ERROR: """Detect console errors from service outputs."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: return self.console_errors.copy()
+def detect_console_errors(self) -> List[str]:
+    pass
+"""Detect console errors from service outputs."""
+pass
+return self.console_errors.copy()
 
-# REMOVED_SYNTAX_ERROR: def verify_port_allocation(self) -> Tuple[bool, List[str]]:
-    # REMOVED_SYNTAX_ERROR: """Verify services are running on correct ports."""
-    # REMOVED_SYNTAX_ERROR: issues = []
+def verify_port_allocation(self) -> Tuple[bool, List[str]]:
+    pass
+"""Verify services are running on correct ports."""
+issues = []
 
     # Check backend port
-    # REMOVED_SYNTAX_ERROR: backend_port = self.config.backend_port or 8000
-    # REMOVED_SYNTAX_ERROR: if not self._is_port_in_use(backend_port):
-        # REMOVED_SYNTAX_ERROR: issues.append("formatted_string")
+backend_port = self.config.backend_port or 8000
+if not self._is_port_in_use(backend_port):
+    pass
+issues.append("")
 
         # Check auth port
-        # REMOVED_SYNTAX_ERROR: if not self._is_port_in_use(8081):
-            # REMOVED_SYNTAX_ERROR: issues.append("Auth port 8081 not in use")
+if not self._is_port_in_use(8081):
+    pass
+issues.append("Auth port 8081 not in use)"
 
             # Check frontend port (if enabled)
-            # REMOVED_SYNTAX_ERROR: if self.config.frontend_port:
-                # REMOVED_SYNTAX_ERROR: if not self._is_port_in_use(self.config.frontend_port):
-                    # REMOVED_SYNTAX_ERROR: issues.append("formatted_string")
+if self.config.frontend_port:
+    pass
+if not self._is_port_in_use(self.config.frontend_port):
+    pass
+issues.append("")
 
-                    # REMOVED_SYNTAX_ERROR: return len(issues) == 0, issues
+return len(issues) == 0, issues
 
-# REMOVED_SYNTAX_ERROR: def _is_port_in_use(self, port: int) -> bool:
-    # REMOVED_SYNTAX_ERROR: """Check if a port is in use."""
-    # REMOVED_SYNTAX_ERROR: with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        # REMOVED_SYNTAX_ERROR: try:
-            # REMOVED_SYNTAX_ERROR: s.bind(('localhost', port))
-            # REMOVED_SYNTAX_ERROR: return False
-            # REMOVED_SYNTAX_ERROR: except OSError:
-                # REMOVED_SYNTAX_ERROR: return True
+def _is_port_in_use(self, port: int) -> bool:
+    pass
+"""Check if a port is in use."""
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+try:
+    pass
+s.bind(('localhost', port))
+return False
+except OSError:
+    pass
+return True
 
-# REMOVED_SYNTAX_ERROR: def verify_grace_periods(self) -> Tuple[bool, List[str]]:
-    # REMOVED_SYNTAX_ERROR: """Verify grace periods are respected in startup."""
-    # REMOVED_SYNTAX_ERROR: issues = []
+def verify_grace_periods(self) -> Tuple[bool, List[str]]:
+    pass
+"""Verify grace periods are respected in startup."""
+issues = []
 
-    # REMOVED_SYNTAX_ERROR: if not self.start_time:
-        # REMOVED_SYNTAX_ERROR: issues.append("Start time not recorded")
-        # REMOVED_SYNTAX_ERROR: return False, issues
+if not self.start_time:
+    pass
+issues.append("Start time not recorded)"
+return False, issues
 
-        # REMOVED_SYNTAX_ERROR: elapsed = time.time() - self.start_time
+elapsed = time.time() - self.start_time
 
         # Grace periods per SPEC:
             # - Backend readiness: 30s
             # - Auth verification: 15s
             # - Frontend readiness: 90s
 
-            # REMOVED_SYNTAX_ERROR: if elapsed < 5:  # Minimum reasonable startup time
-            # REMOVED_SYNTAX_ERROR: issues.append("formatted_string")
+if elapsed < 5:  # Minimum reasonable startup time
+issues.append("")
 
             # No maximum time check - some systems are slower
 
-            # REMOVED_SYNTAX_ERROR: return len(issues) == 0, issues
+return len(issues) == 0, issues
 
-# REMOVED_SYNTAX_ERROR: def _force_free_test_ports(self):
-    # REMOVED_SYNTAX_ERROR: """Force free test ports."""
-    # REMOVED_SYNTAX_ERROR: test_ports = [8000, 8081, 3000]
-    # REMOVED_SYNTAX_ERROR: for port in test_ports:
-        # REMOVED_SYNTAX_ERROR: self._force_free_port(port)
+def _force_free_test_ports(self):
+    pass
+"""Force free test ports."""
+test_ports = [8000, 8081, 3000]
+for port in test_ports:
+self._force_free_port(port)
 
-# REMOVED_SYNTAX_ERROR: def _force_free_port(self, port: int):
-    # REMOVED_SYNTAX_ERROR: """Force free a specific port."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: if sys.platform == "win32":
-        # REMOVED_SYNTAX_ERROR: try:
-            # REMOVED_SYNTAX_ERROR: result = subprocess.run( )
-            # REMOVED_SYNTAX_ERROR: "formatted_string",
-            # REMOVED_SYNTAX_ERROR: shell=True, capture_output=True, text=True
+def _force_free_port(self, port: int):
+    pass
+"""Force free a specific port."""
+pass
+if sys.platform == "win32:"
+    pass
+try:
+    pass
+result = subprocess.run( )
+"",
+shell=True, capture_output=True, text=True
             
-            # REMOVED_SYNTAX_ERROR: if result.stdout:
-                # REMOVED_SYNTAX_ERROR: lines = result.stdout.strip().split(" )
-                # REMOVED_SYNTAX_ERROR: ")
-                # REMOVED_SYNTAX_ERROR: for line in lines:
-                    # REMOVED_SYNTAX_ERROR: parts = line.split()
-                    # REMOVED_SYNTAX_ERROR: if len(parts) >= 5:
-                        # REMOVED_SYNTAX_ERROR: pid = parts[-1]
-                        # REMOVED_SYNTAX_ERROR: if pid.isdigit():
-                            # REMOVED_SYNTAX_ERROR: subprocess.run("formatted_string", shell=True)
-                            # REMOVED_SYNTAX_ERROR: except Exception:
-                                # REMOVED_SYNTAX_ERROR: pass
+if result.stdout:
+    pass
+lines = result.stdout.strip().split(" )"
+")"
+for line in lines:
+parts = line.split()
+if len(parts) >= 5:
+    pass
+pid = parts[-1]
+if pid.isdigit():
+    pass
+subprocess.run("", shell=True)
+except Exception:
+    pass
+pass

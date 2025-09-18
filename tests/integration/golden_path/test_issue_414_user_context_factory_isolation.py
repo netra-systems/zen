@@ -4,7 +4,7 @@ Golden Path Issue #414 - User Context Factory Isolation Unit Tests
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - System Stability & Development Velocity
-- Business Goal: Platform Reliability & Revenue Protection ($500K+ ARR)
+- Business Goal: Platform Reliability & Revenue Protection (500K+ ARR)
 - Value Impact: Validates user context factory isolation preventing cross-user contamination
 - Strategic/Revenue Impact: Prevents user data leaks that could expose enterprise customer data
 

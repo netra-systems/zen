@@ -11,7 +11,7 @@ PURPOSE:
 - Validates user isolation and security patterns
 
 BUSINESS VALUE:
-- Protects $500K+ ARR chat functionality 
+- Protects 500K+ ARR chat functionality 
 - Ensures enterprise-grade user experience
 - Validates system reliability and performance
 
@@ -38,7 +38,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from tests.e2e.staging_test_base import StagingTestBase, track_test_timing
 from tests.e2e.staging_config import StagingTestConfig as StagingConfig
 from tests.e2e.staging_auth_client import StagingAuthClient
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from netra_backend.tests.e2e.real_websocket_client import RealWebSocketClient
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
@@ -215,7 +215,7 @@ class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
         - Valid AI response received
         - No connection failures or timeouts
         
-        FAILURE INDICATES: Critical system issues affecting $500K+ ARR
+        FAILURE INDICATES: Critical system issues affecting 500K+ ARR
         
         DIFFICULTY: Very High (60-120 seconds)
         REAL SERVICES: Yes (staging.netrasystems.ai)
@@ -384,7 +384,7 @@ class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
             pytest.fail(
                 f'GOLDEN PATH ASSERTION FAILURE: {str(e)} after {total_duration:.1f}s. '
                 f'Events received: {events_received}. Journey steps: {journey_steps}. '
-                f'BUSINESS IMPACT: Critical $500K+ ARR Golden Path functionality broken.'
+                f'BUSINESS IMPACT: Critical 500K+ ARR Golden Path functionality broken.'
             )
             
         except asyncio.TimeoutError:
@@ -502,7 +502,7 @@ class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
         self, 
         subprotocols: List[str], 
         timeout: float
-    ) -> Optional[websockets.WebSocketClientProtocol]:
+    ) -> Optional[websockets.ClientConnection]:
         """
         Establish WebSocket connection for Golden Path testing
         

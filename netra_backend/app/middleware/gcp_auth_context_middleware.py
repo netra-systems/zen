@@ -12,8 +12,12 @@ Business Value Justification (BVJ):
 
 import asyncio
 import logging
-from typing import Any, Dict, Optional
+import time
+from dataclasses import dataclass, field
+from typing import Any, Dict, Optional, Set
 from contextvars import ContextVar
+from datetime import datetime, timedelta
+from enum import Enum
 
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -32,6 +36,174 @@ auth_session_context: ContextVar[Dict[str, Any]] = ContextVar(
 )
 
 logger = logging.getLogger(__name__)
+
+
+class SessionAccessFailureReason(Enum):
+    """Reasons for session access failures that need log rate limiting."""
+    MIDDLEWARE_NOT_INSTALLED = "middleware_not_installed"
+    RUNTIME_ERROR = "runtime_error"
+    ATTRIBUTE_ERROR = "attribute_error"
+    ASSERTION_ERROR = "assertion_error"
+
+
+@dataclass
+class SessionAccessLogMetrics:
+    """Metrics for tracking session access log events."""
+    total_attempts: int = 0
+    total_failures: int = 0
+    suppressed_logs: int = 0
+    failures_by_reason: Dict[str, int] = field(default_factory=dict)
+    last_log_time: Optional[datetime] = None
+    last_failure_time: Optional[datetime] = None
+    window_start_time: Optional[datetime] = None
+
+
+class SessionAccessRateLimiter:
+    """Rate limiter for session access failure logs to prevent log spam.
+
+    CRITICAL FIX for Issue #169: SessionMiddleware log spam
+
+    This class implements time-windowed log suppression following SSOT patterns
+    similar to WebSocketEmergencyThrottler to reduce log volume from 100+/hour
+    to <12/hour (90% reduction target).
+
+    Features:
+    1. Time-windowed suppression (5-minute windows)
+    2. Thread safety for concurrent requests
+    3. Reason-based failure tracking
+    4. Metrics for monitoring effectiveness
+    5. Follows SSOT patterns from emergency throttling
+
+    Business Value Justification (BVJ):
+    - Segment: Platform/Infrastructure (ALL users benefit from reduced log noise)
+    - Business Goal: Operational efficiency and log cost reduction
+    - Value Impact: Eliminates log spam while preserving critical error visibility
+    - Strategic Impact: Reduces operational noise and log storage costs
+    """
+
+    def __init__(self, log_window_minutes: int = 5, max_logs_per_window: int = 1):
+        """Initialize session access rate limiter.
+
+        Args:
+            log_window_minutes: Time window for log suppression (default 5 minutes)
+            max_logs_per_window: Maximum logs allowed per window (default 1)
+        """
+        self.log_window_seconds = log_window_minutes * 60
+        self.max_logs_per_window = max_logs_per_window
+        self.metrics = SessionAccessLogMetrics()
+        self._lock = asyncio.Lock()
+
+        # Track log events within current window
+        self.current_window_logs = 0
+        self.current_window_start: Optional[datetime] = None
+
+        logger.debug(f"🛡️ SessionAccessRateLimiter initialized: {log_window_minutes}min windows, max {max_logs_per_window} logs/window")
+
+    async def should_log_failure(self, failure_reason: SessionAccessFailureReason, error_message: str) -> bool:
+        """Check if a session access failure should be logged.
+
+        Args:
+            failure_reason: Reason for the session access failure
+            error_message: Error message that would be logged
+
+        Returns:
+            bool: True if the failure should be logged, False if suppressed
+        """
+        async with self._lock:
+            now = datetime.now()
+
+            # Update metrics
+            self.metrics.total_attempts += 1
+            self.metrics.total_failures += 1
+            self.metrics.last_failure_time = now
+
+            # Track failure by reason
+            reason_key = failure_reason.value
+            self.metrics.failures_by_reason[reason_key] = self.metrics.failures_by_reason.get(reason_key, 0) + 1
+
+            # Initialize or reset window if needed
+            if (self.current_window_start is None or
+                (now - self.current_window_start).total_seconds() > self.log_window_seconds):
+
+                self.current_window_start = now
+                self.current_window_logs = 0
+                self.metrics.window_start_time = now
+
+            # Check if we can log in current window
+            if self.current_window_logs < self.max_logs_per_window:
+                self.current_window_logs += 1
+                self.metrics.last_log_time = now
+
+                logger.debug(f"📝 Session access failure logged ({self.current_window_logs}/{self.max_logs_per_window} in current window)")
+                return True
+            else:
+                # Suppress this log
+                self.metrics.suppressed_logs += 1
+
+                # Log suppression notice at debug level (less frequent)
+                if self.metrics.suppressed_logs % 10 == 1:  # Every 10th suppression
+                    logger.debug(
+                        f"🔇 Session access log suppressed (#{self.metrics.suppressed_logs}) - "
+                        f"window limit reached ({self.max_logs_per_window} logs per {self.log_window_seconds/60:.0f}min)"
+                    )
+
+                return False
+
+    async def record_success(self):
+        """Record a successful session access."""
+        async with self._lock:
+            self.metrics.total_attempts += 1
+            # Success doesn't count toward log limits
+
+    def get_suppression_metrics(self) -> Dict[str, Any]:
+        """Get current log suppression metrics."""
+        return {
+            "rate_limiting": {
+                "window_seconds": self.log_window_seconds,
+                "max_logs_per_window": self.max_logs_per_window,
+                "current_window_logs": self.current_window_logs,
+                "current_window_start": self.current_window_start.isoformat() if self.current_window_start else None
+            },
+            "metrics": {
+                "total_attempts": self.metrics.total_attempts,
+                "total_failures": self.metrics.total_failures,
+                "suppressed_logs": self.metrics.suppressed_logs,
+                "suppression_rate": (self.metrics.suppressed_logs / max(1, self.metrics.total_failures)) * 100,
+                "failures_by_reason": dict(self.metrics.failures_by_reason),
+                "last_log_time": self.metrics.last_log_time.isoformat() if self.metrics.last_log_time else None,
+                "last_failure_time": self.metrics.last_failure_time.isoformat() if self.metrics.last_failure_time else None
+            }
+        }
+
+    def get_window_status(self) -> Dict[str, Any]:
+        """Get current window status for monitoring."""
+        now = datetime.now()
+        window_remaining = 0
+
+        if self.current_window_start:
+            elapsed = (now - self.current_window_start).total_seconds()
+            window_remaining = max(0, self.log_window_seconds - elapsed)
+
+        return {
+            "window_active": self.current_window_start is not None,
+            "logs_used": self.current_window_logs,
+            "logs_remaining": max(0, self.max_logs_per_window - self.current_window_logs),
+            "window_remaining_seconds": window_remaining,
+            "next_reset_time": (self.current_window_start + timedelta(seconds=self.log_window_seconds)).isoformat()
+                              if self.current_window_start else None
+        }
+
+
+# Global rate limiter instance
+_session_access_rate_limiter: Optional[SessionAccessRateLimiter] = None
+
+
+def get_session_access_rate_limiter() -> SessionAccessRateLimiter:
+    """Get the global session access rate limiter instance."""
+    global _session_access_rate_limiter
+    if _session_access_rate_limiter is None:
+        _session_access_rate_limiter = SessionAccessRateLimiter()
+    return _session_access_rate_limiter
 
 
 class GCPAuthContextMiddleware(BaseHTTPMiddleware):
@@ -124,9 +296,9 @@ class GCPAuthContextMiddleware(BaseHTTPMiddleware):
                     logger.warning(f"Auth service JWT validation failed: {e} - using fallback context")
                     auth_context.update({'auth_method': 'jwt_validation_error'})
             
-            # Extract from session if available - DEFENSIVE SESSION ACCESS
-            # CRITICAL FIX: Prevent SessionMiddleware crashes with try-catch and hasattr checks
-            session_data = self._safe_extract_session_data(request)
+            # Extract from session if available - DEFENSIVE SESSION ACCESS WITH RATE LIMITING
+            # CRITICAL FIX: Prevent SessionMiddleware crashes with try-catch and rate limited logging
+            session_data = await self._safe_extract_session_data(request)
             auth_context.update(session_data)
             
             # Extract from request state (OAuth/auth service integration)
@@ -154,25 +326,27 @@ class GCPAuthContextMiddleware(BaseHTTPMiddleware):
         
         return auth_context
     
-    def _safe_extract_session_data(self, request: Request) -> Dict[str, Any]:
-        """Safely extract session data with defensive programming.
-        
-        CRITICAL FIX for Issue #169: SessionMiddleware authentication failures
-        
+    async def _safe_extract_session_data(self, request: Request) -> Dict[str, Any]:
+        """Safely extract session data with defensive programming and log rate limiting.
+
+        CRITICAL FIX for Issue #169: SessionMiddleware authentication failures and log spam
+
         This method implements multiple fallback strategies to prevent crashes
         when SessionMiddleware is not installed or configured properly:
         1. Direct try-catch around session access (removes hasattr check)
-        2. Improved RuntimeError handling for middleware order issues  
+        2. Improved RuntimeError handling for middleware order issues
         3. Fallback to request state and cookies if session unavailable
-        
+        4. RATE LIMITED LOGGING: Implements log suppression to reduce spam from 100+/hour to <12/hour
+
         Args:
             request: FastAPI request object
-            
+
         Returns:
             Dict containing session data or empty dict if unavailable
         """
         session_data = {}
-        
+        rate_limiter = get_session_access_rate_limiter()
+
         try:
             # First line of defense: Try to access session directly
             # FIXED: Removed hasattr check that was causing RuntimeError issues
@@ -183,28 +357,54 @@ class GCPAuthContextMiddleware(BaseHTTPMiddleware):
                     'user_id': session.get('user_id'),
                     'user_email': session.get('user_email')
                 })
+                # Record successful session access
+                await rate_limiter.record_success()
                 logger.debug(f"Successfully extracted session data: {list(session_data.keys())}")
                 return session_data
         except (AttributeError, RuntimeError, AssertionError) as e:
-            # Session middleware not installed or session access failed
-            logger.warning(f"Session access failed (middleware not installed?): {e}")
-        
+            # RATE LIMITED LOGGING: Use rate limiter to suppress log spam
+            failure_reason = self._categorize_session_failure(e)
+            error_message = f"Session access failed (middleware not installed?): {e}"
+
+            # Only log if rate limiter allows it
+            should_log = await rate_limiter.should_log_failure(failure_reason, error_message)
+            if should_log:
+                logger.warning(error_message)
+
         try:
             # Second line of defense: Fallback to cookie-based session extraction
             session_data.update(self._extract_session_from_cookies(request))
-            
+
             # Third line of defense: Fallback to request state
             session_data.update(self._extract_session_from_request_state(request))
-            
+
             if session_data:
                 logger.info(f"Session data extracted via fallback methods: {list(session_data.keys())}")
             else:
                 logger.debug("No session data available via any method")
-                
+
         except Exception as e:
             logger.error(f"Unexpected error in session data extraction: {e}", exc_info=True)
-        
+
         return session_data
+
+    def _categorize_session_failure(self, exception: Exception) -> SessionAccessFailureReason:
+        """Categorize session access failure for proper rate limiting.
+
+        Args:
+            exception: Exception that occurred during session access
+
+        Returns:
+            SessionAccessFailureReason: Categorized failure reason
+        """
+        if isinstance(exception, AttributeError):
+            return SessionAccessFailureReason.ATTRIBUTE_ERROR
+        elif isinstance(exception, RuntimeError):
+            return SessionAccessFailureReason.RUNTIME_ERROR
+        elif isinstance(exception, AssertionError):
+            return SessionAccessFailureReason.ASSERTION_ERROR
+        else:
+            return SessionAccessFailureReason.MIDDLEWARE_NOT_INSTALLED
     
     def _extract_session_from_cookies(self, request: Request) -> Dict[str, Any]:
         """Extract session data from cookies as fallback.
@@ -405,11 +605,45 @@ class MultiUserErrorContext:
 # Factory function for easy integration
 def create_gcp_auth_context_middleware(enable_user_isolation: bool = True) -> GCPAuthContextMiddleware:
     """Create GCP authentication context middleware.
-    
+
     Args:
         enable_user_isolation: Enable user isolation for enterprise customers
-        
+
     Returns:
         Configured middleware instance
     """
     return GCPAuthContextMiddleware(None, enable_user_isolation)
+
+
+# Public API for session access rate limiting monitoring
+def get_session_access_suppression_metrics() -> Dict[str, Any]:
+    """Get session access log suppression metrics for monitoring.
+
+    Returns:
+        Dict containing current rate limiting and suppression metrics
+    """
+    return get_session_access_rate_limiter().get_suppression_metrics()
+
+
+def get_session_access_window_status() -> Dict[str, Any]:
+    """Get current session access rate limiting window status.
+
+    Returns:
+        Dict containing current window status and remaining capacity
+    """
+    return get_session_access_rate_limiter().get_window_status()
+
+
+# Export public interface
+__all__ = [
+    'GCPAuthContextMiddleware',
+    'MultiUserErrorContext',
+    'SessionAccessRateLimiter',
+    'SessionAccessFailureReason',
+    'get_current_user_context',
+    'get_current_auth_context',
+    'create_gcp_auth_context_middleware',
+    'get_session_access_rate_limiter',
+    'get_session_access_suppression_metrics',
+    'get_session_access_window_status'
+]

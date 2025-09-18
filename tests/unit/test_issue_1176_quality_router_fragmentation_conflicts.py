@@ -45,7 +45,7 @@ class QualityMessageRouterFragmentationTests(SSotBaseTestCase):
         try:
             from netra_backend.app.websocket_core.handlers import MessageRouter
             self.core_router_class = MessageRouter
-            logger.info("✅ Core MessageRouter import: SUCCESS")
+            logger.info("CHECK Core MessageRouter import: SUCCESS")
         except Exception as e:
             self.fail(f"Core MessageRouter import failed: {e}")
         
@@ -58,18 +58,18 @@ class QualityMessageRouterFragmentationTests(SSotBaseTestCase):
             from netra_backend.app.services.websocket.quality_message_router import QualityMessageRouter
             self.quality_router_class = QualityMessageRouter
             quality_import_success = True
-            logger.info("✅ QualityMessageRouter import: SUCCESS")
+            logger.info("CHECK QualityMessageRouter import: SUCCESS")
         except ImportError as e:
             quality_import_error = str(e)
             if "UnifiedWebSocketManager" in str(e):
-                logger.info(f"❌ QualityMessageRouter import: EXPECTED FAILURE - {e}")
+                logger.info(f"X QualityMessageRouter import: EXPECTED FAILURE - {e}")
                 self.dependency_failures.append(("UnifiedWebSocketManager", str(e)))
             else:
-                logger.warning(f"❌ QualityMessageRouter import: UNEXPECTED FAILURE - {e}")
+                logger.warning(f"X QualityMessageRouter import: UNEXPECTED FAILURE - {e}")
                 self.dependency_failures.append(("Unexpected", str(e)))
         except Exception as e:
             quality_import_error = str(e)
-            logger.error(f"❌ QualityMessageRouter import: CRITICAL FAILURE - {e}")
+            logger.error(f"X QualityMessageRouter import: CRITICAL FAILURE - {e}")
             self.dependency_failures.append(("Critical", str(e)))
         
         # Test 3: Verify fragmentation pattern
@@ -174,20 +174,20 @@ class QualityMessageRouterFragmentationTests(SSotBaseTestCase):
                     # Try to get the specific item from the module
                     item = getattr(module, item_name)
                     dependency_results.append((dependency_path, True, None))
-                    logger.debug(f"✅ Dependency resolved: {dependency_path}")
+                    logger.debug(f"CHECK Dependency resolved: {dependency_path}")
                 else:
                     dependency_results.append((dependency_path, True, None))
-                    logger.debug(f"✅ Module resolved: {dependency_path}")
+                    logger.debug(f"CHECK Module resolved: {dependency_path}")
                     
             except ImportError as e:
                 dependency_results.append((dependency_path, False, f"ImportError: {e}"))
-                logger.warning(f"❌ Dependency failed: {dependency_path} - {e}")
+                logger.warning(f"X Dependency failed: {dependency_path} - {e}")
             except AttributeError as e:
                 dependency_results.append((dependency_path, False, f"AttributeError: {e}"))
-                logger.warning(f"❌ Dependency failed: {dependency_path} - {e}")
+                logger.warning(f"X Dependency failed: {dependency_path} - {e}")
             except Exception as e:
                 dependency_results.append((dependency_path, False, f"Error: {e}"))
-                logger.error(f"❌ Dependency failed: {dependency_path} - {e}")
+                logger.error(f"X Dependency failed: {dependency_path} - {e}")
         
         # Analyze dependency resolution results
         successful_deps = [r for r in dependency_results if r[1]]
@@ -220,10 +220,10 @@ class QualityMessageRouterFragmentationTests(SSotBaseTestCase):
             from netra_backend.app.websocket_core.handlers import MessageRouter
             core_router = MessageRouter()
             instantiation_results.append(('core', True, len(core_router.handlers), None))
-            logger.info(f"✅ Core MessageRouter instantiation: SUCCESS - {len(core_router.handlers)} handlers")
+            logger.info(f"CHECK Core MessageRouter instantiation: SUCCESS - {len(core_router.handlers)} handlers")
         except Exception as e:
             instantiation_results.append(('core', False, 0, str(e)))
-            logger.error(f"❌ Core MessageRouter instantiation: FAILED - {e}")
+            logger.error(f"X Core MessageRouter instantiation: FAILED - {e}")
         
         # Test 2: QualityMessageRouter instantiation (requires dependencies)
         try:
@@ -244,14 +244,14 @@ class QualityMessageRouterFragmentationTests(SSotBaseTestCase):
             
             handler_count = len(quality_router.handlers) if hasattr(quality_router, 'handlers') else 0
             instantiation_results.append(('quality', True, handler_count, None))
-            logger.info(f"✅ QualityMessageRouter instantiation: SUCCESS - {handler_count} handlers")
+            logger.info(f"CHECK QualityMessageRouter instantiation: SUCCESS - {handler_count} handlers")
             
         except ImportError as e:
             instantiation_results.append(('quality', False, 0, f"ImportError: {e}"))
-            logger.warning(f"❌ QualityMessageRouter instantiation: IMPORT FAILED - {e}")
+            logger.warning(f"X QualityMessageRouter instantiation: IMPORT FAILED - {e}")
         except Exception as e:
             instantiation_results.append(('quality', False, 0, str(e)))
-            logger.error(f"❌ QualityMessageRouter instantiation: FAILED - {e}")
+            logger.error(f"X QualityMessageRouter instantiation: FAILED - {e}")
         
         # Analyze instantiation complexity difference
         successful_instantiations = [r for r in instantiation_results if r[1]]

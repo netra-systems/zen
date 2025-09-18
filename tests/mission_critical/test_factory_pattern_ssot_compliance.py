@@ -3,7 +3,7 @@
 FAILING TEST: Factory Pattern SSOT Compliance - Issue #680
 
 This test PROVES factory pattern violates user isolation by creating shared instances.
-Business Impact: $500K+ ARR at risk from shared state between users
+Business Impact: 500K+ ARR at risk from shared state between users
 
 Test Strategy:
 - Create WebSocket instances for 2 different users via factory

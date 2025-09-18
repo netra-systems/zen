@@ -303,8 +303,8 @@ class UserContextIsolationPhase2Tests(SSotBaseTestCase):
                     })
 
         print(f"  📊 Concurrent execution results:")
-        print(f"     ✅ Successful executions: {len(user_execution_results)}")
-        print(f"     ❌ Failed executions: {len(isolation_violations)}")
+        print(f"     CHECK Successful executions: {len(user_execution_results)}")
+        print(f"     X Failed executions: {len(isolation_violations)}")
 
         # Validate isolation between users
         print(f"\n  🔒 Validating user isolation...")
@@ -350,7 +350,7 @@ class UserContextIsolationPhase2Tests(SSotBaseTestCase):
 
         print(f"  🚨 Isolation violation summary:")
         for violation in isolation_violations:
-            print(f"     ❌ {violation['violation_type']}: {violation['user_id']}")
+            print(f"     X {violation['violation_type']}: {violation['user_id']}")
             print(f"        {violation.get('description', violation.get('error', 'Unknown issue'))}")
 
         self.isolation_test_results['execution_isolation'] = {
@@ -363,7 +363,7 @@ class UserContextIsolationPhase2Tests(SSotBaseTestCase):
         self.assertEqual(
             len(isolation_violations),
             0,
-            f"✅ USER EXECUTION ISOLATION: Found {len(isolation_violations)} isolation violations. "
+            f"CHECK USER EXECUTION ISOLATION: Found {len(isolation_violations)} isolation violations. "
             f"Expected 0 for secure multi-user execution. "
             f"User isolation is CRITICAL for $500K+ ARR protection."
         )
@@ -437,8 +437,8 @@ class UserContextIsolationPhase2Tests(SSotBaseTestCase):
                     })
 
         print(f"  📊 WebSocket isolation results:")
-        print(f"     ✅ Successful WebSocket creations: {len(user_websocket_results)}")
-        print(f"     ❌ Failed WebSocket creations: {len(websocket_isolation_violations)}")
+        print(f"     CHECK Successful WebSocket creations: {len(user_websocket_results)}")
+        print(f"     X Failed WebSocket creations: {len(websocket_isolation_violations)}")
 
         # Validate WebSocket isolation
         print(f"\n  🔒 Validating WebSocket event isolation...")
@@ -492,7 +492,7 @@ class UserContextIsolationPhase2Tests(SSotBaseTestCase):
 
         print(f"  🚨 WebSocket isolation violation summary:")
         for violation in websocket_isolation_violations:
-            print(f"     ❌ {violation['violation_type']}: {violation['user_id']}")
+            print(f"     X {violation['violation_type']}: {violation['user_id']}")
             print(f"        {violation.get('description', violation.get('error', 'Unknown issue'))}")
 
         self.isolation_test_results['websocket_isolation'] = {
@@ -505,7 +505,7 @@ class UserContextIsolationPhase2Tests(SSotBaseTestCase):
         self.assertEqual(
             len(websocket_isolation_violations),
             0,
-            f"✅ WEBSOCKET ISOLATION: Found {len(websocket_isolation_violations)} WebSocket isolation violations. "
+            f"CHECK WEBSOCKET ISOLATION: Found {len(websocket_isolation_violations)} WebSocket isolation violations. "
             f"Expected 0 for secure event routing. "
             f"WebSocket isolation is CRITICAL for chat functionality ($500K+ ARR)."
         )
@@ -600,8 +600,8 @@ class UserContextIsolationPhase2Tests(SSotBaseTestCase):
                     })
 
         print(f"  📊 Tool dispatcher isolation results:")
-        print(f"     ✅ Successful dispatcher creations: {len(user_tool_results)}")
-        print(f"     ❌ Failed dispatcher creations: {len(tool_isolation_violations)}")
+        print(f"     CHECK Successful dispatcher creations: {len(user_tool_results)}")
+        print(f"     X Failed dispatcher creations: {len(tool_isolation_violations)}")
 
         # Validate tool isolation and permissions
         print(f"\n  🔒 Validating tool permission isolation...")
@@ -662,7 +662,7 @@ class UserContextIsolationPhase2Tests(SSotBaseTestCase):
 
         print(f"  🚨 Tool isolation violation summary:")
         for violation in tool_isolation_violations:
-            print(f"     ❌ {violation['violation_type']}: {violation['user_id']}")
+            print(f"     X {violation['violation_type']}: {violation['user_id']}")
             print(f"        {violation.get('description', violation.get('error', 'Unknown issue'))}")
 
         self.isolation_test_results['tool_isolation'] = {
@@ -675,7 +675,7 @@ class UserContextIsolationPhase2Tests(SSotBaseTestCase):
         self.assertEqual(
             len(tool_isolation_violations),
             0,
-            f"✅ TOOL DISPATCHER ISOLATION: Found {len(tool_isolation_violations)} tool isolation violations. "
+            f"CHECK TOOL DISPATCHER ISOLATION: Found {len(tool_isolation_violations)} tool isolation violations. "
             f"Expected 0 for secure tool execution. "
             f"Tool isolation is CRITICAL for multi-user security."
         )
@@ -776,14 +776,14 @@ class UserContextIsolationPhase2Tests(SSotBaseTestCase):
                 })
 
         print(f"  🧹 Cleanup validation results:")
-        print(f"     ✅ Sessions cleaned: {len(self.test_users) - len(cleanup_violations)}")
-        print(f"     ❌ Cleanup failures: {len(cleanup_violations)}")
+        print(f"     CHECK Sessions cleaned: {len(self.test_users) - len(cleanup_violations)}")
+        print(f"     X Cleanup failures: {len(cleanup_violations)}")
         print(f"     💾 Memory leaks detected: {len(memory_leaks)}")
 
         all_violations = cleanup_violations + memory_leaks
 
         for violation in all_violations:
-            print(f"     ❌ {violation.get('violation_type', 'memory_leak')}: {violation['user_id']}")
+            print(f"     X {violation.get('violation_type', 'memory_leak')}: {violation['user_id']}")
             print(f"        {violation.get('description', violation.get('error', 'Unknown issue'))}")
 
         self.isolation_test_results['session_cleanup'] = {
@@ -797,7 +797,7 @@ class UserContextIsolationPhase2Tests(SSotBaseTestCase):
         self.assertEqual(
             len(all_violations),
             0,
-            f"✅ SESSION CLEANUP: Found {len(all_violations)} cleanup/memory violations. "
+            f"CHECK SESSION CLEANUP: Found {len(all_violations)} cleanup/memory violations. "
             f"Expected 0 for proper resource management. "
             f"Session cleanup is CRITICAL for preventing memory leaks."
         )
@@ -972,13 +972,13 @@ class UserContextIsolationPhase2Tests(SSotBaseTestCase):
 
         if preservation_percentage >= 80:
             recommendation = "PRESERVE - Essential for business functionality"
-            print(f"\n     ✅ RECOMMENDATION: {recommendation}")
+            print(f"\n     CHECK RECOMMENDATION: {recommendation}")
         elif preservation_percentage >= 60:
             recommendation = "PRESERVE WITH OPTIMIZATION - Has value but needs improvement"
-            print(f"\n     ⚠️  RECOMMENDATION: {recommendation}")
+            print(f"\n     WARNING️  RECOMMENDATION: {recommendation}")
         else:
             recommendation = "CONSIDER REPLACEMENT - Poor performance or functionality"
-            print(f"\n     ❌ RECOMMENDATION: {recommendation}")
+            print(f"\n     X RECOMMENDATION: {recommendation}")
 
         self.isolation_test_results['preservation_analysis'] = preservation_analysis
 
@@ -986,7 +986,7 @@ class UserContextIsolationPhase2Tests(SSotBaseTestCase):
         self.assertGreaterEqual(
             preservation_percentage,
             80.0,
-            f"✅ ISOLATION FACTORY PRESERVATION: Factory scored {preservation_percentage:.1f}% preservation value. "
+            f"CHECK ISOLATION FACTORY PRESERVATION: Factory scored {preservation_percentage:.1f}% preservation value. "
             f"Required ≥80% to justify preservation during cleanup. "
             f"User isolation factory is ESSENTIAL for multi-user security ($500K+ ARR)."
         )

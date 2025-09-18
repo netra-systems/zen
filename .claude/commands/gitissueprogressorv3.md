@@ -11,6 +11,7 @@ ISSUE: ${1 : one recent open issue}
  
 If ISSUE is not a single literal number:
     Search git issues to determine most important issue to work on relative to ISSUE text.
+    Be mindful of dependency tags
     Then set ISSUE = to that number
 
 SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
@@ -27,14 +28,14 @@ Issue Exclusion List (IEL): generally do not create issues for the following cas
 
 PROCESS INSTRUCTIONS START:
 
-AGENT_SESSEION_ID = agent-session-{datetime}
+AGENT_SESSION_ID = agent-session-{datetime}
 
 0) BRANCH SAFETY CHECK : SNST: 
     Verify current branch is develop-long-lived: `git branch --show-current`
     If not on develop-long-lived, STOP and switch: `git checkout develop-long-lived`
     Record branch state for safety monitoring throughout process.
     pull latest, and handle merge conflicts
-    add a tags to the issue: actively-being-worked-on, AGENT_SESSEION_ID
+    add a tags to the issue: actively-being-worked-on, AGENT_SESSION_ID
 
 1) READ ISSUE : SNST: Use gh to read the ISSUE in question.
 

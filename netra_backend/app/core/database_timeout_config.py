@@ -12,14 +12,214 @@ Business Value Justification (BVJ):
 """
 
 from typing import Dict, Optional, Callable, Any
-import logging
 import time
 import threading
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from collections import deque
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
+
+
+@dataclass
+class ConnectionMetrics:
+    """Container for database connection performance metrics."""
+    connection_attempts: int = 0
+    successful_connections: int = 0
+    failed_connections: int = 0
+    total_connection_time: float = 0.0
+    max_connection_time: float = 0.0
+    min_connection_time: float = float('inf')
+    last_connection_time: Optional[float] = None
+    timeout_violations: int = 0
+    recent_connection_times: deque = field(default_factory=lambda: deque(maxlen=100))
+    first_recorded: Optional[datetime] = None
+    last_updated: Optional[datetime] = None
+
+    def add_connection_attempt(self, connection_time: float, success: bool, timeout_threshold: float) -> None:
+        """Record a new connection attempt with timing and success status."""
+        now = datetime.now()
+        if self.first_recorded is None:
+            self.first_recorded = now
+        self.last_updated = now
+
+        self.connection_attempts += 1
+        self.last_connection_time = connection_time
+        self.recent_connection_times.append(connection_time)
+        self.total_connection_time += connection_time
+
+        if connection_time > self.max_connection_time:
+            self.max_connection_time = connection_time
+        if connection_time < self.min_connection_time:
+            self.min_connection_time = connection_time
+
+        if success:
+            self.successful_connections += 1
+        else:
+            self.failed_connections += 1
+
+        if connection_time > timeout_threshold:
+            self.timeout_violations += 1
+
+    def get_average_connection_time(self) -> float:
+        """Calculate average connection time across all attempts."""
+        if self.connection_attempts == 0:
+            return 0.0
+        return self.total_connection_time / self.connection_attempts
+
+    def get_recent_average_connection_time(self, window_size: int = 20) -> float:
+        """Calculate average connection time for recent attempts."""
+        if not self.recent_connection_times:
+            return 0.0
+        recent = list(self.recent_connection_times)[-window_size:]
+        return sum(recent) / len(recent)
+
+    def get_success_rate(self) -> float:
+        """Calculate connection success rate as percentage."""
+        if self.connection_attempts == 0:
+            return 0.0
+        return (self.successful_connections / self.connection_attempts) * 100.0
+
+    def get_timeout_violation_rate(self) -> float:
+        """Calculate timeout violation rate as percentage."""
+        if self.connection_attempts == 0:
+            return 0.0
+        return (self.timeout_violations / self.connection_attempts) * 100.0
+
+
+class DatabaseConnectionMonitor:
+    """Monitor and track database connection performance across environments."""
+
+    def __init__(self):
+        self._metrics_by_environment: Dict[str, ConnectionMetrics] = {}
+        self._lock = threading.Lock()
+        self._alert_callbacks: list[Callable[[str, Dict[str, Any]], None]] = []
+
+    def register_alert_callback(self, callback: Callable[[str, Dict[str, Any]], None]) -> None:
+        """Register a callback function for connection performance alerts."""
+        self._alert_callbacks.append(callback)
+
+    def record_connection_attempt(self, environment: str, connection_time: float,
+                                success: bool, timeout_config: Dict[str, float]) -> None:
+        """Record a database connection attempt with timing and outcome."""
+        with self._lock:
+            if environment not in self._metrics_by_environment:
+                self._metrics_by_environment[environment] = ConnectionMetrics()
+
+            metrics = self._metrics_by_environment[environment]
+            timeout_threshold = timeout_config.get('connection_timeout', 30.0)
+
+            metrics.add_connection_attempt(connection_time, success, timeout_threshold)
+
+            # Check for alert conditions
+            self._check_alert_conditions(environment, metrics, timeout_config)
+
+    def _check_alert_conditions(self, environment: str, metrics: ConnectionMetrics,
+                               timeout_config: Dict[str, float]) -> None:
+        """Check if current metrics warrant performance alerts."""
+        alerts = []
+
+        # Alert on high connection times (>80% of timeout threshold)
+        connection_timeout = timeout_config.get('connection_timeout', 30.0)
+        warning_threshold = connection_timeout * 0.8  # 80% of timeout
+        critical_threshold = connection_timeout * 0.95  # 95% of timeout
+
+        if metrics.last_connection_time:
+            if metrics.last_connection_time > critical_threshold:
+                alerts.append({
+                    'level': 'critical',
+                    'type': 'connection_time',
+                    'message': f'Connection time {metrics.last_connection_time:.2f}s exceeds critical threshold {critical_threshold:.2f}s',
+                    'value': metrics.last_connection_time,
+                    'threshold': critical_threshold
+                })
+            elif metrics.last_connection_time > warning_threshold:
+                alerts.append({
+                    'level': 'warning',
+                    'type': 'connection_time',
+                    'message': f'Connection time {metrics.last_connection_time:.2f}s exceeds warning threshold {warning_threshold:.2f}s',
+                    'value': metrics.last_connection_time,
+                    'threshold': warning_threshold
+                })
+
+        # Alert on low success rate (if we have enough samples)
+        if metrics.connection_attempts >= 10:
+            success_rate = metrics.get_success_rate()
+            if success_rate < 90.0:
+                alerts.append({
+                    'level': 'critical' if success_rate < 80.0 else 'warning',
+                    'type': 'success_rate',
+                    'message': f'Connection success rate {success_rate:.1f}% is below threshold',
+                    'value': success_rate,
+                    'threshold': 90.0
+                })
+
+        # Alert on timeout violation rate
+        if metrics.connection_attempts >= 5:
+            violation_rate = metrics.get_timeout_violation_rate()
+            if violation_rate > 20.0:
+                alerts.append({
+                    'level': 'critical' if violation_rate > 40.0 else 'warning',
+                    'type': 'timeout_violations',
+                    'message': f'Timeout violation rate {violation_rate:.1f}% is above threshold',
+                    'value': violation_rate,
+                    'threshold': 20.0
+                })
+
+        # Fire alerts
+        for alert in alerts:
+            for callback in self._alert_callbacks:
+                try:
+                    callback(environment, alert)
+                except Exception as e:
+                    logger.error(f"Alert callback failed: {e}")
+
+    def get_environment_metrics(self, environment: str) -> Optional[ConnectionMetrics]:
+        """Get connection metrics for a specific environment."""
+        with self._lock:
+            return self._metrics_by_environment.get(environment)
+
+    def get_all_metrics(self) -> Dict[str, ConnectionMetrics]:
+        """Get connection metrics for all environments."""
+        with self._lock:
+            return dict(self._metrics_by_environment)
+
+    def get_performance_summary(self, environment: str) -> Dict[str, Any]:
+        """Get a comprehensive performance summary for an environment."""
+        metrics = self.get_environment_metrics(environment)
+        if not metrics:
+            return {'environment': environment, 'status': 'no_data'}
+
+        return {
+            'environment': environment,
+            'connection_attempts': metrics.connection_attempts,
+            'success_rate': metrics.get_success_rate(),
+            'average_connection_time': metrics.get_average_connection_time(),
+            'recent_average_connection_time': metrics.get_recent_average_connection_time(),
+            'max_connection_time': metrics.max_connection_time,
+            'min_connection_time': metrics.min_connection_time if metrics.min_connection_time != float('inf') else 0.0,
+            'timeout_violation_rate': metrics.get_timeout_violation_rate(),
+            'last_connection_time': metrics.last_connection_time,
+            'monitoring_duration_hours': (
+                (metrics.last_updated - metrics.first_recorded).total_seconds() / 3600
+                if metrics.first_recorded and metrics.last_updated else 0
+            ),
+            'status': 'healthy' if metrics.get_success_rate() > 90 and metrics.get_timeout_violation_rate() < 10 else 'degraded'
+        }
+
+    def reset_metrics(self, environment: Optional[str] = None) -> None:
+        """Reset metrics for specified environment or all environments."""
+        with self._lock:
+            if environment:
+                if environment in self._metrics_by_environment:
+                    del self._metrics_by_environment[environment]
+            else:
+                self._metrics_by_environment.clear()
+
+
+# Global connection monitor instance
+_connection_monitor = DatabaseConnectionMonitor()
 
 
 @dataclass
@@ -248,7 +448,7 @@ def get_database_timeout_config(environment: str) -> Dict[str, float]:
             "health_check_timeout": 10.0,      # Health check queries
         },
         "test": {
-            "initialization_timeout": 25.0,    # Memory DB or test containers
+            "initialization_timeout": 20.0,    # Issue #1278: Optimized from 25s to 20s for better budget balance
             "table_setup_timeout": 10.0,       # Test operations should be fast
             "connection_timeout": 15.0,        # Test connections
             "pool_timeout": 20.0,              # Minimal pool operations
@@ -256,17 +456,20 @@ def get_database_timeout_config(environment: str) -> Dict[str, float]:
         },
         "staging": {
             # CRITICAL FIX Issue #1278: VPC Connector Capacity Constraints - Further extended timeout configuration
-            # Root cause analysis: Previous 45.0s still insufficient for compound infrastructure failures
+            # Issue #1278 Remediation Plan Implementation: Extended timeout configuration for infrastructure reliability
+            # Root cause analysis: Previous timeouts insufficient for compound infrastructure failures
             # New evidence from Issue #1278: VPC connector scaling + Cloud SQL capacity pressure creates compound delays
             # VPC connector capacity pressure: 30s delay during peak scaling events
             # Cloud SQL resource constraints: 25s delay under concurrent connection pressure
             # Network latency amplification: 10s additional delay during infrastructure stress
             # Safety margin for cascading failures: 15s buffer
-            "initialization_timeout": 75.0,    # CRITICAL: Extended to handle compound VPC+CloudSQL delays (increased from 45.0)
-            "table_setup_timeout": 25.0,       # Extended for schema operations under load (increased from 15.0)
-            "connection_timeout": 35.0,        # Extended for VPC connector peak scaling delays (increased from 25.0)
-            "pool_timeout": 45.0,              # Extended for connection pool exhaustion + VPC delays (increased from 30.0)
-            "health_check_timeout": 20.0,      # Extended for compound infrastructure health checks (increased from 15.0)
+            # Issue #1278 Remediation: Comprehensive timeout configuration based on infrastructure evidence
+            # CRITICAL: Combines all remediation efforts with proven values from testing
+            "initialization_timeout": 95.0,    # CRITICAL: Extended to handle compound VPC+CloudSQL delays (Issue #1278 Phase 1 evidence)
+            "table_setup_timeout": 35.0,       # Extended for schema operations under load (auth service alignment)  
+            "connection_timeout": 75.0,        # Extended for VPC connector peak scaling delays (Issue #1278 remediation - increased to 75s)
+            "pool_timeout": 60.0,              # Extended for connection pool exhaustion + VPC delays (increased from 45.0)
+            "health_check_timeout": 30.0,      # Extended for compound infrastructure health checks (increased from 20.0)
         },
         "production": {
             # CRITICAL: Production needs maximum reliability
@@ -316,16 +519,16 @@ def get_cloud_sql_optimized_config(environment: str) -> Dict[str, any]:
             },
             # Pool configuration for Cloud SQL with capacity constraints (Issue #1278)
             "pool_config": {
-                "pool_size": 10,              # Reduced to respect Cloud SQL connection limits (reduced from 15)
-                "max_overflow": 15,           # Reduced to stay within 80% of Cloud SQL capacity (reduced from 25)
-                "pool_timeout": 90.0,         # Extended for VPC connector + Cloud SQL delays (increased from 60.0)
-                "pool_recycle": 3600,         # 1 hour recycle for stability
+                "pool_size": 10,              # Balanced for Cloud SQL connection limits (Issue #1278 remediation)
+                "max_overflow": 15,           # Conservative to stay within Cloud SQL capacity limits
+                "pool_timeout": 120.0,        # Extended for VPC connector + Cloud SQL delays (Issue #1278 proven value - increased to 120s)
+                "pool_recycle": 1800,         # Issue #1278 remediation - faster refresh for better connection health
                 "pool_pre_ping": True,        # Always verify connections
                 "pool_reset_on_return": "rollback",  # Safe connection resets
                 # New: VPC connector capacity awareness
                 "vpc_connector_capacity_buffer": 5,   # Reserve connections for VPC connector scaling
                 "cloud_sql_capacity_limit": 100,     # Track Cloud SQL instance connection limit
-                "capacity_safety_margin": 0.8,       # Use only 80% of available connections
+                "capacity_safety_margin": 0.75,      # Issue #1278 remediation - reduced from 0.8 to 0.75 for more aggressive usage
             }
         }
     else:
@@ -466,12 +669,7 @@ def log_timeout_configuration(environment: str) -> None:
     timeout_config = get_database_timeout_config(environment)
     cloud_sql_config = get_cloud_sql_optimized_config(environment)
     retry_config = get_progressive_retry_config(environment)
-<<<<<<< HEAD
-
-=======
     vpc_config = get_vpc_connector_capacity_config(environment)
-    
->>>>>>> b7e0f383cead3f7a19649e62a1d232d823e826ae
     logger.info(f"Database Configuration Summary for {environment}:")
     logger.info(f"  Timeout Configuration: {timeout_config}")
     logger.info(f"  Cloud SQL Optimized: {is_cloud_sql_environment(environment)}")
@@ -660,3 +858,237 @@ def log_connection_performance_summary(environment: str) -> None:
             logger.warning(f"  VPC Performance Issues: {'; '.join(vpc_performance['performance_issues'])}")
         if vpc_performance.get('recommendations'):
             logger.info(f"  Recommendations: {'; '.join(vpc_performance['recommendations'])}")
+
+
+def calculate_adaptive_timeout(environment: str, operation_type: str,
+                             base_timeout: Optional[float] = None) -> float:
+    """Calculate adaptive timeout based on historical performance data.
+
+    This function implements Issue #1005 Master Plan Phase 1: Enhanced timeout
+    configuration with adaptive calculation based on observed connection patterns.
+
+    Args:
+        environment: Environment name (development, test, staging, production)
+        operation_type: Type of operation (connection, initialization, table_setup, etc.)
+        base_timeout: Optional base timeout to adjust, defaults to config value
+
+    Returns:
+        Adaptive timeout value in seconds that accounts for historical performance
+
+    Business Value Justification (BVJ):
+    - Segment: Platform/Internal
+    - Business Goal: Staging Environment Stability & Golden Path Reliability
+    - Value Impact: Prevents false timeout failures while maintaining responsiveness
+    - Strategic Impact: Enables reliable CI/CD and customer confidence
+    """
+    timeout_config = get_database_timeout_config(environment)
+
+    # Get base timeout from config if not provided
+    if base_timeout is None:
+        base_timeout = timeout_config.get(f"{operation_type}_timeout", 30.0)
+
+    # Get historical performance metrics
+    metrics = _connection_monitor.get_environment_metrics(environment)
+
+    if not metrics or metrics.connection_attempts < 5:
+        # Insufficient data - use base timeout with small safety margin
+        safety_factor = 1.2 if is_cloud_sql_environment(environment) else 1.1
+        adaptive_timeout = base_timeout * safety_factor
+        logger.debug(f"Adaptive timeout for {environment}/{operation_type}: {adaptive_timeout:.2f}s "
+                    f"(insufficient data, base: {base_timeout:.2f}s, factor: {safety_factor})")
+        return adaptive_timeout
+
+    # Calculate performance-based adjustments
+    avg_time = metrics.get_average_connection_time()
+    recent_avg = metrics.get_recent_average_connection_time(window_size=10)
+    success_rate = metrics.get_success_rate()
+
+    # Base multiplier starts at 1.0
+    multiplier = 1.0
+
+    # Adjust based on recent performance trends
+    if recent_avg > avg_time * 1.3:
+        # Recent performance is degrading - increase timeout
+        multiplier += 0.3
+        logger.debug(f"Performance degradation detected: recent {recent_avg:.2f}s vs avg {avg_time:.2f}s")
+    elif recent_avg < avg_time * 0.7:
+        # Recent performance is improving - can reduce timeout slightly
+        multiplier -= 0.1
+        logger.debug(f"Performance improvement detected: recent {recent_avg:.2f}s vs avg {avg_time:.2f}s")
+
+    # Adjust based on success rate
+    if success_rate < 90.0:
+        # Low success rate - increase timeout significantly
+        multiplier += 0.4
+        logger.debug(f"Low success rate detected: {success_rate:.1f}%")
+    elif success_rate > 98.0:
+        # High success rate - can reduce timeout slightly
+        multiplier -= 0.05
+
+    # Adjust based on timeout violations
+    violation_rate = metrics.get_timeout_violation_rate()
+    if violation_rate > 15.0:
+        # High violation rate - increase timeout
+        multiplier += 0.5
+        logger.debug(f"High timeout violation rate: {violation_rate:.1f}%")
+
+    # Apply environment-specific constraints
+    if is_cloud_sql_environment(environment):
+        # Cloud SQL environments need more conservative timeouts
+        multiplier = max(multiplier, 1.1)  # Minimum 10% increase
+        multiplier = min(multiplier, 2.5)  # Maximum 150% increase
+    else:
+        # Local environments can be more aggressive
+        multiplier = max(multiplier, 0.8)  # Minimum 20% decrease
+        multiplier = min(multiplier, 2.0)  # Maximum 100% increase
+
+    # Calculate final adaptive timeout
+    adaptive_timeout = base_timeout * multiplier
+
+    # Apply VPC connector capacity awareness if needed
+    if is_cloud_sql_environment(environment):
+        adaptive_timeout = calculate_capacity_aware_timeout(environment, adaptive_timeout)
+
+    logger.debug(f"Adaptive timeout for {environment}/{operation_type}: {adaptive_timeout:.2f}s "
+                f"(base: {base_timeout:.2f}s, multiplier: {multiplier:.2f}, "
+                f"success_rate: {success_rate:.1f}%, violation_rate: {violation_rate:.1f}%)")
+
+    return adaptive_timeout
+
+
+def get_adaptive_timeout_config(environment: str) -> Dict[str, float]:
+    """Get adaptive timeout configuration for all operation types.
+
+    This function provides the main interface for Issue #1005 Master Plan Phase 1
+    enhanced timeout configuration with adaptive calculation.
+
+    Args:
+        environment: Environment name
+
+    Returns:
+        Dictionary with adaptive timeout values for all operation types
+    """
+    base_config = get_database_timeout_config(environment)
+    adaptive_config = {}
+
+    # Calculate adaptive timeouts for each operation type
+    for operation_type in ["initialization", "table_setup", "connection", "pool", "health_check"]:
+        adaptive_config[f"{operation_type}_timeout"] = calculate_adaptive_timeout(
+            environment, operation_type
+        )
+
+    # Log the adaptive configuration
+    logger.info(f"Adaptive timeout configuration for {environment}:")
+    for key, value in adaptive_config.items():
+        base_value = base_config.get(key, 0.0)
+        change = ((value - base_value) / base_value * 100) if base_value > 0 else 0
+        logger.info(f"  {key}: {value:.1f}s (base: {base_value:.1f}s, change: {change:+.1f}%)")
+
+    return adaptive_config
+
+
+def should_use_adaptive_timeouts(environment: str) -> bool:
+    """Determine if adaptive timeouts should be used for the environment.
+
+    Args:
+        environment: Environment name
+
+    Returns:
+        True if adaptive timeouts should be used, False for fallback to base config
+    """
+    # Always use adaptive timeouts for Cloud SQL environments
+    if is_cloud_sql_environment(environment):
+        return True
+
+    # For local environments, use adaptive if we have sufficient data
+    metrics = _connection_monitor.get_environment_metrics(environment)
+    return metrics is not None and metrics.connection_attempts >= 10
+
+
+def get_failure_type_analysis(environment: str) -> Dict[str, Any]:
+    """Analyze failure types and patterns for SMD bypass logic enhancement.
+
+    This function implements Issue #1005 Master Plan Phase 1: Enhanced SMD bypass
+    logic with intelligent failure type analysis.
+
+    Args:
+        environment: Environment name
+
+    Returns:
+        Dictionary with failure analysis data for SMD bypass decisions
+    """
+    metrics = _connection_monitor.get_environment_metrics(environment)
+
+    if not metrics:
+        return {
+            'environment': environment,
+            'has_data': False,
+            'bypass_recommendation': 'conservative',
+            'reason': 'No historical data available'
+        }
+
+    # Analyze failure patterns
+    success_rate = metrics.get_success_rate()
+    violation_rate = metrics.get_timeout_violation_rate()
+    recent_avg = metrics.get_recent_average_connection_time(window_size=5)
+    overall_avg = metrics.get_average_connection_time()
+
+    # Determine failure characteristics
+    failure_analysis = {
+        'environment': environment,
+        'has_data': True,
+        'connection_attempts': metrics.connection_attempts,
+        'success_rate': success_rate,
+        'timeout_violation_rate': violation_rate,
+        'recent_performance_trend': 'stable',
+        'failure_type': 'none',
+        'severity': 'low',
+        'bypass_recommendation': 'strict',
+        'confidence': 'high'
+    }
+
+    # Analyze performance trends
+    if recent_avg > overall_avg * 1.2:
+        failure_analysis['recent_performance_trend'] = 'degrading'
+        failure_analysis['confidence'] = 'medium'
+    elif recent_avg < overall_avg * 0.8:
+        failure_analysis['recent_performance_trend'] = 'improving'
+
+    # Classify failure types and severity
+    if success_rate < 80.0:
+        failure_analysis['failure_type'] = 'connection_failure'
+        failure_analysis['severity'] = 'critical'
+        failure_analysis['bypass_recommendation'] = 'conditional'
+        failure_analysis['reason'] = f'Critical connection failure rate: {success_rate:.1f}%'
+    elif success_rate < 90.0:
+        failure_analysis['failure_type'] = 'intermittent_failure'
+        failure_analysis['severity'] = 'medium'
+        failure_analysis['bypass_recommendation'] = 'conditional'
+        failure_analysis['reason'] = f'Moderate connection failure rate: {success_rate:.1f}%'
+    elif violation_rate > 25.0:
+        failure_analysis['failure_type'] = 'timeout_failure'
+        failure_analysis['severity'] = 'medium'
+        failure_analysis['bypass_recommendation'] = 'permissive'
+        failure_analysis['reason'] = f'High timeout violation rate: {violation_rate:.1f}% (infrastructure issue)'
+    elif violation_rate > 15.0:
+        failure_analysis['failure_type'] = 'performance_degradation'
+        failure_analysis['severity'] = 'low'
+        failure_analysis['bypass_recommendation'] = 'permissive'
+        failure_analysis['reason'] = f'Moderate timeout violations: {violation_rate:.1f}% (likely infrastructure)'
+    else:
+        failure_analysis['failure_type'] = 'none'
+        failure_analysis['severity'] = 'low'
+        failure_analysis['bypass_recommendation'] = 'strict'
+        failure_analysis['reason'] = 'Performance within acceptable bounds'
+
+    # Adjust recommendations for Cloud SQL environments
+    if is_cloud_sql_environment(environment):
+        if failure_analysis['failure_type'] in ['timeout_failure', 'performance_degradation']:
+            # Cloud SQL timeout issues are often infrastructure-related
+            failure_analysis['bypass_recommendation'] = 'permissive'
+            failure_analysis['reason'] += ' (Cloud SQL infrastructure considerations)'
+
+    logger.debug(f"Failure analysis for {environment}: {failure_analysis['failure_type']} "
+                f"(severity: {failure_analysis['severity']}, recommendation: {failure_analysis['bypass_recommendation']})")
+
+    return failure_analysis

@@ -32,23 +32,26 @@ import unittest
 from unittest.mock import Mock, AsyncMock
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from test_framework.ssot.mock_factory import SSotMockFactory
 
 
-class MockWebSocketManager:
-    """Mock WebSocket manager for testing user isolation"""
-    def __init__(self, user_id: str):
-        self.user_id = user_id
-        self.events_sent = []
-        self.send_agent_event = AsyncMock(side_effect=self._record_event)
-    
-    async def _record_event(self, event_type: str, data: Dict[str, Any]):
+def create_mock_websocket_manager_for_isolation(user_id: str):
+    """Create WebSocket manager mock using SSOT factory for user isolation testing"""
+    mock_manager = SSotMockFactory.create_websocket_manager_mock(user_isolation=True)
+    mock_manager.user_id = user_id
+    mock_manager.events_sent = []
+
+    async def _record_event(event_type: str, data: Dict[str, Any]):
         """Record events sent for validation"""
-        self.events_sent.append({
+        mock_manager.events_sent.append({
             'event_type': event_type,
             'data': data,
-            'user_id': self.user_id,
+            'user_id': user_id,
             'timestamp': time.time()
         })
+
+    mock_manager.send_agent_event = AsyncMock(side_effect=_record_event)
+    return mock_manager
 
 
 @pytest.mark.unit
@@ -77,7 +80,7 @@ class UserExecutionEngineIsolationValidationTests(SSotAsyncTestCase):
         
         # Create engines for different users
         for user in self.test_users:
-            mock_ws = MockWebSocketManager(user['id'])
+            mock_ws = create_mock_websocket_manager_for_isolation(user['id'])
             
             try:
                 engine = UserExecutionEngine(
@@ -241,7 +244,7 @@ class UserExecutionEngineIsolationValidationTests(SSotAsyncTestCase):
         
         for i in range(10):
             user_id = f'temp_user_{i}'
-            mock_ws = MockWebSocketManager(user_id)
+            mock_ws = create_mock_websocket_manager_for_isolation(user_id)
             
             try:
                 engine = UserExecutionEngine(
@@ -281,7 +284,7 @@ class UserExecutionEngineIsolationValidationTests(SSotAsyncTestCase):
             batch_engines = []
             for i in range(5):
                 user_id = f'batch_{batch}_user_{i}'
-                mock_ws = MockWebSocketManager(user_id)
+                mock_ws = create_mock_websocket_manager_for_isolation(user_id)
                 
                 try:
                     engine = UserExecutionEngine(
@@ -325,7 +328,7 @@ class UserExecutionEngineIsolationValidationTests(SSotAsyncTestCase):
         def create_and_test_engine(user_index: int):
             """Thread worker function"""
             user_id = f'thread_user_{user_index}'
-            mock_ws = MockWebSocketManager(user_id)
+            mock_ws = create_mock_websocket_manager_for_isolation(user_id)
             
             try:
                 # Create engine

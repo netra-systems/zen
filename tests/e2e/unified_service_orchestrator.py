@@ -56,7 +56,6 @@ class UnifiedServiceOrchestrator:
         
         # Core SSOT Docker manager
         self.docker_manager = UnifiedDockerManager(
-            environment="e2e-test",
             environment_type=environment_type
         )
         

@@ -10,7 +10,7 @@ CRITICAL: These tests are EXPECTED TO FAIL initially to demonstrate:
 3. WebSocket authentication integration problems
 4. Real-world authentication scenarios
 
-These failures validate that SSOT remediation is needed for the $500K+ ARR
+These failures validate that SSOT remediation is needed for the 500K+ ARR
 Golden Path user flow to work reliably in production.
 
 Business Impact: Complete user authentication flow from login through chat
@@ -47,7 +47,7 @@ class GoldenPathJWTAuthenticationTests(SSotAsyncTestCase):
         self.set_env_var("ENVIRONMENT", "staging")
         self.set_env_var("NETRA_ENVIRONMENT", "staging")
         self.set_env_var("AUTH_SERVICE_URL", "https://api.staging.netrasystems.ai")
-        self.set_env_var("BACKEND_URL", "https://backend.staging.netrasystems.ai")
+        self.set_env_var("BACKEND_URL", "https://api.staging.netrasystems.ai")
         self.set_env_var("WEBSOCKET_URL", "wss://ws.staging.netrasystems.ai")
         
         # Test user credentials for Golden Path
@@ -213,7 +213,7 @@ class GoldenPathJWTAuthenticationTests(SSotAsyncTestCase):
                 await self.test_golden_path_websocket_authentication()
             
             # Test Golden Path chat flow using agent execution
-            # This represents the $500K+ ARR business value
+            # This represents the 500K+ ARR business value
             test_message = "Help me optimize my AI infrastructure for better performance"
             
             # SSOT VIOLATION CHECK: Chat should work with Golden Path authentication

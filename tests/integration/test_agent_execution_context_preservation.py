@@ -9,7 +9,7 @@ EXPECTED BEHAVIOR: Tests should demonstrate context preservation challenges
 during SSOT consolidation and validate that fixes maintain execution integrity.
 
 Business Impact:
-- Protects Golden Path: Users login → get AI responses
+- Protects Golden Path: Users login -> get AI responses
 - Ensures agent execution state consistency
 - Maintains $500K+ ARR agent-based functionality
 - Validates user isolation in agent execution contexts

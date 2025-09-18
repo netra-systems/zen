@@ -28,7 +28,7 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-'\nComprehensive Performance and SLA Validation Tests for Golden Path\n\nBusiness Value Justification (BVJ):\n- Segment: All (Free, Early, Mid, Enterprise)\n- Business Goal: Ensure golden path meets performance SLAs protecting $500K+ ARR\n- Value Impact: Validates user experience quality that drives retention and conversion\n- Strategic Impact: Ensures platform can scale to support business growth\n\nThis test suite validates performance and SLA requirements for the golden path:\n1. Connection establishment performance (<3s)\n2. First agent response time (<5s)\n3. Total execution time (<60s)\n4. Event delivery latency (<1s)\n5. Concurrent user capacity (100+ users)\n6. Memory efficiency and resource usage\n7. Error rate thresholds (<1%)\n8. Recovery time objectives (<10s)\n\nKey Coverage Areas:\n- WebSocket connection performance\n- Agent execution speed and efficiency\n- Real-time event delivery latency\n- Concurrent user load testing\n- Memory usage and resource optimization\n- Error handling and recovery performance\n- Throughput and scalability validation\n- Business SLA compliance verification\n'
+'\nComprehensive Performance and SLA Validation Tests for Golden Path\n\nBusiness Value Justification (BVJ):\n- Segment: All (Free, Early, Mid, Enterprise)\n- Business Goal: Ensure golden path meets performance SLAs protecting 500K+ ARR\n- Value Impact: Validates user experience quality that drives retention and conversion\n- Strategic Impact: Ensures platform can scale to support business growth\n\nThis test suite validates performance and SLA requirements for the golden path:\n1. Connection establishment performance (<3s)\n2. First agent response time (<5s)\n3. Total execution time (<60s)\n4. Event delivery latency (<1s)\n5. Concurrent user capacity (100+ users)\n6. Memory efficiency and resource usage\n7. Error rate thresholds (<1%)\n8. Recovery time objectives (<10s)\n\nKey Coverage Areas:\n- WebSocket connection performance\n- Agent execution speed and efficiency\n- Real-time event delivery latency\n- Concurrent user load testing\n- Memory usage and resource optimization\n- Error handling and recovery performance\n- Throughput and scalability validation\n- Business SLA compliance verification\n'
 import asyncio
 import gc
 import psutil
@@ -37,7 +37,7 @@ import statistics
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -251,7 +251,7 @@ class GoldenPathPerformanceSLAComprehensiveTests(SSotAsyncTestCase):
         event_types = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
         for test_round in range(num_event_tests // len(event_types)):
             for event_type in event_types:
-                event_data = {'test_round': test_round, 'event_type': event_type, 'timestamp': datetime.utcnow().isoformat(), 'data': f'performance_test_data_{test_round}'}
+                event_data = {'test_round': test_round, 'event_type': event_type, 'timestamp': datetime.now(UTC).isoformat(), 'data': f'performance_test_data_{test_round}'}
                 try:
                     await emitter.send_event(event_type, event_data, user_id=str(uuid.uuid4()), thread_id=str(uuid.uuid4()))
                 except AttributeError:
@@ -293,7 +293,7 @@ class GoldenPathPerformanceSLAComprehensiveTests(SSotAsyncTestCase):
             factory = ExecutionEngineFactory(websocket_bridge=websocket_bridge)
             engine = await factory.create_for_user(context)
             engines.append(engine)
-            large_data = {'user_data': f'user_{i}_' * 100, 'execution_history': [f'step_{j}' for j in range(50)], 'metadata': {'user_index': i, 'created_at': datetime.utcnow().isoformat()}}
+            large_data = {'user_data': f'user_{i}_' * 100, 'execution_history': [f'step_{j}' for j in range(50)], 'metadata': {'user_index': i, 'created_at': datetime.now(UTC).isoformat()}}
             engine.set_agent_state('performance_test_data', large_data)
             engine.set_execution_state('current_task', {'task': f'memory_test_{i}'})
             if (i + 1) % 5 == 0:
@@ -399,7 +399,7 @@ class GoldenPathPerformanceSLAComprehensiveTests(SSotAsyncTestCase):
 
     def _generate_performance_report(self) -> Dict[str, Any]:
         """Generate comprehensive performance report."""
-        return {'test_timestamp': datetime.utcnow().isoformat(), 'sla_requirements': self.sla_requirements, 'performance_measurements': self.performance_measurements, 'memory_samples': self.memory_samples, 'overall_sla_compliance': all((measurement.get('sla_compliance', False) for measurement in self.performance_measurements)), 'total_measurements': len(self.performance_measurements), 'test_environment': 'unit_test'}
+        return {'test_timestamp': datetime.now(UTC).isoformat(), 'sla_requirements': self.sla_requirements, 'performance_measurements': self.performance_measurements, 'memory_samples': self.memory_samples, 'overall_sla_compliance': all((measurement.get('sla_compliance', False) for measurement in self.performance_measurements)), 'total_measurements': len(self.performance_measurements), 'test_environment': 'unit_test'}
 
     def teardown_method(self, method):
         """Cleanup after performance tests."""

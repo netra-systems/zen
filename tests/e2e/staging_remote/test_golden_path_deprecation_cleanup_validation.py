@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 This test suite validates Golden Path functionality on staging GCP remote
 environment after deprecation warning cleanup for Issue #1090:
 
-1. Complete user flow: login → agent → chat → response works on staging
+1. Complete user flow: login -> agent -> chat -> response works on staging
 2. All 5 critical WebSocket events are delivered correctly
 3. No deprecation warnings appear in staging environment
 4. User authentication and agent execution remain intact
@@ -67,7 +67,7 @@ class TestGoldenPathDeprecationCleanupValidation(SSotBaseTestCase):
     @pytest.mark.staging_remote
     @pytest.mark.mission_critical
     async def test_complete_golden_path_flow_post_cleanup(self):
-        """Test complete user flow: login → agent → chat → response on staging.
+        """Test complete user flow: login -> agent -> chat -> response on staging.
         
         SHOULD PASS BOTH BEFORE AND AFTER: Golden Path functionality protected
         """
@@ -456,11 +456,7 @@ class TestGoldenPathDeprecationCleanupValidation(SSotBaseTestCase):
         
         if 'websocket_connection_latency_ms' in performance_metrics:
             ws_latency = performance_metrics['websocket_connection_latency_ms']  
-            self.assertLess(ws_latency, 10000, "WebSocket connection latency should be reasonable (<10s)")
-
-
-class TestStagingEnvironmentDependencyValidation(SSotBaseTestCase):
-    """Test staging environment dependency validation."""
+            self.assertLess(ws_latency, 10000, "WebSocket connection latency should be reasonable (<10s)""""Test staging environment dependency validation."""
     
     def setUp(self):
         """Setup test environment."""

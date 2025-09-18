@@ -14,8 +14,8 @@
   <problem>
     <description>
       Service ID mismatch between backend and auth service in staging environment.
-      Backend was sending a SERVICE_ID with timestamp suffix (e.g., 'netra-auth-staging-1757224059')
-      while auth service expected 'netra-auth-staging-1757228147', causing authentication failures.
+      Backend was sending a SERVICE_ID with timestamp suffix (e.g., 'netra-auth-1757224059')
+      while auth service expected 'netra-auth-1757228147', causing authentication failures.
     </description>
     <symptoms>
       <symptom>Auth service logs showing: "Blacklist check - Service ID mismatch"</symptom>
@@ -25,19 +25,19 @@
     <root_cause>
       The deployment script (scripts/deploy_to_gcp.py) was appending a timestamp
       to the SERVICE_ID when creating the Google Secret Manager secret:
-      "service-id-staging": f"netra-auth-staging-{int(time.time())}"
+      "service-id-staging": f"netra-auth-{int(time.time())}"
     </root_cause>
   </problem>
   
   <solution>
     <change file="scripts/deploy_to_gcp.py" line="1368">
-      <before>"service-id-staging": f"netra-auth-staging-{int(time.time())}"</before>
-      <after>"service-id-staging": "netra-auth-staging"</after>
+      <before>"service-id-staging": f"netra-auth-{int(time.time())}"</before>
+      <after>"service-id-staging": "netra-auth"</after>
     </change>
     <explanation>
       Removed the timestamp suffix from SERVICE_ID generation to ensure
       both backend and auth services use the same consistent SERVICE_ID
-      value of "netra-auth-staging" for inter-service authentication.
+      value of "netra-auth" for inter-service authentication.
     </explanation>
   </solution>
   

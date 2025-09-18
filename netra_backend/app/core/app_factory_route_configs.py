@@ -24,9 +24,11 @@ def _get_auth_route_configs(modules: dict) -> dict:
         "agents_execute": (modules["agents_execute_router"], "/api/agents", ["agents"]),
         "metrics_api": (modules["metrics_api_router"], "/api/metrics", ["metrics"]),
         "health_check": (modules["health_check_router"], "/api/health", ["health-check"]),
-        "system_info": (modules["system_info_router"], "/api/system", ["system-info"])
+        "system_info": (modules["system_info_router"], "/api/system", ["system-info"]),
+        "websocket_ticket": (modules["websocket_ticket_router"], "/api", ["websocket-auth"])
         # auth_resilience router removed - functionality consolidated into auth_client_core
         # health_check and system_info routers added - provides system introspection
+        # websocket_ticket router added - provides ticket-based authentication (Issue #1296 Phase 2)
     }
 
 

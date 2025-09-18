@@ -5,7 +5,7 @@ Factory class to create high-value business scenarios for testing mock response
 elimination. Focuses on scenarios where receiving inauthentic AI responses would
 have severe business consequences for enterprise customers.
 
-Business Value: Validates that $500K+ ARR scenarios never receive mock responses
+Business Value: Validates that 500K+ ARR scenarios never receive mock responses
 that could cause customer churn or reputation damage.
 """
 
@@ -19,8 +19,8 @@ from enum import Enum
 class BusinessImpactLevel(Enum):
     """Business impact levels for different scenarios."""
     CRITICAL = "critical"      # $1M+ ARR, board decisions, public disclosure
-    HIGH = "high"              # $500K+ ARR, executive decisions, contract renewals
-    MEDIUM = "medium"          # $100K+ ARR, department decisions, budget planning
+    HIGH = "high"              # 500K+ ARR, executive decisions, contract renewals
+    MEDIUM = "medium"          # 100K+ ARR, department decisions, budget planning
     LOW = "low"                # <$100K ARR, individual decisions, routine queries
 
 

@@ -30,7 +30,7 @@ import asyncio
 import time
 import uuid
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, asdict
 from concurrent.futures import ThreadPoolExecutor
@@ -68,7 +68,7 @@ class RealUserExecutionContext:
         if not hasattr(self, 'metadata') or self.metadata is None:
             self.metadata = {}
         if not hasattr(self, 'created_at'):
-            self.created_at = datetime.utcnow()
+            self.created_at = datetime.now(UTC)
 
 
 @dataclass
@@ -154,7 +154,7 @@ class MockDatabase:
         key = f"triage:{user_id}:{result.get('request_id', 'unknown')}"
         self.stored_data[key] = {
             **result,
-            "stored_at": datetime.utcnow().isoformat()
+            "stored_at": datetime.now(UTC).isoformat()
         }
     
     async def get_triage_result(self, user_id: str, request_id: str):
@@ -298,7 +298,7 @@ class TriageAgentIntegrationTests(SSotBaseTestCase):
                 thread_id=f"thread_{i}_{uuid.uuid4().hex[:8]}",
                 run_id=f"run_{i}_{uuid.uuid4().hex[:8]}",
                 session_id=f"session_{i}_{uuid.uuid4().hex[:8]}",
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(UTC),
                 metadata={"test_user": True, "user_index": i}
             )
             users.append(user_context)
@@ -349,7 +349,7 @@ class TriageAgentIntegrationTests(SSotBaseTestCase):
                 thread_id=f"concurrent_thread_{i}",
                 run_id=f"concurrent_run_{i}",
                 session_id=f"concurrent_session_{i}",
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(UTC),
                 metadata={"concurrent_test": True, "user_id": i}
             )
             
@@ -432,7 +432,7 @@ class TriageAgentIntegrationTests(SSotBaseTestCase):
             thread_id="db_test_thread",
             run_id="db_test_run",
             session_id="db_test_session",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
             metadata={"test": "database_storage"}
         )
         
@@ -467,7 +467,7 @@ class TriageAgentIntegrationTests(SSotBaseTestCase):
             {
                 **result,
                 "request_id": user_context.request_id,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
         )
         
@@ -516,7 +516,7 @@ class TriageAgentIntegrationTests(SSotBaseTestCase):
             thread_id="db_error_test_thread",
             run_id="db_error_test_run",
             session_id="db_error_test_session",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
             metadata={"test": "database_error_recovery"}
         )
         
@@ -576,7 +576,7 @@ class TriageAgentIntegrationTests(SSotBaseTestCase):
             thread_id="cache_test_thread", 
             run_id="cache_test_run",
             session_id="cache_test_session",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
             metadata={"test": "caching"}
         )
         
@@ -649,7 +649,7 @@ class TriageAgentIntegrationTests(SSotBaseTestCase):
             thread_id="cache_thread_1",
             run_id="cache_run_1", 
             session_id="cache_session_1",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
             metadata={"test": "cache_isolation"}
         )
         
@@ -659,7 +659,7 @@ class TriageAgentIntegrationTests(SSotBaseTestCase):
             thread_id="cache_thread_2",
             run_id="cache_run_2",
             session_id="cache_session_2", 
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
             metadata={"test": "cache_isolation"}
         )
         
@@ -716,7 +716,7 @@ class TriageAgentIntegrationTests(SSotBaseTestCase):
             thread_id="websocket_test_thread",
             run_id="websocket_test_run",
             session_id="websocket_test_session",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
             metadata={"test": "websocket_events"}
         )
         
@@ -790,7 +790,7 @@ class TriageAgentIntegrationTests(SSotBaseTestCase):
                 thread_id=f"websocket_thread_{i}",
                 run_id=f"websocket_run_{i}",
                 session_id=f"websocket_session_{i}",
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(UTC),
                 metadata={"user_index": i}
             )
             users.append(user_context)
@@ -872,7 +872,7 @@ class TriageAgentIntegrationTests(SSotBaseTestCase):
             thread_id="llm_failure_test_thread",
             run_id="llm_failure_test_run",
             session_id="llm_failure_test_session",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
             metadata={"test": "llm_failure_recovery"}
         )
         
@@ -930,7 +930,7 @@ class TriageAgentIntegrationTests(SSotBaseTestCase):
             thread_id="timeout_test_thread",
             run_id="timeout_test_run",
             session_id="timeout_test_session",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
             metadata={"test": "timeout_handling"}
         )
         
@@ -1002,7 +1002,7 @@ class TriageAgentIntegrationTests(SSotBaseTestCase):
                 thread_id=f"perf_thread_{i}",
                 run_id=f"perf_run_{i}",
                 session_id=f"perf_session_{i}",
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(UTC),
                 metadata={"performance_test": True, "request_index": i}
             )
             

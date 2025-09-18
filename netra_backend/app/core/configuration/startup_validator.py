@@ -10,7 +10,7 @@ from typing import List, Tuple, Optional
 from enum import Enum
 
 from netra_backend.app.core.config_dependencies import ConfigDependencyMap, ConfigImpactLevel
-from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.config import get_config as get_unified_config
 from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger
 

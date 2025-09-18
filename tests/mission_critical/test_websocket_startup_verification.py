@@ -2,7 +2,7 @@
 Mission Critical Test Suite: WebSocket Startup Verification
 
 This module tests the critical WebSocket startup verification process that protects
-$500K+ ARR functionality by ensuring WebSocket events can be delivered for chat functionality.
+500K+ ARR functionality by ensuring WebSocket events can be delivered for chat functionality.
 
 Business Value: Platform/Critical - System Stability & Customer Experience
 Ensures WebSocket system can support chat functionality (90% of platform value).

@@ -5,7 +5,7 @@ This package contains the MISSION CRITICAL tests that validate the complete gold
 user journey from initial connection through AI-powered business value delivery.
 
 CRITICAL BUSINESS CONTEXT:
-These tests protect $500K+ ARR by ensuring the core revenue-generating user flow works:
+These tests protect 500K+ ARR by ensuring the core revenue-generating user flow works:
 User Opens Chat  ->  Authentication  ->  Cost Optimization Request  ->  Agent Pipeline  ->  Business Value
 
 PRIMARY TEST:

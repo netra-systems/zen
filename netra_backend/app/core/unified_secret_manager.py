@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 class SecretType(Enum):
     """Types of secrets managed by the system."""
     SESSION_SECRET = "SESSION_SECRET"  # For SessionMiddleware
-    JWT_SECRET = "JWT_SECRET"         # For JWT token validation
+    # JWT_SECRET removed - JWT operations delegated to auth service (SSOT compliance)
     DATABASE_PASSWORD = "DATABASE_PASSWORD"  # Database connections
     API_KEY = "API_KEY"              # External service API keys
     OAUTH_CLIENT_SECRET = "OAUTH_CLIENT_SECRET"  # OAuth integration
@@ -268,12 +268,7 @@ class UnifiedSecretManager:
                 'APP_SECRET_KEY',
                 'DJANGO_SECRET_KEY'
             ]
-        elif secret_name == 'JWT_SECRET_KEY':
-            alternatives = [
-                'JWT_SECRET',
-                'AUTH_SECRET_KEY',
-                'TOKEN_SECRET_KEY'
-            ]
+        # JWT_SECRET_KEY handling removed - JWT operations delegated to auth service (SSOT compliance)
         elif secret_type == SecretType.DATABASE_PASSWORD:
             alternatives = [
                 f"{secret_name}_PASSWORD",
@@ -383,8 +378,8 @@ class UnifiedSecretManager:
         return self.get_secret('SECRET_KEY', SecretType.SESSION_SECRET, min_length=32)
     
     def get_jwt_secret(self) -> SecretInfo:
-        """Get JWT secret for token validation."""
-        return self.get_secret('JWT_SECRET_KEY', SecretType.JWT_SECRET, min_length=32)
+        """JWT secret access removed - JWT operations delegated to auth service (SSOT compliance)."""
+        raise NotImplementedError("JWT operations have been delegated to auth service for SSOT compliance")
     
     def validate_all_secrets(self) -> Dict[str, Any]:
         """Validate all critical secrets and return status report."""
@@ -400,7 +395,7 @@ class UnifiedSecretManager:
         # Critical secrets to validate
         critical_secrets = [
             ('SECRET_KEY', SecretType.SESSION_SECRET, 32, True),
-            ('JWT_SECRET_KEY', SecretType.JWT_SECRET, 32, False)
+            # JWT_SECRET_KEY removed - JWT operations delegated to auth service (SSOT compliance)
         ]
         
         all_success = True

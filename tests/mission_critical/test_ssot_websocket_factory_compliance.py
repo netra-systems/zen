@@ -2,7 +2,7 @@
 """MISSION CRITICAL: SSOT WebSocket Factory Pattern Compliance Tests
 
 THIS SUITE VALIDATES SSOT FACTORY PATTERN COMPLIANCE FOR WEBSOCKET COMPONENTS.
-Business Value: $500K+ ARR - Ensures WebSocket user isolation works correctly
+Business Value: 500K+ ARR - Ensures WebSocket user isolation works correctly
 
 PURPOSE:
 - Test that deprecated get_websocket_manager_factory() patterns are detected as violations
@@ -144,7 +144,7 @@ class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
         PURPOSE: Validates that the SSOT pattern for WebSocket manager creation
         works properly and maintains user isolation.
         
-        BUSINESS VALUE: Core functionality for $500K+ ARR chat features.
+        BUSINESS VALUE: Core functionality for 500K+ ARR chat features.
         """
         logger.info("[SSOT COMPLIANCE] Testing SSOT WebSocket manager creation...")
         
@@ -239,7 +239,7 @@ class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
         PURPOSE: Ensures that migrating from deprecated factory pattern to SSOT
         pattern maintains all existing functionality and doesn't break anything.
         
-        BUSINESS VALUE: Zero downtime migration protecting $500K+ ARR.
+        BUSINESS VALUE: Zero downtime migration protecting 500K+ ARR.
         """
         logger.info("[MIGRATION COMPATIBILITY] Testing migration compatibility...")
         

@@ -97,7 +97,7 @@ class SyntaxErrorDetectionComprehensive(SSotBaseTestCase):
                 print(f"   ... and {len(syntax_error_files) - 10} more")
 
         # This test documents findings but doesn't fail - we need to understand scope
-        print(f"\n✅ Syntax validation complete. Found {len(syntax_error_files)} issues.")
+        print(f"\nCHECK Syntax validation complete. Found {len(syntax_error_files)} issues.")
 
     def test_import_statement_validation(self):
         """Test 2: Specifically validate import statements from automated migration."""
@@ -111,7 +111,7 @@ class SyntaxErrorDetectionComprehensive(SSotBaseTestCase):
             "from from ",  # Duplicated 'from'
             "import import ",  # Duplicated 'import'
             "from . import from",  # Circular naming
-            "from netra_backend.netra_backend",  # Duplicated path
+            "from netra_api.netra_backend",  # Duplicated path
             "from auth_service.auth_service",  # Duplicated path
         ]
 
@@ -166,7 +166,7 @@ class SyntaxErrorDetectionComprehensive(SSotBaseTestCase):
             if len(import_error_files) > 15:
                 print(f"   ... and {len(import_error_files) - 15} more")
 
-        print(f"\n✅ Import validation complete.")
+        print(f"\nCHECK Import validation complete.")
 
     def test_collection_impact_measurement(self):
         """Test 3: Measure impact of syntax errors on test collection."""
@@ -228,12 +228,12 @@ class SyntaxErrorDetectionComprehensive(SSotBaseTestCase):
                     'stderr': result.stderr
                 })
 
-            print(f"\n✅ Collection impact measurement complete.")
+            print(f"\nCHECK Collection impact measurement complete.")
 
         except subprocess.TimeoutExpired:
-            print("⚠️ Collection test timed out after 60 seconds")
+            print("WARNING️ Collection test timed out after 60 seconds")
         except Exception as e:
-            print(f"⚠️ Collection test failed: {str(e)}")
+            print(f"WARNING️ Collection test failed: {str(e)}")
 
     def test_generate_comprehensive_report(self):
         """Test 4: Generate comprehensive report of findings."""
@@ -298,7 +298,7 @@ class SyntaxErrorDetectionComprehensive(SSotBaseTestCase):
         if critical_files:
             print(f"   - Prioritize fixes for mission critical test files")
 
-        print(f"\n✅ Comprehensive report generation complete.")
+        print(f"\nCHECK Comprehensive report generation complete.")
 
         # Store results in class for access by other methods
         self.final_report = {

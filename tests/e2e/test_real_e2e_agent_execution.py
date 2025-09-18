@@ -44,7 +44,7 @@ import pytest
 from loguru import logger
 from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.fixtures.real_services import real_postgres_connection, with_test_database
-from test_framework.environment_fixtures import isolated_test_env
+from test_framework.environment_fixtures import isolated_test_env_fixture
 from test_framework.websocket_helpers import WebSocketTestHelpers, MockWebSocketConnection
 from test_framework.agent_test_helpers import AgentResultValidator, AgentTestExecutor, ValidationConfig, TestExecutionContext, create_test_execution_context, CommonValidators
 from shared.isolated_environment import get_env
@@ -453,7 +453,7 @@ class RealAgentExecutionTester(BaseE2ETest):
         logger.info(f'[U+2713] User isolation validated for {len(user_ids)} users')
 
 @pytest.fixture
-async def agent_tester(real_postgres_connection, isolated_test_env):
+async def agent_tester(real_postgres_connection, isolated_test_env_fixture):
     """Create and setup the agent execution tester with real services."""
     tester = RealAgentExecutionTester()
     await tester.setup_test_environment()
@@ -632,8 +632,7 @@ class RealAgentExecutionTests(BaseE2ETest):
         logger.info(f'[U+2713] Comprehensive validation complete: {success_rate:.1%} success, {business_value_rate:.1%} business value')
         compliance_results = agent_tester.validate_business_value_compliance()
         logger.info('BUSINESS VALUE COMPLIANCE REPORT:')
-        logger.info(f"- WebSocket Compliance: {compliance_results['websocket_compliant']}/{compliance_results['total_tests']} ({compliance_results['websocket_compliant'] * 100 / compliance_results['total_tests']:.1f}%)")
-        logger.info(f"- Business Value Delivered: {compliance_results['business_value_delivered']}/{compliance_results['total_tests']} ({compliance_results['business_value_delivered'] * 100 / compliance_results['total_tests']:.1f}%)")
+        logger.info(f"- WebSocket Compliance: {compliance_results['websocket_compliant']}/{compliance_results['total_tests']} ({compliance_results['websocket_compliant'] * 100 / compliance_results['total_tests']:.1f}%)""- Business Value Delivered: {compliance_results['business_value_delivered']}/{compliance_results['total_tests']} ({compliance_results['business_value_delivered'] * 100 / compliance_results['total_tests']:.1f}%)")
         logger.info(f"- Overall Compliance Score: {compliance_results['compliance_score']:.2f}")
         assert compliance_results['compliance_score'] >= 0.7, f"Compliance score {compliance_results['compliance_score']:.2f} below required 0.7"
         if compliance_results['critical_failures']:
@@ -658,7 +657,7 @@ def validate_test_framework_imports():
         assert create_test_execution_context, 'create_test_execution_context import failed'
         assert CommonValidators, 'CommonValidators import failed'
         assert real_postgres_connection, 'real_postgres_connection import failed'
-        assert isolated_test_env, 'isolated_test_env import failed'
+        assert isolated_test_env_fixture, 'isolated_test_env_fixture import failed'
         assert TEST_PORTS['backend'] == 8000, 'Backend port configuration incorrect'
         assert TEST_PORTS['postgresql'] == 5434, 'PostgreSQL test port configuration incorrect'
         logger.info('[U+2713] All test framework imports validated')

@@ -3,11 +3,12 @@
 This module provides user session management functionality for WebSocket connections.
 """
 
-import logging
 from typing import Any, Dict, Optional, Set
 from shared.types import UserID
 
-logger = logging.getLogger(__name__)
+from shared.logging.unified_logging_ssot import get_logger
+
+logger = get_logger(__name__)
 
 
 class UserSessionManager:

@@ -25,10 +25,10 @@
     # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
 
     #!/usr/bin/env python
-    # REMOVED_SYNTAX_ERROR: '''
+    # REMOVED_SYNTAX_ERROR: """
     # REMOVED_SYNTAX_ERROR: MISSION CRITICAL: BaseAgent Edge Cases and Reliability Tests
 
-    # REMOVED_SYNTAX_ERROR: Business Value: Protects $200K+ ARR by ensuring BaseAgent reliability in extreme conditions
+    # REMOVED_SYNTAX_ERROR: Business Value: Protects 200K+ ARR by ensuring BaseAgent reliability in extreme conditions
     # REMOVED_SYNTAX_ERROR: Critical Requirements:
         # REMOVED_SYNTAX_ERROR: - BaseAgent must handle all edge cases without crashing or data corruption
         # REMOVED_SYNTAX_ERROR: - State management must be consistent under concurrent access
@@ -42,7 +42,7 @@
             # REMOVED_SYNTAX_ERROR: - Resource exhaustion from unclosed connections/files
 
             # REMOVED_SYNTAX_ERROR: ANY FAILURE HERE INDICATES FUNDAMENTAL ARCHITECTURE PROBLEMS.
-            # REMOVED_SYNTAX_ERROR: '''
+            # REMOVED_SYNTAX_ERROR: """'''
 
             # REMOVED_SYNTAX_ERROR: import asyncio
             # REMOVED_SYNTAX_ERROR: import gc

@@ -29,7 +29,7 @@ except ImportError:
     print("Note: Install 'rich' for better formatting: pip install rich")
 
 # Default test credentials (can be overridden)
-DEFAULT_EMAIL = "test@netra.ai"
+DEFAULT_EMAIL = "test@netrasystems.ai"
 DEFAULT_PASSWORD = "TestPassword123!"
 
 def print_header(text: str):

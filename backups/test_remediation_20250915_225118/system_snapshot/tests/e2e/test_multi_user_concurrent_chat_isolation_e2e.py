@@ -1,0 +1,350 @@
+"""
+E2E Test: Multi-User Concurrent Chat Isolation - MISSION CRITICAL Security & Scalability
+
+BUSINESS IMPACT: Tests multi-user chat isolation that enables enterprise scalability.
+This validates the security and isolation that allows multiple customers to use the platform simultaneously.
+
+Business Value Justification (BVJ):
+- Segment: Enterprise/Multi-Tenant - Platform Scalability  
+- Business Goal: Platform Security & Scalability - Enable multiple customers safely
+- Value Impact: Validates isolation that enables enterprise multi-tenant revenue
+- Strategic Impact: Tests security architecture that prevents data leaks and ensures compliance
+
+CRITICAL SUCCESS METRICS:
+ PASS:  Complete user isolation in concurrent chat sessions
+ PASS:  No data leakage between users during simultaneous chat
+ PASS:  Performance maintains quality under concurrent load
+ PASS:  Authentication and WebSocket isolation work correctly
+ PASS:  Agent responses are correctly routed to appropriate users
+
+ISOLATION VALIDATION:
+[U+2022] User context isolation - Each user maintains separate execution context
+[U+2022] WebSocket isolation - Messages routed only to correct user
+[U+2022] Agent isolation - Agent responses don't cross-contaminate
+[U+2022] Data isolation - Business data and insights remain user-specific
+[U+2022] Thread isolation - Chat threads remain completely separate
+
+COMPLIANCE:
+@compliance CLAUDE.md - Multi-user system (Section 0.4 and 1.2)
+@compliance CLAUDE.md - E2E AUTH MANDATORY (Section 7.3)
+@compliance CLAUDE.md - Factory pattern user isolation
+@compliance SPEC/core.xml - User isolation patterns
+"""
+import asyncio
+import json
+import pytest
+import time
+import uuid
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Set, Tuple
+from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, create_authenticated_user_context
+from test_framework.ssot.websocket_golden_path_helpers import WebSocketGoldenPathHelper, GoldenPathTestConfig
+from netra_backend.app.websocket_core.event_validator import AgentEventValidator, CriticalAgentEventType, WebSocketEventMessage
+from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
+from shared.types.execution_types import StronglyTypedUserExecutionContext
+from test_framework.ssot.base_test_case import SSotBaseTestCase
+
+@pytest.mark.e2e
+@pytest.mark.staging_compatible
+@pytest.mark.multi_user
+class MultiUserConcurrentChatIsolationE2ETests(SSotBaseTestCase):
+    """
+    MISSION CRITICAL E2E Tests for Multi-User Concurrent Chat Isolation.
+    
+    These tests validate that multiple users can chat simultaneously
+    with complete isolation and no data leakage between users.
+    
+    SECURITY IMPACT: If isolation fails, customer data could leak to other customers.
+    """
+
+    def setup_method(self):
+        """Set up multi-user concurrent chat isolation test environment."""
+        super().setup_method()
+        self.environment = self.get_test_environment()
+        self.ws_auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
+        self.golden_path_helper = WebSocketGoldenPathHelper(environment=self.environment)
+        self.config = GoldenPathTestConfig.for_environment(self.environment)
+        self.config.enable_performance_monitoring = True
+        self.test_start_time = time.time()
+        self.concurrent_users_tested = 0
+        self.isolation_violations = 0
+        self.cross_contamination_detected = False
+        self.performance_degradation = False
+        print(f'\n[U+1F465] MULTI-USER CONCURRENT CHAT ISOLATION E2E - Environment: {self.environment}')
+        print(f'[U+1F512] Target: Complete user isolation with concurrent chat sessions')
+        print(f'[U+1F3E2] Business Impact: Enterprise security and scalability validation')
+
+    def teardown_method(self):
+        """Clean up and report multi-user isolation metrics."""
+        test_duration = time.time() - self.test_start_time
+        print(f'\n CHART:  Multi-User Isolation Test Summary:')
+        print(f'[U+23F1][U+FE0F] Duration: {test_duration:.2f}s')
+        print(f'[U+1F465] Concurrent Users Tested: {self.concurrent_users_tested}')
+        print(f'[U+1F512] Isolation Violations: {self.isolation_violations}')
+        print(f" ALERT:  Cross-Contamination: {('DETECTED' if self.cross_contamination_detected else 'NONE')}")
+        print(f"[U+1F4C9] Performance Issues: {('YES' if self.performance_degradation else 'NO')}")
+        if self.isolation_violations == 0 and (not self.cross_contamination_detected):
+            print(f' PASS:  EXCELLENT ISOLATION - Enterprise-ready security')
+        elif self.isolation_violations <= 1:
+            print(f' WARNING: [U+FE0F] MINOR ISOLATION ISSUES - Acceptable for most use cases')
+        else:
+            print(f' FAIL:  CRITICAL ISOLATION FAILURES - Enterprise security at risk')
+        super().teardown_method()
+
+    async def _create_isolated_user_session(self, user_index: int, user_business_context: str) -> Tuple[StronglyTypedUserExecutionContext, WebSocketGoldenPathHelper]:
+        """
+        Create an isolated user session with authentication and business context.
+        
+        Args:
+            user_index: Index of user for identification
+            user_business_context: Business context for this user's session
+            
+        Returns:
+            Tuple of (user_context, golden_path_helper)
+        """
+        user_context = await create_authenticated_user_context(user_email=f'isolation_user_{user_index}_{uuid.uuid4().hex[:8]}@enterprise.com', environment=self.environment, permissions=['read', 'write', 'chat', 'multi_user_isolation', 'enterprise'], websocket_enabled=True)
+        user_context.agent_context.update({'user_index': user_index, 'business_context': user_business_context, 'isolation_test': True, 'test_session_id': f'session_{user_index}_{int(time.time())}'})
+        user_helper = WebSocketGoldenPathHelper(config=self.config, environment=self.environment)
+        return (user_context, user_helper)
+
+    def _analyze_response_for_contamination(self, response: str, user_index: int, other_users_contexts: List[str]) -> bool:
+        """
+        Analyze a user's response for contamination from other users.
+        
+        Args:
+            response: The response content to analyze
+            user_index: Index of the user who should have received this response
+            other_users_contexts: Business contexts of other users
+            
+        Returns:
+            True if contamination detected, False if clean
+        """
+        response_lower = response.lower()
+        for other_context in other_users_contexts:
+            context_keywords = other_context.lower().split()[:3]
+            for keyword in context_keywords:
+                if len(keyword) > 4 and keyword in response_lower:
+                    print(f" ALERT:  CONTAMINATION DETECTED: User {user_index} response contains '{keyword}' from other user")
+                    return True
+        for i in range(10):
+            if i != user_index and f'user_{i}' in response_lower:
+                print(f' ALERT:  USER CONTAMINATION: User {user_index} response mentions user_{i}')
+                return True
+        return False
+
+    @pytest.mark.asyncio
+    async def test_dual_user_concurrent_chat_isolation(self):
+        """
+        CRITICAL: Dual user concurrent chat with complete isolation.
+        
+        Tests that two users can chat simultaneously with completely
+        isolated responses and no data leakage between sessions.
+        
+        BUSINESS IMPACT: Validates basic multi-tenant security.
+        """
+        print('\n[U+1F9EA] CRITICAL: Testing dual user concurrent chat isolation...')
+        user1_context, user1_helper = await self._create_isolated_user_session(user_index=1, user_business_context='Technology Startup with AI Product Development')
+        user2_context, user2_helper = await self._create_isolated_user_session(user_index=2, user_business_context='Manufacturing Company with Supply Chain Optimization')
+        assert user1_context.user_id != user2_context.user_id, 'Users must have different IDs'
+        assert user1_context.thread_id != user2_context.thread_id, 'Users must have different thread IDs'
+        print(f'[U+1F464] User 1: {user1_context.user_id} (Technology Startup)')
+        print(f'[U+1F464] User 2: {user2_context.user_id} (Manufacturing)')
+        user1_request = 'As a technology startup developing AI products, I need strategic advice on scaling our machine learning infrastructure, hiring data scientists, and positioning our AI platform for Series A funding. Our current tech stack includes Python, TensorFlow, and cloud infrastructure.'
+        user2_request = 'As a manufacturing company, I need optimization strategies for our supply chain. We have 15 suppliers, 3 warehouses, and distribute to 200+ retail locations. Our focus is reducing inventory costs, improving delivery times, and implementing lean manufacturing principles.'
+
+        async def execute_user_chat_session(user_context, user_helper, request, user_label):
+            """Execute isolated chat session for one user."""
+            try:
+                async with user_helper.authenticated_websocket_connection(user_context):
+                    result = await user_helper.execute_golden_path_flow(user_message=request, user_context=user_context, timeout=90.0)
+                    return {'user_label': user_label, 'user_id': str(user_context.user_id), 'success': result.success, 'events_received': result.events_received, 'execution_time': result.execution_metrics.total_execution_time, 'business_value_score': result.execution_metrics.business_value_score}
+            except Exception as e:
+                return {'user_label': user_label, 'user_id': str(user_context.user_id), 'success': False, 'events_received': [], 'execution_time': 0.0, 'business_value_score': 0.0, 'error': str(e)[:200]}
+        concurrent_start = time.time()
+        user1_result, user2_result = await asyncio.gather(execute_user_chat_session(user1_context, user1_helper, user1_request, 'Technology User'), execute_user_chat_session(user2_context, user2_helper, user2_request, 'Manufacturing User'), return_exceptions=True)
+        concurrent_duration = time.time() - concurrent_start
+        assert not isinstance(user1_result, Exception), f'User 1 session failed: {user1_result}'
+        assert not isinstance(user2_result, Exception), f'User 2 session failed: {user2_result}'
+        self.concurrent_users_tested = 2
+        print(f' PASS:  Both users completed concurrent sessions in {concurrent_duration:.2f}s')
+        print(f"[U+1F464] User 1: {('SUCCESS' if user1_result['success'] else 'FAILED')} - {len(user1_result['events_received'])} events")
+        print(f"[U+1F464] User 2: {('SUCCESS' if user2_result['success'] else 'FAILED')} - {len(user2_result['events_received'])} events")
+        user1_responses = []
+        user2_responses = []
+        for event in user1_result['events_received']:
+            if hasattr(event, 'data') and event.event_type == 'agent_completed':
+                response = event.data.get('response') or event.data.get('message', '')
+                if len(response) > 50:
+                    user1_responses.append(response)
+        for event in user2_result['events_received']:
+            if hasattr(event, 'data') and event.event_type == 'agent_completed':
+                response = event.data.get('response') or event.data.get('message', '')
+                if len(response) > 50:
+                    user2_responses.append(response)
+        contamination_detected = False
+        for response in user1_responses:
+            if self._analyze_response_for_contamination(response, 1, ['Manufacturing Company with Supply Chain Optimization']):
+                contamination_detected = True
+                self.isolation_violations += 1
+        for response in user2_responses:
+            if self._analyze_response_for_contamination(response, 2, ['Technology Startup with AI Product Development']):
+                contamination_detected = True
+                self.isolation_violations += 1
+        self.cross_contamination_detected = contamination_detected
+        if concurrent_duration > 120.0:
+            self.performance_degradation = True
+            print(f' WARNING: [U+FE0F] Performance degradation detected: {concurrent_duration:.2f}s')
+        assert not contamination_detected, 'CRITICAL: Cross-contamination detected between users'
+        assert user1_result['success'] or user2_result['success'], 'At least one user session must succeed'
+        assert concurrent_duration < 150.0, f'Concurrent execution too slow: {concurrent_duration:.2f}s'
+        print(f'[U+1F512] Dual user isolation validation successful')
+        print(f' PASS:  No contamination detected')
+        print(f' CHART:  Performance: {concurrent_duration:.2f}s')
+
+    @pytest.mark.asyncio
+    async def test_triple_user_concurrent_isolation_stress(self):
+        """
+        CRITICAL: Triple user concurrent isolation under stress.
+        
+        Tests that three users can chat simultaneously with complete
+        isolation, testing the platform's multi-tenant capabilities.
+        
+        BUSINESS IMPACT: Validates enterprise-scale multi-tenant security.
+        """
+        print('\n[U+1F9EA] CRITICAL: Testing triple user concurrent isolation stress...')
+        user_sessions = []
+        business_contexts = ['E-commerce Retail with Customer Analytics', 'Healthcare SaaS with Patient Management', 'Financial Services with Risk Assessment']
+        for i in range(3):
+            user_context, user_helper = await self._create_isolated_user_session(user_index=i + 1, user_business_context=business_contexts[i])
+            user_sessions.append((user_context, user_helper, business_contexts[i]))
+        print(f'[U+1F465] Created 3 isolated user sessions:')
+        for i, (context, _, business) in enumerate(user_sessions):
+            print(f'   User {i + 1}: {context.user_id} ({business[:30]}...)')
+        business_requests = ['As an e-commerce retailer, analyze our customer behavior data to identify high-value segments, optimize our conversion funnel, and develop personalized marketing strategies. We have 50K monthly visitors and 2% conversion rate.', 'As a healthcare SaaS provider, help optimize our patient management workflow to reduce administrative burden on medical staff, improve patient outcomes, and ensure HIPAA compliance. We serve 200+ medical practices.', 'As a financial services company, develop risk assessment models for loan applications, analyze market volatility impacts, and create investment portfolio optimization strategies. We manage $500M in assets.']
+
+        async def execute_stress_test_session(session_data, request, index):
+            """Execute stress test session for one user."""
+            user_context, user_helper, business_context = session_data
+            try:
+                async with user_helper.authenticated_websocket_connection(user_context):
+                    result = await user_helper.execute_golden_path_flow(user_message=request, user_context=user_context, timeout=120.0)
+                    return {'user_index': index + 1, 'user_id': str(user_context.user_id), 'business_context': business_context, 'success': result.success, 'events_count': len(result.events_received), 'execution_time': result.execution_metrics.total_execution_time, 'business_value_score': result.execution_metrics.business_value_score, 'events': result.events_received}
+            except Exception as e:
+                return {'user_index': index + 1, 'user_id': str(user_context.user_id), 'business_context': business_contexts[index], 'success': False, 'events_count': 0, 'execution_time': 0.0, 'business_value_score': 0.0, 'events': [], 'error': str(e)[:200]}
+        stress_start = time.time()
+        stress_results = await asyncio.gather(*[execute_stress_test_session(session, request, i) for i, (session, request) in enumerate(zip(user_sessions, business_requests))], return_exceptions=True)
+        stress_duration = time.time() - stress_start
+        successful_sessions = []
+        for result in stress_results:
+            if not isinstance(result, Exception) and result.get('success'):
+                successful_sessions.append(result)
+            elif isinstance(result, Exception):
+                print(f' FAIL:  Session exception: {str(result)[:100]}')
+            else:
+                print(f" FAIL:  Session failed: User {result.get('user_index', '?')}")
+        self.concurrent_users_tested = 3
+        success_rate = len(successful_sessions) / 3 * 100
+        print(f' CHART:  Stress test results: {len(successful_sessions)}/3 successful ({success_rate:.1f}%)')
+        print(f'[U+23F1][U+FE0F] Total stress duration: {stress_duration:.2f}s')
+        contamination_violations = 0
+        for i, session in enumerate(successful_sessions):
+            user_responses = []
+            for event in session['events']:
+                if hasattr(event, 'data') and event.event_type == 'agent_completed':
+                    response = event.data.get('response') or event.data.get('message', '')
+                    if len(response) > 30:
+                        user_responses.append(response)
+            other_contexts = [ctx for j, ctx in enumerate(business_contexts) if j != i]
+            for response in user_responses:
+                if self._analyze_response_for_contamination(response, session['user_index'], other_contexts):
+                    contamination_violations += 1
+        self.isolation_violations = contamination_violations
+        self.cross_contamination_detected = contamination_violations > 0
+        if stress_duration > 180.0:
+            self.performance_degradation = True
+        avg_execution_time = sum((s['execution_time'] for s in successful_sessions)) / len(successful_sessions) if successful_sessions else 0
+        assert success_rate >= 66.0, f'Stress test success rate too low: {success_rate:.1f}%'
+        assert contamination_violations == 0, f'CRITICAL: {contamination_violations} contamination violations detected'
+        assert stress_duration < 200.0, f'Stress test duration excessive: {stress_duration:.2f}s'
+        assert avg_execution_time < 100.0, f'Average execution time too slow: {avg_execution_time:.2f}s'
+        print(f' CELEBRATION:  Triple user concurrent isolation stress test successful')
+        print(f'[U+1F512] Isolation violations: {contamination_violations}')
+        print(f' CHART:  Average execution time: {avg_execution_time:.2f}s')
+        print(f' PASS:  Enterprise-scale isolation validated')
+
+    @pytest.mark.asyncio
+    async def test_isolation_with_similar_business_contexts(self):
+        """
+        CRITICAL: Isolation validation with similar business contexts.
+        
+        Tests isolation when users have similar business contexts that
+        could potentially cause confusion or cross-contamination.
+        
+        BUSINESS IMPACT: Validates isolation robustness in realistic scenarios.
+        """
+        print('\n[U+1F9EA] CRITICAL: Testing isolation with similar business contexts...')
+        user1_context, user1_helper = await self._create_isolated_user_session(user_index=1, user_business_context='E-commerce Platform with Revenue Growth Focus')
+        user2_context, user2_helper = await self._create_isolated_user_session(user_index=2, user_business_context='E-commerce Marketplace with Revenue Optimization')
+        print(f'[U+1F464] User 1: E-commerce Platform ({user1_context.user_id})')
+        print(f'[U+1F464] User 2: E-commerce Marketplace ({user2_context.user_id})')
+        user1_request = 'Our e-commerce platform needs revenue growth strategies. We have $2M ARR, 5000 active sellers, and want to expand into subscription services. Analyze our current metrics and recommend growth tactics for Q4.'
+        user2_request = 'Our e-commerce marketplace needs revenue optimization. We have $1.8M ARR, 4500 active vendors, and want to improve commission structures. Evaluate our performance metrics and suggest optimization approaches for Q4.'
+
+        async def execute_similar_context_session(user_context, user_helper, request, user_label):
+            """Execute session with similar business context."""
+            async with user_helper.authenticated_websocket_connection(user_context):
+                result = await user_helper.execute_golden_path_flow(user_message=request, user_context=user_context, timeout=90.0)
+                return {'user_label': user_label, 'user_id': str(user_context.user_id), 'success': result.success, 'events': result.events_received, 'business_value_score': result.execution_metrics.business_value_score}
+        similar_start = time.time()
+        user1_result, user2_result = await asyncio.gather(execute_similar_context_session(user1_context, user1_helper, user1_request, 'Platform User'), execute_similar_context_session(user2_context, user2_helper, user2_request, 'Marketplace User'))
+        similar_duration = time.time() - similar_start
+        user1_content = []
+        user2_content = []
+        for event in user1_result['events']:
+            if hasattr(event, 'data') and event.event_type in ['agent_completed', 'tool_completed']:
+                content = event.data.get('response') or event.data.get('message', '')
+                if len(content) > 30:
+                    user1_content.append(content.lower())
+        for event in user2_result['events']:
+            if hasattr(event, 'data') and event.event_type in ['agent_completed', 'tool_completed']:
+                content = event.data.get('response') or event.data.get('message', '')
+                if len(content) > 30:
+                    user2_content.append(content.lower())
+        subtle_contamination_detected = False
+        user1_specific = ['2m arr', '$2m', '5000 sellers', '5000 active sellers', 'subscription services']
+        user2_specific = ['1.8m arr', '$1.8m', '4500 vendors', '4500 active vendors', 'commission structures']
+        for content in user1_content:
+            for user2_metric in user2_specific:
+                if user2_metric in content:
+                    print(f' ALERT:  SUBTLE CONTAMINATION: User 1 content contains User 2 metric: {user2_metric}')
+                    subtle_contamination_detected = True
+                    self.isolation_violations += 1
+        for content in user2_content:
+            for user1_metric in user1_specific:
+                if user1_metric in content:
+                    print(f' ALERT:  SUBTLE CONTAMINATION: User 2 content contains User 1 metric: {user1_metric}')
+                    subtle_contamination_detected = True
+                    self.isolation_violations += 1
+        self.cross_contamination_detected = subtle_contamination_detected
+        self.concurrent_users_tested = 2
+        user1_all_content = ' '.join(user1_content)
+        user2_all_content = ' '.join(user2_content)
+        user1_platform_mentions = user1_all_content.count('platform')
+        user1_marketplace_mentions = user1_all_content.count('marketplace')
+        user2_platform_mentions = user2_all_content.count('platform')
+        user2_marketplace_mentions = user2_all_content.count('marketplace')
+        if user1_content and user1_platform_mentions < user1_marketplace_mentions:
+            print(f' WARNING: [U+FE0F] User 1 (platform) has more marketplace mentions than platform')
+        if user2_content and user2_marketplace_mentions < user2_platform_mentions:
+            print(f' WARNING: [U+FE0F] User 2 (marketplace) has more platform mentions than marketplace')
+        assert not subtle_contamination_detected, 'CRITICAL: Subtle contamination detected with similar contexts'
+        assert user1_result['success'] and user2_result['success'], 'Both similar context sessions must succeed'
+        assert similar_duration < 120.0, f'Similar context execution too slow: {similar_duration:.2f}s'
+        print(f'[U+1F512] Similar context isolation validation successful')
+        print(f' PASS:  No subtle contamination detected')
+        print(f'[U+1F465] Both users maintained context appropriately')
+        print(f' CHART:  Execution time: {similar_duration:.2f}s')
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

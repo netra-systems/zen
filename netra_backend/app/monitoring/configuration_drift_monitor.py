@@ -1,3 +1,4 @@
+from netra_backend.app.logging_config import central_logger
 """
 Configuration Drift Monitoring and Alert System - CRITICAL PREVENTION SYSTEM
 
@@ -539,9 +540,8 @@ class WebSocketConfigurationValidator:
             # Get expected CORS origins based on environment
             if current_env == "staging":
                 expected_origins = [
-                    "https://app.staging.netrasystems.ai",
-                    "https://api.staging.netrasystems.ai",
-                    "wss://api.staging.netrasystems.ai"
+                    "https://staging.netrasystems.ai",
+                    "wss://api-staging.netrasystems.ai"
                 ]
             elif current_env == "production":
                 expected_origins = [

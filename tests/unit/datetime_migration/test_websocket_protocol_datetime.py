@@ -29,7 +29,7 @@ class WebSocketProtocolDateTimeMigrationTests(unittest.TestCase):
         self.warnings_captured = []
 
     def test_deprecated_datetime_patterns_exist(self):
-        """FAILING TEST: Detects deprecated datetime.utcnow() usage in protocols."""
+        """FAILING TEST: Detects deprecated datetime.now(UTC) usage in protocols."""
         target_file = project_root / "netra_backend" / "app" / "websocket_core" / "protocols.py"
 
         with open(target_file, 'r', encoding='utf-8') as f:
@@ -37,7 +37,7 @@ class WebSocketProtocolDateTimeMigrationTests(unittest.TestCase):
 
         # Check for deprecated patterns
         deprecated_patterns = [
-            "datetime.utcnow()",
+            "datetime.now(UTC)",
             "from datetime import datetime\n",  # Should be: from datetime import datetime, timezone
         ]
 
@@ -56,7 +56,7 @@ class WebSocketProtocolDateTimeMigrationTests(unittest.TestCase):
         # Create a mock manager with the current (deprecated) patterns
         mock_manager = type('MockManager', (), {
             'validate_protocol_interface': lambda self, interface: {
-                'validation_timestamp': datetime.utcnow().isoformat()  # Deprecated pattern
+                'validation_timestamp': datetime.now(UTC).isoformat()  # Deprecated pattern
             }
         })()
 
@@ -75,7 +75,7 @@ class WebSocketProtocolDateTimeMigrationTests(unittest.TestCase):
         """Verify WebSocket protocol timestamps maintain equivalence between old and new patterns."""
 
         # Test both old and new patterns produce equivalent UTC timestamps
-        old_timestamp = datetime.utcnow()  # Will be removed after migration
+        old_timestamp = datetime.now(UTC)  # Will be removed after migration
         new_timestamp = datetime.now(timezone.utc).replace(tzinfo=None)
 
         # Timestamps should be within 1 second of each other
@@ -140,7 +140,7 @@ class DeprecatedPatternDetectionTests(unittest.TestCase):
             if full_path.exists():
                 with open(full_path, 'r', encoding='utf-8') as f:
                     content = f.read()
-                    if "datetime.utcnow()" in content:
+                    if "datetime.now(UTC)" in content:
                         deprecated_files.append(file_path)
 
         # This test SHOULD FAIL before migration

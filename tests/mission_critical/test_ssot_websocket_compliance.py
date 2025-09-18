@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """MISSION CRITICAL TEST SUITE: SSOT WebSocket Compliance - Revenue Protection
 
-THIS SUITE PROTECTS $500K+ ARR FROM WEBSOCKET FACTORY PATTERN VIOLATIONS.
-Business Value: Core Golden Path user flow (login → AI responses)
+THIS SUITE PROTECTS 500K+ ARR FROM WEBSOCKET FACTORY PATTERN VIOLATIONS.
+Business Value: Core Golden Path user flow (login -> AI responses)
 
 CRITICAL PROTECTION AREAS:
 1. Golden Path Business Value - Complete user journey from login to AI response
@@ -94,7 +94,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
     """
     Mission Critical Test Suite: SSOT WebSocket Compliance & Revenue Protection
     
-    BUSINESS IMPACT: This test suite protects $500K+ ARR by validating:
+    BUSINESS IMPACT: This test suite protects 500K+ ARR by validating:
     1. Complete Golden Path user flow works end-to-end
     2. SSOT architecture prevents system instabilities
     3. WebSocket events deliver the real-time feedback that powers 90% of platform value
@@ -119,7 +119,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
         
         # Track test as business value protection
         self.record_metric("test_category", "mission_critical")
-        self.record_metric("business_value", "$500K+ ARR Protection")
+        self.record_metric("business_value", "500K+ ARR Protection")
         self.record_metric("priority", "P0_CRITICAL")
         
         logger.info(f"🚨 MISSION CRITICAL TEST: {method.__name__ if method else 'unknown'}")
@@ -129,7 +129,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
         """
         MISSION CRITICAL: Validate complete Golden Path user flow works end-to-end.
         
-        This test protects the primary $500K+ ARR user journey:
+        This test protects the primary 500K+ ARR user journey:
         1. User connects to WebSocket (authentication)
         2. WebSocket connection established 
         3. User sends message (agent execution begins)
@@ -148,14 +148,14 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             connection_start = time.time()
             
             # Create user execution context (secure multi-tenant isolation)
-            user_id = ensure_user_id(f"golden_path_test_{uuid.uuid4().hex[:8]}")
-            thread_id = ensure_thread_id(f"thread_{uuid.uuid4().hex[:8]}")
+            user_id = ensure_user_id(str(uuid.uuid4()))
+            thread_id = ensure_thread_id(str(uuid.uuid4()))
             
             user_context = UserExecutionContext(
                 user_id=user_id,
                 thread_id=thread_id,
-                session_id=f"session_{uuid.uuid4().hex[:8]}",
-                trace_id=f"trace_{uuid.uuid4().hex[:8]}"
+                session_id=str(uuid.uuid4()),
+                trace_id=str(uuid.uuid4())
             )
             
             # Get WebSocket manager using SSOT pattern (NOT factory pattern)
@@ -165,7 +165,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             # Validate WebSocketManager is SSOT implementation
             self.assertTrue(
                 isinstance(websocket_manager, WebSocketManager),
-                f"❌ CRITICAL: WebSocket manager must be SSOT WebSocketManager, got {type(websocket_manager)}"
+                f"X CRITICAL: WebSocket manager must be SSOT WebSocketManager, got {type(websocket_manager)}"
             )
             
             self.golden_path_metrics.connection_time = time.time() - connection_start
@@ -179,7 +179,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             agent_context = AgentExecutionContext(
                 user_id=user_id,
                 thread_id=thread_id,
-                run_id=RunID(f"run_{uuid.uuid4().hex[:8]}"),
+                run_id=RunID(str(uuid.uuid4())),
                 message_content="Test message for Golden Path validation",
                 agent_type="data_helper",
                 execution_mode="standard"
@@ -227,14 +227,14 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
                         "timestamp": datetime.now(UTC).isoformat(),
                         "data": f"Test data for {event_type}"
                     })
-                    self.assertTrue(success, f"❌ CRITICAL: {event_type} event delivery failed")
+                    self.assertTrue(success, f"X CRITICAL: {event_type} event delivery failed")
             
             # Validate all critical events were delivered
             for event_type in required_events:
                 self.assertIn(
                     event_type, 
                     received_events,
-                    f"❌ CRITICAL BUSINESS FAILURE: {event_type} event missing - impacts 90% of platform value"
+                    f"X CRITICAL BUSINESS FAILURE: {event_type} event missing - impacts 90% of platform value"
                 )
                 
             self.golden_path_metrics.websocket_events_received = received_events
@@ -264,7 +264,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             self.golden_path_metrics.total_response_time = time.time() - start_time
             
             # SUCCESS: Golden Path protected
-            logger.info("✅ GOLDEN PATH PROTECTED: Complete user journey validated successfully")
+            logger.info("CHECK GOLDEN PATH PROTECTED: Complete user journey validated successfully")
             self.record_metric("golden_path_success", True)
             self.record_metric("total_response_time", self.golden_path_metrics.total_response_time)
             
@@ -272,11 +272,11 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             self.assertLessEqual(
                 self.golden_path_metrics.total_response_time, 
                 30.0,  # 30 second max for complete flow
-                "❌ PERFORMANCE: Golden Path too slow - impacts user experience and revenue"
+                "X PERFORMANCE: Golden Path too slow - impacts user experience and revenue"
             )
             
         except Exception as e:
-            logger.error(f"❌ GOLDEN PATH FAILURE: {str(e)}")
+            logger.error(f"X GOLDEN PATH FAILURE: {str(e)}")
             self.record_metric("golden_path_failure", str(e))
             raise AssertionError(f"🚨 CRITICAL BUSINESS FAILURE: Golden Path broken - ${500000}+ ARR at risk: {e}")
     
@@ -300,9 +300,9 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             logger.info("📍 Phase 1: Validating WebSocketManager as canonical SSOT")
             
             user_context = UserExecutionContext(
-                user_id=ensure_user_id(f"ssot_test_{uuid.uuid4().hex[:8]}"),
-                thread_id=ensure_thread_id(f"thread_{uuid.uuid4().hex[:8]}"),
-                session_id=f"session_{uuid.uuid4().hex[:8]}"
+                user_id=ensure_user_id(str(uuid.uuid4())),
+                thread_id=ensure_thread_id(str(uuid.uuid4())),
+                session_id=str(uuid.uuid4())
             )
             
             # Get WebSocket manager - must be SSOT implementation
@@ -312,7 +312,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             self.assertEqual(
                 type(websocket_manager).__name__,
                 "UnifiedWebSocketManager",
-                "❌ SSOT VIOLATION: WebSocketManager must be UnifiedWebSocketManager"
+                "X SSOT VIOLATION: WebSocketManager must be UnifiedWebSocketManager"
             )
             
             # Phase 2: Factory Pattern Violation Detection
@@ -336,7 +336,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             
             # Allow some factory patterns if they're properly marked as SSOT
             if deprecated_patterns:
-                logger.warning(f"⚠️ Factory patterns detected: {deprecated_patterns}")
+                logger.warning(f"WARNING️ Factory patterns detected: {deprecated_patterns}")
                 # Only fail if these are not SSOT-compliant factories
                 for pattern in deprecated_patterns:
                     if 'websocket_manager_factory' in pattern:
@@ -345,7 +345,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             self.assertLessEqual(
                 self.ssot_metrics.factory_pattern_violations,
                 0,
-                f"❌ FACTORY VIOLATION: Deprecated factory patterns detected: {deprecated_patterns}"
+                f"X FACTORY VIOLATION: Deprecated factory patterns detected: {deprecated_patterns}"
             )
             
             # Phase 3: Import Path Validation
@@ -360,11 +360,11 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
                 self.assertEqual(
                     type(websocket_manager),
                     SSoTManager,
-                    "❌ IMPORT VIOLATION: get_websocket_manager() must return canonical WebSocketManager"
+                    "X IMPORT VIOLATION: get_websocket_manager() must return canonical WebSocketManager"
                 )
                 
             except ImportError as e:
-                self.fail(f"❌ SSOT IMPORT FAILURE: Canonical imports broken: {e}")
+                self.fail(f"X SSOT IMPORT FAILURE: Canonical imports broken: {e}")
             
             # Phase 4: Duplicate Implementation Detection
             logger.info("📍 Phase 4: Scanning for duplicate WebSocket implementations")
@@ -391,7 +391,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             self.assertLessEqual(
                 self.ssot_metrics.duplicate_implementations_found,
                 1,  # Allow one compatibility layer
-                f"❌ DUPLICATE VIOLATION: Multiple WebSocket implementations found: {websocket_classes}"
+                f"X DUPLICATE VIOLATION: Multiple WebSocket implementations found: {websocket_classes}"
             )
             
             # Phase 5: Architecture Compliance Score
@@ -411,16 +411,16 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             self.assertGreaterEqual(
                 self.ssot_metrics.architecture_compliance_score,
                 80.0,
-                f"❌ COMPLIANCE FAILURE: Architecture compliance too low: {self.ssot_metrics.architecture_compliance_score}%"
+                f"X COMPLIANCE FAILURE: Architecture compliance too low: {self.ssot_metrics.architecture_compliance_score}%"
             )
             
             # SUCCESS: SSOT architecture protected
-            logger.info(f"✅ SSOT ARCHITECTURE PROTECTED: Compliance score {self.ssot_metrics.architecture_compliance_score}%")
+            logger.info(f"CHECK SSOT ARCHITECTURE PROTECTED: Compliance score {self.ssot_metrics.architecture_compliance_score}%")
             self.record_metric("ssot_compliance_score", self.ssot_metrics.architecture_compliance_score)
             self.record_metric("ssot_violations_count", total_violations)
             
         except Exception as e:
-            logger.error(f"❌ SSOT ARCHITECTURE FAILURE: {str(e)}")
+            logger.error(f"X SSOT ARCHITECTURE FAILURE: {str(e)}")
             self.record_metric("ssot_failure", str(e))
             raise AssertionError(f"🚨 CRITICAL ARCHITECTURE FAILURE: SSOT compliance broken: {e}")
     
@@ -442,9 +442,9 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
         try:
             # Setup user context and WebSocket infrastructure
             user_context = UserExecutionContext(
-                user_id=ensure_user_id(f"events_test_{uuid.uuid4().hex[:8]}"),
-                thread_id=ensure_thread_id(f"thread_{uuid.uuid4().hex[:8]}"),
-                session_id=f"session_{uuid.uuid4().hex[:8]}"
+                user_id=ensure_user_id(str(uuid.uuid4())),
+                thread_id=ensure_thread_id(str(uuid.uuid4())),
+                session_id=str(uuid.uuid4())
             )
             
             websocket_manager = get_websocket_manager(user_context=user_context)
@@ -513,7 +513,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
                     success = await websocket_bridge.emit_event(event_type, event_data)
                     self.assertTrue(
                         success,
-                        f"❌ CRITICAL EVENT FAILURE: {event_type} delivery failed - breaks user experience"
+                        f"X CRITICAL EVENT FAILURE: {event_type} delivery failed - breaks user experience"
                     )
             
             # Validate all critical events were delivered
@@ -521,7 +521,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
                 self.assertIn(
                     event_type,
                     delivered_events,
-                    f"❌ MISSION CRITICAL FAILURE: {event_type} not delivered - eliminates platform value"
+                    f"X MISSION CRITICAL FAILURE: {event_type} not delivered - eliminates platform value"
                 )
                 
                 # Validate event contains required business data
@@ -533,16 +533,16 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
                 self.assertLessEqual(
                     delivery_time,
                     0.1,  # 100ms max per event
-                    f"❌ PERFORMANCE: {event_type} delivery too slow ({delivery_time:.3f}s) - impacts real-time UX"
+                    f"X PERFORMANCE: {event_type} delivery too slow ({delivery_time:.3f}s) - impacts real-time UX"
                 )
             
             # SUCCESS: All critical events delivered successfully
-            logger.info("✅ WEBSOCKET EVENTS PROTECTED: All 5 critical events delivered successfully")
+            logger.info("CHECK WEBSOCKET EVENTS PROTECTED: All 5 critical events delivered successfully")
             self.record_metric("critical_events_delivered", len(delivered_events))
             self.record_metric("average_delivery_time", sum(delivery_times.values()) / len(delivery_times))
             
         except Exception as e:
-            logger.error(f"❌ WEBSOCKET EVENT DELIVERY FAILURE: {str(e)}")
+            logger.error(f"X WEBSOCKET EVENT DELIVERY FAILURE: {str(e)}")
             self.record_metric("event_delivery_failure", str(e))
             raise AssertionError(f"🚨 CRITICAL EVENT FAILURE: WebSocket events broken - 90% of platform value lost: {e}")
     
@@ -563,16 +563,16 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
         try:
             # Create two distinct enterprise users
             user_a_context = UserExecutionContext(
-                user_id=ensure_user_id(f"enterprise_user_a_{uuid.uuid4().hex[:8]}"),
-                thread_id=ensure_thread_id(f"thread_a_{uuid.uuid4().hex[:8]}"),
-                session_id=f"session_a_{uuid.uuid4().hex[:8]}",
+                user_id=ensure_user_id(str(uuid.uuid4())),
+                thread_id=ensure_thread_id(str(uuid.uuid4())),
+                session_id=str(uuid.uuid4()),
                 metadata={"customer_tier": "enterprise", "revenue": "$50K ARR"}
             )
             
             user_b_context = UserExecutionContext(
-                user_id=ensure_user_id(f"enterprise_user_b_{uuid.uuid4().hex[:8]}"),
-                thread_id=ensure_thread_id(f"thread_b_{uuid.uuid4().hex[:8]}"),
-                session_id=f"session_b_{uuid.uuid4().hex[:8]}",
+                user_id=ensure_user_id(str(uuid.uuid4())),
+                thread_id=ensure_thread_id(str(uuid.uuid4())),
+                session_id=str(uuid.uuid4()),
                 metadata={"customer_tier": "enterprise", "revenue": "$75K ARR"}
             )
             
@@ -601,7 +601,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
                 self.assertEqual(
                     data.get("user_id"),
                     str(user_a_context.user_id),
-                    f"❌ ISOLATION BREACH: User A received event with wrong user_id"
+                    f"X ISOLATION BREACH: User A received event with wrong user_id"
                 )
                 return True
             
@@ -612,7 +612,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
                 self.assertEqual(
                     data.get("user_id"),
                     str(user_b_context.user_id),
-                    f"❌ ISOLATION BREACH: User B received event with wrong user_id"
+                    f"X ISOLATION BREACH: User B received event with wrong user_id"
                 )
                 return True
             
@@ -657,24 +657,24 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
                 self.assertEqual(
                     event_data["user_id"],
                     str(user_a_context.user_id),
-                    "❌ CRITICAL SECURITY BREACH: User A received User B's data"
+                    "X CRITICAL SECURITY BREACH: User A received User B's data"
                 )
                 self.assertNotIn(
                     "User B",
                     str(event_data),
-                    "❌ CRITICAL SECURITY BREACH: User A event contains User B data"
+                    "X CRITICAL SECURITY BREACH: User A event contains User B data"
                 )
             
             for event_type, event_data in user_b_events:
                 self.assertEqual(
                     event_data["user_id"],
                     str(user_b_context.user_id),
-                    "❌ CRITICAL SECURITY BREACH: User B received User A's data"
+                    "X CRITICAL SECURITY BREACH: User B received User A's data"
                 )
                 self.assertNotIn(
                     "User A",
                     str(event_data),
-                    "❌ CRITICAL SECURITY BREACH: User B event contains User A data"
+                    "X CRITICAL SECURITY BREACH: User B event contains User A data"
                 )
             
             # Validate enterprise customer data protection
@@ -686,20 +686,20 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             
             # Verify no sensitive data crossed user boundaries
             for _, data in user_a_events:
-                self.assertNotIn("Enterprise B", str(data), "❌ ENTERPRISE BREACH: User A has User B enterprise data")
+                self.assertNotIn("Enterprise B", str(data), "X ENTERPRISE BREACH: User A has User B enterprise data")
             for _, data in user_b_events:
-                self.assertNotIn("Enterprise A", str(data), "❌ ENTERPRISE BREACH: User B has User A enterprise data")
+                self.assertNotIn("Enterprise A", str(data), "X ENTERPRISE BREACH: User B has User A enterprise data")
             
             self.golden_path_metrics.user_isolation_validated = True
             
             # SUCCESS: User isolation maintained perfectly
-            logger.info("✅ USER ISOLATION PROTECTED: Enterprise customer data security validated")
+            logger.info("CHECK USER ISOLATION PROTECTED: Enterprise customer data security validated")
             self.record_metric("user_isolation_validated", True)
             self.record_metric("security_violations", 0)
             self.record_metric("enterprise_protection", "validated")
             
         except Exception as e:
-            logger.error(f"❌ USER ISOLATION FAILURE: {str(e)}")
+            logger.error(f"X USER ISOLATION FAILURE: {str(e)}")
             self.golden_path_metrics.security_violations_detected += 1
             self.record_metric("isolation_failure", str(e))
             raise AssertionError(f"🚨 CRITICAL SECURITY FAILURE: User isolation broken - Enterprise revenue at risk: {e}")
@@ -723,9 +723,9 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             logger.info("📍 Phase 1: Testing normal connection establishment")
             
             user_context = UserExecutionContext(
-                user_id=ensure_user_id(f"reliability_test_{uuid.uuid4().hex[:8]}"),
-                thread_id=ensure_thread_id(f"thread_{uuid.uuid4().hex[:8]}"),
-                session_id=f"session_{uuid.uuid4().hex[:8]}"
+                user_id=ensure_user_id(str(uuid.uuid4())),
+                thread_id=ensure_thread_id(str(uuid.uuid4())),
+                session_id=str(uuid.uuid4())
             )
             
             connection_start = time.time()
@@ -736,7 +736,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             self.assertLessEqual(
                 connection_time,
                 5.0,
-                f"❌ PERFORMANCE: Connection establishment too slow ({connection_time:.3f}s)"
+                f"X PERFORMANCE: Connection establishment too slow ({connection_time:.3f}s)"
             )
             
             # Phase 2: Connection Maintenance During Agent Execution
@@ -836,18 +836,18 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
                 self.assertLessEqual(
                     load_time,
                     10.0,
-                    f"❌ LOAD PERFORMANCE: High load handling too slow ({load_time:.3f}s)"
+                    f"X LOAD PERFORMANCE: High load handling too slow ({load_time:.3f}s)"
                 )
             
             # SUCCESS: Connection reliability validated
-            logger.info("✅ CONNECTION RELIABILITY PROTECTED: All stability tests passed")
+            logger.info("CHECK CONNECTION RELIABILITY PROTECTED: All stability tests passed")
             self.record_metric("connection_establishment_time", connection_time)
             self.record_metric("maintenance_events_delivered", len(maintenance_events))
             self.record_metric("recovery_capability", "validated")
             self.record_metric("load_test_performance", load_time)
             
         except Exception as e:
-            logger.error(f"❌ CONNECTION RELIABILITY FAILURE: {str(e)}")
+            logger.error(f"X CONNECTION RELIABILITY FAILURE: {str(e)}")
             self.record_metric("reliability_failure", str(e))
             raise AssertionError(f"🚨 CRITICAL RELIABILITY FAILURE: WebSocket connections unreliable: {e}")
     
@@ -868,15 +868,15 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
                 self.golden_path_metrics.user_isolation_validated and
                 self.ssot_metrics.architecture_compliance_score >= 80.0):
                 
-                logger.info("✅ MISSION CRITICAL SUCCESS: All revenue protection tests passed")
+                logger.info("CHECK MISSION CRITICAL SUCCESS: All revenue protection tests passed")
                 self.record_metric("mission_critical_status", "SUCCESS")
                 
             else:
-                logger.error("❌ MISSION CRITICAL FAILURE: Revenue protection compromised")
+                logger.error("X MISSION CRITICAL FAILURE: Revenue protection compromised")
                 self.record_metric("mission_critical_status", "FAILURE")
                 
         except Exception as e:
-            logger.error(f"❌ TEARDOWN ERROR: {str(e)}")
+            logger.error(f"X TEARDOWN ERROR: {str(e)}")
             
         finally:
             super().teardown_method(method)
@@ -892,7 +892,7 @@ if __name__ == "__main__":
         
         try:
             logger.info("🚨 STARTING MISSION CRITICAL SSOT WEBSOCKET COMPLIANCE TESTS")
-            logger.info("🎯 OBJECTIVE: Protect $500K+ ARR from WebSocket factory pattern violations")
+            logger.info("🎯 OBJECTIVE: Protect 500K+ ARR from WebSocket factory pattern violations")
             
             # Run all mission critical tests
             tests = [
@@ -908,19 +908,19 @@ if __name__ == "__main__":
                 test_suite.setup_method(None)
                 try:
                     await test
-                    logger.info(f"✅ Mission Critical Test {i} PASSED")
+                    logger.info(f"CHECK Mission Critical Test {i} PASSED")
                 except Exception as e:
-                    logger.error(f"❌ Mission Critical Test {i} FAILED: {e}")
+                    logger.error(f"X Mission Critical Test {i} FAILED: {e}")
                     raise
                 finally:
                     test_suite.teardown_method(None)
             
             logger.info("🎉 ALL MISSION CRITICAL TESTS PASSED")
-            logger.info("✅ $500K+ ARR PROTECTED: Golden Path and SSOT compliance validated")
+            logger.info("CHECK 500K+ ARR PROTECTED: Golden Path and SSOT compliance validated")
             
         except Exception as e:
             logger.error(f"🚨 MISSION CRITICAL FAILURE: {e}")
-            logger.error("❌ DEPLOYMENT BLOCKED: Fix critical issues before production")
+            logger.error("X DEPLOYMENT BLOCKED: Fix critical issues before production")
             raise
     
     # Run the tests

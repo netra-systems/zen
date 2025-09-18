@@ -92,7 +92,7 @@ class Issue1278InfrastructureConfig:
             InfrastructureUpdate(
                 component="service_authentication",
                 configuration_type="service_id_configuration",
-                current_value={"SERVICE_ID": "netra-auth-staging-1757260376"},
+                current_value={"SERVICE_ID": "netra-auth-1757260376"},
                 recommended_value={"SERVICE_ID": "netra-backend"},
                 rationale="Fix SERVICE_ID misconfiguration causing 100% E2E test failures",
                 priority="critical",

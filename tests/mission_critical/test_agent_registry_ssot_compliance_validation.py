@@ -1,17 +1,22 @@
 """
+
 AgentRegistry SSOT Compliance Validation Tests - Issue #1080
 
 MISSION: Validate AgentRegistry SSOT compliance after fixes
-Business Impact: $500K+ ARR Golden Path restoration
+Business Impact: 500K+  ARR Golden Path restoration
 
 These tests validate the FIXED state after SSOT consolidation.
 EXPECTED INITIAL RESULT: ALL TESTS FAIL (waiting for fixes)
 AFTER SSOT FIXES: ALL TESTS PASS (proving compliance achieved)
 
-Golden Path Restored: Users login → AI agents process requests → Users receive AI responses
+Golden Path Restored: Users login -> AI agents process requests -> Users receive AI responses
 
-Created: 2025-09-14 - SSOT Test Plan Step 2
+Created: 2025-9-14 - SSOT Test Plan Step 2
 Priority: P0 Critical - Golden Path validation
+"
+""
+
+
 """
 
 import pytest
@@ -28,39 +33,47 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
-    """
+    "
+    ""
+
     Validation tests for AgentRegistry SSOT compliance.
     
     EXPECTED INITIAL: All tests FAIL (fixes not implemented)
     AFTER SSOT FIX: All tests PASS (proving compliance)
-    """
+"
+""
+
     
     def setup_method(self, method=None):
-        """Set up test environment with SSOT patterns"""
+        "Set up test environment with SSOT patterns"
         super().setup_method(method)
         self.env = IsolatedEnvironment()
         
         # Test user context for isolation validation
-        self.test_user_id = "test-user-ssot-compliance-validation"
-        self.test_session_id = "test-session-ssot-compliance"
+        self.test_user_id = test-user-ssot-compliance-validation""
+        self.test_session_id = test-session-ssot-compliance
         
         # Record test context for business impact measurement
-        self.record_metric("business_value_protected", "500K_plus_ARR")
-        self.record_metric("golden_path_validation", True)
+        self.record_metric(business_value_protected, "500K_plus_ARR)"
+        self.record_metric(golden_path_validation", True)"
 
     async def test_single_registry_import_resolution(self):
         """
+    ""
+
         CRITICAL: Validate only one AgentRegistry class exists across all imports
         
         Business Impact: Eliminates developer confusion and ensures consistency
         Expected: FAIL initially, PASS after SSOT fix
-        """
-        self.record_metric("test_type", "ssot_import_validation")
+        "
+        ""
+
+        self.record_metric(test_type, ssot_import_validation)
         
         # Define all possible import paths for AgentRegistry
         import_paths = [
-            "netra_backend.app.agents.registry.AgentRegistry",
-            "netra_backend.app.agents.supervisor.agent_registry.AgentRegistry",
+            netra_backend.app.agents.registry.AgentRegistry","
+            netra_backend.app.agents.supervisor.agent_registry.AgentRegistry,
         ]
         
         imported_classes = []
@@ -75,29 +88,34 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
                 imported_classes.append(registry_class)
                 successful_imports.append(import_path)
                 
-                self.record_metric(f"import_success_{module_path}", True)
+                self.record_metric(fimport_success_{module_path}, True)"
+                self.record_metric(fimport_success_{module_path}, True)""
+
                 
             except (ImportError, AttributeError) as e:
-                self.record_metric(f"import_failed_{import_path}", str(e))
+                self.record_metric(f"import_failed_{import_path}, str(e))"
         
         # SSOT COMPLIANCE: All successful imports must resolve to the same class
         unique_class_ids = set(id(cls) for cls in imported_classes)
         
-        self.record_metric("successful_imports", len(successful_imports))
-        self.record_metric("unique_classes", len(unique_class_ids))
-        self.record_metric("import_paths_tested", import_paths)
+        self.record_metric(successful_imports, len(successful_imports))
+        self.record_metric(unique_classes, len(unique_class_ids))"
+        self.record_metric(unique_classes, len(unique_class_ids))"
+        self.record_metric(import_paths_tested", import_paths)"
         
         # Must have at least one working import
-        assert len(successful_imports) > 0, (
-            f"SSOT COMPLIANCE FAILURE: No AgentRegistry imports work. "
-            f"Tried: {import_paths}"
+        assert len(successful_imports) > 0, ()
+            fSSOT COMPLIANCE FAILURE: No AgentRegistry imports work. 
+            fTried: {import_paths}"
+            fTried: {import_paths}""
+
         )
         
         # All working imports must resolve to same class
         assert len(unique_class_ids) == 1, (
-            f"SSOT COMPLIANCE FAILURE: {len(unique_class_ids)} different AgentRegistry classes found "
-            f"from {len(successful_imports)} successful imports. "
-            f"SSOT requires exactly 1 class. Import paths: {successful_imports}"
+            f"SSOT COMPLIANCE FAILURE: {len(unique_class_ids)} different AgentRegistry classes found"
+            ffrom {len(successful_imports)} successful imports. 
+            fSSOT requires exactly 1 class. Import paths: {successful_imports}
         )
         
         # Additional validation - check that all classes are identical
@@ -105,32 +123,33 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
             reference_class = imported_classes[0]
             for i, registry_class in enumerate(imported_classes[1:], 1):
                 assert reference_class is registry_class, (
-                    f"SSOT COMPLIANCE FAILURE: Class from {successful_imports[0]} "
-                    f"is not identical to class from {successful_imports[i]}. "
-                    f"Object IDs: {id(reference_class)} vs {id(registry_class)}"
+                    fSSOT COMPLIANCE FAILURE: Class from {successful_imports[0]} ""
+                    fis not identical to class from {successful_imports[i]}. 
+                    fObject IDs: {id(reference_class)} vs {id(registry_class)}
                 )
 
     async def test_unified_websocket_event_delivery(self):
-        """
+    """
+
         CRITICAL: Validate consistent WebSocket event delivery across all contexts
         
         Business Impact: Ensures reliable Golden Path chat experience
         Expected: FAIL initially, PASS after SSOT fix
-        """
-        self.record_metric("test_type", "websocket_consistency_validation")
+        
+        self.record_metric(test_type", websocket_consistency_validation)"
         
         # Import the SSOT AgentRegistry (should be single source)
         try:
             # Try the preferred SSOT import path
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-            self.record_metric("ssot_registry_import", "SUCCESS")
+            self.record_metric(ssot_registry_import, SUCCESS)
         except ImportError:
             try:
                 # Fallback to basic import if still available
                 from netra_backend.app.agents.registry import AgentRegistry
-                self.record_metric("ssot_registry_import", "FALLBACK")
+                self.record_metric(ssot_registry_import, "FALLBACK)"
             except ImportError:
-                pytest.fail("No AgentRegistry import available for testing")
+                pytest.fail(No AgentRegistry import available for testing")"
         
         # Create multiple instances to test consistency
         registry_instances = []
@@ -138,7 +157,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
             instance = AgentRegistry()
             registry_instances.append(instance)
             
-        self.record_metric("registry_instances_created", len(registry_instances))
+        self.record_metric(registry_instances_created, len(registry_instances))
         
         # Validate WebSocket capabilities are consistent across instances
         websocket_capabilities = []
@@ -153,28 +172,32 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
             }
             
             websocket_capabilities.append(capability)
-            self.record_metric(f"instance_{i}_websocket_capability", capability)
+            self.record_metric(finstance_{i}_websocket_capability", capability)"
         
         # All instances must have identical WebSocket capabilities
         reference_capability = websocket_capabilities[0]
         for i, capability in enumerate(websocket_capabilities[1:], 1):
             assert capability == reference_capability, (
-                f"SSOT COMPLIANCE FAILURE: WebSocket capabilities inconsistent. "
-                f"Instance 0: {reference_capability} vs Instance {i}: {capability}. "
+                fSSOT COMPLIANCE FAILURE: WebSocket capabilities inconsistent. 
+                fInstance 0: {reference_capability} vs Instance {i}: {capability}. 
                 f"SSOT requires all instances to have identical capabilities."
             )
         
-        self.record_metric("websocket_consistency_validated", True)
+        self.record_metric(websocket_consistency_validated", True)"
 
     async def test_uniform_multi_user_isolation(self):
         """
+    ""
+
         CRITICAL: Validate user isolation works consistently across all instances
         
         Business Impact: Ensures enterprise security and data protection
         Expected: FAIL initially, PASS after SSOT fix  
-        """
-        self.record_metric("test_type", "multi_user_isolation_validation")
-        self.record_metric("security_impact", "ENTERPRISE_CRITICAL")
+        "
+        ""
+
+        self.record_metric(test_type, multi_user_isolation_validation)
+        self.record_metric(security_impact", ENTERPRISE_CRITICAL)"
         
         # Import SSOT AgentRegistry
         try:
@@ -183,10 +206,10 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
             try:
                 from netra_backend.app.agents.registry import AgentRegistry
             except ImportError:
-                pytest.fail("No AgentRegistry available for isolation testing")
+                pytest.fail(No AgentRegistry available for isolation testing)
         
         # Test user isolation capabilities
-        user_contexts = ["user_1", "user_2", "user_3"]
+        user_contexts = [user_1, user_2", user_3]"
         isolation_results = {}
         
         for user_id in user_contexts:
@@ -197,11 +220,11 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
                 'has_user_context': hasattr(registry, 'create_user_context') or hasattr(registry, 'get_user_context'),
                 'has_isolation_factory': hasattr(registry, 'create_for_user') or hasattr(registry, 'user_factory'),
                 'has_isolation_manager': hasattr(registry, 'isolate_user') or hasattr(registry, 'user_isolation'),
-                'has_context_methods': any(hasattr(registry, method) for method in ['set_user_context', 'clear_user_context', 'get_current_user'])
+                'has_context_methods': any(hasattr(registry, method) for method in ['set_user_context', 'clear_user_context', 'get_current_user']
             }
             
             isolation_results[user_id] = isolation_methods
-            self.record_metric(f"{user_id}_isolation_capability", isolation_methods)
+            self.record_metric(f{user_id}_isolation_capability, isolation_methods)
         
         # All user contexts must have identical isolation capabilities
         reference_isolation = isolation_results[user_contexts[0]]
@@ -209,22 +232,26 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
             user_isolation = isolation_results[user_id]
             
             assert user_isolation == reference_isolation, (
-                f"SSOT COMPLIANCE FAILURE: User isolation capabilities inconsistent. "
-                f"User {user_contexts[0]}: {reference_isolation} "
-                f"vs User {user_id}: {user_isolation}. "
-                f"SSOT requires consistent isolation across all users."
+                f"SSOT COMPLIANCE FAILURE: User isolation capabilities inconsistent."
+                fUser {user_contexts[0]}: {reference_isolation} "
+                fUser {user_contexts[0]}: {reference_isolation} ""
+
+                fvs User {user_id}: {user_isolation}. 
+                fSSOT requires consistent isolation across all users."
+                fSSOT requires consistent isolation across all users.""
+
             )
         
-        self.record_metric("multi_user_isolation_consistent", True)
+        self.record_metric("multi_user_isolation_consistent, True)"
 
     async def test_consistent_factory_pattern(self):
-        """
+        
         CRITICAL: Validate factory pattern is uniform across all registry instances
         
         Business Impact: Ensures consistent developer experience
         Expected: FAIL initially, PASS after SSOT fix
-        """
-        self.record_metric("test_type", "factory_pattern_validation")
+""
+        self.record_metric(test_type, factory_pattern_validation)
         
         # Import SSOT AgentRegistry
         try:
@@ -233,12 +260,12 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
             try:
                 from netra_backend.app.agents.registry import AgentRegistry
             except ImportError:
-                pytest.fail("No AgentRegistry available for factory pattern testing")
+                pytest.fail("No AgentRegistry available for factory pattern testing)"
         
         # Analyze factory pattern of the SSOT registry
         factory_analysis = self._analyze_registry_factory_pattern(AgentRegistry)
         
-        self.record_metric("factory_pattern_analysis", factory_analysis)
+        self.record_metric(factory_pattern_analysis, factory_analysis)
         
         # Create multiple instances and verify they all follow the same pattern
         instances = []
@@ -252,18 +279,18 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
         for i, instance in enumerate(instances):
             instance_methods = dir(instance)
             factory_methods = [method for method in instance_methods 
-                             if any(keyword in method.lower() for keyword in ['create', 'factory', 'make', 'build', 'get'])]
+                             if any(keyword in method.lower() for keyword in ['create', 'factory', 'make', 'build', 'get']]
             
             factory_method_sets.append(set(factory_methods))
-            self.record_metric(f"instance_{i}_factory_methods", factory_methods)
+            self.record_metric(finstance_{i}_factory_methods, factory_methods)
         
         # All instances must have identical factory method sets
         reference_methods = factory_method_sets[0]
         for i, method_set in enumerate(factory_method_sets[1:], 1):
             assert method_set == reference_methods, (
-                f"SSOT COMPLIANCE FAILURE: Factory methods inconsistent between instances. "
-                f"Instance 0: {reference_methods} vs Instance {i}: {method_set}. "
-                f"Differences: {reference_methods.symmetric_difference(method_set)}"
+                fSSOT COMPLIANCE FAILURE: Factory methods inconsistent between instances. ""
+                fInstance 0: {reference_methods} vs Instance {i}: {method_set}. 
+                fDifferences: {reference_methods.symmetric_difference(method_set)}
             )
         
         # Validate initialization consistency
@@ -279,14 +306,17 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
             reference_signature = init_signatures[0]
             for i, signature in enumerate(init_signatures[1:], 1):
                 assert signature == reference_signature, (
-                    f"SSOT COMPLIANCE FAILURE: Initialization signatures inconsistent. "
-                    f"Instance 0: {reference_signature} vs Instance {i}: {signature}"
+                    f"SSOT COMPLIANCE FAILURE: Initialization signatures inconsistent."
+                    fInstance 0: {reference_signature} vs Instance {i}: {signature}"
+                    fInstance 0: {reference_signature} vs Instance {i}: {signature}""
+
                 )
         
-        self.record_metric("factory_pattern_consistent", True)
+        self.record_metric(factory_pattern_consistent, True)
 
     def _analyze_registry_factory_pattern(self, registry_class: Type) -> Dict[str, Any]:
-        """Analyze the factory pattern of a registry class for SSOT compliance"""
+        ""Analyze the factory pattern of a registry class for SSOT compliance""
+
         
         # Get class methods
         class_methods = inspect.getmembers(registry_class, predicate=inspect.ismethod)
@@ -321,13 +351,14 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
         }
 
     async def test_ssot_compliance_comprehensive_validation(self):
-        """
+    """
+
         Comprehensive validation of all SSOT compliance aspects
         
         Business Impact: Complete Golden Path protection validation
         Expected: FAIL initially, PASS after all SSOT fixes complete
-        """
-        self.record_metric("test_type", "comprehensive_ssot_validation")
+        
+        self.record_metric(test_type, "comprehensive_ssot_validation)"
         
         compliance_score = 0
         total_checks = 0
@@ -338,11 +369,11 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
             compliance_score += 1
-            compliance_details.append("✓ SSOT AgentRegistry import successful")
-            self.record_metric("ssot_import_check", "PASS")
+            compliance_details.append(CHECK SSOT AgentRegistry import successful")"
+            self.record_metric(ssot_import_check, PASS)
         except ImportError:
-            compliance_details.append("✗ SSOT AgentRegistry import failed")
-            self.record_metric("ssot_import_check", "FAIL")
+            compliance_details.append("✗ SSOT AgentRegistry import failed)"
+            self.record_metric(ssot_import_check, FAIL)
         
         # Check 2: No duplicate classes exist
         total_checks += 1
@@ -352,16 +383,17 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
             
             if Registry1 is Registry2:
                 compliance_score += 1
-                compliance_details.append("✓ No duplicate AgentRegistry classes")
-                self.record_metric("duplicate_class_check", "PASS")
+                compliance_details.append(CHECK No duplicate AgentRegistry classes)"
+                compliance_details.append(CHECK No duplicate AgentRegistry classes)"
+                self.record_metric("duplicate_class_check, PASS)"
             else:
-                compliance_details.append("✗ Duplicate AgentRegistry classes exist")
-                self.record_metric("duplicate_class_check", "FAIL")
+                compliance_details.append(✗ Duplicate AgentRegistry classes exist)
+                self.record_metric(duplicate_class_check", FAIL)"
         except ImportError:
             # If one import fails, this could indicate proper consolidation
             compliance_score += 0.5  # Partial credit
-            compliance_details.append("~ One AgentRegistry import path unavailable (possible consolidation)")
-            self.record_metric("duplicate_class_check", "PARTIAL")
+            compliance_details.append(~ One AgentRegistry import path unavailable (possible consolidation))
+            self.record_metric(duplicate_class_check, PARTIAL")"
         
         # Check 3: Interface consistency
         total_checks += 1
@@ -375,15 +407,15 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
             
             if has_essential:
                 compliance_score += 1
-                compliance_details.append("✓ Essential AgentRegistry interface methods present")
-                self.record_metric("interface_consistency_check", "PASS")
+                compliance_details.append("CHECK Essential AgentRegistry interface methods present)"
+                self.record_metric(interface_consistency_check, PASS)
             else:
-                compliance_details.append("✗ Missing essential AgentRegistry interface methods")
-                self.record_metric("interface_consistency_check", "FAIL")
+                compliance_details.append(✗ Missing essential AgentRegistry interface methods")"
+                self.record_metric(interface_consistency_check, FAIL)
                 
         except Exception as e:
-            compliance_details.append(f"✗ Interface consistency check failed: {e}")
-            self.record_metric("interface_consistency_check", "FAIL")
+            compliance_details.append(f✗ Interface consistency check failed: {e})
+            self.record_metric(interface_consistency_check", FAIL)"
         
         # Check 4: WebSocket integration consistency
         total_checks += 1
@@ -397,36 +429,34 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
             
             if has_websocket_support:
                 compliance_score += 1
-                compliance_details.append("✓ WebSocket integration present")
-                self.record_metric("websocket_integration_check", "PASS")
+                compliance_details.append(CHECK WebSocket integration present)
+                self.record_metric(websocket_integration_check, PASS")"
             else:
-                compliance_details.append("✗ Missing WebSocket integration")
-                self.record_metric("websocket_integration_check", "FAIL")
-                
-        except Exception as e:
-            compliance_details.append(f"✗ WebSocket integration check failed: {e}")
-            self.record_metric("websocket_integration_check", "FAIL")
+                compliance_details.append("✗ Missing WebSocket integration)"")"
+            self.record_metric(websocket_integration_check, FAIL)
         
         # Calculate compliance percentage
         compliance_percentage = (compliance_score / total_checks) * 100 if total_checks > 0 else 0
         
-        self.record_metric("ssot_compliance_score", compliance_score)
-        self.record_metric("ssot_compliance_total_checks", total_checks)
-        self.record_metric("ssot_compliance_percentage", compliance_percentage)
-        self.record_metric("ssot_compliance_details", compliance_details)
+        self.record_metric(ssot_compliance_score, compliance_score)"
+        self.record_metric(ssot_compliance_score, compliance_score)"
+        self.record_metric(ssot_compliance_total_checks", total_checks)"
+        self.record_metric(ssot_compliance_percentage, compliance_percentage)
+        self.record_metric(ssot_compliance_details", compliance_details)"
         
         # SSOT compliance requires 100% pass rate
         assert compliance_percentage == 100.0, (
-            f"SSOT COMPLIANCE FAILURE: Achieved {compliance_percentage}% compliance "
-            f"({compliance_score}/{total_checks} checks passed). "
-            f"SSOT requires 100% compliance. Details:\n" + "\n".join(compliance_details)
+            fSSOT COMPLIANCE FAILURE: Achieved {compliance_percentage}% compliance 
+            f({compliance_score}/{total_checks} checks passed). 
+            f"SSOT requires 100% compliance. Details:\n + \n.join(compliance_details)"
         )
         
-        self.record_metric("ssot_compliance_achieved", True)
+        self.record_metric("ssot_compliance_achieved, True)"
 
 
-if __name__ == "__main__":
+if __name__ == __main__":"
     # Allow running individual test file
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+))

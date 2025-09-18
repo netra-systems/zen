@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Fix end-to-end agent-database pattern filtering reliability
 - Value Impact: Complete agent workflows with database persistence must work end-to-end
-- Strategic Impact: $500K+ ARR protection from agent execution and database integration failures
+- Strategic Impact: 500K+ ARR protection from agent execution and database integration failures
 
 EXPECTED RESULT: FAIL - Reproduces Issue #1270 end-to-end failures on staging
 This test suite intentionally creates failing E2E tests to reproduce the end-to-end
@@ -24,7 +24,6 @@ STAGING ENVIRONMENT ONLY: These tests run against real GCP staging services
 - Real staging authentication and user context
 """
 
-import asyncio
 import json
 import os
 import sys
@@ -40,11 +39,11 @@ from unittest.mock import Mock, AsyncMock, patch
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from test_framework.base_e2e_test import BaseE2ETest
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.staging_fixtures import staging_environment, staging_database_connection
 from test_framework.websocket_helpers import WebSocketTestHelpers, StagingWebSocketConnection
 from test_framework.agent_test_helpers import StagingAgentTestExecutor, StagingAgentValidator
-from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class MockStagingAgentForIssue1270:
@@ -116,13 +115,29 @@ class MockStagingAgentForIssue1270:
 @pytest.mark.staging
 @pytest.mark.issue_1270
 @pytest.mark.agent_database_pattern
-class TestAgentDatabasePatternE2EIssue1270(BaseE2ETest):
+class TestAgentDatabasePatternE2EIssue1270(SSotAsyncTestCase):
     """E2E tests reproducing Issue #1270 agent database pattern filtering failures on staging."""
+
+    async def asyncSetUp(self):
+        """SSOT async setup method for Issue #1270 test initialization."""
+        await super().asyncSetUp()
+
+        # Initialize SSOT environment for staging tests
+        self.isolated_env = IsolatedEnvironment()
+
+        # Setup Issue #1270 test context
+        self.issue_1270_context = {
+            "test_suite": "agent_database_pattern_e2e",
+            "issue_number": "1270",
+            "environment": "staging",
+            "expected_result": "FAIL",
+            "ssot_compliance": "enabled"
+        }
 
     @pytest.mark.staging_only
     @pytest.mark.real_services
-    def test_staging_agent_execution_database_category_pattern_filtering_failure(
-        self, staging_environment
+    async def test_staging_agent_execution_database_category_pattern_filtering_failure(
+        self
     ):
         """
         EXPECTED: FAIL - Staging agent execution fails with database category pattern filtering.
@@ -181,9 +196,9 @@ class TestAgentDatabasePatternE2EIssue1270(BaseE2ETest):
         # This should work but fails due to Issue #1270 in staging
         with pytest.raises(RuntimeError, match="Issue #1270 E2E: Staging database connection missing"):
             # ASSERTION THAT SHOULD FAIL: Staging agent execution breaks with category filtering
-            asyncio.run(staging_agent.execute_with_staging_database_and_websocket(
+            await staging_agent.execute_with_staging_database_and_websocket(
                 database_connection, websocket_connection, staging_user_context
-            ))
+            )
 
         # The test failure demonstrates Issue #1270: category filtering breaks staging execution
         assert False, (
@@ -196,8 +211,8 @@ class TestAgentDatabasePatternE2EIssue1270(BaseE2ETest):
 
     @pytest.mark.staging_only
     @pytest.mark.websocket_events
-    def test_staging_websocket_events_database_pattern_filtering_failure(
-        self, staging_environment
+    async def test_staging_websocket_events_database_pattern_filtering_failure(
+        self
     ):
         """
         EXPECTED: FAIL - Staging WebSocket events fail with database pattern filtering.
@@ -281,8 +296,8 @@ class TestAgentDatabasePatternE2EIssue1270(BaseE2ETest):
 
     @pytest.mark.staging_only
     @pytest.mark.agent_state_persistence
-    def test_staging_agent_state_persistence_pattern_filtering_failure(
-        self, staging_environment, staging_database_connection
+    async def test_staging_agent_state_persistence_pattern_filtering_failure(
+        self
     ):
         """
         EXPECTED: FAIL - Staging agent state persistence fails with pattern filtering.
@@ -347,8 +362,10 @@ class TestAgentDatabasePatternE2EIssue1270(BaseE2ETest):
 
         # TEST: State persistence with pattern filtering in staging
         pattern_filter = "*agent*database*"
+        # Mock staging database connection for test
+        mock_staging_db_connection = Mock()
         persistence_results = simulate_staging_state_persistence_with_pattern_filter(
-            staging_agent_state, staging_database_connection, pattern_filter
+            staging_agent_state, mock_staging_db_connection, pattern_filter
         )
 
         # Expected: State should be saved successfully
@@ -367,8 +384,8 @@ class TestAgentDatabasePatternE2EIssue1270(BaseE2ETest):
 
     @pytest.mark.staging_only
     @pytest.mark.end_to_end_workflow
-    def test_staging_complete_agent_workflow_database_pattern_filtering_failure(
-        self, staging_environment
+    async def test_staging_complete_agent_workflow_database_pattern_filtering_failure(
+        self
     ):
         """
         EXPECTED: FAIL - Complete staging agent workflow fails with database pattern filtering.

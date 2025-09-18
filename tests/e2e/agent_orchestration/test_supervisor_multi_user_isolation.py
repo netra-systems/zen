@@ -138,7 +138,7 @@ class SupervisorMultiUserIsolationTests(SSotAsyncTestCase):
         self.assertLess(execution_time, self.test_timeout, 
                        f"Concurrent execution took too long: {execution_time:.1f}s")
         
-        logger.info(f"✅ Concurrent supervisor isolation test completed: "
+        logger.info(f"CHECK Concurrent supervisor isolation test completed: "
                    f"{len(successful_results)}/{len(user_sessions)} successful, "
                    f"execution_time={execution_time:.1f}s")
 
@@ -205,7 +205,7 @@ class SupervisorMultiUserIsolationTests(SSotAsyncTestCase):
             context_b=context_b
         )
         
-        logger.info("✅ Supervisor agent state isolation test completed successfully")
+        logger.info("CHECK Supervisor agent state isolation test completed successfully")
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -269,7 +269,7 @@ class SupervisorMultiUserIsolationTests(SSotAsyncTestCase):
         # Verify no cross-contamination in sub-agent results
         await self._verify_sub_agent_result_isolation(successful_orchestrations)
         
-        logger.info(f"✅ Supervisor sub-agent isolation test completed: "
+        logger.info(f"CHECK Supervisor sub-agent isolation test completed: "
                    f"{len(successful_orchestrations)} successful orchestrations")
 
     # === Helper Methods ===
@@ -281,7 +281,7 @@ class SupervisorMultiUserIsolationTests(SSotAsyncTestCase):
         for i in range(count):
             # Create unique user identity
             user_id = f"isolation_test_user_{i}_{uuid.uuid4().hex[:8]}"
-            email = f"{user_id}@test.netra.ai"
+            email = f"{user_id}@test.netrasystems.ai"
             
             # Create auth helper for this user
             auth_helper = E2EWebSocketAuthHelper(

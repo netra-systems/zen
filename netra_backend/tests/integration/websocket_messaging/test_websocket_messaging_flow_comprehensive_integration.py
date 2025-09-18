@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - Chat functionality represents 90% of delivered value
 - Business Goal: Ensure complete message flow from WebSocket reception to agent execution and response delivery
 - Value Impact: Validates that users receive actionable AI insights through real-time WebSocket interactions
-- Strategic Impact: $500K+ ARR protection - WebSocket messaging is the primary delivery mechanism for our AI value
+- Strategic Impact: 500K+ ARR protection - WebSocket messaging is the primary delivery mechanism for our AI value
 
 CRITICAL REQUIREMENT: This test validates the complete "Golden Path" message flow documented in 
 GOLDEN_PATH_USER_FLOW_COMPLETE.md. Every test scenario must use REAL SERVICES and validate actual

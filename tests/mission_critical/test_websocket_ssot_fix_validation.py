@@ -24,10 +24,10 @@
     # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
     # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
 
-    # REMOVED_SYNTAX_ERROR: '''
+    # REMOVED_SYNTAX_ERROR: """
     # REMOVED_SYNTAX_ERROR: CRITICAL: WebSocket SSOT Fix Validation Test Suite
 
-    # REMOVED_SYNTAX_ERROR: Business Value: Ensure $500K+ ARR is protected by validating that the removal of
+    # REMOVED_SYNTAX_ERROR: Business Value: Ensure 500K+ ARR is protected by validating that the removal of
     # REMOVED_SYNTAX_ERROR: the duplicate WebSocket manager does not break any functionality.
 
     # REMOVED_SYNTAX_ERROR: REQUIREMENTS:
@@ -39,7 +39,7 @@
 
         # REMOVED_SYNTAX_ERROR: This test validates that the canonical manager.py contains ALL functionality
         # REMOVED_SYNTAX_ERROR: that was previously split between manager.py and manager_ttl_implementation.py
-        # REMOVED_SYNTAX_ERROR: '''
+        # REMOVED_SYNTAX_ERROR: """'''
 
         # REMOVED_SYNTAX_ERROR: import asyncio
         # REMOVED_SYNTAX_ERROR: import json
@@ -449,7 +449,7 @@
                                                                                                     # REMOVED_SYNTAX_ERROR: assert hasattr(manager, 'associate_run_id')
 
                                                                                                     # REMOVED_SYNTAX_ERROR: print("[U+2713] ALL CRITICAL BUSINESS REQUIREMENTS MET")
-                                                                                                    # REMOVED_SYNTAX_ERROR: print("[U+2713] WebSocket SSOT fix successful - $500K+ ARR protected")
+                                                                                                    # REMOVED_SYNTAX_ERROR: print("[U+2713] WebSocket SSOT fix successful - 500K+ ARR protected")
 
                                                                                                     # REMOVED_SYNTAX_ERROR: finally:
                                                                                                         # REMOVED_SYNTAX_ERROR: await manager.shutdown()
@@ -460,5 +460,5 @@
                                                                                                             # REMOVED_SYNTAX_ERROR: asyncio.run(test_critical_business_requirements())
                                                                                                             # REMOVED_SYNTAX_ERROR: print(" )
                                                                                                             # REMOVED_SYNTAX_ERROR:  TARGET:  CRITICAL WebSocket SSOT Fix Validation: PASSED")
-                                                                                                            # REMOVED_SYNTAX_ERROR: print("[U+1F4B0] Business Value Protected: $500K+ ARR from chat functionality")
+                                                                                                            # REMOVED_SYNTAX_ERROR: print("[U+1F4B0] Business Value Protected: 500K+ ARR from chat functionality")
                                                                                                             # REMOVED_SYNTAX_ERROR: print("[U+1F527] Technical Debt Eliminated: Duplicate manager removed safely")

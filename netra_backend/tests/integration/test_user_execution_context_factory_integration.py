@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise/Platform - Multi-User Systems
 - Business Goal: Ensure complete user isolation and prevent data leakage in concurrent operations
 - Value Impact: Validates that 10+ concurrent users can safely use the system simultaneously
-- Strategic Impact: Critical for $500K+ ARR protection - prevents security breaches and data corruption
+- Strategic Impact: Critical for 500K+ ARR protection - prevents security breaches and data corruption
 
 These integration tests validate the Factory-based isolation patterns that enable reliable
 multi-user operation. Each test validates specific aspects of the isolation architecture

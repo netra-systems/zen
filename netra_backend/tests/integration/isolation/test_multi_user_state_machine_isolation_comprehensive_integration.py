@@ -16,7 +16,7 @@ import pytest
 import asyncio
 import json
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Any, Set
 from enum import Enum
 from concurrent.futures import ThreadPoolExecutor
@@ -82,7 +82,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
     async def _create_isolated_user_context(self, real_services_fixture, user_index: int,
                                           scenario: IsolationTestScenario) -> UserIsolationContext:
         """Create isolated user context for testing."""
-        user_email = f"isolation_user_{user_index}_{scenario.value}@netra.ai"
+        user_email = f"isolation_user_{user_index}_{scenario.value}@netrasystems.ai"
         
         # Create user with real services
         user_data = await self.create_test_user_context(real_services_fixture, {
@@ -131,10 +131,10 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
         if not user_context.websocket_client.is_connected():
             await user_context.websocket_client.connect()
         
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         
         try:
-            while (datetime.utcnow() - start_time).total_seconds() < duration_seconds:
+            while (datetime.now(UTC) - start_time).total_seconds() < duration_seconds:
                 try:
                     event = await asyncio.wait_for(
                         user_context.websocket_client.receive_json(),
@@ -142,7 +142,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                     )
                     
                     user_context.state_events.append({
-                        'timestamp': datetime.utcnow().isoformat(),
+                        'timestamp': datetime.now(UTC).isoformat(),
                         'event': event,
                         'user_id': user_context.user_id
                     })
@@ -150,7 +150,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                     # Categorize events
                     if event.get('type') == 'error':
                         user_context.errors.append({
-                            'timestamp': datetime.utcnow().isoformat(),
+                            'timestamp': datetime.now(UTC).isoformat(),
                             'error': event,
                             'user_id': user_context.user_id
                         })
@@ -159,7 +159,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                     continue
                 except Exception as e:
                     user_context.errors.append({
-                        'timestamp': datetime.utcnow().isoformat(),
+                        'timestamp': datetime.now(UTC).isoformat(),
                         'error': {'type': 'websocket_error', 'details': str(e)},
                         'user_id': user_context.user_id
                     })
@@ -167,7 +167,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
         
         except Exception as e:
             user_context.errors.append({
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'error': {'type': 'state_tracking_error', 'details': str(e)},
                 'user_id': user_context.user_id
             })
@@ -210,7 +210,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                                 'user_id': user_id,
                                 'contaminated_by': other_user_id,
                                 'key': key,
-                                'timestamp': datetime.utcnow().isoformat()
+                                'timestamp': datetime.now(UTC).isoformat()
                             })
         
         return {
@@ -268,7 +268,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                                         'user_id': user_id,
                                         'contaminated_by': other_user_id,
                                         'record_id': record_dict.get('id'),
-                                        'timestamp': datetime.utcnow().isoformat()
+                                        'timestamp': datetime.now(UTC).isoformat()
                                     })
             
             except Exception as e:
@@ -326,7 +326,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                             "user_id": user_context.user_id,
                             "private_data": f"secret_data_for_user_{user_index}"
                         },
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                     
                     await user_context.websocket_client.send_json(user_message)
@@ -344,7 +344,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                 state_test_message = {
                     "type": "connection_state_test",
                     "data": {"user_specific": True, "user_id": user_context.user_id},
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 await user_context.websocket_client.send_json(state_test_message)
                 user_context.messages_sent.append(state_test_message)
@@ -362,7 +362,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                 
             except Exception as e:
                 user_context.errors.append({
-                    'timestamp': datetime.utcnow().isoformat(),
+                    'timestamp': datetime.now(UTC).isoformat(),
                     'error': {'type': 'session_error', 'details': str(e)},
                     'user_id': user_context.user_id
                 })
@@ -477,7 +477,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                         "private_context": f"private_data_user_{user_index}",
                         "user_preferences": {"preference": f"user_{user_index}_setting"}
                     },
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 
                 await user_context.websocket_client.send_json(agent_request)
@@ -496,7 +496,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                         
                         agent_events.append(event)
                         user_context.state_events.append({
-                            'timestamp': datetime.utcnow().isoformat(),
+                            'timestamp': datetime.now(UTC).isoformat(),
                             'event': event,
                             'user_id': user_context.user_id
                         })
@@ -527,7 +527,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                 
             except Exception as e:
                 user_context.errors.append({
-                    'timestamp': datetime.utcnow().isoformat(),
+                    'timestamp': datetime.now(UTC).isoformat(),
                     'error': {'type': 'agent_execution_error', 'details': str(e)},
                     'user_id': user_context.user_id
                 })
@@ -682,7 +682,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                                 
                                 if error_response.get('type') == 'error':
                                     user_context.errors.append({
-                                        'timestamp': datetime.utcnow().isoformat(),
+                                        'timestamp': datetime.now(UTC).isoformat(),
                                         'error': error_response,
                                         'user_id': user_context.user_id,
                                         'expected': True
@@ -696,7 +696,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                             
                         except Exception as e:
                             user_context.errors.append({
-                                'timestamp': datetime.utcnow().isoformat(),
+                                'timestamp': datetime.now(UTC).isoformat(),
                                 'error': {'type': 'send_error', 'details': str(e)},
                                 'user_id': user_context.user_id,
                                 'expected': True
@@ -709,7 +709,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                         "agent": "triage_agent",
                         "message": f"Normal request from user {user_index}",
                         "user_id": user_context.user_id,
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                     
                     await user_context.websocket_client.send_json(normal_request)
@@ -723,7 +723,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                         )
                         
                         user_context.state_events.append({
-                            'timestamp': datetime.utcnow().isoformat(),
+                            'timestamp': datetime.now(UTC).isoformat(),
                             'event': normal_response,
                             'user_id': user_context.user_id
                         })
@@ -735,7 +735,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                     except asyncio.TimeoutError:
                         # Normal user should not timeout due to other user's errors
                         user_context.errors.append({
-                            'timestamp': datetime.utcnow().isoformat(),
+                            'timestamp': datetime.now(UTC).isoformat(),
                             'error': {'type': 'unexpected_timeout', 'details': 'Normal user timed out'},
                             'user_id': user_context.user_id,
                             'expected': False
@@ -752,7 +752,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
                 
             except Exception as e:
                 user_context.errors.append({
-                    'timestamp': datetime.utcnow().isoformat(),
+                    'timestamp': datetime.now(UTC).isoformat(),
                     'error': {'type': 'session_exception', 'details': str(e)},
                     'user_id': user_context.user_id,
                     'expected': user_index == error_user_index

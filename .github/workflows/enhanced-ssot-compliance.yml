@@ -1,0 +1,416 @@
+name: 🚨 Enhanced SSOT Compliance Check
+
+on:
+  pull_request:
+    branches: [ develop-long-lived, main ]
+    paths:
+      - 'netra_backend/**/*.py'
+      - 'auth_service/**/*.py'
+      - 'frontend/**/*.ts'
+      - 'frontend/**/*.tsx'
+      - 'scripts/**/*.py'
+      - 'test_framework/**/*.py'
+
+  push:
+    branches: [ develop-long-lived, main ]
+    paths:
+      - 'netra_backend/**/*.py'
+      - 'auth_service/**/*.py'
+      - 'frontend/**/*.ts'
+      - 'frontend/**/*.tsx'
+
+  workflow_dispatch:
+    inputs:
+      compliance_threshold:
+        description: 'Compliance threshold (0-100)'
+        required: false
+        default: '90'
+        type: number
+      strict_mode:
+        description: 'Enable strict mode'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  # Business context
+  BUSINESS_IMPACT: "$500K+ ARR protected from SSOT violations"
+  COMPLIANCE_THRESHOLD: ${{ inputs.compliance_threshold || '90' }}
+
+  # Compliance settings
+  PYTHONPATH: ${{ github.workspace }}
+  COMPLIANCE_REPORTS_DIR: ${{ github.workspace }}/reports/ci_compliance
+
+jobs:
+  enhanced-ssot-compliance:
+    runs-on: ubuntu-latest
+    name: 🔍 Enhanced SSOT Compliance Validation
+
+    # Skip on draft PRs unless specifically requested
+    if: github.event.pull_request.draft == false || contains(github.event.pull_request.labels.*.name, 'compliance-check')
+
+    steps:
+    - name: 📋 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: 📦 Install dependencies
+      run: |
+        pip install --upgrade pip
+        # Install core dependencies for compliance checking
+        pip install pytest pytest-asyncio pytest-mock
+        # Install project dependencies if available
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        fi
+
+    - name: 🏗️ Create reports directory
+      run: |
+        mkdir -p ${{ env.COMPLIANCE_REPORTS_DIR }}
+        chmod 755 ${{ env.COMPLIANCE_REPORTS_DIR }}
+
+    - name: 🔍 Run Enhanced Architecture Compliance Check
+      id: compliance_check
+      run: |
+        echo "🚀 Starting Enhanced SSOT Compliance Check"
+        echo "Business Impact: ${{ env.BUSINESS_IMPACT }}"
+        echo "Compliance Threshold: ${{ env.COMPLIANCE_THRESHOLD }}%"
+        echo "Repository: ${{ github.repository }}"
+        echo "Branch: ${{ github.ref_name }}"
+        echo "Commit: ${{ github.sha }}"
+
+        # Determine strictness based on branch and inputs
+        if [[ "${{ github.ref_name }}" == "main" ]] || [[ "${{ inputs.strict_mode }}" == "true" ]]; then
+          CRITICAL_THRESHOLD=0
+          ERROR_THRESHOLD=0
+          WARNING_THRESHOLD=5
+          echo "Mode: Strict (Production-ready)"
+        elif [[ "${{ github.ref_name }}" == "develop-long-lived" ]]; then
+          CRITICAL_THRESHOLD=0
+          ERROR_THRESHOLD=3
+          WARNING_THRESHOLD=15
+          echo "Mode: Standard (Development)"
+        else
+          CRITICAL_THRESHOLD=0
+          ERROR_THRESHOLD=5
+          WARNING_THRESHOLD=20
+          echo "Mode: Permissive (Feature branch)"
+        fi
+
+        echo "Thresholds - Critical: $CRITICAL_THRESHOLD, Error: $ERROR_THRESHOLD, Warning: $WARNING_THRESHOLD"
+
+        # Generate compliance report with CI mode
+        REPORT_FILE="${{ env.COMPLIANCE_REPORTS_DIR }}/compliance-report-${{ github.sha }}.json"
+
+        # Run compliance check with enhanced CI/CD mode
+        python scripts/check_architecture_compliance.py \
+          --ci-mode \
+          --fail-on-violation \
+          --threshold="${{ env.COMPLIANCE_THRESHOLD }}" \
+          --critical-threshold="$CRITICAL_THRESHOLD" \
+          --error-threshold="$ERROR_THRESHOLD" \
+          --warning-threshold="$WARNING_THRESHOLD" \
+          --json-output="$REPORT_FILE" \
+          --path="${{ github.workspace }}" \
+          --target-folders netra_backend auth_service frontend scripts \
+          --verbose 2>&1 | tee compliance.log
+
+        # Capture exit code for later use
+        COMPLIANCE_EXIT_CODE=$?
+        echo "COMPLIANCE_EXIT_CODE=$COMPLIANCE_EXIT_CODE" >> $GITHUB_ENV
+        echo "REPORT_FILE=$REPORT_FILE" >> $GITHUB_ENV
+
+        # Exit with compliance code (will be handled by continue-on-error)
+        exit $COMPLIANCE_EXIT_CODE
+      continue-on-error: true
+
+    - name: 📊 Parse compliance results
+      if: always()
+      id: parse_results
+      run: |
+        # Check if report file exists and parse results
+        if [[ -f "$REPORT_FILE" ]]; then
+          # Extract key metrics using jq
+          COMPLIANCE_SCORE=$(jq -r '.compliance_score // 0' "$REPORT_FILE")
+          TOTAL_VIOLATIONS=$(jq -r '.total_violations // 0' "$REPORT_FILE")
+          CRITICAL_COUNT=$(jq -r '.violations_by_severity.critical // 0' "$REPORT_FILE")
+          HIGH_COUNT=$(jq -r '.violations_by_severity.high // 0' "$REPORT_FILE")
+          MEDIUM_COUNT=$(jq -r '.violations_by_severity.medium // 0' "$REPORT_FILE")
+          LOW_COUNT=$(jq -r '.violations_by_severity.low // 0' "$REPORT_FILE")
+
+          echo "COMPLIANCE_SCORE=$COMPLIANCE_SCORE" >> $GITHUB_OUTPUT
+          echo "TOTAL_VIOLATIONS=$TOTAL_VIOLATIONS" >> $GITHUB_OUTPUT
+          echo "CRITICAL_COUNT=$CRITICAL_COUNT" >> $GITHUB_OUTPUT
+          echo "HIGH_COUNT=$HIGH_COUNT" >> $GITHUB_OUTPUT
+          echo "MEDIUM_COUNT=$MEDIUM_COUNT" >> $GITHUB_OUTPUT
+          echo "LOW_COUNT=$LOW_COUNT" >> $GITHUB_OUTPUT
+
+          # Determine overall status
+          if [[ "$COMPLIANCE_EXIT_CODE" == "0" ]]; then
+            echo "STATUS=✅ PASSED" >> $GITHUB_OUTPUT
+            echo "STATUS_COLOR=green" >> $GITHUB_OUTPUT
+          elif [[ "$COMPLIANCE_EXIT_CODE" == "2" ]]; then
+            echo "STATUS=🚨 CRITICAL" >> $GITHUB_OUTPUT
+            echo "STATUS_COLOR=red" >> $GITHUB_OUTPUT
+          else
+            echo "STATUS=❌ FAILED" >> $GITHUB_OUTPUT
+            echo "STATUS_COLOR=orange" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "STATUS=❓ ERROR" >> $GITHUB_OUTPUT
+          echo "STATUS_COLOR=red" >> $GITHUB_OUTPUT
+          echo "COMPLIANCE_SCORE=0" >> $GITHUB_OUTPUT
+          echo "TOTAL_VIOLATIONS=0" >> $GITHUB_OUTPUT
+        fi
+
+    - name: 📄 Generate enhanced compliance summary
+      if: always()
+      run: |
+        echo "## 🚨 Enhanced SSOT Compliance Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [[ -f "$REPORT_FILE" ]]; then
+          echo "### 📊 Compliance Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ steps.parse_results.outputs.STATUS }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Compliance Score**: ${{ steps.parse_results.outputs.COMPLIANCE_SCORE }}% (threshold: ${{ env.COMPLIANCE_THRESHOLD }}%)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Violations**: ${{ steps.parse_results.outputs.TOTAL_VIOLATIONS }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **🔴 Critical**: ${{ steps.parse_results.outputs.CRITICAL_COUNT }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **🟠 High**: ${{ steps.parse_results.outputs.HIGH_COUNT }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **🟡 Medium**: ${{ steps.parse_results.outputs.MEDIUM_COUNT }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **⚪ Low**: ${{ steps.parse_results.outputs.LOW_COUNT }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Add actionable fixes if available
+          ACTIONABLE_FIXES=$(jq -r '.actionable_fixes[]?' "$REPORT_FILE" 2>/dev/null || echo "")
+          if [[ -n "$ACTIONABLE_FIXES" ]]; then
+            echo "### 🔧 Actionable Fixes" >> $GITHUB_STEP_SUMMARY
+            echo "$ACTIONABLE_FIXES" | while read -r fix; do
+              echo "- $fix" >> $GITHUB_STEP_SUMMARY
+            done
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Add critical violations details if any
+          if [[ "${{ steps.parse_results.outputs.CRITICAL_COUNT }}" != "0" ]]; then
+            echo "### 🚨 Critical Violations (IMMEDIATE ACTION REQUIRED)" >> $GITHUB_STEP_SUMMARY
+            jq -r '.violations[] | select(.severity == "critical") | "- **\(.violation_type)**: \(.description) (\(.file_path))"' "$REPORT_FILE" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+        else
+          echo "⚠️ **Compliance check failed** - No report generated" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        # Add business impact
+        echo "### 💼 Business Impact" >> $GITHUB_STEP_SUMMARY
+        echo "- **Revenue Protection**: ${{ env.BUSINESS_IMPACT }}" >> $GITHUB_STEP_SUMMARY
+        if [[ "${{ steps.parse_results.outputs.CRITICAL_COUNT }}" != "0" ]]; then
+          echo "- **Risk Level**: 🚨 HIGH - Critical security vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+        elif [[ "$COMPLIANCE_EXIT_CODE" != "0" ]]; then
+          echo "- **Risk Level**: ⚠️ MEDIUM - SSOT violations could impact system reliability" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- **Risk Level**: ✅ LOW - System maintains architectural integrity" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: 🏷️ Add enhanced PR labels
+      if: github.event_name == 'pull_request' && always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const criticalCount = parseInt('${{ steps.parse_results.outputs.CRITICAL_COUNT }}') || 0;
+          const totalViolations = parseInt('${{ steps.parse_results.outputs.TOTAL_VIOLATIONS }}') || 0;
+          const complianceScore = parseFloat('${{ steps.parse_results.outputs.COMPLIANCE_SCORE }}') || 0;
+          const threshold = parseFloat('${{ env.COMPLIANCE_THRESHOLD }}') || 90;
+
+          const labels = [];
+
+          // Remove old compliance labels first
+          const existingLabels = await github.rest.issues.listLabelsOnIssue({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.payload.pull_request.number
+          });
+
+          const complianceLabels = existingLabels.data.filter(label =>
+            label.name.includes('ssot-') ||
+            label.name.includes('compliance-') ||
+            label.name.includes('critical-violations')
+          );
+
+          for (const label of complianceLabels) {
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                name: label.name
+              });
+            } catch (e) {
+              console.log(`Could not remove label ${label.name}: ${e.message}`);
+            }
+          }
+
+          // Add new labels based on results
+          if (criticalCount > 0) {
+            labels.push('🚨 critical-violations');
+            labels.push('security-risk');
+            labels.push('deployment-blocked');
+          } else if (totalViolations > 0) {
+            labels.push('⚠️ ssot-violations');
+          }
+
+          if (complianceScore >= threshold) {
+            labels.push('✅ compliance-passed');
+          } else {
+            labels.push('❌ compliance-failed');
+          }
+
+          // Add score-based labels
+          if (complianceScore >= 95) {
+            labels.push('🌟 excellent-compliance');
+          } else if (complianceScore >= 85) {
+            labels.push('👍 good-compliance');
+          }
+
+          // Add new labels
+          if (labels.length > 0) {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              labels: labels
+            });
+          }
+
+    - name: 💬 Enhanced PR comment
+      if: github.event_name == 'pull_request' && always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const criticalCount = parseInt('${{ steps.parse_results.outputs.CRITICAL_COUNT }}') || 0;
+          const totalViolations = parseInt('${{ steps.parse_results.outputs.TOTAL_VIOLATIONS }}') || 0;
+          const complianceScore = parseFloat('${{ steps.parse_results.outputs.COMPLIANCE_SCORE }}') || 0;
+          const status = '${{ steps.parse_results.outputs.STATUS }}';
+
+          let comment = `## 🚨 Enhanced SSOT Compliance Results\n\n`;
+
+          // Status header
+          comment += `**${status}** | Compliance Score: **${complianceScore.toFixed(1)}%**\n\n`;
+
+          // Metrics table
+          comment += `| Metric | Count | Status |\n`;
+          comment += `|--------|-------|--------|\n`;
+          comment += `| 🔴 Critical | ${{ steps.parse_results.outputs.CRITICAL_COUNT }} | ${criticalCount > 0 ? '❌ Blocking' : '✅ Good'} |\n`;
+          comment += `| 🟠 High | ${{ steps.parse_results.outputs.HIGH_COUNT }} | - |\n`;
+          comment += `| 🟡 Medium | ${{ steps.parse_results.outputs.MEDIUM_COUNT }} | - |\n`;
+          comment += `| ⚪ Low | ${{ steps.parse_results.outputs.LOW_COUNT }} | - |\n`;
+          comment += `| **Total** | **${totalViolations}** | - |\n\n`;
+
+          // Business impact
+          comment += `### 💼 Business Impact\n`;
+          if (criticalCount > 0) {
+            comment += `🚨 **HIGH RISK**: Critical violations detected that could compromise **$500K+ ARR**\n`;
+            comment += `- Deployment is **BLOCKED** until critical issues are resolved\n`;
+            comment += `- Security vulnerabilities pose immediate risk to system integrity\n\n`;
+          } else if (totalViolations > 0) {
+            comment += `⚠️ **MEDIUM RISK**: SSOT violations detected\n`;
+            comment += `- System reliability may be impacted by architectural inconsistencies\n`;
+            comment += `- Code quality concerns that should be addressed\n\n`;
+          } else {
+            comment += `✅ **LOW RISK**: All compliance checks passed\n`;
+            comment += `- System maintains proper architectural integrity\n`;
+            comment += `- **$500K+ ARR** protected from compliance-related issues\n\n`;
+          }
+
+          // Action items
+          if (criticalCount > 0) {
+            comment += `### 🚨 Immediate Actions Required\n`;
+            comment += `1. Fix all critical security violations before attempting to merge\n`;
+            comment += `2. Review the compliance report for specific remediation steps\n`;
+            comment += `3. Re-run compliance checks to verify fixes\n\n`;
+          } else if (totalViolations > 0) {
+            comment += `### 🔧 Recommended Actions\n`;
+            comment += `1. Review and address SSOT violations\n`;
+            comment += `2. Consider consolidating duplicate implementations\n`;
+            comment += `3. Follow SSOT patterns documented in SSOT_IMPORT_REGISTRY.md\n\n`;
+          } else {
+            comment += `### ✅ Great Job!\n`;
+            comment += `All compliance checks passed. This PR maintains proper system integrity.\n\n`;
+          }
+
+          comment += `### 📊 Resources\n`;
+          comment += `- [Enhanced Compliance Report](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${{ github.run_id }})\n`;
+          comment += `- [SSOT Import Registry](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/${{ github.sha }}/SSOT_IMPORT_REGISTRY.md)\n`;
+          comment += `- [Definition of Done Checklist](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/${{ github.sha }}/reports/DEFINITION_OF_DONE_CHECKLIST.md)\n\n`;
+
+          comment += `---\n`;
+          comment += `🤖 *Enhanced SSOT Compliance Monitor* | Threshold: ${{ env.COMPLIANCE_THRESHOLD }}% | Business Impact: ${{ env.BUSINESS_IMPACT }}`;
+
+          // Find and update existing comment or create new one
+          const comments = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.payload.pull_request.number,
+          });
+
+          const existingComment = comments.data.find(comment =>
+            comment.body.includes('Enhanced SSOT Compliance Results')
+          );
+
+          if (existingComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: existingComment.id,
+              body: comment
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: comment
+            });
+          }
+
+    - name: 📊 Upload enhanced compliance report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: enhanced-compliance-report-${{ github.sha }}
+        path: |
+          ${{ env.COMPLIANCE_REPORTS_DIR }}/*.json
+          compliance.log
+        retention-days: 30
+
+    - name: 🚫 Enforce compliance gate
+      if: always()
+      run: |
+        echo "Final compliance enforcement check"
+        echo "Exit code from compliance check: $COMPLIANCE_EXIT_CODE"
+        echo "Critical violations: ${{ steps.parse_results.outputs.CRITICAL_COUNT }}"
+        echo "Total violations: ${{ steps.parse_results.outputs.TOTAL_VIOLATIONS }}"
+        echo "Compliance score: ${{ steps.parse_results.outputs.COMPLIANCE_SCORE }}%"
+
+        if [[ "$COMPLIANCE_EXIT_CODE" == "2" ]]; then
+          echo "🚨 DEPLOYMENT BLOCKED: Critical security violations detected"
+          echo "These violations pose immediate risk to ${{ env.BUSINESS_IMPACT }}"
+          echo "Action required: Fix all critical violations before merge"
+          exit 2
+        elif [[ "$COMPLIANCE_EXIT_CODE" == "1" ]]; then
+          echo "❌ COMPLIANCE FAILED: SSOT violations detected"
+          echo "System reliability may be impacted"
+          echo "Action required: Address violations to improve code quality"
+          exit 1
+        else
+          echo "✅ COMPLIANCE PASSED: All checks successful"
+          echo "System maintains proper architectural integrity"
+          exit 0
+        fi

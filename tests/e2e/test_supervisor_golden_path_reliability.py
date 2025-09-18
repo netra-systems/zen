@@ -1,10 +1,10 @@
 """NEW E2E TESTS - SupervisorAgent Golden Path Reliability SSOT Issues  
 
 Business Value: Exposes how Issue #800 supervisor SSOT violations impact the Golden Path user flow
-BVJ: ALL segments | Golden Path Protection | $500K+ ARR user experience reliability
+BVJ: ALL segments | Golden Path Protection | 500K+ ARR user experience reliability
 
 PURPOSE: E2E tests that expose how SupervisorAgent SSOT violations impact real user workflows.
-Tests the complete user login → supervisor selection → AI response flow for reliability issues.
+Tests the complete user login -> supervisor selection -> AI response flow for reliability issues.
 
 These tests target GCP staging environment to avoid Docker dependencies.
 """
@@ -27,7 +27,7 @@ class SupervisorGoldenPathReliabilityTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_golden_path_supervisor_selection_reliability_SHOULD_FAIL(self):
-        """FAILING E2E - Tests user login → supervisor selection → AI response flow
+        """FAILING E2E - Tests user login -> supervisor selection -> AI response flow
         
         Expected to FAIL: With multiple SupervisorAgent implementations, the system
         may have unreliable supervisor selection, causing inconsistent user experiences.
@@ -45,7 +45,7 @@ class SupervisorGoldenPathReliabilityTests(SSotAsyncTestCase):
             user_id = f"test_user_{user_session}"
             
             try:
-                # Simulate the Golden Path: User login → Agent service → Supervisor selection
+                # Simulate the Golden Path: User login -> Agent service -> Supervisor selection
                 logger.info(f"Testing Golden Path for user {user_id}")
                 
                 selected_supervisor_info = await self._simulate_supervisor_selection(user_id)
@@ -315,7 +315,7 @@ class SupervisorGoldenPathReliabilityTests(SSotAsyncTestCase):
     async def _simulate_user_ai_request(self, user_id: str) -> Dict[str, Any]:
         """Simulate a complete user AI request through the Golden Path.
         
-        This mimics: User request → AgentService → SupervisorAgent → AI response
+        This mimics: User request -> AgentService -> SupervisorAgent -> AI response
         
         Args:
             user_id: User identifier
@@ -582,7 +582,7 @@ class SupervisorGoldenPathReliabilityTests(SSotAsyncTestCase):
                                f"each emit {max(event_counts)} events. Expected: Single source. "
                                f"Total events: {len(captured_events)}")
         
-        logger.info(f"✓ WebSocket event test completed. Results: {websocket_test_results}")
+        logger.info(f"CHECK WebSocket event test completed. Results: {websocket_test_results}")
 
 
 # After SSOT remediation validation tests (currently skipped)
@@ -598,7 +598,7 @@ class SupervisorGoldenPathValidationTests(SSotAsyncTestCase):
         Currently SKIPPED: Will be enabled after SSOT remediation.
         After remediation: Will pass when reliable supervisor selection exists.
         """
-        logger.info("✅ VALIDATING: Reliable Golden Path supervisor flow")
+        logger.info("CHECK VALIDATING: Reliable Golden Path supervisor flow")
         
         # Test multiple user sessions should all get consistent supervisor
         for user_session in range(3):
@@ -616,7 +616,7 @@ class SupervisorGoldenPathValidationTests(SSotAsyncTestCase):
             assert supervisor is not None, f"SSOT supervisor should create for user {user_id}"
             assert type(supervisor).__name__ == "SupervisorAgent", "Should be SupervisorAgent type"
             
-        logger.info("✓ All users get consistent SSOT supervisor")
+        logger.info("CHECK All users get consistent SSOT supervisor")
 
     @pytest.mark.skip("Will be enabled after SSOT remediation")
     @pytest.mark.asyncio 
@@ -626,7 +626,7 @@ class SupervisorGoldenPathValidationTests(SSotAsyncTestCase):
         Currently SKIPPED: Will be enabled after SSOT remediation.
         After remediation: Will pass when proper user isolation exists.
         """
-        logger.info("✅ VALIDATING: Perfect concurrent user isolation")
+        logger.info("CHECK VALIDATING: Perfect concurrent user isolation")
         
         # Import the SSOT SupervisorAgent
         from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
@@ -651,7 +651,7 @@ class SupervisorGoldenPathValidationTests(SSotAsyncTestCase):
         
         assert len(set(instance_ids)) == len(instance_ids), "All supervisors should be separate instances"
         
-        logger.info("✓ Perfect user isolation with separate supervisor instances")
+        logger.info("CHECK Perfect user isolation with separate supervisor instances")
 
 
 if __name__ == "__main__":
@@ -665,26 +665,26 @@ if __name__ == "__main__":
         
         try:
             await test_instance.test_golden_path_supervisor_selection_reliability_SHOULD_FAIL()
-            print("❌ Golden Path reliability test unexpectedly passed")
+            print("X Golden Path reliability test unexpectedly passed")
         except AssertionError as e:
-            print(f"✅ Golden Path reliability issue exposed: {e}")
+            print(f"CHECK Golden Path reliability issue exposed: {e}")
         except Exception as e:
-            print(f"⚠️  Golden Path reliability test error: {e}")
+            print(f"WARNING️  Golden Path reliability test error: {e}")
         
         try:
             await test_instance.test_concurrent_users_supervisor_isolation_SHOULD_FAIL()
-            print("❌ Concurrent user isolation test unexpectedly passed")
+            print("X Concurrent user isolation test unexpectedly passed")
         except AssertionError as e:
-            print(f"✅ Concurrent user isolation issue exposed: {e}")
+            print(f"CHECK Concurrent user isolation issue exposed: {e}")
         except Exception as e:
-            print(f"⚠️  Concurrent user isolation test error: {e}")
+            print(f"WARNING️  Concurrent user isolation test error: {e}")
         
         try:
             await test_instance.test_golden_path_websocket_event_consistency_SHOULD_FAIL()
-            print("❌ WebSocket event consistency test unexpectedly passed")
+            print("X WebSocket event consistency test unexpectedly passed")
         except AssertionError as e:
-            print(f"✅ WebSocket event consistency issue exposed: {e}")
+            print(f"CHECK WebSocket event consistency issue exposed: {e}")
         except Exception as e:
-            print(f"⚠️  WebSocket event consistency test error: {e}")
+            print(f"WARNING️  WebSocket event consistency test error: {e}")
     
     asyncio.run(run_golden_path_analysis())

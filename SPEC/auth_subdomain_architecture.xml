@@ -111,7 +111,7 @@
                     <pr_proxy>true</pr_proxy>
                 </features>
                 <cloud_run_config>
-                    <service_name>auth-staging</service_name>
+                    <service_name>auth</service_name>
                     <region>us-central1</region>
                     <memory>512Mi</memory>
                     <cpu>1</cpu>

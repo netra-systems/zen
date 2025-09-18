@@ -99,10 +99,10 @@ class MessageRoutingConsistencyTests(SSotAsyncTestCase):
             for violation in consistency_violations:
                 self.logger.error(f'  Routing consistency violation: {violation}')
         if len(consistency_violations) == 0:
-            self.logger.info('✅ SSOT COMPLIANCE: All MessageRouter implementations exhibit consistent routing behavior')
+            self.logger.info('CHECK SSOT COMPLIANCE: All MessageRouter implementations exhibit consistent routing behavior')
         else:
             violation_msg = f'SSOT VIOLATION: {len(consistency_violations)} routing consistency violations detected'
-            self.logger.error(f'❌ {violation_msg}')
+            self.logger.error(f'X {violation_msg}')
             self.fail(f'SSOT VIOLATION: MessageRouter implementations must have consistent routing behavior. Found {len(consistency_violations)} violations proving fragmented routing logic.')
 
     async def _test_message_routing(self, router_instance: Any, message: Any, message_id: str) -> Dict[str, Any]:
@@ -193,10 +193,10 @@ class MessageRoutingConsistencyTests(SSotAsyncTestCase):
             for inconsistency in handler_inconsistencies:
                 self.logger.error(f'  Handler inconsistency: {inconsistency}')
         if len(handler_inconsistencies) == 0:
-            self.logger.info('✅ SSOT COMPLIANCE: All MessageRouter implementations have consistent handler availability')
+            self.logger.info('CHECK SSOT COMPLIANCE: All MessageRouter implementations have consistent handler availability')
         else:
             violation_msg = f'SSOT VIOLATION: {len(handler_inconsistencies)} handler availability inconsistencies detected'
-            self.logger.error(f'❌ {violation_msg}')
+            self.logger.error(f'X {violation_msg}')
             self.fail(f'SSOT VIOLATION: MessageRouter implementations must have consistent handler availability. Found {len(handler_inconsistencies)} inconsistencies proving fragmented handler management.')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

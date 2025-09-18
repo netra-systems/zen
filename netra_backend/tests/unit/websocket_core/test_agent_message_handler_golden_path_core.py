@@ -4,7 +4,7 @@ Unit Tests for Agent Message Handler Golden Path Core Logic - Issue #861 Phase 1
 Business Value Justification:
 - Segment: Platform/Internal
 - Business Goal: Development Velocity & Quality Assurance
-- Value Impact: Comprehensive test coverage for $500K+ ARR agent golden path functionality
+- Value Impact: Comprehensive test coverage for 500K+ ARR agent golden path functionality
 - Strategic Impact: Prevents regressions in core agent-WebSocket message handling
 
 Test Coverage Focus:

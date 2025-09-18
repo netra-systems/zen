@@ -1,4 +1,10 @@
-"""ExecutionTracker - Orchestrates execution tracking, monitoring, and recovery.
+"""ExecutionTracker - SSOT Consolidated Implementation.
+
+**SSOT COMPLIANCE WARNING**: This module has been consolidated into the canonical
+AgentExecutionTracker implementation. This file now serves as a compatibility layer.
+
+**IMPORT RECOMMENDATION**: Use the SSOT implementation instead:
+    from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
 
 This module provides the main orchestration layer that coordinates between
 registry, heartbeat monitoring, timeout management, and recovery mechanisms
@@ -11,12 +17,26 @@ provides real-time execution visibility, and enables automatic recovery.
 import asyncio
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
+import warnings
 
 from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
+# SSOT imports - Use the canonical AgentExecutionTracker
+try:
+    from netra_backend.app.core.agent_execution_tracker import (
+        AgentExecutionTracker as SSoTAgentExecutionTracker,
+        ExecutionState as SSoTExecutionState,
+        ExecutionRecord as SSoTExecutionRecord,
+        get_execution_tracker as ssot_get_execution_tracker
+    )
+    SSOT_AVAILABLE = True
+except ImportError:
+    SSOT_AVAILABLE = False
+
+# Legacy imports for backward compatibility
 from netra_backend.app.agents.execution_tracking.heartbeat import HeartbeatMonitor, HeartbeatStatus
 from netra_backend.app.agents.execution_tracking.registry import ExecutionRecord, ExecutionRegistry, ExecutionState
 from netra_backend.app.agents.execution_tracking.timeout import TimeoutInfo, TimeoutManager
@@ -69,6 +89,13 @@ class AgentExecutionResult(BaseModel):
 class ExecutionTracker:
     """Orchestrates execution tracking, monitoring, and recovery.
     
+    **SSOT CONSOLIDATION**: This class has been consolidated to delegate to the 
+    canonical AgentExecutionTracker implementation in core/agent_execution_tracker.py.
+    
+    **DEPRECATION WARNING**: This implementation is now a compatibility layer.
+    New code should use:
+        from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
+    
     This class provides the unified interface for all execution tracking
     functionality, coordinating between registry, heartbeat monitoring,
     timeout management, and WebSocket notifications.
@@ -90,36 +117,88 @@ class ExecutionTracker:
     ):
         """Initialize ExecutionTracker with all components.
         
+        **SSOT DELEGATION**: If available, delegates to canonical AgentExecutionTracker
+        for consolidated execution tracking functionality.
+        
         Args:
             websocket_bridge: AgentWebSocketBridge for real-time notifications
             heartbeat_interval: Heartbeat check interval in seconds
             timeout_check_interval: Timeout check interval in seconds
         """
+        # Issue deprecation warning
+        warnings.warn(
+            "ExecutionTracker from execution_tracking.tracker is deprecated. "
+            "Use 'from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker' instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         self.websocket_bridge = websocket_bridge
         
-        # Initialize core components
-        self.registry = ExecutionRegistry()
-        self.heartbeat_monitor = HeartbeatMonitor(heartbeat_interval_seconds=heartbeat_interval)
-        self.timeout_manager = TimeoutManager(check_interval_seconds=timeout_check_interval)
-        
-        # Setup callbacks
-        self._setup_callbacks()
+        # Try to delegate to SSOT implementation if available
+        if SSOT_AVAILABLE:
+            self._ssot_tracker = SSoTAgentExecutionTracker(
+                heartbeat_timeout=int(heartbeat_interval),
+                execution_timeout=int(timeout_check_interval * 6),  # Convert to reasonable timeout
+                cleanup_interval=60
+            )
+            logger.info(" PASS:  ExecutionTracker delegating to SSOT AgentExecutionTracker")
+        else:
+            self._ssot_tracker = None
+            # Initialize legacy components
+            self.registry = ExecutionRegistry()
+            self.heartbeat_monitor = HeartbeatMonitor(heartbeat_interval_seconds=heartbeat_interval)
+            self.timeout_manager = TimeoutManager(check_interval_seconds=timeout_check_interval)
+            
+            # Setup callbacks
+            self._setup_callbacks()
+            logger.info(" PASS:  ExecutionTracker initialized with legacy components")
         
         # Metrics
         self._total_executions_started = 0
         self._successful_executions = 0
         self._failed_executions = 0
         self._recovered_executions = 0
-        
-        logger.info(" PASS:  ExecutionTracker initialized with comprehensive monitoring")
     
     def _setup_callbacks(self) -> None:
         """Setup callbacks between components."""
-        # HeartbeatMonitor callbacks
-        self.heartbeat_monitor.add_failure_callback(self._handle_heartbeat_failure)
-        
-        # TimeoutManager callbacks  
-        self.timeout_manager.add_timeout_callback(self._handle_timeout)
+        # Only setup callbacks if using legacy implementation
+        if not self._ssot_tracker:
+            # HeartbeatMonitor callbacks
+            self.heartbeat_monitor.add_failure_callback(self._handle_heartbeat_failure)
+            
+            # TimeoutManager callbacks  
+            self.timeout_manager.add_timeout_callback(self._handle_timeout)
+    
+    # SSOT delegation methods for missing interfaces
+    def create_execution_id(self, agent_name: str, context: Optional[Dict[str, Any]] = None) -> str:
+        """Create a unique execution ID - SSOT delegation method."""
+        if self._ssot_tracker:
+            return self._ssot_tracker.create_execution_id(agent_name, context)
+        else:
+            # Fallback for legacy - generate simple ID
+            import uuid
+            return f"exec_{agent_name}_{uuid.uuid4().hex[:8]}"
+    
+    def complete_execution(self, execution_id: str, result: Optional[Any] = None, 
+                          execution_time_ms: Optional[int] = None) -> bool:
+        """Complete execution - SSOT delegation method."""
+        if self._ssot_tracker:
+            return self._ssot_tracker.complete_execution(execution_id, result, execution_time_ms)
+        else:
+            # Legacy implementation would need to be added here
+            logger.warning(f"Legacy complete_execution not implemented for {execution_id}")
+            return False
+    
+    def fail_execution(self, execution_id: str, error: str, 
+                      error_context: Optional[Dict[str, Any]] = None) -> bool:
+        """Fail execution - SSOT delegation method."""
+        if self._ssot_tracker:
+            return self._ssot_tracker.fail_execution(execution_id, error, error_context)
+        else:
+            # Legacy implementation would need to be added here
+            logger.warning(f"Legacy fail_execution not implemented for {execution_id}")
+            return False
     
     async def start_execution(
         self, 
@@ -129,6 +208,8 @@ class ExecutionTracker:
     ) -> str:
         """Start tracking a new agent execution.
         
+        **SSOT DELEGATION**: Delegates to canonical AgentExecutionTracker if available.
+        
         Args:
             run_id: Original run ID from agent execution
             agent_name: Name of the executing agent
@@ -137,6 +218,24 @@ class ExecutionTracker:
         Returns:
             str: Unique execution ID for tracking
         """
+        if self._ssot_tracker:
+            # Delegate to SSOT implementation
+            execution_id = self._ssot_tracker.create_execution(
+                agent_name=agent_name,
+                thread_id=run_id,
+                user_id=context.user_id,
+                timeout_seconds=None,  # Use default
+                metadata=context.metadata
+            )
+            
+            # Start execution
+            self._ssot_tracker.start_execution(execution_id)
+            
+            self._total_executions_started += 1
+            logger.info(f"[U+1F680] Started execution tracking via SSOT for {agent_name} (execution_id: {execution_id})")
+            return execution_id
+        
+        # Legacy implementation
         # Register execution in registry
         record = await self.registry.register_execution(
             run_id=run_id,

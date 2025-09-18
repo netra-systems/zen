@@ -1,0 +1,262 @@
+#!/usr/bin/env python3
+"""
+Script to fix corrupted test files with REMOVED_SYNTAX_ERROR pattern.
+This script restores files by removing the corruption prefixes and fixing syntax.
+"""
+
+import os
+import re
+import subprocess
+from pathlib import Path
+from typing import List, Tuple, Set
+
+def find_corrupted_files(root_dir: str) -> List[str]:
+    """Find all files containing REMOVED_SYNTAX_ERROR pattern."""
+    try:
+        result = subprocess.run(
+            ['grep', '-r', '-l', 'REMOVED_SYNTAX_ERROR', root_dir],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+        files = [f.strip() for f in result.stdout.split('\n') if f.strip()]
+        # Filter out markdown files and backups - only fix Python test files
+        python_files = [f for f in files if f.endswith('.py') and not f.endswith('.backup')]
+        return python_files
+    except Exception as e:
+        print(f"Error finding files: {e}")
+        return []
+
+def fix_file_content(content: str) -> Tuple[str, bool]:
+    """Fix the corrupted content by removing REMOVED_SYNTAX_ERROR prefixes and restoring syntax."""
+    lines = content.split('\n')
+    fixed_lines = []
+    changes_made = False
+    
+    # Track indentation context
+    in_class = False
+    in_function = False
+    current_indent = 0
+    
+    for line in lines:
+        original_line = line
+        
+        # Remove the corruption prefix
+        if '# REMOVED_SYNTAX_ERROR:' in line:
+            line = line.replace('# REMOVED_SYNTAX_ERROR:', '').strip()
+            changes_made = True
+            
+            # If the line was completely commented out, restore it
+            if line:
+                # Handle special cases for class/function definitions
+                if line.strip().startswith('class ') and line.strip().endswith(':'):
+                    fixed_lines.append(line)
+                    in_class = True
+                    current_indent = 0
+                    continue
+                elif line.strip().startswith('def ') and line.strip().endswith(':'):
+                    # Add proper indentation for methods inside classes
+                    if in_class:
+                        line = '    ' + line
+                    fixed_lines.append(line)
+                    in_function = True
+                    continue
+                elif line.strip().startswith('async def ') and line.strip().endswith(':'):
+                    # Add proper indentation for async methods inside classes  
+                    if in_class:
+                        line = '    ' + line
+                    fixed_lines.append(line)
+                    in_function = True
+                    continue
+                else:
+                    # Regular line - add appropriate indentation
+                    if in_function and in_class:
+                        # Inside method body
+                        if not line.startswith('    '):
+                            line = '        ' + line
+                    elif in_class and not in_function:
+                        # Class level but not in function
+                        if not line.startswith('    '):
+                            line = '    ' + line
+                    
+                    fixed_lines.append(line)
+            continue
+        
+        # Handle lines that were corrupted but are now fixed
+        # Remove comment prefixes for import statements
+        if line.strip().startswith('# ') and ('import ' in line or 'from ' in line):
+            line = line.replace('# ', '', 1)
+            changes_made = True
+        
+        # Fix syntax errors in the content
+        line = fix_syntax_errors(line)
+        if line != original_line:
+            changes_made = True
+            
+        fixed_lines.append(line)
+        
+        # Track context
+        if line.strip().startswith('class '):
+            in_class = True
+            in_function = False
+        elif line.strip() and not line.strip().startswith('#'):
+            # Reset function context if we're at root level
+            if not line.startswith(' ') and not line.startswith('\t'):
+                in_class = False
+                in_function = False
+    
+    return '\n'.join(fixed_lines), changes_made
+
+def fix_syntax_errors(line: str) -> str:
+    """Fix common syntax errors in lines."""
+    # Fix broken dictionary syntax
+    line = re.sub(r'{\s*\)', '{', line)
+    line = re.sub(r'set\(\s*\)', 'set()', line)
+    
+    # Fix broken string formatting
+    line = re.sub(r'"formatted_string"', 'f"Error executing agent: {e}"', line)
+    
+    # Fix import issues
+    if 'Magic' in line and 'mock_ws_manager' in line:
+        line = line.replace('Magic', 'MagicMock()')
+    
+    # Fix async/await issues
+    if line.strip().startswith('await asyncio.sleep') and 'def get_messages' in line:
+        # This was incorrectly placed, remove it
+        return '    return self.messages_sent.copy()'
+    
+    # Fix pytest.mark issues
+    if 'Removed problematic line: @pytest.mark.asyncio' in line:
+        return '@pytest.mark.asyncio'
+    
+    if 'Removed problematic line: async def' in line:
+        # Extract the function definition
+        match = re.search(r'async def ([^:]+):', line)
+        if match:
+            return f'    async def {match.group(1)}:'
+    
+    return line
+
+def fix_import_statements(content: str) -> str:
+    """Add necessary import statements at the top of the file."""
+    lines = content.split('\n')
+    
+    # Check if we need to add imports
+    has_imports = any('import ' in line or 'from ' in line for line in lines[:50])
+    
+    if not has_imports:
+        # Add basic imports that are commonly needed
+        import_block = """import asyncio
+import pytest
+from typing import List, Set, Dict, Any
+from unittest.mock import MagicMock, AsyncMock
+from test_framework.ssot.base_test_case import SSotBaseTestCase
+
+"""
+        return import_block + content
+    
+    return content
+
+def backup_file(file_path: str) -> bool:
+    """Create a backup of the original file."""
+    try:
+        backup_path = f"{file_path}.backup_fix"
+        if not os.path.exists(backup_path):
+            with open(file_path, 'r', encoding='utf-8') as f:
+                original_content = f.read()
+            with open(backup_path, 'w', encoding='utf-8') as f:
+                f.write(original_content)
+            return True
+    except Exception as e:
+        print(f"Warning: Could not create backup for {file_path}: {e}")
+        return False
+    return True
+
+def fix_single_file(file_path: str) -> bool:
+    """Fix a single corrupted file."""
+    try:
+        print(f"Fixing {file_path}...")
+        
+        # Create backup
+        backup_file(file_path)
+        
+        # Read the file
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read()
+        
+        # Fix the content
+        fixed_content, changes_made = fix_file_content(content)
+        
+        if changes_made:
+            # Add necessary imports
+            fixed_content = fix_import_statements(fixed_content)
+            
+            # Write back the fixed content
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(fixed_content)
+            
+            print(f"  ✓ Fixed {file_path}")
+            return True
+        else:
+            print(f"  - No changes needed for {file_path}")
+            return False
+            
+    except Exception as e:
+        print(f"  ✗ Error fixing {file_path}: {e}")
+        return False
+
+def validate_python_syntax(file_path: str) -> bool:
+    """Validate that the fixed file has valid Python syntax."""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Try to compile the content
+        compile(content, file_path, 'exec')
+        return True
+    except SyntaxError as e:
+        print(f"  ⚠ Syntax error in {file_path}: {e}")
+        return False
+    except Exception as e:
+        print(f"  ⚠ Error validating {file_path}: {e}")
+        return False
+
+def main():
+    """Main function to fix all corrupted files."""
+    root_dir = "/Users/anthony/Desktop/netra-apex"
+    
+    print("🔍 Finding corrupted test files...")
+    corrupted_files = find_corrupted_files(root_dir)
+    
+    if not corrupted_files:
+        print("No corrupted files found!")
+        return
+    
+    print(f"Found {len(corrupted_files)} corrupted files")
+    
+    # Process files
+    fixed_count = 0
+    valid_syntax_count = 0
+    
+    for file_path in corrupted_files:
+        if fix_single_file(file_path):
+            fixed_count += 1
+            
+            # Validate syntax
+            if validate_python_syntax(file_path):
+                valid_syntax_count += 1
+    
+    print(f"\n📊 Results:")
+    print(f"  Files processed: {len(corrupted_files)}")
+    print(f"  Files fixed: {fixed_count}")
+    print(f"  Files with valid syntax: {valid_syntax_count}")
+    print(f"  Files with syntax issues: {fixed_count - valid_syntax_count}")
+    
+    if fixed_count > 0:
+        print(f"\n✅ Successfully fixed {fixed_count} corrupted test files!")
+        print("   Backups saved with .backup_fix extension")
+    else:
+        print("\n⚠️  No files were fixed")
+
+if __name__ == "__main__":
+    main()

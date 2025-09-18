@@ -3,15 +3,15 @@ E2E Tests for Cross-Service Integration in Agent Golden Path
 Issue #1081 - Agent Golden Path Messages E2E Test Creation
 
 MISSION CRITICAL: Tests complete cross-service integration during agent message processing
-- Backend → Auth Service integration during message processing
-- Backend → Database service integration for chat history
-- WebSocket → Agent → LLM service integration for responses
+- Backend -> Auth Service integration during message processing
+- Backend -> Database service integration for chat history
+- WebSocket -> Agent -> LLM service integration for responses
 - Real-time event delivery across service boundaries
 
 Business Value Justification (BVJ):
 - Segment: All Users (Free/Early/Mid/Enterprise)
 - Business Goal: System Reliability & Service Integration Validation
-- Value Impact: Ensures $500K+ ARR chat functionality works across all service boundaries
+- Value Impact: Ensures 500K+ ARR chat functionality works across all service boundaries
 - Strategic Impact: Validates production-ready multi-service architecture
 
 Test Strategy:
@@ -82,10 +82,10 @@ class CrossServiceIntegrationE2ETests(SSotAsyncTestCase):
         4. Auth failures are handled gracefully
         
         Flow:
-        1. Authenticate with auth service → get JWT
-        2. Connect WebSocket with JWT → backend validates with auth service
-        3. Send agent message → processing validates auth continuously
-        4. Receive agent response → auth maintained throughout
+        1. Authenticate with auth service -> get JWT
+        2. Connect WebSocket with JWT -> backend validates with auth service
+        3. Send agent message -> processing validates auth continuously
+        4. Receive agent response -> auth maintained throughout
         
         Coverage: Auth service integration, token validation, service-to-service auth
         """
@@ -99,14 +99,14 @@ class CrossServiceIntegrationE2ETests(SSotAsyncTestCase):
                 validate_response = await client.get(f"{self.service_endpoints['auth']}/auth/validate", headers={'Authorization': f'Bearer {auth_user.jwt_token}'}, timeout=10.0)
                 assert validate_response.status_code == 200, f'Auth service token validation failed: {validate_response.status_code}'
                 auth_events.append({'event': 'token_validation', 'timestamp': time.time() - auth_integration_start, 'success': True, 'status_code': validate_response.status_code})
-                self.logger.info('✅ Direct auth service validation successful')
+                self.logger.info('CHECK Direct auth service validation successful')
             ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
             headers = self.auth_helper.get_websocket_headers(auth_user.jwt_token)
             websocket = await asyncio.wait_for(websockets.connect(self.service_endpoints['websocket'], additional_headers=headers, ssl=ssl_context, ping_interval=30, ping_timeout=10), timeout=20.0)
             auth_events.append({'event': 'websocket_auth_connection', 'timestamp': time.time() - auth_integration_start, 'success': True})
-            self.logger.info('✅ WebSocket connection with auth integration successful')
+            self.logger.info('CHECK WebSocket connection with auth integration successful')
             auth_test_message = {'type': 'chat_message', 'content': 'Test message requiring auth validation during agent processing', 'thread_id': self.thread_id, 'run_id': self.run_id, 'user_id': auth_user.user_id, 'timestamp': datetime.now(timezone.utc).isoformat(), 'context': {'test_type': 'auth_integration', 'expects_agent_processing': True}}
             await websocket.send(json.dumps(auth_test_message))
             auth_events.append({'event': 'auth_message_sent', 'timestamp': time.time() - auth_integration_start, 'success': True})
@@ -145,7 +145,7 @@ class CrossServiceIntegrationE2ETests(SSotAsyncTestCase):
             self.logger.info(f'   Agent events with auth: {len(agent_events)}')
             self.logger.info(f'   Auth maintained: {auth_maintained}')
         except Exception as e:
-            self.logger.error(f'❌ Auth service integration failed: {e}')
+            self.logger.error(f'X Auth service integration failed: {e}')
             raise AssertionError(f'Auth service integration during message processing failed: {e}. This breaks authentication across service boundaries.')
 
     async def test_database_persistence_during_agent_processing(self):
@@ -159,10 +159,10 @@ class CrossServiceIntegrationE2ETests(SSotAsyncTestCase):
         4. Database operations don't impact agent response times
         
         Flow:
-        1. Send message → should persist to database
-        2. Agent processes → intermediate states may be persisted
-        3. Agent completes → response persisted to database
-        4. Verify chat history via API → database read validation
+        1. Send message -> should persist to database
+        2. Agent processes -> intermediate states may be persisted
+        3. Agent completes -> response persisted to database
+        4. Verify chat history via API -> database read validation
         
         Coverage: Database integration, persistence, chat history, data consistency
         """
@@ -208,7 +208,7 @@ class CrossServiceIntegrationE2ETests(SSotAsyncTestCase):
                     db_operations.append({'operation': 'persistence_validation', 'timestamp': time.time() - db_integration_start, 'messages_found': len(messages), 'test_message_persisted': test_message_found, 'agent_response_persisted': agent_response_found})
                     assert len(messages) > 0, 'Should find persisted messages in chat history'
                     assert test_message_found, f"Test message should be persisted in database. Messages found: {[msg.get('content', '')[:50] for msg in messages]}"
-                    self.logger.info(f'✅ Database persistence validated: {len(messages)} messages found')
+                    self.logger.info(f'CHECK Database persistence validated: {len(messages)} messages found')
                 else:
                     self.logger.warning(f'Chat history endpoint returned {history_response.status_code}')
             total_db_time = time.time() - db_integration_start
@@ -219,7 +219,7 @@ class CrossServiceIntegrationE2ETests(SSotAsyncTestCase):
             for op in db_operations:
                 self.logger.info(f"   - {op['operation']}: {op['timestamp']:.2f}s")
         except Exception as e:
-            self.logger.error(f'❌ Database persistence integration failed: {e}')
+            self.logger.error(f'X Database persistence integration failed: {e}')
             raise AssertionError(f'Database persistence during agent processing failed: {e}. This breaks data consistency across service boundaries.')
 
     async def test_websocket_event_delivery_across_services(self):
@@ -233,9 +233,9 @@ class CrossServiceIntegrationE2ETests(SSotAsyncTestCase):
         4. No events are lost during service communication
         
         Flow:
-        1. Send message → backend processes → events flow to WebSocket service
-        2. Agent starts → backend notifies WebSocket → client receives event
-        3. Agent completes → backend notifies WebSocket → client receives event
+        1. Send message -> backend processes -> events flow to WebSocket service
+        2. Agent starts -> backend notifies WebSocket -> client receives event
+        3. Agent completes -> backend notifies WebSocket -> client receives event
         4. Validate event sequence and timing
         
         Coverage: WebSocket service integration, real-time events, service communication
@@ -292,7 +292,7 @@ class CrossServiceIntegrationE2ETests(SSotAsyncTestCase):
             self.logger.info(f'   Critical events: {critical_events_received}')
             self.logger.info(f'   Event flow steps: {len(event_flow)}')
         except Exception as e:
-            self.logger.error(f'❌ WebSocket cross-service event delivery failed: {e}')
+            self.logger.error(f'X WebSocket cross-service event delivery failed: {e}')
             raise AssertionError(f'WebSocket event delivery across services failed: {e}. This breaks real-time user experience across service boundaries.')
 
     async def test_service_resilience_during_agent_processing(self):
@@ -306,7 +306,7 @@ class CrossServiceIntegrationE2ETests(SSotAsyncTestCase):
         4. Error handling works across services
         
         Flow:
-        1. Send complex message → stresses cross-service communication
+        1. Send complex message -> stresses cross-service communication
         2. Monitor for service stress indicators
         3. Validate graceful handling of service delays
         4. Ensure system remains responsive
@@ -368,7 +368,7 @@ class CrossServiceIntegrationE2ETests(SSotAsyncTestCase):
             self.logger.info(f'   Timeout rate: {timeout_rate:.1%}')
             self.logger.info(f'   Avg response time: {avg_response_time:.2f}s')
         except Exception as e:
-            self.logger.error(f'❌ Service resilience testing failed: {e}')
+            self.logger.error(f'X Service resilience testing failed: {e}')
             raise AssertionError(f'Service resilience during agent processing failed: {e}. This indicates system instability under stress.')
 
     async def test_end_to_end_service_integration_flow(self):
@@ -376,11 +376,11 @@ class CrossServiceIntegrationE2ETests(SSotAsyncTestCase):
         Test complete end-to-end service integration flow.
         
         Validates the complete cross-service integration in one comprehensive test:
-        1. Auth service → JWT generation and validation
-        2. WebSocket service → Real-time connection and events
-        3. Backend service → Message processing and agent orchestration
-        4. Database service → Persistence and history
-        5. LLM service → Agent response generation
+        1. Auth service -> JWT generation and validation
+        2. WebSocket service -> Real-time connection and events
+        3. Backend service -> Message processing and agent orchestration
+        4. Database service -> Persistence and history
+        5. LLM service -> Agent response generation
         
         This is the ultimate cross-service integration test.
         
@@ -460,11 +460,11 @@ class CrossServiceIntegrationE2ETests(SSotAsyncTestCase):
             self.logger.info(f'   Events received: {len(all_events)}')
             self.logger.info(f'   Response length: {response_length} chars')
             for step in integration_steps:
-                status = '✅' if step['success'] else '❌'
+                status = 'CHECK' if step['success'] else 'X'
                 optional = ' (optional)' if step.get('optional') else ''
                 self.logger.info(f"   {status} {step['step']}: {step['duration']:.2f}s{optional}")
         except Exception as e:
-            self.logger.error(f'❌ End-to-end service integration failed: {e}')
+            self.logger.error(f'X End-to-end service integration failed: {e}')
             raise AssertionError(f'Complete end-to-end service integration failed: {e}. This indicates fundamental service mesh communication issues.')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

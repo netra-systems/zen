@@ -2,7 +2,7 @@
 Test Team Collaboration Features
 
 Business Value Justification (BVJ):
-- Segment: Mid and Enterprise customers ($5K-$50K+ ARR per account)
+- Segment: Mid and Enterprise customers ($5K-50K+ ARR per account)
 - Business Goal: Enable team-wide AI optimization and collaboration
 - Value Impact: Teams achieve 3-5x more value through collaborative optimization
 - Strategic Impact: Team features drive enterprise adoption and higher ACV

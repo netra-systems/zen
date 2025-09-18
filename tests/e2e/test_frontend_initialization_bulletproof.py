@@ -1,6 +1,6 @@
 """MISSION CRITICAL E2E TEST: Frontend Initialization and First-Time Page Load
 
-Business Value: $500K+ ARR - Core user experience and chat functionality
+Business Value: 500K+ ARR - Core user experience and chat functionality
 THIS TEST MUST PASS OR THE PRODUCT IS BROKEN.
 
 Tests the complete frontend initialization flow with:
@@ -20,7 +20,7 @@ import sys
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Any
 import threading
 import pytest
@@ -109,7 +109,7 @@ class FrontendInitializationSimulator:
         """Initialize authentication and get token."""
         try:
             if get_env().get('NODE_ENV') == 'development':
-                user = AuthUser(id=f'dev_user_{uuid.uuid4().hex[:8]}', email='dev@netra.ai', name='Dev User')
+                user = AuthUser(id=f'dev_user_{uuid.uuid4().hex[:8]}', email='dev@netrasystems.ai', name='Dev User')
             else:
                 response = self.client.post('/auth/callback', json={'code': 'test_auth_code', 'state': 'test_state'})
                 if response.status_code != 200:
@@ -174,7 +174,7 @@ class FrontendInitializationSimulator:
             if thread_response.status_code != 200:
                 return {'success': False, 'error': f'Thread creation failed: {thread_response.status_code}'}
             thread_id = thread_response.json()['id']
-            test_message = {'type': 'user_message', 'payload': {'content': 'Test first message for initialization', 'thread_id': thread_id, 'message_id': f'msg_{uuid.uuid4().hex[:8]}', 'timestamp': datetime.utcnow().isoformat()}}
+            test_message = {'type': 'user_message', 'payload': {'content': 'Test first message for initialization', 'thread_id': thread_id, 'message_id': f'msg_{uuid.uuid4().hex[:8]}', 'timestamp': datetime.now(UTC).isoformat()}}
             websocket.send_json(test_message)
             start_time = time.time()
             timeout = FrontendInitTestConfig.FIRST_MESSAGE_TIMEOUT / 1000

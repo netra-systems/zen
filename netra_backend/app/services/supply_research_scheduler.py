@@ -47,7 +47,8 @@ class SupplyResearchScheduler:
     def _setup_redis_connection(self):
         """Setup Redis connection with error handling"""
         try:
-            self.redis_manager = RedisManager()
+            from netra_backend.app.redis_manager import redis_manager
+            self.redis_manager = redis_manager
         except Exception as e:
             logger.warning(f"Redis not available for scheduler: {e}")
     

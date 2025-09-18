@@ -6,7 +6,7 @@ that are essential for reliable WebSocket connections in Cloud Run environments.
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)  
-- Business Goal: Ensure reliable WebSocket connections (foundation for $500K+ ARR)
+- Business Goal: Ensure reliable WebSocket connections (foundation for 500K+ ARR)
 - Value Impact: Prevents connection failures that break chat experience
 - Strategic Impact: Core platform stability for user engagement
 

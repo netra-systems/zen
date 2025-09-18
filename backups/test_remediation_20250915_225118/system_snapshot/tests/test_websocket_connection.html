@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Connection Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #0f0;
+        }
+        button {
+            background: #333;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+        button:hover {
+            background: #444;
+        }
+        #status {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #0f0;
+            background: #111;
+        }
+        #log {
+            background: #000;
+            padding: 10px;
+            border: 1px solid #0f0;
+            height: 400px;
+            overflow-y: auto;
+        }
+        .error { color: #f00; }
+        .success { color: #0f0; }
+        .info { color: #0ff; }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Connection Test</h1>
+    
+    <div id="status">
+        Status: <span id="statusText">Not Connected</span>
+    </div>
+    
+    <div>
+        <button onclick="authenticate()">1. Authenticate (Dev Login)</button>
+        <button onclick="connectWebSocket()">2. Connect WebSocket</button>
+        <button onclick="sendMessage()">3. Send Test Message</button>
+        <button onclick="disconnect()">4. Disconnect</button>
+    </div>
+    
+    <h3>Log:</h3>
+    <div id="log"></div>
+    
+    <script>
+        let ws = null;
+        let token = null;
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function updateStatus(status) {
+            document.getElementById('statusText').textContent = status;
+        }
+        
+        async function authenticate() {
+            try {
+                log('Authenticating with dev login...', 'info');
+                
+                const response = await fetch('http://localhost:8081/auth/dev/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: 'dev_user',
+                        name: 'Development User',
+                        email: 'dev@example.com'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Auth failed: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                token = data.access_token;
+                
+                log('Authentication successful!', 'success');
+                log(`Token: ${token.substring(0, 50)}...`, 'info');
+                log(`User: ${data.user.email}`, 'info');
+                
+                // Store token in localStorage for frontend to use
+                localStorage.setItem('jwt_token', token);
+                localStorage.setItem('refresh_token', data.refresh_token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                
+                updateStatus('Authenticated');
+            } catch (error) {
+                log(`Authentication failed: ${error.message}`, 'error');
+                updateStatus('Auth Failed');
+            }
+        }
+        
+        function connectWebSocket() {
+            if (!token) {
+                log('Please authenticate first!', 'error');
+                return;
+            }
+            
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                log('WebSocket already connected', 'info');
+                return;
+            }
+            
+            try {
+                log('Connecting to WebSocket...', 'info');
+                updateStatus('Connecting...');
+                
+                // Create WebSocket with auth header via subprotocol
+                const encodedToken = btoa(token).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+                ws = new WebSocket('ws://localhost:8000/ws', [`jwt.${encodedToken}`]);
+                
+                ws.onopen = () => {
+                    log('WebSocket connected!', 'success');
+                    updateStatus('Connected');
+                };
+                
+                ws.onmessage = (event) => {
+                    log(`Received: ${event.data}`, 'info');
+                };
+                
+                ws.onerror = (error) => {
+                    log(`WebSocket error: ${error}`, 'error');
+                    updateStatus('Error');
+                };
+                
+                ws.onclose = (event) => {
+                    log(`WebSocket closed: Code ${event.code}, Reason: ${event.reason}`, 'info');
+                    updateStatus('Disconnected');
+                    ws = null;
+                };
+                
+            } catch (error) {
+                log(`Connection failed: ${error.message}`, 'error');
+                updateStatus('Connection Failed');
+            }
+        }
+        
+        function sendMessage() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                log('WebSocket not connected!', 'error');
+                return;
+            }
+            
+            const message = {
+                type: 'user_message',
+                payload: {
+                    content: 'Hello from test client!',
+                    timestamp: new Date().toISOString()
+                }
+            };
+            
+            ws.send(JSON.stringify(message));
+            log(`Sent: ${JSON.stringify(message)}`, 'success');
+        }
+        
+        function disconnect() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.close();
+                log('Disconnecting...', 'info');
+            } else {
+                log('WebSocket not connected', 'info');
+            }
+        }
+        
+        // Auto-authenticate on load
+        window.onload = () => {
+            log('Test page loaded. Click "Authenticate" to begin.', 'info');
+        };
+    </script>
+</body>
+</html>

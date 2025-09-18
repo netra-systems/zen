@@ -4,7 +4,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - Real-time events are critical for user experience
 - Business Goal: Ensure reliable WebSocket event delivery under high concurrency and load
 - Value Impact: Users receive consistent real-time feedback during agent execution even under load
-- Strategic Impact: $500K+ ARR real-time communication reliability foundation
+- Strategic Impact: 500K+ ARR real-time communication reliability foundation
 
 These E2E tests validate WebSocket agent event integration with complete system stack under load:
 - Real authentication (JWT/OAuth) for multiple concurrent users

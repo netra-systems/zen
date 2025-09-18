@@ -3,7 +3,7 @@ Unit Tests for WebSocket Event Emission Business Logic
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free, Early, Mid, Enterprise)
-- Business Goal: Revenue Protection - Validates $500K+ ARR real-time chat experience
+- Business Goal: Revenue Protection - Validates 500K+ ARR real-time chat experience
 - Value Impact: WebSocket events provide progress visibility and engagement for AI interactions
 - Strategic Impact: Unit tests ensure 5 required events are emitted for business value delivery
 

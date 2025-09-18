@@ -9,7 +9,7 @@ GCP staging environment including:
 - Multi-user concurrent operations in staging
 
 Business Value Justification (BVJ):
-- Segment: Platform/ALL - Validates $500K+ ARR Golden Path functionality
+- Segment: Platform/ALL - Validates 500K+ ARR Golden Path functionality
 - Business Goal: Production Readiness - Ensures staging environment reliability
 - Value Impact: Validates complete customer chat experience end-to-end
 - Revenue Impact: Prevents production deployment issues affecting revenue
@@ -177,7 +177,7 @@ class WebSocketSSOTGoldenPathE2ETests(SSotAsyncTestCase, unittest.TestCase):
                             }
                             logger.warning(f"WebSocket response timeout for {user_config['user_id']}")
                             
-                except websockets.exceptions.ConnectionClosed as e:
+                except websockets.ConnectionClosed as e:
                     connection_results[user_config['user_id']] = {
                         'success': False,
                         'error': f'Connection closed: {e}',

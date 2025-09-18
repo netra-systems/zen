@@ -4,9 +4,9 @@ Critical tests for WebSocket queue disruption of the Golden Path user flow.
 Issue #1011 WebSocket Message Queue Consolidation - Golden Path Disruption Tests
 
 This test module focuses specifically on how the fragmented queue implementations
-disrupt the core Golden Path user flow that generates $500K+ ARR business value:
+disrupt the core Golden Path user flow that generates 500K+ ARR business value:
 
-Golden Path Flow: User Login → Agent Processing → Real-time Updates → AI Response
+Golden Path Flow: User Login -> Agent Processing -> Real-time Updates -> AI Response
 
 These tests demonstrate how queue fragmentation breaks this critical business flow
 by causing message loss, ordering issues, and state corruption that directly
@@ -16,7 +16,7 @@ DESIGNED TO FAIL initially to prove business impact of queue consolidation issue
 
 Business Value Justification:
 - Segment: All Tiers (Free/Early/Mid/Enterprise) - CRITICAL
-- Business Goal: Golden Path Protection - $500K+ ARR
+- Business Goal: Golden Path Protection - 500K+ ARR
 - Value Impact: Ensures core chat functionality delivers reliable AI responses
 - Strategic Impact: Protects primary value delivery mechanism of the platform
 """
@@ -145,7 +145,7 @@ class GoldenPathQueueDisruptionTests(SSotAsyncTestCase):
     async def test_golden_path_flow_disruption_by_queue_fragmentation(self):
         """
         FAILING CRITICAL TEST: Demonstrates how queue fragmentation completely
-        disrupts the Golden Path user flow, breaking the core $500K+ ARR experience.
+        disrupts the Golden Path user flow, breaking the core 500K+ ARR experience.
 
         This test simulates the exact sequence of events in the Golden Path
         and shows how different queue implementations cause:
@@ -332,7 +332,7 @@ class GoldenPathQueueDisruptionTests(SSotAsyncTestCase):
 
         self.fail(
             f"EXPECTED FAILURE - Golden Path Flow Disruption (Issue #1011):\n"
-            f"Queue fragmentation CATASTROPHICALLY disrupts the $500K+ ARR Golden Path:\n"
+            f"Queue fragmentation CATASTROPHICALLY disrupts the 500K+ ARR Golden Path:\n"
             f"\n=== GOLDEN PATH FLOW INTEGRITY ===\n"
             f"- Expected event sequence: {expected_sequence}\n"
             f"- Actual user experience: {actual_user_experience}\n"
@@ -353,7 +353,7 @@ class GoldenPathQueueDisruptionTests(SSotAsyncTestCase):
             f"🚨 GOLDEN PATH BROKEN: Users see incoherent agent behavior\n"
             f"🚨 CONVERSATION FLOW DISRUPTED: Agent responses out of logical order\n"
             f"🚨 USER TRUST DAMAGED: Inconsistent and confusing chat experience\n"
-            f"🚨 REVENUE IMPACT: $500K+ ARR at risk due to broken core functionality\n"
+            f"🚨 REVENUE IMPACT: 500K+ ARR at risk due to broken core functionality\n"
             f"\n=== CONSOLIDATION REQUIRED ===\n"
             f"Single unified queue implementation needed immediately to restore Golden Path integrity."
         )
@@ -554,7 +554,7 @@ class GoldenPathQueueDisruptionTests(SSotAsyncTestCase):
             f"🤖 Users lose trust in AI intelligence\n"
             f"\n=== BUSINESS IMPACT ===\n"
             f"Agent personality disorder reduces user engagement and satisfaction.\n"
-            f"Poor AI experience directly impacts the $500K+ ARR chat value proposition.\n"
+            f"Poor AI experience directly impacts the 500K+ ARR chat value proposition.\n"
             f"Users expect coherent, intelligent agent behavior throughout conversations."
         )
 
@@ -761,6 +761,6 @@ class GoldenPathQueueDisruptionTests(SSotAsyncTestCase):
             f"\n=== BUSINESS IMPACT ===\n"
             f"Poor real-time experience reduces user engagement and trust.\n"
             f"Users expect immediate feedback in modern AI chat interfaces.\n"
-            f"Delayed or missing real-time updates directly impact $500K+ ARR retention.\n"
+            f"Delayed or missing real-time updates directly impact 500K+ ARR retention.\n"
             f"Competing AI platforms provide better real-time responsiveness."
         )

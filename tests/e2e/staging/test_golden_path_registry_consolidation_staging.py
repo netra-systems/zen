@@ -8,8 +8,8 @@ EXPECTED BEHAVIOR: Tests must validate the complete user journey works end-to-en
 in staging regardless of registry implementation challenges.
 
 Business Impact:
-- Validates Golden Path: Users login → get AI responses
-- Protects $500K+ ARR functionality in production-like environment
+- Validates Golden Path: Users login -> get AI responses
+- Protects 500K+ ARR functionality in production-like environment
 - Ensures staging environment reflects production readiness
 - Validates real WebSocket event delivery in cloud environment
 
@@ -37,8 +37,8 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Staging environment detection
 STAGING_ENVIRONMENT = os.getenv('NETRA_ENV', '').lower() == 'staging'
-GCP_STAGING_URL = os.getenv('STAGING_API_URL', 'https://staging-api.netra.ai')
-GCP_STAGING_WS_URL = os.getenv('STAGING_WS_URL', 'wss://staging-api.netra.ai/ws')
+GCP_STAGING_URL = os.getenv('STAGING_API_URL', 'https://staging-api.netrasystems.ai')
+GCP_STAGING_WS_URL = os.getenv('STAGING_WS_URL', 'wss://staging-api.netrasystems.ai/ws')
 
 # Registry imports for staging validation
 try:
@@ -86,7 +86,7 @@ class GoldenPathRegistryConsolidationStagingTests(SSotAsyncTestCase):
     E2E test suite for Golden Path validation in GCP staging environment.
 
     Tests the complete user journey during registry SSOT consolidation
-    to ensure business continuity and $500K+ ARR protection.
+    to ensure business continuity and 500K+ ARR protection.
     """
 
     def setup_method(self, method):
@@ -168,7 +168,7 @@ class GoldenPathRegistryConsolidationStagingTests(SSotAsyncTestCase):
                 # Fallback: Direct HTTP authentication
                 async with httpx.AsyncClient(timeout=self.staging_config['timeout']) as client:
                     auth_request = {
-                        'username': f'test_user_{uuid.uuid4().hex[:8]}@staging.netra.ai',
+                        'username': f'test_user_{uuid.uuid4().hex[:8]}@staging.netrasystems.ai',
                         'password': 'staging_test_password_123',
                         'grant_type': 'password'
                     }
@@ -654,14 +654,14 @@ class GoldenPathRegistryConsolidationStagingTests(SSotAsyncTestCase):
         logger.info(f"Golden Path Success Rate: {golden_path_success_rate:.1%}")
         logger.info("Golden Path Steps:")
         for step_name, completed in self.golden_path_steps.items():
-            status = "✓ COMPLETED" if completed else "✗ FAILED"
+            status = "CHECK COMPLETED" if completed else "✗ FAILED"
             logger.info(f"  - {step_name}: {status}")
 
         logger.info(f"WebSocket Events Received: {len(self.received_websocket_events)}")
         logger.info(f"Critical Events: {list(self.critical_events_received)}")
-        logger.info(f"Authentication: {'✓' if self.golden_path_steps.get('user_authentication') else '✗'}")
-        logger.info(f"Agent Execution: {'✓' if self.golden_path_steps.get('agent_execution') else '✗'}")
-        logger.info(f"WebSocket Communication: {'✓' if self.golden_path_steps.get('websocket_events_received') else '✗'}")
+        logger.info(f"Authentication: {'CHECK' if self.golden_path_steps.get('user_authentication') else '✗'}")
+        logger.info(f"Agent Execution: {'CHECK' if self.golden_path_steps.get('agent_execution') else '✗'}")
+        logger.info(f"WebSocket Communication: {'CHECK' if self.golden_path_steps.get('websocket_events_received') else '✗'}")
         logger.info("=== END GOLDEN PATH STAGING SUMMARY ===")
 
         # Golden Path must be highly successful in staging

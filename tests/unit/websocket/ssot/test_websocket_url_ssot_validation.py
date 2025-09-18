@@ -5,14 +5,14 @@ CRITICAL MISSION: Create SSOT validation tests for WebSocket URL environment var
 duplication issue (Issue #507).
 
 PROBLEM: Duplicate `NEXT_PUBLIC_WS_URL` vs `NEXT_PUBLIC_WEBSOCKET_URL` 
-BUSINESS IMPACT: $500K+ ARR Golden Path chat functionality at risk
+BUSINESS IMPACT: 500K+ ARR Golden Path chat functionality at risk
 
 TEST DESIGN:
 - Pre-SSOT Fix: These tests MUST FAIL (by design - detecting dual variables)
 - Post-SSOT Fix: These tests MUST PASS (confirming SSOT consolidation works)
 
 Business Value: Platform/Internal - System Stability & Revenue Protection
-Protects $500K+ ARR by ensuring WebSocket URL configuration consistency.
+Protects 500K+ ARR by ensuring WebSocket URL configuration consistency.
 """
 import pytest
 from unittest.mock import patch, MagicMock

@@ -24,7 +24,7 @@ Agent class registry initialization failed: name 'ToolDispatcher' is not defined
 **Status**: ✅ FIXED
 
 **Root Cause**: OAuth redirect URI domain mismatch was incorrectly flagged as critical failure:
-- OAuth configured for: `https://app.staging.netra.ai/auth/callback` 
+- OAuth configured for: `https://app.staging.netrasystems.ai/auth/callback` 
 - Deployment using: `https://app.staging.netrasystems.ai`
 - Per CLAUDE.md: "OAuth redirect mismatches should be warnings in non-prod, not failures"
 
@@ -102,7 +102,7 @@ FRONTEND_URL=https://app.staging.netrasystems.ai
 - Agent system successfully initialized with fixed imports
 
 ### OAuth Configuration Note
-- Current OAuth client configured for `netra.ai` domain
+- Current OAuth client configured for `netrasystems.ai` domain
 - Deployment uses `netrasystems.ai` domain  
 - **Non-blocking**: Bypass applied as OAuth domain mismatch is non-critical in staging per architecture guidelines
 - **Future Action**: Update OAuth client configuration if needed for production readiness

@@ -3,13 +3,13 @@ Test 1: Singleton to Factory Migration Validation
 
 PURPOSE: Validate complete elimination of singleton patterns in agent factory modules.
 ISSUE: #709 - Agent Factory Singleton Legacy remediation
-SCOPE: Core SSOT validation for singleton→factory pattern migration
+SCOPE: Core SSOT validation for singleton->factory pattern migration
 
 EXPECTED BEHAVIOR:
 - BEFORE REMEDIATION: Tests should FAIL (proving SSOT violations exist)
 - AFTER REMEDIATION: Tests should PASS (proving SSOT compliance)
 
-Business Value: Platform/Internal - $500K+ ARR protection through proper user isolation
+Business Value: Platform/Internal - 500K+ ARR protection through proper user isolation
 """
 import asyncio
 import gc
@@ -88,7 +88,7 @@ class SingletonToFactoryMigrationTests(SSotAsyncTestCase):
             from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory, get_agent_instance_factory
             module = sys.modules['netra_backend.app.agents.supervisor.agent_instance_factory']
             global_factory_instance = getattr(module, '_factory_instance', None)
-            assert global_factory_instance is None, f'SINGLETON VIOLATION: Global _factory_instance exists: {global_factory_instance}. This proves singleton pattern is still active. Expected: None after singleton→factory migration.'
+            assert global_factory_instance is None, f'SINGLETON VIOLATION: Global _factory_instance exists: {global_factory_instance}. This proves singleton pattern is still active. Expected: None after singleton->factory migration.'
             factory1 = get_agent_instance_factory()
             factory2 = get_agent_instance_factory()
             self._tracked_instances.extend([factory1, factory2])
@@ -129,7 +129,7 @@ class SingletonToFactoryMigrationTests(SSotAsyncTestCase):
             from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory, get_execution_engine_factory
             module = sys.modules['netra_backend.app.agents.supervisor.execution_engine_factory']
             global_factory_instance = getattr(module, '_factory_instance', None)
-            assert global_factory_instance is None, f'SINGLETON VIOLATION: Global _factory_instance exists in ExecutionEngineFactory: {global_factory_instance}. This proves singleton pattern is still active. Expected: None after singleton→factory migration.'
+            assert global_factory_instance is None, f'SINGLETON VIOLATION: Global _factory_instance exists in ExecutionEngineFactory: {global_factory_instance}. This proves singleton pattern is still active. Expected: None after singleton->factory migration.'
             mock_bridge = SSotMockFactory.create_mock_websocket_bridge()
             try:
                 factory1 = ExecutionEngineFactory(websocket_bridge=mock_bridge)

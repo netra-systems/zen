@@ -107,7 +107,7 @@ class ExpiredTokenRejectedTests(TokenValidationFlowTests):
         """Test WebSocket connection rejects expired token."""
         token = await self._generate_test_token(expired_token_payload)
         
-        with pytest.raises(websockets.exceptions.ConnectionClosedError):
+        with pytest.raises(websockets.ConnectionClosedError):
             async with websockets.connect(f"ws://localhost:8000/ws?token={token}") as ws:
                 await ws.ping()
 
@@ -229,7 +229,7 @@ class WebSocketAuthenticationTests(TokenValidationFlowTests):
                 # Connection successful means auth passed
                 await websocket.ping()
                 assert websocket.open
-        except (websockets.exceptions.ConnectionClosed, ConnectionRefusedError):
+        except (websockets.ConnectionClosed, ConnectionRefusedError):
             # Service may not be running - test validates structure
             pass
     
@@ -237,7 +237,7 @@ class WebSocketAuthenticationTests(TokenValidationFlowTests):
     @pytest.mark.e2e
     async def test_websocket_no_token_rejection(self, test_harness):
         """Test WebSocket rejects connection without token."""
-        with pytest.raises((websockets.exceptions.ConnectionClosedError, ConnectionRefusedError)):
+        with pytest.raises((websockets.ConnectionClosedError, ConnectionRefusedError)):
             async with websockets.connect("ws://localhost:8000/ws", timeout=5) as ws:
                 await ws.ping()
 
@@ -377,7 +377,7 @@ class CrossServiceTokenFlowTests(TokenValidationFlowTests):
                 try:
                     async with websockets.connect(f"ws://localhost:8000/ws?token={token}") as ws:
                         assert ws.open
-                except (websockets.exceptions.ConnectionClosed, ConnectionRefusedError):
+                except (websockets.ConnectionClosed, ConnectionRefusedError):
                     pass  # Service may not be running
 
 
@@ -394,7 +394,7 @@ Value Impact:
 - Supports tiered access control for freemium model conversion
 
 Revenue Impact:
-- Enterprise deals requiring security audits: $50K+ ARR per customer
+- Enterprise deals requiring security audits: 50K+ ARR per customer
 - Compliance certifications unlock 40% larger enterprise segment
 - Security breach prevention: Protects $millions in potential damages
 - Freemium conversion: Secure paid feature access drives 15% conversion rate

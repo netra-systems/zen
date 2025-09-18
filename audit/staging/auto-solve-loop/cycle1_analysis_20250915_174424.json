@@ -1,0 +1,782 @@
+{
+  "timestamp": "2025-09-15T17:44:24.106959",
+  "total_logs": 400,
+  "issues_by_severity": {
+    "ERROR": {
+      "database": 30,
+      "timeout": 30,
+      "connection": 25,
+      "auth": 15,
+      "startup": 15
+    },
+    "WARNING": {},
+    "NOTICE": {},
+    "INFO": {
+      "websocket": 2
+    }
+  },
+  "top_errors": [],
+  "recurring_patterns": [
+    {
+      "message": "{\"@type\": \"type.googleapis.com/google.cloud.audit.AuditLog\", \"authenticationInfo\": {\"principalEmail\": \"github-staging-deployer@netra-staging.iam.gserviceaccount.com\", \"serviceAccountKeyName\": \"//iam.g",
+      "count": 100
+    },
+    {
+      "message": "Container called exit(3).",
+      "count": 39
+    },
+    {
+      "message": "Sentry SDK not available - install sentry-sdk[fastapi] to enable error tracking",
+      "count": 30
+    },
+    {
+      "message": "SERVICE_ID contained whitespace - sanitized from 'netra-backend\\n' to 'netra-backend'",
+      "count": 30
+    },
+    {
+      "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/gunicorn/arbiter.py\", line 608, in spawn_worker\n    worker.init_process()\n  File \"/usr/local/lib/python3.11/site-pack",
+      "count": 14
+    },
+    {
+      "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 799, in setup_middleware\n    _add_websocket_exclusion_middleware(app)\n  File \"/app/netra_backend/app/c",
+      "count": 14
+    },
+    {
+      "message": "Traceback (most recent call last):\n  File \"/app/netra_backend/app/core/middleware_setup.py\", line 852, in _add_websocket_exclusion_middleware\n    from netra_backend.app.middleware.uvicorn_protocol_enh",
+      "count": 14
+    },
+    {
+      "message": "Middleware setup failure details: ModuleNotFoundError: No module named 'netra_backend.app.services.monitoring'",
+      "count": 14
+    },
+    {
+      "message": "CRITICAL: Enhanced middleware setup failed: No module named 'netra_backend.app.services.monitoring'",
+      "count": 14
+    },
+    {
+      "message": "AuthCircuitBreakerManager initialized with UnifiedCircuitBreaker",
+      "count": 6
+    }
+  ],
+  "service_issues": {
+    "netra-auth-service": [
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:44:10.319275+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:44:10.319275+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:44:10.319275+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:44:10.319275+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:44:10.319275+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:44:10.319258+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:44:10.319258+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:44:10.319258+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:44:10.319258+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:44:10.319258+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T00:44:10.319245+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T00:44:10.319245+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T00:44:10.319245+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T00:44:10.319230+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T00:44:10.319230+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:44:10.308293+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:44:10.308293+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:44:10.308293+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:44:10.308293+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:44:10.308293+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T00:44:10.308069+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T00:44:10.308069+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T00:44:10.308069+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:43:48.694208+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:43:48.694208+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:43:48.694208+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:43:48.694208+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:43:48.694208+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:43:48.694189+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:43:48.694189+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:43:48.694189+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:43:48.694189+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:43:48.694189+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T00:43:48.694176+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T00:43:48.694176+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T00:43:48.694176+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T00:43:48.694160+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T00:43:48.694160+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:43:48.682308+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:43:48.682308+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:43:48.682308+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:43:48.682308+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:43:48.682308+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T00:43:48.682199+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T00:43:48.682199+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T00:43:48.682199+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:43:26.142240+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:43:26.142240+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:43:26.142240+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:43:26.142240+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:43:26.142240+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:43:26.142220+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:43:26.142220+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:43:26.142220+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:43:26.142220+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:43:26.142220+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T00:43:26.142207+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T00:43:26.142207+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T00:43:26.142207+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T00:43:26.142192+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T00:43:26.142192+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:43:26.130940+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:43:26.130940+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:43:26.130940+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:43:26.130940+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:43:26.130940+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T00:43:26.130848+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T00:43:26.130848+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T00:43:26.130848+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:43:03.219172+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:43:03.219172+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:43:03.219172+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:43:03.219172+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:43:03.219172+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:43:03.219154+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:43:03.219154+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:43:03.219154+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:43:03.219154+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:43:03.219154+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T00:43:03.219140+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T00:43:03.219140+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T00:43:03.219140+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T00:43:03.219121+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T00:43:03.219121+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:43:03.197223+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:43:03.197223+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:43:03.197223+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:43:03.197223+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:43:03.197223+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T00:43:03.197179+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T00:43:03.197179+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T00:43:03.197179+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:42:41.292543+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:42:41.292543+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:42:41.292543+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:42:41.292543+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File \"/usr/l",
+        "timestamp": "2025-09-16T00:42:41.292543+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:42:41.292528+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:42:41.292528+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:42:41.292528+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:42:41.292528+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-16T00:42:41.292528+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T00:42:41.292516+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T00:42:41.292516+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-16T00:42:41.292516+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T00:42:41.292503+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-16T00:42:41.292503+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:42:41.281732+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:42:41.281732+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:42:41.281732+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:42:41.281732+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-16T00:42:41.281732+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T00:42:41.281651+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T00:42:41.281651+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-16T00:42:41.281651+00:00",
+        "severity": "ERROR"
+      }
+    ],
+    "netra-backend-staging": [
+      {
+        "type": "websocket",
+        "message": "WebSocket Error Validator compatibility module loaded with SSOT imports",
+        "timestamp": "2025-09-16T00:44:12.885003+00:00",
+        "severity": "INFO"
+      },
+      {
+        "type": "websocket",
+        "message": "WebSocket Error Validator compatibility module loaded with SSOT imports",
+        "timestamp": "2025-09-16T00:44:06.113703+00:00",
+        "severity": "INFO"
+      }
+    ]
+  },
+  "http_errors": [
+    {
+      "status": 404,
+      "url": "https://0.0.0.0/admin/config.php",
+      "method": "GET",
+      "timestamp": "2025-09-16T00:42:33.086070+00:00",
+      "service": "netra-frontend-staging"
+    }
+  ],
+  "connection_issues": [],
+  "database_issues": [],
+  "websocket_issues": [],
+  "auth_issues": []
+}

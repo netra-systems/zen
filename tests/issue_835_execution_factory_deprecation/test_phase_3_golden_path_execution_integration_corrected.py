@@ -2,7 +2,7 @@
 Issue #835 - Phase 3: Golden Path Execution Integration Tests (Corrected)
 
 These tests validate that the golden path user flow works correctly
-with CANONICAL SSOT execution factory patterns, ensuring the $500K+ ARR
+with CANONICAL SSOT execution factory patterns, ensuring the 500K+ ARR
 business functionality is protected, while also testing failure scenarios
 with the missing UnifiedExecutionEngineFactory.
 
@@ -17,7 +17,7 @@ Expected Results: 3 PASSES, 2 FAILURES (40% failure rate in this suite)
 
 Business Value Justification:
 - Segment: All (Free, Early, Mid, Enterprise)
-- Business Goal: Protect $500K+ ARR Golden Path functionality
+- Business Goal: Protect 500K+ ARR Golden Path functionality
 - Value Impact: Ensure chat functionality works with canonical factory patterns
 - Strategic Impact: Validate SSOT consolidation maintains business value
 """
@@ -38,7 +38,7 @@ class TestPhase3GoldenPathExecutionIntegrationCorrected(SSotAsyncTestCase):
         """
         EXPECTED: PASS - Golden path should work with canonical ExecutionEngineFactory.
 
-        This test demonstrates that $500K+ ARR functionality is preserved
+        This test demonstrates that 500K+ ARR functionality is preserved
         when using the canonical ExecutionEngineFactory instead of the missing
         UnifiedExecutionEngineFactory.
         """
@@ -100,7 +100,7 @@ class TestPhase3GoldenPathExecutionIntegrationCorrected(SSotAsyncTestCase):
                 'agent_completed',
                 {
                     'result': 'AI cost analysis completed with optimization recommendations',
-                    'business_value': '$500K+ ARR protected',
+                    'business_value': '500K+ ARR protected',
                     'savings_potential': 25000,
                     'recommendations': [
                         'Switch to cheaper LLM for simple queries',

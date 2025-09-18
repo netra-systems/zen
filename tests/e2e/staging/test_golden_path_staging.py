@@ -11,7 +11,7 @@ PURPOSE:
 - Ensures staging parity with production expectations
 
 BUSINESS VALUE:
-- Protects $500K+ ARR staging environment reliability
+- Protects 500K+ ARR staging environment reliability
 - Validates production deployment readiness
 - Tests real infrastructure components (GCP, OAuth, SSL)
 - Ensures staging matches production behavior
@@ -94,12 +94,12 @@ STAGING_TEST_SCENARIOS = [
     }
 ]
 
-# Canonical staging URLs (as specified in CLAUDE.md)
+# Canonical staging URLs (as specified in CLAUDE.md - Issue #1278 fix)
 STAGING_URLS = {
-    "auth_service": "https://auth.staging.netrasystems.ai",
-    "backend_api": "https://backend.staging.netrasystems.ai",
-    "frontend": "https://app.staging.netrasystems.ai",
-    "websocket": "wss://backend.staging.netrasystems.ai/ws"
+    "auth_service": "https://staging.netrasystems.ai",
+    "backend_api": "https://staging.netrasystems.ai",
+    "frontend": "https://staging.netrasystems.ai",
+    "websocket": "wss://api-staging.netrasystems.ai/ws"
 }
 
 
@@ -480,8 +480,12 @@ class GoldenPathStagingTests(SSotAsyncTestCase):
                             if header in response.headers:
                                 self.logger.info(f"{service_name} has security header: {header}")
                         
-                    except httpx.SSLError as e:
-                        pytest.fail(f'SSL error for {service_name}: {e}')
+                    except (httpx.ConnectError, httpx.TransportError) as e:
+                        # SSL errors typically manifest as connection/transport errors
+                        if 'SSL' in str(e) or 'certificate' in str(e).lower():
+                            pytest.fail(f'SSL error for {service_name}: {e}')
+                        else:
+                            raise  # Re-raise if not SSL-related
                     except Exception as e:
                         self.logger.warning(f'SSL test issue for {service_name}: {e}')
             
@@ -513,7 +517,7 @@ class GoldenPathStagingTests(SSotAsyncTestCase):
                     
                     if response.status_code == 200:
                         tested_services.append(service_name)
-                        self.logger.info(f"✓ {service_name} service healthy")
+                        self.logger.info(f"CHECK {service_name} service healthy")
                     else:
                         failed_services.append(f"{service_name}:{response.status_code}")
                         self.logger.error(f"✗ {service_name} service unhealthy: {response.status_code}")
@@ -551,7 +555,7 @@ class GoldenPathStagingTests(SSotAsyncTestCase):
                 'token_type': 'access_token'
             }
 
-    async def _establish_staging_websocket_connection(self) -> Optional[websockets.WebSocketClientProtocol]:
+    async def _establish_staging_websocket_connection(self) -> Optional[websockets.ClientConnection]:
         """Establish secure WebSocket connection to staging"""
         try:
             # Use proper staging WebSocket URL with SSL

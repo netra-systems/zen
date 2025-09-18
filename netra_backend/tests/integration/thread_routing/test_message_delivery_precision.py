@@ -25,7 +25,7 @@ import uuid
 import pytest
 import json
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Dict, Any, List, Optional, Set, Tuple
 from unittest.mock import patch
 from collections import defaultdict, namedtuple
@@ -133,7 +133,7 @@ class MessageDeliveryPrecisionTests(BaseIntegrationTest):
                 email=user_data["email"],
                 full_name=user_data["name"],
                 is_active=True,
-                created_at=datetime.utcnow()
+                created_at=datetime.now(UTC)
             )
             db_session.add(test_user)
             users_threads_data[user_id] = []
@@ -208,7 +208,7 @@ class MessageDeliveryPrecisionTests(BaseIntegrationTest):
                             "target_thread_index": thread_idx,
                             "message_sequence": msg_idx,
                             "precision_signature": precision_signature,
-                            "delivery_timestamp": datetime.utcnow().isoformat(),
+                            "delivery_timestamp": datetime.now(UTC).isoformat(),
                             "auth_session_id": user_data["session_id"],
                             "execution_context": execution_context.dict()
                         }
@@ -529,7 +529,7 @@ class MessageDeliveryPrecisionTests(BaseIntegrationTest):
                             "thread_index": thread_idx,
                             "message_index": msg_idx,
                             "load_signature": load_signature,
-                            "delivery_timestamp": datetime.utcnow().isoformat(),
+                            "delivery_timestamp": datetime.now(UTC).isoformat(),
                             "execution_context": execution_context.dict()
                         }
                     )
@@ -757,7 +757,7 @@ class MessageDeliveryPrecisionTests(BaseIntegrationTest):
                 "thread_id": thread.id,
                 "session_id": user_data["session_id"],
                 "auth_token_hash": hashlib.sha256(user_data["access_token"].encode()).hexdigest()[:16],
-                "connected_at": datetime.utcnow().isoformat(),
+                "connected_at": datetime.now(UTC).isoformat(),
                 "e2e_integration_test": True
             }
             
@@ -795,7 +795,7 @@ class MessageDeliveryPrecisionTests(BaseIntegrationTest):
                     "thread_id": thread_id,
                     "websocket_id": str(websocket_info["websocket_id"]),
                     "content": f"E2E integration test message {flow_index} for thread {thread_id}",
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "request_id": str(uuid.uuid4()),
                     "session_id": user_data["session_id"],
                     "e2e_integration_test": True,
@@ -824,7 +824,7 @@ class MessageDeliveryPrecisionTests(BaseIntegrationTest):
                         "e2e_integration_test": True,
                         "flow_index": flow_index,
                         "stage": "user_message_stored",
-                        "processing_timestamp": datetime.utcnow().isoformat()
+                        "processing_timestamp": datetime.now(UTC).isoformat()
                     }
                 )
                 flow_stages.append(("database_storage_complete", stored_message.id))
@@ -842,7 +842,7 @@ class MessageDeliveryPrecisionTests(BaseIntegrationTest):
                         "flow_index": flow_index,
                         "stage": "agent_response",
                         "response_to_message": stored_message.id,
-                        "agent_processing_timestamp": datetime.utcnow().isoformat()
+                        "agent_processing_timestamp": datetime.now(UTC).isoformat()
                     }
                 )
                 flow_stages.append(("agent_processing_complete", agent_response_message.id))
@@ -853,7 +853,7 @@ class MessageDeliveryPrecisionTests(BaseIntegrationTest):
                     "thread_id": thread_id,
                     "message_id": agent_response_message.id,
                     "content": agent_response_message.content,
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "request_id": incoming_message["request_id"],
                     "websocket_id": str(websocket_info["websocket_id"])
                 }

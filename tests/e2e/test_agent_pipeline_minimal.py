@@ -125,7 +125,7 @@ class AgentPipelineMinimalTests(SSotAsyncTestCase):
             assert hasattr(supervisor, 'agent_factory'), "Supervisor should have agent_factory attribute"
             
             # Verify proper initialization
-            print(f"✅ Supervisor agent created successfully")
+            print(f"CHECK Supervisor agent created successfully")
             print(f"📊 Supervisor type: {type(supervisor).__name__}")
             
             # Test basic agent properties
@@ -133,10 +133,10 @@ class AgentPipelineMinimalTests(SSotAsyncTestCase):
             assert supervisor.agent_factory is not None, "Agent factory should be set"
             assert supervisor._initialization_user_context is not None, "User context should be set"
             
-            print(f"✅ All supervisor agent attributes validated successfully")
+            print(f"CHECK All supervisor agent attributes validated successfully")
             
         except Exception as e:
-            print(f"❌ Test failed with error: {e}")
+            print(f"X Test failed with error: {e}")
             print(f"📝 Error type: {type(e).__name__}")
             raise
 

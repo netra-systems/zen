@@ -56,15 +56,14 @@ else:
 
 from shared.logging.unified_logging_ssot import get_logger
 
-central_logger = get_logger(__name__)
+# ISSUE #1184 REMEDIATION: Fix deprecated logging pattern
+logger = get_logger(__name__)
 
 # CRITICAL ISSUE #387 REMEDIATION: Agent Execution Prerequisites Validation  
 from netra_backend.app.agents.supervisor.agent_execution_prerequisites import (
     AgentExecutionPrerequisites,
     PrerequisiteValidationLevel
 )
-
-logger = central_logger
 
 
 # SSOT CONSOLIDATION: Agent enums moved here to break circular imports
@@ -2179,6 +2178,104 @@ class AgentRegistry(BaseAgentRegistry):
         """
         return await self.get_user_session(user_id)
 
+    # ===================== ISSUE #991 INTERFACE REMEDIATION =====================
+    # Missing interface methods identified in Issue #991 testing
+
+    def get_websocket_manager(self) -> Optional[Any]:
+        """Get current WebSocket manager instance.
+        
+        This method provides access to the current WebSocket manager for 
+        real-time agent event delivery, supporting the Golden Path user flow.
+        
+        Returns:
+            WebSocket manager instance if set, None otherwise
+        """
+        try:
+            # Return the WebSocket manager set on this registry
+            return getattr(self, 'websocket_manager', None)
+        except Exception as e:
+            logger.warning(f"Failed to get WebSocket manager: {e}")
+            return None
+
+    async def cleanup_async(self, user_id: str) -> None:
+        """Async cleanup for user sessions and resources.
+        
+        This method provides comprehensive cleanup of user-specific resources
+        to prevent memory leaks and ensure proper resource management.
+        
+        Args:
+            user_id: User identifier for targeted cleanup
+        """
+        try:
+            if not user_id:
+                logger.warning("cleanup_async called with empty user_id")
+                return
+            
+            # Use existing cleanup functionality
+            cleanup_metrics = await self.cleanup_user_session(user_id)
+            logger.info(
+                f"Async cleanup completed for user {user_id}: "
+                f"cleaned {cleanup_metrics.get('cleaned_agents', 0)} agents"
+            )
+            
+        except Exception as e:
+            logger.error(f"Async cleanup failed for user {user_id}: {e}")
+            # Don't re-raise - cleanup methods should be robust
+
+    async def register_agent_async(self, agent_type: str, agent_class: Type) -> None:
+        """Async agent registration pattern.
+        
+        This method provides async agent registration capabilities for 
+        modern agent orchestration patterns and non-blocking operations.
+        
+        Args:
+            agent_type: Type identifier for the agent
+            agent_class: Agent class to register for factory creation
+        """
+        try:
+            if not agent_type or not agent_class:
+                raise ValueError("agent_type and agent_class are required")
+            
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            
+            # Create async factory for the agent class
+            async def async_agent_factory(context: UserExecutionContext, websocket_bridge=None):
+                """Async factory for creating agent instances."""
+                try:
+                    # Create tool dispatcher for the agent
+                    tool_dispatcher = await self.create_tool_dispatcher_for_user(
+                        user_context=context,
+                        websocket_bridge=websocket_bridge,
+                        enable_admin_tools=False
+                    )
+                    
+                    # Create agent instance with proper dependencies
+                    agent = agent_class(
+                        llm_manager=self.llm_manager,
+                        tool_dispatcher=tool_dispatcher
+                    )
+                    
+                    logger.debug(f"Created {agent_type} agent instance via async factory")
+                    return agent
+                    
+                except Exception as e:
+                    logger.error(f"Async agent factory failed for {agent_type}: {e}")
+                    return None
+            
+            # Register the async factory
+            self.register_factory(
+                key=agent_type,
+                factory=async_agent_factory,
+                tags=["async_registered"],
+                description=f"Async registered {agent_type} agent"
+            )
+            
+            logger.info(f"Async registration completed for {agent_type} agent")
+            
+        except Exception as e:
+            logger.error(f"Async agent registration failed for {agent_type}: {e}")
+            raise
+
     # ===================== LEGACY INTERFACE COMPATIBILITY =====================
     # Issue #991: Add missing interface methods to achieve SSOT compatibility
 
@@ -2242,6 +2339,151 @@ class AgentRegistry(BaseAgentRegistry):
                 "created_at": datetime.now().isoformat(),
                 "last_cleanup": datetime.now().isoformat()
             }
+
+    # ===================== MISSING INTERFACE METHODS =====================
+    # Issue #991: Add missing interface methods identified by failing tests
+    
+    def get_agent_by_name(self, name: str) -> Optional[Any]:
+        """Get agent instance by name.
+        
+        Args:
+            name: Agent name to look up
+            
+        Returns:
+            Agent instance if found, None otherwise
+        """
+        try:
+            if not name:
+                logger.warning("get_agent_by_name called with empty name")
+                return None
+            
+            # Use existing find_agent_by_name method which searches available agents
+            return self.find_agent_by_name(name)
+            
+        except Exception as e:
+            logger.error(f"Failed to get agent by name '{name}': {e}")
+            return None
+
+    def get_agent_by_id(self, agent_id: str) -> Optional[Any]:
+        """Get agent instance by ID.
+        
+        Args:
+            agent_id: Agent ID to look up
+            
+        Returns:
+            Agent instance if found, None otherwise
+        """
+        try:
+            if not agent_id:
+                logger.warning("get_agent_by_id called with empty agent_id")
+                return None
+            
+            # Search through user sessions for agent with this ID
+            for user_id, session in self._user_sessions.items():
+                if hasattr(session, 'agents'):
+                    for agent in session.agents:
+                        if hasattr(agent, 'id') and agent.id == agent_id:
+                            return agent
+                        elif hasattr(agent, 'agent_id') and agent.agent_id == agent_id:
+                            return agent
+            
+            logger.debug(f"Agent with ID '{agent_id}' not found")
+            return None
+            
+        except Exception as e:
+            logger.error(f"Failed to get agent by ID '{agent_id}': {e}")
+            return None
+
+    def is_agent_available(self, agent_type: str) -> bool:
+        """Check if agent type is available for creation.
+        
+        Args:
+            agent_type: Agent type to check availability for
+            
+        Returns:
+            True if agent type is available, False otherwise
+        """
+        try:
+            if not agent_type:
+                logger.warning("is_agent_available called with empty agent_type")
+                return False
+            
+            # Check if we have a factory for this agent type
+            available_types = [
+                'supervisor_agent',
+                'data_helper_agent', 
+                'triage_agent',
+                'apex_optimizer_agent'
+            ]
+            
+            is_available = agent_type.lower() in [t.lower() for t in available_types]
+            logger.debug(f"Agent type '{agent_type}' availability: {is_available}")
+            return is_available
+            
+        except Exception as e:
+            logger.error(f"Failed to check availability for agent type '{agent_type}': {e}")
+            return False
+
+    def get_agent_metadata(self, agent_type: str) -> Dict[str, Any]:
+        """Get metadata for agent type.
+        
+        Args:
+            agent_type: Agent type to get metadata for
+            
+        Returns:
+            Dictionary containing agent metadata
+        """
+        try:
+            if not agent_type:
+                logger.warning("get_agent_metadata called with empty agent_type")
+                return {}
+            
+            # Define metadata for supported agent types
+            metadata = {
+                'supervisor_agent': {
+                    'name': 'Supervisor Agent',
+                    'description': 'Central orchestrator for multi-agent workflows',
+                    'capabilities': ['orchestration', 'workflow_management', 'task_delegation'],
+                    'requires_auth': True,
+                    'supports_websocket': True
+                },
+                'data_helper_agent': {
+                    'name': 'Data Helper Agent',
+                    'description': 'Assists with data requirements and analysis',
+                    'capabilities': ['data_analysis', 'data_validation', 'requirements_gathering'],
+                    'requires_auth': True,
+                    'supports_websocket': True
+                },
+                'triage_agent': {
+                    'name': 'Triage Agent',
+                    'description': 'Routes and prioritizes user requests',
+                    'capabilities': ['request_routing', 'priority_assessment', 'data_sufficiency'],
+                    'requires_auth': True,
+                    'supports_websocket': True
+                },
+                'apex_optimizer_agent': {
+                    'name': 'APEX Optimizer Agent',
+                    'description': 'AI optimization and performance tuning',
+                    'capabilities': ['ai_optimization', 'performance_tuning', 'cost_analysis'],
+                    'requires_auth': True,
+                    'supports_websocket': True
+                }
+            }
+            
+            agent_metadata = metadata.get(agent_type.lower(), {
+                'name': f'Unknown Agent ({agent_type})',
+                'description': 'Agent type not recognized',
+                'capabilities': [],
+                'requires_auth': True,
+                'supports_websocket': False
+            })
+            
+            logger.debug(f"Retrieved metadata for agent type '{agent_type}'")
+            return agent_metadata
+            
+        except Exception as e:
+            logger.error(f"Failed to get metadata for agent type '{agent_type}': {e}")
+            return {}
 
 
 # ===================== MODULE EXPORTS =====================

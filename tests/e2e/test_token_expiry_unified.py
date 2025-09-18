@@ -130,9 +130,9 @@ class WebSocketAutoDisconnectTests(TokenExpiryUnifiedTests):
             ) as websocket:
                 assert websocket.open
                 await asyncio.sleep(3)
-                with pytest.raises(websockets.exceptions.ConnectionClosed):
+                with pytest.raises(websockets.ConnectionClosed):
                     await websocket.send('{"type": "ping"}')
-        except (websockets.exceptions.ConnectionClosed, ConnectionRefusedError):
+        except (websockets.ConnectionClosed, ConnectionRefusedError):
             pass
     
     @pytest.mark.asyncio
@@ -149,7 +149,7 @@ class WebSocketAutoDisconnectTests(TokenExpiryUnifiedTests):
             ) as websocket:
                 await asyncio.sleep(3)
                 assert not websocket.open
-        except (websockets.exceptions.ConnectionClosed, ConnectionRefusedError):
+        except (websockets.ConnectionClosed, ConnectionRefusedError):
             pass
 
 
@@ -294,8 +294,8 @@ class ExpiryPerformanceTests(TokenExpiryUnifiedTests):
                 timeout=2
             ) as ws:
                 await ws.ping()
-        except (websockets.exceptions.ConnectionClosed, ConnectionRefusedError, 
-                websockets.exceptions.InvalidStatus):
+        except (websockets.ConnectionClosed, ConnectionRefusedError, 
+                websockets.InvalidStatus):
             # Expected for expired token
             pass
         

@@ -4,7 +4,7 @@ E2E GCP Staging Tests for Service Authentication Failures - Issue #1037
 Business Value Justification (BVJ):
 - Segment: Platform/Infrastructure (affects all customer tiers)
 - Business Goal: System Stability - Prevent service communication breakdown
-- Value Impact: Protects $500K+ ARR by ensuring core platform functionality
+- Value Impact: Protects 500K+ ARR by ensuring core platform functionality
 - Revenue Impact: Prevents complete service outage affecting all customers
 
 These tests validate service-to-service authentication in the REAL GCP staging
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 # GCP Staging Configuration
 GCP_STAGING_CONFIG = {
     "backend_service_url": "https://netra-backend-staging-YOUR-PROJECT.a.run.app",
-    "auth_service_url": "https://netra-auth-staging-YOUR-PROJECT.a.run.app",
+    "auth_service_url": "https://netra-auth-YOUR-PROJECT.a.run.app",
     "project_id": "netra-staging",
     "region": "us-central1"
 }
@@ -82,7 +82,7 @@ class ServiceAuthFailuresStagingTests(BaseE2ETest):
                 assert auth_health.status_code == 200, f"Auth staging service unhealthy: {auth_health.status_code}"
 
             except httpx.RequestError as e:
-                logger.error(f"❌ GCP staging services unreachable: {e}")
+                logger.error(f"X GCP staging services unreachable: {e}")
                 pytest.skip("GCP staging services not accessible for SERVICE_SECRET sync test")
 
             # Test 2: Attempt service-to-service authentication
@@ -108,7 +108,7 @@ class ServiceAuthFailuresStagingTests(BaseE2ETest):
 
                 # CRITICAL: If SERVICE_SECRET sync is broken, this should fail
                 if not auth_result.get("authenticated"):
-                    logger.error("✅ REPRODUCTION SUCCESS: SERVICE_SECRET synchronization failure in staging")
+                    logger.error("CHECK REPRODUCTION SUCCESS: SERVICE_SECRET synchronization failure in staging")
                     logger.error(f"   Auth Response: {auth_result}")
                     logger.error(f"   Error: {auth_result.get('error')}")
                     logger.error("   This reproduces production SERVICE_SECRET sync issues")
@@ -132,12 +132,12 @@ class ServiceAuthFailuresStagingTests(BaseE2ETest):
 
                         # Cross-service token validation should work if secrets are synced
                         if backend_validation.status_code != 200:
-                            logger.error("✅ REPRODUCTION SUCCESS: Cross-service token validation failure")
+                            logger.error("CHECK REPRODUCTION SUCCESS: Cross-service token validation failure")
                             logger.error(f"   Backend validation status: {backend_validation.status_code}")
                             logger.error("   This indicates SERVICE_SECRET synchronization issues")
 
             except Exception as e:
-                logger.error(f"✅ REPRODUCTION SUCCESS: Service authentication error: {e}")
+                logger.error(f"CHECK REPRODUCTION SUCCESS: Service authentication error: {e}")
                 assert True, "Service authentication failure in staging environment"
 
     @pytest.mark.e2e
@@ -172,7 +172,7 @@ class ServiceAuthFailuresStagingTests(BaseE2ETest):
                 )
 
                 if health_response.status_code == 403:
-                    logger.error("✅ REPRODUCTION SUCCESS: 403 Not authenticated in staging")
+                    logger.error("CHECK REPRODUCTION SUCCESS: 403 Not authenticated in staging")
                     logger.error(f"   Status Code: {health_response.status_code}")
                     logger.error(f"   Response: {health_response.text}")
                     logger.error("   This reproduces production authentication failure pattern")
@@ -194,19 +194,19 @@ class ServiceAuthFailuresStagingTests(BaseE2ETest):
                 )
 
                 if db_response.status_code == 403:
-                    logger.error("✅ REPRODUCTION SUCCESS: Database session authentication failure")
+                    logger.error("CHECK REPRODUCTION SUCCESS: Database session authentication failure")
                     logger.error(f"   Database Status: {db_response.status_code}")
                     logger.error("   This reproduces get_request_scoped_db_session failures")
 
                     assert db_response.status_code == 403, "Expected database authentication failure"
 
             except httpx.RequestError as e:
-                logger.error(f"✅ REPRODUCTION SUCCESS: Service communication failure: {e}")
+                logger.error(f"CHECK REPRODUCTION SUCCESS: Service communication failure: {e}")
                 # Network-level failures also indicate authentication/configuration issues
                 assert True, "Service communication failure reproduces production issues"
 
             except Exception as e:
-                logger.error(f"✅ REPRODUCTION SUCCESS: Authentication error: {e}")
+                logger.error(f"CHECK REPRODUCTION SUCCESS: Authentication error: {e}")
                 assert True, "Service authentication error reproduced in staging"
 
     @pytest.mark.e2e
@@ -239,7 +239,7 @@ class ServiceAuthFailuresStagingTests(BaseE2ETest):
                 )
 
                 if login_response.status_code == 403:
-                    logger.error("✅ REPRODUCTION SUCCESS: User login fails due to service auth issues")
+                    logger.error("CHECK REPRODUCTION SUCCESS: User login fails due to service auth issues")
                     logger.error("   Service authentication blocks Golden Path user flow")
                     assert True, "Golden Path blocked by service authentication failure"
                     return
@@ -260,7 +260,7 @@ class ServiceAuthFailuresStagingTests(BaseE2ETest):
                     )
 
                     if chat_response.status_code == 403:
-                        logger.error("✅ REPRODUCTION SUCCESS: Chat fails due to backend service auth issues")
+                        logger.error("CHECK REPRODUCTION SUCCESS: Chat fails due to backend service auth issues")
                         logger.error("   Service authentication breaks core user functionality")
                         assert True, "Golden Path chat blocked by service authentication"
 
@@ -274,12 +274,12 @@ class ServiceAuthFailuresStagingTests(BaseE2ETest):
                     )
 
                     if thread_response.status_code == 403:
-                        logger.error("✅ REPRODUCTION SUCCESS: Database operations fail in Golden Path")
+                        logger.error("CHECK REPRODUCTION SUCCESS: Database operations fail in Golden Path")
                         logger.error("   Service authentication prevents user data access")
                         assert True, "Database operations blocked by service authentication"
 
             except Exception as e:
-                logger.error(f"✅ REPRODUCTION SUCCESS: Golden Path service auth failure: {e}")
+                logger.error(f"CHECK REPRODUCTION SUCCESS: Golden Path service auth failure: {e}")
                 assert True, "Service authentication breaks Golden Path user flow"
 
         logger.info("Golden Path service authentication test completed")
@@ -323,7 +323,7 @@ class RealGCPSecretManagerIntegrationTests(BaseE2ETest):
                 auth_secret_configured = auth_health.get("service_secret_configured", False)
 
                 if not backend_secret_configured or not auth_secret_configured:
-                    logger.error("✅ REPRODUCTION SUCCESS: GCP Secret Manager SERVICE_SECRET configuration failure")
+                    logger.error("CHECK REPRODUCTION SUCCESS: GCP Secret Manager SERVICE_SECRET configuration failure")
                     logger.error(f"   Backend configured: {backend_secret_configured}")
                     logger.error(f"   Auth configured: {auth_secret_configured}")
                     logger.error("   This reproduces GCP Secret Manager integration issues")
@@ -346,12 +346,12 @@ class RealGCPSecretManagerIntegrationTests(BaseE2ETest):
                     if service_auth_test.status_code != 200:
                         result = service_auth_test.json()
                         if not result.get("authenticated"):
-                            logger.error("✅ REPRODUCTION SUCCESS: GCP secret consistency failure")
+                            logger.error("CHECK REPRODUCTION SUCCESS: GCP secret consistency failure")
                             logger.error(f"   Cross-service auth failed: {result.get('error')}")
                             assert True, "GCP Secret Manager consistency issue reproduced"
 
             except Exception as e:
-                logger.error(f"✅ REPRODUCTION SUCCESS: GCP Secret Manager integration error: {e}")
+                logger.error(f"CHECK REPRODUCTION SUCCESS: GCP Secret Manager integration error: {e}")
                 assert True, "GCP Secret Manager integration failure reproduced"
 
     @pytest.mark.e2e
@@ -395,7 +395,7 @@ class RealGCPSecretManagerIntegrationTests(BaseE2ETest):
                         cloud_run_config_issues.append(f"{service_name} missing SERVICE_SECRET")
 
                 if cloud_run_config_issues:
-                    logger.error("✅ REPRODUCTION SUCCESS: Cloud Run service auth configuration issues")
+                    logger.error("CHECK REPRODUCTION SUCCESS: Cloud Run service auth configuration issues")
                     for issue in cloud_run_config_issues:
                         logger.error(f"   - {issue}")
                     logger.error("   This reproduces Cloud Run configuration-related auth failures")
@@ -403,7 +403,7 @@ class RealGCPSecretManagerIntegrationTests(BaseE2ETest):
                     assert len(cloud_run_config_issues) > 0, "Cloud Run configuration issues detected"
 
             except Exception as e:
-                logger.error(f"✅ REPRODUCTION SUCCESS: Cloud Run environment configuration error: {e}")
+                logger.error(f"CHECK REPRODUCTION SUCCESS: Cloud Run environment configuration error: {e}")
                 assert True, "Cloud Run environment configuration issues reproduced"
 
 
@@ -438,11 +438,11 @@ class Issue1037E2EReproductionSuiteTests:
 
         # Document E2E test coverage
         e2e_test_scenarios = [
-            "✅ GCP Secret Manager SERVICE_SECRET synchronization",
-            "✅ Real Cloud Run service-to-service requests",
-            "✅ Golden Path service authentication validation",
-            "✅ GCP Secret Manager integration testing",
-            "✅ Cloud Run environment configuration validation"
+            "CHECK GCP Secret Manager SERVICE_SECRET synchronization",
+            "CHECK Real Cloud Run service-to-service requests",
+            "CHECK Golden Path service authentication validation",
+            "CHECK GCP Secret Manager integration testing",
+            "CHECK Cloud Run environment configuration validation"
         ]
 
         for scenario in e2e_test_scenarios:
@@ -456,7 +456,7 @@ class Issue1037E2EReproductionSuiteTests:
         # Document staging environment requirements
         staging_requirements = {
             "gcp_project": GCP_STAGING_CONFIG["project_id"],
-            "services_deployed": ["netra-backend-staging", "netra-auth-staging"],
+            "services_deployed": ["netra-backend-staging", "netra-auth"],
             "secret_manager_enabled": True,
             "cloud_run_configuration": "production-like",
             "authentication_enabled": True

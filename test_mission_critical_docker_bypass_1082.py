@@ -20,7 +20,7 @@ def test_mission_critical_docker_bypass_issue_1082():
 
     # Staging environment URLs (canonical fallback)
     staging_urls = {
-        'backend': 'https://backend.staging.netrasystems.ai',
+        'backend': 'https://api.staging.netrasystems.ai',
         'auth': 'https://auth.staging.netrasystems.ai',
         'frontend': 'https://staging.netrasystems.ai'
     }
@@ -81,7 +81,7 @@ def test_mission_critical_docker_bypass_issue_1082():
     print("\n2. Testing staging WebSocket functionality without Docker...")
     websocket_fallback_issues = []
 
-    staging_websocket_url = f"wss://backend.staging.netrasystems.ai{critical_endpoints['websocket_endpoint']}"
+    staging_websocket_url = f"wss://api.staging.netrasystems.ai{critical_endpoints['websocket_endpoint']}"
     print(f"   [INFO] Testing WebSocket: {staging_websocket_url}")
 
     # Simulate WebSocket fallback issues
@@ -182,7 +182,7 @@ def test_mission_critical_docker_bypass_issue_1082():
         ],
         'cors_configuration': [
             'https://staging.netrasystems.ai',
-            'wss://backend.staging.netrasystems.ai'
+            'wss://api.staging.netrasystems.ai'
         ]
     }
 

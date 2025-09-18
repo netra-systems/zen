@@ -39,13 +39,12 @@ try:
 
     # Provide backward compatible aliases for existing consumers
     ExecutionEngineFactory = UserExecutionEngineFactory
-    RequestScopedExecutionEngineFactory = UserExecutionEngineFactory  # Legacy alias
+    # Legacy aliases removed to enforce SSOT - use canonical imports
     create_execution_engine_factory = configure_execution_engine_factory  # Function alias
 
     __all__ = [
         'ExecutionEngineFactory',
         'UserExecutionEngineFactory',
-        'RequestScopedExecutionEngineFactory',
         'get_execution_engine_factory',
         'configure_execution_engine_factory',
         'create_execution_engine_factory',
@@ -55,23 +54,15 @@ try:
 except ImportError as e:
     logger.error(f"CRITICAL: Could not import UserExecutionEngineFactory from supervisor package: {e}")
 
-    # Provide error-raising fallback implementations
-    class ExecutionEngineFactory:
+    # SSOT ENFORCING: Raise ImportError instead of creating alternative class
+    def ExecutionEngineFactory(*args, **kwargs):
         """Error fallback - SSOT factory not available."""
+        raise ImportError(
+            "SSOT UserExecutionEngineFactory not available. "
+            "Check netra_backend.app.agents.supervisor.execution_engine_factory import."
+        )
 
-        def __init__(self, *args, **kwargs):
-            raise ImportError(
-                "SSOT UserExecutionEngineFactory not available. "
-                "Check netra_backend.app.agents.supervisor.execution_engine_factory import."
-            )
-
-        def create_execution_engine(self, *args, **kwargs):
-            """Create execution engine - error fallback."""
-            raise ImportError("SSOT UserExecutionEngineFactory not available")
-
-    class RequestScopedExecutionEngineFactory(ExecutionEngineFactory):
-        """Error fallback for legacy request-scoped factory."""
-        pass
+    # Legacy aliases removed to enforce SSOT - use canonical imports
 
     UserExecutionEngineFactory = ExecutionEngineFactory
 
@@ -94,7 +85,6 @@ except ImportError as e:
     __all__ = [
         'ExecutionEngineFactory',
         'UserExecutionEngineFactory',
-        'RequestScopedExecutionEngineFactory',
         'get_execution_engine_factory',
         'configure_execution_engine_factory',
         'create_execution_engine_factory',

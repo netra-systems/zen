@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All tiers - Critical for 90% of platform value (real-time chat experience)
 - Business Goal: Ensure reliable real-time agent event delivery for user engagement
 - Value Impact: Users see live agent progress - core differentiator of AI platform
-- Strategic/Revenue Impact: $500K+ ARR depends on real-time agent transparency
+- Strategic/Revenue Impact: 500K+ ARR depends on real-time agent transparency
 
 This test suite validates comprehensive WebSocket agent event delivery:
 1. All 5 required agent events delivered in sequence
@@ -57,7 +57,7 @@ class WebSocketAgentEventsE2ETests(BaseE2ETest):
         assert self.staging_config.validate_configuration(), 'Staging configuration invalid'
         self.test_users = []
         for i in range(3):
-            user_context = await create_authenticated_user_context(user_email=f'websocket_event_test_{i}_{int(time.time())}@staging.netra.ai', environment='staging', permissions=['read', 'write', 'execute_agents', 'websocket_events'])
+            user_context = await create_authenticated_user_context(user_email=f'websocket_event_test_{i}_{int(time.time())}@staging.netrasystems.ai', environment='staging', permissions=['read', 'write', 'execute_agents', 'websocket_events'])
             self.test_users.append(user_context)
         self.collected_events = {}
         self.event_timings = {}
@@ -66,13 +66,13 @@ class WebSocketAgentEventsE2ETests(BaseE2ETest):
             self.collected_events[user.user_id] = []
             self.event_timings[user.user_id] = {}
             self.event_sequence_validation[user.user_id] = {'expected_sequence': ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed'], 'received_sequence': [], 'timing_gaps': [], 'payload_validation': {}}
-        self.logger.info(f'✅ PASS: WebSocket event test environment ready - {len(self.test_users)} users authenticated')
+        self.logger.info(f'CHECK PASS: WebSocket event test environment ready - {len(self.test_users)} users authenticated')
 
     async def test_complete_agent_event_sequence_validation(self):
         """
         Test complete agent event sequence with precise validation.
 
-        BVJ: Validates $500K+ ARR core value - Users must see all agent progress
+        BVJ: Validates 500K+ ARR core value - Users must see all agent progress
         Ensures: All 5 required events delivered in correct order with valid content
         """
         user_context = self.test_users[0]
@@ -141,10 +141,10 @@ class WebSocketAgentEventsE2ETests(BaseE2ETest):
         assert 'result' in tool_completed_data or 'output' in tool_completed_data, 'tool_completed missing result data'
         agent_completed_data = event_payloads.get('agent_completed', {})
         assert 'status' in agent_completed_data or 'result' in agent_completed_data, 'agent_completed missing completion data'
-        self.logger.info(f'✅ PASS: Complete agent event sequence validated successfully')
+        self.logger.info(f'CHECK PASS: Complete agent event sequence validated successfully')
         self.logger.info(f'📊 Total events: {len(collected_events)}')
         self.logger.info(f'⏱️ Total duration: {total_duration:.3f}s')
-        self.logger.info(f"📋 Event sequence: {' → '.join(event_sequence[:10])}")
+        self.logger.info(f"📋 Event sequence: {' -> '.join(event_sequence[:10])}")
 
     async def test_real_time_event_timing_validation(self):
         """
@@ -215,7 +215,7 @@ class WebSocketAgentEventsE2ETests(BaseE2ETest):
         max_quartile_events = max(events_in_quartiles)
         total_events = len(event_timestamps)
         assert max_quartile_events < total_events * 0.8, f'Events too concentrated in time: {events_in_quartiles}'
-        self.logger.info(f'✅ PASS: Real-time event timing validated successfully')
+        self.logger.info(f'CHECK PASS: Real-time event timing validated successfully')
         self.logger.info(f'⚡ First event delay: {first_event_delay:.3f}s')
         self.logger.info(f'📊 Average inter-event delay: {sum(inter_event_delays) / len(inter_event_delays):.3f}s')
         self.logger.info(f'⏱️ Total execution time: {total_execution_time:.3f}s')
@@ -279,7 +279,7 @@ class WebSocketAgentEventsE2ETests(BaseE2ETest):
         assert users_with_all_events == len(self.test_users), f'Expected {len(self.test_users)} users with all events, got {users_with_all_events}'
         expected_min_events = len(self.test_users) * 5
         assert total_events >= expected_min_events, f'Expected at least {expected_min_events} total events, got {total_events}'
-        self.logger.info(f'✅ PASS: Concurrent WebSocket event delivery validated')
+        self.logger.info(f'CHECK PASS: Concurrent WebSocket event delivery validated')
         self.logger.info(f'👥 Concurrent users: {successful_users}')
         self.logger.info(f'📊 Total events delivered: {total_events}')
         self.logger.info(f'🎯 Users with all events: {users_with_all_events}')
@@ -339,7 +339,7 @@ class WebSocketAgentEventsE2ETests(BaseE2ETest):
         assert len(completed_payload) > 0, 'agent_completed payload is empty'
         has_result = any((key in completed_payload for key in ['result', 'status', 'outcome', 'summary']))
         assert has_result, f'agent_completed payload missing result information: {list(completed_payload.keys())}'
-        self.logger.info(f'✅ PASS: Event payload accuracy validated successfully')
+        self.logger.info(f'CHECK PASS: Event payload accuracy validated successfully')
         self.logger.info(f'📋 Event payloads validated: {len(event_payloads)}')
         self.logger.info(f'🎯 User-specific data found: {user_data_found}')
         self.logger.info(f"📊 Payload completeness: {sum((1 for v in payload_validation_results.values() if v.get('valid', False)))}/{len(payload_validation_results)}")
@@ -406,11 +406,11 @@ class WebSocketAgentEventsE2ETests(BaseE2ETest):
         assert final_event.get('type') == 'agent_completed', 'Agent execution did not complete after recovery'
         total_events = len(events_before_error) + len(error_events) + len(recovery_events) + len(events_after_recovery)
         assert total_events >= 8, f'Expected at least 8 total events for complete error recovery flow, got {total_events}'
-        self.logger.info(f'✅ PASS: WebSocket event error recovery validated')
+        self.logger.info(f'CHECK PASS: WebSocket event error recovery validated')
         self.logger.info(f'📊 Events before error: {len(events_before_error)}')
         self.logger.info(f'🚨 Error events: {len(error_events)}')
         self.logger.info(f'🔄 Recovery events: {len(recovery_events)}')
-        self.logger.info(f'✅ Events after recovery: {len(events_after_recovery)}')
+        self.logger.info(f'CHECK Events after recovery: {len(events_after_recovery)}')
 
     def _validate_event_content(self, event_type: str, event_data: Dict[str, Any], user_context) -> None:
         """Validate event content based on type and user context."""

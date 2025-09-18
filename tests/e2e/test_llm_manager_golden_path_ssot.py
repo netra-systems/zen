@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,18 +23,13 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 LLM Manager Golden Path Protection Tests (E2E)
 
 These tests are DESIGNED TO FAIL initially to prove golden path violations exist.
 They will PASS after proper LLM manager SSOT remediation is implemented.
 
-Business Value: Platform/Enterprise - $500K+ ARR Protection
+Business Value: Platform/Enterprise - 500K+ ARR Protection
 Protects critical user journey: login  ->  agent execution  ->  AI response delivery.
 
 Test Categories:
@@ -109,7 +96,7 @@ class LLMManagerGoldenPathProtectionTests(SSotAsyncTestCase):
         - User isolation violations causing conversation mixing
         - Performance degradation under user load
         
-        Business Impact: $500K+ ARR dependent on reliable AI chat functionality
+        Business Impact: 500K+ ARR dependent on reliable AI chat functionality
         """
         golden_path_violations = []
         
@@ -468,12 +455,7 @@ class LLMManagerGoldenPathProtectionTests(SSotAsyncTestCase):
         # Force violations for test demonstration
         if len(websocket_violations) == 0:
             websocket_violations.extend([
-                f"EXPECTED: WebSocket event delivery issues during LLM operations ({len(connection_data['events_received'])}/{len(expected_events)} events)",
-                f"EXPECTED: LLM manager inconsistency in WebSocket flow ({len(unique_llm_ids)} manager IDs)",
-                f"EXPECTED: Performance degradation in WebSocket + LLM integration (flow time: {total_flow_time:.2f}s)"
-            ])
-        
-        logger.info(f"WebSocket Flow: {len(connection_data['events_received'])}/{len(expected_events)} events, {len(connection_data['llm_operations'])} LLM ops")
+                f"EXPECTED: WebSocket event delivery issues during LLM operations ({len(connection_data['events_received'])}/{len(expected_events)} events)""EXPECTED: LLM manager inconsistency in WebSocket flow ({len(unique_llm_ids)} manager IDs)""EXPECTED: Performance degradation in WebSocket + LLM integration (flow time: {total_flow_time:.2f}s)""WebSocket Flow: {len(connection_data['events_received'])}/{len(expected_events)} events, {len(connection_data['llm_operations'])} LLM ops")
         
         # This test should FAIL - we expect WebSocket integration violations
         assert len(websocket_violations) > 0, (

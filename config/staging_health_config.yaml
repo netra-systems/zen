@@ -327,7 +327,7 @@ notifications:
     smtp_port: 587
     smtp_username: "${SMTP_USERNAME}"
     smtp_password: "${SMTP_PASSWORD}"
-    from_address: "staging-health@netra.ai"
+    from_address: "staging-health@netrasystems.ai"
     
     recipients:
       oncall:

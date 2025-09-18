@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 
 # Staging environment URLs (canonical staging URLs per requirements)
 STAGING_URLS = {
-    'backend': 'https://backend.staging.netrasystems.ai',
+    'backend': 'https://api.staging.netrasystems.ai',
     'auth': 'https://auth.staging.netrasystems.ai',
     'frontend': 'https://frontend.staging.netrasystems.ai',
-    'websocket': 'wss://backend.staging.netrasystems.ai/ws'
+    'websocket': 'wss://api.staging.netrasystems.ai/ws'
 }
 
 class StagingBackendDiagnostic:
@@ -177,14 +177,14 @@ class StagingBackendOutageTests:
                 connection_result['status'] = 'CONNECTED'
                 logger.warning("UNEXPECTED: WebSocket connection succeeded")
 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             connection_result.update({
                 'status': 'CONNECTION_CLOSED',
                 'error_message': str(e)
             })
             logger.info(f"CONFIRMED: WebSocket connection closed - {str(e)}")
 
-        except websockets.exceptions.InvalidURI as e:
+        except websockets.InvalidURI as e:
             connection_result.update({
                 'status': 'INVALID_URI',
                 'error_message': str(e)

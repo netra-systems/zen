@@ -70,7 +70,7 @@ class PerformanceThresholdAdjustmentTests(SSotAsyncTestCase):
         logger.info(f"  First Event: {avg_first_event_latency:.2f}s vs {self.original_thresholds['first_event_max_seconds']}s ({('FAIL' if first_event_exceeds else 'PASS')})")
         logger.info(f"  Execution: {avg_execution_time:.2f}s vs {self.original_thresholds['total_execution_max_seconds']}s ({('FAIL' if execution_exceeds else 'PASS')})")
         assert connection_exceeds or first_event_exceeds or execution_exceeds, 'Should reproduce at least one threshold failure'
-        logger.info('✅ REPRODUCTION CONFIRMED: Original thresholds would fail with staging performance')
+        logger.info('CHECK REPRODUCTION CONFIRMED: Original thresholds would fail with staging performance')
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -96,7 +96,7 @@ class PerformanceThresholdAdjustmentTests(SSotAsyncTestCase):
         assert connection_passes, f"Connection time should pass staging threshold: {avg_connection_time:.2f}s <= {self.staging_optimized_thresholds['connection_time_max_seconds']}s"
         assert first_event_passes, f"First event latency should pass staging threshold: {avg_first_event_latency:.2f}s <= {self.staging_optimized_thresholds['first_event_max_seconds']}s"
         assert execution_passes, f"Execution time should pass staging threshold: {avg_execution_time:.2f}s <= {self.staging_optimized_thresholds['total_execution_max_seconds']}s"
-        logger.info('✅ STAGING THRESHOLDS VALIDATED: Would resolve Issue #677 performance failures')
+        logger.info('CHECK STAGING THRESHOLDS VALIDATED: Would resolve Issue #677 performance failures')
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -148,7 +148,7 @@ class PerformanceThresholdAdjustmentTests(SSotAsyncTestCase):
             assert recommended_thresholds['connection_time_max_seconds'] >= 10.0, 'Connection threshold should accommodate cold starts'
             assert recommended_thresholds['first_event_max_seconds'] >= 15.0, 'First event threshold should accommodate initialization'
             assert recommended_thresholds['total_execution_max_seconds'] >= 100.0, 'Execution threshold should accommodate staging performance'
-        logger.info('✅ PERFORMANCE ANALYSIS COMPLETE: Threshold recommendations validated')
+        logger.info('CHECK PERFORMANCE ANALYSIS COMPLETE: Threshold recommendations validated')
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -176,7 +176,7 @@ class PerformanceThresholdAdjustmentTests(SSotAsyncTestCase):
         assert connection_passes, f"Connection time should pass conservative threshold: {avg_connection_time:.2f}s <= {self.conservative_staging_thresholds['connection_time_max_seconds']}s"
         assert first_event_passes, f"First event latency should pass conservative threshold: {avg_first_event_latency:.2f}s <= {self.conservative_staging_thresholds['first_event_max_seconds']}s"
         assert execution_passes, f"Execution time should pass conservative threshold: {avg_execution_time:.2f}s <= {self.conservative_staging_thresholds['total_execution_max_seconds']}s"
-        logger.info('✅ CONSERVATIVE THRESHOLDS VALIDATED: Would handle worst-case staging scenarios')
+        logger.info('CHECK CONSERVATIVE THRESHOLDS VALIDATED: Would handle worst-case staging scenarios')
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -188,7 +188,7 @@ class PerformanceThresholdAdjustmentTests(SSotAsyncTestCase):
         """
         logger.info('🔍 ISSUE #677: Generating final threshold adjustment recommendations')
         threshold_analysis = {'original': {'thresholds': self.original_thresholds, 'staging_compatibility': 'Poor', 'failure_rate_estimate': 0.8, 'business_risk': 'High - blocks staging validation'}, 'staging_optimized': {'thresholds': self.staging_optimized_thresholds, 'staging_compatibility': 'Good', 'failure_rate_estimate': 0.2, 'business_risk': 'Low - enables staging validation'}, 'conservative': {'thresholds': self.conservative_staging_thresholds, 'staging_compatibility': 'Excellent', 'failure_rate_estimate': 0.05, 'business_risk': 'Minimal - maximum compatibility'}}
-        recommendations = {'immediate_fix': {'option': 'Staging-Optimized Thresholds', 'rationale': 'Balances performance requirements with staging environment realities', 'changes': {'connection_time_max_seconds': f"{self.original_thresholds['connection_time_max_seconds']} → {self.staging_optimized_thresholds['connection_time_max_seconds']}", 'first_event_max_seconds': f"{self.original_thresholds['first_event_max_seconds']} → {self.staging_optimized_thresholds['first_event_max_seconds']}", 'total_execution_max_seconds': f"{self.original_thresholds['total_execution_max_seconds']} → {self.staging_optimized_thresholds['total_execution_max_seconds']}"}, 'implementation_effort': 'Low', 'success_probability': 0.9}, 'conservative_fallback': {'option': 'Conservative Staging Thresholds', 'rationale': 'Maximum compatibility with all staging scenarios', 'changes': {'connection_time_max_seconds': f"{self.original_thresholds['connection_time_max_seconds']} → {self.conservative_staging_thresholds['connection_time_max_seconds']}", 'first_event_max_seconds': f"{self.original_thresholds['first_event_max_seconds']} → {self.conservative_staging_thresholds['first_event_max_seconds']}", 'total_execution_max_seconds': f"{self.original_thresholds['total_execution_max_seconds']} → {self.conservative_staging_thresholds['total_execution_max_seconds']}"}, 'implementation_effort': 'Low', 'success_probability': 0.95}, 'infrastructure_fix': {'option': 'Staging Infrastructure Repair', 'rationale': 'Address root cause rather than adjust thresholds', 'changes': {'staging_deployment': 'Fix 503 Service Unavailable errors', 'websocket_endpoints': 'Resolve connection timeouts', 'performance_optimization': 'Improve staging environment performance'}, 'implementation_effort': 'High', 'success_probability': 0.7}}
+        recommendations = {'immediate_fix': {'option': 'Staging-Optimized Thresholds', 'rationale': 'Balances performance requirements with staging environment realities', 'changes': {'connection_time_max_seconds': f"{self.original_thresholds['connection_time_max_seconds']} -> {self.staging_optimized_thresholds['connection_time_max_seconds']}", 'first_event_max_seconds': f"{self.original_thresholds['first_event_max_seconds']} -> {self.staging_optimized_thresholds['first_event_max_seconds']}", 'total_execution_max_seconds': f"{self.original_thresholds['total_execution_max_seconds']} -> {self.staging_optimized_thresholds['total_execution_max_seconds']}"}, 'implementation_effort': 'Low', 'success_probability': 0.9}, 'conservative_fallback': {'option': 'Conservative Staging Thresholds', 'rationale': 'Maximum compatibility with all staging scenarios', 'changes': {'connection_time_max_seconds': f"{self.original_thresholds['connection_time_max_seconds']} -> {self.conservative_staging_thresholds['connection_time_max_seconds']}", 'first_event_max_seconds': f"{self.original_thresholds['first_event_max_seconds']} -> {self.conservative_staging_thresholds['first_event_max_seconds']}", 'total_execution_max_seconds': f"{self.original_thresholds['total_execution_max_seconds']} -> {self.conservative_staging_thresholds['total_execution_max_seconds']}"}, 'implementation_effort': 'Low', 'success_probability': 0.95}, 'infrastructure_fix': {'option': 'Staging Infrastructure Repair', 'rationale': 'Address root cause rather than adjust thresholds', 'changes': {'staging_deployment': 'Fix 503 Service Unavailable errors', 'websocket_endpoints': 'Resolve connection timeouts', 'performance_optimization': 'Improve staging environment performance'}, 'implementation_effort': 'High', 'success_probability': 0.7}}
         for option_name, recommendation in recommendations.items():
             assert 'option' in recommendation
             assert 'rationale' in recommendation
@@ -206,7 +206,7 @@ class PerformanceThresholdAdjustmentTests(SSotAsyncTestCase):
                 logger.info(f'     {change_type}: {change_detail}')
         assert best_recommendation[1]['success_probability'] >= 0.9, 'Best recommendation should have high success probability'
         assert best_recommendation[1]['implementation_effort'] == 'Low', 'Best recommendation should have low implementation effort'
-        logger.info('✅ FINAL RECOMMENDATIONS GENERATED: Ready for Issue #677 resolution implementation')
+        logger.info('CHECK FINAL RECOMMENDATIONS GENERATED: Ready for Issue #677 resolution implementation')
         return recommendations
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

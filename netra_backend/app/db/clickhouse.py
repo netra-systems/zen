@@ -16,11 +16,11 @@ import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.core.configuration import get_configuration
+from netra_backend.app.config import get_config as get_configuration  # SSOT UnifiedConfigManager
 from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
-from netra_backend.app.logging_config import central_logger as logger
+from shared.logging.unified_logging_ssot import get_logger
 from shared.isolated_environment import get_env
 from netra_backend.app.db.transaction_errors import (
     DeadlockError, ConnectionError, TransactionError, TimeoutError,
@@ -29,6 +29,8 @@ from netra_backend.app.db.transaction_errors import (
 )
 from sqlalchemy.exc import SQLAlchemyError, OperationalError, IntegrityError
 # test_decorator removed - production code must not depend on test_framework
+
+logger = get_logger(__name__)
 
 # Check if ClickHouse is available
 try:
@@ -662,7 +664,7 @@ async def get_clickhouse_client(bypass_manager: bool = False, service_context: O
     
     # CRITICAL FIX: Use unified config environment for better testing support
     # The unified config system correctly handles test environment detection
-    from netra_backend.app.core.configuration import get_configuration
+    from netra_backend.app.config import get_config as get_configuration  # SSOT UnifiedConfigManager
     unified_config = get_configuration()
     actual_environment = getattr(unified_config, 'environment', environment)
     environment = actual_environment
@@ -799,7 +801,7 @@ async def _test_and_yield_client(client):
 
 def _log_connection_attempt(config, use_secure: bool):
     """Log ClickHouse connection attempt."""
-    from netra_backend.app.core.configuration import get_configuration
+    from netra_backend.app.config import get_config as get_configuration  # SSOT UnifiedConfigManager
     app_config = get_configuration()
     logger.info(f"[ClickHouse] Connecting to instance at {config.host}:{config.port} (secure={use_secure}, environment={app_config.environment})")
 

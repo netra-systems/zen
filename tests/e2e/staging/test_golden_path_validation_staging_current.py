@@ -14,15 +14,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-_lazy_imports = {}
-
-def lazy_import(module_path: str, component: str = None):
-    """Lazy import pattern for performance optimization"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component] if component else [])
@@ -31,12 +23,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
-            _lazy_imports[module_path] = None
-    
-    return _lazy_imports[module_path]
-
-"""
+            print(f"Warning: Failed to lazy load {module_path}: {e}""""
 E2E STAGING TEST: Current Golden Path Validation Issues
 
 This test is DESIGNED TO FAIL against the current staging environment
@@ -147,7 +134,7 @@ class GoldenPathValidationStagingIssuesTests:
                 headers = {"Authorization": f"Bearer {token}"}
                 
                 # Test basic backend health
-                backend_url = "https://staging-backend.netra-systems.com/health"  # Adjust URL
+                backend_url = "https://staging-api.netra-systems.com/health"  # Adjust URL
                 response = await client.get(backend_url, headers=headers)
                 
                 # Should get some response indicating backend is reachable

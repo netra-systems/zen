@@ -41,7 +41,7 @@ class EnvironmentValidationTest(unittest.TestCase):
         print(f"\nCurrent working directory: {current_dir}")
 
         if current_dir not in sys.path:
-            print("⚠️  Current directory not in sys.path")
+            print("WARNING️  Current directory not in sys.path")
             self.python_path_issues.append("current_directory_missing")
 
         # Check for netra_backend accessibility
@@ -49,12 +49,12 @@ class EnvironmentValidationTest(unittest.TestCase):
         print(f"\nChecking netra_backend path: {netra_backend_path}")
 
         if netra_backend_path.exists():
-            print("✓ netra_backend directory exists")
+            print("CHECK netra_backend directory exists")
 
             # Check if we can import netra_backend
             try:
                 import netra_backend
-                print("✓ netra_backend package imports successfully")
+                print("CHECK netra_backend package imports successfully")
                 print(f"  Location: {netra_backend.__file__}")
             except ImportError as e:
                 print(f"✗ netra_backend import failed: {e}")
@@ -89,7 +89,7 @@ class EnvironmentValidationTest(unittest.TestCase):
                     self.module_discovery_issues.append(module_name)
                     continue
 
-                print(f"  ✓ Module spec found")
+                print(f"  CHECK Module spec found")
                 print(f"    Name: {spec.name}")
                 print(f"    Origin: {spec.origin}")
                 print(f"    Loader: {type(spec.loader).__name__ if spec.loader else 'None'}")
@@ -98,7 +98,7 @@ class EnvironmentValidationTest(unittest.TestCase):
                 if spec.origin:
                     origin_path = Path(spec.origin)
                     if origin_path.exists():
-                        print(f"    ✓ Origin file exists: {origin_path}")
+                        print(f"    CHECK Origin file exists: {origin_path}")
                         stat = origin_path.stat()
                         print(f"      Size: {stat.st_size} bytes")
                         print(f"      Modified: {stat.st_mtime}")
@@ -109,7 +109,7 @@ class EnvironmentValidationTest(unittest.TestCase):
                 # Test if we can create module from spec
                 try:
                     module = importlib.util.module_from_spec(spec)
-                    print(f"    ✓ Module object created successfully")
+                    print(f"    CHECK Module object created successfully")
                 except Exception as e:
                     print(f"    ✗ Module creation failed: {e}")
 
@@ -145,22 +145,22 @@ class EnvironmentValidationTest(unittest.TestCase):
         if pythonpath:
             pythonpath_dirs = pythonpath.split(os.pathsep)
             if current_dir not in pythonpath_dirs:
-                print(f"⚠️  Current directory not in PYTHONPATH")
+                print(f"WARNING️  Current directory not in PYTHONPATH")
                 self.environment_issues.append("current_dir_not_in_pythonpath")
         else:
-            print("⚠️  PYTHONPATH not set")
+            print("WARNING️  PYTHONPATH not set")
             self.environment_issues.append("pythonpath_not_set")
 
         # Check virtual environment
         virtual_env = os.environ.get('VIRTUAL_ENV')
         if virtual_env:
-            print(f"✓ Virtual environment: {virtual_env}")
+            print(f"CHECK Virtual environment: {virtual_env}")
             venv_path = Path(virtual_env)
             if not venv_path.exists():
                 print(f"✗ Virtual environment path does not exist: {venv_path}")
                 self.environment_issues.append("venv_path_missing")
         else:
-            print("⚠️  No virtual environment detected")
+            print("WARNING️  No virtual environment detected")
 
     def test_site_packages_configuration(self):
         """Test site-packages configuration"""
@@ -188,11 +188,11 @@ class EnvironmentValidationTest(unittest.TestCase):
 
         # Check if we're running under pytest or unittest
         if 'pytest' in sys.modules:
-            print("✓ Running under pytest")
+            print("CHECK Running under pytest")
             pytest_version = sys.modules['pytest'].__version__
             print(f"  Version: {pytest_version}")
         else:
-            print("✓ Running under unittest")
+            print("CHECK Running under unittest")
 
         # Check for test-specific environment modifications
         print("\nTest-specific sys.path modifications:")
@@ -212,7 +212,7 @@ class EnvironmentValidationTest(unittest.TestCase):
         # Verify test can access main codebase
         try:
             from netra_backend.app.core.configuration.base import get_config
-            print("✓ Test can access main codebase (configuration)")
+            print("CHECK Test can access main codebase (configuration)")
         except ImportError as e:
             print(f"✗ Test cannot access main codebase: {e}")
             self.environment_issues.append("codebase_access_failed")
@@ -242,10 +242,10 @@ class EnvironmentValidationTest(unittest.TestCase):
             try:
                 __import__(module_name)
                 duration = time.time() - start_time
-                print(f"  ✓ Import successful: {duration:.3f}s")
+                print(f"  CHECK Import successful: {duration:.3f}s")
 
                 if duration > 10.0:
-                    print(f"  ⚠️  SLOW IMPORT: {duration:.3f}s")
+                    print(f"  WARNING️  SLOW IMPORT: {duration:.3f}s")
                     self.environment_issues.append(f"slow_import_{module_name}")
 
             except Exception as e:
@@ -301,7 +301,7 @@ except Exception as e:
                 print(f"✗ Subprocess failed with return code: {result.returncode}")
                 self.environment_issues.append("subprocess_import_failed")
             else:
-                print("✓ Subprocess completed successfully")
+                print("CHECK Subprocess completed successfully")
 
         except subprocess.TimeoutExpired:
             print("✗ Subprocess timed out (import hang detected)")
@@ -336,7 +336,7 @@ except Exception as e:
                        len(self.module_discovery_issues) + len(self.environment_issues))
 
         if total_issues == 0:
-            print("\n✓ Environment validation passed - no issues detected")
+            print("\nCHECK Environment validation passed - no issues detected")
         else:
             print(f"\n✗ Environment validation found {total_issues} issues")
 

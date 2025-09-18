@@ -96,7 +96,7 @@ class GCPSecretManagerConnectivityTests(SSotBaseTestCase):
             secrets_list = list(response)
             api_response_time = time.time() - start_time
             
-            logger.info(f"✅ SUCCESS: GCP Secret Manager API connectivity established")
+            logger.info(f"CHECK SUCCESS: GCP Secret Manager API connectivity established")
             logger.info(f"   - Project: {self.gcp_project}")
             logger.info(f"   - API Response Time: {api_response_time:.2f}s")
             logger.info(f"   - Available Secrets: {len(secrets_list)}")
@@ -108,7 +108,7 @@ class GCPSecretManagerConnectivityTests(SSotBaseTestCase):
         except ImportError:
             pytest.fail("google-cloud-secret-manager package not installed. Install with: pip install google-cloud-secret-manager")
         except Exception as e:
-            logger.error(f"❌ FAILURE: GCP Secret Manager API connectivity failed: {e}")
+            logger.error(f"X FAILURE: GCP Secret Manager API connectivity failed: {e}")
             pytest.fail(f"GCP Secret Manager API connectivity failed: {e}")
 
     def test_service_account_authentication(self):
@@ -141,18 +141,18 @@ class GCPSecretManagerConnectivityTests(SSotBaseTestCase):
                 # Force execution to test authentication
                 list(response)
                 
-                logger.info("✅ SUCCESS: Service account authentication working")
+                logger.info("CHECK SUCCESS: Service account authentication working")
                 logger.info(f"   - Authenticated Project ID: {project_id}")
                 logger.info(f"   - Target Project: {self.gcp_project}")
                 
             except Exception as auth_error:
-                logger.error(f"❌ AUTHENTICATION FAILURE: {auth_error}")
+                logger.error(f"X AUTHENTICATION FAILURE: {auth_error}")
                 pytest.fail(f"Service account lacks Secret Manager permissions: {auth_error}")
                 
         except ImportError:
             pytest.fail("google-auth package not available")
         except Exception as e:
-            logger.error(f"❌ FAILURE: Service account authentication failed: {e}")
+            logger.error(f"X FAILURE: Service account authentication failed: {e}")
             pytest.fail(f"Service account authentication failed: {e}")
 
     def test_critical_secrets_existence_in_gcp(self):
@@ -196,20 +196,20 @@ class GCPSecretManagerConnectivityTests(SSotBaseTestCase):
             
             # Log results
             if existing_secrets:
-                logger.info(f"✅ EXISTING SECRETS: {existing_secrets}")
+                logger.info(f"CHECK EXISTING SECRETS: {existing_secrets}")
             
             if missing_secrets:
-                logger.error(f"❌ MISSING SECRETS: {missing_secrets}")
+                logger.error(f"X MISSING SECRETS: {missing_secrets}")
                 logger.info("🔧 REMEDIATION: Create missing secrets in GCP Secret Manager:")
                 for secret in missing_secrets:
                     logger.info(f"   gcloud secrets create {secret} --data-file=-")
                 
                 pytest.fail(f"Missing critical secrets in GCP Secret Manager: {missing_secrets}")
             else:
-                logger.info("✅ SUCCESS: All critical secrets exist in GCP Secret Manager")
+                logger.info("CHECK SUCCESS: All critical secrets exist in GCP Secret Manager")
                 
         except Exception as e:
-            logger.error(f"❌ FAILURE: Error checking secret existence: {e}")
+            logger.error(f"X FAILURE: Error checking secret existence: {e}")
             pytest.fail(f"Error checking secret existence: {e}")
 
     def test_secret_value_retrieval_performance(self):
@@ -272,13 +272,13 @@ class GCPSecretManagerConnectivityTests(SSotBaseTestCase):
             
             if successful_retrievals:
                 avg_time = sum(r['retrieval_time'] for r in successful_retrievals) / len(successful_retrievals)
-                logger.info(f"✅ PERFORMANCE: Average retrieval time: {avg_time:.3f}s")
+                logger.info(f"CHECK PERFORMANCE: Average retrieval time: {avg_time:.3f}s")
             
             if failed_retrievals:
-                logger.warning(f"⚠️ PERFORMANCE: {len(failed_retrievals)} secrets failed retrieval")
+                logger.warning(f"WARNING️ PERFORMANCE: {len(failed_retrievals)} secrets failed retrieval")
                 
         except Exception as e:
-            logger.error(f"❌ FAILURE: Secret retrieval performance test failed: {e}")
+            logger.error(f"X FAILURE: Secret retrieval performance test failed: {e}")
             pytest.fail(f"Secret retrieval performance test failed: {e}")
 
     def test_secret_value_validation(self):
@@ -358,7 +358,7 @@ class GCPSecretManagerConnectivityTests(SSotBaseTestCase):
             invalid_secrets = [r for r in validation_results if not r.get('valid')]
             
             if invalid_secrets:
-                logger.error(f"❌ VALIDATION FAILURE: Invalid secrets detected")
+                logger.error(f"X VALIDATION FAILURE: Invalid secrets detected")
                 for invalid in invalid_secrets:
                     secret_name = invalid['secret']
                     if invalid.get('is_placeholder'):
@@ -371,10 +371,10 @@ class GCPSecretManagerConnectivityTests(SSotBaseTestCase):
                 logger.info("🔧 REMEDIATION: Update invalid secrets with real values in GCP Secret Manager")
                 pytest.fail(f"Secret validation failed for: {[s['secret'] for s in invalid_secrets]}")
             else:
-                logger.info("✅ SUCCESS: All tested secrets contain valid values")
+                logger.info("CHECK SUCCESS: All tested secrets contain valid values")
                 
         except Exception as e:
-            logger.error(f"❌ FAILURE: Secret value validation failed: {e}")
+            logger.error(f"X FAILURE: Secret value validation failed: {e}")
             pytest.fail(f"Secret value validation failed: {e}")
 
     def test_gcp_secret_manager_error_handling(self):
@@ -451,13 +451,13 @@ class GCPSecretManagerConnectivityTests(SSotBaseTestCase):
             unhandled_errors = [s for s in error_scenarios if not s.get('handled')]
             
             if unhandled_errors:
-                logger.error(f"❌ ERROR HANDLING FAILURE: Unhandled error scenarios: {unhandled_errors}")
+                logger.error(f"X ERROR HANDLING FAILURE: Unhandled error scenarios: {unhandled_errors}")
                 pytest.fail(f"Error handling failed for scenarios: {[s['scenario'] for s in unhandled_errors]}")
             else:
-                logger.info("✅ SUCCESS: All error scenarios properly handled")
+                logger.info("CHECK SUCCESS: All error scenarios properly handled")
                 
         except Exception as e:
-            logger.error(f"❌ FAILURE: Error handling test failed: {e}")
+            logger.error(f"X FAILURE: Error handling test failed: {e}")
             pytest.fail(f"Error handling test failed: {e}")
 
     def test_gcp_secret_manager_quota_and_limits(self):
@@ -528,10 +528,10 @@ class GCPSecretManagerConnectivityTests(SSotBaseTestCase):
             assert success_rate >= 0.8, \
                 f"Low success rate ({success_rate:.1%}) may indicate quota/rate limit issues"
             
-            logger.info(f"✅ SUCCESS: GCP Secret Manager quota/limits test passed (success rate: {success_rate:.1%})")
+            logger.info(f"CHECK SUCCESS: GCP Secret Manager quota/limits test passed (success rate: {success_rate:.1%})")
             
         except Exception as e:
-            logger.error(f"❌ FAILURE: Quota/limits test failed: {e}")
+            logger.error(f"X FAILURE: Quota/limits test failed: {e}")
             pytest.fail(f"Quota/limits test failed: {e}")
 
 
@@ -569,18 +569,18 @@ class GCPSecretManagerConfigurationTests(SSotBaseTestCase):
                 # Get first few secrets to validate access
                 secrets_count = len(list(response))
                 
-                logger.info(f"✅ SUCCESS: GCP project configuration valid")
+                logger.info(f"CHECK SUCCESS: GCP project configuration valid")
                 logger.info(f"   - Project ID: {project_id}")
                 logger.info(f"   - Accessible Secrets: {secrets_count}")
                 
             except Exception as project_error:
-                logger.error(f"❌ PROJECT CONFIGURATION ERROR: {project_error}")
+                logger.error(f"X PROJECT CONFIGURATION ERROR: {project_error}")
                 pytest.fail(f"GCP project configuration invalid: {project_error}")
                 
         except ImportError:
             pytest.fail("google-cloud-secret-manager not available")
         except Exception as e:
-            logger.error(f"❌ FAILURE: GCP project configuration test failed: {e}")
+            logger.error(f"X FAILURE: GCP project configuration test failed: {e}")
             pytest.fail(f"GCP project configuration test failed: {e}")
 
     def test_secret_manager_permissions_validation(self):
@@ -642,7 +642,7 @@ class GCPSecretManagerConfigurationTests(SSotBaseTestCase):
             failed_permissions = [p for p in permissions_test_results if not p.get('granted')]
             
             if failed_permissions:
-                logger.error(f"❌ PERMISSIONS FAILURE: Missing permissions")
+                logger.error(f"X PERMISSIONS FAILURE: Missing permissions")
                 for perm in failed_permissions:
                     logger.error(f"   - {perm['permission']}: {perm.get('error', 'Access denied')}")
                 
@@ -653,8 +653,8 @@ class GCPSecretManagerConfigurationTests(SSotBaseTestCase):
                 
                 pytest.fail(f"Missing Secret Manager permissions: {[p['permission'] for p in failed_permissions]}")
             else:
-                logger.info("✅ SUCCESS: Service account has proper Secret Manager permissions")
+                logger.info("CHECK SUCCESS: Service account has proper Secret Manager permissions")
                 
         except Exception as e:
-            logger.error(f"❌ FAILURE: Permissions validation failed: {e}")
+            logger.error(f"X FAILURE: Permissions validation failed: {e}")
             pytest.fail(f"Permissions validation failed: {e}")

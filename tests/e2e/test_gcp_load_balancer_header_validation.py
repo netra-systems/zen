@@ -148,12 +148,12 @@ class GCPLoadBalancerHeaderValidationTests(SSotBaseTestCase):
                 except asyncio.TimeoutError:
                     result['headers_preserved'] = True
                     result['status'] = 'connection_established_no_response'
-        except websockets.exceptions.InvalidHandshake as e:
+        except websockets.InvalidHandshake as e:
             result['error'] = f'WebSocket handshake failed: {e}'
             result['status'] = 'handshake_failed'
             if '401' in str(e) or '403' in str(e):
                 result['error'] += ' (possible auth header stripping)'
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             result['error'] = f'WebSocket connection closed: {e}'
             result['status'] = 'connection_closed'
         except Exception as e:

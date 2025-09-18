@@ -197,7 +197,7 @@ async def setup_staging_authentication(self):
 # In WebSocket client setup
 def get_staging_websocket_url(self) -> str:
     """Get proper staging WebSocket URL"""
-    base_url = get_env("STAGING_WEBSOCKET_URL", "wss://staging-api.netra.ai")
+    base_url = get_env("STAGING_WEBSOCKET_URL", "wss://staging-api.netrasystems.ai")
     return f"{base_url}/ws"
 ```
 

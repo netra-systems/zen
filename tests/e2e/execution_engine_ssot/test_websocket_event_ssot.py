@@ -4,7 +4,7 @@ PURPOSE: Validate WebSocket events delivered through UserExecutionEngine only
 SHOULD FAIL NOW: Events delivered through multiple paths
 SHOULD PASS AFTER: Events delivered through UserExecutionEngine only
 
-Business Value: Prevents $500K+ ARR WebSocket event delivery corruption
+Business Value: Prevents 500K+ ARR WebSocket event delivery corruption
 """
 
 import pytest
@@ -120,7 +120,7 @@ class WebSocketEventSSotTests(SSotAsyncTestCase):
         if violations:
             print("   Event Delivery Violations:")
             for violation in violations:
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
 
         print(f"\n   Delivery Path Details:")
         for path in sorted(self.event_tracker.delivery_paths):
@@ -134,7 +134,7 @@ class WebSocketEventSSotTests(SSotAsyncTestCase):
         self.assertGreater(
             len(violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(violations)} WebSocket event delivery violations. "
+            f"X SSOT VIOLATION: Found {len(violations)} WebSocket event delivery violations. "
             f"Events must be delivered only through {self.ssot_execution_engine}."
         )
 
@@ -148,13 +148,13 @@ class WebSocketEventSSotTests(SSotAsyncTestCase):
         if agent_violations:
             print("   Agent Event Source Violations:")
             for violation in agent_violations:
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - Agent event source violations detected
         self.assertGreater(
             len(agent_violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(agent_violations)} agent event source violations. "
+            f"X SSOT VIOLATION: Found {len(agent_violations)} agent event source violations. "
             "All agent events must originate from SSOT execution engine."
         )
 
@@ -168,13 +168,13 @@ class WebSocketEventSSotTests(SSotAsyncTestCase):
         if isolation_violations:
             print("   Isolation Violations:")
             for violation in isolation_violations:
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - Event isolation violations detected
         self.assertGreater(
             len(isolation_violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(isolation_violations)} event isolation violations. "
+            f"X SSOT VIOLATION: Found {len(isolation_violations)} event isolation violations. "
             "Non-SSOT engines cause cross-user event contamination."
         )
 
@@ -188,13 +188,13 @@ class WebSocketEventSSotTests(SSotAsyncTestCase):
         if consistency_violations:
             print("   Consistency Violations:")
             for violation in consistency_violations:
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - Event consistency violations detected
         self.assertGreater(
             len(consistency_violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(consistency_violations)} event consistency violations. "
+            f"X SSOT VIOLATION: Found {len(consistency_violations)} event consistency violations. "
             "Different engines produce inconsistent event patterns."
         )
 
@@ -208,13 +208,13 @@ class WebSocketEventSSotTests(SSotAsyncTestCase):
         if binding_violations:
             print("   Emitter Binding Violations:")
             for violation in binding_violations:
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - Emitter binding violations detected
         self.assertGreater(
             len(binding_violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(binding_violations)} emitter binding violations. "
+            f"X SSOT VIOLATION: Found {len(binding_violations)} emitter binding violations. "
             "WebSocket emitters must bind only to SSOT execution engines."
         )
 

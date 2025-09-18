@@ -3,7 +3,7 @@ Unit Tests for WebSocket Authentication Business Logic
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free, Early, Mid, Enterprise) 
-- Business Goal: Revenue Protection - Prevents authentication failures that block user access to $500K+ ARR chat functionality
+- Business Goal: Revenue Protection - Prevents authentication failures that block user access to 500K+ ARR chat functionality
 - Value Impact: WebSocket authentication is the gateway to ALL AI-powered interactions
 - Strategic Impact: Unit tests provide fast feedback (30s execution) for critical authentication flows
 

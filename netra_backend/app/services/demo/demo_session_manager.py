@@ -2,7 +2,7 @@
 
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
     
 from netra_backend.app.logging_config import central_logger
@@ -151,15 +151,15 @@ class DemoSessionManager:
                     "user_id": str(user_id) if user_id else None,
                     "status": "active",
                     "progress_percentage": 0.0,
-                    "started_at": datetime.utcnow().isoformat(),
-                    "created_at": datetime.utcnow().isoformat(),
+                    "started_at": datetime.now(timezone.utc).isoformat(),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
                     "messages": []  # Store messages in memory
                 }
                 self._in_memory_sessions[session_id] = session_data
                 return session_data
                 
             user_id_str = str(user_id) if user_id else None
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             
             row = await conn.fetchrow(
                 """
@@ -191,7 +191,7 @@ class DemoSessionManager:
                 "user_id": str(user_id) if user_id else None,
                 "status": "active",
                 "progress_percentage": 0.0,
-                "started_at": datetime.utcnow().isoformat(),
+                "started_at": datetime.now(timezone.utc).isoformat(),
                 "messages": []
             }
             self._in_memory_sessions[session_id] = session_data
@@ -218,7 +218,7 @@ class DemoSessionManager:
                         "message": message,
                         "agents": agents,
                         "metrics": metrics,
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(timezone.utc).isoformat()
                     })
                 return
                 
@@ -237,7 +237,7 @@ class DemoSessionManager:
                 message if role == "assistant" else None,
                 agents or [],
                 json.dumps(metrics) if metrics else None,
-                datetime.utcnow()
+                datetime.now(timezone.utc)
             )
             
             # Update session progress
@@ -250,7 +250,7 @@ class DemoSessionManager:
                     WHERE id = $1 AND progress_percentage < 100
                     """,
                     session_id,
-                    datetime.utcnow()
+                    datetime.now(timezone.utc)
                 )
                 
         except Exception as e:

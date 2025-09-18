@@ -1,0 +1,322 @@
+{
+  "report_metadata": {
+    "generated_timestamp": 1757977183.7006001,
+    "issue_number": "1278",
+    "analysis_scope": "Issue #1278 Staging Startup Failure Tests",
+    "analyzer_version": "1.0"
+  },
+  "test_analysis_summary": {
+    "total_files_analyzed": 4,
+    "total_fake_score": 0,
+    "total_quality_score": 91,
+    "normalized_fake_score": 0,
+    "normalized_quality_score": 100
+  },
+  "effectiveness_analysis": {
+    "timestamp": 1757977183.700594,
+    "effectiveness_criteria": {
+      "covers_critical_scenarios": true,
+      "tests_expected_failures": true,
+      "validates_infrastructure": true,
+      "measures_performance": true,
+      "comprehensive_coverage": true
+    },
+    "method_coverage": {
+      "test_staging_startup_simple.py": {
+        "total_methods": 3,
+        "async_methods": 0,
+        "documented_methods": 3,
+        "assertion_heavy_methods": 3
+      },
+      "test_issue_1278_staging_startup_failure_reproduction.py": {
+        "total_methods": 0,
+        "async_methods": 0,
+        "documented_methods": 0,
+        "assertion_heavy_methods": 0
+      },
+      "test_issue_1278_smd_phase3_database_timeout_unit.py": {
+        "total_methods": 1,
+        "async_methods": 0,
+        "documented_methods": 1,
+        "assertion_heavy_methods": 0
+      },
+      "test_issue_1278_database_connectivity_integration.py": {
+        "total_methods": 0,
+        "async_methods": 0,
+        "documented_methods": 0,
+        "assertion_heavy_methods": 0
+      }
+    },
+    "overall_effectiveness_score": 100.0,
+    "recommendations": [
+      "Test suite shows good quality indicators and comprehensive coverage"
+    ]
+  },
+  "fake_test_detection": {
+    "timestamp": 1757977183.700597,
+    "potentially_fake_files": [],
+    "high_quality_files": [
+      {
+        "file": "test_staging_startup_simple.py",
+        "quality_score": 19,
+        "test_methods": 3
+      },
+      {
+        "file": "test_issue_1278_staging_startup_failure_reproduction.py",
+        "quality_score": 14,
+        "test_methods": 0
+      },
+      {
+        "file": "test_issue_1278_smd_phase3_database_timeout_unit.py",
+        "quality_score": 39,
+        "test_methods": 1
+      },
+      {
+        "file": "test_issue_1278_database_connectivity_integration.py",
+        "quality_score": 19,
+        "test_methods": 0
+      }
+    ],
+    "suspicious_patterns": [],
+    "overall_fake_risk": "LOW"
+  },
+  "detailed_file_analysis": {
+    "test_staging_startup_simple.py": {
+      "file_path": "/Users/anthony/Desktop/netra-apex/test_staging_startup_simple.py",
+      "total_lines": 242,
+      "test_methods": [
+        {
+          "name": "test_staging_startup_failure_reproduction",
+          "line_number": 23,
+          "is_async": false,
+          "docstring": "Test staging startup failure reproduction for Issue #1278.\n\nThis test simulates the staging startup failure pattern:\n1. Phase 1 (INIT) succeeds quickly\n2. Phase 2 (DEPENDENCIES) succeeds slowly \n3. Phase 3 (DATABASE) times out\n4. Phases 4-7 are blocked\n5. FastAPI lifespan fails\n6. Container exits with code 3",
+          "assertion_count": 13
+        },
+        {
+          "name": "test_staging_container_restart_cycle",
+          "line_number": 84,
+          "is_async": false,
+          "docstring": "Test staging container restart cycle reproduction.\n\nThis test simulates the restart loop that occurs when SMD Phase 3\nconsistently fails, causing containers to restart repeatedly.",
+          "assertion_count": 4
+        },
+        {
+          "name": "test_staging_log_pattern_analysis",
+          "line_number": 116,
+          "is_async": false,
+          "docstring": "Test staging log pattern analysis for Issue #1278.\n\nThis test simulates analysis of staging logs to confirm the failure\npattern matches the documented issue.",
+          "assertion_count": 5
+        }
+      ],
+      "fake_indicators": [],
+      "quality_indicators": [
+        {
+          "pattern": "assert.*timeout",
+          "matches": 4,
+          "examples": [
+            "assert \"timed out\" in smd_phases[\"phase_3_database\"][\"failure_reason\"].lower(), \"Phase 3 should fail due to timeout",
+            "assert 20.0 <= smd_phases[\"phase_3_database\"][\"duration\"] <= 30.0, \"Phase 3 should timeout",
+            "assert len(phase3_failures) > 0, \"Should find Phase 3 database timeout"
+          ]
+        },
+        {
+          "pattern": "assert.*duration",
+          "matches": 4,
+          "examples": [
+            "assert 0.05 <= smd_phases[\"phase_1_init\"][\"duration\"] <= 0.1, \"Phase 1 duration",
+            "assert smd_phases[\"phase_2_dependencies\"][\"duration",
+            "assert 20.0 <= smd_phases[\"phase_3_database\"][\"duration"
+          ]
+        },
+        {
+          "pattern": "assert.*error",
+          "matches": 3,
+          "examples": [
+            "assert \"database\" in lifespan_result[\"error",
+            "assert \"database\" in attempt_result[\"failure_reason\"].lower(), f\"Attempt {attempt} should fail with database error",
+            "assert any(keyword in failure[\"error"
+          ]
+        },
+        {
+          "pattern": "assert.*failure",
+          "matches": 8,
+          "examples": [
+            "assert \"timed out\" in smd_phases[\"phase_3_database\"][\"failure",
+            "assert \"database\" in lifespan_result[\"error_message\"].lower(), \"Lifespan failure",
+            "assert \"database\" in attempt_result[\"failure"
+          ]
+        }
+      ],
+      "fake_test_score": 0,
+      "quality_score": 19,
+      "is_potentially_fake": false
+    },
+    "test_issue_1278_staging_startup_failure_reproduction.py": {
+      "file_path": "/Users/anthony/Desktop/netra-apex/tests/e2e/test_issue_1278_staging_startup_failure_reproduction.py",
+      "total_lines": 632,
+      "test_methods": [],
+      "fake_indicators": [],
+      "quality_indicators": [
+        {
+          "pattern": "assert.*timeout",
+          "matches": 2,
+          "examples": [
+            "assert \"timeout",
+            "assert 18.0 <= timeout"
+          ]
+        },
+        {
+          "pattern": "assert.*duration",
+          "matches": 5,
+          "examples": [
+            "assert expected_range[0] <= duration",
+            "assert duration",
+            "assert expected_range[0] <= duration"
+          ]
+        },
+        {
+          "pattern": "assert.*error",
+          "matches": 2,
+          "examples": [
+            "assert any(keyword in lifespan_error",
+            "assert any(keyword in error"
+          ]
+        },
+        {
+          "pattern": "assert.*failure",
+          "matches": 5,
+          "examples": [
+            "assert \"timeout\" in failure_reason.lower() or \"20.0\" in failure",
+            "assert failure_details.get(failure",
+            "assert \"database\" in failure_reason.lower() or \"phase\" in failure"
+          ]
+        }
+      ],
+      "fake_test_score": 0,
+      "quality_score": 14,
+      "is_potentially_fake": false
+    },
+    "test_issue_1278_smd_phase3_database_timeout_unit.py": {
+      "file_path": "/Users/anthony/Desktop/netra-apex/netra_backend/tests/unit/test_issue_1278_smd_phase3_database_timeout_unit.py",
+      "total_lines": 509,
+      "test_methods": [
+        {
+          "name": "test_container_exit_code_3_expected_behavior",
+          "line_number": 349,
+          "is_async": false,
+          "docstring": "Test that container exit code 3 is the expected behavior for startup failures.\n\nExit code 3 typically indicates configuration or dependency issues,\nwhich matches the SMD Phase 3 database timeout scenario.\n\nThis test validates the expected exit pattern without actually exiting.",
+          "assertion_count": 2
+        }
+      ],
+      "fake_indicators": [],
+      "quality_indicators": [
+        {
+          "pattern": "assert.*timeout",
+          "matches": 7,
+          "examples": [
+            "assert timeout_config[\"initialization_timeout\"] == expected_init_timeout",
+            "assert execution_time >= expected_init_timeout",
+            "assert execution_time < expected_init_timeout"
+          ]
+        },
+        {
+          "pattern": "assert.*error",
+          "matches": 2,
+          "examples": [
+            "assert any(keyword in lifespan_error",
+            "assert expected_error"
+          ]
+        },
+        {
+          "pattern": "assert.*failure",
+          "matches": 2,
+          "examples": [
+            "assert hasattr(app.state, 'startup_failed'), \"App should track startup failure",
+            "assert hasattr(app.state, 'startup_failed'), \"App should track startup failure"
+          ]
+        },
+        {
+          "pattern": "with pytest.raises",
+          "matches": 4,
+          "examples": [
+            "with pytest.raises",
+            "with pytest.raises",
+            "with pytest.raises"
+          ]
+        },
+        {
+          "pattern": "asyncio.TimeoutError",
+          "matches": 6,
+          "examples": [
+            "asyncio.TimeoutError",
+            "asyncio.TimeoutError",
+            "asyncio.TimeoutError"
+          ]
+        },
+        {
+          "pattern": "DeterministicStartupError",
+          "matches": 18,
+          "examples": [
+            "DeterministicStartupError",
+            "DeterministicStartupError",
+            "DeterministicStartupError"
+          ]
+        }
+      ],
+      "fake_test_score": 0,
+      "quality_score": 39,
+      "is_potentially_fake": false
+    },
+    "test_issue_1278_database_connectivity_integration.py": {
+      "file_path": "/Users/anthony/Desktop/netra-apex/netra_backend/tests/integration/test_issue_1278_database_connectivity_integration.py",
+      "total_lines": 597,
+      "test_methods": [],
+      "fake_indicators": [],
+      "quality_indicators": [
+        {
+          "pattern": "assert.*timeout",
+          "matches": 8,
+          "examples": [
+            "assert execution_time < self.staging_timeouts[\"command_timeout",
+            "assert execution_time >= self.staging_timeouts[\"command_timeout",
+            "assert execution_time <= self.staging_timeouts[\"connection_timeout"
+          ]
+        },
+        {
+          "pattern": "assert.*duration",
+          "matches": 2,
+          "examples": [
+            "assert abs(partition_time - partition_duration",
+            "assert execution_time < partition_duration"
+          ]
+        },
+        {
+          "pattern": "assert.*error",
+          "matches": 3,
+          "examples": [
+            "assert any(keyword in socket_error",
+            "assert len(timeout_error",
+            "assert any(keyword in ssl_error"
+          ]
+        },
+        {
+          "pattern": "asyncio.TimeoutError",
+          "matches": 6,
+          "examples": [
+            "asyncio.TimeoutError",
+            "asyncio.TimeoutError",
+            "asyncio.TimeoutError"
+          ]
+        }
+      ],
+      "fake_test_score": 0,
+      "quality_score": 19,
+      "is_potentially_fake": false
+    }
+  },
+  "final_recommendations": [
+    "\u2705 Test suite demonstrates high quality and effectiveness",
+    "\u2705 Low risk of fake tests detected",
+    "\u2705 Comprehensive coverage of Issue #1278 scenarios",
+    "\u2705 Tests are ready for production validation"
+  ]
+}

@@ -5,7 +5,7 @@ These tests are DESIGNED TO FAIL initially to demonstrate the missing
 end-to-end automated secret injection validation in the staging deployment
 pipeline.
 
-Business Impact: $500K+ ARR staging environment depends on reliable secret 
+Business Impact: 500K+ ARR staging environment depends on reliable secret 
 injection and validation during actual deployments to GCP.
 
 Test Coverage:

@@ -87,7 +87,7 @@ class ErrorRecoveryResilienceTests:
         """
         Test 1: Circuit Breaker Activation and Recovery with Business Continuity
         
-        Business Value: $200K+ ARR protection - Tests that:
+        Business Value: 200K+ ARR protection - Tests that:
         1. Circuit breakers activate under real system stress
         2. Business operations continue via fallback mechanisms
         3. Automatic recovery restores full functionality
@@ -267,7 +267,7 @@ class ErrorRecoveryResilienceTests:
         """
         Test 2: WebSocket Connection Resilience with Automatic Reconnection
         
-        Business Value: $150K+ ARR protection - Tests that:
+        Business Value: 150K+ ARR protection - Tests that:
         1. WebSocket connections survive network interruptions
         2. Automatic reconnection maintains real-time functionality
         3. Message queuing prevents data loss during disconnections
@@ -332,13 +332,7 @@ class ErrorRecoveryResilienceTests:
                     resilience_metrics["successful_connections"] += 1
                     connection_established = time.time()
                     
-                    logger.info(f" PASS:  WebSocket connected successfully (cycle {connection_cycle})")
-                    
-                    # Send test messages during connection
-                    test_message_count = 5
-                    for i in range(test_message_count):
-                        test_message = {
-                            "type": "resilience_test_message",
+                    logger.info(f" PASS:  WebSocket connected successfully (cycle {connection_cycle})""type": "resilience_test_message",
                             "message_id": f"resilience_{connection_cycle}_{i}",
                             "request_id": str(self.user_context.request_id),
                             "thread_id": str(self.user_context.thread_id),
@@ -388,7 +382,7 @@ class ErrorRecoveryResilienceTests:
                         await asyncio.sleep(5.0)
                         logger.info("[U+1F310] Simulating network interruption")
                     
-            except (websockets.exceptions.ConnectionClosed, websockets.exceptions.WebSocketException, OSError) as e:
+            except (websockets.ConnectionClosed, websockets.WebSocketException, OSError) as e:
                 resilience_metrics["disconnection_events"] += 1
                 disconnection_time = time.time()
                 downtime_start = disconnection_time
@@ -490,7 +484,7 @@ class ErrorRecoveryResilienceTests:
         """
         Test 3: Multi-Service Failure Cascade and Graceful Degradation Patterns
         
-        Business Value: $300K+ ARR protection - Tests that:
+        Business Value: 300K+ ARR protection - Tests that:
         1. System handles cascading failures across multiple services
         2. Graceful degradation maintains core functionality during outages
         3. Service isolation prevents complete system failures

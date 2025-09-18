@@ -11,7 +11,7 @@ MISSION CRITICAL: Tests real tool execution during agent message processing
 Business Value Justification (BVJ):
 - Segment: Mid/Enterprise Users requiring tool-assisted analysis
 - Business Goal: Tool Integration Validation & Advanced AI Capabilities
-- Value Impact: Validates $500K+ ARR premium features requiring tool execution
+- Value Impact: Validates 500K+ ARR premium features requiring tool execution
 - Strategic Impact: Demonstrates platform's advanced AI capabilities beyond simple chat
 
 Test Strategy:
@@ -118,10 +118,10 @@ class RealToolExecutionE2ETests(SSotAsyncTestCase):
         4. Tool results are integrated into meaningful response
         
         Flow:
-        1. Send data analysis request → agent processes
-        2. Agent executes data tools → tool_executing events
-        3. Tools complete → tool_completed events  
-        4. Response integrates tool results → business value
+        1. Send data analysis request -> agent processes
+        2. Agent executes data tools -> tool_executing events
+        3. Tools complete -> tool_completed events  
+        4. Response integrates tool results -> business value
         
         Coverage: Data analysis tools, tool event delivery, result integration
         """
@@ -156,7 +156,7 @@ class RealToolExecutionE2ETests(SSotAsyncTestCase):
                     if 'tool_completed' in event_type:
                         tool_completion_detected = True
                         tool_metrics['completions'] += 1
-                        self.logger.info(f'✅ Tool completion detected: {event_type}')
+                        self.logger.info(f'CHECK Tool completion detected: {event_type}')
                     if event_type == 'agent_completed':
                         final_response = event
                         break
@@ -189,7 +189,7 @@ class RealToolExecutionE2ETests(SSotAsyncTestCase):
             self.logger.info(f'   Response length: {len(response_text)} chars')
             self.logger.info(f'   Business indicators: {found_indicators}')
         except Exception as e:
-            self.logger.error(f'❌ Data analysis tool execution failed: {e}')
+            self.logger.error(f'X Data analysis tool execution failed: {e}')
             raise AssertionError(f'Data analysis tool execution failed: {e}. This breaks advanced AI capabilities requiring tool integration.')
 
     async def test_calculation_tool_execution(self):
@@ -203,9 +203,9 @@ class RealToolExecutionE2ETests(SSotAsyncTestCase):
         4. Calculations are integrated into actionable recommendations
         
         Flow:
-        1. Send calculation request → agent processes
-        2. Agent executes calculation tools → numeric results
-        3. Tool results integrated → response with calculated values
+        1. Send calculation request -> agent processes
+        2. Agent executes calculation tools -> numeric results
+        3. Tool results integrated -> response with calculated values
         4. Validate calculation accuracy and integration
         
         Coverage: Calculation tools, numeric processing, computational accuracy
@@ -274,7 +274,7 @@ class RealToolExecutionE2ETests(SSotAsyncTestCase):
             self.logger.info(f"   Accuracy score: {calculation_metrics['accuracy_score']:.3f}")
             self.logger.info(f'   Response length: {len(response_text)} chars')
         except Exception as e:
-            self.logger.error(f'❌ Calculation tool execution failed: {e}')
+            self.logger.error(f'X Calculation tool execution failed: {e}')
             raise AssertionError(f'Calculation tool execution failed: {e}. This breaks computational capabilities and business calculations.')
 
     async def test_multi_tool_workflow_execution(self):
@@ -288,9 +288,9 @@ class RealToolExecutionE2ETests(SSotAsyncTestCase):
         4. Comprehensive business insights are delivered
         
         Flow:
-        1. Send complex request → requires multiple tools
-        2. Agent executes tool sequence → data gathering → analysis → calculation
-        3. Tools coordinate → results build comprehensive analysis
+        1. Send complex request -> requires multiple tools
+        2. Agent executes tool sequence -> data gathering -> analysis -> calculation
+        3. Tools coordinate -> results build comprehensive analysis
         4. Final response integrates all tool outputs
         
         Coverage: Multi-tool coordination, workflow orchestration, complex analysis
@@ -363,7 +363,7 @@ class RealToolExecutionE2ETests(SSotAsyncTestCase):
             self.logger.info(f'   Business coverage: {coverage_rate:.1%}')
             self.logger.info(f'   Response length: {len(response_text)} chars')
         except Exception as e:
-            self.logger.error(f'❌ Multi-tool workflow execution failed: {e}')
+            self.logger.error(f'X Multi-tool workflow execution failed: {e}')
             raise AssertionError(f'Multi-tool workflow execution failed: {e}. This breaks complex analysis capabilities requiring tool coordination.')
 
     async def test_tool_error_handling_and_recovery(self):
@@ -449,7 +449,7 @@ class RealToolExecutionE2ETests(SSotAsyncTestCase):
             self.logger.info(f'   Business value maintained: {found_value}')
             self.logger.info(f'   Response length: {len(response_text)} chars')
         except Exception as e:
-            self.logger.error(f'❌ Tool error handling test failed: {e}')
+            self.logger.error(f'X Tool error handling test failed: {e}')
             raise AssertionError(f'Tool error handling and recovery failed: {e}. This breaks system resilience and user experience.')
 
     async def test_tool_performance_and_efficiency(self):
@@ -509,7 +509,7 @@ class RealToolExecutionE2ETests(SSotAsyncTestCase):
                         if tool_name in tool_start_times:
                             execution_time = event_time - tool_start_times[tool_name]
                             performance_metrics['tool_execution_times'].append(execution_time)
-                            self.logger.info(f'✅ Tool completed: {tool_name} ({execution_time:.2f}s)')
+                            self.logger.info(f'CHECK Tool completed: {tool_name} ({execution_time:.2f}s)')
                     if event_type == 'agent_completed':
                         final_response = event
                         break
@@ -557,7 +557,7 @@ class RealToolExecutionE2ETests(SSotAsyncTestCase):
             self.logger.info(f'   Business terms found: {found_terms}')
             self.logger.info(f'   Response length: {len(response_text)} chars')
         except Exception as e:
-            self.logger.error(f'❌ Tool performance test failed: {e}')
+            self.logger.error(f'X Tool performance test failed: {e}')
             raise AssertionError(f'Tool performance and efficiency test failed: {e}. This indicates tool execution performance issues.')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

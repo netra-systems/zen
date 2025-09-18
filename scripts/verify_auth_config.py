@@ -15,8 +15,9 @@ import requests
 def check_auth_service_endpoints(env: str) -> Tuple[str, List[str], List[str]]:
     """Check auth service endpoints for an environment."""
     if env == 'staging':
-        base_url = 'https://auth.staging.netrasystems.ai'
-        frontend_url = 'https://app.staging.netrasystems.ai'
+        # CRITICAL DOMAIN CONFIGURATION UPDATE (Issue #1278): Use correct staging domains
+        base_url = 'https://staging.netrasystems.ai'
+        frontend_url = 'https://staging.netrasystems.ai'
     elif env == 'production':
         base_url = 'https://auth.netrasystems.ai'
         frontend_url = 'https://netrasystems.ai'

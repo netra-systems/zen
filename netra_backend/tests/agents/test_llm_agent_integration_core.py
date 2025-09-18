@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, Mock, patch, MagicMock
 
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -37,70 +37,71 @@ UserIntent)
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
 
-class LLMAgentIntegrationCoreTests:
-    """Core tests for LLM agent integration."""
 
-    @pytest.fixture
-    def real_llm_manager():
-        """Use real service instance."""
-        # TODO: Initialize real service
-        """Create properly mocked LLM manager"""
-        # Mock: LLM service isolation for fast testing without API calls or rate limits
-        llm_manager = Mock(spec=LLMManager)
-        
-        # Mock standard LLM responses
-        # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager.call_llm = AsyncMock(return_value={
+@pytest.fixture
+def real_llm_manager():
+    """Use real service instance."""
+    # TODO: Initialize real service
+    """Create properly mocked LLM manager"""
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
+    llm_manager = Mock(spec=LLMManager)
+
+    # Mock standard LLM responses
+    # Mock: LLM provider isolation to prevent external API usage and costs
+    llm_manager.call_llm = AsyncMock(return_value={
         "content": "I'll help you optimize your AI workload",
         "tool_calls": []
-        })
-        
-        # Mock structured responses for triage
-        # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager.ask_llm = AsyncMock(return_value=json.dumps({
+    })
+
+    # Mock structured responses for triage
+    # Mock: LLM provider isolation to prevent external API usage and costs
+    llm_manager.ask_llm = AsyncMock(return_value=json.dumps({
         "category": "optimization",
         "confidence": 0.95,
         "requires_data": True,
         "requires_optimization": True,
         "requires_actions": True,
         "analysis": "User needs AI workload optimization"
-        }))
-        
-        # Mock structured LLM for triage agent
-        from netra_backend.app.agents.triage.unified_triage_agent import (
+    }))
+
+    # Mock structured LLM for triage agent
+    from netra_backend.app.agents.triage.unified_triage_agent import (
         Complexity,
         ExtractedEntities,
         Priority,
         TriageMetadata,
         TriageResult,
         UserIntent)
-        
-        # Mock: LLM provider isolation to prevent external API usage and costs
-        llm_manager.ask_structured_llm = AsyncMock(return_value=TriageResult(
+
+    # Mock: LLM provider isolation to prevent external API usage and costs
+    llm_manager.ask_structured_llm = AsyncMock(return_value=TriageResult(
         category="AI Optimization",
         confidence_score=0.95,
         priority=Priority.HIGH,
         complexity=Complexity.MODERATE,
         is_admin_mode=False,
         extracted_entities=ExtractedEntities(
-        models_mentioned=["GPT-4", "Claude"],
-        metrics_mentioned=["latency", "throughput"],
-        time_ranges=[]  # Empty list or proper dict format
+            models_mentioned=["GPT-4", "Claude"],
+            metrics_mentioned=["latency", "throughput"],
+            time_ranges=[]  # Empty list or proper dict format
         ),
         user_intent=UserIntent(
-        primary_intent="optimize",
-        secondary_intents=["analyze", "monitor"]
+            primary_intent="optimize",
+            secondary_intents=["analyze", "monitor"]
         ),
         tool_recommendations=[],  # Empty list or proper ToolRecommendation objects
         metadata=TriageMetadata(
-        triage_duration_ms=150,
-        cache_hit=False,
-        fallback_used=False,
-        retry_count=0
+            triage_duration_ms=150,
+            cache_hit=False,
+            fallback_used=False,
+            retry_count=0
         )
-        ))
-        
-        return llm_manager
+    ))
+
+    return llm_manager
+
+
+class LLMAgentIntegrationCoreTests:
 
     def mock_db_session(self):
         """Create mock database session"""

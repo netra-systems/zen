@@ -1,0 +1,24 @@
+{
+  "instances": [
+    {
+      "name": "code-reviewer",
+      "command": "/review the authentication system in auth_service/ directory, check for security issues and suggest improvements",
+      "description": "Review auth service security",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 15000
+    },
+    {
+      "name": "test-creator",
+      "command": "/createtestsv2 agent authentication flows, security validation",
+      "description": "Create auth tests",
+      "max_tokens_per_command": 20000
+    },
+    {
+      "name": "doc-generator",
+      "command": "/createdocs for the zen orchestrator token tracking features with examples",
+      "description": "Generate documentation",
+      "max_tokens_per_command": 12000
+    }
+  ]
+}

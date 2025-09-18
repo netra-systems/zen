@@ -6,9 +6,9 @@ Issues: #463 (Frontend WebSocket auth), #465 (Token management), #426 cluster
 Approach: Mock auth services, test real coordination patterns
 
 MISSION CRITICAL: These tests validate the complete authentication flow that enables
-the Golden Path user workflow (Login → WebSocket → AI Response) without Docker.
+the Golden Path user workflow (Login -> WebSocket -> AI Response) without Docker.
 
-Business Impact: Authentication enables $500K+ ARR user access to AI chat functionality
+Business Impact: Authentication enables 500K+ ARR user access to AI chat functionality
 """
 import pytest
 import asyncio
@@ -16,7 +16,7 @@ import json
 import jwt
 import uuid
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any, Optional, List
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -30,7 +30,7 @@ class WebSocketAuthenticationFlowTests(SSotAsyncTestCase):
         """Setup test environment with auth mocks and test contexts"""
         await super().asyncSetUp()
         self.jwt_secret = 'test-jwt-secret-key-must-be-at-least-32-characters-long'
-        self.test_user_data = {'user_id': str(uuid.uuid4()), 'email': 'test.user@netra-testing.ai', 'name': 'Test User', 'iat': datetime.utcnow(), 'exp': datetime.utcnow() + timedelta(hours=1)}
+        self.test_user_data = {'user_id': str(uuid.uuid4()), 'email': 'test.user@netra-testing.ai', 'name': 'Test User', 'iat': datetime.now(UTC), 'exp': datetime.now(UTC) + timedelta(hours=1)}
         self.valid_jwt_token = jwt.encode(self.test_user_data, self.jwt_secret, algorithm='HS256')
         self.encoded_token = base64.urlsafe_b64encode(self.valid_jwt_token.encode()).decode().rstrip('=')
         self.user_context = UserExecutionContext(user_id=UserID(self.test_user_data['user_id']), thread_id=ThreadID(str(uuid.uuid4())), run_id=RunID(str(uuid.uuid4())), request_id=f'auth_test_{uuid.uuid4()}', websocket_client_id=f'ws_auth_{uuid.uuid4()}', agent_context={'auth_test': True, 'user_email': self.test_user_data['email']}, audit_metadata={'test_case': 'websocket_auth_flow', 'auth_method': 'jwt'})
@@ -56,15 +56,15 @@ class WebSocketAuthenticationFlowTests(SSotAsyncTestCase):
             mock_auth_instance.validate_token.return_value = {'valid': True, 'user_data': self.test_user_data, 'user_id': self.test_user_data['user_id']}
             mock_auth.return_value = mock_auth_instance
             for protocol_test in websocket_protocols:
-                test_start = datetime.utcnow()
+                test_start = datetime.now(UTC)
                 try:
                     connection_result = await self._simulate_websocket_auth_handshake(frontend_auth_state=frontend_auth_state, websocket_protocols=protocol_test['protocols'], expected_success=protocol_test['should_succeed'])
-                    test_duration = (datetime.utcnow() - test_start).total_seconds()
+                    test_duration = (datetime.now(UTC) - test_start).total_seconds()
                     auth_coordination_results.append({'protocol_name': protocol_test['name'], 'protocols': protocol_test['protocols'], 'expected_success': protocol_test['should_succeed'], 'actual_success': connection_result['success'], 'duration': test_duration, 'details': connection_result.get('details', {})})
                     if protocol_test['should_succeed'] != connection_result['success']:
                         self.logger.error(f"Protocol coordination mismatch: {protocol_test['name']} expected {protocol_test['should_succeed']}, got {connection_result['success']}")
                 except Exception as e:
-                    auth_coordination_results.append({'protocol_name': protocol_test['name'], 'protocols': protocol_test['protocols'], 'expected_success': protocol_test['should_succeed'], 'actual_success': False, 'error': str(e), 'duration': (datetime.utcnow() - test_start).total_seconds()})
+                    auth_coordination_results.append({'protocol_name': protocol_test['name'], 'protocols': protocol_test['protocols'], 'expected_success': protocol_test['should_succeed'], 'actual_success': False, 'error': str(e), 'duration': (datetime.now(UTC) - test_start).total_seconds()})
         successful_coords = [r for r in auth_coordination_results if r['actual_success']]
         failed_coords = [r for r in auth_coordination_results if not r['actual_success']]
         self.logger.info(f'Auth coordination results: {len(successful_coords)} success, {len(failed_coords)} failed')
@@ -92,7 +92,7 @@ class WebSocketAuthenticationFlowTests(SSotAsyncTestCase):
             mock_auth_instance = AsyncMock()
 
             async def track_token_validation(token):
-                validation_event = {'timestamp': datetime.utcnow().isoformat(), 'token': token[:20] + '...', 'action': 'validate'}
+                validation_event = {'timestamp': datetime.now(UTC).isoformat(), 'token': token[:20] + '...', 'action': 'validate'}
                 token_lifecycle_events.append(validation_event)
                 try:
                     decoded = jwt.decode(token, self.jwt_secret, algorithms=['HS256'])
@@ -103,7 +103,7 @@ class WebSocketAuthenticationFlowTests(SSotAsyncTestCase):
             mock_auth.return_value = mock_auth_instance
             lifecycle_scenarios = [{'name': 'fresh_token_connection', 'token': self.valid_jwt_token, 'expected_validations': 1}, {'name': 'token_reuse_same_connection', 'token': self.valid_jwt_token, 'reuse_count': 3, 'expected_validations': 1}, {'name': 'expired_token_handling', 'token': self._generate_expired_token(), 'expected_validation_failure': True}, {'name': 'token_refresh_scenario', 'token': self.valid_jwt_token, 'refresh_token': self._generate_fresh_token(), 'expected_validations': 2}]
             for scenario in lifecycle_scenarios:
-                scenario_start = datetime.utcnow()
+                scenario_start = datetime.now(UTC)
                 self.logger.info(f"Testing token lifecycle scenario: {scenario['name']}")
                 try:
                     if scenario['name'] == 'fresh_token_connection':
@@ -116,7 +116,7 @@ class WebSocketAuthenticationFlowTests(SSotAsyncTestCase):
                             await self._test_expired_token_connection(scenario['token'])
                     elif scenario['name'] == 'token_refresh_scenario':
                         await self._test_token_refresh_flow(original_token=scenario['token'], refresh_token=scenario['refresh_token'])
-                    scenario_duration = (datetime.utcnow() - scenario_start).total_seconds()
+                    scenario_duration = (datetime.now(UTC) - scenario_start).total_seconds()
                     self.logger.info(f"Scenario {scenario['name']} completed in {scenario_duration:.2f}s")
                 except Exception as e:
                     if not scenario.get('expected_validation_failure', False):
@@ -166,13 +166,13 @@ class WebSocketAuthenticationFlowTests(SSotAsyncTestCase):
                 auth_result = await mock_auth_instance.validate_token(self.valid_jwt_token)
                 assert auth_result['valid'], 'Authentication should succeed'
                 integration_steps.append('user_context_creation')
-                authenticated_context = UserExecutionContext(user_id=UserID(auth_result['user_id']), thread_id=self.user_context.thread_id, run_id=self.user_context.run_id, request_id=self.user_context.request_id, websocket_client_id=self.user_context.websocket_client_id, agent_context={'authenticated': True, 'user_email': auth_result['user_data']['email'], 'auth_method': 'jwt'}, audit_metadata={'auth_validated_at': datetime.utcnow().isoformat(), 'test_integration': True})
+                authenticated_context = UserExecutionContext(user_id=UserID(auth_result['user_id']), thread_id=self.user_context.thread_id, run_id=self.user_context.run_id, request_id=self.user_context.request_id, websocket_client_id=self.user_context.websocket_client_id, agent_context={'authenticated': True, 'user_email': auth_result['user_data']['email'], 'auth_method': 'jwt'}, audit_metadata={'auth_validated_at': datetime.now(UTC).isoformat(), 'test_integration': True})
                 integration_steps.append('websocket_bridge_creation')
                 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
                 websocket_bridge = create_agent_websocket_bridge(authenticated_context)
                 assert websocket_bridge is not None, 'WebSocket bridge should be created'
                 integration_steps.append('authenticated_event_sending')
-                auth_events = [('user_authenticated', {'user_id': str(authenticated_context.user_id), 'user_email': self.test_user_data['email'], 'auth_timestamp': datetime.utcnow().isoformat()}), ('agent_started', {'user_id': str(authenticated_context.user_id), 'authenticated_session': True, 'capabilities': ['chat', 'ai_analysis']}), ('agent_completed', {'user_id': str(authenticated_context.user_id), 'session_duration': 5.2, 'authenticated': True})]
+                auth_events = [('user_authenticated', {'user_id': str(authenticated_context.user_id), 'user_email': self.test_user_data['email'], 'auth_timestamp': datetime.now(UTC).isoformat()}), ('agent_started', {'user_id': str(authenticated_context.user_id), 'authenticated_session': True, 'capabilities': ['chat', 'ai_analysis']}), ('agent_completed', {'user_id': str(authenticated_context.user_id), 'session_duration': 5.2, 'authenticated': True})]
                 for event_type, event_data in auth_events:
                     if hasattr(websocket_bridge, 'send_event'):
                         await websocket_bridge.send_event(event_type, event_data)
@@ -237,14 +237,14 @@ class WebSocketAuthenticationFlowTests(SSotAsyncTestCase):
     def _generate_expired_token(self) -> str:
         """Generate an expired JWT token for testing"""
         expired_data = self.test_user_data.copy()
-        expired_data['exp'] = datetime.utcnow() - timedelta(minutes=1)
+        expired_data['exp'] = datetime.now(UTC) - timedelta(minutes=1)
         return jwt.encode(expired_data, self.jwt_secret, algorithm='HS256')
 
     def _generate_fresh_token(self) -> str:
         """Generate a fresh JWT token for testing"""
         fresh_data = self.test_user_data.copy()
-        fresh_data['exp'] = datetime.utcnow() + timedelta(hours=2)
-        fresh_data['iat'] = datetime.utcnow()
+        fresh_data['exp'] = datetime.now(UTC) + timedelta(hours=2)
+        fresh_data['iat'] = datetime.now(UTC)
         return jwt.encode(fresh_data, self.jwt_secret, algorithm='HS256')
 pytestmark = [pytest.mark.integration, pytest.mark.websocket_auth, pytest.mark.auth_coordination, pytest.mark.frontend_coordination, pytest.mark.token_management, pytest.mark.issue_463, pytest.mark.issue_465, pytest.mark.issue_426_cluster, pytest.mark.no_docker_required, pytest.mark.real_services_not_required]
 if __name__ == '__main__':

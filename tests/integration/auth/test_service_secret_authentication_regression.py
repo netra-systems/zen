@@ -97,7 +97,7 @@ class ServiceSecretAuthenticationRegressionTests(SSotAsyncTestCase):
                         await websocket.send('{"type": "test", "message": "auth test"}')
                         response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                         self.fail(f'WebSocket authentication should have failed with SERVICE_SECRET mismatch. Got successful response: {response}. This indicates Issue #1037 WebSocket regression is not reproduced.')
-                except (ConnectionClosedError, websockets.exceptions.WebSocketException, asyncio.TimeoutError) as e:
+                except (ConnectionClosedError, websockets.WebSocketException, asyncio.TimeoutError) as e:
                     logger.error(f'WEBSOCKET REGRESSION CONFIRMED: {str(e)}')
                     raise AssertionError(f'Issue #1037 WebSocket regression confirmed: Authentication failed causing connection closure. This leads to 503 service errors. Error: {str(e)}')
             except ImportError:

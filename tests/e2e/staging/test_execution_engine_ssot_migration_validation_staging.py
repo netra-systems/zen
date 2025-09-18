@@ -6,11 +6,11 @@ Business Value Justification (BVJ):
 - Segment: Platform Infrastructure - Critical for all tiers
 - Business Goal: Golden Path Protection - Ensure execution engine migration works on staging GCP
 - Value Impact: Validates execution engine migration maintains complete Golden Path user flow
-- Strategic Impact: $500K+ ARR depends on staging GCP environment validating user login → agent response
+- Strategic Impact: 500K+ ARR depends on staging GCP environment validating user login -> agent response
 
 This E2E staging test validates that execution engine migration components work correctly
 on the REAL staging GCP environment including:
-1. Complete Golden Path user flow: login → WebSocket connection → agent execution → AI response
+1. Complete Golden Path user flow: login -> WebSocket connection -> agent execution -> AI response
 2. Real staging GCP WebSocket infrastructure with all 5 critical events
 3. Real staging database persistence with UserExecutionContext
 4. Real staging multi-user isolation and concurrent scenarios
@@ -57,7 +57,7 @@ class ExecutionEngineSSotMigrationValidationStagingTests(SSotAsyncTestCase):
         """
         Test Golden Path works with migrated execution engine on staging.
 
-        CRITICAL: Complete user login → agent response flow on real staging GCP.
+        CRITICAL: Complete user login -> agent response flow on real staging GCP.
         """
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         staging_user_context = UserExecutionContext(user_id='staging_golden_path_user', thread_id='staging_golden_thread_123', run_id='staging_golden_run_456', request_id='staging_golden_req_789')

@@ -2,7 +2,7 @@
 WebSocket Message Delivery Reliability Test
 
 GitHub Issue: #1056 - Message router fragmentation blocking Golden Path
-Business Impact: $500K+ ARR - Users cannot receive AI responses reliably
+Business Impact: 500K+ ARR - Users cannot receive AI responses reliably
 
 PURPOSE: Validate WebSocket events reach correct users during consolidation
 STATUS: MUST PASS before, during, and after SSOT consolidation
@@ -43,7 +43,7 @@ class WebSocketMessageDeliveryReliabilityTests(SSotAsyncTestCase):
         Test WebSocket message delivery reliability during MessageRouter changes.
 
         CRITICAL: This test MUST PASS always to protect Golden Path.
-        BUSINESS VALUE: Ensures reliable real-time communication for $500K+ ARR.
+        BUSINESS VALUE: Ensures reliable real-time communication for 500K+ ARR.
         """
         overall_success = True
         scenario_results = []
@@ -60,14 +60,14 @@ class WebSocketMessageDeliveryReliabilityTests(SSotAsyncTestCase):
         self.logger.info(f'  Total messages delivered: {delivered_messages}')
         self.logger.info(f'  Overall delivery rate: {overall_delivery_rate * 100:.1f}%')
         for result in scenario_results:
-            status = '✅' if result['success'] else '❌'
+            status = 'CHECK' if result['success'] else 'X'
             self.logger.info(f"  {status} {result['scenario_name']}: {result['delivery_rate'] * 100:.1f}% delivery rate")
         min_required_delivery_rate = 0.8
         if overall_delivery_rate >= min_required_delivery_rate and overall_success:
-            self.logger.info(f'✅ GOLDEN PATH PROTECTED: WebSocket message delivery reliability maintained ({overall_delivery_rate * 100:.1f}%)')
+            self.logger.info(f'CHECK GOLDEN PATH PROTECTED: WebSocket message delivery reliability maintained ({overall_delivery_rate * 100:.1f}%)')
         else:
             failed_scenarios = [r['scenario_name'] for r in scenario_results if not r['success']]
-            self.fail(f'GOLDEN PATH VIOLATION: WebSocket message delivery reliability compromised. Overall delivery rate {overall_delivery_rate * 100:.1f}% below required {min_required_delivery_rate * 100:.1f}%. Failed scenarios: {failed_scenarios}. This indicates MessageRouter SSOT changes are affecting reliable message delivery, critical for real-time user experience and $500K+ ARR Golden Path protection.')
+            self.fail(f'GOLDEN PATH VIOLATION: WebSocket message delivery reliability compromised. Overall delivery rate {overall_delivery_rate * 100:.1f}% below required {min_required_delivery_rate * 100:.1f}%. Failed scenarios: {failed_scenarios}. This indicates MessageRouter SSOT changes are affecting reliable message delivery, critical for real-time user experience and 500K+ ARR Golden Path protection.')
 
     async def _test_delivery_scenario(self, scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Test a specific message delivery scenario."""
@@ -180,10 +180,10 @@ class WebSocketMessageDeliveryReliabilityTests(SSotAsyncTestCase):
                 overall_success = False
         self.logger.info('WebSocket event ordering reliability analysis:')
         for result in ordering_results:
-            status = '✅' if result['success'] else '❌'
+            status = 'CHECK' if result['success'] else 'X'
             self.logger.info(f"  {status} {result['scenario_name']}: {result['order_accuracy'] * 100:.1f}% order accuracy")
         if overall_success:
-            self.logger.info('✅ GOLDEN PATH PROTECTED: WebSocket event ordering reliability maintained')
+            self.logger.info('CHECK GOLDEN PATH PROTECTED: WebSocket event ordering reliability maintained')
         else:
             failed_scenarios = [r['scenario_name'] for r in ordering_results if not r['success']]
             self.fail(f'GOLDEN PATH VIOLATION: WebSocket event ordering reliability compromised in scenarios: {failed_scenarios}. This indicates MessageRouter SSOT changes are affecting event sequencing, critical for proper user experience in Golden Path workflows.')
@@ -255,10 +255,10 @@ class WebSocketMessageDeliveryReliabilityTests(SSotAsyncTestCase):
                 overall_resilience = False
         self.logger.info('WebSocket connection resilience analysis:')
         for result in resilience_results:
-            status = '✅' if result['success'] else '❌'
+            status = 'CHECK' if result['success'] else 'X'
             self.logger.info(f"  {status} {result['test_name']}: {result['stability_rate'] * 100:.1f}% stability")
         if overall_resilience:
-            self.logger.info('✅ GOLDEN PATH PROTECTED: WebSocket connection resilience maintained')
+            self.logger.info('CHECK GOLDEN PATH PROTECTED: WebSocket connection resilience maintained')
         else:
             failed_tests = [r['test_name'] for r in resilience_results if not r['success']]
             self.fail(f'GOLDEN PATH VIOLATION: WebSocket connection resilience compromised in tests: {failed_tests}. This indicates MessageRouter SSOT changes are affecting connection stability, critical for continuous user experience in Golden Path workflows.')

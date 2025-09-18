@@ -70,7 +70,7 @@ class AuthenticatedUser:
 @dataclass
 class E2EAuthConfig:
     """Configuration for E2E authentication."""
-    auth_service_url: str = "http://localhost:8083"  # Default test auth service
+    auth_service_url: str = "http://localhost:8081"  # Default test auth service - Fixed to correct port
     backend_url: str = "http://localhost:8002"       # Default test backend
     websocket_url: str = "ws://localhost:8002/ws"    # Default test WebSocket
     test_user_email: str = "e2e_test@example.com"
@@ -274,10 +274,132 @@ class E2EAuthHelper:
         token_b64 = base64.urlsafe_b64encode(token.encode()).decode().rstrip('=')
         
         return [
-            "jwt-auth",  # Standard JWT auth subprotocol
+            "jwt-auth",  # Standard JWT auth subprotocol (SSOT primary method)
+            f"jwt-auth.{token}",  # SSOT PRIORITY: jwt-auth.TOKEN format (most reliable)
             f"jwt.{token_b64}",  # Actual JWT token transmission
             "e2e-testing"  # E2E test detection subprotocol
         ]
+    
+    def get_ssot_websocket_headers(self, token: Optional[str] = None) -> Dict[str, str]:
+        """
+        Get WebSocket headers optimized for SSOT authentication patterns.
+        
+        ISSUE #1176 REMEDIATION: Headers optimized for new unified auth pathway.
+        Includes both Authorization header and E2E bypass headers for comprehensive support.
+        
+        Args:
+            token: JWT token (uses cached if not provided)
+            
+        Returns:
+            Headers dict optimized for SSOT WebSocket authentication
+        """
+        token = token or self._get_valid_token()
+        environment = getattr(self, 'environment', None) or self.env.get("TEST_ENV", "test")
+        
+        return {
+            # PRIMARY: Authorization header (may be stripped by GCP load balancer)
+            "Authorization": f"Bearer {token}",
+            
+            # E2E BYPASS: Headers for testing environment bypass
+            "X-E2E-User-ID": self._extract_user_id(token),
+            "X-E2E-Bypass": "true" if environment in ["test", "development", "local"] else "false",
+            
+            # METADATA: Additional context for debugging
+            "X-Test-Environment": environment.lower(),
+            "X-Auth-Method": "ssot-unified",
+            "X-Generated-By": "e2e-auth-helper"
+        }
+    
+    def get_ssot_websocket_subprotocols(self, token: Optional[str] = None) -> List[str]:
+        """
+        Get WebSocket subprotocols optimized for SSOT authentication.
+        
+        ISSUE #1176 REMEDIATION: Prioritizes jwt-auth.TOKEN format as most reliable.
+        
+        Args:
+            token: JWT token (uses cached if not provided)
+            
+        Returns:
+            List of subprotocols in priority order (most reliable first)
+        """
+        token = token or self._get_valid_token()
+        
+        return [
+            f"jwt-auth.{token}",  # PRIORITY 1: jwt-auth.TOKEN (most reliable in GCP)
+            f"jwt.{token}",       # PRIORITY 2: jwt.TOKEN (legacy compatibility)
+            f"bearer.{token}",    # PRIORITY 3: bearer.TOKEN (alternative format)
+            "e2e-testing"         # PRIORITY 4: E2E test detection
+        ]
+    
+    async def create_ssot_websocket_connection(
+        self,
+        websocket_url: Optional[str] = None,
+        token: Optional[str] = None,
+        timeout: float = 10.0,
+        use_query_fallback: bool = True
+    ) -> tuple[object, Dict[str, Any]]:
+        """
+        Create WebSocket connection using SSOT authentication patterns.
+        
+        ISSUE #1176 REMEDIATION: Uses optimized authentication priority:
+        1. jwt-auth subprotocol (most reliable)
+        2. Authorization header (may be stripped)
+        3. Query parameter fallback (infrastructure workaround)
+        
+        Args:
+            websocket_url: WebSocket URL (uses config if not provided)
+            token: JWT token (uses cached if not provided)
+            timeout: Connection timeout in seconds
+            use_query_fallback: Whether to add token as query param for GCP workaround
+            
+        Returns:
+            Tuple of (websocket_connection, connection_metadata)
+        """
+        import websockets
+        
+        websocket_url = websocket_url or self.config.websocket_url
+        token = token or self._get_valid_token()
+        
+        # GCP WORKAROUND: Add token as query parameter if requested
+        if use_query_fallback:
+            separator = "&" if "?" in websocket_url else "?"
+            websocket_url = f"{websocket_url}{separator}token={token}"
+        
+        headers = self.get_ssot_websocket_headers(token)
+        subprotocols = self.get_ssot_websocket_subprotocols(token)
+        
+        logger.info(f"🔗 SSOT WebSocket: Connecting to {websocket_url}")
+        logger.debug(f"🔗 SSOT WebSocket: Using {len(subprotocols)} subprotocols, {len(headers)} headers")
+        
+        try:
+            websocket = await websockets.connect(
+                websocket_url,
+                additional_headers=headers,
+                subprotocols=subprotocols,
+                ping_interval=30,
+                ping_timeout=10,
+                close_timeout=5,
+                max_size=2**20,  # 1MB message size limit
+                timeout=timeout
+            )
+            
+            connection_metadata = {
+                "url": websocket_url,
+                "user_id": self._extract_user_id(token),
+                "authenticated": True,
+                "auth_method": "ssot-unified",
+                "headers_sent": list(headers.keys()),
+                "subprotocols_sent": subprotocols,
+                "query_fallback_used": use_query_fallback,
+                "connection_timeout": timeout
+            }
+            
+            logger.info(f"✅ SSOT WebSocket: Connected successfully for user {connection_metadata['user_id']}")
+            return websocket, connection_metadata
+            
+        except Exception as e:
+            logger.error(f"❌ SSOT WebSocket: Connection failed - {str(e)}")
+            raise
     
     async def create_websocket_connection(
         self,
@@ -629,6 +751,37 @@ class E2EAuthHelper:
         token, _ = await self.authenticate_user()
         headers = self.get_auth_headers(token)
         return aiohttp.ClientSession(headers=headers)
+    
+    async def create_authenticated_user_session(self, user_credentials: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Create an authenticated user session with a test user.
+        Wrapper for backward compatibility with existing tests.
+        
+        Args:
+            user_credentials: Optional dict with user data (email, password, name, etc.)
+        
+        Returns:
+            Dict containing authentication result with user_id, access_token, success, etc.
+        """
+        # Extract user data from credentials or use defaults
+        if user_credentials is None:
+            user_credentials = {}
+            
+        email = user_credentials.get('email')
+        password = user_credentials.get('password') 
+        name = user_credentials.get('name')
+        user_id = user_credentials.get('user_id')
+        permissions = user_credentials.get('permissions')
+        tier = user_credentials.get('user_tier', 'free')
+        
+        # Use existing authenticate_test_user method which returns the expected format
+        return await self.authenticate_test_user(
+            email=email,
+            password=password,
+            tier=tier,
+            permissions=permissions,
+            force_new=True  # Always create new session for these tests
+        )
     
     def create_sync_authenticated_client(self) -> httpx.Client:
         """
@@ -1618,7 +1771,7 @@ def get_user_auth_token(
     Returns:
         JWT authentication token string
     """
-    email = email or f"{user_id}@test.netra.ai"
+    email = email or f"{user_id}@test.netrasystems.ai"
     permissions = permissions or ["read", "write"]
     
     return get_jwt_token_for_user(
@@ -1650,7 +1803,7 @@ def get_test_user_context(
     """
     # Generate defaults
     user_id = user_id or f"test_user_{uuid.uuid4().hex[:8]}"
-    email = email or f"{user_id}@test.netra.ai"
+    email = email or f"{user_id}@test.netrasystems.ai"
     permissions = permissions or ["read", "write"]
     
     # Create authenticated user context

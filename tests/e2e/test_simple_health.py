@@ -6,54 +6,56 @@ import aiohttp
 from shared.isolated_environment import IsolatedEnvironment
 
 
-# REMOVED_SYNTAX_ERROR: class TestSimpleHealthCheck:
-    # REMOVED_SYNTAX_ERROR: """Simple health check test class."""
+class TestSimpleHealthCheck:
+    """Simple health check test class."""
 
-    # Removed problematic line: @pytest.mark.asyncio
-    # Removed problematic line: async def test_basic_connectivity(self):
-        # REMOVED_SYNTAX_ERROR: """Test basic connectivity infrastructure."""
+@pytest.mark.asyncio
+    async def test_basic_connectivity(self):
+"""Test basic connectivity infrastructure."""
         # Test that we can create an HTTP session
-        # REMOVED_SYNTAX_ERROR: async with aiohttp.ClientSession() as session:
-            # REMOVED_SYNTAX_ERROR: assert session is not None
+async with aiohttp.ClientSession() as session:
+assert session is not None
 
-            # REMOVED_SYNTAX_ERROR: print("[SUCCESS] Basic connectivity test passed")
+print("[SUCCESS] Basic connectivity test passed)"
 
-            # Removed problematic line: @pytest.mark.asyncio
-            # Removed problematic line: async def test_service_attempt(self):
-                # REMOVED_SYNTAX_ERROR: """Attempt to connect to services (passes regardless of result)."""
-                # REMOVED_SYNTAX_ERROR: pass
-                # REMOVED_SYNTAX_ERROR: services = [ )
-                # REMOVED_SYNTAX_ERROR: ("backend", "http://localhost:8000/health"),
-                # REMOVED_SYNTAX_ERROR: ("auth", "http://localhost:8080/health")
+@pytest.mark.asyncio
+    async def test_service_attempt(self):
+"""Attempt to connect to services (passes regardless of result)."""
+pass
+services = [ ]
+("backend", "http://localhost:8000/health),"
+("auth", "http://localhost:8080/health)"
                 
 
-                # REMOVED_SYNTAX_ERROR: results = {}
+results = {}
 
-                # REMOVED_SYNTAX_ERROR: for service_name, url in services:
-                    # REMOVED_SYNTAX_ERROR: try:
-                        # REMOVED_SYNTAX_ERROR: timeout = aiohttp.ClientTimeout(total=2.0)
-                        # REMOVED_SYNTAX_ERROR: async with aiohttp.ClientSession(timeout=timeout) as session:
-                            # REMOVED_SYNTAX_ERROR: async with session.get(url) as response:
-                                # REMOVED_SYNTAX_ERROR: results[service_name] = { )
-                                # REMOVED_SYNTAX_ERROR: "accessible": True,
-                                # REMOVED_SYNTAX_ERROR: "status": response.status,
-                                # REMOVED_SYNTAX_ERROR: "healthy": response.status == 200
+for service_name, url in services:
+try:
+    pass
+timeout = aiohttp.ClientTimeout(total=2.0)
+async with aiohttp.ClientSession(timeout=timeout) as session:
+async with session.get(url) as response:
+results[service_name] = { }
+"accessible: True,"
+"status: response.status,"
+"healthy: response.status == 200"
                                 
-                                # REMOVED_SYNTAX_ERROR: except Exception as e:
-                                    # REMOVED_SYNTAX_ERROR: results[service_name] = { )
-                                    # REMOVED_SYNTAX_ERROR: "accessible": False,
-                                    # REMOVED_SYNTAX_ERROR: "error": str(e),
-                                    # REMOVED_SYNTAX_ERROR: "healthy": False
+except Exception as e:
+    pass
+results[service_name] = { }
+"accessible: False,"
+"error: str(e),"
+"healthy: False"
                                     
 
                                     # Print results
-                                    # REMOVED_SYNTAX_ERROR: print(f" )
-                                    # REMOVED_SYNTAX_ERROR: [INFO] Service connectivity check:")
-                                    # REMOVED_SYNTAX_ERROR: for service_name, result in results.items():
-                                        # REMOVED_SYNTAX_ERROR: if result["accessible"]:
-                                            # REMOVED_SYNTAX_ERROR: print("formatted_string")
-                                            # REMOVED_SYNTAX_ERROR: else:
-                                                # REMOVED_SYNTAX_ERROR: print("formatted_string")
+print(f" )"
+[INFO] Service connectivity check:")"
+for service_name, result in results.items():
+if result["accessible]:"
+    print("")
+else:
+    print("")
 
-                                                # Test always passes - we're just checking infrastructure
-                                                # REMOVED_SYNTAX_ERROR: assert True, "Infrastructure test completed"
+                                                # Test always passes - we're just checking infrastructure'
+assert True, "Infrastructure test completed"

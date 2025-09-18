@@ -4,7 +4,7 @@ Agent Golden Path Auth Integration E2E Tests - Issue #1081 Phase 1
 Business Value Justification:
 - Segment: All tiers - Critical authentication and authorization
 - Business Goal: Ensure secure and reliable authentication for agent interactions
-- Value Impact: Protects $500K+ ARR from auth failures and security breaches
+- Value Impact: Protects 500K+ ARR from auth failures and security breaches
 - Revenue Impact: Prevents customer lockout and security incidents that damage trust
 
 PURPOSE:
@@ -145,7 +145,7 @@ class AgentGoldenPathAuthIntegrationTests(SSotAsyncTestCase):
         print(f'[AUTH] JWT validation test completed in {total_time:.2f}s')
         self.assertTrue(valid_token_working, f'AUTH FAILURE: Valid JWT tokens not accepted for agent interactions. Authenticated users cannot access agent functionality. Core business value is blocked by auth issues.')
         self.assertTrue(token_validation_enforced or graceful_auth_handling, f'AUTH FAILURE: No token validation or graceful auth handling. System may be vulnerable to unauthorized access or provides poor UX for auth errors.')
-        print(f'[AUTH] ✓ JWT token validation during agent interaction validated in {total_time:.2f}s')
+        print(f'[AUTH] CHECK JWT token validation during agent interaction validated in {total_time:.2f}s')
 
     async def test_permission_based_agent_access_control(self):
         """
@@ -223,11 +223,11 @@ class AgentGoldenPathAuthIntegrationTests(SSotAsyncTestCase):
         total_time = time.time() - test_start_time
         print(f'[PERMS] Permission-based access control test completed in {total_time:.2f}s')
         self.assertTrue(permission_enforcement_working, f'PERMISSION FAILURE: Permission-based access control not working. Users may have inappropriate access to agent features. Security and authorization controls are insufficient.')
-        print(f'[PERMS] ✓ Permission-based agent access control validated in {total_time:.2f}s')
+        print(f'[PERMS] CHECK Permission-based agent access control validated in {total_time:.2f}s')
         if appropriate_access_granted:
-            print(f'[PERMS] ✓ Appropriate permission differentiation validated')
+            print(f'[PERMS] CHECK Appropriate permission differentiation validated')
         if graceful_permission_denial:
-            print(f'[PERMS] ✓ Graceful permission denial feedback validated')
+            print(f'[PERMS] CHECK Graceful permission denial feedback validated')
 
     async def test_user_session_persistence_across_auth_renewal(self):
         """
@@ -301,9 +301,9 @@ class AgentGoldenPathAuthIntegrationTests(SSotAsyncTestCase):
         print(f'[SESSION] Session persistence test completed in {total_time:.2f}s')
         self.assertTrue(session_persistence_working, f'SESSION FAILURE: User sessions not persisting properly. Users may lose context during auth operations. Session interactions: {session_interactions}')
         self.assertTrue(auth_renewal_handled, f'SESSION FAILURE: Auth token renewal not handled properly. Users may be disconnected during normal token refresh cycles. This impacts long-term session stability.')
-        print(f'[SESSION] ✓ User session persistence across auth renewal validated in {total_time:.2f}s')
+        print(f'[SESSION] CHECK User session persistence across auth renewal validated in {total_time:.2f}s')
         if session_continuity_maintained:
-            print(f'[SESSION] ✓ Session continuity maintained during auth renewal')
+            print(f'[SESSION] CHECK Session continuity maintained during auth renewal')
 
     async def test_auth_service_failure_graceful_degradation(self):
         """
@@ -375,9 +375,9 @@ class AgentGoldenPathAuthIntegrationTests(SSotAsyncTestCase):
         total_time = time.time() - test_start_time
         print(f'[AUTH-FAIL] Auth service failure test completed in {total_time:.2f}s')
         self.assertTrue(auth_failure_handled or graceful_degradation_working, f"AUTH-FAIL FAILURE: System does not handle auth service failures gracefully. Users may experience poor error handling during auth issues. Scenarios handled: {(len([s for s in auth_failure_scenarios if s.get('connection_successful') or s.get('graceful_rejection')]) if auth_failure_scenarios else 0)}")
-        print(f'[AUTH-FAIL] ✓ Auth service failure graceful degradation validated in {total_time:.2f}s')
+        print(f'[AUTH-FAIL] CHECK Auth service failure graceful degradation validated in {total_time:.2f}s')
         if fallback_functionality_available:
-            print(f'[AUTH-FAIL] ✓ Fallback functionality available during auth issues')
+            print(f'[AUTH-FAIL] CHECK Fallback functionality available during auth issues')
 
     def _is_service_unavailable_error(self, error: Exception) -> bool:
         """Check if error indicates service unavailability rather than test failure."""

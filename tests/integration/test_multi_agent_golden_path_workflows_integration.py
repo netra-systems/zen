@@ -3,12 +3,12 @@ P0 Critical Integration Tests: Multi-Agent Golden Path Workflows Integration
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - Core multi-agent orchestration
-- Business Goal: Platform Stability & User Experience - $500K+ ARR chat functionality
+- Business Goal: Platform Stability & User Experience - 500K+ ARR chat functionality
 - Value Impact: Validates complex multi-agent workflows that deliver sophisticated AI responses
 - Strategic Impact: Critical Golden Path orchestration - Multi-agent coordination drives premium value
 
 This module tests the COMPLETE Multi-Agent Golden Path workflow integration covering:
-1. Supervisor → Triage → Data Helper → APEX Optimizer agent orchestration
+1. Supervisor -> Triage -> Data Helper -> APEX Optimizer agent orchestration
 2. Agent handoff and state transfer reliability across the execution pipeline
 3. Inter-agent communication and data sharing through WebSocket events
 4. Multi-agent workflow resilience and error recovery patterns
@@ -19,7 +19,7 @@ This module tests the COMPLETE Multi-Agent Golden Path workflow integration cove
 CRITICAL REQUIREMENTS per CLAUDE.md:
 - Uses SSOT BaseTestCase patterns for consistent test infrastructure
 - NO MOCKS for agent coordination - uses real agent instances and workflows
-- Tests must validate $500K+ ARR multi-agent chat functionality
+- Tests must validate 500K+ ARR multi-agent chat functionality
 - All agent handoffs must be tested with real WebSocket event coordination
 - Tests must validate user isolation and security across agent workflows
 - Tests must pass or fail meaningfully (no test cheating allowed)
@@ -81,7 +81,7 @@ class MultiAgentWorkflowTracker:
         handoff_time = datetime.now()
         handoff_data = {'from_agent': from_agent.value, 'to_agent': to_agent.value, 'context': context.copy(), 'timestamp': handoff_time.isoformat(), 'relative_time_ms': (handoff_time - self.start_time).total_seconds() * 1000}
         self.agent_handoffs.append(handoff_data)
-        print(f'[HANDOFF] {from_agent.value} → {to_agent.value}')
+        print(f'[HANDOFF] {from_agent.value} -> {to_agent.value}')
 
     def validate_workflow_completion(self) -> Dict[str, Any]:
         """Validate complete multi-agent workflow execution."""
@@ -109,7 +109,7 @@ class MultiAgentGoldenPathWorkflowsIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_complete_golden_path_workflow_execution(self):
-        """Test complete supervisor → triage → data helper → APEX workflow."""
+        """Test complete supervisor -> triage -> data helper -> APEX workflow."""
 
         async def track_workflow_events(event_type: str, data: Dict[str, Any]):
             agent_name = data.get('agent_name', 'unknown')

@@ -7,8 +7,8 @@ CRITICAL: This is an SSOT compatibility layer that re-exports the unified WebSoc
 to maintain existing import paths while consolidating the actual implementation.
 
 PHASE 1 SSOT CONSOLIDATION: Now imports from canonical websocket_manager.py (SSOT)
-- Legacy: from netra_backend.app.websocket_core.manager import WebSocketManager  
-- SSOT: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+- Legacy: from netra_backend.app.websocket_core.manager import WebSocketManager
+- SSOT: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 Business Justification:
 - Maintains backward compatibility for existing tests and Golden Path functionality
@@ -29,15 +29,18 @@ warnings.warn(
 
 # ISSUE #824 REMEDIATION: Import from canonical SSOT path
 # SSOT CONSOLIDATION: websocket_manager.py is the canonical import point
-from netra_backend.app.websocket_core.canonical_import_patterns import (
-    UnifiedWebSocketManager,
+from netra_backend.app.websocket_core.websocket_manager import (
+    WebSocketManager as WebSocketManagerCanonical,
+    get_websocket_manager
+)
+from netra_backend.app.websocket_core.types import (
     WebSocketConnection,
     _serialize_message_safely,
     WebSocketManagerMode
 )
 
 # Create compatibility alias
-WebSocketManager = UnifiedWebSocketManager
+WebSocketManager = WebSocketManagerCanonical
 
 # Import protocol for type checking
 try:
@@ -54,13 +57,17 @@ except ImportError:
     WebSocketHeartbeat = None
     WebSocketHeartbeatManager = None
 
+# Import the canonical get_websocket_manager function for deployment compatibility
+# Already imported above
+
 # Re-export for compatibility
 __all__ = [
     'WebSocketManager',
     'WebSocketConnection',
     'WebSocketManagerProtocol',
     '_serialize_message_safely',
-    'UnifiedWebSocketManager',
+    'WebSocketManagerCanonical',
     'WebSocketHeartbeat',
-    'WebSocketHeartbeatManager'  # Compatibility alias
+    'WebSocketHeartbeatManager',  # Compatibility alias
+    'get_websocket_manager'  # Deployment compatibility
 ]

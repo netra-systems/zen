@@ -150,8 +150,15 @@ class DatabaseTestUtility:
     
     def _get_database_config(self) -> Dict[str, Any]:
         """Get database configuration for the service."""
+        # Determine appropriate isolation level based on database engine
+        db_url = self.env.get("DATABASE_URL", "")
+        if db_url.startswith("sqlite"):
+            isolation_level = "SERIALIZABLE"  # SQLite compatible isolation level
+        else:
+            isolation_level = "READ_COMMITTED"  # PostgreSQL and other databases
+
         config = {
-            "isolation_level": "READ_COMMITTED",
+            "isolation_level": isolation_level,
             "pool_size": 1,  # Minimal for tests
             "max_overflow": 0,
             "pool_timeout": 30,

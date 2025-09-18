@@ -100,7 +100,7 @@ class ImportPathUnificationValidationTests(SSotAsyncTestCase):
                     'name': getattr(class_obj, '__name__', 'unknown')
                 }
                 successful_imports[import_path] = class_obj
-                logger.info(f"✓ {import_path} -> class id {id(class_obj)} from {module_file}")
+                logger.info(f"CHECK {import_path} -> class id {id(class_obj)} from {module_file}")
 
         # Must have at least one successful import
         self.assertGreater(len(successful_imports), 0,
@@ -119,7 +119,7 @@ class ImportPathUnificationValidationTests(SSotAsyncTestCase):
                 self.fail(f"SSOT VIOLATION: Import paths resolve to different WebSocketManager classes:\n" +
                          "\n".join(details))
 
-        logger.info("✅ All WebSocketManager imports resolve to same class object")
+        logger.info("CHECK All WebSocketManager imports resolve to same class object")
 
     def test_websocket_manager_function_unification(self):
         """Test that WebSocket Manager factory functions are unified across import paths."""
@@ -137,7 +137,7 @@ class ImportPathUnificationValidationTests(SSotAsyncTestCase):
                     'name': getattr(function_obj, '__name__', 'unknown')
                 }
                 successful_imports[import_path] = function_obj
-                logger.info(f"✓ {import_path} -> function id {id(function_obj)} from {module_file}")
+                logger.info(f"CHECK {import_path} -> function id {id(function_obj)} from {module_file}")
 
         # If multiple paths work, they should ideally be the same function
         if len(successful_imports) > 1:
@@ -145,7 +145,7 @@ class ImportPathUnificationValidationTests(SSotAsyncTestCase):
 
             if len(function_ids) > 1:
                 # Multiple different functions - check if they're equivalent
-                logger.warning("⚠ Multiple get_websocket_manager functions found - checking equivalence")
+                logger.warning("WARNING Multiple get_websocket_manager functions found - checking equivalence")
 
                 # At minimum, they should have consistent behavior documentation
                 for path, info in imported_functions.items():
@@ -153,7 +153,7 @@ class ImportPathUnificationValidationTests(SSotAsyncTestCase):
                     if "DEPRECATED" in func_doc.upper():
                         logger.info(f"  {path} is marked as deprecated")
 
-        logger.info("✅ WebSocket Manager function unification validated")
+        logger.info("CHECK WebSocket Manager function unification validated")
 
     def test_import_path_consistency_across_modules(self):
         """Test that modules consistently use the same import paths for WebSocket Manager."""
@@ -209,9 +209,9 @@ class ImportPathUnificationValidationTests(SSotAsyncTestCase):
 
             # Should trend toward canonical usage
             if deprecated_usage > canonical_usage:
-                logger.warning("⚠ More deprecated imports than canonical imports found")
+                logger.warning("WARNING More deprecated imports than canonical imports found")
 
-        logger.info("✅ Import path consistency across modules validated")
+        logger.info("CHECK Import path consistency across modules validated")
 
     def test_websocket_manager_class_identity_stability(self):
         """Test that WebSocket Manager class identity remains stable across imports."""
@@ -242,19 +242,19 @@ class ImportPathUnificationValidationTests(SSotAsyncTestCase):
         unique_ids = set(class_ids)
 
         if len(unique_ids) > 1:
-            logger.warning("⚠ WebSocketManager class identity varies across imports")
+            logger.warning("WARNING WebSocketManager class identity varies across imports")
             # This might be acceptable due to module reloading, but log it
             for info in canonical_classes:
                 logger.info(f"  Iteration {info['iteration']}: id={info['id']}, name={info['name']}")
         else:
-            logger.info("✓ WebSocketManager class identity stable across imports")
+            logger.info("CHECK WebSocketManager class identity stable across imports")
 
         # At minimum, all should have the same name and be classes
         for info in canonical_classes:
             self.assertTrue(inspect.isclass(info['class']))
             self.assertEqual(info['name'], self.canonical_class_name)
 
-        logger.info("✅ WebSocket Manager class identity stability validated")
+        logger.info("CHECK WebSocket Manager class identity stability validated")
 
     def test_deprecated_imports_redirect_to_canonical(self):
         """Test that deprecated import paths properly redirect to canonical implementation."""
@@ -264,7 +264,7 @@ class ImportPathUnificationValidationTests(SSotAsyncTestCase):
             from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as CanonicalWSM
             canonical_class = CanonicalWSM
             canonical_id = id(CanonicalWSM)
-            logger.info(f"✓ Canonical WebSocketManager loaded (id: {canonical_id})")
+            logger.info(f"CHECK Canonical WebSocketManager loaded (id: {canonical_id})")
         except ImportError as e:
             self.fail(f"Cannot load canonical WebSocketManager: {e}")
 
@@ -280,16 +280,16 @@ class ImportPathUnificationValidationTests(SSotAsyncTestCase):
                 deprecated_id = id(class_obj)
 
                 if deprecated_id == canonical_id:
-                    logger.info(f"✓ {deprecated_path} correctly redirects to canonical (same id)")
+                    logger.info(f"CHECK {deprecated_path} correctly redirects to canonical (same id)")
                 else:
                     # Different class object - check if it's a compatible wrapper
                     if hasattr(class_obj, '__name__') and class_obj.__name__ == self.canonical_class_name:
-                        logger.warning(f"⚠ {deprecated_path} uses different class object but same name")
+                        logger.warning(f"WARNING {deprecated_path} uses different class object but same name")
                     else:
                         self.fail(f"REDIRECT FAILURE: {deprecated_path} resolves to different class "
                                  f"(id: {deprecated_id} vs canonical: {canonical_id})")
 
-        logger.info("✅ Deprecated import redirection validated")
+        logger.info("CHECK Deprecated import redirection validated")
 
     def test_import_path_documentation_consistency(self):
         """Test that import path documentation is consistent across modules."""
@@ -345,9 +345,9 @@ class ImportPathUnificationValidationTests(SSotAsyncTestCase):
             )
 
             if deprecated_recommendations > canonical_recommendations:
-                logger.warning("⚠ More deprecated import recommendations than canonical ones")
+                logger.warning("WARNING More deprecated import recommendations than canonical ones")
 
-        logger.info("✅ Import path documentation consistency validated")
+        logger.info("CHECK Import path documentation consistency validated")
 
 
 if __name__ == '__main__':

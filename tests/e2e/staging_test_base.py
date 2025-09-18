@@ -94,6 +94,12 @@ class StagingTestBase:
         cls.client = None
         cls.websocket = None
         
+        # CRITICAL FIX Issue #1197: Add staging URL attributes that tests expect
+        # Following CLAUDE.md domain requirements (*.netrasystems.ai)
+        cls.staging_base_url = cls.config.backend_url
+        cls.staging_auth_url = cls.config.auth_url  
+        cls.staging_websocket_url = cls.config.websocket_url
+        
         # Check if staging is available and adapt behavior
         if not is_staging_available():
             import logging

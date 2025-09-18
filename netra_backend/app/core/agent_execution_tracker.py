@@ -22,9 +22,9 @@ from typing import Dict, List, Optional, Any, Set, Callable, TypeVar
 from collections import defaultdict
 # Import UnifiedIDManager for SSOT ID generation  
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 T = TypeVar('T')
 
@@ -1235,6 +1235,154 @@ class AgentExecutionTracker:
         """
         return self.execution_timeout
     
+    def create_execution_id(self, agent_name: str, context: Optional[Dict[str, Any]] = None) -> str:
+        """
+        Create a unique execution ID for agent tracking.
+        
+        This method generates a structured execution ID using the UnifiedIDManager
+        to ensure uniqueness and provide audit trail capabilities.
+        
+        Args:
+            agent_name: Name of the agent that will be executed
+            context: Optional context information for ID generation
+            
+        Returns:
+            str: Unique execution ID
+        """
+        # Use UnifiedIDManager for structured execution ID with audit trail
+        id_manager = UnifiedIDManager()
+        
+        # Build context for ID generation
+        id_context = {
+            "agent_name": agent_name,
+            "operation": "execution",
+            "timestamp": int(time.time())
+        }
+        
+        # Merge provided context
+        if context:
+            id_context.update(context)
+        
+        execution_id = id_manager.generate_id(
+            IDType.EXECUTION,
+            prefix="exec",
+            context=id_context
+        )
+        
+        logger.info(
+            f"[U+1F195] EXECUTION_ID_CREATED: Generated unique execution ID. "
+            f"Execution_id: {execution_id}, Agent: {agent_name}, "
+            f"Context_keys: {list(context.keys()) if context else []}, "
+            f"Business_context: ID ready for agent execution tracking"
+        )
+        return execution_id
+    
+    def complete_execution(self, execution_id: str, result: Optional[Any] = None, 
+                          execution_time_ms: Optional[int] = None) -> bool:
+        """
+        Mark an execution as successfully completed.
+        
+        This method provides a simplified interface for completing executions
+        and delegates to update_execution_state with appropriate parameters.
+        
+        Args:
+            execution_id: The execution ID to complete
+            result: Optional result data from the execution
+            execution_time_ms: Optional execution time in milliseconds
+            
+        Returns:
+            bool: True if successfully completed, False if execution not found or invalid state
+        """
+        # Validate execution exists
+        record = self._executions.get(execution_id)
+        if not record:
+            logger.warning(f"Cannot complete unknown execution: {execution_id}")
+            return False
+        
+        # Don't complete already terminal states
+        if record.is_terminal:
+            logger.warning(
+                f"Cannot complete execution {execution_id} - already in terminal state: {record.state.value}"
+            )
+            return False
+        
+        # Update execution state to completed with result
+        success = self.update_execution_state(
+            execution_id=execution_id,
+            state=ExecutionState.COMPLETED,
+            error=None,
+            result=result
+        )
+        
+        if success and execution_time_ms:
+            # Update execution time if provided
+            record.metadata["execution_time_ms"] = execution_time_ms
+        
+        if success:
+            logger.info(
+                f" PASS:  EXECUTION_COMPLETED: Agent execution marked as successful. "
+                f"Execution_id: {execution_id}, Agent: {record.agent_name}, "
+                f"User: {record.user_id[:8]}..., "
+                f"Duration: {(record.updated_at - record.started_at).total_seconds():.3f}s, "
+                f"Has_result: {result is not None}, "
+                f"Business_value: User receives successful AI response (90% platform value delivered)"
+            )
+        
+        return success
+    
+    def fail_execution(self, execution_id: str, error: str, 
+                      error_context: Optional[Dict[str, Any]] = None) -> bool:
+        """
+        Mark an execution as failed.
+        
+        This method provides a simplified interface for failing executions
+        and delegates to update_execution_state with appropriate parameters.
+        
+        Args:
+            execution_id: The execution ID to fail
+            error: Error message describing the failure
+            error_context: Optional context about the error
+            
+        Returns:
+            bool: True if successfully failed, False if execution not found or invalid state
+        """
+        # Validate execution exists
+        record = self._executions.get(execution_id)
+        if not record:
+            logger.warning(f"Cannot fail unknown execution: {execution_id}")
+            return False
+        
+        # Don't fail already terminal states
+        if record.is_terminal:
+            logger.warning(
+                f"Cannot fail execution {execution_id} - already in terminal state: {record.state.value}"
+            )
+            return False
+        
+        # Update metadata with error context if provided
+        if error_context:
+            record.metadata.update(error_context)
+        
+        # Update execution state to failed with error
+        success = self.update_execution_state(
+            execution_id=execution_id,
+            state=ExecutionState.FAILED,
+            error=error,
+            result=None
+        )
+        
+        if success:
+            logger.error(
+                f" ALERT:  EXECUTION_FAILED: Agent execution marked as failed. "
+                f"Execution_id: {execution_id}, Agent: {record.agent_name}, "
+                f"User: {record.user_id[:8]}..., Error: {error}, "
+                f"Duration: {(record.updated_at - record.started_at).total_seconds():.3f}s, "
+                f"Has_context: {error_context is not None}, "
+                f"Business_impact: User receives error instead of AI response (90% platform value lost)"
+            )
+        
+        return success
+
     def get_metrics(self) -> Dict[str, Any]:
         """Get execution metrics"""
         active_count = len(self._active_executions)

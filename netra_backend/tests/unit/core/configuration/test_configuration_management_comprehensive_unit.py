@@ -199,7 +199,7 @@ class ConfigurationManagementUnitTests:
             "invalid://url",
             "postgresql://",
             "postgresql://user@localhost",  # Missing database
-            "mysql://user:pass@localhost:3306/db"  # Invalid scheme
+            "oracle://user:pass@localhost:1521/db"  # Invalid scheme
         ]
         
         for invalid_url in invalid_urls:

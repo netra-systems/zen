@@ -15,7 +15,7 @@ def test_timezone_awareness():
     print("=== TIMEZONE AWARENESS VALIDATION ===")
     
     # Create timestamps
-    utcnow_timestamp = datetime.utcnow()
+    utcnow_timestamp = datetime.now(UTC)
     modern_timestamp = datetime.now(timezone.utc)
     
     print(f"Legacy utcnow() tzinfo: {utcnow_timestamp.tzinfo}")
@@ -34,7 +34,7 @@ def test_serialization_consistency():
     """Test serialization format consistency."""
     print("\n=== SERIALIZATION CONSISTENCY VALIDATION ===")
     
-    utcnow_timestamp = datetime.utcnow()
+    utcnow_timestamp = datetime.now(UTC)
     modern_timestamp = datetime.now(timezone.utc)
     
     serialization_tests = {
@@ -98,11 +98,11 @@ def test_comparison_behavior():
     """Test datetime comparison behavior."""
     print("\n=== COMPARISON BEHAVIOR VALIDATION ===")
     
-    utcnow_base = datetime.utcnow()
+    utcnow_base = datetime.now(UTC)
     modern_base = datetime.now(timezone.utc)
     
     # Same-type comparisons
-    utcnow_later = datetime.utcnow()
+    utcnow_later = datetime.now(UTC)
     modern_later = datetime.now(timezone.utc)
     
     print("Same-type comparisons:")
@@ -137,7 +137,7 @@ def test_json_serialization():
     """Test JSON serialization compatibility."""
     print("\n=== JSON SERIALIZATION VALIDATION ===")
     
-    utcnow_timestamp = datetime.utcnow()
+    utcnow_timestamp = datetime.now(UTC)
     modern_timestamp = datetime.now(timezone.utc)
     
     # Test common data structures
@@ -170,7 +170,7 @@ def test_json_serialization():
             print(f"\n{structure_name.upper()}:")
             print(f"  Legacy JSON length: {len(legacy_json)} chars")
             print(f"  Modern JSON length: {len(modern_json)} chars")
-            print(f"  Both serializable: ✅")
+            print(f"  Both serializable: CHECK")
             print(f"  Structure compatible: {set(legacy_parsed.keys()) == set(modern_parsed.keys())}")
             
             serialization_results[structure_name] = {
@@ -193,7 +193,7 @@ def test_arithmetic_operations():
     """Test datetime arithmetic operations."""
     print("\n=== ARITHMETIC OPERATIONS VALIDATION ===")
     
-    utcnow_base = datetime.utcnow()
+    utcnow_base = datetime.now(UTC)
     modern_base = datetime.now(timezone.utc)
     
     # Test arithmetic operations
@@ -246,7 +246,7 @@ def test_database_compatibility():
     """Test database datetime compatibility patterns."""
     print("\n=== DATABASE COMPATIBILITY VALIDATION ===")
     
-    utcnow_timestamp = datetime.utcnow()
+    utcnow_timestamp = datetime.now(UTC)
     modern_timestamp = datetime.now(timezone.utc)
     
     # Common database storage patterns
@@ -336,13 +336,13 @@ def main():
     
     # Analyze results
     if results['timezone_awareness']['improvement']:
-        improvements.append("✅ Timezone awareness: Modern approach provides explicit timezone info")
+        improvements.append("CHECK Timezone awareness: Modern approach provides explicit timezone info")
     
     if results['serialization_consistency']['isoformat']['improvement']:
-        improvements.append("✅ ISO serialization: Modern includes timezone in output")
+        improvements.append("CHECK ISO serialization: Modern includes timezone in output")
     
     if results['comparison_behavior']['mixed_comparison_risky']:
-        risks.append("⚠️  Mixed comparisons: Naive vs aware datetime comparisons may warn/fail")
+        risks.append("WARNING️  Mixed comparisons: Naive vs aware datetime comparisons may warn/fail")
     
     # Overall assessment
     print("\nIMPROVEMENTS:")
@@ -355,7 +355,7 @@ def main():
     
     # Recommendations
     print("\n=== MODERNIZATION RECOMMENDATIONS ===")
-    print("✅ PROCEED WITH MODERNIZATION:")
+    print("CHECK PROCEED WITH MODERNIZATION:")
     print("  - Modern datetime.now(timezone.utc) provides better timezone handling")
     print("  - Explicit timezone information improves data consistency")
     print("  - Compatible with existing serialization patterns")

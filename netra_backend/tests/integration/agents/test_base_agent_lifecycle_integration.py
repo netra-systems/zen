@@ -29,7 +29,7 @@ import pytest
 import time
 import uuid
 import weakref
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
@@ -151,7 +151,7 @@ class BaseAgentLifecycleIntegrationTests(SSotAsyncTestCase):
         async def track_event(event_type, *args, **kwargs):
             mock_bridge.events_emitted.append({
                 "event_type": event_type,
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(UTC),
                 "args": args,
                 "kwargs": kwargs
             })

@@ -1,0 +1,16 @@
+{
+  "instances": [
+    {
+      "command": "/audit-docker-logs",
+      "name": "audit-docker-logs",
+      "description": "Audits Docker container logs",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": ["/clear"]
+    }
+  ]
+}

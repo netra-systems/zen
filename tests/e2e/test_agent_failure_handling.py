@@ -172,7 +172,7 @@ class AgentFailureHandlingE2ETests:
         print('=' * 80)
         user_message = 'Help me analyze my AWS costs and find optimization opportunities'
         await mock_user.send_chat_message(user_message, agent_type='triage')
-        print(f'✓ User sent message: {user_message}')
+        print(f'CHECK User sent message: {user_message}')
         mock_user.websocket.queue_message({'type': 'agent_started', 'data': {'agent': 'triage', 'execution_id': 'test-execution-001', 'message': 'Agent started processing your request'}})
         mock_user.websocket.queue_message({'type': 'agent_thinking', 'data': {'thought': 'Understanding your request...', 'progress': 20}})
         mock_user.websocket.queue_message({'type': 'agent_thinking', 'data': {'thought': 'Analyzing AWS cost patterns...', 'progress': 40}})
@@ -181,16 +181,16 @@ class AgentFailureHandlingE2ETests:
         print('⏳ Waiting for user to receive death notification...')
         death_notification = await mock_user.wait_for_error_notification(timeout_seconds=20)
         if death_notification:
-            print(f'✓ Death notification received: {death_notification}')
-            print(f"✓ Error message: {death_notification.get('data', {}).get('message', 'N/A')}")
+            print(f'CHECK Death notification received: {death_notification}')
+            print(f"CHECK Error message: {death_notification.get('data', {}).get('message', 'N/A')}")
         else:
             print('✗ No death notification received (this indicates the bug exists)')
         if death_notification:
             error_data = death_notification.get('data', {})
             error_message = error_data.get('message', str(error_data))
             assert len(error_message) > 0, 'Error message should not be empty'
-            print(f'✓ Error message provided: {error_message}')
-        print('\n✅ PASS: E2E USER EXPERIENCE TEST PASSED!')
+            print(f'CHECK Error message provided: {error_message}')
+        print('\nCHECK PASS: E2E USER EXPERIENCE TEST PASSED!')
         print('   - Agent death was simulated')
         print('   - User received proper notification')
         print('   - Error message was provided')
@@ -211,7 +211,7 @@ class AgentFailureHandlingE2ETests:
                 print(f'💀 Message {i + 1}: Simulated agent failure')
             else:
                 mock_user.websocket.queue_message({'type': 'agent_completed', 'data': {'response': f'Response to message {i + 1}: Analysis completed', 'success': True}})
-                print(f'✅ Message {i + 1}: Simulated agent success')
+                print(f'CHECK Message {i + 1}: Simulated agent success')
             await asyncio.sleep(0.1)
         await asyncio.sleep(2)
         completion_messages = mock_user.get_received_messages_by_type('agent_completed')
@@ -226,7 +226,7 @@ class AgentFailureHandlingE2ETests:
         assert len(death_messages) >= expected_failures * 0.8, f'Expected ~{expected_failures} failures, got {len(death_messages)}'
         assert mock_user.connection_status == 'connected', 'User should still be connected'
         assert not mock_user.websocket.is_closed, 'WebSocket should still be open'
-        print('\n✅ PASS: CHAT UI RESILIENCE TEST PASSED!')
+        print('\nCHECK PASS: CHAT UI RESILIENCE TEST PASSED!')
         print('   - Multiple messages processed concurrently')
         print('   - Failures properly detected and reported')
         print('   - Successes completed normally')

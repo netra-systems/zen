@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Segment: Enterprise/Multi-tenant 
 - Business Goal: Test multi-user scalability and isolation
 - Value Impact: Validates enterprise multi-tenant security requirements
-- Strategic Impact: Enables testing of concurrent user scenarios for $500K+ ARR
+- Strategic Impact: Enables testing of concurrent user scenarios for 500K+ ARR
 """
 
 import asyncio
@@ -102,7 +102,7 @@ class ConcurrentUserIsolationManager:
                 # Create authenticated user via SSOT helper
                 user = await create_authenticated_user(
                     user_id=user_id,
-                    email=f"{user_id}@concurrent.test.netra.ai",
+                    email=f"{user_id}@concurrent.test.netrasystems.ai",
                     permissions=["read", "write", "concurrent_test"]
                 )
                 

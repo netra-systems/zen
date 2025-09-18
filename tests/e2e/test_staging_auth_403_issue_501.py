@@ -13,7 +13,7 @@ Test Strategy:
 3. Validate token presence vs API access mismatch
 4. Identify the specific point where authentication breaks down
 
-Business Impact: $500K+ ARR at risk from authentication failures
+Business Impact: 500K+ ARR at risk from authentication failures
 Technical Focus: Real staging environment testing with actual user flows
 """
 
@@ -41,13 +41,13 @@ from netra_backend.app.auth_integration.auth import BackendAuthIntegration, Auth
 logger = logging.getLogger(__name__)
 
 # Staging environment configuration
-STAGING_BACKEND_URL = os.environ.get("STAGING_BACKEND_URL", "https://staging-backend.netra.ai")
-STAGING_AUTH_URL = os.environ.get("STAGING_AUTH_URL", "https://staging-auth.netra.ai")
-STAGING_FRONTEND_URL = os.environ.get("STAGING_FRONTEND_URL", "https://staging.netra.ai")
+STAGING_BACKEND_URL = os.environ.get("STAGING_BACKEND_URL", "https://staging-api.netrasystems.ai")
+STAGING_AUTH_URL = os.environ.get("STAGING_AUTH_URL", "https://staging-auth.netrasystems.ai")
+STAGING_FRONTEND_URL = os.environ.get("STAGING_FRONTEND_URL", "https://staging.netrasystems.ai")
 
 # Test configuration
 REQUEST_TIMEOUT = 30  # seconds
-TEST_USER_EMAIL = "test-issue-501@netra.ai"
+TEST_USER_EMAIL = "test-issue-501@netrasystems.ai"
 TEST_USER_PASSWORD = "TestPassword123!"
 
 class StagingAuth403ReproductionTest:
@@ -99,7 +99,7 @@ class StagingAuth403ReproductionTest:
             frontend_response = await staging_client.get(f"{STAGING_FRONTEND_URL}")
             assert frontend_response.status_code in [200, 301, 302], f"Frontend not accessible: {frontend_response.status_code}"
             
-            logger.info("✅ Staging environment connectivity verified")
+            logger.info("CHECK Staging environment connectivity verified")
             
         except httpx.ConnectError as e:
             pytest.skip(f"Cannot connect to staging environment: {e}")
@@ -141,7 +141,7 @@ class StagingAuth403ReproductionTest:
             
             assert access_token is not None, "Login succeeded but no access token received"
             
-            logger.info(f"✅ User login successful - token received: {access_token[:20]}...")
+            logger.info(f"CHECK User login successful - token received: {access_token[:20]}...")
             
             # Step 2: Make authenticated API call - this is where Issue #501 manifests
             auth_headers = {

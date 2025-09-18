@@ -4,7 +4,7 @@ Agent Message Pipeline Integration Tests
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) - Core message processing pipeline
 - Business Goal: Platform Stability & Revenue Protection - $500K+ ARR protection
-- Value Impact: Validates complete user message → AI response pipeline integrity
+- Value Impact: Validates complete user message -> AI response pipeline integrity
 - Strategic Impact: Critical Golden Path component - chat message processing delivers core platform value
 
 CRITICAL REQUIREMENTS per CLAUDE.md:
@@ -68,7 +68,7 @@ class MessagePipelineIntegrationTests(SSotAsyncTestCase):
     P0 Critical Integration Tests for Message Pipeline Processing.
 
     This test class validates the complete message processing pipeline:
-    User Message → Router → Supervisor → Agent → Response
+    User Message -> Router -> Supervisor -> Agent -> Response
 
     Tests protect $500K+ ARR message processing by validating:
     - Complete message ingestion and validation
@@ -197,7 +197,7 @@ class MessagePipelineIntegrationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_complete_message_ingestion_to_response_pipeline(self):
         """
-        Test complete message pipeline: Ingestion → Routing → Processing → Response.
+        Test complete message pipeline: Ingestion -> Routing -> Processing -> Response.
 
         Business Value: $500K+ ARR protection - validates core message processing
         pipeline that enables all AI-powered business interactions.

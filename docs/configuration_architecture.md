@@ -1,6 +1,6 @@
 # Configuration and Environment Management Architecture
 
-**Last Updated:** 2025-09-14 | **Status:** OPERATIONAL - Configuration Manager SSOT Phase 1 Complete
+**Last Updated:** 2025-01-17 | **Status:** OPERATIONAL - Configuration Manager SSOT Phase 1 Complete
 
 ## Related Documentation
 
@@ -8,6 +8,8 @@
 - [Independent Services Spec](../SPEC/independent_services.xml) - Service independence requirements
 - [Type Safety Spec](../SPEC/type_safety.xml) - Type safety and duplication rules
 - [Database Connectivity Architecture](../SPEC/database_connectivity_architecture.xml) - Database configuration patterns
+- **[SECRET VALUE LOADING FLOW](SECRET_VALUE_LOADING_FLOW.md) - CRITICAL: Complete timeline of secret loading and failure points**
+- **[Secret Loading Validation Issue #1294](../SPEC/learnings/secret_loading_validation_critical_issue_1294.xml) - Service account access failures**
 - [WebSocket Agent Integration](../SPEC/learnings/websocket_agent_integration_critical.xml) - Critical WebSocket event requirements
 - [WebSocket Silent Failure Prevention](../SPEC/learnings/websocket_silent_failure_prevention_masterclass.xml) - Comprehensive silent failure prevention
 - [WebSocket Silent Failures](../SPEC/learnings/websocket_silent_failures.xml) - Silent failure detection and mitigation

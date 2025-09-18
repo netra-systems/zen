@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# REMOVED_SYNTAX_ERROR: '''REAL WEBSOCKET LOAD TEST - No Mocks, Real Connections Only
+# REMOVED_SYNTAX_ERROR: """REAL WEBSOCKET LOAD TEST - No Mocks, Real Connections Only
 
 # REMOVED_SYNTAX_ERROR: This focused test validates WebSocket and concurrency fixes using REAL WebSocket connections
 # REMOVED_SYNTAX_ERROR: and REAL services. All MockWebSocketConnection instances have been eliminated per CLAUDE.md.
@@ -11,8 +11,8 @@
     # REMOVED_SYNTAX_ERROR: - Connection recovery works within acceptable limits
     # REMOVED_SYNTAX_ERROR: - Each concurrent user gets the complete event sequence
 
-    # REMOVED_SYNTAX_ERROR: Business Value: $500K+ ARR - Chat delivers 90% of user value
-    # REMOVED_SYNTAX_ERROR: '''
+    # REMOVED_SYNTAX_ERROR: Business Value: 500K+ ARR - Chat delivers 90% of user value
+    # REMOVED_SYNTAX_ERROR: """'''
 
     # REMOVED_SYNTAX_ERROR: import asyncio
     # REMOVED_SYNTAX_ERROR: import json

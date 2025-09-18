@@ -38,7 +38,7 @@ class Issue521AuthenticationRegressionTests(SSotBaseTestCase):
     def setUpClass(cls):
         """Setup test class with staging environment configuration."""
         super().setUpClass()
-        cls.staging_config = {'base_url': 'https://netra-backend-staging-1234567890-uc.a.run.app', 'auth_service_url': 'https://netra-auth-staging-1234567890-uc.a.run.app', 'timeout': 30, 'retry_count': 3}
+        cls.staging_config = {'base_url': 'https://netra-backend-staging-1234567890-uc.a.run.app', 'auth_service_url': 'https://netra-auth-1234567890-uc.a.run.app', 'timeout': 30, 'retry_count': 3}
 
     def setUp(self):
         """Setup individual test with required configuration."""
@@ -179,7 +179,7 @@ class Issue521AuthenticationRegressionTests(SSotBaseTestCase):
         """
         Test: Validate Golden Path user workflow after Issue #521 resolution
         
-        This test ensures that the core business value (users login → get AI responses)
+        This test ensures that the core business value (users login -> get AI responses)
         is restored after fixing the service authentication failures. This represents
         the ultimate validation that Issue #521 resolution protects $500K+ ARR.
         

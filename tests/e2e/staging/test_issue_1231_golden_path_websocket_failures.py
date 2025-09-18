@@ -10,7 +10,7 @@ Business Impact:
 - Complete Golden Path user flow broken
 - Users cannot login and get AI responses
 - 90% of platform value non-functional
-- $500K+ ARR dependency completely broken
+- 500K+ ARR dependency completely broken
 - Real-time chat experience destroyed
 
 Test Focus:
@@ -43,9 +43,9 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 # Staging environment configuration
-STAGING_BASE_URL = "https://backend.staging.netrasystems.ai"
+STAGING_BASE_URL = "https://api.staging.netrasystems.ai"
 STAGING_AUTH_URL = "https://auth.staging.netrasystems.ai"
-STAGING_WEBSOCKET_URL = "wss://backend.staging.netrasystems.ai/ws"
+STAGING_WEBSOCKET_URL = "wss://api.staging.netrasystems.ai/ws"
 
 
 class Issue1231GoldenPathWebSocketFailuresTests:
@@ -203,7 +203,7 @@ class Issue1231GoldenPathWebSocketFailuresTests:
                     # If we get a response, the bug might be fixed
                     return {"connected": True, "response": response}
 
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 if e.code == 1011:  # Expected due to server-side async/await bug
                     raise RuntimeError(f"WebSocket connection closed with 1011 due to async/await bug: {e}")
                 else:

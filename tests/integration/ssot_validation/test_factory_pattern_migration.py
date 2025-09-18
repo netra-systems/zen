@@ -475,12 +475,7 @@ class FactoryPatternMigrationTests(SSotAsyncTestCase):
             
             # 3. Engine has WebSocket support for chat UX
             if not hasattr(engine, 'websocket_emitter') or not engine.websocket_emitter:
-                print("GOLDEN PATH WARNING: No WebSocket emitter (may affect chat UX)")
-                # Not marking as failure - might be acceptable for some implementations
-            
-            # 4. Engine can maintain state for conversation context
-            if hasattr(engine, 'set_agent_state') and hasattr(engine, 'get_agent_state'):
-                engine.set_agent_state("golden_path_agent", "processing")
+                print("GOLDEN PATH WARNING: No WebSocket emitter (may affect chat UX)""golden_path_agent", "processing")
                 state = engine.get_agent_state("golden_path_agent")
                 if state != "processing":
                     golden_path_functional = False

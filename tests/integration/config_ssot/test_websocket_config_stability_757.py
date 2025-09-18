@@ -3,7 +3,7 @@ Phase 3: WebSocket Configuration Stability Tests
 Issue #757 - WebSocket-specific stability during config migration
 
 These tests focus specifically on WebSocket configuration stability
-as WebSocket failures are the #1 threat to Golden Path and $500K+ ARR.
+as WebSocket failures are the #1 threat to Golden Path and 500K+ ARR.
 """
 import os
 import sys
@@ -42,8 +42,8 @@ class WebSocketConfigurationStabilityTests:
                         cors_stability[method_name] = False
                         print(f'CORS config error in {method_name}: {e}')
                 stable_cors_configs = sum((1 for stable in cors_stability.values() if stable))
-                assert stable_cors_configs >= len(cors_stability), f'CRITICAL: WebSocket CORS configuration unstable - CONNECTION BLOCKING RISK: {cors_stability}. Unstable CORS blocks frontend WebSocket connections, breaking real-time chat and $500K+ ARR.'
-                print(f'✅ WebSocket CORS config fully stable: {stable_cors_configs}/{len(cors_stability)} configs stable')
+                assert stable_cors_configs >= len(cors_stability), f'CRITICAL: WebSocket CORS configuration unstable - CONNECTION BLOCKING RISK: {cors_stability}. Unstable CORS blocks frontend WebSocket connections, breaking real-time chat and 500K+ ARR.'
+                print(f'CHECK WebSocket CORS config fully stable: {stable_cors_configs}/{len(cors_stability)} configs stable')
             else:
                 print('ℹ️ No explicit CORS methods - testing general origin handling')
                 cors_env_vars = ['CORS_ORIGINS', 'ALLOWED_ORIGINS', 'FRONTEND_URL']
@@ -80,15 +80,15 @@ class WebSocketConfigurationStabilityTests:
                             stability = len(set(network_configs)) == 1
                             host_port_stability[method_name] = stability
                             if not stability:
-                                print(f'⚠️ {method_name} instability: {network_configs}')
+                                print(f'WARNING️ {method_name} instability: {network_configs}')
                         else:
                             host_port_stability[method_name] = True
                     except Exception as e:
                         host_port_stability[method_name] = False
                         print(f'Host/port config error in {method_name}: {e}')
                 stable_network_configs = sum((1 for stable in host_port_stability.values() if stable))
-                assert stable_network_configs >= len(host_port_stability), f'CRITICAL: WebSocket network configuration unstable - CONNECTION FAILURE RISK: {host_port_stability}. Unstable host/port configuration prevents WebSocket connections, breaking real-time functionality and $500K+ ARR.'
-                print(f'✅ WebSocket network config fully stable: {stable_network_configs}/{len(host_port_stability)} configs stable')
+                assert stable_network_configs >= len(host_port_stability), f'CRITICAL: WebSocket network configuration unstable - CONNECTION FAILURE RISK: {host_port_stability}. Unstable host/port configuration prevents WebSocket connections, breaking real-time functionality and 500K+ ARR.'
+                print(f'CHECK WebSocket network config fully stable: {stable_network_configs}/{len(host_port_stability)} configs stable')
             else:
                 print('ℹ️ No explicit host/port methods - testing environment network config')
                 network_env_vars = ['HOST', 'PORT', 'WEBSOCKET_URL', 'BACKEND_URL']
@@ -125,15 +125,15 @@ class WebSocketConfigurationStabilityTests:
                             stability = len(set(auth_configs)) == 1
                             websocket_auth_stability[method_name] = stability
                             if not stability:
-                                print(f'⚠️ {method_name} authentication instability detected')
+                                print(f'WARNING️ {method_name} authentication instability detected')
                         else:
                             websocket_auth_stability[method_name] = True
                     except Exception as e:
                         websocket_auth_stability[method_name] = False
                         print(f'WebSocket auth config error in {method_name}: {e}')
                 stable_auth_configs = sum((1 for stable in websocket_auth_stability.values() if stable))
-                assert stable_auth_configs >= len(websocket_auth_stability), f'CRITICAL: WebSocket authentication configuration unstable - SECURITY BREACH RISK: {websocket_auth_stability}. Unstable auth config prevents secure WebSocket connections, creating security vulnerabilities and breaking $500K+ ARR functionality.'
-                print(f'✅ WebSocket auth config fully stable: {stable_auth_configs}/{len(websocket_auth_stability)} configs stable')
+                assert stable_auth_configs >= len(websocket_auth_stability), f'CRITICAL: WebSocket authentication configuration unstable - SECURITY BREACH RISK: {websocket_auth_stability}. Unstable auth config prevents secure WebSocket connections, creating security vulnerabilities and breaking 500K+ ARR functionality.'
+                print(f'CHECK WebSocket auth config fully stable: {stable_auth_configs}/{len(websocket_auth_stability)} configs stable')
             else:
                 print('ℹ️ No explicit auth methods - testing JWT environment stability')
                 jwt_env_vars = ['JWT_SECRET_KEY', 'JWT_SECRET', 'SECRET_KEY']
@@ -176,8 +176,8 @@ class WebSocketConfigurationStabilityTests:
                         event_config_stability[method_name] = False
                         print(f'Event config error in {method_name}: {e}')
                 stable_event_configs = sum((1 for stable in event_config_stability.values() if stable))
-                assert stable_event_configs >= len(event_config_stability), f'CRITICAL: WebSocket event delivery configuration unstable - REAL-TIME UX FAILURE: {event_config_stability}. Unstable event config breaks real-time agent progress updates, degrading user experience and $500K+ ARR value.'
-                print(f'✅ WebSocket event config fully stable: {stable_event_configs}/{len(event_config_stability)} configs stable')
+                assert stable_event_configs >= len(event_config_stability), f'CRITICAL: WebSocket event delivery configuration unstable - REAL-TIME UX FAILURE: {event_config_stability}. Unstable event config breaks real-time agent progress updates, degrading user experience and 500K+ ARR value.'
+                print(f'CHECK WebSocket event config fully stable: {stable_event_configs}/{len(event_config_stability)} configs stable')
             else:
                 print('ℹ️ No explicit event methods - testing general configuration stability')
                 all_methods = [method for method in dir(config_manager) if not method.startswith('_') and callable(getattr(config_manager, method))]
@@ -221,7 +221,7 @@ class WebSocketConfigurationStabilityTests:
                         pool_config_stability[method_name] = False
                 stable_pool_configs = sum((1 for stable in pool_config_stability.values() if stable))
                 assert stable_pool_configs >= len(pool_config_stability) * 0.8, f'WebSocket connection pooling configuration unstable: {pool_config_stability}'
-                print(f'✅ WebSocket connection pooling config stable: {stable_pool_configs}/{len(pool_config_stability)} configs stable')
+                print(f'CHECK WebSocket connection pooling config stable: {stable_pool_configs}/{len(pool_config_stability)} configs stable')
             else:
                 print('ℹ️ No explicit connection pooling methods found')
         except ImportError as e:
@@ -254,8 +254,8 @@ class WebSocketMigrationIntegrationTests:
                         accessible_methods += 1
                 except Exception as e:
                     method_results[method_name] = f'error: {str(e)[:30]}'
-            assert accessible_methods >= 3, f'WebSocket manager cannot access sufficient configuration methods: {method_results}. This breaks WebSocket initialization and $500K+ ARR.'
-            print(f'✅ WebSocket manager config compatibility: {accessible_methods}/{len(websocket_compatible_methods)} methods accessible')
+            assert accessible_methods >= 3, f'WebSocket manager cannot access sufficient configuration methods: {method_results}. This breaks WebSocket initialization and 500K+ ARR.'
+            print(f'CHECK WebSocket manager config compatibility: {accessible_methods}/{len(websocket_compatible_methods)} methods accessible')
         except ImportError as e:
             pytest.fail(f'Cannot test WebSocket manager configuration compatibility: {e}')
 
@@ -293,8 +293,8 @@ class WebSocketMigrationIntegrationTests:
                     startup_successes.append(False)
                     print(f'Startup simulation {attempt + 1} failed: {e}')
             overall_startup_success = sum(startup_successes) >= len(startup_successes)
-            assert overall_startup_success, f'CRITICAL: WebSocket startup sequence fails with canonical configuration - SERVICE AVAILABILITY RISK: {startup_successes}. WebSocket service cannot start reliably, breaking real-time functionality and $500K+ ARR.'
-            print(f'✅ WebSocket startup sequence stable: {sum(startup_successes)}/{len(startup_successes)} successful startups')
+            assert overall_startup_success, f'CRITICAL: WebSocket startup sequence fails with canonical configuration - SERVICE AVAILABILITY RISK: {startup_successes}. WebSocket service cannot start reliably, breaking real-time functionality and 500K+ ARR.'
+            print(f'CHECK WebSocket startup sequence stable: {sum(startup_successes)}/{len(startup_successes)} successful startups')
         except ImportError as e:
             pytest.fail(f'Cannot test WebSocket startup sequence: {e}')
 if __name__ == '__main__':

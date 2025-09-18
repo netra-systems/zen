@@ -4,14 +4,14 @@ E2E Staging Tests for Issue #1181 Business Value Protection
 
 Business Value Justification:
 - Segment: All Segments (Free, Early, Mid, Enterprise)
-- Business Goal: $500K+ ARR Protection & Revenue Continuity
+- Business Goal: 500K+ ARR Protection & Revenue Continuity
 - Value Impact: Ensures MessageRouter consolidation doesn't break revenue-generating features
 - Strategic Impact: Validates that all business-critical workflows continue to work
 
 CRITICAL BUSINESS VALUE PROTECTION:
 Issue #1181 MessageRouter consolidation must not impact the revenue-generating
 capabilities of the platform. These E2E tests validate that all business-critical
-workflows continue to function, protecting the $500K+ ARR.
+workflows continue to function, protecting the 500K+ ARR.
 
 Tests verify user onboarding, chat functionality, agent interactions, tool executions,
 and subscription workflows that directly impact customer satisfaction and retention.
@@ -42,8 +42,8 @@ class Issue1181BusinessValueProtectionStagingE2ETests(SSotAsyncTestCase):
         super().setUpClass()
         
         # Staging environment configuration
-        cls.staging_base_url = "https://backend.staging.netrasystems.ai"
-        cls.staging_ws_url = "wss://backend.staging.netrasystems.ai/ws"
+        cls.staging_base_url = "https://api.staging.netrasystems.ai"
+        cls.staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
         cls.staging_auth_url = "https://auth.staging.netrasystems.ai"
         
         # Business value test configuration
@@ -165,17 +165,17 @@ class Issue1181BusinessValueProtectionStagingE2ETests(SSotAsyncTestCase):
                         self.revenue_impact_metrics["successful_workflows"] += 1
                         self.revenue_impact_metrics["response_times"].append(workflow_duration)
                         
-                        logger.info(f" REVENUE:  ✅ {workflow['workflow']} succeeded ({workflow_duration:.2f}s)")
+                        logger.info(f" REVENUE:  CHECK {workflow['workflow']} succeeded ({workflow_duration:.2f}s)")
                     else:
                         self.revenue_impact_metrics["failed_workflows"] += 1
                         self.revenue_impact_metrics["error_count"] += 1
                         
-                        logger.error(f" REVENUE:  ❌ {workflow['workflow']} failed - REVENUE IMPACT: {workflow['revenue_impact']}")
+                        logger.error(f" REVENUE:  X {workflow['workflow']} failed - REVENUE IMPACT: {workflow['revenue_impact']}")
                 
                 except Exception as e:
                     self.revenue_impact_metrics["failed_workflows"] += 1
                     self.revenue_impact_metrics["error_count"] += 1
-                    logger.error(f" REVENUE:  ❌ {workflow['workflow']} error: {e}")
+                    logger.error(f" REVENUE:  X {workflow['workflow']} error: {e}")
             
             # Calculate business value metrics
             total_workflows = len(chat_workflows)
@@ -202,7 +202,7 @@ class Issue1181BusinessValueProtectionStagingE2ETests(SSotAsyncTestCase):
             logger.info(f"   - Success rate: {success_rate:.2%}")
             logger.info(f"   - Average response time: {avg_response_time:.2f}s")
             logger.info(f"   - Total test duration: {total_test_duration:.2f}s")
-            logger.info(f"   - Revenue protection: {'✅ PROTECTED' if success_rate >= self.user_satisfaction_threshold else '❌ AT RISK'}")
+            logger.info(f"   - Revenue protection: {'CHECK PROTECTED' if success_rate >= self.user_satisfaction_threshold else 'X AT RISK'}")
             
         except Exception as e:
             self.fail(f"CRITICAL REVENUE FAILURE: {e}")
@@ -289,16 +289,16 @@ class Issue1181BusinessValueProtectionStagingE2ETests(SSotAsyncTestCase):
                     })
                     
                     if feature_success == feature["expected_access"]:
-                        logger.info(f" SUBSCRIPTION:  ✅ {feature['feature']} access correct")
+                        logger.info(f" SUBSCRIPTION:  CHECK {feature['feature']} access correct")
                     else:
-                        logger.warning(f" SUBSCRIPTION:  ⚠️ {feature['feature']} access unexpected")
+                        logger.warning(f" SUBSCRIPTION:  WARNING️ {feature['feature']} access unexpected")
                 
                 except Exception as e:
                     subscription_results.append({
                         "feature": feature["feature"],
                         "error": str(e)
                     })
-                    logger.error(f" SUBSCRIPTION:  ❌ {feature['feature']} test failed: {e}")
+                    logger.error(f" SUBSCRIPTION:  X {feature['feature']} test failed: {e}")
             
             # Validate subscription feature protection
             correct_access_count = sum(1 for r in subscription_results 
@@ -313,7 +313,7 @@ class Issue1181BusinessValueProtectionStagingE2ETests(SSotAsyncTestCase):
             
             for result in subscription_results:
                 if "error" not in result:
-                    status = "✅" if result["access_granted"] == result["expected_access"] else "⚠️"
+                    status = "CHECK" if result["access_granted"] == result["expected_access"] else "WARNING️"
                     logger.info(f"   {status} {result['feature']} ({result['tier_required']})")
             
             # Should have high accuracy in subscription feature access
@@ -389,9 +389,9 @@ class Issue1181BusinessValueProtectionStagingE2ETests(SSotAsyncTestCase):
                     })
                     
                     if step_success:
-                        logger.info(f" ONBOARDING:  ✅ {workflow['step']} ({step_duration:.2f}s)")
+                        logger.info(f" ONBOARDING:  CHECK {workflow['step']} ({step_duration:.2f}s)")
                     else:
-                        logger.error(f" ONBOARDING:  ❌ {workflow['step']} failed")
+                        logger.error(f" ONBOARDING:  X {workflow['step']} failed")
                 
                 except Exception as e:
                     onboarding_results.append({
@@ -399,7 +399,7 @@ class Issue1181BusinessValueProtectionStagingE2ETests(SSotAsyncTestCase):
                         "success": False,
                         "error": str(e)
                     })
-                    logger.error(f" ONBOARDING:  ❌ {workflow['step']} error: {e}")
+                    logger.error(f" ONBOARDING:  X {workflow['step']} error: {e}")
             
             # Validate onboarding success
             successful_steps = sum(1 for r in onboarding_results if r["success"])
@@ -412,7 +412,7 @@ class Issue1181BusinessValueProtectionStagingE2ETests(SSotAsyncTestCase):
             logger.info(f"   - Success rate: {onboarding_success_rate:.2%}")
             
             for result in onboarding_results:
-                status = "✅" if result["success"] else "❌"
+                status = "CHECK" if result["success"] else "X"
                 duration = f"({result.get('duration', 0):.2f}s)" if result.get("duration") else ""
                 logger.info(f"   {status} {result['step']} {duration}")
             

@@ -1,0 +1,1 @@
+gh issue create --title "P0 Critical Test Import Failures Blocking $500K+ ARR Functionality Validation" --body-file "GITHUB_ISSUE_CRITICAL_TEST_IMPORT_FAILURES_COMPREHENSIVE.md" --label "test-infrastructure-critical,P0,critical,import-errors,websocket,golden-path"

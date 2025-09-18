@@ -1,0 +1,120 @@
+{
+  "test_session_id": "e2e-test-1755873366",
+  "timestamp": "2025-08-22T07:36:06.045875",
+  "overall_status": "FAILED",
+  "test_phases": {
+    "infrastructure": {
+      "status": "completed",
+      "tests": [
+        {
+          "name": "Backend Health",
+          "status": "FAIL",
+          "details": "All connection attempts failed"
+        },
+        {
+          "name": "Auth Service Health",
+          "status": "FAIL",
+          "details": "All connection attempts failed"
+        },
+        {
+          "name": "Frontend Health",
+          "status": "PASS",
+          "details": "Responded with 500 (acceptable)"
+        }
+      ]
+    },
+    "authentication": {
+      "status": "completed",
+      "tests": [
+        {
+          "name": "Dev Login",
+          "status": "FAIL",
+          "details": "All connection attempts failed"
+        }
+      ]
+    },
+    "platform_endpoints": {
+      "status": "completed",
+      "tests": [
+        {
+          "name": "WebSocket Info Endpoint",
+          "status": "FAIL",
+          "details": "All connection attempts failed"
+        },
+        {
+          "name": "WebSocket Config Endpoint",
+          "status": "FAIL",
+          "details": "All connection attempts failed"
+        },
+        {
+          "name": "Thread Management Endpoint",
+          "status": "FAIL",
+          "details": "All connection attempts failed"
+        },
+        {
+          "name": "Agent Message Endpoint",
+          "status": "FAIL",
+          "details": "All connection attempts failed"
+        },
+        {
+          "name": "Health Check Endpoint",
+          "status": "FAIL",
+          "details": "All connection attempts failed"
+        }
+      ]
+    },
+    "integration": {
+      "status": "completed",
+      "tests": [
+        {
+          "name": "Service Integration",
+          "status": "FAIL",
+          "details": "Only 1/3 services healthy"
+        },
+        {
+          "name": "Authentication Integration",
+          "status": "FAIL",
+          "details": "JWT token generation failed"
+        },
+        {
+          "name": "API Endpoint Integration",
+          "status": "FAIL",
+          "details": "Only 0/5 endpoints available"
+        }
+      ]
+    }
+  },
+  "total_passed": 1,
+  "total_failed": 11,
+  "auth_token": null,
+  "errors": [],
+  "summary": {
+    "total_tests": 12,
+    "passed_tests": 1,
+    "failed_tests": 11,
+    "success_rate": 8.333333333333332,
+    "phase_summary": {
+      "infrastructure": {
+        "total": 3,
+        "passed": 1,
+        "failed": 2
+      },
+      "authentication": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "platform_endpoints": {
+        "total": 5,
+        "passed": 0,
+        "failed": 5
+      },
+      "integration": {
+        "total": 3,
+        "passed": 0,
+        "failed": 3
+      }
+    }
+  },
+  "completion_timestamp": "2025-08-22T07:36:24.800579"
+}

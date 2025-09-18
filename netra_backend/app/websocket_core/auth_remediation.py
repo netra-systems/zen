@@ -14,12 +14,12 @@ with the existing WebSocket infrastructure to fix handshake timing issues.
 """
 
 import asyncio
-import logging
 from typing import Optional
 from dataclasses import dataclass
 
 # SSOT imports
 from shared.isolated_environment import get_env
+from shared.logging.unified_logging_ssot import get_logger
 from shared.types.core_types import UserID, ConnectionID
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
@@ -53,7 +53,7 @@ class WebSocketAuthIntegration:
     """Integration layer for WebSocket authentication remediation."""
     
     def __init__(self, config: Optional[WebSocketAuthConfig] = None):
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
         self.config = config or self._load_config_from_environment()
         
         # Initialize remediation manager if available
@@ -182,42 +182,3 @@ def get_websocket_auth_integration() -> WebSocketAuthIntegration:
     return _websocket_auth_integration
 
 
-async def authenticate_websocket_with_remediation(
-    token: Optional[str],
-    connection_id: str
-) -> tuple[bool, Optional[UserExecutionContext], Optional[str]]:
-    """
-    DEPRECATED: Remediation-based authentication - use authenticate_websocket_ssot() instead.
-    
-    MIGRATION REQUIRED: This function is deprecated as part of SSOT consolidation.
-    All WebSocket authentication should use authenticate_websocket_ssot() from
-    netra_backend.app.websocket_core.unified_websocket_auth.
-    
-    This function is preserved for backward compatibility but delegates to the
-    deprecated auth integration which in turn should not be used for new code.
-    
-    Args:
-        token: Optional JWT token
-        connection_id: WebSocket connection identifier
-        
-    Returns:
-        Tuple of (success, user_context, error_message)
-    """
-    import warnings
-    warnings.warn(
-        "authenticate_websocket_with_remediation() is deprecated. "
-        "Use authenticate_websocket_ssot() from unified_websocket_auth instead. "
-        "This function will be removed in the next release.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    
-    import logging
-    logger = logging.getLogger(__name__)
-    logger.warning(
-        f"DEPRECATION: authenticate_websocket_with_remediation() called for connection {connection_id}. "
-        "Migrate to authenticate_websocket_ssot() - this function will be removed."
-    )
-    
-    auth_integration = get_websocket_auth_integration()
-    return await auth_integration.authenticate_websocket_connection(token, connection_id)

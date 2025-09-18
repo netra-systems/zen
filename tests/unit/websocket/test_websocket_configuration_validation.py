@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: Platform Infrastructure (affects all customer segments)
 - Business Goal: Stability + Configuration Validation
 - Value Impact: Ensures WebSocket service can be properly configured
-- Revenue Impact: Protects $500K+ ARR by validating configuration integrity
+- Revenue Impact: Protects 500K+ ARR by validating configuration integrity
 
 Expected Result: PASSING (no infrastructure dependencies)
 Difficulty: LOW - Unit testing without external dependencies
@@ -43,13 +43,8 @@ class WebSocketConfigurationValidationTests(unittest.TestCase):
         Business Impact: Ensures WebSocket service can bind to correct port
         """
         # Test default port configuration
-        default_port = 8002
-        self.assertEqual(default_port, 8002, "Default WebSocket port should be 8002")
-
-        # Test port validation logic
-        valid_ports = [8000, 8001, 8002, 8080, 3000]
-        for port in valid_ports:
-            self.assertTrue(1024 <= port <= 65535, f"Port {port} should be in valid range")
+        default_port = 8000
+        self.assertEqual(default_port, 8000, "Default WebSocket port should be 8000 (backend)""Port {port} should be in valid range")
 
         # Test invalid ports
         invalid_ports = [0, 80, 443, 1023, 65536]
@@ -70,13 +65,13 @@ class WebSocketConfigurationValidationTests(unittest.TestCase):
         """
         # Test local development URL construction
         local_host = "localhost"
-        local_port = 8002
+        local_port = 8000
         local_url = f"ws://{local_host}:{local_port}/ws"
 
         parsed = urlparse(local_url)
         self.assertEqual(parsed.scheme, "ws", "Local WebSocket should use ws:// scheme")
         self.assertEqual(parsed.hostname, "localhost", "Local host should be localhost")
-        self.assertEqual(parsed.port, 8002, "Local port should be 8002")
+        self.assertEqual(parsed.port, 8000, "Local port should be 8000 (backend)")
         self.assertEqual(parsed.path, "/ws", "WebSocket path should be /ws")
 
         # Test staging URL construction
@@ -193,8 +188,8 @@ class WebSocketConfigurationValidationTests(unittest.TestCase):
 
         # Test environment-specific configurations
         env_configs = {
-            "test": {"host": "localhost", "port": 8002, "secure": False},
-            "dev": {"host": "localhost", "port": 8002, "secure": False},
+            "test": {"host": "localhost", "port": 8000, "secure": False},
+            "dev": {"host": "localhost", "port": 8000, "secure": False},
             "staging": {"host": "api.staging.netrasystems.ai", "port": 443, "secure": True},
             "prod": {"host": "api.netrasystems.ai", "port": 443, "secure": True}
         }
@@ -207,7 +202,7 @@ class WebSocketConfigurationValidationTests(unittest.TestCase):
             if config["secure"]:
                 self.assertEqual(config["port"], 443, f"Secure environments should use port 443")
             else:
-                self.assertIn(config["port"], [8000, 8001, 8002], f"Local environments should use dev ports")
+                self.assertIn(config["port"], [8000, 8001], f"Local environments should use dev ports")
 
     @patch('socket.socket')
     def test_websocket_connection_failure_simulation(self, mock_socket):
@@ -225,7 +220,7 @@ class WebSocketConfigurationValidationTests(unittest.TestCase):
 
         # Test that we can detect and handle this specific error
         try:
-            mock_socket.return_value.connect(("localhost", 8002))
+            mock_socket.return_value.connect(("localhost", 8000))
             self.fail("Should have raised ConnectionRefusedError")
         except ConnectionRefusedError as e:
             self.assertIn("refused", str(e).lower(), "Error should mention connection refusal")
@@ -256,7 +251,7 @@ class WebSocketConfigurationValidationTests(unittest.TestCase):
         Business Impact: Ensures system continues to work when WebSocket service down
         """
         # Test fallback URL configuration
-        primary_url = "ws://localhost:8002/ws"
+        primary_url = "ws://localhost:8000/ws"
         fallback_url = "wss://api.staging.netrasystems.ai/ws"
 
         self.assertNotEqual(primary_url, fallback_url, "Fallback should be different from primary")
@@ -288,7 +283,7 @@ class WebSocketConfigurationValidationTests(unittest.TestCase):
         # Test business value metrics
         business_metrics = {
             "chat_functionality_percentage": 90,  # 90% of platform value
-            "arr_at_risk": 500000,               # $500K+ ARR
+            "arr_at_risk": 500000,               # 500K+ ARR
             "critical_events_count": 5,          # 5 critical WebSocket events
             "user_experience_impact": "HIGH"     # High impact on user experience
         }

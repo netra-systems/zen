@@ -1,0 +1,111 @@
+{
+  "// Description": "Blog post and documentation generation workflow with research, writing, and optimization",
+  "// Use Case": "Creating technical blog posts, documentation, tutorials, and marketing content",
+  "// Best Practices": "Separates research, outline creation, writing, and optimization phases",
+
+  "instances": [
+    {
+      "name": "research-specialist",
+      "command": "/research topic comprehensively; Gather information from multiple sources; Identify key concepts, current trends, and expert opinions; Create research summary with citations and credible sources",
+      "description": "Conducts thorough research on the content topic",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 12000,
+      "allowed_tools": ["WebSearch", "WebFetch", "Read", "Write", "Task"],
+      "session_id": "research_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "/clear",
+        "Set context: I am conducting research for content creation",
+        "Focus: Current trends, expert insights, practical examples, credible sources"
+      ]
+    },
+    {
+      "name": "content-strategist",
+      "command": "/create content strategy and outline; Analyze target audience and define key messages; Structure content for maximum engagement and comprehension; Plan content flow and sections",
+      "description": "Develops content strategy and detailed outline",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 10000,
+      "allowed_tools": ["Read", "Write", "Task"],
+      "session_id": "strategy_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am creating content strategy based on completed research",
+        "Focus: Target audience, key messages, content structure, engagement optimization"
+      ]
+    },
+    {
+      "name": "technical-writer",
+      "command": "/write comprehensive content; Create engaging, well-structured content following the outline; Include practical examples, code snippets, and actionable insights; Ensure technical accuracy and clarity",
+      "description": "Writes the main content following strategy and outline",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 20000,
+      "allowed_tools": ["Read", "Write", "Edit", "MultiEdit", "Task"],
+      "session_id": "writing_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am writing technical content based on research and strategy",
+        "Style: Clear, engaging, practical with examples and actionable insights"
+      ]
+    },
+    {
+      "name": "seo-optimizer",
+      "command": "/optimize content for SEO and readability; Analyze keyword usage and search intent; Improve meta descriptions, headings, and content structure; Ensure accessibility and mobile-friendliness",
+      "description": "Optimizes content for search engines and readability",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 8000,
+      "allowed_tools": ["Read", "Edit", "MultiEdit", "Write", "Task"],
+      "session_id": "seo_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am optimizing content for SEO and user experience",
+        "Focus: Keyword optimization, readability, meta tags, content structure"
+      ]
+    },
+    {
+      "name": "quality-editor",
+      "command": "/perform final editing and quality assurance; Review for grammar, style, and consistency; Fact-check technical details; Ensure brand voice alignment and call-to-action effectiveness",
+      "description": "Performs final editing and quality assurance",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 12000,
+      "allowed_tools": ["Read", "Edit", "MultiEdit", "Write", "Task"],
+      "session_id": "editing_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am performing final editing and quality assurance",
+        "Focus: Grammar, style, consistency, fact-checking, brand voice, call-to-action"
+      ]
+    }
+  ],
+
+  "// Content Guidelines": {
+    "target_length": "1500-3000 words for blog posts, varies for documentation",
+    "tone": "Professional yet accessible, with practical focus",
+    "structure": "Introduction → Problem/Context → Solution/Method → Examples → Conclusion",
+    "seo_targets": "Primary keyword density 1-2%, semantic keywords throughout",
+    "quality_metrics": "Readability score, engagement elements, actionability"
+  },
+
+  "// Configuration Notes": {
+    "workflow_type": "Sequential content creation pipeline",
+    "session_management": "Each stage builds on previous work while maintaining focus",
+    "token_allocation": "Writing gets most tokens, research and editing get substantial allocation",
+    "tool_integration": "Web tools for research, editing tools for refinement",
+    "best_practices": [
+      "Research thoroughly before writing to ensure accuracy",
+      "Create detailed outline to guide writing process",
+      "Separate writing and editing phases for better quality",
+      "Optimize for both search engines and human readers",
+      "Include practical examples and actionable insights"
+    ]
+  }
+}

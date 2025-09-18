@@ -1,3 +1,4 @@
+from shared.logging.unified_logging_ssot import get_logger
 """
 Application startup management module.
 Handles initialization of logging, database connections, services, and health checks.
@@ -30,6 +31,34 @@ _setup_paths()
 from shared.isolated_environment import get_env
 from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 
+# CRITICAL: Import CloudEnvironmentDetector with comprehensive error handling
+try:
+    from netra_backend.app.core.environment_context.cloud_environment_detector import (
+        get_cloud_environment_detector, CloudPlatform
+    )
+except ImportError as e:
+    import sys
+    print(f"CRITICAL IMPORT ERROR: CloudEnvironmentDetector import failed: {e}", file=sys.stderr)
+    print(f"Python path: {sys.path}", file=sys.stderr)
+    print(f"Current working directory: {Path.cwd()}", file=sys.stderr)
+    print(f"Module file location: {__file__}", file=sys.stderr)
+
+    # Try to provide more diagnostic information
+    try:
+        import netra_backend.app.core.environment_context
+        print(f"environment_context package found: {netra_backend.app.core.environment_context}", file=sys.stderr)
+
+        import os
+        detector_path = Path(__file__).parent / "core" / "environment_context" / "cloud_environment_detector.py"
+        print(f"CloudEnvironmentDetector file exists: {detector_path.exists()}", file=sys.stderr)
+        if detector_path.exists():
+            print(f"File size: {detector_path.stat().st_size} bytes", file=sys.stderr)
+    except Exception as diag_error:
+        print(f"Diagnostic information gathering failed: {diag_error}", file=sys.stderr)
+
+    # Re-raise the original import error to fail startup cleanly
+    raise RuntimeError(f"CRITICAL: CloudEnvironmentDetector import failed in startup_module.py: {e}") from e
+
 from fastapi import FastAPI
 
 from netra_backend.app.agents.base.monitoring import performance_monitor
@@ -52,7 +81,7 @@ from netra_backend.app.db.migration_utils import (
 )
 from netra_backend.app.db.postgres import initialize_postgres
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.services.key_manager import KeyManager
 from netra_backend.app.services.security_service import SecurityService
@@ -317,7 +346,7 @@ async def _run_index_optimization_background(logger: logging.Logger) -> None:
 def initialize_logging() -> Tuple[float, logging.Logger]:
     """Initialize startup logging and timing."""
     start_time = time.time()
-    logger = central_logger.get_logger(__name__)
+    logger = get_logger(__name__)
     logger.info("Starting Netra Backend...")
     return start_time, logger
 
@@ -404,8 +433,7 @@ def _is_postgres_service_mock_mode() -> bool:
     
     # Check configuration for postgres mode
     try:
-        from netra_backend.app.core.configuration.base import get_unified_config
-        config = get_unified_config()
+        config = get_config()
         return getattr(config, 'postgres_mode', '').lower() == 'mock'
     except Exception:
         # Fallback for bootstrap
@@ -497,7 +525,7 @@ async def _async_initialize_postgres(logger: logging.Logger):
 
 async def setup_database_connections(app: FastAPI) -> None:
     """Setup PostgreSQL connection factory (critical service) with timeout protection."""
-    logger = central_logger.get_logger(__name__)
+    logger = get_logger(__name__)
     logger.debug("Setting up database connections...")
     config = get_config()
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
@@ -552,6 +580,27 @@ async def setup_database_connections(app: FastAPI) -> None:
         
         if health_result['status'] == 'healthy':
             logger.info(" PASS:  DatabaseManager health check passed")
+            
+            # Warmup connection pool for better performance under load
+            try:
+                logger.info(" WARMUP:  Starting database connection pool warmup...")
+                warmup_result = await asyncio.wait_for(
+                    manager.warmup_connection_pool('primary'),
+                    timeout=30.0  # 30 second timeout for warmup
+                )
+                
+                successful_connections = warmup_result.get('successful_connections', 0)
+                target_connections = warmup_result.get('target_connections', 0)
+                
+                if successful_connections > 0:
+                    logger.info(f" PASS:  Connection pool warmup completed: {successful_connections}/{target_connections} connections")
+                else:
+                    logger.warning(f" WARNING: [U+FE0F] Connection pool warmup failed: {warmup_result.get('error', 'No connections established')}")
+                    
+            except asyncio.TimeoutError:
+                logger.warning(" WARNING: [U+FE0F] Connection pool warmup timed out - continuing without warmup")
+            except Exception as warmup_error:
+                logger.warning(f" WARNING: [U+FE0F] Connection pool warmup failed: {warmup_error}")
         else:
             logger.warning(f" WARNING: [U+FE0F] DatabaseManager health check warning: {health_result}")
             if not graceful_startup:
@@ -681,10 +730,6 @@ async def _should_check_docker_containers(logger: logging.Logger) -> bool:
     """
     try:
         # Use CloudEnvironmentDetector for reliable environment detection
-        from netra_backend.app.core.environment_context.cloud_environment_detector import (
-            get_cloud_environment_detector, CloudPlatform
-        )
-        
         detector = get_cloud_environment_detector()
         context = await detector.detect_environment_context()
         
@@ -944,9 +989,9 @@ def _create_tool_dispatcher(tool_registry):
     """
     import warnings
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-    from netra_backend.app.logging_config import central_logger
+    from shared.logging.unified_logging_ssot import get_logger
     
-    logger = central_logger.get_logger(__name__)
+    logger = get_logger(__name__)
     
     # Emit deprecation warning
     warnings.warn(
@@ -1050,10 +1095,10 @@ async def _validate_staging_readiness(app: FastAPI, logger) -> None:
 
 def _create_agent_supervisor(app: FastAPI) -> None:
     """Create agent supervisor - CRITICAL for chat functionality with enhanced error handling."""
-    from netra_backend.app.logging_config import central_logger
+    from shared.logging.unified_logging_ssot import get_logger
     from shared.isolated_environment import get_env
     import asyncio
-    logger = central_logger.get_logger(__name__)
+    logger = get_logger(__name__)
     
     environment = get_env().get("ENVIRONMENT", "development").lower()
     
@@ -1151,8 +1196,8 @@ def _create_agent_supervisor(app: FastAPI) -> None:
 def _build_supervisor_agent(app: FastAPI):
     """Build supervisor agent instance."""
     from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-    from netra_backend.app.logging_config import central_logger
-    logger = central_logger.get_logger(__name__)
+    from shared.logging.unified_logging_ssot import get_logger
+    logger = get_logger(__name__)
     
     # Log current app.state attributes for debugging
     logger.debug("Checking supervisor dependencies in app.state...")
@@ -1300,7 +1345,7 @@ async def _emergency_cleanup(logger: logging.Logger) -> None:
     try:
         await _cleanup_connections()
         cleanup_multiprocessing()
-        await central_logger.shutdown()
+        # SSOT: No need for explicit logger shutdown with unified logging
     except Exception as cleanup_error:
         logger.error(f"Error during cleanup: {cleanup_error}")
 
@@ -1412,7 +1457,7 @@ async def initialize_monitoring_integration(handlers: dict = None) -> bool:
         bool: True if integration successful, False if integration failed but components
               are still operating independently
     """
-    logger = central_logger.get_logger(__name__)
+    logger = get_logger(__name__)
     
     try:
         # ARCHITECTURE CLARIFICATION: WebSocket handlers are registered per-connection, not during startup
@@ -1459,11 +1504,46 @@ async def initialize_monitoring_integration(handlers: dict = None) -> bool:
             logger.warning(f"Could not update health status for agent_websocket_bridge: {health_error}")
             logger.info("[U+2139][U+FE0F] AgentWebSocketBridge using per-request pattern - this is expected")
         
-        # CRITICAL FIX: Removed legacy bridge registration code
-        # The AgentWebSocketBridge is now per-request, not singleton
-        # There's no global 'bridge' instance to register with the monitor
-        # Each request creates its own bridge instance as needed
-        logger.info(" PASS:  Monitoring integration complete - per-request bridges work independently")
+        # ENHANCED for issue #1019: Improved ChatEventMonitor integration
+        # While AgentWebSocketBridge is per-request, we can still configure monitoring
+        # Each bridge instance will auto-register with ChatEventMonitor when created
+        
+        # Verify ChatEventMonitor is ready to accept bridge registrations
+        if hasattr(chat_event_monitor, 'register_component'):
+            logger.info("✅ ChatEventMonitor ready to accept bridge component registrations")
+        else:
+            logger.warning("⚠️ ChatEventMonitor missing component registration - some monitoring features disabled")
+        
+        # Test the monitoring integration by creating a temporary bridge instance
+        try:
+            from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+            
+            # Create a temporary system-level bridge to test monitoring integration
+            test_bridge = AgentWebSocketBridge(user_context=None)
+            
+            # Verify it auto-registered with ChatEventMonitor
+            if hasattr(test_bridge, '_monitor_observers') and len(test_bridge._monitor_observers) > 0:
+                logger.info("✅ AgentWebSocketBridge successfully auto-registers with ChatEventMonitor")
+            else:
+                logger.info("ℹ️  AgentWebSocketBridge monitoring integration available but not auto-connected")
+            
+            # Get health status to verify enhanced interface
+            health_status = await test_bridge.get_health_status()
+            if "integration_health" in health_status:
+                logger.info("✅ Enhanced monitoring interface active with integration health tracking")
+            else:
+                logger.warning("⚠️ Basic monitoring interface only - enhanced features unavailable")
+            
+            # Clean up test bridge
+            del test_bridge
+            
+        except Exception as test_error:
+            logger.warning(
+                f"Could not test monitoring integration: {test_error}. "
+                f"Bridge-monitor integration will be verified per-request."
+            )
+        
+        logger.info(" PASS:  Enhanced monitoring integration complete - per-request bridges auto-register with ChatEventMonitor")
         
         return True
     
@@ -1505,9 +1585,9 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     # Initialize logger FIRST - before any logic to ensure it's always available in all scopes
     logger = None
     try:
-        logger = central_logger.get_logger(__name__)
+        logger = get_logger(__name__)
     except Exception as e:
-        # Fallback logger initialization if central_logger fails
+        # Fallback logger initialization if unified logging fails
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         logger = logging.getLogger(__name__)
         logger.error(f"Failed to initialize central logger, using fallback: {e}")
@@ -1566,8 +1646,8 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
             return start_time, logger
             
         except Exception as e:
-            # Use central_logger directly in exception handler to avoid scope issues
-            error_logger = central_logger.get_logger(__name__)
+            # Use unified logging directly in exception handler to avoid scope issues
+            error_logger = get_logger(__name__)
             error_logger.error(f"Error in robust startup: {e}")
             # Set startup failure flags
             app.state.startup_complete = False

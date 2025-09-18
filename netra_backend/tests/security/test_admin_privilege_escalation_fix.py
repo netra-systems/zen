@@ -23,7 +23,6 @@ Test Categories:
 5. Error handling and attack detection tests
 """
 import json
-import jwt
 import pytest
 from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException

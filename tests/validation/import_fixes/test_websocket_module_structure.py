@@ -11,7 +11,7 @@ Expected Failures Until Fixed:
 - AttributeError for incorrect class structures
 
 Business Impact: WebSocket syntax errors block test collection, preventing validation
-of the primary $500K+ ARR user flow (chat functionality).
+of the primary 500K+ ARR user flow (chat functionality).
 """
 
 import pytest

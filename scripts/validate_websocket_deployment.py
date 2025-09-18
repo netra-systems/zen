@@ -113,7 +113,7 @@ class WebSocketDeploymentValidator:
                         self.logger.info(f"[WARN] No response on {endpoint}, but connection established")
                         return True, f"Connection established on {endpoint} (no response timeout)"
                         
-            except websockets.exceptions.WebSocketException as e:
+            except websockets.WebSocketException as e:
                 self.logger.info(f"[ERROR] WebSocket protocol error on {endpoint}: {e}")
                 continue
             except asyncio.TimeoutError:
@@ -159,7 +159,7 @@ class WebSocketDeploymentValidator:
                         self.logger.info(f" WARNING: [U+FE0F] Expected auth error but got: {response_data}")
                         return False, f"Authentication not enforced: {response_data}"
                         
-                except websockets.exceptions.ConnectionClosedError as e:
+                except websockets.ConnectionClosedError as e:
                     if e.code == 1008:  # Authentication required
                         self.logger.info(f" PASS:  Authentication properly required (code 1008)")
                         return True, "Authentication enforced with proper close code"
@@ -201,7 +201,7 @@ class WebSocketDeploymentValidator:
                 self.logger.info(f" PASS:  WebSocket headers properly handled")
                 return True, "WebSocket headers properly handled"
                 
-        except websockets.exceptions.InvalidHandshake as e:
+        except websockets.InvalidHandshake as e:
             self.logger.info(f" FAIL:  WebSocket handshake failed: {e}")
             return False, f"Invalid handshake: {e}"
         except Exception as e:

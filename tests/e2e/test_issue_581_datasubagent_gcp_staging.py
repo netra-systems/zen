@@ -2,8 +2,8 @@
 E2E Tests for Issue #581: DataSubAgent Workflow on GCP Staging
 
 BUSINESS VALUE:
-- Enterprise/Platform | Golden Path Protection | $500K+ ARR rescue
-- Validates complete user journey: login → data agent request → AI response
+- Enterprise/Platform | Golden Path Protection | 500K+ ARR rescue
+- Validates complete user journey: login -> data agent request -> AI response
 - Tests real GCP Cloud Run deployment with actual agent instantiation
 - Protects critical Golden Path user flow with real infrastructure
 
@@ -173,7 +173,7 @@ class Issue581DataSubAgentGCPStagingTests(SSotAsyncTestCase):
                             elif event.get("type") == "agent_completed":
                                 agent_completed = True
                                 
-                        except websockets.exceptions.ConnectionClosed:
+                        except websockets.ConnectionClosed:
                             break
                         except asyncio.TimeoutError:
                             break
@@ -387,7 +387,7 @@ class Issue581DataSubAgentGCPStagingTests(SSotAsyncTestCase):
                             else:
                                 pytest.fail(f"Other error in quality test: {error_msg}")
                     
-                    except websockets.exceptions.ConnectionClosed:
+                    except websockets.ConnectionClosed:
                         break
             
             # Validate response quality

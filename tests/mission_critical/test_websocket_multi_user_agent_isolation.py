@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """MISSION CRITICAL: WebSocket Multi-User Agent Isolation Tests - REAL SERVICES ONLY
 
-THIS IS A MISSION CRITICAL TEST SUITE - BUSINESS VALUE: $500K+ ARR
+THIS IS A MISSION CRITICAL TEST SUITE - BUSINESS VALUE: 500K+ ARR
 
 Business Value Justification:
 - Segment: Platform/Internal - Multi-user system foundation
@@ -699,7 +699,7 @@ if __name__ == "__main__":
     # Run the mission critical multi-user isolation tests
     print("\n" + "=" * 80)
     print("MISSION CRITICAL: WebSocket Multi-User Agent Isolation Tests")
-    print("BUSINESS VALUE: $500K+ ARR - Perfect User Isolation Validation")
+    print("BUSINESS VALUE: 500K+ ARR - Perfect User Isolation Validation")
     print("=" * 80)
     print()
     print("Testing Requirements:")

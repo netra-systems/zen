@@ -24,7 +24,7 @@ import asyncio
 import uuid
 import pytest
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Dict, Any, List, Optional, Set
 from unittest.mock import patch
 from contextlib import asynccontextmanager
@@ -104,7 +104,7 @@ class ThreadCreationPostgreSQLTests(BaseIntegrationTest):
                 email=user_data["email"],
                 full_name=user_data["name"],
                 is_active=True,
-                created_at=datetime.utcnow()
+                created_at=datetime.now(UTC)
             )
             db_session.add(test_user)
         
@@ -613,7 +613,7 @@ class ThreadCreationPostgreSQLTests(BaseIntegrationTest):
                 metadata={
                     "lifecycle_test": True,
                     "message_index": i,
-                    "creation_timestamp": datetime.utcnow().isoformat()
+                    "creation_timestamp": datetime.now(UTC).isoformat()
                 }
             )
             message_ids.append(message.id)

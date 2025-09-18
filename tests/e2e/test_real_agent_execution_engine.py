@@ -21,7 +21,7 @@ import asyncio
 import json
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Dict, List, Optional
 from unittest.mock import patch
 
@@ -126,7 +126,7 @@ class RealAgentExecutionEngineTests(BaseE2ETest):
             user_id=user_id,
             run_id=run_id,
             thread_id=thread_id,
-            metadata={"test_execution": True, "timestamp": datetime.utcnow().isoformat()}
+            metadata={"test_execution": True, "timestamp": datetime.now(UTC).isoformat()}
         )
     
     async def create_test_state(self, 

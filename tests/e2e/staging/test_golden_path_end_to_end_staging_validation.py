@@ -3,7 +3,7 @@ Golden Path End-to-End Validation Tests for Issue #1176
 =======================================================
 
 MISSION CRITICAL: These tests validate the complete Golden Path user journey on staging:
-User login → AI responses flow protecting $500K+ ARR chat functionality.
+User login -> AI responses flow protecting 500K+ ARR chat functionality.
 
 TARGET: Real staging environment validation at *.staging.netrasystems.ai
 - Auth Service: https://auth.staging.netrasystems.ai
@@ -260,7 +260,7 @@ class GoldenPathEndToEndStagingValidationTests(SSotAsyncTestCase):
                         "This indicates WebSocket handshake or authentication issues."
                     )
                 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             self.fail(
                 f"WEBSOCKET CONNECTION CLOSED:\n"
                 f"Close code: {e.code}\n"

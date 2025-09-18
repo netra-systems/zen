@@ -38,9 +38,9 @@ class MockWebSocketConnection:
         self.message_count += 1
         if self.fail_after and self.message_count > self.fail_after:
             self.is_connected = False
-            raise websockets.exceptions.ConnectionClosed(None, None)
+            raise websockets.ConnectionClosed(None, None)
         if self.should_fail:
-            raise websockets.exceptions.ConnectionClosed(None, None)
+            raise websockets.ConnectionClosed(None, None)
         self.received_messages.append(json.loads(message))
         return True
 
@@ -79,7 +79,7 @@ class ToolEventDeliveryConfirmationTests:
             event_count += 1
             self.event_delivery_log.append({'event_type': event_type, 'attempt': event_count, 'timestamp': datetime.now(timezone.utc)})
             if event_count > 1:
-                raise websockets.exceptions.ConnectionClosed(None, None)
+                raise websockets.ConnectionClosed(None, None)
             return True
         self.websocket_manager.send_event.side_effect = failing_send_event
         dispatcher = UnifiedToolDispatcherFactory.create_for_request(user_context=self.user_context, websocket_manager=self.websocket_manager)

@@ -8,7 +8,7 @@ This test simulates the specific Cloud Run environment conditions that cause
 WebSocket handshake race conditions when multiple UserWebSocketEmitter 
 implementations compete during container scaling.
 
-Business Impact: $500K+ ARR at risk from chat failures during high traffic
+Business Impact: 500K+ ARR at risk from chat failures during high traffic
 when Cloud Run scales containers and WebSocket connections race.
 
 CRITICAL: This test MUST FAIL before consolidation to prove race conditions exist.

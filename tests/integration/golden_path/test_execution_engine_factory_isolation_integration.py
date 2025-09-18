@@ -3,7 +3,7 @@ Comprehensive Integration Tests for ExecutionEngineFactory Isolation in Golden P
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
-- Business Goal: Ensure complete user execution isolation protecting $500K+ ARR
+- Business Goal: Ensure complete user execution isolation protecting 500K+ ARR
 - Value Impact: Validates factory patterns that enable multi-tenant platform scalability
 - Strategic Impact: Prevents user data leakage and enables concurrent user sessions
 
@@ -31,7 +31,7 @@ import pytest
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -144,7 +144,7 @@ class ExecutionEngineFactoryIsolationIntegrationTests(SSotAsyncTestCase):
             operation_results = []
             for op_num in range(operations_per_user):
                 op_key = f'operation_{op_num}'
-                op_data = {'user_index': user_index, 'operation_num': op_num, 'timestamp': datetime.utcnow().isoformat(), 'data': f'concurrent_data_user_{user_index}_op_{op_num}'}
+                op_data = {'user_index': user_index, 'operation_num': op_num, 'timestamp': datetime.now(UTC).isoformat(), 'data': f'concurrent_data_user_{user_index}_op_{op_num}'}
                 engine.set_agent_state(op_key, op_data)
                 retrieved_data = engine.get_agent_state(op_key)
                 operation_results.append({'operation': op_num, 'success': retrieved_data == op_data, 'data_matches': retrieved_data['user_index'] == user_index if retrieved_data else False})
@@ -205,7 +205,7 @@ class ExecutionEngineFactoryIsolationIntegrationTests(SSotAsyncTestCase):
             created_engines.append(engine)
             engine_user_ids.append(context.user_id)
             self.created_engines.append(engine)
-            large_state = {'large_dataset': {f'key_{j}': f'value_{j}_' * 50 for j in range(100)}, 'user_data': f'user_{i}_data' * 100, 'execution_history': [f'execution_{k}' for k in range(50)], 'metadata': {'user_index': i, 'created_at': datetime.utcnow().isoformat()}}
+            large_state = {'large_dataset': {f'key_{j}': f'value_{j}_' * 50 for j in range(100)}, 'user_data': f'user_{i}_data' * 100, 'execution_history': [f'execution_{k}' for k in range(50)], 'metadata': {'user_index': i, 'created_at': datetime.now(UTC).isoformat()}}
             engine.set_agent_state('large_state', large_state)
             engine.set_execution_state('current_task', {'task': f'user_{i}_task', 'data': large_state})
         memory_after_creation = self._get_memory_usage()
@@ -238,7 +238,7 @@ class ExecutionEngineFactoryIsolationIntegrationTests(SSotAsyncTestCase):
             engine_state = engine.get_agent_state('large_state')
             assert engine_state is not None, f'Remaining engine {i} should still have state'
             new_state_key = 'post_cleanup_state'
-            new_state_value = {'post_cleanup': True, 'timestamp': datetime.utcnow().isoformat()}
+            new_state_value = {'post_cleanup': True, 'timestamp': datetime.now(UTC).isoformat()}
             engine.set_agent_state(new_state_key, new_state_value)
             retrieved_new_state = engine.get_agent_state(new_state_key)
             assert retrieved_new_state == new_state_value, f'Remaining engine {i} should handle new state'
@@ -279,7 +279,7 @@ class ExecutionEngineFactoryIsolationIntegrationTests(SSotAsyncTestCase):
                 engine = await self.execution_factory.create_for_user(context)
                 creation_time = time.time() - creation_start
                 self.created_engines.append(engine)
-                engine.set_agent_state('batch_data', {'batch_index': batch_index, 'engine_index': engine_index, 'created_at': datetime.utcnow().isoformat()})
+                engine.set_agent_state('batch_data', {'batch_index': batch_index, 'engine_index': engine_index, 'created_at': datetime.now(UTC).isoformat()})
                 batch_results.append({'batch_index': batch_index, 'engine_index': engine_index, 'creation_time': creation_time, 'engine_id': id(engine), 'user_id': context.user_id})
                 creation_times.append(creation_time)
             batch_time = time.time() - batch_start
@@ -317,7 +317,7 @@ class ExecutionEngineFactoryIsolationIntegrationTests(SSotAsyncTestCase):
             assert 'batch_index' in batch_data, f'Sample engine {i} should have batch index'
             assert 'engine_index' in batch_data, f'Sample engine {i} should have engine index'
         performance_summary = {'total_engines': total_engines, 'total_time': total_load_time, 'throughput_eps': engines_per_second, 'avg_creation_ms': avg_creation_time * 1000, 'max_creation_ms': max_creation_time * 1000, 'p95_creation_ms': p95_creation_time * 1000, 'avg_batch_time_ms': avg_batch_time * 1000, 'concurrent_batches': num_concurrent_batches}
-        self.memory_usage_samples.append({'phase': 'after_load_test', 'memory_usage': self._get_memory_usage(), 'timestamp': datetime.utcnow(), 'engines_created': total_engines})
+        self.memory_usage_samples.append({'phase': 'after_load_test', 'memory_usage': self._get_memory_usage(), 'timestamp': datetime.now(UTC), 'engines_created': total_engines})
         logger.info(f' PASS:  Factory performance under load validated: {engines_per_second:.1f} engines/sec, {avg_creation_time * 1000:.1f}ms avg creation')
 
     @pytest.mark.integration

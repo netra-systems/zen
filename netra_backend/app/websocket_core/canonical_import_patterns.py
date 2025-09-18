@@ -17,13 +17,40 @@ from typing import Any, Optional, Dict, Union
 import warnings
 from functools import wraps
 
+# Import logger for deprecation warnings
+from shared.logging.unified_logging_ssot import get_logger
+
+logger = get_logger(__name__)
+
 # Import the actual implementation
-from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
+from netra_backend.app.websocket_core.unified_manager import (
+    _UnifiedWebSocketManagerImplementation,
+    RegistryCompat,
+    MAX_CONNECTIONS_PER_USER
+)
 from netra_backend.app.websocket_core.types import (
     WebSocketManagerMode,
     WebSocketConnection,
-    _serialize_message_safely
+    _serialize_message_safely,
+    _get_enum_key_representation,
+    create_server_message,
+    create_error_message
 )
+from netra_backend.app.websocket_core.protocols import (
+    WebSocketManagerProtocol,
+    WebSocketManagerProtocolValidator
+)
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+
+# ISSUE #1286 FIX: Add missing create_test_user_context import for test compatibility
+from netra_backend.app.websocket_core.websocket_manager import create_test_user_context
+
+# Import protocol and emitter classes for test compatibility
+from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+
+# Create compatibility alias for WebSocketEventEmitter
+WebSocketEventEmitter = UnifiedWebSocketEmitter
 
 
 class CanonicalImportDeprecationWarning(UserWarning):
@@ -106,6 +133,22 @@ async def create_websocket_manager_async(user_context: Optional[Any] = None,
     return get_websocket_manager(user_context=user_context, **kwargs)
 
 
+def create_test_fallback_manager(user_context: Optional[Any] = None) -> _UnifiedWebSocketManagerImplementation:
+    """
+    Create test fallback manager for test environments.
+
+    Args:
+        user_context: User execution context
+
+    Returns:
+        Test fallback WebSocket manager instance
+    """
+    _log_import_usage("Test Fallback Factory", "canonical_import_patterns.create_test_fallback_manager")
+
+    from netra_backend.app.websocket_core.websocket_manager import create_test_fallback_manager as _create_fallback
+    return _create_fallback(user_context)
+
+
 # =============================================================================
 # CANONICAL PATTERN 2: Class-based Import Pattern
 # =============================================================================
@@ -137,8 +180,60 @@ class UnifiedWebSocketManager(_UnifiedWebSocketManagerImplementation):
         super().__init__(*args, **kwargs)
 
 
+class WebSocketManagerFactory:
+    """
+    DEPRECATED: Unnecessary factory wrapper - Issue #1194 Factory Over-Engineering Cleanup
+
+    This factory class adds no value over calling get_websocket_manager() directly.
+    It's an example of the factory pattern over-engineering that Issue #1194 addresses.
+
+    MIGRATION PATH:
+    - Replace WebSocketManagerFactory.create_manager() with get_websocket_manager()
+    - Replace WebSocketManagerFactory.get_manager() with get_websocket_manager()
+
+    Example:
+        # OLD (over-engineered)
+        factory = WebSocketManagerFactory()
+        manager = factory.create_manager(user_context=ctx)
+
+        # NEW (direct function call)
+        manager = get_websocket_manager(user_context=ctx)
+    """
+
+    @staticmethod
+    def create_manager(user_context: Optional[Any] = None, **kwargs) -> _UnifiedWebSocketManagerImplementation:
+        """
+        DEPRECATED: Use get_websocket_manager() directly.
+
+        This method adds unnecessary indirection. Use the function directly.
+        """
+        _log_import_usage("Factory Class (DEPRECATED)", "canonical_import_patterns.WebSocketManagerFactory.create_manager")
+        logger.warning(
+            "WebSocketManagerFactory.create_manager() is deprecated. "
+            "Use get_websocket_manager() directly for Issue #1194 compliance."
+        )
+        return get_websocket_manager(user_context=user_context, **kwargs)
+
+    @staticmethod
+    def get_manager(user_context: Optional[Any] = None, **kwargs) -> _UnifiedWebSocketManagerImplementation:
+        """
+        DEPRECATED: Use get_websocket_manager() directly.
+
+        This method adds unnecessary indirection. Use the function directly.
+        """
+        _log_import_usage("Factory Class (DEPRECATED)", "canonical_import_patterns.WebSocketManagerFactory.get_manager")
+        logger.warning(
+            "WebSocketManagerFactory.get_manager() is deprecated. "
+            "Use get_websocket_manager() directly for Issue #1194 compliance."
+        )
+        return get_websocket_manager(user_context=user_context, **kwargs)
+
+
 # Type alias for backwards compatibility
 WebSocketManager = UnifiedWebSocketManager
+
+# Backwards compatibility alias for WebSocketEventEmitter
+WebSocketEventEmitter = UnifiedWebSocketEmitter
 
 
 # =============================================================================
@@ -315,15 +410,104 @@ def validate_import_pattern_usage() -> Dict[str, Any]:
     }
 
 
+def check_websocket_service_available() -> bool:
+    """
+    Check if WebSocket service is available and properly configured.
+
+    Used by test infrastructure and validation modules to verify
+    WebSocket service availability before running tests or operations.
+
+    Returns:
+        bool: True if WebSocket service is available, False otherwise
+
+    Example:
+        from netra_backend.app.websocket_core.canonical_import_patterns import check_websocket_service_available
+
+        if check_websocket_service_available():
+            # Proceed with WebSocket operations
+            manager = get_websocket_manager(user_context=ctx)
+        else:
+            # Handle WebSocket service unavailable
+            logging.warning("WebSocket service not available")
+    """
+    _log_import_usage("Service Availability Check", "canonical_import_patterns.check_websocket_service_available")
+
+    try:
+        # Check if we can create a manager instance (basic availability test)
+        test_manager = get_websocket_manager()
+
+        # Check if core components are accessible
+        has_connection_interface = hasattr(test_manager, '_connection_manager')
+        has_event_emitter = hasattr(test_manager, '_event_emitter') or hasattr(test_manager, 'emit_event')
+        has_auth_integration = hasattr(test_manager, '_auth_integration')
+
+        # Log service availability check
+        from shared.logging.unified_logging_ssot import get_logger
+        logger = get_logger(__name__)
+        logger.debug(f"WebSocket service availability check: connection={has_connection_interface}, events={has_event_emitter}, auth={has_auth_integration}")
+
+        return has_connection_interface and has_event_emitter
+
+    except Exception as e:
+        # Log availability check failure
+        from shared.logging.unified_logging_ssot import get_logger
+        logger = get_logger(__name__)
+        logger.warning(f"WebSocket service availability check failed: {e}")
+        return False
+
+
+async def check_websocket_service_available_async() -> bool:
+    """
+    Async version of WebSocket service availability check.
+
+    Returns:
+        bool: True if WebSocket service is available, False otherwise
+    """
+    _log_import_usage("Async Service Availability Check", "canonical_import_patterns.check_websocket_service_available_async")
+
+    try:
+        # Create async manager and test availability
+        manager = await create_websocket_manager_async()
+
+        # Check if core async components are accessible
+        has_connection_interface = hasattr(manager, '_connection_manager')
+        has_event_emitter = hasattr(manager, '_event_emitter') or hasattr(manager, 'emit_event')
+
+        return has_connection_interface and has_event_emitter
+
+    except Exception as e:
+        from shared.logging.unified_logging_ssot import get_logger
+        logger = get_logger(__name__)
+        logger.warning(f"Async WebSocket service availability check failed: {e}")
+        return False
+
+
 # Export all canonical imports for easy access
 __all__ = [
     # Pattern 1: Factory Functions
     'get_websocket_manager',
     'create_websocket_manager_async',
+    'create_test_fallback_manager',
 
     # Pattern 2: Class Imports
     'UnifiedWebSocketManager',
     'WebSocketManager',
+    'WebSocketManagerFactory',
+    'WebSocketConnection',
+    'RegistryCompat',
+    'MAX_CONNECTIONS_PER_USER',
+    '_serialize_message_safely',
+    '_get_enum_key_representation',
+    'create_server_message',
+    'create_error_message',
+
+    # Event emitter imports
+    'UnifiedWebSocketEmitter',
+    'WebSocketEventEmitter',
+
+    # Protocol and validation
+    'WebSocketManagerProtocol',
+    'WebSocketManagerProtocolValidator',
 
     # Pattern 3: Component Interfaces
     'get_component_interface',
@@ -334,8 +518,18 @@ __all__ = [
     'get_manager',
     'create_manager',
 
+    # Test Compatibility - Issue #1188: Add missing exports for unit tests
+    'WebSocketManagerProtocol',
+    'WebSocketEventEmitter',
+    'UnifiedWebSocketEmitter',
+
+    # ISSUE #1286 FIX: Add missing create_test_user_context export for test compatibility
+    'create_test_user_context',
+
     # Utilities
     'get_migration_guide',
     'validate_import_pattern_usage',
+    'check_websocket_service_available',
+    'check_websocket_service_available_async',
     'MIGRATION_GUIDE'
 ]

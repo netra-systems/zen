@@ -30,10 +30,10 @@ from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Business reliability test configuration
-STAGING_HEALTH_URL = "https://backend.staging.netrasystems.ai/health"
-STAGING_API_URL = "https://backend.staging.netrasystems.ai"
+STAGING_HEALTH_URL = "https://api.staging.netrasystems.ai/health"
+STAGING_API_URL = "https://api.staging.netrasystems.ai"
 STAGING_AUTH_URL = "https://auth.staging.netrasystems.ai"
-STAGING_WS_URL = "wss://backend.staging.netrasystems.ai/ws"
+STAGING_WS_URL = "wss://api.staging.netrasystems.ai/ws"
 
 @dataclass
 class ReliabilityMetric:
@@ -576,7 +576,7 @@ class SystemReliabilityTests:
                           if test_category.lower().replace(' ', '_') in m.name.lower().replace(' ', '_')]
 
         for metric in category_metrics:
-            status_emoji = "✅" if metric.status == "PASS" else "❌" if metric.status == "FAIL" else "⚠️"
+            status_emoji = "CHECK" if metric.status == "PASS" else "X" if metric.status == "FAIL" else "WARNING️"
             recovery_info = f" (recovery: {metric.recovery_time:.2f}s)" if metric.recovery_time else ""
 
             print(f"{status_emoji} {metric.name}: {metric.actual_value:.2f} {metric.unit} "
@@ -591,10 +591,10 @@ class SystemReliabilityTests:
             print(f"\n🚨 RELIABILITY RISK: CRITICAL ({len(critical_failures)} critical failures)")
             print("   Business Impact: Immediate revenue protection action required")
         elif failed_metrics:
-            print(f"\n⚠️ RELIABILITY RISK: HIGH ({len(failed_metrics)} failed metrics)")
+            print(f"\nWARNING️ RELIABILITY RISK: HIGH ({len(failed_metrics)} failed metrics)")
             print("   Business Impact: System reliability affects customer trust")
         else:
-            print(f"\n✅ RELIABILITY RISK: LOW (All metrics within acceptable ranges)")
+            print(f"\nCHECK RELIABILITY RISK: LOW (All metrics within acceptable ranges)")
             print("   Business Impact: System reliability supports business operations")
 
 if __name__ == "__main__":
@@ -636,15 +636,15 @@ if __name__ == "__main__":
                 print(f"   - {failure.name}: {failure.business_impact}")
             sys.exit(1)
         elif len(high_risk_failures) > 3:
-            print("\n⚠️ BUSINESS OUTCOME: HIGH RELIABILITY RISK")
+            print("\nWARNING️ BUSINESS OUTCOME: HIGH RELIABILITY RISK")
             print("Multiple reliability issues may affect business operations")
             sys.exit(1)
         else:
-            print("\n✅ BUSINESS OUTCOME: SYSTEM RELIABILITY ACCEPTABLE")
+            print("\nCHECK BUSINESS OUTCOME: SYSTEM RELIABILITY ACCEPTABLE")
             print("Reliability metrics support business continuity and revenue protection")
             sys.exit(0)
 
     except Exception as e:
-        print(f"\n❌ RELIABILITY VALIDATION FAILED: {e}")
+        print(f"\nX RELIABILITY VALIDATION FAILED: {e}")
         print("Cannot validate system reliability for business operations")
         sys.exit(1)

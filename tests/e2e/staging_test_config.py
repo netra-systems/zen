@@ -11,19 +11,20 @@ from dataclasses import dataclass
 class StagingConfig:
     """Configuration for staging environment tests"""
     
-    # Backend URLs - Using proper staging domain (cross-linked to GCP backends)
-    backend_url: str = "https://api.staging.netrasystems.ai"
-    api_url: str = "https://api.staging.netrasystems.ai/api"
-    websocket_url: str = "wss://api.staging.netrasystems.ai/api/v1/websocket"
+    # Backend URLs - Using CLAUDE.md *.netrasystems.ai domains (Issue #1278)
+    backend_url: str = "https://staging.netrasystems.ai"
+    api_url: str = "https://staging.netrasystems.ai/api"
+    # FIX: Using main staging domain since api-staging.netrasystems.ai doesn't resolve
+    websocket_url: str = "wss://staging.netrasystems.ai/api/v1/websocket"
     
     # CRITICAL FIX: Add missing base_url attribute (required by configuration system)
-    base_url: str = "https://api.staging.netrasystems.ai"
+    base_url: str = "https://staging.netrasystems.ai"
     
-    # Auth service URLs (when deployed) - Updated after commit 630b63ca2
-    auth_url: str = "https://auth.staging.netrasystems.ai"
-    
+    # Auth service URLs (when deployed) - Updated per CLAUDE.md domains
+    auth_url: str = "https://staging.netrasystems.ai"
+
     # Frontend URL (when deployed)
-    frontend_url: str = "https://app.staging.netrasystems.ai"
+    frontend_url: str = "https://staging.netrasystems.ai"
     
     # Test configuration - PRIORITY 3 FIX: Cloud-native timeout hierarchy
     # CRITICAL: These timeouts coordinate with centralized timeout_configuration.py
@@ -165,8 +166,6 @@ class StagingConfig:
                 print(f"[STAGING PHASE1 FIX] No subprotocol set - using header auth only")
             
             print(f"[STAGING AUTH FIX] Added JWT token to WebSocket headers (Authorization + subprotocol)")
-        else:
-            # Fallback test headers (will likely be rejected but enables auth flow testing)
             headers["X-Test-Auth"] = "test-token-for-staging"
             # PHASE 1 FIX: Remove fallback subprotocol that causes negotiation failure
             # headers["sec-websocket-protocol"] = "e2e-testing"
@@ -242,7 +241,7 @@ class StagingConfig:
             
             # Create staging config with updated auth service URL
             staging_config = E2EAuthConfig.for_staging()
-            staging_config.auth_service_url = "https://auth.staging.netrasystems.ai"
+            staging_config.auth_service_url = "https://staging.netrasystems.ai"
             staging_config.jwt_validation_strict = False  # Allow E2E test tokens in staging
             auth_helper = E2EAuthHelper(config=staging_config, environment="staging")
             

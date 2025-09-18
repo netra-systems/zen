@@ -5,7 +5,7 @@ PURPOSE: E2E test validating session management consistency across auth service 
 EXPECTED: PASS after SSOT remediation - validates cross-service session consistency
 TARGET: Session lifecycle managed by auth service, consistent across all backend services
 
-BUSINESS VALUE: Ensures session reliability for $500K+ ARR user authentication experience
+BUSINESS VALUE: Ensures session reliability for 500K+ ARR user authentication experience
 EXECUTION: Staging GCP environment - NO Docker dependency
 """
 import logging
@@ -211,7 +211,7 @@ class CrossServiceAuthSessionMgmtTests(SSotAsyncTestCase):
     async def _validate_websocket_rejects_expired_session(self):
         """Validate WebSocket rejects expired session"""
         headers = {'Authorization': f'Bearer {self.auth_token}', 'X-Session-ID': self.session_data['session_id']}
-        with pytest.raises(websockets.exceptions.ConnectionClosedError):
+        with pytest.raises(websockets.ConnectionClosedError):
             websocket_connection = await websockets.connect(self.websocket_url, extra_headers=headers, timeout=10)
             await websocket_connection.recv()
 if __name__ == '__main__':

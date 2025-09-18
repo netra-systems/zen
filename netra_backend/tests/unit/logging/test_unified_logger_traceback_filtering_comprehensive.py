@@ -1,3 +1,4 @@
+from netra_backend.app.logging_config import central_logger
 """
 Comprehensive Unit Tests for UnifiedLogger - Traceback Filtering Critical Issue
 

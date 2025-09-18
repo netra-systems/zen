@@ -2,7 +2,7 @@
 Golden Path Authentication Fragmentation Integration Tests - Issue #1060
 
 MISSION CRITICAL: These tests demonstrate authentication fragmentation specifically
-within the Golden Path user flow - the $500K+ ARR critical business flow.
+within the Golden Path user flow - the 500K+ ARR critical business flow.
 
 Business Impact: CRITICAL - Golden Path auth failures directly block revenue
 Technical Impact: End-to-end authentication fragmentation evidence in user workflow
@@ -11,7 +11,7 @@ TEST STRATEGY: Integration tests that simulate the complete Golden Path user flo
 and demonstrate where authentication fragmentation breaks the user experience.
 
 GOLDEN PATH AUTH FRAGMENTATION POINTS:
-1. Login → Chat initiation auth handoff failures
+1. Login -> Chat initiation auth handoff failures
 2. WebSocket connection auth during chat flow
 3. Agent execution auth context fragmentation
 4. Multi-user concurrent auth state corruption
@@ -25,7 +25,7 @@ import json
 from typing import Dict, Any, Optional, List, Tuple
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 # SSOT integration test infrastructure
 from test_framework.ssot.base_integration_test import BaseIntegrationTest
@@ -123,24 +123,24 @@ class GoldenPathAuthFragmentationTests(BaseIntegrationTest):
                     "consistent_auth": False
                 }
 
-        # BUSINESS IMPACT ANALYSIS: How many users can complete login → chat flow?
+        # BUSINESS IMPACT ANALYSIS: How many users can complete login -> chat flow?
         successful_handoffs = sum(1 for r in handoff_results.values() if r.get("consistent_auth"))
         total_users = len(handoff_results)
 
-        print(f"GOLDEN PATH LOGIN→CHAT FRAGMENTATION EVIDENCE:")
+        print(f"GOLDEN PATH LOGIN->CHAT FRAGMENTATION EVIDENCE:")
         print(f"Handoff results: {handoff_results}")
         print(f"Successful handoffs: {successful_handoffs}/{total_users}")
         print(f"Business Impact: {(1 - successful_handoffs/total_users)*100:.1f}% user failure rate")
 
         # CRITICAL: If all handoffs succeed, fragmentation may be resolved
         if successful_handoffs == total_users:
-            print("WARNING: All login→chat handoffs succeeded - fragmentation may be resolved")
+            print("WARNING: All login->chat handoffs succeeded - fragmentation may be resolved")
         else:
-            print(f"CRITICAL FRAGMENTATION: {total_users - successful_handoffs} user types unable to complete login→chat flow")
+            print(f"CRITICAL FRAGMENTATION: {total_users - successful_handoffs} user types unable to complete login->chat flow")
 
         # Golden Path fragmentation should block some user types
         self.assertLess(successful_handoffs, total_users,
-                       "Expected login→chat auth fragmentation to block some users")
+                       "Expected login->chat auth fragmentation to block some users")
 
     async def test_golden_path_concurrent_user_auth_corruption(self):
         """
@@ -228,7 +228,7 @@ class GoldenPathAuthFragmentationTests(BaseIntegrationTest):
 
         for user_type, user_data in self.golden_path_users.items():
             try:
-                # Simulate Golden Path: User authenticated → Agent execution requested
+                # Simulate Golden Path: User authenticated -> Agent execution requested
                 user_context = await self._create_golden_path_user_context(user_data)
 
                 # Test different agent execution authentication paths
@@ -365,8 +365,8 @@ class GoldenPathAuthFragmentationTests(BaseIntegrationTest):
                 "email": user_data["email"],
                 "subscription": user_data["subscription"],
                 "permissions": user_data["expected_permissions"],
-                "iat": int(datetime.utcnow().timestamp()),
-                "exp": int((datetime.utcnow() + timedelta(hours=2)).timestamp())
+                "iat": int(datetime.now(UTC).timestamp()),
+                "exp": int((datetime.now(UTC) + timedelta(hours=2)).timestamp())
             }
 
             # Mock login success with token generation
@@ -465,7 +465,7 @@ class GoldenPathAuthFragmentationTests(BaseIntegrationTest):
             "subscription": user_data["subscription"],
             "permissions": user_data["expected_permissions"],
             "session_token": jwt.encode(
-                {"user_id": user_data["user_id"], "exp": int((datetime.utcnow() + timedelta(hours=1)).timestamp())},
+                {"user_id": user_data["user_id"], "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp())},
                 "context-secret",
                 algorithm="HS256"
             )
@@ -519,7 +519,7 @@ class GoldenPathAuthFragmentationTests(BaseIntegrationTest):
         """Test Golden Path session persistence"""
         return {
             "session_token": jwt.encode(
-                {"user_id": user_data["user_id"], "exp": int((datetime.utcnow() + timedelta(hours=1)).timestamp())},
+                {"user_id": user_data["user_id"], "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp())},
                 "session-secret",
                 algorithm="HS256"
             ),

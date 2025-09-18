@@ -72,7 +72,7 @@ The test script now prompts for credentials interactively:
    ```
 
 2. **When prompted:**
-   - Press Enter to use default test account (test@netra.ai)
+   - Press Enter to use default test account (test@netrasystems.ai)
    - Or enter your own email and password
    - If the account doesn't exist, you'll be offered to create it
 
@@ -83,7 +83,7 @@ The test script now prompts for credentials interactively:
    Uses default credentials without prompting.
 
 ### Default Test Credentials
-- **Email**: test@netra.ai
+- **Email**: test@netrasystems.ai
 - **Password**: TestPassword123!
 
 ### Authentication Flow
@@ -137,7 +137,7 @@ import requests
 # Login
 response = requests.post(
     "http://localhost:8081/auth/login",
-    json={"email": "test@netra.ai", "password": "TestPassword123!"}
+    json={"email": "test@netrasystems.ai", "password": "TestPassword123!"}
 )
 token = response.json()["access_token"]
 
