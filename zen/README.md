@@ -5,7 +5,7 @@ Zen runs multiple Code CLI instances for peaceful parallel task execution.
 ## What is Zen?
 
 Zen allows you to:
-- Run multiple Claude Code CLI instances simultaneously (Codex support coming soon)
+- Run multiple headless Claude Code CLI instances simultaneously (Codex support coming soon)
 - Calm results (status, time, token usage)
 - Relax **"5-hour limit reached"** lockout fears with easy token budget limits
 - Get more value out of your Claude MAX subscription
@@ -13,7 +13,7 @@ with scheduling features. (`--run-at "2am"`)
 
 ## Inspiration and background
 While developing Netra Apex (commerical product)
-our team has been running 100s of parrallel claude code instances.
+our team has been running 100s of parallel claude code instances.
 During that process we got annoyed at the "cognitive overhead"
 of each having 10s of terminals open per machine and scrolling mountains of text.
 Did the `/command` work or not?
