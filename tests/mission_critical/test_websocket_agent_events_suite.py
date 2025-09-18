@@ -806,10 +806,10 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     @pytest.mark.unit
     @pytest.mark.concurrency
     async def test_concurrent_pipeline_execution_isolation(self):
-    ""
-        Test concurrent pipeline execution with proper user isolation.
-        
+        """Test concurrent pipeline execution with proper user isolation.
+
         BVJ: Platform scalability - supports multiple users executing pipelines concurrently
+        """
         
         # Arrange: Create multiple pipeline executors for different users (using mocks)
         user_context_1 = MagicMock()
@@ -999,8 +999,8 @@ class AgentWebSocketIntegrationEnhancedTests:
         
         # Test enhanced tool dispatcher creation with WebSocket integration
         user_context = UserExecutionContext.from_request(
-            user_id=ftest_user_{uuid.uuid4().hex[:8]}","
-            thread_id=f"test_thread_{uuid.uuid4().hex[:8]},
+            user_id=f"test_user_{uuid.uuid4().hex[:8]}",
+            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
             run_id=f"test_run_{uuid.uuid4().hex[:8]}",
             request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
@@ -1017,17 +1017,17 @@ class AgentWebSocketIntegrationEnhancedTests:
     @pytest.mark.critical
     # @require_docker_services()  # Temporarily disabled - GCP integration regression
     async def test_execution_engine_websocket_notifier_integration(self):
-        "Test ExecutionEngine + WebSocketNotifier critical integration point.
-        
+        """Test ExecutionEngine + WebSocketNotifier critical integration point.
+
         Business Value: Validates that agent execution properly delivers WebSocket events.
-"
-        conf"ig = RealWebSocketTestConfig()
+        """
+        config = RealWebSocketTestConfig()
         context = create_test_context()
         
         # Setup execution engine with WebSocket integration
         user_context = UserExecutionContext.from_request(
-            user_id=ftest_user_{uuid.uuid4().hex[:8]}",
-            thread_id=ftest_thread_{uuid.uuid4().hex[:8]}","
+            user_id=f"test_user_{uuid.uuid4().hex[:8]}",
+            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
             run_id=f"test_run_{uuid.uuid4().hex[:8]}",
             request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
@@ -1052,27 +1052,28 @@ class AgentWebSocketIntegrationEnhancedTests:
         )
         
         # Verify WebSocket integration in agent context
-        assert agent_context.websocket_notifier is websocket_notifier, Agent context WebSocket integration failed"
-        
-        logger.info( PASS:  ExecutionEngine WebSocket integration validated")
+        assert agent_context.websocket_notifier is websocket_notifier, "Agent context WebSocket integration failed"
+
+        logger.info("PASS: ExecutionEngine WebSocket integration validated")
 
     @pytest.mark.asyncio
     @pytest.mark.critical  
     # @require_docker_services()  # Temporarily disabled - GCP integration regression
     async def test_enhanced_tool_execution_websocket_wrapping(self):
-        Test EnhancedToolExecutionEngine WebSocket event wrapping.""
-        
+        """Test EnhancedToolExecutionEngine WebSocket event wrapping.
+
         Business Value: Validates that tool execution generates the required WebSocket events.
-        
-        conf"ig = RealWebSocketTestConfig()
+        """
+
+        config = RealWebSocketTestConfig()
         context = create_test_context()
         # TODO: Replace with appropriate event capture mechanism
         # event_capture = RealWebSocketEventCapture()
         
         # Setup enhanced tool execution engine
         user_context = UserExecutionContext.from_request(
-            user_id=ftest_user_{uuid.uuid4().hex[:8]}","
-            thread_id=f"test_thread_{uuid.uuid4().hex[:8]},
+            user_id=f"test_user_{uuid.uuid4().hex[:8]}",
+            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
             run_id=f"test_run_{uuid.uuid4().hex[:8]}",
             request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
