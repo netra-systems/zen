@@ -8,13 +8,13 @@ version = "1.0.0"
 description = "Multi-instance Claude orchestrator for parallel task execution"
 readme = "README.md"
 authors = [
-    {name = "Netra Systems", email = "support@netrasystems.ai"}
+    {name = "Netra Systems", email = "pypi@netrasystems.ai"}
 ]
 license = {text = "MIT"}
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: Commercial :: Commercial",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
