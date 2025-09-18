@@ -700,4 +700,5 @@ class AgentExecutionWebSocketEventsComprehensiveTests(BaseE2ETest):
         
         # Log failure statistics for monitoring
         failure_rate_actual = len(failure_bridge.events_failed) / len(failure_bridge.events_attempted)
-        print(f"WebSocket event failure rate: {failure_rate_actual:.1%} ({len(failure_bridge.events_failed)}/{len(failure_bridge.events_attempted)})""Not all WebSocket events should fail"
+        print(f"WebSocket event failure rate: {failure_rate_actual:.1%} ({len(failure_bridge.events_failed)}/{len(failure_bridge.events_attempted)})")
+        assert failure_rate_actual < 1.0, "Not all WebSocket events should fail"

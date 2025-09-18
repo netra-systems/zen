@@ -33,23 +33,23 @@ class AgentRegistryAdapterSignatureMismatchSimpleTests:
             user_context=self.user_context
         )
 
-    def test_current_broken_signature_lacks_context_parameter(self):
-        """Test that current signature is missing the required context parameter."""
+    def test_current_signature_has_required_parameters(self):
+        """Test that current signature has all required parameters."""
         signature = inspect.signature(self.adapter.get_async)
         params = list(signature.parameters.keys())
 
-        # Current broken state - missing context parameter
-        assert 'agent_name' in params
-        assert 'context' not in params, "Current signature incorrectly missing context parameter"
+        # Current working state - signature is correct
+        assert 'agent_name' in params, "get_async should have agent_name parameter"
+        assert 'context' in params, "get_async should have context parameter"
 
-        # This documents what we expect after the fix
+        # Verify complete signature is as expected
         expected_params = ['agent_name', 'context']
-        missing_params = [p for p in expected_params if p not in params]
-        assert missing_params == ['context'], f"Missing required parameters for fix: {missing_params}"
+        assert all(param in params for param in expected_params), \
+            f"Missing required parameters. Current: {params}, Expected: {expected_params}"
 
     @pytest.mark.asyncio
-    async def test_call_with_context_parameter_fails_with_type_error(self):
-        """Test that calling get_async with context parameter fails due to signature mismatch."""
+    async def test_call_with_context_parameter_works_correctly(self):
+        """Test that calling get_async with context parameter works correctly."""
         # Set up mock to return something when called correctly
         mock_agent_class = Mock()
         mock_agent_instance = Mock()
@@ -58,14 +58,18 @@ class AgentRegistryAdapterSignatureMismatchSimpleTests:
         self.mock_registry.get.return_value = mock_agent_class
         self.mock_factory.create_instance.return_value = mock_agent_instance
 
-        # This call should fail with TypeError because context parameter is not accepted
-        with pytest.raises(TypeError) as exc_info:
-            await self.adapter.get_async("test_agent", context=self.user_context)
+        # This call should work correctly with the fixed signature
+        result = await self.adapter.get_async("test_agent", context=self.user_context)
 
-        # Verify it's specifically a signature mismatch error
-        error_msg = str(exc_info.value)
-        assert "unexpected keyword argument 'context'" in error_msg, \
-            f"Expected signature error with 'context', got: {error_msg}"
+        # Verify we get the expected result
+        assert result == mock_agent_instance, "Should return the agent instance from factory"
+
+        # Verify the factory was called with correct parameters
+        self.mock_factory.create_instance.assert_called_once_with(
+            "test_agent",
+            self.user_context,  # The context parameter should be passed to factory
+            agent_class=mock_agent_class
+        )
 
     @pytest.mark.asyncio
     async def test_call_without_context_parameter_works(self):

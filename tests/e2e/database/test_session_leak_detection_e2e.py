@@ -439,7 +439,10 @@ class SessionLeakDetectionE2ETests(SessionLeakTestBase):
         for scenario_name, scenario_func in error_scenarios:
             try:
                 await scenario_func()
-                print(f"Warning: {scenario_name} should have failed but didn't""Expected error in {scenario_name}: {e}")
+                print(f"Warning: {scenario_name} should have failed but didn't")
+            except Exception as e:
+                error_count += 1
+                print(f"Expected error in {scenario_name}: {e}")
         
         assert error_count > 0, "At least some error scenarios should trigger exceptions"
         
