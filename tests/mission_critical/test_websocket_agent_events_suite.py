@@ -394,7 +394,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                         # Log critical events
                         event_type = event.get("type", "unknown")
                         if event_type in validator.REQUIRED_EVENTS:
-                            # logger.info(f"✅ Required event received: {event_type}")
+                            pass  # logger.info(f"✅ Required event received: {event_type}")
                         
                         # Stop after completion event
                         if event_type == "agent_completed":
@@ -498,8 +498,8 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         await pipeline_executor.execute_pipeline(
             pipeline=self.test_pipeline_steps,
             user_context=self.test_user_context,
-            run_id=pipeline_run_001,
-            context={user_id: pipeline_user_001", "thread_id: pipeline_thread_001}",
+            run_id="pipeline_run_001",
+            context={"user_id": "pipeline_user_001", "thread_id": "pipeline_thread_001"},
             db_session=self.mock_db_session
         )
         
@@ -528,12 +528,12 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     @pytest.mark.unit
     @pytest.mark.session_management  
     async def test_database_session_management_without_global_state(self):
-    "
+        """
         Test proper database session management without global state storage.
         
         BVJ: Architecture compliance - prevents session leakage and concurrency issues
         Critical Path: Session passing  ->  No global storage  ->  Proper cleanup
-        "
+        """
         # Arrange: Create PipelineExecutor
         pipeline_executor = PipelineExecutor(
             engine=self.mock_execution_engine,
@@ -602,8 +602,8 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         await pipeline_executor_with_context.execute_pipeline(
             pipeline=self.test_pipeline_steps,
             user_context=self.test_user_context,
-            run_id=pipeline_run_001,"
-            context={"user_id: pipeline_user_001, thread_id: pipeline_thread_001},
+            run_id="pipeline_run_001",
+            context={"user_id": "pipeline_user_001", "thread_id": "pipeline_thread_001"},
             db_session=self.mock_db_session
         )
         
