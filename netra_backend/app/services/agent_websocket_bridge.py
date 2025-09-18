@@ -220,8 +220,43 @@ class AgentWebSocketBridge(MonitorableComponent):
         self._registry = None
         self._thread_registry: Optional[ThreadRunRegistry] = None
         self._health_check_task = None
+        self._connection_pool = None
+        self._health_monitor = None
         logger.debug("Dependency references initialized")
-    
+
+    def configure(self,
+                  connection_pool=None,
+                  agent_registry=None,
+                  health_monitor=None) -> None:
+        """Configure AgentWebSocketBridge with infrastructure components.
+
+        This method provides post-initialization configuration of the bridge
+        with external dependencies. It follows the same pattern as other
+        factory classes in the system.
+
+        Args:
+            connection_pool: WebSocket connection pool for managing connections
+            agent_registry: Registry for agent instances and lifecycle management
+            health_monitor: Optional health monitor for external health tracking
+
+        Note:
+            This method can be called multiple times if needed to update configuration.
+            It's designed to be idempotent and safe for reconfiguration scenarios.
+        """
+        if connection_pool is not None:
+            self._connection_pool = connection_pool
+            logger.info(f"[U+1F527] AgentWebSocketBridge configured with connection pool: {type(connection_pool).__name__}")
+
+        if agent_registry is not None:
+            self._registry = agent_registry
+            logger.info(f"[U+1F527] AgentWebSocketBridge configured with agent registry: {type(agent_registry).__name__}")
+
+        if health_monitor is not None:
+            self._health_monitor = health_monitor
+            logger.info(f"[U+1F527] AgentWebSocketBridge configured with health monitor: {type(health_monitor).__name__}")
+
+        logger.info("[U+2713] AgentWebSocketBridge configuration completed successfully")
+
     @property
     def websocket_manager(self):
         """Get the WebSocket manager for this bridge.

@@ -472,9 +472,9 @@ async def test_websocket_auth_connection(
 @router.get("/websocket-auth/session/{user_id}")
 async def monitor_websocket_auth_session(
     user_id: str,
-    duration_ms: int = 30000,
     request: Request,
-    current_user: schemas.UserBase = Depends(require_admin_with_jwt_validation)
+    current_user: schemas.UserBase = Depends(require_admin_with_jwt_validation),
+    duration_ms: int = 30000
 ) -> Dict[str, Any]:
     """
     Monitor WebSocket authentication session for a specific user.

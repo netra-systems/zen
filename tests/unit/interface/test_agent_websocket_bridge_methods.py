@@ -304,6 +304,66 @@ class AgentWebSocketBridgeMethodsTests(SSotAsyncTestCase):
         except Exception as e:
             self.fail(f"Unexpected error checking initialization methods: {e}")
 
+    async def test_configure_method_exists_and_works(self):
+        """Test configure method exists and works correctly - Issue #1339.
+
+        This test validates the configure method that was missing and causing
+        AttributeError: 'AgentWebSocketBridge' object has no attribute 'configure'
+        """
+        try:
+            from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+            from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
+            import inspect
+
+            # Create instance for testing
+            if self.bridge_instance is None:
+                self.bridge_instance = self._create_bridge_instance()
+
+            # Test 1: Check that configure method exists
+            self.assertTrue(hasattr(self.bridge_instance, 'configure'),
+                          "AgentWebSocketBridge should have configure method")
+
+            # Test 2: Check that it's callable
+            configure_method = getattr(self.bridge_instance, 'configure')
+            self.assertTrue(callable(configure_method),
+                          "configure method should be callable")
+
+            # Test 3: Check method signature matches expected parameters
+            signature = inspect.signature(configure_method)
+            params = list(signature.parameters.keys())
+
+            expected_params = ['connection_pool', 'agent_registry', 'health_monitor']
+            for param in expected_params:
+                self.assertIn(param, params,
+                            f"configure method should have parameter '{param}'")
+
+            # Test 4: Test calling configure with None values (common case)
+            try:
+                configure_method(
+                    connection_pool=None,
+                    agent_registry=None,
+                    health_monitor=None
+                )
+            except Exception as e:
+                self.fail(f"configure method should accept None values: {e}")
+
+            # Test 5: Test calling configure with actual instances
+            try:
+                connection_pool = WebSocketConnectionPool()
+                configure_method(
+                    connection_pool=connection_pool,
+                    agent_registry=None,
+                    health_monitor=None
+                )
+            except Exception as e:
+                self.fail(f"configure method should accept connection pool instance: {e}")
+
+            print("SUCCESS: configure method exists and works correctly")
+
+        except Exception as e:
+            self.method_errors.append(f"configure method test failed: {e}")
+            self.fail(f"configure method validation failed: {e}")
+
     def teardown_method(self, method):
         """Clean up and report method issues."""
         super().teardown_method(method)
@@ -336,7 +396,8 @@ if __name__ == "__main__":
             'test_handle_message_method_execution',
             'test_websocket_integration_methods',
             'test_agent_execution_methods',
-            'test_bridge_initialization_methods'
+            'test_bridge_initialization_methods',
+            'test_configure_method_exists_and_works'
         ]
 
         for test_method in test_methods:
