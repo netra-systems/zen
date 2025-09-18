@@ -681,7 +681,7 @@ class AuthHealthChecker:
             
             # Check critical configuration values
             try:
-                from netra_backend.app.core.configuration.base import get_config
+                from netra_backend.app.config import get_config
                 config = get_config()
                 
                 # Check if required config values are present

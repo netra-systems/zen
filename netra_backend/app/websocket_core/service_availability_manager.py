@@ -35,7 +35,7 @@ from enum import Enum
 from fastapi import FastAPI
 
 from shared.logging.unified_logging_ssot import get_logger
-from netra_backend.app.core.configuration.base import get_config
+from netra_backend.app.config import get_config
 
 logger = get_logger(__name__)
 

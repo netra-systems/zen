@@ -51,7 +51,7 @@ import threading
 
 # PHASE 1 GOLDEN PATH REMEDIATION: Add required SSOT auth and config imports
 from netra_backend.app.services.unified_authentication_service import get_unified_auth_service
-from netra_backend.app.core.configuration.base import get_config
+from netra_backend.app.config import get_config
 
 logger = get_logger(__name__)
 

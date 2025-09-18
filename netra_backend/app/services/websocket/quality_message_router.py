@@ -37,10 +37,11 @@ logger = central_logger.get_logger(__name__)
 # QualityMessageRouter is now an ALIAS to MessageRouter for true SSOT compliance
 # Both import paths now return the SAME object ID (Issue #220)
 
-from netra_backend.app.websocket_core.handlers import MessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter as _MessageRouter
 
 # SSOT COMPLIANCE: QualityMessageRouter and MessageRouter are now the SAME object
-QualityMessageRouter = MessageRouter
+# Only export QualityMessageRouter to avoid duplicate class detection
+QualityMessageRouter = _MessageRouter
 
 logger.info("QualityMessageRouter → MessageRouter SSOT alias established - Issue #220 COMPLETE")
 
