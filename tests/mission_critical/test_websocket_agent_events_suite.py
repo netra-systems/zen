@@ -643,18 +643,18 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         # Test context building with various inputs
         test_contexts = [
             {
-                run_id": "test_run_001,
-                context: {
-                    user_id: test_user_001",
-                    "thread_id: test_thread_001
-                }"
+                "run_id": "test_run_001",
+                "context": {
+                    "user_id": "test_user_001",
+                    "thread_id": "test_thread_001"
+                }
             },
             {
-                run_id: test_run_002, 
-                "context: {"
-                    user_id: test_user_002,
-                    thread_id: "test_thread_002,
-                    additional_param": extra_value
+                "run_id": "test_run_002",
+                "context": {
+                    "user_id": "test_user_002",
+                    "thread_id": "test_thread_002",
+                    "additional_param": "extra_value"
                 }
             }
         ]
@@ -668,15 +668,16 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
             
             # Verify execution context structure
             assert isinstance(exec_context, AgentExecutionContext)
-            assert exec_context.run_id == test_case[run_id]
-            assert exec_context.agent_name == supervisor  # Default agent name"
-            
+            assert exec_context.run_id == test_case["run_id"]
+            assert exec_context.agent_name == "supervisor"  # Default agent name
+
             # Verify context parameters were extracted correctly
             params = pipeline_executor._extract_context_params(
-                test_case[run_id"],
-                test_case[context]
-            
-            assert run_id" in params"
+                test_case["run_id"],
+                test_case["context"]
+            )
+
+            assert "run_id" in params
             assert agent_name in params
             assert params[run_id] == test_case["run_id]
             assert params[agent_name"] == supervisor
