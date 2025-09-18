@@ -5,7 +5,7 @@ from typing import Any, List, Optional, Tuple
 from pydantic import ValidationError
 
 from netra_backend.app.config import get_config as get_unified_config
-from netra_backend.app.logging_config import central_logger as logger
+from shared.logging.unified_logging_ssot import get_logger
 
 try:
     from netra_backend.app.schemas.config import AppConfig
@@ -22,7 +22,7 @@ class ConfigValidator:
     """Validates application configuration for consistency and completeness."""
     
     def __init__(self):
-        self._logger = logger
+        self._logger = get_logger(__name__)
         
     def validate_config(self, config: AppConfig) -> None:
         """Validate the complete configuration object."""
