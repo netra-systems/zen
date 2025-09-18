@@ -7,7 +7,7 @@ authentication validation levels to ensure golden path completion.
 
 BUSINESS JUSTIFICATION:
     - Critical Events: 90% of platform business value delivered via WebSocket events
-- Revenue Protection: $""500K"" plus ARR depends on reliable event delivery
+- Revenue Protection: $500K+ plus ARR depends on reliable event delivery
 - User Experience: Events provide transparency and trust in AI interactions
 - Auth Permissiveness: Events must work with all auth modes (strict/relaxed/demo/emergency)
 

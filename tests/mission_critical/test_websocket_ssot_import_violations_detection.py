@@ -4,7 +4,7 @@
 GitHub Issue: #844 SSOT-incomplete-migration-multiple-websocket-managers
 
 THIS TEST DETECTS SSOT IMPORT VIOLATIONS ACROSS THE CODEBASE.
-Business Value: $""500K"" plus ARR - Detects import patterns that violate WebSocket SSOT principles
+Business Value: $500K+ plus ARR - Detects import patterns that violate WebSocket SSOT principles
 
 PURPOSE:
     - Detect files importing from multiple WebSocket managers (SSOT violation)

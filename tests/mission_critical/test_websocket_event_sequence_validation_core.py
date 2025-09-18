@@ -5,7 +5,7 @@ MISSION CRITICAL: Core WebSocket Event Sequence Validation Tests - Issue #1199
 
 Business Value Justification:
     - Segment: Platform (Core Infrastructure) 
-- Business Goal: Ensure 100% reliability of $""500K"" plus ARR chat functionality
+- Business Goal: Ensure 100% reliability of $500K+ plus ARR chat functionality
 - Value Impact: Validates the 5 critical WebSocket events in proper sequence 
 - Strategic Impact: Prevents silent event failures that cause user abandonment
 
@@ -69,7 +69,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
     Core WebSocket event sequence validation tests.
     
     CRITICAL: These tests validate the fundamental 5-event sequence that enables 
-    $""500K"" plus ARR chat functionality. ANY FAILURE HERE INDICATES A CRITICAL SYSTEM ISSUE.
+    $500K+ plus ARR chat functionality. ANY FAILURE HERE INDICATES A CRITICAL SYSTEM ISSUE.
     
 
     @pytest.fixture(autouse=True)
@@ -689,7 +689,7 @@ if __name__ == __main__:"
     print(\n + "= * 80)"
     print(CORE WEBSOCKET EVENT SEQUENCE VALIDATION TESTS - Issue #1199)"
     print(CORE WEBSOCKET EVENT SEQUENCE VALIDATION TESTS - Issue #1199)"
-    print("MISSION CRITICAL: 5-Event Sequence Validation for $""500K"" plus ARR)"
+    print("MISSION CRITICAL: 5-Event Sequence Validation for $500K+ plus ARR)"
     print(= * 80")"
     print()
     print(Tests designed to fail initially to prove validation works correctly:)

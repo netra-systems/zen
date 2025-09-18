@@ -3,7 +3,7 @@
 AgentRegistry SSOT Violation Reproduction Tests - Issue #1080
 
 MISSION: Reproduce AgentRegistry SSOT violations blocking Golden Path
-Business Impact: $""500K"" plus ARR Golden Path user flow protection
+Business Impact: $500K+ plus ARR Golden Path user flow protection
 
 These tests MUST FAIL initially to prove SSOT violations exist.
 After SSOT fixes are implemented, these tests should PASS.
@@ -409,7 +409,7 @@ class AgentRegistrySSoTViolationReproductionTests(SSotAsyncTestCase):
         assert violation_count == 0, (
             fSSOT VIOLATIONS DETECTED: {violation_count} violations found. 
             fDetails: {violation_details}. 
-            f"Golden Path is BLOCKED. Business impact: $""500K"" plus ARR at risk."
+            f"Golden Path is BLOCKED. Business impact: $500K+ plus ARR at risk."
         )
 
 

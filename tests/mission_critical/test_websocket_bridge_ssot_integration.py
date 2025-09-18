@@ -2,7 +2,7 @@
 
 SSOT WebSocket Bridge Integration Protection Tests
 
-Issue #845: Critical P0 test suite protecting $""500K"" plus ARR WebSocket functionality
+Issue #845: Critical P0 test suite protecting $500K+ plus ARR WebSocket functionality
 Business Impact: Ensures 5 critical WebSocket events work after AgentRegistry consolidation
 
 WebSocket Events Protected:
@@ -43,7 +43,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 
 
 class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
-    "Critical P0 tests protecting $""500K"" plus ARR WebSocket functionality during SSOT consolidation"
+    "Critical P0 tests protecting $500K+ plus ARR WebSocket functionality during SSOT consolidation"
     
     def setUp(self):
         "Set up WebSocket bridge test environment with SSOT patterns"
@@ -81,7 +81,7 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
 
         CRITICAL: Validate all 5 critical events still deliver properly
         
-        Business Impact: $""500K"" plus ARR depends on real-time chat functionality
+        Business Impact: $500K+ plus ARR depends on real-time chat functionality
         Expected: PASS - all events must be delivered after consolidation
         "
         "

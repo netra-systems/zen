@@ -40,7 +40,7 @@ class PartialDataHandlingTests:
     def partial_cost_optimization_request(self):
         "Request with partial cost data - enough to start but not complete."
         return {
-            user_request": Our LLM costs are around $""8K"" monthly using mostly GPT-4,"
+            user_request": Our LLM costs are around $8K+ monthly using mostly GPT-4,"
             available_data: {
                 monthly_spend_estimate: 7000-9000","
                 "primary_model: gpt-4,"
@@ -603,14 +603,14 @@ class PartialDataHandlingTests:
         }
         
         refined_request = {
-            user_request: Optimize AI costs, spending $""5K"" on GPT-4,
+            user_request: Optimize AI costs, spending $5K+ on GPT-4,
             completeness: 0.60,"
             completeness: 0.60,"
             "iteration: 2"
         }
         
         complete_request = {
-            user_request: Optimize AI costs, $""5K"" on GPT-4, ""2M"" tokens/day, customer service,
+            user_request: Optimize AI costs, $5K+ on GPT-4, ""2M"" tokens/day, customer service,
             completeness": 0.85,"
             iteration: 3
         }

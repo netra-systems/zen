@@ -8,7 +8,7 @@ These are the HIGHEST BUSINESS VALUE authentication flows.
 Business Value Justification (BVJ):
     - Segment: ALL (Free, Early, Mid, Enterprise) - 100% of users
 - Business Goal: User Onboarding & Retention - Enable all user access
-- Value Impact: $""500K"" plus ARR - Without auth, ZERO revenue possible
+- Value Impact: $500K+ plus ARR - Without auth, ZERO revenue possible
 - Strategic Impact: Platform Foundation - Auth enables all other features
 
 CRITICAL SUCCESS CRITERIA:

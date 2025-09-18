@@ -1,7 +1,7 @@
 "Mission Critical: Redis SSOT Consolidation Tests"
 
 Validates that Redis SSOT consolidation resolves WebSocket 1011 errors and
-restores chat functionality worth $""500K"" plus ARR.
+restores chat functionality worth $500K+ plus ARR.
 
 Business Impact:
     - Eliminates 12+ competing Redis connection pools
@@ -169,7 +169,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
     async def test_websocket_redis_race_condition_elimination(self):
         MISSION CRITICAL: Test WebSocket operations don't cause 1011 errors.""'
         
-        BUSINESS IMPACT: Prevents $""500K"" plus ARR loss from broken chat functionality.
+        BUSINESS IMPACT: Prevents $500K+ plus ARR loss from broken chat functionality.
         SUCCESS CRITERIA: Concurrent WebSocket Redis operations succeed reliably.
         
         # Simulate WebSocket Redis operations under load

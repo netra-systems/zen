@@ -3,7 +3,7 @@
 WebSocket Event Typo Prevention - Mission Critical Tests
 
 Business Value Justification (BVJ):
-    - Segment: Platform/Internal - $""500K"" plus ARR Revenue Protection
+    - Segment: Platform/Internal - $500K+ plus ARR Revenue Protection
 - Business Goal: Prevent silent failures that block revenue-generating chat interactions  
 - Value Impact: Bulletproof typo detection for 5 critical events delivering 90% of platform value
 - Strategic Impact: MISSION CRITICAL - These tests protect the primary revenue stream
@@ -73,7 +73,7 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
 
     Mission Critical Tests for WebSocket Event Typo Prevention.
     
-    These tests protect $""500K"" plus ARR by ensuring event name typos are detected
+    These tests protect $500K+ plus ARR by ensuring event name typos are detected
     and handled appropriately to prevent revenue-impacting silent failures.
     
     Focus: Comprehensive typo detection, business impact assessment, performance.

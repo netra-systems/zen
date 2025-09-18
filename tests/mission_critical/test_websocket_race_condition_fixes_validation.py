@@ -10,7 +10,7 @@ This test validates that the five-whys root cause analysis fixes are working pro
 4. Environment-aware service discovery
 5. Enhanced retry mechanisms
 
-Business Impact: $""500K"" plus ARR protection through reliable WebSocket authentication.
+Business Impact: $500K+ plus ARR protection through reliable WebSocket authentication.
 "
 ""
 

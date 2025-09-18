@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
     - Segment: Platform/Internal (enabling all segments)
 - Business Goal: Ensure zero memory leaks during deterministic startup sequences
 - Value Impact: Prevents memory-related crashes and ensures stable service initialization
-- Revenue Impact: Critical - memory leaks cause service degradation affecting $""500K"" plus ARR
+- Revenue Impact: Critical - memory leaks cause service degradation affecting $500K+ plus ARR
 
 ISSUE #601 FIX: Strategic validation mocking to prevent infinite hangs during 
 `_run_comprehensive_validation()` while preserving actual memory leak detection logic.
@@ -603,7 +603,7 @@ if __name__ == __main__:
     print(="*80)"
     print(Testing strategic validation mocking to prevent deadlocks...)"
     print(Testing strategic validation mocking to prevent deadlocks...)"
-    print(Business Impact: $""500K"" plus ARR platform reliability validation")"
+    print(Business Impact: $500K+ plus ARR platform reliability validation")"
     print(=*80")"
     
     # Configure logging

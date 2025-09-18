@@ -6,7 +6,7 @@ This comprehensive test suite validates the core business impact of broad databa
 exception handling patterns that mask specific errors, making production debugging 
 extremely difficult and increasing incident resolution times by 3-""5x"".
 
-BUSINESS IMPACT: $""500K"" plus ARR depends on reliable database error diagnosis
+BUSINESS IMPACT: $500K+ plus ARR depends on reliable database error diagnosis
 EXPECTED BEHAVIOR: All tests should FAIL initially, proving the systemic issue exists
 
 This suite demonstrates:
@@ -231,7 +231,7 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
     
     @pytest.mark.mission_critical
     def test_database_error_business_value_impact(self):
-        FAILING TEST: Database errors directly impact $""500K"" plus ARR business value delivery.""
+        FAILING TEST: Database errors directly impact $500K+ plus ARR business value delivery.""
         
         # Map database errors to business value impact
         business_value_scenarios = [
@@ -239,7 +239,7 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
                 'business_function': 'Chat functionality (90% of platform value)',
                 'database_dependency': 'User session management, message persistence',
                 'error_impact': 'Users cannot save chat history or maintain sessions',
-                'revenue_at_risk': 450000  # 90% of $""500K"" ARR
+                'revenue_at_risk': 450000  # 90% of $500K+ ARR
             },
             {
                 'business_function': 'Analytics insights for customers',

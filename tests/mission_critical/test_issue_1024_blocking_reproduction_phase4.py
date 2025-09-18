@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 """
 
 - Business Goal: Stability - Prevent deployment blocking from test chaos
-- Value Impact: Protects $""500K"" plus ARR from deployment delays and failures
+- Value Impact: Protects $500K+ plus ARR from deployment delays and failures
 - Revenue Impact: Prevents customer churn from unreliable system deployments
 
 CRITICAL PURPOSE: Reproduce the actual deployment-blocking issues caused by
@@ -216,7 +216,7 @@ class DeploymentBlockingReproductionTests(BaseTestCase):
         self.assertGreaterEqual(
             mission_critical_success_rate, 99.0,
             fBUSINESS CRITICAL: Mission critical test success rate {mission_critical_success_rate:.""1f""}% 
-            fbelow required 99%. $""500K"" plus ARR deployment blocked. 
+            fbelow required 99%. $500K+ plus ARR deployment blocked. 
             fFailed tests: {[test for test, result in test_execution_results.items() if not result]}. ""
             fUnauthorized test runners compromising business continuity.
         )
@@ -268,7 +268,7 @@ class BusinessImpactQuantificationTests(AsyncBaseTestCase):
         Expected to FAIL - demonstrates financial impact
 ""
         # Business metrics from Issue #1024
-        annual_recurring_revenue = 500000  # $""500K"" plus ARR
+        annual_recurring_revenue = 500000  # $500K+ plus ARR
         golden_path_reliability_current = 60.0  # ~60%
         golden_path_reliability_target = 95.0   # >95%
 
@@ -286,7 +286,7 @@ class BusinessImpactQuantificationTests(AsyncBaseTestCase):
 
         # This test SHOULD FAIL to demonstrate financial impact
         self.assertLess(
-            total_business_impact, 50000,  # Max $""50K"" acceptable impact
+            total_business_impact, 50000,  # Max $50K+ acceptable impact
             fFINANCIAL CRITICAL: ${total_business_impact:.""0f""} business impact from test chaos. 
             fRevenue at risk: ${revenue_at_risk:.0f} from {reliability_gap:.1f}% reliability gap. "
             fRevenue at risk: ${revenue_at_risk:.0f} from {reliability_gap:.1f}% reliability gap. "

@@ -12,7 +12,7 @@ Focus Areas:
 - Command-line option management
 
 Business Impact: HIGH - Enables Mission Critical test suite execution
-Priority: P0 - Required for $""500K"" plus ARR protection
+Priority: P0 - Required for $500K+ plus ARR protection
 "
 ""
 

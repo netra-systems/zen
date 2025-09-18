@@ -8,7 +8,7 @@ This validates that authenticated users receive proper WebSocket events during a
 Business Value Justification (BVJ):
     - Segment: ALL users (Free, Early, Mid, Enterprise) - 100% of chat users
 - Business Goal: Seamless Real-time Chat Experience - Core value delivery
-- Value Impact: $""500K"" plus ARR - Chat is 90% of our customer value delivery
+- Value Impact: $500K+ plus ARR - Chat is 90% of our customer value delivery
 - Strategic Impact: Platform Foundation - WebSocket + Auth enables all AI interactions
 
 CRITICAL SUCCESS CRITERIA:

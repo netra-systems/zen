@@ -30,7 +30,7 @@ class TestWebSocketConnection:
         This is a P0 CRITICAL test - these events are currently missing in production.
 
         Business Value Justification (BVJ):
-        1. Segment: All customer tiers ($""120K""+ MRR protection)
+        1. Segment: All customer tiers ($120K+ MRR protection)
         2. Business Goal: Ensure real-time WebSocket event reliability
         3. Value Impact: Validates core product functionality - agent lifecycle tracking
         4. Revenue Impact: Prevents churn from poor real-time experience

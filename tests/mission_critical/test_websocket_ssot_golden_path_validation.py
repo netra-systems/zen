@@ -1,11 +1,11 @@
 "Mission Critical Test: WebSocket SSOT Golden Path Validation for Issue #1104"
 
 This test suite validates that WebSocket Manager SSOT consolidation protects the 
-Golden Path user flow that generates $""500K"" plus ARR from AI chat functionality.
+Golden Path user flow that generates $500K+ plus ARR from AI chat functionality.
 
 MISSION CRITICAL SCOPE:
     - Golden Path: User login -> AI chat -> Real responses
-- Revenue Protection: $""500K"" plus ARR chat functionality
+- Revenue Protection: $500K+ plus ARR chat functionality
 - User Experience: Real-time AI interactions via WebSocket events
 - Business Continuity: Enterprise-grade WebSocket reliability
 
@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
     - Segment: ALL (Free -> Enterprise)
 - Business Goal: Protect Golden Path revenue and user experience
 - Value Impact: Ensure reliable WebSocket communication for AI chat
-- Revenue Impact: Mission-critical infrastructure for $""500K"" plus ARR
+- Revenue Impact: Mission-critical infrastructure for $500K+ plus ARR
 
 CRITICAL: These tests will FAIL until Issue #1104 SSOT consolidation is complete.
 This proves that import fragmentation blocks business-critical functionality.
@@ -61,7 +61,7 @@ class WebSocketSSOTGoldenPathValidationTests(SSotBaseTestCase, unittest.TestCase
         
         # Business metrics tracking
         self.business_metrics = {
-            'revenue_at_risk': 500000,  # $""500K"" plus ARR
+            'revenue_at_risk': 500000,  # $500K+ plus ARR
             'affected_user_segments': ['Free', 'Early', 'Mid', 'Enterprise'],
             'critical_events': ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
         }

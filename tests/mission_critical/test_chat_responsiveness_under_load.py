@@ -5,7 +5,7 @@ Comprehensive Chat Responsiveness Under Load Tests - Issue #976 Restoration
 
 Business Value Justification (BVJ):
     - Segment: ALL (Free/Early/Mid/Enterprise/Platform)
-- Business Goal: Validate $""500K"" plus ARR chat functionality maintains responsiveness under concurrent load
+- Business Goal: Validate $500K+ plus ARR chat functionality maintains responsiveness under concurrent load
 - Value Impact: Ensures chat system delivers reliable AI responses even with multiple concurrent users
 - Revenue Impact: Protects core business functionality that drives customer retention and conversion
 

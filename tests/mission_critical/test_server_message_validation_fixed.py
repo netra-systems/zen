@@ -6,7 +6,7 @@ Mission Critical Server Message Validation Tests - POST FIX
 This module tests the FIXED MissionCriticalEventValidator's ability to handle'
 both flat and ServerMessage format structures.
 
-BUSINESS IMPACT: $""500K"" plus ARR depends on proper WebSocket event validation
+BUSINESS IMPACT: $500K+ plus ARR depends on proper WebSocket event validation
 to ensure Golden Path chat functionality works correctly.
 
 Issue #892: Validation that MissionCriticalEventValidator now handles

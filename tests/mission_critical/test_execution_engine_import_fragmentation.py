@@ -14,7 +14,7 @@ PURPOSE:
 EXPECTED INITIAL STATE: FAIL (proving fragmentation exists)
 EXPECTED POST-CONSOLIDATION STATE: PASS (single canonical import)
 
-Business Impact: $""500K"" plus ARR depends on Golden Path stability
+Business Impact: $500K+ plus ARR depends on Golden Path stability
 Critical Path: User login -> AI response flow requires stable imports
 "
 ""

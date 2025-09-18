@@ -4,7 +4,7 @@
 Mission Critical Test Suite: No SSOT Violations with Comprehensive Isolation Testing
 
 Business Value: Platform/Internal - System Reliability & Data Integrity
-Critical for $""500K"" plus ARR protection through comprehensive isolation and SSOT compliance.
+Critical for $500K+ plus ARR protection through comprehensive isolation and SSOT compliance.
 
 This comprehensive test suite validates:
     1. SSOT compliance across all services

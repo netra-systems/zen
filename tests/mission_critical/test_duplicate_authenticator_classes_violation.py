@@ -2,7 +2,7 @@
 
 Test for WebSocket Authentication SSOT Violation: Duplicate UnifiedWebSocketAuthenticator Classes
 
-BUSINESS IMPACT: $""500K"" plus ARR - WebSocket authentication chaos blocking Golden Path
+BUSINESS IMPACT: $500K+ plus ARR - WebSocket authentication chaos blocking Golden Path
 """
 
 ISSUE: #1076 - Two complete UnifiedWebSocketAuthenticator classes exist in unified_websocket_auth.py
@@ -33,7 +33,7 @@ class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
     Mission Critical Test: WebSocket Authentication SSOT Violation Detection
     
     Tests that only one UnifiedWebSocketAuthenticator class exists in the codebase.
-    This is a business-critical test protecting $""500K"" plus ARR chat functionality.
+    This is a business-critical test protecting $500K+ plus ARR chat functionality.
 "
 ""
 

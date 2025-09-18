@@ -10,7 +10,7 @@ This test suite validates that ALL Docker operations go through the rate limiter
 
 to prevent Docker daemon crashes from concurrent operation storms.
 
-CRITICAL: These tests protect the $""2M""+ ARR platform from Docker daemon instability.
+CRITICAL: These tests protect the $2M+ ARR platform from Docker daemon instability.
 
 INFRASTRUCTURE VALIDATION:
     - Performance benchmarks (throughput, latency, resource usage)

@@ -3,7 +3,7 @@
 AgentRegistry SSOT Compliance Validation Tests - Issue #1080
 
 MISSION: Validate AgentRegistry SSOT compliance after fixes
-Business Impact: $""500K"" plus ARR Golden Path restoration
+Business Impact: $500K+ plus ARR Golden Path restoration
 
 These tests validate the FIXED state after SSOT consolidation.
 EXPECTED INITIAL RESULT: ALL TESTS FAIL (waiting for fixes)

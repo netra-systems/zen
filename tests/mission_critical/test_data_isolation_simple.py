@@ -1,20 +1,20 @@
-"Mission Critical Data Layer Isolation Security Tests - REAL SERVICES ONLY"
+"""Mission Critical Data Layer Isolation Security Tests - REAL SERVICES ONLY
 
 These tests use REAL services to detect critical security vulnerabilities:
     1. Redis key collision between users
-2. Database session isolation failures
-3. Cache contamination between users  
-4. User context propagation failure
-5. Concurrent user data isolation
-6. WebSocket message isolation
-7. Agent state contamination
-8. Thread safety violations
+    2. Database session isolation failures
+    3. Cache contamination between users
+    4. User context propagation failure
+    5. Concurrent user data isolation
+    6. WebSocket message isolation
+    7. Agent state contamination
+    8. Thread safety violations
 
 COMPLIANCE:
     @claude.md - NO MOCKS ALLOWED, REAL services for spacecraft reliability
-@spec/type_safety.xml - Full type safety with real service responses
-@spec/core.xml - SSOT pattern enforcement with real data flows
-""
+    @spec/type_safety.xml - Full type safety with real service responses
+    @spec/core.xml - SSOT pattern enforcement with real data flows
+"""
 
 import asyncio
 import json
@@ -38,13 +38,13 @@ from test_framework.test_context import TestContext, create_isolated_test_contex
 
 @pytest.fixture(scope=module)
 def isolated_env():
-    Isolated environment for testing.""
+    """Isolated environment for testing."""
     return IsolatedEnvironment()
 
 
 @pytest.fixture(scope=module)
 async def redis_client(isolated_env):
-    "Real Redis client for testing."
+    """Real Redis client for testing."""
     redis_url = isolated_env.get('REDIS_URL', 'redis://localhost:6381')
     client = redis.from_url(redis_url, decode_responses=True)
     
@@ -58,11 +58,9 @@ async def redis_client(isolated_env):
     await client.close()
 
 
-@pytest.fixture(scope=module)"
-@pytest.fixture(scope=module)""
-
+@pytest.fixture(scope=module)
 async def database_engine(isolated_env):
-    "Real database engine for testing."
+    """Real database engine for testing."""
     database_url = isolated_env.get('DATABASE_URL', 'postgresql+asyncpg://netra:netra@localhost:5434/netra_test')
     engine = create_async_engine(database_url, echo=False)
     
@@ -71,10 +69,9 @@ async def database_engine(isolated_env):
     await engine.dispose()
 
 
-@pytest.fixture(scope=module")"
+@pytest.fixture(scope=module)
 async def backend_client(isolated_env):
-    Real backend client for testing."
-    Real backend client for testing.""
+    """Real backend client for testing."""
 
     backend_url = isolated_env.get('BACKEND_URL', 'http://localhost:8000')
     client = BackendTestClient(backend_url)

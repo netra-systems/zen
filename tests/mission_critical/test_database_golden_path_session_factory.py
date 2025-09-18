@@ -40,7 +40,7 @@ def lazy_import(module_path: str, component: str = None):
 "MISSION CRITICAL: Database Golden Path Session Factory Test Suite"
 
 THIS SUITE VALIDATES GOLDEN PATH DATABASE SESSION CREATION
-Business Value: $""500K"" plus ARR - Ensures WebSocket connections can create database sessions
+Business Value: $500K+ plus ARR - Ensures WebSocket connections can create database sessions
 
 CRITICAL GOLDEN PATH FLOWS TO VALIDATE:
     1. WebSocket manager can successfully create database sessions

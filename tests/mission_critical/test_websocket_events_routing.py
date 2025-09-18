@@ -7,7 +7,7 @@ event delivery and prevents cross-user event leakage.
 Business Value Justification:
     - Segment: Platform/Internal  
 - Business Goal: User Experience & Security
-- Value Impact: Ensures real-time chat events reach correct users for $""500K"" plus ARR operations
+- Value Impact: Ensures real-time chat events reach correct users for $500K+ plus ARR operations
 - Strategic Impact: Validates WebSocket integration in SSOT ExecutionEngine consolidation
 
 Key Validation Areas:

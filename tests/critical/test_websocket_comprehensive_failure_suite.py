@@ -10,7 +10,7 @@ that could cause complete loss of real-time user feedback.
     BUSINESS IMPACT:
         - Chat functionality delivers 90% of product value
 - WebSocket failures = user abandonment = revenue loss
-- Each failure mode represents a potential $""50K""+ ARR impact
+- Each failure mode represents a potential $50K+ ARR impact
 
         TEST CATEGORIES:
             1.0Bridge Initialization Failures (15 tests)
@@ -222,7 +222,7 @@ reproduction_steps=[ ]
 "5.0User abandons session thinking system is broken"
 
         affected_users=["all_concurrent_users],"
-metrics={"failure_rate": "100%", "revenue_impact": "$""50K""+}"
+metrics={"failure_rate": "100%", "revenue_impact": "$50K+}"
 
         test_results.append({"test": "bridge_none_failure", "expected_failure: True})"
 except Exception as e:
@@ -361,7 +361,7 @@ reproduction_steps=[ ]
 "5.0GDPR/regulatory violation occurs"
 
         affected_users=["all_concurrent_users],"
-metrics={"breach_severity": "CRITICAL", "regulatory_fine_risk": "$""100K""+}"
+metrics={"breach_severity": "CRITICAL", "regulatory_fine_risk": "$100K+}"
 
         test_results.append({"test": "websocket_data_leak", "expected_failure: True})"
 except Exception as e:
@@ -517,11 +517,11 @@ user_experience_issues = 0
 
         for failure in self.failures:
         if failure.failure_type in ["SILENT_FAILURE", "DATA_LEAKAGE", "CONNECTION_HIJACKING]:"
-revenue_impact += 50000  # $""50K"" per critical failure
+revenue_impact += 50000  # $50K+ per critical failure
 if failure.failure_type in ["DATA_LEAKAGE", "CONNECTION_HIJACKING]:"
 security_violations += 1
 elif failure.failure_type in ["CONNECTION_LOSS", "PERFORMANCE_DEGRADATION", "RECONNECTION_LOSS]:"
-revenue_impact += 25000  # $""25K"" per user experience issue
+revenue_impact += 25000  # $25K+ per user experience issue
 user_experience_issues += 1
 
         self.business_impact_metrics = { }

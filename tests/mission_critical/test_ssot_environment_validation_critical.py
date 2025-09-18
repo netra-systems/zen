@@ -12,7 +12,7 @@ PURPOSE: Prevent revenue loss from configuration errors by validating SSOT compl
 Business Value Justification (BVJ):
     - Segment: Platform/Internal
 - Goal: System Stability & Revenue Protection  
-- Value Impact: Prevents $""500K"" plus ARR loss from configuration cascade failures
+- Value Impact: Prevents $500K+ plus ARR loss from configuration cascade failures
 - Revenue Impact: Critical infrastructure tests protecting Golden Path user flow
 
 CRITICAL REQUIREMENTS:
@@ -119,7 +119,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
         This test ensures the central validator maintains SSOT patterns and
         prevents duplicate validation logic that could cause configuration drift.
         
-        BUSINESS IMPACT: Prevents configuration errors that could cause $""500K"" plus ARR loss.
+        BUSINESS IMPACT: Prevents configuration errors that could cause $500K+ plus ARR loss.
         
         start_time = time.time()
         validation_errors = []

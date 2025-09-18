@@ -1,6 +1,6 @@
 "Golden Path Protection Tests for Issue #821 - SupervisorAgent SSOT Consolidation"
 
-Business Value: Protect $""500K"" plus ARR Golden Path during SSOT consolidation
+Business Value: Protect $500K+ plus ARR Golden Path during SSOT consolidation
 BVJ: ALL segments | Platform Stability | Ensure SSOT fixes don't break core functionality'
 
 MISSION: Ensure Golden Path (users login -> get AI responses) remains functional during/after SSOT consolidation

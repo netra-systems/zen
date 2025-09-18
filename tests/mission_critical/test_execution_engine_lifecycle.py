@@ -7,7 +7,7 @@ It ensures resources are properly managed across user sessions.
 Business Value Justification:
     - Segment: Platform/Internal  
 - Business Goal: System Performance & Reliability
-- Value Impact: Ensures stable resource management for $""500K"" plus ARR operations
+- Value Impact: Ensures stable resource management for $500K+ plus ARR operations
 - Strategic Impact: Validates production-ready resource management in SSOT consolidation
 
 Key Validation Areas:

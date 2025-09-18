@@ -3,7 +3,7 @@
 Business Value Justification:
     - Segment: Platform/Internal
 - Business Goal: Stability & System Integrity 
-- Value Impact: Prevents execution engine duplication cascade failures affecting $""500K"" plus ARR
+- Value Impact: Prevents execution engine duplication cascade failures affecting $500K+ plus ARR
 - Strategic Impact: Ensures 12 execution engines -> 1 UserExecutionEngine consolidation remains stable
 
 CRITICAL MISSION: NEW 20% SSOT VALIDATION TESTS
@@ -104,7 +104,7 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
             for violation in forbidden_classes_found:
                 error_msg.append(f  - {violation['file']}:{violation['line']} class {violation['class']} ({violation['reason']})
             error_msg.append(f\nIssue #1146: All execution engines must be consolidated into UserExecutionEngine)
-            error_msg.append(fBusiness Impact: Multiple execution engines cause state contamination affecting $""500K"" plus ARR")"
+            error_msg.append(fBusiness Impact: Multiple execution engines cause state contamination affecting $500K+ plus ARR")"
             
             pytest.fail(\n.join(error_msg))
 

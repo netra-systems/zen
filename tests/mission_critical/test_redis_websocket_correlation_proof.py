@@ -4,7 +4,7 @@ This test suite proves the direct correlation between Redis SSOT violations
 and WebSocket 1011 errors that are blocking the Golden Path chat functionality.
 
 Business Value:
-    - Proves $""500K"" plus ARR chat functionality is blocked by Redis violations
+    - Proves $500K+ plus ARR chat functionality is blocked by Redis violations
 - Documents the 85% WebSocket error probability correlation
 - Validates that SSOT remediation fixes the Golden Path
 
@@ -110,7 +110,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
             total_tests: self.test_iterations,
             "failures: failure_count,"
             expected_pattern: 85% error probability due to Redis violations,
-            business_impact: "Blocks $""500K"" plus ARR chat functionality"
+            business_impact: "Blocks $500K+ plus ARR chat functionality"
         }
 
         # Save evidence

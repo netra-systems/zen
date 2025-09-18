@@ -3,7 +3,7 @@
 
 MISSION CRITICAL TEST SUITE: SSOT WebSocketNotifier Validation
 
-Business Value: Platform/Internal - $""500K"" plus ARR Golden Path Protection
+Business Value: Platform/Internal - $500K+ plus ARR Golden Path Protection
 Prevents duplicate WebSocketNotifier implementations that cause agent event delivery failures.
 
 This test suite validates:

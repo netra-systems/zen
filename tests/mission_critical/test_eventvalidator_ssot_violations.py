@@ -17,7 +17,7 @@ Expected Behavior:
 
 """
 
-Business Value Impact: $""500K"" plus ARR at risk from inconsistent event validation
+Business Value Impact: $500K+ plus ARR at risk from inconsistent event validation
 "
 ""
 
@@ -170,7 +170,7 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             logger.critical( ALERT:  SSOT VIOLATION DETECTED: Multiple EventValidator implementations exist!)"
             logger.critical( ALERT:  SSOT VIOLATION DETECTED: Multiple EventValidator implementations exist!)"
             logger.critical(" ALERT:  This proves Issue #231: EventValidator SSOT violations)"
-            logger.critical( ALERT:  BUSINESS IMPACT: $""500K"" plus ARR at risk from inconsistent validation)
+            logger.critical( ALERT:  BUSINESS IMPACT: $500K+ plus ARR at risk from inconsistent validation)
             
             # Test that they give different results (proving violation)
             if len(validation_results) > 1:
@@ -341,7 +341,7 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             if len(set(str(sorted(events)) for events in event_support_sets)) > 1:
                 logger.critical( ALERT:  GOLDEN PATH VIOLATION: Different validators support different critical events!)"
                 logger.critical( ALERT:  GOLDEN PATH VIOLATION: Different validators support different critical events!)"
-                logger.critical( ALERT:  This directly impacts $""500K"" plus ARR chat functionality")"
+                logger.critical( ALERT:  This directly impacts $500K+ plus ARR chat functionality")"
                 logger.critical( ALERT:  Critical events must be consistently validated across all implementations)
                 
                 # Show the differences
@@ -351,7 +351,7 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
                 # FAIL TO PROVE GOLDEN PATH IMPACT
                 self.fail(
                     fGOLDEN PATH VIOLATION: EventValidator implementations support different critical events. 
-                    fThis blocks consistent $""500K"" plus ARR chat functionality. 
+                    fThis blocks consistent $500K+ plus ARR chat functionality. 
                     f"Validator support: {validator_support}"
                 )
 

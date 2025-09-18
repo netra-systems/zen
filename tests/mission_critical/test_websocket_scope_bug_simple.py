@@ -2,7 +2,7 @@
 "MISSION CRITICAL TEST: WebSocket Scope Bug Simple Reproduction - Issue #165"
 
 THIS TEST PROVIDES A SIMPLE REPRODUCTION OF THE WEBSOCKET SCOPE BUG.
-Business Impact: $""500K"" plus ARR - Complete WebSocket connection failure
+Business Impact: $500K+ plus ARR - Complete WebSocket connection failure
 
 Simplified Scope Bug Reproduction:
     - Focuses directly on the NameError at lines 1433 and 1452
@@ -15,7 +15,7 @@ Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Document and reproduce critical scope violation
 - Value Impact: Prove exact technical cause of 100% WebSocket connection failures  
-- Strategic Impact: Enable targeted fix for $""500K"" plus ARR blocking bug
+- Strategic Impact: Enable targeted fix for $500K+ plus ARR blocking bug
 
 
 import asyncio
@@ -161,7 +161,7 @@ class WebSocketScopeBugSimpleTests:
             fCRITICAL SCOPE BUG CONFIRMED: Found {len(confirmed_violations)} confirmed violations ""
             fat lines {[v['line'] for v in confirmed_violations]} and {len(problem_lines)} total 
             fscope violations. This variable scope isolation bug causes 100% WebSocket connection 
-            f"failures, blocking $""500K"" plus ARR and affecting all user tiers."
+            f"failures, blocking $500K+ plus ARR and affecting all user tiers."
         )
         
     @pytest.mark.mission_critical
@@ -268,7 +268,7 @@ class WebSocketScopeBugSimpleTests:
         REPRODUCER: Document complete business impact of scope bug.
         
         This test quantifies and documents the business impact of the scope bug
-        to justify the urgency of the fix and validate the $""500K"" plus ARR claim.
+        to justify the urgency of the fix and validate the $500K+ plus ARR claim.
         
         Expected Behavior: FAIL - Document severe business impact
 ""
@@ -291,7 +291,7 @@ class WebSocketScopeBugSimpleTests:
                 user_experience: COMPLETE_SERVICE_FAILURE
             },
             "revenue_impact: {"
-                immediate_arr_at_risk: 500000,  # $""500K"" plus
+                immediate_arr_at_risk: 500000,  # $500K+ plus
                 affected_revenue_streams: ["
                 affected_revenue_streams: ["
                     Subscription revenue (blocked user access)","
@@ -371,7 +371,7 @@ class WebSocketScopeBugSimpleTests:
         severity_multipliers = {
             connection_failure_rate: 1.0,  # 100% failure = max impact
             affected_tiers": len(user_impact['affected_user_tiers') / 4,  # All 4 tiers affected"
-            revenue_impact: 1.0,  # $""500K"" plus = max impact
+            revenue_impact: 1.0,  # $500K+ plus = max impact
             fix_difficulty: 0.1   # Easy fix but critical impact"
             fix_difficulty: 0.1   # Easy fix but critical impact""
 

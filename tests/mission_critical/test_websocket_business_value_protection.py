@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
     - Segment: Platform Revenue Protection (all customer segments)
 - Business Goal: Revenue protection + business continuity
 - Value Impact: Validates core platform value delivery (90% chat functionality)
-- Revenue Impact: Directly protects $""500K"" plus ARR through functional validation
+- Revenue Impact: Directly protects $500K+ plus ARR through functional validation
 
 Expected Result: PASSING (business value validated)
 Difficulty: CRITICAL - Must validate revenue-protecting functionality
@@ -37,7 +37,7 @@ class WebSocketBusinessValueMetrics:
     "Business value metrics for WebSocket functionality."
 
     # Revenue protection metrics
-    ARR_AT_RISK = 500000  # $""500K"" plus ARR at risk
+    ARR_AT_RISK = 500000  # $500K+ plus ARR at risk
     CHAT_VALUE_PERCENTAGE = 90  # 90% of platform value from chat
 
     # Critical WebSocket events for user experience
@@ -79,12 +79,12 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
         Test that WebSocket functionality protects defined revenue levels.
 
         CRITICAL: This test MUST PASS for deployment approval
-        Business Impact: Validates $""500K"" plus ARR protection mechanisms
+        Business Impact: Validates $500K+ plus ARR protection mechanisms
 ""
         # Test revenue protection calculations
         protected_arr = self.metrics.ARR_AT_RISK
         self.assertGreaterEqual(protected_arr, 500000,
-                               fMust protect at least $""500K"" ARR, currently protecting ${protected_arr})
+                               fMust protect at least $500K+ ARR, currently protecting ${protected_arr})
 
         # Test chat value percentage
         chat_percentage = self.metrics.CHAT_VALUE_PERCENTAGE
@@ -96,7 +96,7 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
         # Calculate revenue at risk from WebSocket failure
         revenue_from_chat = protected_arr * (chat_percentage / 100)
         self.assertGreaterEqual(revenue_from_chat, 450000,
-                               f"WebSocket failure risks ${revenue_from_chat}, must be at least $""450K"")"
+                               f"WebSocket failure risks ${revenue_from_chat}, must be at least $450K+)"
 
         # Test business value validation metrics exist
         self.assertTrue(hasattr(self.metrics, 'CRITICAL_EVENTS'),
@@ -228,7 +228,7 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
         websocket_failure_impact = total_arr * chat_percentage
 
         self.assertGreaterEqual(websocket_failure_impact, 450000,
-                               fWebSocket failure impact (${websocket_failure_impact} must be at least $""450K"")
+                               fWebSocket failure impact (${websocket_failure_impact} must be at least $450K+)
 
         # Test partial failure impact scenarios
         partial_failure_scenarios = [
@@ -339,21 +339,21 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
             Staging Environment Testing: {
                 business_value_coverage: 95,  # 95% business value coverage"
                 business_value_coverage: 95,  # 95% business value coverage"
-                arr_protection": 475000,      # $""475K"" ARR protection"
+                arr_protection": 475000,      # $475K+ ARR protection"
                 user_experience_validation: True,
                 acceptable_for_deployment": True"
             },
             Unit Configuration Testing: {
                 business_value_coverage: 70,  # 70% business value coverage"
                 business_value_coverage: 70,  # 70% business value coverage"
-                "arr_protection: 350000,      # $""350K"" ARR protection"
+                "arr_protection: 350000,      # $350K+ ARR protection"
                 user_experience_validation: False,
                 "acceptable_for_deployment: False  # Not sufficient alone"
             },
             Mock Service Testing: {
                 business_value_coverage: 40,  # 40% business value coverage"
                 business_value_coverage: 40,  # 40% business value coverage"
-                arr_protection": 200000,      # $""200K"" ARR protection"
+                arr_protection": 200000,      # $200K+ ARR protection"
                 user_experience_validation: False,
                 acceptable_for_deployment": False  # Not sufficient alone"
             }
@@ -375,7 +375,7 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
             if metrics[acceptable_for_deployment]:""
 
                 self.assertGreaterEqual(protection, 400000,
-                                       f{strategy_name} must protect at least $""400K"" ARR for deployment acceptance")"
+                                       f{strategy_name} must protect at least $400K+ ARR for deployment acceptance")"
 
             # Test deployment acceptance criteria
             if strategy_name == Staging Environment Testing:
@@ -388,7 +388,7 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
 
         combined_protection = staging_protection + (unit_protection * 0.1)  # Unit provides additional coverage
         self.assertGreaterEqual(combined_protection, 480000,
-                               Combined staging + unit testing must protect at least $""480K"" ARR)
+                               Combined staging + unit testing must protect at least $480K+ ARR)
 
     @pytest.mark.no_skip
     def test_websocket_business_value_regression_prevention(self):

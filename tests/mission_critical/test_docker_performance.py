@@ -1,7 +1,7 @@
 """
 
 MISSION CRITICAL: Docker Performance Benchmark & Analysis Suite
-BUSINESS IMPACT: QUANTIFIES $""2M""+ ARR PLATFORM PERFORMANCE UNDER LOAD
+BUSINESS IMPACT: QUANTIFIES $2M+ ARR PLATFORM PERFORMANCE UNDER LOAD
 
 This test suite provides comprehensive performance benchmarking of Docker operations
 to establish baselines, identify bottlenecks, and validate performance under various
@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
     1. Segment: Platform/Internal - Performance Optimization & Risk Reduction
 2. Business Goal: Ensure Docker infrastructure scales with development team growth
 3. Value Impact: Prevents performance degradation that could slow 10+ developers
-4. Revenue Impact: Protects $""2M""+ ARR platform from performance-related downtime
+4. Revenue Impact: Protects $2M+ ARR platform from performance-related downtime
 
 PERFORMANCE METRICS MEASURED:
     - Operation latency with rate limiting

@@ -4,7 +4,7 @@
 SSOT Compliance Validation Test Suite - Issue #1075 Implementation
 Tests designed to FAIL initially and detect the specific SSOT violations identified in the analysis.
 
-CRITICAL BUSINESS IMPACT: These tests protect $""500K"" plus ARR by ensuring SSOT architectural compliance.
+CRITICAL BUSINESS IMPACT: These tests protect $500K+ plus ARR by ensuring SSOT architectural compliance.
 Violations detected lead to system instability, development inefficiency, and technical debt accumulation.
 
 Test Implementation Strategy:
@@ -395,7 +395,7 @@ class TestSsotComplianceValidationSuite(SSotBaseTestCase):
     SSOT Compliance Validation Test Suite
 
     These tests are designed to FAIL initially and detect specific SSOT violations.
-    Business Value: Protects $""500K"" plus ARR by ensuring architectural compliance.
+    Business Value: Protects $500K+ plus ARR by ensuring architectural compliance.
 "
 ""
 

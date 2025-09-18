@@ -6,7 +6,7 @@ These tests protect business-critical functionality by ensuring that ClickHouse
 exception handling maintains system stability and prevents revenue-impacting failures.
 
 Business Value Protection:
-    - $""500K"" plus ARR: Protects analytics pipeline reliability
+    - $500K+ plus ARR: Protects analytics pipeline reliability
 - Customer Experience: Ensures clear error reporting and graceful degradation
 """
 

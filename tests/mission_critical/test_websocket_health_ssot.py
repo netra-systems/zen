@@ -2,7 +2,7 @@
 "MISSION CRITICAL: WebSocket Health Check SSOT Integration Tests"
 
 THIS SUITE FOCUSES ON THE CRITICAL VIOLATIONS IN WEBSOCKET HEALTH ENDPOINTS.
-Business Value: $""500K"" plus ARR - Validates health check functionality during SSOT migration
+Business Value: $500K+ plus ARR - Validates health check functionality during SSOT migration
 
 PURPOSE:
     - Focus on critical violations in websocket_ssot.py lines 1439, 1470, 1496

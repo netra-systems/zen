@@ -2,7 +2,7 @@
 "MISSION CRITICAL: WebSocket Factory Migration Validation Tests"
 
 THIS SUITE VALIDATES THE WEBSOCKET FACTORY MIGRATION PROCESS ITSELF.
-Business Value: $""500K"" plus ARR - Ensures migration doesn't break Golden Path'
+Business Value: $500K+ plus ARR - Ensures migration doesn't break Golden Path'
 
 PURPOSE:
     - Test that reproduces the current violations (expected to fail during migration)

@@ -5,7 +5,7 @@ Mission Critical Test: Triage Agent Start Failure Reproduction
 """
 
 This test reproduces the EXACT failure that prevents triage agents from starting,
-which directly impacts the Golden Path user flow and $""500K"" plus ARR chat functionality.
+which directly impacts the Golden Path user flow and $500K+ plus ARR chat functionality.
 
 BUSINESS CRITICAL ISSUE:
     - Users cannot get AI responses because triage agent fails to start
@@ -129,7 +129,7 @@ class TriageStartFailureReproductionTests(SSotAsyncTestCase):
         4. Triage agent never starts
         5. User receives no AI response
         
-        BUSINESS IMPACT: Blocks $""500K"" plus ARR chat functionality
+        BUSINESS IMPACT: Blocks $500K+ plus ARR chat functionality
         
         EXPECTED BEHAVIOR:
         - With current broken code: Test FAILS, reproducing production issue
@@ -313,7 +313,7 @@ class TriageStartFailureReproductionTests(SSotAsyncTestCase):
         Failure Point: Triage agent cannot start to process user message
         
         This test demonstrates how the session pattern failure breaks the
-        complete user experience and $""500K"" plus ARR chat functionality.
+        complete user experience and $500K+ plus ARR chat functionality.
 ""
         
         # Simulate Golden Path user flow up to triage agent start
@@ -364,7 +364,7 @@ class TriageStartFailureReproductionTests(SSotAsyncTestCase):
         
         BUSINESS METRICS:
         - Chat = 90% of platform value
-        - $""500K"" plus ARR dependent on chat functionality  
+        - $500K+ plus ARR dependent on chat functionality  
         - Triage agent is first step in AI response pipeline
         - Session pattern failure = complete chat breakdown
         
@@ -377,7 +377,7 @@ class TriageStartFailureReproductionTests(SSotAsyncTestCase):
             'ai_responses_delivered': 0,  # No responses due to agent start failure
             'user_experience_quality': 'BROKEN',  # Users get no AI assistance
             'platform_value_delivery': '0%',  # No value delivered without chat
-            'revenue_at_risk': '$""500K"" plus ARR',  # Revenue dependent on chat functionality
+            'revenue_at_risk': '$500K+ plus ARR',  # Revenue dependent on chat functionality
             'customer_satisfaction': 'DEGRADED'  # Customers cannot use core feature
         }
         
@@ -403,7 +403,7 @@ class TriageStartFailureReproductionTests(SSotAsyncTestCase):
             assert business_impact['ai_responses_delivered'] == 0
             assert business_impact['user_experience_quality'] == 'BROKEN'
             assert business_impact['platform_value_delivery'] == '0%'
-            assert '$""500K"" plus' in business_impact['revenue_at_risk']
+            assert '$500K+ plus' in business_impact['revenue_at_risk']
             assert business_impact['customer_satisfaction'] == 'DEGRADED'
             
             self.record_metric(
@@ -420,7 +420,7 @@ class TriageStartFailureReproductionTests(SSotAsyncTestCase):
         
         # Log mission critical test results
         print(f\n=== MISSION CRITICAL: Triage Start Failure Reproduction Results ===)
-        print(fBusiness Impact: $""500K"" plus ARR chat functionality at risk")"
+        print(fBusiness Impact: $500K+ plus ARR chat functionality at risk")"
         print(fTechnical Issue: async for with _AsyncGeneratorContextManager)
         print(fRequired Fix: Change line 125 in agent_handler.py from 'async for' to 'async with'")"
         print(fGolden Path Impact: Complete user journey blocked at triage agent start)

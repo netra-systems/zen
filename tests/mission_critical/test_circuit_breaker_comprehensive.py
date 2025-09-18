@@ -39,7 +39,7 @@ class WebSocketTestHelper:
 
 MISSION CRITICAL: Circuit Breaker Cascade Failure Stress Tests
 
-Business Value: Prevents $""100K""+ ARR loss from cascading service failures
+Business Value: Prevents $100K+ ARR loss from cascading service failures
 Critical Requirements:
     - Circuit breakers must prevent cascade failures across all services
 - Recovery must be automatic and coordinated 

@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
     - Segment: ALL (Free  ->  Enterprise) - Authentication affects every user
 - Business Goal: Prevent complete system lockout due to JWT validation failures  
 - Value Impact: Protects ALL business value that depends on user authentication
-- Strategic Impact: $""120K""+ MRR protection through functional authentication
+- Strategic Impact: $120K+ MRR protection through functional authentication
 "
 ""
 
@@ -431,7 +431,7 @@ class JWTValidationMissionCriticalTests:
         "Document the mission critical JWT validation test suite."
         
         critical_summary = {
-            mission: "Protect $""120K""+ MRR by ensuring JWT authentication works,"
+            mission: "Protect $120K+ MRR by ensuring JWT authentication works,"
             failure_tolerance": ZERO - Any failure = complete user lockout,"
             critical_validations: [
                 "JWT Validator initialization and method availability,"
@@ -449,7 +449,7 @@ class JWTValidationMissionCriticalTests:
         
         assert critical_summary[failure_tolerance] == ZERO - Any failure = complete user lockout
         assert len(critical_summary["critical_validations) >= 6"
-        assert $""120K""+ in critical_summary[mission]
+        assert $120K+ in critical_summary[mission]
         
         critical_test_logger.info(\n + =*80)
         critical_test_logger.info( ALERT:  MISSION CRITICAL JWT VALIDATION TEST SUMMARY")"
