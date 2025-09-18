@@ -29,6 +29,92 @@ The market is moving quickly, codex is getting better and other Code CLIs are co
 
 Commercial users who wish to may seemlessly use Zen with Netra Apex (Commercial Product) for the most effective usage and control of business AI spend.
 
+## Limitations
+
+### Budget Enforcement Behavior
+
+**Important:** Zen's budget constraints are client-side only and not enforced server-side by Claude Code or other CLI tools.
+
+- **Local Monitoring Only**: Budgets defined in `zen.yaml` or command-line flags are tracked locally by Zen but cannot prevent the underlying CLI from consuming tokens beyond the limit
+- **Team Usage**: When multiple team members use Zen, each instance tracks its own budget independently - there is no shared budget enforcement across users
+- **Budget Exceeded Behavior**:
+  - `warn` mode: Zen logs warnings but continues execution
+  - `block` mode: Zen prevents launching new instances but cannot stop running instances mid-execution
+- **Token Counting**: Budget calculations are based on estimates and may not match exact billing from Claude/OpenAI
+
+### Target Audience and Use Cases
+
+**Zen is designed for internal developer productivity and is not suitable for all use cases:**
+
+**✅ Supported Use Cases:**
+- Internal development workflows and automation
+- Parallel execution of development tasks
+- Managing multiple Claude Code instances for team productivity
+- Development environment orchestration
+- CI/CD integration for development teams
+
+**❌ Not Recommended For:**
+- External integration or customer-facing applications
+- Production systems requiring guaranteed uptime
+- Mission-critical deployments without fallback mechanisms
+- Real-time applications requiring sub-second response times
+- Applications requiring strict budget enforcement at the API level
+
+### System Limitations
+
+**Conversation History Management:**
+- No persistent conversation history across Zen restarts
+- Each Claude Code instance maintains its own isolated context
+- No cross-instance memory or shared context between parallel executions
+
+**State Persistence:**
+- Zen does not persist execution state between sessions
+- Interrupted executions cannot be resumed from checkpoints
+- No automatic recovery from partial completions
+
+**Parallel Execution Constraints:**
+- Limited by system resources (CPU, memory, network bandwidth)
+- No built-in load balancing or resource allocation
+- Concurrent API rate limits apply to all instances collectively
+- Startup delays between instances may be necessary to avoid rate limiting
+
+**Error Handling Limitations:**
+- Individual instance failures do not automatically retry
+- No circuit breaker pattern for cascading failures
+- Limited error aggregation across multiple instances
+- Debugging parallel execution can be complex due to interleaved output
+
+### Known Issues
+
+**Windows Permission Issues (Issue #1320):**
+- **Problem**: Commands may fail with "This command requires approval" on Windows
+- **Workaround**: Zen automatically enables `bypassPermissions` mode on Windows
+- **Status**: Partially resolved, see [Issue #1320 Documentation](../docs/issues/ISSUE_1320_ZEN_PERMISSION_ERROR_FIX.md)
+
+**Output Truncation:**
+- **Problem**: Long outputs may be truncated in console display
+- **Workaround**: Use `--max-console-lines` and `--max-line-length` parameters, or redirect output to files
+- **Impact**: Full execution logs are preserved but may not be visible in real-time
+
+**Token Budget Accuracy:**
+- **Problem**: Budget calculations may not exactly match actual API billing
+- **Cause**: Estimates based on local token counting vs. server-side billing
+- **Workaround**: Use conservative budget limits and monitor actual usage through provider dashboards
+
+**Scheduling Precision:**
+- **Problem**: `--start-at` timing may have minor delays (±30 seconds)
+- **Cause**: System scheduling overhead and startup time variations
+- **Workaround**: Account for potential delays in time-sensitive workflows
+
+**Configuration File Validation:**
+- **Problem**: Limited validation of JSON configuration files
+- **Impact**: Invalid configurations may cause runtime errors
+- **Workaround**: Use `--dry-run` to validate configurations before execution
+
+**Resource Cleanup:**
+- **Problem**: Interrupted executions may leave background processes running
+- **Workaround**: Monitor system processes and manually terminate if necessary
+- **Planned Fix**: Improved signal handling and cleanup in future versions
 
 ## Installation
 
