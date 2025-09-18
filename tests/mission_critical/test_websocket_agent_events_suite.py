@@ -728,11 +728,11 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     @pytest.mark.unit
     @pytest.mark.error_handling
     async def test_pipeline_error_handling_and_recovery(self):
-    "
+        """
         Test pipeline error handling and recovery mechanisms.
-        
+
         BVJ: System reliability - graceful handling of pipeline step failures
-        "
+        """
         # Arrange: Create PipelineExecutor
         pipeline_executor = PipelineExecutor(
             engine=self.mock_execution_engine,
@@ -753,8 +753,8 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                     'success': False,
                     'error': 'Simulated failure',
                     'timestamp': time.time()
-                }"
-                raise RuntimeError(Simulated agent execution failure)
+                })
+                raise RuntimeError('Simulated agent execution failure')
             
             # Success for other steps
             result = AgentExecutionResult(
