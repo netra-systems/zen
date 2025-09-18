@@ -41,12 +41,6 @@ class TestSSotAgentMessageHandlerValidation(SSotAsyncTestCase):
         # Test user
         self.user_id = "test-user-123"
 
-        # Create SSOT handler
-        self.ssot_handler = SSotAgentMessageHandler(
-            self.mock_message_handler_service,
-            self.mock_websocket
-        )
-
     async def test_ssot_handler_initialization(self):
         """Test that SSOT handler initializes with correct configuration."""
         # Create mocks
@@ -92,6 +86,10 @@ class TestSSotAgentMessageHandlerValidation(SSotAsyncTestCase):
     async def test_ssot_handler_start_agent_message(self, mock_supervisor, mock_context_class,
                                                   mock_db_session, mock_ws_manager, mock_user_context):
         """Test SSOT handler processes START_AGENT messages correctly."""
+        user_id = "test-user-123"
+        mock_websocket = MagicMock()
+        mock_service = MagicMock()
+
         # Setup mocks
         mock_user_context_instance = MagicMock()
         mock_user_context_instance.thread_id = "thread-123"
@@ -110,7 +108,7 @@ class TestSSotAgentMessageHandlerValidation(SSotAsyncTestCase):
 
         # Mock WebSocketContext
         mock_context_instance = MagicMock()
-        mock_context_instance.user_id = self.user_id
+        mock_context_instance.user_id = user_id
         mock_context_instance.thread_id = "thread-123"
         mock_context_instance.run_id = "run-456"
         mock_context_instance.update_activity = MagicMock()
@@ -128,6 +126,9 @@ class TestSSotAgentMessageHandlerValidation(SSotAsyncTestCase):
             thread_id="thread-123"
         )
 
+        # Create SSOT handler
+        ssot_handler = SSotAgentMessageHandler(mock_service, mock_websocket)
+
         # Mock ThreadService
         with patch('netra_backend.app.websocket_core.ssot_agent_message_handler.ThreadService'):
             # Mock MessageHandlerService
@@ -137,14 +138,14 @@ class TestSSotAgentMessageHandlerValidation(SSotAsyncTestCase):
                 mock_mhs.return_value = mock_mhs_instance
 
                 # Test the handler
-                result = await self.ssot_handler.handle_message(self.user_id, self.mock_websocket, message)
+                result = await ssot_handler.handle_message(user_id, mock_websocket, message)
 
                 # Verify success
                 self.assertTrue(result)
 
                 # Verify context creation
                 mock_user_context.assert_called_once_with(
-                    user_id=self.user_id,
+                    user_id=user_id,
                     thread_id="thread-123",
                     run_id=None
                 )
@@ -153,7 +154,7 @@ class TestSSotAgentMessageHandlerValidation(SSotAsyncTestCase):
                 mock_mhs_instance.handle_start_agent.assert_called_once()
 
                 # Check stats updated
-                stats = self.ssot_handler.get_stats()
+                stats = ssot_handler.get_stats()
                 self.assertEqual(stats["start_agent_requests"], 1)
                 self.assertEqual(stats["messages_processed"], 1)
                 self.assertEqual(stats["golden_path_events_sent"], 5)  # All 5 events
