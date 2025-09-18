@@ -83,7 +83,6 @@ def require_docker_services_smart() -> None:
     7. Validate staging environment health with proper URLs
     8. Configure test environment for staging/mock validation with all 5 WebSocket events
     """
-    """
     import platform
 
     try:
@@ -215,7 +214,7 @@ def require_docker_services_smart() -> None:
 
 
 def is_docker_available() -> bool:
-    Check if Docker is available - wrapper for UnifiedDockerManager.""
+    """Check if Docker is available - wrapper for UnifiedDockerManager.
 
     This function provides a unified interface for mission-critical tests to check
     Docker availability through the SSOT UnifiedDockerManager pattern.
@@ -224,15 +223,15 @@ def is_docker_available() -> bool:
         bool: True if Docker is available and functional
 
     Business Value:
-        - Enables proper test environment detection for $500K+ ARR validation
+        - Enables proper test environment detection for ARR validation
         - Supports Golden Path first message experience testing
         - Maintains SSOT compliance through UnifiedDockerManager delegation
-    
+    """
     try:
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
         return manager.is_docker_available()
     except Exception as e:
-        logger.warning(fDocker availability check failed: {e}")"
+        logger.warning(f"Docker availability check failed: {e}")"
         return False
 
 
