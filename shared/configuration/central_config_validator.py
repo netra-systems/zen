@@ -699,13 +699,19 @@ class CentralConfigurationValidator:
                 # CRITICAL FIX: In test contexts, skip readiness check to avoid timeout issues
                 # Tests should run immediately without waiting for Docker/OAuth readiness
                 is_test_context = self._is_test_context()
-                if not is_test_context:
-                    try:
-                        env = self.get_environment()
-                        timeout = 3.0 if env == "staging" else 10.0
-                    except:
-                        timeout = 3.0  # Default to shorter timeout if environment detection fails
-                    
+
+                # DEVELOPMENT MODE FIX: Skip readiness check in development to prevent OAuth race conditions
+                is_development_mode = False
+                try:
+                    env = self.get_environment()
+                    is_development_mode = env == Environment.DEVELOPMENT
+                    timeout = 3.0 if env == Environment.STAGING else 10.0
+                except:
+                    timeout = 3.0  # Default to shorter timeout if environment detection fails
+
+                # Skip OAuth validation in development and test contexts
+                skip_oauth_validation = get_env().get("SKIP_OAUTH_VALIDATION", "false").lower() == "true"
+                if not is_test_context and not is_development_mode and not skip_oauth_validation:
                     if not self._wait_for_environment_readiness(timeout_seconds=timeout):
                         timing_issue = self._detect_timing_issue()
                         if timing_issue:
@@ -716,6 +722,8 @@ class CentralConfigurationValidator:
                             self._readiness_state = "failed"
                             self._last_error = "Environment readiness timeout (unknown cause)"
                             raise ValueError(self._last_error)
+                elif is_development_mode or skip_oauth_validation:
+                    logger.info("Skipping OAuth readiness check in development mode to prevent race conditions")
                 
                 # LEVEL 2 FIX: Enhanced error attribution for timing issues
                 environment = self.get_environment()

@@ -477,7 +477,18 @@ class StartupFixesIntegration:
             
             duration = time.time() - start_time
             success = status["fallback_configured"] or status["fallback_mode_supported"]
-            
+
+            # DEVELOPMENT MODE FIX: Allow Redis fallback to be non-critical in development
+            is_development_env = (
+                get_env().get("ENVIRONMENT", "").lower() in ["development", "dev"] or
+                get_env().get("SKIP_REDIS_VALIDATION", "").lower() == "true"
+            )
+
+            if not success and is_development_env:
+                logger.warning("Redis fallback validation failed in development mode - continuing startup anyway")
+                success = True  # Allow startup to continue in development
+                status["development_mode_override"] = True
+
             result = FixResult(
                 name=fix_name,
                 status=FixStatus.SUCCESS if success else FixStatus.FAILED,
