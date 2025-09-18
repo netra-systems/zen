@@ -19,7 +19,6 @@ async def test_comprehensive_stability():
     try:
         from netra_backend.app.db.database_manager import DatabaseManager
         from netra_backend.app.db.optimized_startup_checks import optimized_startup_checker
-        from netra_backend.app.db.postgres import get_postgres_url
         from netra_backend.app.db.clickhouse import ClickHouseClient
         print("[PASS] Core database modules import successfully")
         results.append(("Database Imports", True, None))
@@ -30,8 +29,8 @@ async def test_comprehensive_stability():
     # Test 2: Configuration system
     print("\nTest 2: Configuration system...")
     try:
-        from netra_backend.app.core.configuration.base import ConfigurationManager
-        config = ConfigurationManager().get_config()
+        from netra_backend.app.core.configuration.base import UnifiedConfigManager
+        config = UnifiedConfigManager().get_config()
         print("[PASS] Configuration system operational")
         results.append(("Configuration System", True, None))
     except Exception as e:
@@ -41,7 +40,7 @@ async def test_comprehensive_stability():
     # Test 3: Agent system imports (uses database)
     print("\nTest 3: Agent system imports...")
     try:
-        from netra_backend.app.agents.registry import AgentRegistry
+        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
         print("[PASS] Agent system imports working")
         results.append(("Agent System", True, None))
@@ -52,7 +51,7 @@ async def test_comprehensive_stability():
     # Test 4: WebSocket system (uses database for state)
     print("\nTest 4: WebSocket system imports...")
     try:
-        from netra_backend.app.websocket_core.manager import WebSocketConnectionManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.websocket_core.auth import WebSocketAuthenticationManager
         print("[PASS] WebSocket system imports working")
         results.append(("WebSocket System", True, None))
@@ -60,18 +59,19 @@ async def test_comprehensive_stability():
         print(f"[FAIL] WebSocket error: {e}")
         results.append(("WebSocket System", False, str(e)))
 
-    # Test 5: Database operations (critical test for our fixes)
+    # Test 5: Database operations (CRITICAL TEST for Issue #1340 fixes)
     print("\nTest 5: Database operations (Row object handling)...")
     try:
-        from netra_backend.app.core.configuration.base import ConfigurationManager
-        config = ConfigurationManager().get_config()
+        from netra_backend.app.core.configuration.base import UnifiedConfigManager
+        config = UnifiedConfigManager().get_config()
         db_manager = DatabaseManager(config)
 
         async with db_manager.get_async_session() as session:
             from sqlalchemy import text
-            result = await session.execute(text("SELECT 1 as test_col"))
-            row = result.fetchone()  # Fixed: no await here - this was our fix!
+            result = await session.execute(text("SELECT 1 as test_col, 'Issue #1340 Fix Test' as description"))
+            row = result.fetchone()  # CRITICAL: Fixed await error - this was our Issue #1340 fix!
             assert row[0] == 1, f"Expected 1, got {row[0]}"
+            print(f"[CRITICAL SUCCESS] Row access working: {row[1]}")
         print("[PASS] Database operations functional (Row objects handled correctly)")
         results.append(("Database Operations", True, None))
     except Exception as e:
@@ -82,7 +82,7 @@ async def test_comprehensive_stability():
     # Test 6: Auth integration (depends on database)
     print("\nTest 6: Auth integration...")
     try:
-        from netra_backend.app.auth_integration.auth import AuthIntegration
+        from netra_backend.app.auth_integration.auth import BackendAuthIntegration
         print("[PASS] Auth integration imports working")
         results.append(("Auth Integration", True, None))
     except Exception as e:

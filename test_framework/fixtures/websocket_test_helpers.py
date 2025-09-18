@@ -9,7 +9,10 @@ from test_framework.websocket_helpers import (
     assert_websocket_events,
     assert_websocket_events_sent,
     wait_for_agent_completion,
-    WebSocketTestHelpers
+    create_test_websocket_connection,
+    WebSocketTestHelpers,
+    MockWebSocket,
+    MockWebSocketConnection
 )
 
 # Additional fixtures-specific aliases for compatibility
@@ -22,5 +25,8 @@ __all__ = [
     'assert_websocket_events',
     'assert_websocket_events_sent',
     'wait_for_agent_completion',
-    'WebSocketTestHelpers'
+    'create_test_websocket_connection',
+    'WebSocketTestHelpers',
+    'MockWebSocket',
+    'MockWebSocketConnection'
 ]

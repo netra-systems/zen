@@ -189,6 +189,33 @@ async def wait_for_agent_completion(websocket, timeout: float = 60.0) -> Dict[st
     }
 
 
+async def create_test_websocket_connection(
+    url: str = None,
+    user_id: str = None,
+    headers: Optional[Dict[str, str]] = None,
+    **kwargs
+) -> WebSocketTestClient:
+    """
+    Create and return a configured WebSocketTestClient for testing.
+
+    Args:
+        url: WebSocket URL to connect to
+        user_id: User ID for the connection
+        headers: Additional headers for the connection
+        **kwargs: Additional arguments for the client
+
+    Returns:
+        Configured WebSocketTestClient instance
+    """
+    client = WebSocketTestClient(
+        url=url or "ws://localhost:8000/ws",
+        user_id=user_id,
+        headers=headers,
+        **kwargs
+    )
+    return client
+
+
 class WebSocketTestHelpers:
     """Helper functions for WebSocket integration testing."""
 
@@ -245,6 +272,181 @@ class WebSocketTestHelpers:
             await websocket.send(message)
         else:
             await websocket.send_text(message)
+
+    @staticmethod
+    async def create_test_websocket_connection(
+        url: str = None,
+        user_id: str = None,
+        headers: Optional[Dict[str, str]] = None,
+        timeout: float = 10.0,
+        **kwargs
+    ) -> WebSocketTestClient:
+        """
+        Create and return a configured WebSocketTestClient for testing.
+
+        Args:
+            url: WebSocket URL to connect to
+            user_id: User ID for the connection
+            headers: Additional headers for the connection
+            timeout: Connection timeout
+            **kwargs: Additional arguments for the client
+
+        Returns:
+            Configured WebSocketTestClient instance
+        """
+        client = WebSocketTestClient(
+            url=url or "ws://localhost:8000/ws",
+            user_id=user_id,
+            headers=headers,
+            **kwargs
+        )
+        await client.connect()
+        return client
+
+    @staticmethod
+    async def send_test_message(
+        websocket,
+        message: Union[str, Dict[str, Any]],
+        timeout: float = 5.0
+    ):
+        """
+        Send a test message through WebSocket connection.
+
+        Args:
+            websocket: WebSocket connection
+            message: Message to send (string or dict)
+            timeout: Send timeout
+        """
+        if hasattr(websocket, 'send'):
+            await websocket.send(message)
+        elif hasattr(websocket, 'send_text'):
+            if isinstance(message, dict):
+                await websocket.send_text(json.dumps(message))
+            else:
+                await websocket.send_text(str(message))
+
+    @staticmethod
+    async def receive_test_message(
+        websocket,
+        timeout: float = 5.0
+    ) -> Dict[str, Any]:
+        """
+        Receive a test message from WebSocket connection.
+
+        Args:
+            websocket: WebSocket connection
+            timeout: Receive timeout
+
+        Returns:
+            Received message as dict
+        """
+        if hasattr(websocket, 'receive'):
+            message = await asyncio.wait_for(websocket.receive(timeout), timeout=timeout)
+        elif hasattr(websocket, 'receive_text'):
+            message = await asyncio.wait_for(websocket.receive_text(), timeout=timeout)
+        else:
+            raise AttributeError("WebSocket has no receive method")
+
+        # Parse JSON if it's a string
+        if isinstance(message, str):
+            try:
+                return json.loads(message)
+            except json.JSONDecodeError:
+                return {"type": "text", "content": message}
+        return message
+
+    @staticmethod
+    async def close_test_connection(websocket):
+        """
+        Close WebSocket test connection.
+
+        Args:
+            websocket: WebSocket connection to close
+        """
+        if hasattr(websocket, 'close'):
+            await websocket.close()
+        elif hasattr(websocket, 'disconnect'):
+            await websocket.disconnect()
+
+
+class MockWebSocket:
+    """Mock WebSocket for testing purposes."""
+
+    def __init__(self, user_id: str = None):
+        self.user_id = user_id or str(uuid.uuid4())
+        self._messages = []
+        self._connected = True
+        self.send = AsyncMock()
+        self.receive = AsyncMock()
+        self.close = AsyncMock()
+        self.accept = AsyncMock()
+
+    async def send_text(self, message: str):
+        """Mock send_text method."""
+        await self.send(message)
+        self._messages.append(message)
+
+    async def receive_text(self) -> str:
+        """Mock receive_text method."""
+        if self._messages:
+            return self._messages.pop(0)
+        return '{"type": "mock", "data": "test"}'
+
+    async def send_json(self, data: Dict[str, Any]):
+        """Mock send_json method."""
+        message = json.dumps(data)
+        await self.send_text(message)
+
+    async def receive_json(self) -> Dict[str, Any]:
+        """Mock receive_json method."""
+        message = await self.receive_text()
+        return json.loads(message) if message else {}
+
+
+class MockWebSocketConnection:
+    """Mock WebSocket connection for testing purposes."""
+
+    def __init__(self, user_id: str = None, url: str = None):
+        self.user_id = user_id or str(uuid.uuid4())
+        self.url = url or "ws://localhost:8000/ws"
+        self._websocket = MockWebSocket(user_id)
+        self._connected = False
+        self._messages = []
+
+    async def __aenter__(self):
+        """Async context manager entry."""
+        await self.connect()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit."""
+        await self.disconnect()
+
+    async def connect(self):
+        """Mock connect method."""
+        self._connected = True
+        return self._websocket
+
+    async def disconnect(self):
+        """Mock disconnect method."""
+        self._connected = False
+        await self._websocket.close()
+
+    async def send(self, message: Union[str, Dict[str, Any]]):
+        """Send message through mock connection."""
+        if isinstance(message, dict):
+            await self._websocket.send_json(message)
+        else:
+            await self._websocket.send_text(message)
+
+    async def receive(self, timeout: Optional[float] = None) -> str:
+        """Receive message from mock connection."""
+        return await self._websocket.receive_text()
+
+    @property
+    def websocket(self):
+        """Get the underlying websocket."""
+        return self._websocket
 
 
 class WebSocketPerformanceMonitor:
