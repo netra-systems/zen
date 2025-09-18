@@ -91,7 +91,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         self.regression_violations = []
 
     def test_no_new_direct_mock_creation(self):
-        ""
+        """
         Test that no new direct Mock() creation patterns have been introduced.
         
         CRITICAL: Direct mock creation violates SSOT principles.
@@ -106,7 +106,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
                         f"New direct mock creation violations detected: {filtered_violations})"
 
     def test_no_new_websocket_mock_violations(self):
-        "
+        """
         "
         Test that no new WebSocket mock violations have been introduced.
         
@@ -145,7 +145,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
                         fNew database mock violations detected: {filtered_violations})
 
     def test_ssot_mock_factory_usage_compliance(self):
-        "
+        """
         "
         Test that new test files use SSotMockFactory instead of direct mocks.
         
@@ -167,7 +167,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
                         fTest files using mocks without SSOT factory: {non_compliant_files})
 
     def test_import_compliance_validation(self):
-        ""
+        """
         Test that new files import from SSOT mock factory correctly.
         
         IMPORTANT: Proper imports are essential for SSOT compliance.
@@ -181,7 +181,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
                 
                 # Check if file uses mocks but doesn't import SSOT factory'
                 if self._file_has_mock_creation(test_file):
-                    ssot_import_found = any(
+                    ssot_import_found = any()
                         'test_framework.ssot.mock_factory' in imp or
                         'SSotMockFactory' in imp
                         for imp in imports
@@ -198,7 +198,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
                         f"Files missing SSOT factory imports: {[v['file'] for v in violations]})"
 
     def test_mock_pattern_consistency_enforcement(self):
-        "
+        """
         "
         Test that mock creation patterns are consistent with SSOT standards.
         
@@ -439,7 +439,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         )
 
     def _file_uses_ssot_factory(self, file_path: str) -> bool:
-        ""Check if file imports and uses SSOT mock factory.
+        ""Check if file imports and uses SSOT mock factory."
         content = self._get_file_content(file_path)
         return (
             'SSotMockFactory' in content or
@@ -551,7 +551,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         return \n".join(summary_lines)"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # Run as standalone test for development and CI integration
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

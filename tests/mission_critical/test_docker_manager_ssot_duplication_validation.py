@@ -49,7 +49,7 @@ class DockerManagerSSOTDuplicationValidationTests(SSotBaseTestCase, unittest.Tes
         self.project_root = Path(__file__).parent.parent.parent
 
     def test_docker_manager_class_implementations_are_unique(self):
-        ""
+        """
         CRITICAL SSOT TEST: Validates that UnifiedDockerManager class exists only once.
 
         EXPECTED BEHAVIOR (AFTER REMEDIATION):
@@ -167,7 +167,7 @@ class DockerManagerSSOTDuplicationValidationTests(SSotBaseTestCase, unittest.Tes
         )
 
     def test_docker_manager_functionality_consistency(self):
-    "
+        """
     "
         CRITICAL SSOT TEST: Validates that Docker Manager behavior is consistent.
 

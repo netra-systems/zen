@@ -101,7 +101,7 @@ class WebSocketHandlerInheritanceAnalyzer:
         self.full_target_path = self.working_directory / self.target_file_path
     
     def discover_test_classes_from_ast(self, file_path: Path) -> Dict[str, Dict[str, Any]]:
-    ""
+    """
         Discover test classes using AST parsing.
         
         Args:
@@ -200,7 +200,7 @@ class WebSocketHandlerInheritanceAnalyzer:
             return str(base_node)
     
     def _calls_super_setup_method(self, method_node: ast.FunctionDef) -> bool:
-    ""
+    """
         Check if a setup_method calls super().setup_method().
         
         Args:
@@ -222,7 +222,7 @@ class WebSocketHandlerInheritanceAnalyzer:
         return False
     
     def _extract_method_body(self, method_node: ast.FunctionDef, file_content: str) -> List[str]:
-        ""Extract the method body as lines of code.
+        ""Extract the method body as lines of code."
         lines = file_content.split('\n')
         start_line = method_node.lineno
         
@@ -237,7 +237,7 @@ class WebSocketHandlerInheritanceAnalyzer:
         return method_lines
     
     def analyze_inheritance_violations(self) -> InheritanceAnalysisReport:
-    ""
+    """
         Perform comprehensive inheritance analysis.
         
         Returns:
@@ -269,7 +269,7 @@ class WebSocketHandlerInheritanceAnalyzer:
         return report
     
     def _check_for_violations(self, class_name: str, class_analysis: Dict[str, Any) -> Optional[SetupMethodInheritanceViolation):
-    "
+        """
     "
         Check a single class for inheritance violations.
         
@@ -336,7 +336,7 @@ class WebSocketHandlerInheritanceAnalyzer:
         return any(base in ' '.join(base_classes) for base in test_base_classes)
     
     def _calculate_mro_chain(self, class_name: str, base_classes: List[str) -> List[str):
-        ""Calculate the Method Resolution Order chain for documentation.
+        ""Calculate the Method Resolution Order chain for documentation."
         mro = [class_name]
         mro.extend(base_classes)
         
@@ -348,7 +348,7 @@ class WebSocketHandlerInheritanceAnalyzer:
 
 
 class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
-    ""
+    """
     MISSION CRITICAL: Test suite for detecting setup_method() inheritance violations.
     
     This test suite FAILS when inheritance issues are detected, providing detailed
@@ -388,12 +388,12 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
                 fDiscovered classes: {sorted(discovered_names)}
             )
         
-        print(f"\n[U+2713] Successfully discovered {len(test_classes)} test classes:)")
+        print(f"\n[U+2713] Successfully discovered {len(test_classes)} test classes:))"
         for class_name in sorted(test_classes.keys()"):"
             print(f  - {class_name})
     
     def test_detect_missing_super_setup_calls(self):
-    ""
+    """
         CRITICAL TEST: Detect test classes missing super().setup_method() calls.
         
         This test FAILS when it finds classes that have setup_method() but don't'
@@ -408,7 +408,7 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
         self.record_metric(compliant_classes, len(self.report.compliant_classes))"
         self.record_metric(compliant_classes, len(self.report.compliant_classes))"
         
-        print(f"\n{self.report.get_summary()})")
+        print(f"\n{self.report.get_summary()}))"
         
         # CRITICAL ASSERTION: No violations should exist
         if self.report.violations_found > 0:
@@ -428,7 +428,7 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
         print("[U+2713] All test classes have proper setup_method() inheritance)"
     
     def test_verify_specific_known_violations(self):
-        "
+        """
         "
         CRITICAL TEST: Verify detection of known inheritance violations.
         
@@ -445,7 +445,7 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
         
         # Record specific violation metrics
         self.record_metric(typing_handler_violation, TestTypingHandler in violation_classes)
-        self.record_metric(heartbeat_handler_violation, "TestHeartbeatHandler" in violation_classes)
+        self.record_metric(heartbeat_handler_violation, "TestHeartbeatHandler in violation_classes)"
         
         print(f\nViolation Analysis:)
         print(f  TestTypingHandler has violation: {'TestTypingHandler' in violation_classes})
@@ -477,14 +477,14 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
         if not self.report:
             self.report = self.analyzer.analyze_inheritance_violations()
         
-        print(f"\nMethod Resolution Order Analysis:)")
+        print(f"\nMethod Resolution Order Analysis:))"
         
         # Analyze MRO for all test classes
         for violation in self.report.violations:
             print(f\n  {violation.test_class_name}:)
             print(f    MRO Chain: {' -> '.join(violation.mro_chain)}")"
             print(f    Violation Type: {violation.violation_type})
-            print(f"    Has setup_method: {violation.has_setup_method})")
+            print(f"    Has setup_method: {violation.has_setup_method}))"
             print(f    Calls super setup: {violation.calls_super_setup})
         
         # Record MRO metrics
@@ -515,7 +515,7 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
                 fAll violations must have clear fix instructions.
             )
             
-            print(f"\n  {violation.test_class_name} ({violation.violation_type}:)")
+            print(f"\n  {violation.test_class_name} ({violation.violation_type}:))"
             for i, step in enumerate(violation.remediation_steps, 1):
                 print(f    {i}. {step})
         
@@ -598,7 +598,7 @@ if __name__ == __main__:
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print(MIGRATION NOTICE: This file previously used direct pytest execution.)
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)
-    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md)"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

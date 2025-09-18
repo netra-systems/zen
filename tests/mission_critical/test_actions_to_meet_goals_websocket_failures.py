@@ -71,7 +71,7 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
         # Mission critical test configuration
         self.set_env_var(TESTING", true)"
         self.set_env_var(MISSION_CRITICAL, true)
-        self.set_env_var(WEBSOCKET_EVENTS_REQUIRED", "true)
+        self.set_env_var(WEBSOCKET_EVENTS_REQUIRED", true)"
         
         # Generate unique test identifiers
         self.test_client_id = fws_test_{uuid.uuid4().hex[:8]}
@@ -135,8 +135,8 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
             
             # If execution succeeds (fallback works), verify proper events
             event_types = [e["event_type] for e in captured_events]"
-            assert agent_started in event_types, CRITICAL: agent_started event missing
-            assert agent_completed" in event_types, "CRITICAL: agent_completed event missing
+            assert agent_started in event_types, "CRITICAL: agent_started event missing"
+            assert agent_completed" in event_types, CRITICAL: agent_completed event missing"
             
             # Record successful event delivery
             self.record_metric(critical_events_delivered, True)
@@ -163,7 +163,7 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_event_sequence_integrity_during_failure(self):
-        ""MISSION CRITICAL: WebSocket event sequence integrity during failures.
+        ""MISSION CRITICAL: WebSocket event sequence integrity during failures."
         
         Event sequence must be logical even during failures:
         - No orphaned tool_completed without tool_executing
@@ -262,7 +262,7 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
             def close_connection(self):
                 self.is_connected = False
                 connection_states.append({
-                    "action: connection_closed",
+                    "action: connection_closed,"
                     timestamp: time.time()
                 }
         
@@ -275,7 +275,7 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
         # Mock WebSocket adapter with health tracking
         mock_ws_adapter = Mock()
         mock_ws_adapter.send_json = health_tracker.send_json
-        mock_ws_adapter.emit_agent_started = AsyncMock(side_effect=lambda msg: health_tracker.send_json({event: "agent_started, data": msg})
+        mock_ws_adapter.emit_agent_started = AsyncMock(side_effect=lambda msg: health_tracker.send_json({event: "agent_started, data: msg})"
         mock_ws_adapter.emit_thinking = AsyncMock(side_effect=lambda msg: health_tracker.send_json({event: agent_thinking, "data: msg})"
         mock_ws_adapter.emit_error = AsyncMock(side_effect=lambda msg: health_tracker.send_json({event: error, data: msg})"
         mock_ws_adapter.emit_error = AsyncMock(side_effect=lambda msg: health_tracker.send_json({event: error, data: msg})"
@@ -289,7 +289,7 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
             thread_id=fhealth_thread_{uuid.uuid4().hex[:6]},
             run_id=fhealth_run_{uuid.uuid4().hex[:6]},
             metadata={
-                user_request": "Test WebSocket health during agent failure
+                user_request": Test WebSocket health during agent failure"
             }
         
         # Execute and monitor connection health
@@ -297,7 +297,7 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
             result = await agent.execute(context, stream_updates=True)
             
             # If execution succeeds, verify connection remained healthy
-            assert health_tracker.is_connected, Connection should remain healthy on success
+            assert health_tracker.is_connected, "Connection should remain healthy on success"
             assert health_tracker.messages_sent > 0, Messages should have been sent"
             assert health_tracker.messages_sent > 0, Messages should have been sent"
             
@@ -310,7 +310,7 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
                 pytest.fail(CRITICAL: No messages sent via WebSocket - connection not used")"
             
             # Connection should still be usable after failure
-            assert health_tracker.is_connected, Connection should survive agent failures
+            assert health_tracker.is_connected, "Connection should survive agent failures"
             
             self.record_metric(connection_survived_failure, True)"
             self.record_metric(connection_survived_failure, True)"
@@ -377,7 +377,7 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
             
         except Exception as e:
             ux_metrics[end_time] = time.time()
-            ux_metrics["response_time] = ux_metrics[end_time"] - ux_metrics[start_time]
+            ux_metrics["response_time] = ux_metrics[end_time] - ux_metrics[start_time]"
             
             # Verify failure was fast (not hanging)
             assert ux_metrics[response_time] < 5.0, f"Failure took too long: {ux_metrics['response_time']}s"
@@ -392,7 +392,7 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
             if not ux_metrics["error_message_user_friendly]:"
                 pytest.fail(fTechnical error message exposed to user: {e})
                 
-            self.record_metric("failure_response_time_acceptable, ux_metrics[response_time"] < 5.0)
+            self.record_metric("failure_response_time_acceptable, ux_metrics[response_time] < 5.0)"
             self.record_metric(error_message_user_friendly, ux_metrics[error_message_user_friendly)
             
         # Record all UX metrics
@@ -401,16 +401,16 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
                 self.record_metric(fux_{metric}, value)
 
     def _validate_successful_event_sequence(self, events: List[Dict) -> None:
-        ""Validate WebSocket event sequence for successful execution.
+        ""Validate WebSocket event sequence for successful execution."
         event_types = [e[event_type] for e in events]"
         event_types = [e[event_type] for e in events]"
         
         # Must have agent_started and agent_completed
         assert agent_started" in event_types, Missing agent_started event"
-        assert agent_completed in event_types, Missing agent_completed event
+        assert agent_completed in event_types, "Missing agent_completed event"
         
         # agent_started should come before agent_completed
-        started_pos = next(i for i, e in enumerate(events) if e[event_type"] == "agent_started)
+        started_pos = next(i for i, e in enumerate(events) if e[event_type"] == agent_started)"
         completed_pos = next(i for i, e in enumerate(events) if e[event_type] == agent_completed)
         assert started_pos < completed_pos, agent_started must come before agent_completed"
         assert started_pos < completed_pos, agent_started must come before agent_completed"
@@ -426,7 +426,7 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
         event_types = [e["event_type] for e in events]"
         
         # Should have agent_started but NOT agent_completed on failure
-        assert agent_started in event_types, Missing agent_started event even on failure
+        assert agent_started in event_types, "Missing agent_started event even on failure"
         
         if agent_completed" in event_types:"
             pytest.fail(agent_completed should not be sent on failure)
@@ -449,11 +449,11 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
         assert metrics.get(business_impact) == golden_path_protection
         
         # Log mission critical test completion
-        print(f"\nMission Critical WebSocket Test Completed: {method.__name__ if method else 'unknown'}")
+        print(f"\nMission Critical WebSocket Test Completed: {method.__name__ if method else 'unknown'})"
         print(fMetrics: {metrics})
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # Run mission critical WebSocket tests
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

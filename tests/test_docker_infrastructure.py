@@ -32,7 +32,7 @@ print("")
 if not docker_manager.docker_available:
     print("")
 [X] Docker is not available. Please ensure Docker Desktop is running.")"
-print("   Run: 'docker version' to verify Docker is working")
+print("   Run: 'docker version' to verify Docker is working)"
 return False
 
         # Check and start services
@@ -48,7 +48,7 @@ for service, port in port_mappings.items():
 else:
     print("")
 [!] No Docker services found. Services may need to be started.")"
-print("   Run: docker compose -f docker-compose.alpine-test.yml up -d")
+print("   Run: docker compose -f docker-compose.alpine-test.yml up -d)"
 
                     # Test port discovery
     print("")
@@ -80,9 +80,9 @@ try:
 services = RealServices()
 
                                 # Check all services
-    print("[*] Checking service availability...")
+    print("[*] Checking service availability...)"
 await services.ensure_all_services_available()
-print("[OK] All services are available!")
+print("[OK] All services are available!)"
 
                                 # Test individual services
     print("")
@@ -90,19 +90,19 @@ print("[OK] All services are available!")
 
                                 # Test PostgreSQL
 async with services.postgres() as db:
-result = await db.fetchval("SELECT 1")
+result = await db.fetchval("SELECT 1)"
 print("")
 
                                     # Test Redis
 async with services.redis() as redis:
-await redis.set("test_key", "test_value")
-value = await redis.get("test_key")
+await redis.set("test_key", "test_value)"
+value = await redis.get("test_key)"
 print("")
 
                                         # Test ClickHouse
 try:
     pass
-result = await services.clickhouse.execute("SELECT 1")
+result = await services.clickhouse.execute("SELECT 1)"
 print("")
 except Exception as e:
     print("")
@@ -120,9 +120,9 @@ return False
 def main():
     pass
 """Main test function."""
-print("=" * 60)
-print("Docker Infrastructure Test Suite")
-print("=" * 60)
+print("= * 60)"
+print("Docker Infrastructure Test Suite)"
+print("= * 60)"
 
     # Test Docker detection
 if not test_docker_service_detection():
@@ -130,9 +130,9 @@ if not test_docker_service_detection():
 [!] Docker infrastructure test failed.")"
 print("")
 To fix:")"
-print("1. Start Docker Desktop")
-print("2. Run: docker compose -f docker-compose.alpine-test.yml up -d")
-print("3. Re-run this test")
+print("1. Start Docker Desktop)"
+print("2. Run: docker compose -f docker-compose.alpine-test.yml up -d)"
+print("3. Re-run this test)"
 return 1
 
         # Test service connections
@@ -150,7 +150,7 @@ else:
 return 1
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
 sys.exit(main())
 pass

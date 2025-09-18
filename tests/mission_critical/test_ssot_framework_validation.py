@@ -71,7 +71,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
 # Import SSOT framework components for validation
-from test_framework.ssot import (
+from test_framework.ssot import ()
     BaseTestCase,
     AsyncBaseTestCase, 
     DatabaseTestCase,
@@ -153,7 +153,7 @@ class SSotIsolationTestResult:
     memory_usage_mb: float = 0.0
     
     def has_violations(self) -> bool:
-        ""Check if any isolation violations were detected.
+        ""Check if any isolation violations were detected."
         return self.data_leakage_detected or bool(self.isolation_violations)
 
 
@@ -174,7 +174,7 @@ class SSotUserContextSimulator:
         user_env_vars = {
             fUSER_{self.user_id}_SESSION_ID: fsession_{self.user_id}_{uuid.uuid4().hex},
             fUSER_{self.user_id}_WORKSPACE: f/tmp/user_{self.user_id}_workspace,
-            "ISOLATION_ENABLED: true",
+            "ISOLATION_ENABLED: true,"
             TESTING: 1
         }
         
@@ -396,7 +396,7 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
                    f{execution_time:.2f}s, {memory_increase:.1f}MB increase)
     
     def test_database_session_per_user_ssot_operations(self):
-        ""
+        """
         CRITICAL: Test each user gets isolated database sessions for SSOT operations.
         
         Validates that SSOT database utilities provide proper session isolation
@@ -495,7 +495,7 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
             logger.info(f[U+2713] Database session isolation: {len(session_data)} unique sessions)
     
     def test_websocket_channel_isolation_ssot_framework(self):
-    ""
+    """
         CRITICAL: Test WebSocket channel isolation in SSOT framework operations.
         
         Validates that SSOT WebSocket utilities provide proper channel separation
@@ -506,7 +506,7 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
         isolation_violations = []
         
         def test_user_websocket_isolation(user_id):
-            ""Test WebSocket isolation for a single user.
+            ""Test WebSocket isolation for a single user."
             try:
                 user_simulator = SSotUserContextSimulator(fwsuser_{user_id}, self.test_env_manager)
                 
@@ -600,7 +600,7 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
             logger.info(f[U+2713] WebSocket channel isolation: {len(channel_data)} unique channels)
     
     def test_race_condition_prevention_ssot_framework(self):
-        ""
+        """
         CRITICAL: Test SSOT framework prevents race conditions in concurrent access.
         
         Validates that SSOT components handle concurrent access properly without
@@ -700,7 +700,7 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
         logger.info(f"[U+2713] Race condition prevention: {num_threads} threads, {expected_operations} operations)"
     
     def test_security_boundary_enforcement_ssot_framework(self):
-        "
+        """
         "
         CRITICAL: Test SSOT framework enforces security boundaries between users.
         
@@ -832,7 +832,7 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
         logger.info(f"[U+2713] Security boundary enforcement: {len(user_resources)} isolated users)"
     
     def test_performance_monitoring_ssot_concurrent_load(self):
-        "
+        """
         "
         CRITICAL: Test SSOT framework performance under concurrent load.
         
@@ -1018,7 +1018,7 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
         
         # Validate no compliance violations
         if compliance_violations:
-            logger.warning(f"Compliance violations detected: {compliance_violations})")
+            logger.warning(f"Compliance violations detected: {compliance_violations}))"
         
         # For SSOT framework validation, some violations might be expected
         # The key is that all checks should complete successfully
@@ -1054,7 +1054,7 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
                            fMax compliance check too slow: {max_compliance_time:.2f}s)
         
         logger.info(f[U+2713] SSOT compliance validation: {num_concurrent_checks) concurrent checks, ""
-                   f"avg: {avg_compliance_time:.2f}s")
+                   f"avg: {avg_compliance_time:.2f}s)"
 
 
 if __name__ == '__main__':

@@ -88,20 +88,20 @@ class ServiceAvailability:
     def summary(self) -> Dict[str, Any]:
         """Get summary of service availability."""
         return {
-        "databases": {
-        "postgresql": self.postgresql.available,
-        "redis": self.redis.available,
-        "clickhouse": self.clickhouse.available,
+        "databases: {"
+        "postgresql: self.postgresql.available,"
+        "redis: self.redis.available,"
+        "clickhouse: self.clickhouse.available,"
         },
-        "apis": {
-        "openai": self.openai_api.available,
-        "anthropic": self.anthropic_api.available,
+        "apis: {"
+        "openai: self.openai_api.available,"
+        "anthropic: self.anthropic_api.available,"
         },
-        "configuration": {
-        "use_real_services": self.use_real_services,
-        "use_real_llm": self.use_real_llm,
-        "has_real_databases": self.has_real_databases,
-        "has_real_llm_apis": self.has_real_llm_apis,
+        "configuration: {"
+        "use_real_services: self.use_real_services,"
+        "use_real_llm: self.use_real_llm,"
+        "has_real_databases: self.has_real_databases,"
+        "has_real_llm_apis: self.has_real_llm_apis,"
     
     
 
@@ -141,7 +141,7 @@ class ServiceAvailabilityChecker:
         openai_task = self._check_openai_api()
         anthropic_task = self._check_anthropic_api()
 
-        self.logger.info("Running concurrent service checks...")
+        self.logger.info("Running concurrent service checks...)"
 
         # Wait for all results
         results = await asyncio.gather( )
@@ -157,16 +157,16 @@ class ServiceAvailabilityChecker:
 
         # Handle any exceptions in results
         postgresql, redis_status, clickhouse, openai, anthropic = results
-        service_names = ["postgresql", "redis", "clickhouse", "openai", "anthropic"]
+        service_names = ["postgresql", "redis", "clickhouse", "openai", "anthropic]"
 
         for i, result in enumerate(results):
         if isinstance(result, Exception):
         service_name = service_names[i]
-        self.logger.error(f"Service check failed for {service_name}: {result}")
+        self.logger.error(f"Service check failed for {service_name}: {result})"
         results[i) = ServiceStatus(
         name=service_name,
         available=False,
-        details="Service check failed with exception",
+        details="Service check failed with exception,"
         error=str(result)
                 
 
@@ -182,7 +182,7 @@ class ServiceAvailabilityChecker:
 
                 # Log detailed results
         self.logger.info("")
-        for service_name in ["postgresql", "redis", "clickhouse", "openai_api", "anthropic_api"]:
+        for service_name in ["postgresql", "redis", "clickhouse", "openai_api", "anthropic_api]:"
         service_obj = getattr(availability, service_name)
         status_icon = "[OK]" if service_obj.available else "[FAIL]"
         self.logger.info("")
@@ -199,13 +199,13 @@ class ServiceAvailabilityChecker:
         """Check if real LLM usage is enabled."""
     # Check multiple flag variations that exist in the codebase
         real_llm_flags = [
-        "TEST_USE_REAL_LLM",
-        "ENABLE_REAL_LLM_TESTING",
+        "TEST_USE_REAL_LLM,"
+        "ENABLE_REAL_LLM_TESTING,"
         "USE_REAL_LLM"
     
 
         for flag in real_llm_flags:
-        if get_env().get(flag, "false").lower() == "true":
+        if get_env().get(flag, "false").lower() == "true:"
         return True
 
         return False
@@ -214,19 +214,19 @@ class ServiceAvailabilityChecker:
         """Check PostgreSQL database availability."""
         if not asyncpg:
         return ServiceStatus(
-        name="postgresql",
+        name="postgresql,"
         available=False,
-        details="asyncpg library not available",
+        details="asyncpg library not available,"
         error="Missing asyncpg dependency"
         
 
         # Try multiple common database URLs
         db_urls = [
-        get_env().get("DATABASE_URL"),
-        get_env().get("POSTGRES_URL"),
-        get_env().get("TEST_DATABASE_URL"),
-        "postgresql://postgres:password@localhost:5432/netra",
-        "postgresql://postgres:password@localhost:5432/netra_test",
+        get_env().get("DATABASE_URL),"
+        get_env().get("POSTGRES_URL),"
+        get_env().get("TEST_DATABASE_URL),"
+        "postgresql://postgres:password@localhost:5432/netra,"
+        "postgresql://postgres:password@localhost:5432/netra_test,"
         "postgresql://test:test@localhost:5432/test_db"
         
 
@@ -242,20 +242,20 @@ class ServiceAvailabilityChecker:
                     
 
                     # Test basic query
-        result = await conn.fetchval("SELECT 1")
+        result = await conn.fetchval("SELECT 1)"
         await conn.close()
 
         if result == 1:
                         # Parse URL for connection info (without password)
         parsed = urlparse(db_url)
         connection_info = {
-        "host": parsed.hostname,
-        "port": parsed.port or 5432,
+        "host: parsed.hostname,"
+        "port: parsed.port or 5432,"
         "database": parsed.path.lstrip("/") if parsed.path else "postgres"
                         
 
         return ServiceStatus(
-        name="postgresql",
+        name="postgresql,"
         available=True,
         details="",
         connection_info=connection_info
@@ -269,9 +269,9 @@ class ServiceAvailabilityChecker:
         continue
 
         return ServiceStatus(
-        name="postgresql",
+        name="postgresql,"
         available=False,
-        details="No PostgreSQL connections succeeded",
+        details="No PostgreSQL connections succeeded,"
         error="Connection failed for all attempted URLs"
                                 
 
@@ -279,37 +279,37 @@ class ServiceAvailabilityChecker:
         """Check Redis availability."""
         if not redis:
         return ServiceStatus(
-        name="redis",
+        name="redis,"
         available=False,
-        details="redis library not available",
+        details="redis library not available,"
         error="Missing redis dependency"
         
 
         # Try multiple common Redis configurations
         redis_configs = [
-        {"url": get_env().get("REDIS_URL")},
-        {"url": get_env().get("TEST_REDIS_URL")},
-        {"host": "localhost", "port": 6379},
-        {"host": "127.0.0.1", "port": 6379},
-        {"url": "redis://localhost:6379"},
+        {"url": get_env().get("REDIS_URL)},"
+        {"url": get_env().get("TEST_REDIS_URL)},"
+        {"host": "localhost", "port: 6379},"
+        {"host": "127.0.0.1", "port: 6379},"
+        {"url": "redis://localhost:6379},"
         
 
         for config in redis_configs:
-        if config.get("url") and not config["url"]:
+        if config.get("url") and not config["url]:"
         continue
 
         try:
                     # Create Redis client
-        if "url" in config and config["url"]:
+        if "url" in config and config["url]:"
         client = redis.Redis.from_url( )
-        config["url"],
+        config["url],"
         socket_connect_timeout=self.timeout,
         socket_timeout=self.timeout
                         
         else:
         client = await get_redis_client()
-        host=config["host"],
-        port=config["port"],
+        host=config["host],"
+        port=config["port],"
         socket_connect_timeout=self.timeout,
         socket_timeout=self.timeout
                             
@@ -319,12 +319,12 @@ class ServiceAvailabilityChecker:
         await client.aclose()  # Use aclose() instead of close()
 
         connection_info = {
-        "host": config.get("host", "localhost"),
-        "port": config.get("port", 6379)
+        "host": config.get("host", "localhost),"
+        "port": config.get("port, 6379)"
                             
 
         return ServiceStatus(
-        name="redis",
+        name="redis,"
         available=True,
         details="",
         connection_info=connection_info
@@ -338,9 +338,9 @@ class ServiceAvailabilityChecker:
         continue
 
         return ServiceStatus(
-        name="redis",
+        name="redis,"
         available=False,
-        details="No Redis connections succeeded",
+        details="No Redis connections succeeded,"
         error="Connection failed for all attempted configurations"
                                     
 
@@ -348,28 +348,28 @@ class ServiceAvailabilityChecker:
         """Check ClickHouse availability."""
         if not clickhouse_connect:
         return ServiceStatus(
-        name="clickhouse",
+        name="clickhouse,"
         available=False,
-        details="clickhouse_connect library not available",
+        details="clickhouse_connect library not available,"
         error="Missing clickhouse_connect dependency"
         
 
         # Try multiple ClickHouse configurations
         clickhouse_configs = [
-        {"host": "localhost", "port": 8123, "secure": False},
-        {"host": "localhost", "port": 8443, "secure": True},
-        {"host": "127.0.0.1", "port": 8123, "secure": False},
+        {"host": "localhost", "port": 8123, "secure: False},"
+        {"host": "localhost", "port": 8443, "secure: True},"
+        {"host": "127.0.0.1", "port": 8123, "secure: False},"
         
 
         # Add environment-based config if available
-        ch_url = get_env().get("CLICKHOUSE_URL") or get_env().get("TEST_CLICKHOUSE_URL")
-        if ch_url and ch_url.startswith("clickhouse://"):
+        ch_url = get_env().get("CLICKHOUSE_URL") or get_env().get("TEST_CLICKHOUSE_URL)"
+        if ch_url and ch_url.startswith("clickhouse://):"
         try:
-        parsed = urlparse(ch_url.replace("clickhouse://", "http://"))
+        parsed = urlparse(ch_url.replace("clickhouse://", "http://))"
         clickhouse_configs.insert(0, {
-        "host": parsed.hostname or "localhost",
-        "port": parsed.port or 8123,
-        "secure": False
+        "host": parsed.hostname or "localhost,"
+        "port: parsed.port or 8123,"
+        "secure: False"
                 
         except Exception:
         pass
@@ -380,9 +380,9 @@ class ServiceAvailabilityChecker:
         client = await asyncio.wait_for(
         asyncio.to_thread( )
         clickhouse_connect.get_client,
-        host=config["host"],
-        port=config["port"],
-        secure=config["secure"],
+        host=config["host],"
+        port=config["port],"
+        secure=config["secure],"
         connect_timeout=self.timeout,
         send_receive_timeout=self.timeout
         ),
@@ -391,14 +391,14 @@ class ServiceAvailabilityChecker:
 
                             # Test basic query
         result = await asyncio.wait_for(
-        asyncio.to_thread(client.command, "SELECT 1"),
+        asyncio.to_thread(client.command, "SELECT 1),"
         timeout=self.timeout
                             
 
         client.close()
 
         return ServiceStatus(
-        name="clickhouse",
+        name="clickhouse,"
         available=True,
         details="",
         connection_info=config
@@ -412,27 +412,27 @@ class ServiceAvailabilityChecker:
         continue
 
         return ServiceStatus(
-        name="clickhouse",
+        name="clickhouse,"
         available=False,
-        details="No ClickHouse connections succeeded",
+        details="No ClickHouse connections succeeded,"
         error="Connection failed for all attempted configurations"
                                     
 
     async def _check_openai_api(self) -> ServiceStatus:
         """Check OpenAI API availability."""
-        api_key = get_env().get("OPENAI_API_KEY")
+        api_key = get_env().get("OPENAI_API_KEY)"
         if not api_key:
         return ServiceStatus(
-        name="openai",
+        name="openai,"
         available=False,
         details="OPENAI_API_KEY environment variable not set"
         
 
         if not httpx:
         return ServiceStatus(
-        name="openai",
+        name="openai,"
         available=False,
-        details="httpx library not available for API testing",
+        details="httpx library not available for API testing,"
         error="Missing httpx dependency"
             
 
@@ -440,19 +440,19 @@ class ServiceAvailabilityChecker:
                 # Test API with simple request
         async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
         response = await client.get( )
-        "https://api.openai.com/models",
-        headers={"Authorization": ""}
+        "https://api.openai.com/models,"
+        headers={"Authorization": "}"
                     
 
         if response.status_code == 200:
         return ServiceStatus(
-        name="openai",
+        name="openai,"
         available=True,
         details="OpenAI API key validated successfully"
                         
         else:
         return ServiceStatus(
-        name="openai",
+        name="openai,"
         available=False,
         details="",
         error=""
@@ -460,34 +460,34 @@ class ServiceAvailabilityChecker:
 
         except asyncio.TimeoutError:
         return ServiceStatus(
-        name="openai",
+        name="openai,"
         available=False,
-        details="OpenAI API request timed out",
+        details="OpenAI API request timed out,"
         error="Timeout"
                                 
         except Exception as e:
         return ServiceStatus(
-        name="openai",
+        name="openai,"
         available=False,
-        details="OpenAI API check failed",
+        details="OpenAI API check failed,"
         error=str(e)
                                     
 
     async def _check_anthropic_api(self) -> ServiceStatus:
         """Check Anthropic API availability."""
-        api_key = get_env().get("ANTHROPIC_API_KEY")
+        api_key = get_env().get("ANTHROPIC_API_KEY)"
         if not api_key:
         return ServiceStatus(
-        name="anthropic",
+        name="anthropic,"
         available=False,
         details="ANTHROPIC_API_KEY environment variable not set"
         
 
         if not httpx:
         return ServiceStatus(
-        name="anthropic",
+        name="anthropic,"
         available=False,
-        details="httpx library not available for API testing",
+        details="httpx library not available for API testing,"
         error="Missing httpx dependency"
             
 
@@ -495,9 +495,9 @@ class ServiceAvailabilityChecker:
                 # Test API with simple request (note: different endpoint structure)
         async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
         response = await client.get(
-        "https://api.anthropic.com/messages",
+        "https://api.anthropic.com/messages,"
         headers={
-        "x-api-key": api_key,
+        "x-api-key: api_key,"
         "anthropic-version": "2023-6-1"
                     
                     
@@ -506,20 +506,20 @@ class ServiceAvailabilityChecker:
                     # We just want to verify the API key is recognized
         if response.status_code in [400, 405]:  # Method not allowed or bad request
         return ServiceStatus(
-        name="anthropic",
+        name="anthropic,"
         available=True,
         details="Anthropic API key validated successfully"
                     
         elif response.status_code == 401:
         return ServiceStatus(
-        name="anthropic",
+        name="anthropic,"
         available=False,
-        details="Anthropic API key is invalid",
+        details="Anthropic API key is invalid,"
         error="Invalid API key"
                         
         else:
         return ServiceStatus(
-        name="anthropic",
+        name="anthropic,"
         available=False,
         details="",
         error=""
@@ -527,16 +527,16 @@ class ServiceAvailabilityChecker:
 
         except asyncio.TimeoutError:
         return ServiceStatus(
-        name="anthropic",
+        name="anthropic,"
         available=False,
-        details="Anthropic API request timed out",
+        details="Anthropic API request timed out,"
         error="Timeout"
                                 
         except Exception as e:
         return ServiceStatus(
-        name="anthropic",
+        name="anthropic,"
         available=False,
-        details="Anthropic API check failed",
+        details="Anthropic API check failed,"
         error=str(e)
                                     
 
@@ -560,48 +560,48 @@ class ServiceAvailabilityChecker:
         """CLI interface for testing service availability."""
         import sys
 
-        print("Checking service availability...")
-        print("=" * 50)
+        print("Checking service availability...)"
+        print("= * 50)"
 
         availability = await get_service_availability()
 
     # Print detailed results
-        print(f"Environment Flags:")
+        print(f"Environment Flags:)"
         print("")
         print("")
         print()
 
-        print("Database Services:")
+        print("Database Services:)"
         for service in [availability.postgresql, availability.redis, availability.clickhouse]:
-        status = "[OK]" if service.available else "[FAIL]"  # Use ASCII characters for Windows compatibility
+        status = "[OK]" if service.available else "[FAIL]  # Use ASCII characters for Windows compatibility"
         print("")
         if service.error:
         print("")
         print()
 
-        print("API Services:")
+        print("API Services:)"
         for service in [availability.openai_api, availability.anthropic_api]:
-        status = "[OK]" if service.available else "[FAIL]"  # Use ASCII characters for Windows compatibility
+        status = "[OK]" if service.available else "[FAIL]  # Use ASCII characters for Windows compatibility"
         print("")
         if service.error:
         print("")
         print()
 
-        print("Summary:")
+        print("Summary:)"
         print("")
         print("")
 
                     # Exit with error code if critical services unavailable
         if not availability.has_real_databases and availability.use_real_services:
-        print("ERROR: USE_REAL_SERVICES=true but databases not available")
+        print("ERROR: USE_REAL_SERVICES=true but databases not available)"
         sys.exit(1)
 
         if not availability.has_real_llm_apis and availability.use_real_llm:
-        print("ERROR: USE_REAL_LLM=true but LLM APIs not available")
+        print("ERROR: USE_REAL_LLM=true but LLM APIs not available)"
         sys.exit(1)
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         asyncio.run(main())
 
 ))))))))))))))))))))))))))))

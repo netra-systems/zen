@@ -37,7 +37,7 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
         "Verify validator still works with flat event format after fix."
         flat_event = {
             type: agent_started,
-            "user_id: test-user-123",
+            "user_id: test-user-123,"
             thread_id: test-thread-456, 
             timestamp: self.test_timestamp"
             timestamp: self.test_timestamp"
@@ -52,12 +52,12 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
     def test_server_message_format_now_passes(self):
         "Verify that ServerMessage format now passes with fixed validator."
         server_message = {
-            type": "agent_started,
+            type": agent_started,"
             payload: {
                 user_id: test-user-123","
                 "thread_id: test-thread-456,"
                 timestamp: self.test_timestamp,
-                status": "started,
+                status": started,"
                 agent_name: supervisor
             },
             sender: "system,"
@@ -75,9 +75,9 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
             type: tool_executing,
             "payload: {"
                 tool_name: search_data,
-                parameters: {"query: test search"},
+                parameters: {"query: test search},"
                 timestamp: self.test_timestamp,
-                sub_agent_name": "data_helper
+                sub_agent_name": data_helper"
             },
             sender: system, 
             timestamp: self.test_timestamp"
@@ -95,14 +95,14 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
         server_message = {
             "type: agent_completed,"
             payload: {
-                status": "success,
+                status": success,"
                 final_response: Task completed successfully,
                 timestamp: self.test_timestamp,"
                 timestamp: self.test_timestamp,"
                 "execution_time: 45.2,"
                 agent_name: supervisor
             },
-            sender": "system,
+            sender": system,"
             timestamp: self.test_timestamp
         }
         
@@ -113,7 +113,7 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
         self.assertEqual(len(self.validator.errors), 0, No validation errors for agent_completed ServerMessage)
     
     def test_agent_thinking_both_formats_work(self):
-        ""Test that both flat and ServerMessage formats work for agent_thinking.
+        ""Test that both flat and ServerMessage formats work for agent_thinking."
         flat_event = {
             type: agent_thinking","
             "reasoning: Analyzing user request,"
@@ -121,13 +121,13 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
         }
         
         server_message = {
-            type": "agent_thinking, 
+            type": agent_thinking, "
             payload: {
                 reasoning: Analyzing user request","
                 "timestamp: self.test_timestamp,"
                 agent_name: supervisor
             },
-            sender": "system,
+            sender": system,"
             timestamp: self.test_timestamp
         }
         
@@ -148,7 +148,7 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
         flat_event = {
             type": tool_completed,"
             tool_name: search_data,
-            results": {"data: search results},
+            results": {data: search results},"
             duration: 2.5,"
             duration: 2.5,"
             timestamp": self.test_timestamp"
@@ -158,7 +158,7 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
             type: tool_completed,
             "payload: {"
                 tool_name: search_data,
-                results: {"data: search results"},
+                results: {"data: search results},"
                 duration: 2.5,
                 timestamp": self.test_timestamp,"
                 sub_agent_name: data_helper
@@ -216,7 +216,7 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
         self.assertIn(ServerMessage format, self.validator.errors[0)
     
     def test_invalid_payload_structure_handled(self):
-        ""Test that invalid payload structures are handled gracefully.
+        ""Test that invalid payload structures are handled gracefully."
         # ServerMessage with non-dict payload
         invalid_server_message = {
             type: agent_started","
@@ -233,7 +233,7 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
         self.assertGreater(len(self.validator.errors), 0, Should have validation errors")"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     unittest.main()
 ))))
 }

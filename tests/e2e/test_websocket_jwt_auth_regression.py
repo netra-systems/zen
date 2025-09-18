@@ -23,7 +23,7 @@ class JWTSecretMismatchTests:
 
     @pytest.mark.asyncio
     async def test_jwt_extraction_vs_validation_error_messages(self):
-    ""
+    """
         Test that error messages correctly differentiate between:
         - JWT not found in headers/subprotocols (extraction failure)
         - JWT found but invalid (validation failure)
@@ -32,7 +32,7 @@ class JWTSecretMismatchTests:
         websocket_no_jwt = Mock(spec=WebSocket)
         websocket_no_jwt.headers = {}
         token = extractor.extract_jwt_from_websocket(websocket_no_jwt)
-        assert token is None, 'Should return None when no JWT present'
+        assert token is None, "'Should return None when no JWT present'"
         signing_secret = 'auth_service_secret'
         validation_secret = 'backend_service_secret'
         payload = {'sub': 'test_user_123', 'exp': datetime.now(UTC) + timedelta(hours=1), 'iat': datetime.now(UTC), 'permissions': ['read', 'write'], 'roles': ['user']}
@@ -40,14 +40,14 @@ class JWTSecretMismatchTests:
         websocket_with_jwt = Mock(spec=WebSocket)
         websocket_with_jwt.headers = {'authorization': f'Bearer {token}'}
         extracted_token = extractor.extract_jwt_from_websocket(websocket_with_jwt)
-        assert extracted_token == token, 'Should extract JWT from Authorization header'
+        assert extracted_token == token, "'Should extract JWT from Authorization header'"
         extractor.jwt_secret_key = validation_secret
         decoded = await extractor.validate_and_decode_jwt(extracted_token)
-        assert decoded is None, 'Should fail validation with wrong secret'
+        assert decoded is None, "'Should fail validation with wrong secret'"
 
     @pytest.mark.asyncio
     async def test_environment_specific_jwt_secret_loading(self):
-        ""Test that environment-specific JWT secrets are loaded correctly.
+        ""Test that environment-specific JWT secrets are loaded correctly."
         with patch('shared.isolated_environment.get_env') as mock_env:
             mock_env.return_value.get.side_effect = lambda key, default=None: {'ENVIRONMENT': 'staging', 'JWT_SECRET_STAGING': 'staging_specific_secret_123', 'JWT_SECRET_KEY': 'generic_secret_456'}.get(key, default)
             extractor = UserContextExtractor()
@@ -65,7 +65,7 @@ class JWTSecretMismatchTests:
         extractor = UserContextExtractor()
         extractor.jwt_secret_key = secret
         decoded = await extractor.validate_and_decode_jwt(token)
-        assert decoded is not None, 'Should validate successfully with correct secret'
+        assert decoded is not None, "'Should validate successfully with correct secret'"
         assert decoded['sub'] == 'user_456'
         assert decoded['session_id'] == 'session_789'
 
@@ -105,7 +105,7 @@ class JWTSecretMismatchTests:
         websocket.headers = {'sec-websocket-protocol': f'jwt.{encoded_token}, other-protocol'}
         extractor = UserContextExtractor()
         extracted = extractor.extract_jwt_from_websocket(websocket)
-        assert extracted == token, 'Should extract JWT from subprotocol'
+        assert extracted == token, "'Should extract JWT from subprotocol'"
 
     @pytest.mark.asyncio
     async def test_error_message_clarity(self):

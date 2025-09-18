@@ -40,19 +40,19 @@ from shared.isolated_environment import get_env
         redis_url = 'redis://localhost:6381'
 """
 """
-        isolated_test_env.set('DATABASE_URL', postgres_url, source="test_database_setup")
-        isolated_test_env.set('REDIS_URL', redis_url, source="test_redis_setup")
-        isolated_test_env.set('USE_REAL_SERVICES', 'true', source="test_real_services_flag")
+        isolated_test_env.set('DATABASE_URL', postgres_url, source="test_database_setup)"
+        isolated_test_env.set('REDIS_URL', redis_url, source="test_redis_setup)"
+        isolated_test_env.set('USE_REAL_SERVICES', 'true', source="test_real_services_flag)"
 
     # Set test mode to avoid production checks
-        isolated_test_env.set('TESTING', 'true', source="test_mode_flag")
-        isolated_test_env.set('AUTH_TEST_MODE', 'true', source="auth_test_mode")
+        isolated_test_env.set('TESTING', 'true', source="test_mode_flag)"
+        isolated_test_env.set('AUTH_TEST_MODE', 'true', source="auth_test_mode)"
 
         yield
 
 @pytest.mark.asyncio
     async def test_auth_database_connection_no_auth_errors(self):
-"""Test that auth database connections don't produce authentication error logs."""'
+"""Test that auth database connections don't produce authentication error logs.""'"
         # Test basic database connectivity first
 import psycopg
 postgres_url = 'postgresql://test_user:test_pass@localhost:5433/netra_test'
@@ -61,12 +61,12 @@ try:
     pass
 with psycopg.connect(postgres_url, connect_timeout=5) as conn:"""
 with psycopg.connect(postgres_url, connect_timeout=5) as conn:"""
-cur.execute("SELECT 1")
+cur.execute("SELECT 1)"
 result = cur.fetchone()
 assert result[0] == 1, "Database connectivity test failed"
 except Exception as e:
     pass
-pytest.skip("formatted_string")
+pytest.skip("formatted_string)"
 
                         # Capture all log output
 log_capture = StringIO()
@@ -95,7 +95,7 @@ from auth_service.auth_core.database.connection import AuthDatabase
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 except ImportError as import_error:
     pass
-pytest.skip("formatted_string")
+pytest.skip("formatted_string)"
 
                                     # Create database instance with explicit configuration
 auth_db = AuthDatabase()
@@ -106,12 +106,12 @@ try:
 await asyncio.wait_for(auth_db.initialize(), timeout=30.0)
 except asyncio.TimeoutError:
     pass
-pytest.fail("Database initialization timed out - check service availability")
+pytest.fail("Database initialization timed out - check service availability)"
 except Exception as init_error:
                                                 # Check if this is an expected test environment issue
-if "test" not in str(init_error).lower():
+if "test not in str(init_error).lower():"
     pass
-pytest.fail("formatted_string")
+pytest.fail("formatted_string)"
 else:
                                                         # In test mode, some failures are expected - log them but check for auth errors
 pass
@@ -121,12 +121,12 @@ log_output = log_capture.getvalue()
 
                                                         # Check for auth-related error messages that shouldn't be there'
 unwanted_auth_patterns = [ )
-"authentication failed",
-"password authentication failed",
-"SCRAM authentication",
-"SSL connection has been closed",
-"no pg_hba.conf entry",
-"password authentication failed for user",
+"authentication failed,"
+"password authentication failed,"
+"SCRAM authentication,"
+"SSL connection has been closed,"
+"no pg_hba.conf entry,"
+"password authentication failed for user,"
                                                         
 
 found_auth_issues = []
@@ -137,7 +137,7 @@ for line in log_output.split(" )"
 "):"
 if pattern.lower() in line.lower():
     pass
-found_auth_issues.append("formatted_string")
+found_auth_issues.append("formatted_string)"
 
                                                                         # Assert no unwanted auth error messages
 if found_auth_issues:
@@ -157,7 +157,7 @@ if hasattr(auth_db, 'get_session'):
     pass
 async with auth_db.get_session() as session:
 from sqlalchemy import text
-result = await session.execute(text("SELECT 1 as test_value"))
+result = await session.execute(text("SELECT 1 as test_value))"
 test_result = result.scalar()
 assert test_result == 1, "formatted_string"
 else:
@@ -165,7 +165,7 @@ else:
 pass
 except Exception as op_error:
                                                                                                 # Log but don't fail on operational errors in test environment'
-logging.getLogger(__name__).info("formatted_string")
+logging.getLogger(__name__).info("formatted_string)"
 
 finally:
                                                                                                     # Restore original handlers
@@ -185,11 +185,11 @@ elif hasattr(auth_db, 'engine') and auth_db.engine:
 await auth_db.engine.dispose()
 except Exception as cleanup_error:
                                                                                                                         # Log cleanup errors but don't fail the test'
-logging.getLogger(__name__).warning("formatted_string")
+logging.getLogger(__name__).warning("formatted_string)"
 
 def test_database_manager_no_credential_logging(self):
     pass
-"""Test that DatabaseManager URL building doesn't log credentials."""'
+"""Test that DatabaseManager URL building doesn't log credentials.""'"
 pass
     # Capture all log output
 log_capture = StringIO()
@@ -217,14 +217,14 @@ try:
     pass
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager"""
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager"""
-pytest.skip("formatted_string")
+pytest.skip("formatted_string)"
 
                     # Test various URL transformations with different credential patterns
 test_urls = [ )
-"postgresql://user:password123@localhost/dbname",
-"postgresql+asyncpg://user:secret456@host/db?sslmode=require",
-"postgres://admin:pass789@cloudsql/database",
-"postgresql://test_user:test_pass@localhost:5433/netra_test",  # Match our test config
+"postgresql://user:password123@localhost/dbname,"
+"postgresql+asyncpg://user:secret456@host/db?sslmode=require,"
+"postgres://admin:pass789@cloudsql/database,"
+"postgresql://test_user:test_pass@localhost:5433/netra_test,  # Match our test config"
                     
 
 try:
@@ -232,12 +232,12 @@ try:
 manager = AuthDatabaseManager()
 except Exception as manager_error:
     pass
-pytest.skip("formatted_string")
+pytest.skip("formatted_string)"
 
 for url in test_urls:
                                 # Set environment variable using isolated environment
 original_url = self.env.get('DATABASE_URL')
-self.env.set('DATABASE_URL', url, source="test_database_manager_url_building")
+self.env.set('DATABASE_URL', url, source="test_database_manager_url_building)"
 
 try:
                                     # Test various URL generation methods
@@ -252,21 +252,21 @@ if hasattr(manager, 'get_auth_database_url_async'):
 auth_url = manager.get_auth_database_url_async()
 except Exception as url_error:
                                                     # Log but don't fail - this might be expected in some configurations'
-logging.getLogger(__name__).debug("formatted_string")
+logging.getLogger(__name__).debug("formatted_string)"
 finally:
                                                         # Restore original URL
 if original_url:
     pass
-self.env.set('DATABASE_URL', original_url, source="test_cleanup")
+self.env.set('DATABASE_URL', original_url, source="test_cleanup)"
 else:
     pass
-self.env.delete('DATABASE_URL', source="test_cleanup")
+self.env.delete('DATABASE_URL', source="test_cleanup)"
 
                                                                 # Get captured logs
 log_output = log_capture.getvalue()
 
                                                                 # Check that passwords/credentials aren't logged'
-credentials = ["password123", "secret456", "pass789", "test_pass"]
+credentials = ["password123", "secret456", "pass789", "test_pass]"
 found_credentials = []
 
 for credential in credentials:
@@ -276,14 +276,14 @@ for line in log_output.split(" )"
 "):"
 if credential in line:
     pass
-found_credentials.append("formatted_string")
+found_credentials.append("formatted_string)"
 
                                                                                 # Assert no credentials in logs
 if found_credentials:
     pass
 pytest.fail( )
 f"Found credentials in logs (security issue):\
-" + "\
+" + \"
 ".join(found_credentials) +"
 "formatted_string"
                                                                                     
@@ -294,8 +294,8 @@ for logger, handlers in original_handlers.items():
 logger.handlers = handlers
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
-pytest.main([__file__, "-xvs"])
+pytest.main([__file__, "-xvs])"
 
 ]]]

@@ -127,9 +127,10 @@ class UserExecutionEngineContextIsolationTests(SSotAsyncTestCase):
         mock_agent_factory = Mock()
         mock_agent_factory._agent_registry = self.agent_registry
 
-        # Create mock websocket emitter
+        # Create mock websocket emitter with proper structure for UserExecutionEngine
         mock_websocket_emitter = Mock()
-        mock_websocket_emitter.manager = self.websocket_bridge
+        mock_websocket_emitter.websocket_bridge = self.websocket_bridge  # Property expects this
+        mock_websocket_emitter.manager = self.websocket_bridge  # Keep for backward compatibility
 
         # Use modern constructor signature
         engine = UserExecutionEngine(
@@ -170,9 +171,10 @@ class UserExecutionEngineContextIsolationTests(SSotAsyncTestCase):
         mock_agent_factory = Mock()
         mock_agent_factory._agent_registry = self.agent_registry
 
-        # Create mock websocket emitter
+        # Create mock websocket emitter with proper structure for UserExecutionEngine
         mock_websocket_emitter = Mock()
-        mock_websocket_emitter.manager = self.websocket_bridge
+        mock_websocket_emitter.websocket_bridge = self.websocket_bridge  # Property expects this
+        mock_websocket_emitter.manager = self.websocket_bridge  # Keep for backward compatibility
 
         # Use modern constructor signature
         engine = UserExecutionEngine(
@@ -274,9 +276,10 @@ class UserExecutionEngineContextIsolationTests(SSotAsyncTestCase):
         mock_agent_factory = Mock()
         mock_agent_factory._agent_registry = self.agent_registry
 
-        # Create mock websocket emitter
+        # Create mock websocket emitter with proper structure for UserExecutionEngine
         mock_websocket_emitter = Mock()
-        mock_websocket_emitter.manager = self.websocket_bridge
+        mock_websocket_emitter.websocket_bridge = self.websocket_bridge  # Property expects this
+        mock_websocket_emitter.manager = self.websocket_bridge  # Keep for backward compatibility
 
         # Use modern constructor signature
         engine = UserExecutionEngine(
@@ -374,9 +377,10 @@ class UserExecutionEngineContextIsolationTests(SSotAsyncTestCase):
         mock_agent_factory = Mock()
         mock_agent_factory._agent_registry = self.agent_registry
 
-        # Create mock websocket emitter
+        # Create mock websocket emitter with proper structure for UserExecutionEngine
         mock_websocket_emitter = Mock()
-        mock_websocket_emitter.manager = self.websocket_bridge
+        mock_websocket_emitter.websocket_bridge = self.websocket_bridge  # Property expects this
+        mock_websocket_emitter.manager = self.websocket_bridge  # Keep for backward compatibility
 
         # Use modern constructor signature
         engine = UserExecutionEngine(
@@ -471,9 +475,10 @@ class UserExecutionEngineContextIsolationTests(SSotAsyncTestCase):
         mock_agent_factory = Mock()
         mock_agent_factory._agent_registry = self.agent_registry
 
-        # Create mock websocket emitter
+        # Create mock websocket emitter with proper structure for UserExecutionEngine
         mock_websocket_emitter = Mock()
-        mock_websocket_emitter.manager = self.websocket_bridge
+        mock_websocket_emitter.websocket_bridge = self.websocket_bridge  # Property expects this
+        mock_websocket_emitter.manager = self.websocket_bridge  # Keep for backward compatibility
 
         # Use modern constructor signature
         engine = UserExecutionEngine(
@@ -571,9 +576,10 @@ class UserExecutionEngineContextIsolationTests(SSotAsyncTestCase):
         mock_agent_factory = Mock()
         mock_agent_factory._agent_registry = self.agent_registry
 
-        # Create mock websocket emitter
+        # Create mock websocket emitter with proper structure for UserExecutionEngine
         mock_websocket_emitter = Mock()
-        mock_websocket_emitter.manager = self.websocket_bridge
+        mock_websocket_emitter.websocket_bridge = self.websocket_bridge  # Property expects this
+        mock_websocket_emitter.manager = self.websocket_bridge  # Keep for backward compatibility
 
         # Use modern constructor signature
         engine = UserExecutionEngine(

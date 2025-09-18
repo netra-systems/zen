@@ -90,7 +90,7 @@ class TestWebSocketTimingSuite:
     # ============================================================================
 
 class TestWebSocketAuthTiminger:
-        ""Reproduces WebSocket authentication timing issues during DevLauncher startup.
+        ""Reproduces WebSocket authentication timing issues during DevLauncher startup."
 
     def __init__(self):
         Initialize the WebSocket auth timing tester.""
@@ -227,7 +227,7 @@ class TestWebSocketAuthTiminger:
                                                                                                         # Use real JWT token
         real_token = create_real_jwt_token( )
         user_id=test_user_race_condition,
-        permissions=["read, write", websocket],
+        permissions=["read, write, websocket],"
         token_type=access""
                                                                                                         
         valid_token = "formatted_string"
@@ -276,7 +276,7 @@ class TestWebSocketAuthTiminger:
                     
 
     async def _test_recovery_connection(self, token: str) -> Dict[str, Any]:
-        ""Helper: Test WebSocket connection recovery with valid token.
+        ""Helper: Test WebSocket connection recovery with valid token."
         try:
         headers = {Authorization: token}""
         async with websockets.connect()
@@ -413,11 +413,11 @@ tester = WebSocketAuthTimingTester()
 result = await tester.test_websocket_connection_without_token()
 
                 # Verify connection was attempted
-assert result.connection_attempted, Connection attempt should have been made
+assert result.connection_attempted, "Connection attempt should have been made"
 
                 # Check if this is a service unavailable case (expected in test environment)
 service_unavailable_indicators = ]
-Connection refused, "Connection timeout", Connect call failed,
+Connection refused, "Connection timeout, Connect call failed,"
 connection failed, [Errno 10061], [Errno 111]""
                 
 
@@ -432,7 +432,7 @@ formatted_string
 
                     # Verify error code indicates authentication issue
 if result.error_code:
-    assert result.error_code in [401, 403, 1008], \
+    assert result.error_code in [401, "403, 1008], \"
 
 
 
@@ -465,7 +465,7 @@ tester = WebSocketAuthTimingTester()
 result = await tester.test_websocket_connection_with_null_token()
 
                             # Verify connection was attempted
-assert result.connection_attempted, Connection attempt should have been made
+assert result.connection_attempted, "Connection attempt should have been made"
 
                             # Verify null token is properly rejected
 assert result.auth_failure_detected or result.error_code is not None, \
@@ -473,7 +473,7 @@ formatted_string
 
                             # Verify appropriate error handling
 if result.error_code:
-    assert result.error_code in [401, 403, 1008], \
+    assert result.error_code in [401, "403, 1008], \"
 
 ""
 
@@ -506,7 +506,7 @@ tester = WebSocketAuthTimingTester()
 result = await tester.test_websocket_connection_timing_race()
 
                                     # Verify race condition was simulated
-assert result.connection_attempted, Race condition test should attempt connection
+assert result.connection_attempted, "Race condition test should attempt connection"
 
                                     # Verify initial connection failed as expected
 assert result.auth_failure_detected, \
@@ -514,7 +514,7 @@ formatted_string
 
                                     # Verify recovery is possible when token becomes available
 if result.recovery_successful:
-    print("[GOOD] Recovery successful - system handles race condition well")
+    print("[GOOD] Recovery successful - system handles race condition well)"
 
 else:
     print([WARNING] Recovery failed - may indicate persistent connection issues)
@@ -583,7 +583,7 @@ tester = WebSocketAuthTimingTester()
 result = await tester.test_websocket_auth_recovery(")"
 
                                                         # Verify initial auth failure occurred
-assert result.connection_attempted, Recovery test should attempt initial connection
+assert result.connection_attempted, "Recovery test should attempt initial connection"
 assert result.auth_failure_detected, \
 
 
@@ -601,7 +601,7 @@ assert result.response_time_ms < 20000, \
 
 
                                                                 # At minimum, initial failure should be detected correctly
-assert result.error_code in [401, 403, 1008] if result.error_code else True, \
+assert result.error_code in [401, "403, 1008] if result.error_code else True, \"
 formatted_string
 
 print(")"
@@ -651,10 +651,10 @@ finally:
 
                                                                                         # Comprehensive validation
 assert suite_result.no_token_test is not None, No-token test should complete""
-assert suite_result.null_token_test is not None, Null-token test should complete
+assert suite_result.null_token_test is not None, "Null-token test should complete"
 assert suite_result.race_condition_test is not None, "Race condition test should complete"
-assert suite_result.cors_none_test is not None, CORS test should complete
-assert suite_result.recovery_test is not None, Recovery test should complete
+assert suite_result.cors_none_test is not None, "CORS test should complete"
+assert suite_result.recovery_test is not None, "Recovery test should complete"
 
                                                                                         # Performance validation for complete suite
 assert suite_result.total_execution_time < 60.0, \
@@ -662,7 +662,7 @@ formatted_string
 
                                                                                         # Security validation
 critical_vulnerabilities = [v for v in suite_result.vulnerabilities_found )
-if "without token" in v or null token in v]
+if "without token in v or null token in v]"
 
 if critical_vulnerabilities:
     print()

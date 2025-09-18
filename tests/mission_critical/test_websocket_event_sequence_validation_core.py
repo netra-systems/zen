@@ -39,7 +39,7 @@ from loguru import logger
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Import WebSocket validation framework
-from netra_backend.app.websocket_core.event_validation_framework import (
+from netra_backend.app.websocket_core.event_validation_framework import ()
     EventType, EventValidationLevel, ValidationResult, ValidatedEvent,
     EventValidator, EventSequenceValidator, EventValidationFramework
 )
@@ -62,7 +62,7 @@ class EventSequenceTestResult:
 
 
 class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
-    ""
+    """
     Core WebSocket event sequence validation tests.
     
     CRITICAL: These tests validate the fundamental 5-event sequence that enables 
@@ -71,7 +71,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
 
     @pytest.fixture(autouse=True)
     async def setup_test_environment(self):
-        ""Setup test environment for event sequence validation.
+        ""Setup test environment for event sequence validation."
         # Initialize validation framework
         self.validation_framework = EventValidationFramework(
             validation_level=EventValidationLevel.STRICT
@@ -103,7 +103,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
         await self._log_test_results()
 
     async def _log_test_results(self):
-        ""Log comprehensive test results for analysis.
+        ""Log comprehensive test results for analysis."
         logger.info(fCore WebSocket Event Sequence Validation - Test Results Summary:)
         logger.info(f  Total test sequences: {len(self.test_results)}")"
         
@@ -125,7 +125,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_complete_five_event_sequence_validation(self):
-    ""
+    """
         CRITICAL: Test that all 5 required WebSocket events are delivered in sequence.
         
         This test validates the core chat functionality sequence:
@@ -210,7 +210,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
             sequence_status = self.validation_framework.get_sequence_status(thread_id)
             assert sequence_status is not None, Sequence status not found"
             assert sequence_status is not None, Sequence status not found"
-            assert sequence_status.get('sequence_complete', False), (
+            assert sequence_status.get('sequence_complete', "False), ("
                 f"Sequence not marked as complete. Status: {sequence_status}"
             )
             
@@ -270,7 +270,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
                     agent_name: supervisor","
                     "run_id: run_id,"
                     timestamp: base_timestamp + 2,
-                    "tool_name: analysis_tool",
+                    "tool_name: analysis_tool,"
                     parameters: {query: test analysis},"
                     parameters: {query: test analysis},"
                     tool_purpose": Data analysis for user request"
@@ -392,12 +392,12 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
                 }
             },
             {
-                type": "tool_executing,
+                type": tool_executing,"
                 thread_id: thread_id,
                 message_id: fmsg_{uuid.uuid4().hex[:8]}","
                 "timestamp: time.time() + 2,"
                 payload: {
-                    "agent_name: supervisor",
+                    "agent_name: supervisor,"
                     run_id: run_id,
                     timestamp: time.time() + 2,"
                     timestamp: time.time() + 2,"
@@ -447,7 +447,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
         # Validate that sequence is NOT marked as complete
         sequence_status = self.validation_framework.get_sequence_status(thread_id)
         if sequence_status:
-            assert not sequence_status.get('sequence_complete', False), (
+            assert not sequence_status.get('sequence_complete', "False), ("
                 fVALIDATION FAILURE: Incomplete sequence incorrectly marked as complete. ""
                 fStatus: {sequence_status}
             )
@@ -476,7 +476,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_event_content_structure_validation(self):
-    "
+        """
     "
         CRITICAL: Test that events with missing or malformed content are properly flagged.
         
@@ -530,7 +530,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
                     "run_id: run_id,"
                     timestamp: time.time(),
                     # MISSING: tool_name
-                    "parameters: {query": test}
+                    "parameters: {query: test}"
                 }
             }
         ]

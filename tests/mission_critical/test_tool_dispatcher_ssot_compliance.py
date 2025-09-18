@@ -97,7 +97,7 @@ class ToolDispatcherSSotComplianceTests:
         self.violations = []
 
     def test_single_tool_dispatcher_implementation(self):
-    "
+        """
     "
         CRITICAL: Test that only ONE tool dispatcher implementation exists.
         
@@ -208,7 +208,7 @@ class ToolDispatcherSSotComplianceTests:
             )
 
     async def test_factory_pattern_enforcement(self):
-        "
+        """
         "
         CRITICAL: Test that tool dispatchers use factory patterns for user isolation.
         
@@ -238,7 +238,7 @@ class ToolDispatcherSSotComplianceTests:
             )
 
     async def test_websocket_event_ssot_compliance(self):
-        ""
+        """
         CRITICAL: Test that WebSocket events flow through SSOT channels.
         
         Current State: SHOULD FAIL - Multiple event channels exist

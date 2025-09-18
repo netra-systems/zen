@@ -52,17 +52,17 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import multi-service orchestration modules with error handling
 try:
-    from test_framework.unified_docker_manager import (
+    from test_framework.unified_docker_manager import ()
         UnifiedDockerManager, OrchestrationConfig, ServiceHealth, ContainerInfo
     )
     
-    from test_framework.ssot.orchestration import (
+    from test_framework.ssot.orchestration import ()
         OrchestrationConfig as SSOTOrchestrationConfig,
         get_orchestration_config,
         orchestration_config
     )
     
-    from test_framework.ssot.orchestration_enums import (
+    from test_framework.ssot.orchestration_enums import ()
         BackgroundTaskStatus,
         E2ETestCategory,
         ExecutionStrategy,
@@ -133,7 +133,7 @@ class ServiceMeshIntegrationTests:
 
     @pytest.fixture
     def service_mesh_topology(self):
-        ""Create a comprehensive service mesh topology for testing.
+        ""Create a comprehensive service mesh topology for testing."
         services = {
             user-service: ServiceMeshNode("
             user-service: ServiceMeshNode("
@@ -142,13 +142,13 @@ class ServiceMeshIntegrationTests:
                 replicas=3,
                 sidecar_injected=True,
                 mesh_config={
-                    circuit_breaker": {"enabled: True, failure_threshold: 5},
-                    retry_policy: {attempts": 3, "timeout: 5s},
+                    circuit_breaker": {enabled: True, failure_threshold: 5},"
+                    retry_policy: {attempts": 3, timeout: 5s},"
                     load_balancing: round_robin
                 },
                 traffic_policy={
-                    "traffic_splitting: {v2.1": 80, v2.0: 20},
-                    fault_injection: {"delay: 0.1, abort": 0.1}
+                    "traffic_splitting: {v2.1: 80, v2.0: 20},"
+                    fault_injection: {"delay: 0.1, abort: 0.1}"
                 },
             order-service: ServiceMeshNode(
                 service_name=order-service","
@@ -156,7 +156,7 @@ class ServiceMeshIntegrationTests:
                 replicas=4,
                 sidecar_injected=True,
                 mesh_config={
-                    circuit_breaker: {"enabled: True, failure_threshold": 3},
+                    circuit_breaker: {"enabled: True, failure_threshold: 3},"
                     timeout: 10s,
                     "load_balancing: least_request"
                 },
@@ -167,7 +167,7 @@ class ServiceMeshIntegrationTests:
                 replicas=2,
                 sidecar_injected=True,
                 security_policy={
-                    mTLS: {enabled: True, mode": "strict},
+                    mTLS: {enabled: True, mode": strict},"
                     authorization: {rbac_enabled: True}
                 },
             notification-service: ServiceMeshNode("
@@ -215,7 +215,7 @@ class ServiceMeshIntegrationTests:
                     config_checksum: fchecksum_{service_name}_{service_node.version}","
                     "tls_context: {"
                         common_tls_context: {
-                            "tls_certificates: [f/etc/ssl/certs/{service_name}.pem"],
+                            "tls_certificates: [f/etc/ssl/certs/{service_name}.pem],"
                             validation_context: {
                                 trusted_ca: "/etc/ssl/certs/ca-cert.pem"
                             }
@@ -223,13 +223,13 @@ class ServiceMeshIntegrationTests:
                     },
                     listeners": [{"
                         name: flistener_{service_name},
-                        "address: 0.0.0.0:15006",
+                        "address: 0.0.0.0:15006,"
                         filter_chains: [{
                             filters: [{"
                             filters: [{"
                                 "name: envoy.filters.network.http_connection_manager,"
                                 typed_config: {
-                                    stat_prefix": f"ingress_{service_name},
+                                    stat_prefix": fingress_{service_name},"
                                     route_config: {
                                         name: flocal_route_{service_name},
                                         "virtual_hosts: [{"
@@ -268,7 +268,7 @@ class ServiceMeshIntegrationTests:
 
                 injection_events.append({
                     service: service_name,
-                    event": "sidecar_injected,
+                    event": sidecar_injected,"
                     timestamp: time.time(),
                     duration: time.time() - injection_start,"
                     duration: time.time() - injection_start,"
@@ -278,13 +278,13 @@ class ServiceMeshIntegrationTests:
         # Verify sidecar injection completeness
         injected_services = [event[service] for event in injection_events]
         assert len(injected_services) == len(services), Not all services have sidecars injected""
-        assert len(sidecar_configurations) == len(services), Missing sidecar configurations
+        assert len(sidecar_configurations) == len(services), "Missing sidecar configurations"
 
         # Verify configuration validity
         for service_name, config in sidecar_configurations.items():
             assert listeners in config, f"Missing listeners in {service_name} config"
             assert clusters in config, f"Missing clusters in {service_name} config"
-            assert tls_context in config, fMissing TLS context in {service_name} config
+            assert tls_context in config, "fMissing TLS context in {service_name} config"
 
             # Verify TLS configuration
             tls_context = config[tls_context]
@@ -297,12 +297,12 @@ class ServiceMeshIntegrationTests:
 
         # Verify injection performance
         avg_injection_time = sum(e["duration] for e in injection_events) / len(injection_events)"
-        assert avg_injection_time < 1.0, fAverage injection time too high: {avg_injection_time}s
+        assert avg_injection_time < 1.0, "fAverage injection time too high: {avg_injection_time}s"
 
         # Verify configuration sizes are reasonable
         config_sizes = [e["config_size_bytes] for e in injection_events]"
         max_config_size = max(config_sizes)
-        assert max_config_size < 50000, fConfiguration size too large: {max_config_size} bytes
+        assert max_config_size < 50000, "fConfiguration size too large: {max_config_size} bytes"
 
     def test_multi_tenant_service_isolation(self, service_mesh_topology):
         CRITICAL: Test multi-tenant service isolation and resource boundaries.""
@@ -337,7 +337,7 @@ class ServiceMeshIntegrationTests:
         }
 
         # Tenant isolation enforcement
-        tenant_resource_usage = {tenant_id: {cpu": 0, "memory: 0, requests: 0, connections: 0}
+        tenant_resource_usage = {tenant_id: {cpu": 0, memory: 0, requests: 0, connections: 0}"
                                 for tenant_id in tenants.keys()}
 
         isolation_violations = []
@@ -365,7 +365,7 @@ class ServiceMeshIntegrationTests:
                 total_memory_needed = request_count * memory_per_request
 
                 # Parse resource limits
-                cpu_limit = float(tenant_config[resource_limits][cpu].replace(m", "))
+                cpu_limit = float(tenant_config[resource_limits][cpu].replace(m", ))"
                 memory_limit = float(tenant_config[resource_limits][memory].replace(Gi, ")) * 1024"
 
                 # Check resource limits and enforce

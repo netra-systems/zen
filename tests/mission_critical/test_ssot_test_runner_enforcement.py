@@ -61,9 +61,9 @@ ALLOWED_TEST_RUNNER = PROJECT_ROOT / tests" / unified_test_runner.py"
 # Allowed legacy wrappers (must redirect to SSOT)
 ALLOWED_LEGACY_WRAPPERS = {
     PROJECT_ROOT / scripts / test_backend.py,
-    PROJECT_ROOT / scripts" / "test_frontend.py,
+    PROJECT_ROOT / scripts" / test_frontend.py,"
     PROJECT_ROOT / test_framework / integrated_test_runner.py,
-    PROJECT_ROOT / tests / "staging / run_staging_tests.py",
+    PROJECT_ROOT / tests / "staging / run_staging_tests.py,"
 }
 
 # Paths to scan for unauthorized test runners
@@ -74,7 +74,7 @@ SCAN_PATHS = [
     PROJECT_ROOT / netra_backend / "tests,"
     PROJECT_ROOT / auth_service" / tests,"
     PROJECT_ROOT / frontend / tests,
-    PROJECT_ROOT / analytics_service" / "tests,
+    PROJECT_ROOT / analytics_service" / tests,"
     PROJECT_ROOT / .github / workflows,
     PROJECT_ROOT / .github / "scripts,"
 ]
@@ -119,7 +119,7 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
         "Setup test method with SSOT compliance."
         super().setup_method(method)
         self.record_metric(test_type, mission_critical_ssot_enforcement)
-        self.record_metric("business_value, system_stability_compliance")
+        self.record_metric("business_value, system_stability_compliance)"
 
     def test_ssot_test_runner_exists(self):
         CRITICAL: Verify the SSOT test runner exists and is functional."
@@ -201,8 +201,8 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
             pytest.fail(violation_details)
         
         self.record_metric(invalid_legacy_wrappers, 0)
-        logger.info( PASS:  Legacy wrapper compliance verified)"
-        logger.info( PASS:  Legacy wrapper compliance verified)"
+        logger.info("PASS:  Legacy wrapper compliance verified))"
+        logger.info("PASS:  Legacy wrapper compliance verified))"
 
     def test_ci_scripts_use_ssot_runner(self):
         "WARNING: Check CI/CD scripts for SSOT compliance (warning only)."
@@ -214,8 +214,8 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
             self.record_metric(ci_violations_found", len(ci_violations))"
         else:
             self.record_metric(ci_violations_found, 0)
-            logger.info( PASS:  CI scripts SSOT compliance verified)"
-            logger.info( PASS:  CI scripts SSOT compliance verified)"
+            logger.info("PASS:  CI scripts SSOT compliance verified))"
+            logger.info("PASS:  CI scripts SSOT compliance verified))"
 
     # === PRIVATE IMPLEMENTATION METHODS ===
 
@@ -236,7 +236,7 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
         return unauthorized_runners
 
     def _is_unauthorized_test_runner(self, file_path: Path) -> bool:
-        ""Check if a file is an unauthorized test runner.
+        ""Check if a file is an unauthorized test runner."
         # Skip if it's the allowed SSOT runner'
         if file_path.resolve() == ALLOWED_TEST_RUNNER.resolve():
             return False
@@ -418,7 +418,7 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
             
             # Must not contain substantial test logic
             has_substantial_logic = any(pattern in content.lower() for pattern in [
-                'class test', 'def test_', 'assert ', 'self.assert'
+                'class test', 'def test_', 'assert ', "'self.assert'"
             ]
             
             return has_deprecation and has_redirect and not has_substantial_logic
@@ -453,7 +453,7 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
         ci_violations = []
         
         ci_paths = [
-            PROJECT_ROOT / ".github / workflows",
+            PROJECT_ROOT / ".github / workflows,"
             PROJECT_ROOT / .github / scripts, 
             PROJECT_ROOT / scripts,"
             PROJECT_ROOT / scripts,"
@@ -580,7 +580,7 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
         )
 
     def _format_legacy_wrapper_violations(self, violations: List[Tuple[Path, str)) -> str:
-        ""Format legacy wrapper violations into failure message.
+        ""Format legacy wrapper violations into failure message."
         violation_list = []
         for file_path, reason in violations:
             relative_path = file_path.relative_to(PROJECT_ROOT)
@@ -629,7 +629,7 @@ if __name__ == __main__:"
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print("MIGRATION NOTICE: This file previously used direct pytest execution.)"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")"
-    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md)"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

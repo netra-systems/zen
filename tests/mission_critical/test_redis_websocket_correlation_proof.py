@@ -52,7 +52,7 @@ class RedisInstanceTracker:
 
 
 class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
-    ""Test suite proving Redis violations cause WebSocket failures.
+    ""Test suite proving Redis violations cause WebSocket failures."
 
     def setUp(self):
         Set up test environment.""
@@ -140,7 +140,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
             from netra_backend.app.redis_manager import redis_manager as rm1
             redis_instances.append({
                 instance_id: id(rm1),
-                "import_path: netra_backend.app.redis_manager",
+                "import_path: netra_backend.app.redis_manager,"
                 type: type(rm1).__name__
             }
         except Exception as e:
@@ -165,7 +165,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
             rm3 = RedisCacheManager()
             redis_instances.append({
                 instance_id: id(rm3),
-                "import_path: netra_backend.app.cache.redis_cache_manager",
+                "import_path: netra_backend.app.cache.redis_cache_manager,"
                 type: type(rm3).__name__
             }
         except Exception as e:
@@ -273,7 +273,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
             analysis: High Redis activity correlates with WebSocket 1011 errors
         }
 
-        with open(/c/netra-apex/websocket_redis_correlation_detailed.json", "w) as f:
+        with open(/c/netra-apex/websocket_redis_correlation_detailed.json", w) as f:"
             json.dump(correlation_data, f, indent=2)
 
         self.logger.error(fRedis Success Rate: {redis_success_rate:.1f}%)
@@ -320,7 +320,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
             instance_type: type(rm1).__name__
         }
 
-        with open(/c/netra-apex/redis_singleton_evidence.json", "w) as f:
+        with open(/c/netra-apex/redis_singleton_evidence.json", w) as f:"
             json.dump(singleton_evidence, f, indent=2)
 
         self.logger.info(fRedis manager references: {len(instances)})
@@ -346,7 +346,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
                 timeout=self.connection_timeout
             ) as websocket:
                 # Send a simple message
-                await websocket.send(json.dumps({type: "ping})"
+                await websocket.send(json.dumps({"type": "ping})"
 
                 # Wait for response or timeout
                 try:
@@ -420,5 +420,5 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
 
 if __name__ == __main__:
     # Run tests with verbose output
-    pytest.main([__file__, "-v, -s"])))
+    pytest.main([__file__, "-v, -s])))"
 )))))))

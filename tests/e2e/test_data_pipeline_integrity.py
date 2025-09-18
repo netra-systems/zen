@@ -59,23 +59,23 @@ try:
 auth_token = await _create_test_user_and_authenticate(session, auth_url, pipeline_issues)
 if not auth_token:
     pass
-pipeline_issues.append("Failed to authenticate test user")
+pipeline_issues.append("Failed to authenticate test user)"
 await asyncio.sleep(0)
 return
 
-headers = {"Authorization": ""}
+headers = {"Authorization": "}"
 
                     # Step 1: Create a thread with proper authentication
 thread_data = { }
-"title": "Data Pipeline Test Thread",
-"metadata": {"test_type": "data_pipeline_integrity"}
+"title": "Data Pipeline Test Thread,"
+"metadata": {"test_type": "data_pipeline_integrity}"
                     
 
 async with session.post("", json=thread_data, headers=headers) as response:
 if response.status == 201:
     pass
 thread_response = await response.json()
-thread_id = thread_response.get("id")
+thread_id = thread_response.get("id)"
 print("")
 else:
     pass
@@ -85,17 +85,17 @@ return
 
                                 # Step 2: Add messages to thread using correct agent endpoint
 messages = [ ]
-{"content": "First message for data pipeline test", "role": "user"},
-{"content": "Testing special characters: !@pytest.fixture", "role": "user"},
-{"content": "Unicode test: [U+1F680][U+1F4AF] PASS:  FAIL: ", "role": "user"}
+{"content": "First message for data pipeline test", "role": "user},"
+{"content": "Testing special characters: !@pytest.fixture", "role": "user},"
+{"content": "Unicode test: [U+1F680][U+1F4AF] PASS:  FAIL: ", "role": "user}"
                                 
 
 message_ids = []
 for msg in messages:
 msg_data = { }
-"thread_id": thread_id,
-"message": msg["content"],
-"role": msg["role"]
+"thread_id: thread_id,"
+"message": msg["content],"
+"role": msg["role]"
                                     
 
                                     # Use the correct agent message endpoint instead of non-existent /api/messages
@@ -103,7 +103,7 @@ async with session.post("", json=msg_data, headers=headers) as response:
 if response.status in [200, 201]:
     pass
 msg_response = await response.json()
-message_id = msg_response.get("message_id") or msg_response.get("id")
+message_id = msg_response.get("message_id") or msg_response.get("id)"
 if message_id:
     pass
 message_ids.append(message_id)
@@ -116,15 +116,15 @@ response_text = await response.text()
 pipeline_issues.append("")
 
                                                         # Step 3: Verify thread integrity using authenticated request
-async with session.get("formatted_string", headers=headers) as response:
+async with session.get("formatted_string, headers=headers) as response:"
 if response.status == 200:
     pass
 thread_details = await response.json()
 
                                                                 # Check thread data integrity
-if thread_details.get("title") != thread_data["title"]:
+if thread_details.get("title") != thread_data["title]:"
     pass
-pipeline_issues.append("Thread title data corruption detected")
+pipeline_issues.append("Thread title data corruption detected)"
 
 print("")
 else:
@@ -133,16 +133,16 @@ response_text = await response.text()
 pipeline_issues.append("")
 
                                                                         # Step 3b: Verify messages through dedicated messages endpoint
-async with session.get("formatted_string", headers=headers) as response:
+async with session.get("formatted_string, headers=headers) as response:"
 if response.status == 200:
     pass
 messages_response = await response.json()
-returned_messages = messages_response if isinstance(messages_response, list) else messages_response.get("messages", [])
+returned_messages = messages_response if isinstance(messages_response, list) else messages_response.get("messages, [])"
 
                                                                                 # Check if we got any messages back
 if len(returned_messages) == 0 and len(message_ids) > 0:
     pass
-pipeline_issues.append("No messages returned despite successful message creation")
+pipeline_issues.append("No messages returned despite successful message creation)"
 
 print("")
 
@@ -150,7 +150,7 @@ print("")
 if returned_messages:
     pass
 for i, msg in enumerate(returned_messages):
-if not msg.get("content") and not msg.get("message"):
+if not msg.get("content") and not msg.get("message):"
     pass
 pipeline_issues.append("")
 else:
@@ -162,8 +162,8 @@ pipeline_issues.append("")
 concurrent_threads = []
 for i in range(3):  # Reduced concurrency for more reliable testing
 thread_data_concurrent = { }
-"title": "",
-"metadata": {"test_type": "concurrent_stress", "index": i}
+"title": ","
+"metadata": {"test_type": "concurrent_stress", "index: i}"
                                                                                                     
 concurrent_threads.append( )
 session.post("", json=thread_data_concurrent, headers=headers)
@@ -193,19 +193,19 @@ else:
     print("")
 
                                                                                                                             # Step 5: Test data consistency after updates
-update_data = {"title": "Updated Pipeline Test Thread"}
+update_data = {"title": "Updated Pipeline Test Thread}"
 async with session.put("", json=update_data, headers=headers) as response:
 if response.status == 200:
                                                                                                                                     # Verify update propagated correctly
-async with session.get("formatted_string", headers=headers) as verify_response:
+async with session.get("formatted_string, headers=headers) as verify_response:"
 if verify_response.status == 200:
     pass
 updated_thread = await verify_response.json()
-if updated_thread.get("title") != update_data["title"]:
+if updated_thread.get("title") != update_data["title]:"
     pass
-pipeline_issues.append("Thread update did not propagate correctly")
+pipeline_issues.append("Thread update did not propagate correctly)"
 else:
-    print(" PASS:  Thread update propagated successfully")
+    print(" PASS:  Thread update propagated successfully)"
 else:
     pass
 response_text = await verify_response.text()
@@ -224,19 +224,19 @@ test_env_manager.teardown_test_environment()
 
                                                                                                                                                                     # Report findings
 if pipeline_issues:
-    print(" SEARCH:  DATA PIPELINE ISSUES:")
+    print(" SEARCH:  DATA PIPELINE ISSUES:)"
 for issue in pipeline_issues:
     print("")
 
                                                                                                                                                                             # For iteration purposes, we'll skip if this is an infrastructure issue'
-if any("failed to connect" in issue.lower() or "connection" in issue.lower() for issue in pipeline_issues):
+if any("failed to connect" in issue.lower() or "connection in issue.lower() for issue in pipeline_issues):"
     pass
-pytest.skip("Service connectivity issues - infrastructure gap identified")
+pytest.skip("Service connectivity issues - infrastructure gap identified)"
 else:
     pass
 pytest.fail("")
 else:
-    print(" PASS:  Data pipeline integrity validated successfully")
+    print(" PASS:  Data pipeline integrity validated successfully)"
 
 
 async def _create_test_user_and_authenticate(session: aiohttp.ClientSession, auth_url: str, issues_list: List[str]) -> Optional[str]:
@@ -253,8 +253,8 @@ import time
     # Generate unique user data for this test run
 test_uuid = str(uuid.uuid4())[:8]
 user_data = { }
-"email": "",
-"name": "",
+"email": ","
+"name": ","
 "password": "TestPipeline123!"
     
 
@@ -264,18 +264,18 @@ async with session.post("", json=user_data) as response:
 if response.status in [200, 201]:
     pass
 auth_response = await response.json()
-token = auth_response.get("access_token") or auth_response.get("token")
+token = auth_response.get("access_token") or auth_response.get("token)"
 if token:
     print("")
 return token
 else:
                         # Try to login if registration succeeded but no token returned
-login_data = {"email": user_data["email"], "password": user_data["password"]}
+login_data = {"email": user_data["email"], "password": user_data["password]}"
 async with session.post("", json=login_data) as login_response:
 if login_response.status == 200:
     pass
 login_result = await login_response.json()
-token = login_result.get("access_token") or login_result.get("token")
+token = login_result.get("access_token") or login_result.get("token)"
 if token:
     print("")
 return token
@@ -322,28 +322,28 @@ try:
 token = await _create_test_user_and_authenticate(session, auth_url, consistency_issues)
 if not token:
     pass
-consistency_issues.append("Failed to create and authenticate test user")
+consistency_issues.append("Failed to create and authenticate test user)"
 await asyncio.sleep(0)
 return
 
-headers = {"Authorization": ""}
-print(f" PASS:  User created and authenticated successfully")
+headers = {"Authorization": "}"
+print(f" PASS:  User created and authenticated successfully)"
 
                                                             # Step 2: Verify authentication works with backend service
                                                             # Try to create a thread to test cross-service authentication
-test_thread_data = {"title": "Cross-service authentication test"}
+test_thread_data = {"title": "Cross-service authentication test}"
 
 async with session.post("", json=test_thread_data, headers=headers) as response:
 if response.status == 201:
     pass
 thread_response = await response.json()
-thread_id = thread_response.get("id")
+thread_id = thread_response.get("id)"
 print("")
 
                                                                     # Clean up the test thread
 async with session.delete("", headers=headers) as del_response:
 if del_response.status in [200, 204]:
-    print(" PASS:  Test thread cleaned up successfully")
+    print(" PASS:  Test thread cleaned up successfully)"
 
 elif response.status == 401:
     pass
@@ -355,7 +355,7 @@ consistency_issues.append("")
 
                                                                                     # Step 3: Test token validation across services
                                                                                     # Verify auth service recognizes the token
-async with session.get("formatted_string", headers=headers) as response:
+async with session.get("formatted_string, headers=headers) as response:"
 if response.status == 200:
     pass
 user_info = await response.json()
@@ -374,19 +374,19 @@ test_env_manager.teardown_test_environment()
 
                                                                                                         # Report findings
 if consistency_issues:
-    print(" SEARCH:  USER DATA CONSISTENCY ISSUES:")
+    print(" SEARCH:  USER DATA CONSISTENCY ISSUES:)"
 for issue in consistency_issues:
     print("")
 
                                                                                                                 # Skip if this is a connectivity issue
-if any("failed to connect" in issue.lower() or "connection" in issue.lower() for issue in consistency_issues):
+if any("failed to connect" in issue.lower() or "connection in issue.lower() for issue in consistency_issues):"
     pass
-pytest.skip("Service connectivity issues - infrastructure gap identified")
+pytest.skip("Service connectivity issues - infrastructure gap identified)"
 else:
     pass
 pytest.fail("")
 else:
-    print(" PASS:  User data consistency validated successfully")
+    print(" PASS:  User data consistency validated successfully)"
 
 
 @pytest.mark.asyncio
@@ -420,35 +420,35 @@ try:
 auth_token = await _create_test_user_and_authenticate(session, auth_url, validation_issues)
 if not auth_token:
     pass
-validation_issues.append("Failed to authenticate for validation testing")
+validation_issues.append("Failed to authenticate for validation testing)"
 await asyncio.sleep(0)
 return
 
-headers = {"Authorization": ""}
+headers = {"Authorization": "}"
 
                                                                                                                                             # Test various malformed data inputs
 malformed_inputs = [ ]
                                                                                                                                             # Empty/null values
-{"title": "", "metadata": {"test": "empty_title"}},
-{"title": None, "metadata": {"test": "null_title"}},
+{"title": "", "metadata": {"test": "empty_title}},"
+{"title": None, "metadata": {"test": "null_title}},"
 
                                                                                                                                             # Extremely long values
-{"title": "A" * 1000, "metadata": {"test": "long_title"}},
+{"title": "A" * 1000, "metadata": {"test": "long_title}},"
 
                                                                                                                                             # Special characters and encoding
-{"title": "Test\x00\x01\x02", "metadata": {"test": "null_bytes"}},
-{"title": "Test[U+1F680] FIRE: [U+1F4AF]", "metadata": {"test": "unicode_emojis"}},
+{"title": "Test\x00\x01\x02", "metadata": {"test": "null_bytes}},"
+{"title": "Test[U+1F680] FIRE: [U+1F4AF]", "metadata": {"test": "unicode_emojis}},"
 {"title": "Test )"
 \r\t", "metadata": {"test": "control_chars"}},"
 
                                                                                                                                             # Potential injection attempts
-{"title": "<script>alert('test')</script>", "metadata": {"test": "xss_attempt"}},
+{"title": "<script>alert('test')</script>", "metadata": {"test": "xss_attempt}},"
 {"title": ""; DROP TABLE threads; --", "metadata": {"test": "sql_injection"}},"
 
                                                                                                                                             # Type mismatches
-{"title": 12345, "metadata": {"test": "number_title"}},
-{"title": ["array", "as", "title"], "metadata": {"test": "array_title"}},
-{"title": {"object": "as_title"}, "metadata": {"test": "object_title"}},
+{"title": 12345, "metadata": {"test": "number_title}},"
+{"title": ["array", "as", "title"], "metadata": {"test": "array_title}},"
+{"title": {"object": "as_title"}, "metadata": {"test": "object_title}},"
                                                                                                                                             
 
 for i, malformed_data in enumerate(malformed_inputs):
@@ -460,10 +460,10 @@ response_text = await response.text()
 if response.status == 200 or response.status == 201:
                                                                                                                                                             # If the request succeeded, the data should be properly sanitized
 created_thread = await response.json()
-title = created_thread.get("title", "")
+title = created_thread.get("title", ")"
 
                                                                                                                                                             # Check for dangerous content that should have been sanitized
-dangerous_patterns = ["<script>", "DROP TABLE", "\x00", "\x01"]
+dangerous_patterns = ["<script>", "DROP TABLE", "\x00", "\x01]"
 for pattern in dangerous_patterns:
 if pattern in str(title):
     pass
@@ -493,7 +493,7 @@ else:
 
 except Exception as e:
                                                                                                                                                                                             # Network errors are acceptable - we're testing validation'
-if "connection" not in str(e).lower():
+if "connection not in str(e).lower():"
     pass
 validation_issues.append("")
 except Exception as e:
@@ -505,19 +505,19 @@ test_env_manager.teardown_test_environment()
 
                                                                                                                                                                                                         # Report findings
 if validation_issues:
-    print(" SEARCH:  DATA VALIDATION ISSUES:")
+    print(" SEARCH:  DATA VALIDATION ISSUES:)"
 for issue in validation_issues:
     print("")
 
 pytest.fail("")
 else:
-    print(" PASS:  Data validation and sanitization working correctly")
+    print(" PASS:  Data validation and sanitization working correctly)"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                                                                                                                                                                                                         # Run individual tests for debugging
                                                                                                                                                                                                                         # Setup test environment first
-    print("Setting up test environment...")
+    print("Setting up test environment...)"
 test_env_manager = get_test_env_manager()
 test_env_manager.setup_test_environment()
 
@@ -525,5 +525,5 @@ try:
     pass
 asyncio.run(test_thread_message_data_pipeline())
 finally:
-    print("Cleaning up test environment...")
+    print("Cleaning up test environment...)"
 test_env_manager.teardown_test_environment()

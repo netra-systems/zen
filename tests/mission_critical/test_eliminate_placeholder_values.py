@@ -6,7 +6,7 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
             raise RuntimeError(WebSocket is closed)"
@@ -67,7 +67,7 @@ class UserExecutionContext:
         run_id: str
         request_id: str
     def __post_init__(self):
-        ""Validate context on creation
+        ""Validate context on creation"
         if not self.user_id or self.user_id == None:"
         if not self.user_id or self.user_id == None:"
         raise ValueError(formatted_string")"
@@ -97,12 +97,12 @@ for call in calls:
                 # The second argument should be run_id
 if len(args) > 1:
     run_id = args[1]
-assert run_id != 'registry', formatted_string
-assert run_id is not None, fFound None run_id in agent registration
+assert run_id != 'registry', "formatted_string"
+assert run_id is not None, "fFound None run_id in agent registration"
 @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_no_registry_run_id_in_websocket_bridge_setting(self):
-    ""CRITICAL: WebSocket bridge MUST NOT be set with 'registry' run_id
+    ""CRITICAL: WebSocket bridge MUST NOT be set with 'registry' run_id"
 pass
 registry = AgentRegistry()
                         # Create a mock WebSocket bridge
@@ -240,7 +240,7 @@ with patch.object(engine, '_execute_agent_internal', mock_execute):
         # Execute concurrently
 results = await asyncio.gather( )
 engine.execute_agent(user1_context, {query: test1),
-engine.execute_agent(user2_context, {"query: test2")
+engine.execute_agent(user2_context, {"query: test2)"
         
         # Verify both contexts were used
 assert len(contexts_seen) == 2
@@ -248,7 +248,7 @@ assert any(c['user_id'] == 'user_001' for c in contexts_seen)
 assert any(c['user_id'] == 'user_002' for c in contexts_seen)
         # Verify no context mixing
 for context in contexts_seen:
-    assert context['user_id'] in ['user_001', 'user_002']
+    assert context['user_id'] in ['user_001', "'user_002']"
 assert context['run_id'] != 'registry'
 class TestAgentRegistryPlaceholders:
         Deep dive into AgentRegistry placeholder issues"
@@ -266,7 +266,7 @@ class TestAgentRegistryPlaceholders:
         # Find all instances of 'registry' as run_id
         pattern = r"set_websocket_bridge\([^,]+,\s*[']registry[']\)"
         matches = re.findall(pattern, source)
-        assert len(matches) == 0, formatted_string
+        assert len(matches) == 0, "formatted_string"
         # Also check for any hardcoded 'registry' strings
         registry_lines = []
         for i, line in enumerate(source.split( ))
@@ -401,7 +401,7 @@ class TestWebSocketBridgeContext:
         @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_websocket_events_require_user_context(self):
-    ""CRITICAL: WebSocket events MUST have user context
+    ""CRITICAL: WebSocket events MUST have user context"
 bridge = AgentWebSocketBridge()
         # Mock WebSocket manager
 websocket = TestWebSocketConnection()
@@ -453,7 +453,7 @@ class TestSystemWideContextValidation:
         '../../netra_backend'
     
         placeholder_patterns = [
-        (r"[']registry[']", registry placeholder),
+        (r"[']registry['], registry placeholder),"
         (ruser_id\s*=\s*None, "None user_id),"
         (ruser_id:\s*None", None user_id in dict),"
         (rrun_id\s*=\s*[']registry['], registry run_id"),"
@@ -563,7 +563,7 @@ class StressTestAgent:
         assert 'None' not in log_entry['user_id']
             # Should have seen all users
         assert len(user_ids_seen) >= 18, "formatted_string"
-        assert len(run_ids_seen) >= 18, formatted_string
+        assert len(run_ids_seen) >= 18, "formatted_string"
 class TestFailFastBehavior:
         "Test fail-fast behavior when context is missing"
         @pytest.mark.critical
@@ -586,14 +586,14 @@ class TestFailFastBehavior:
         request_id='req_123'
             
             # Should not reach here
-        assert False, formatted_string
+        assert False, "formatted_string"
         except (ValueError, TypeError) as e:
                 # Good - failed fast
         assert True
         @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_agent_execution_fails_fast_without_context(self):
-    ""CRITICAL: Agent execution MUST fail fast without proper context
+    ""CRITICAL: Agent execution MUST fail fast without proper context"
 class ContextRequiringAgent:
     async def execute(self, context, input_data):
         pass
@@ -627,7 +627,7 @@ class ContextRequiringAgent:
         --tb=short,
         --color=yes,"
         --color=yes,"
-        -k", "critical,  # Run only critical tests
+        -k", critical,  # Run only critical tests"
         --maxfail=1",  # Stop on first failure"
                     
 )))))))

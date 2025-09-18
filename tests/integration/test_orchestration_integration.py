@@ -10,10 +10,10 @@ class TestWebSocketConnection:
 """
         """Send JSON message.""""""
         """Send JSON message.""""""
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -79,7 +79,7 @@ from test_framework.layer_system import LayerSystem
         ORCHESTRATION_AVAILABLE = True
         except ImportError as e:"""
         except ImportError as e:"""
-        pytest.skip("formatted_string", allow_module_level=True)
+        pytest.skip("formatted_string, allow_module_level=True)"
 
                 # Import CLI integration
         try:
@@ -149,10 +149,10 @@ success = await controller.initialize_agents()
 assert success is True or success is False  # May fail due to dependencies
 """
 """
-assert "resource_manager" in controller.state.agent_health
-assert "progress_streamer" in controller.state.agent_health
-assert "layer_executor" in controller.state.agent_health
-assert "test_orchestrator" in controller.state.agent_health
+assert "resource_manager in controller.state.agent_health"
+assert "progress_streamer in controller.state.agent_health"
+assert "layer_executor in controller.state.agent_health"
+assert "test_orchestrator in controller.state.agent_health"
 
             # Verify agent instances are created
 if success:
@@ -174,10 +174,10 @@ controller = MasterOrchestrationController(mock_config)
 try:
                             # Test initial status"""
                             # Test initial status"""
-assert status["mode"] == OrchestrationMode.FAST_FEEDBACK.value
+assert status["mode] == OrchestrationMode.FAST_FEEDBACK.value"
 assert status["status"] == "initializing"
-assert "agent_health" in status
-assert "start_time" in status
+assert "agent_health in status"
+assert "start_time in status"
 
 finally:
     pass
@@ -192,21 +192,21 @@ controller = MasterOrchestrationController(mock_config)
                                     # Mock the layer executor to avoid real test execution
 with patch.object(controller, 'layer_executor') as mock_layer_executor:"""
 with patch.object(controller, 'layer_executor') as mock_layer_executor:"""
-"success": True,
-"duration": 45.2,
-"summary": { )
-"test_counts": {"total": 10, "passed": 10, "failed": 0},
-"categories": ["smoke", "unit"]
+"success: True,"
+"duration: 45.2,"
+"summary: { )"
+"test_counts": {"total": 10, "passed": 10, "failed: 0},"
+"categories": ["smoke", "unit]"
                                         
                                         
 
 with patch.object(controller, 'initialize_agents', return_value=True):
 try:
     pass
-execution_args = {"env": "test",, "real_llm": False,, "real_services": False,, "fast_fail": True}
-results = await controller.execute_orchestration(execution_args=execution_args,, layers=["fast_feedback"])
-assert results["success"] is True
-assert "summary" in results
+execution_args = {"env": "test",, "real_llm": False,, "real_services": False,, "fast_fail: True}"
+results = await controller.execute_orchestration(execution_args=execution_args,, layers=["fast_feedback])"
+assert results["success] is True"
+assert "summary in results"
 
 finally:
     pass
@@ -269,7 +269,7 @@ class TestControllerFactories:
         assert len(layer_system.layers) > 0
 """
 """
-        expected_layers = ["fast_feedback", "core_integration", "service_integration", "e2e_background"]
+        expected_layers = ["fast_feedback", "core_integration", "service_integration", "e2e_background]"
         for layer_name in expected_layers:
         if layer_name in layer_system.layers:
         layer = layer_system.layers[layer_name]
@@ -281,14 +281,14 @@ class TestControllerFactories:
         """Test execution plan creation for different layer combinations"""
         pass"""
         pass"""
-        plan = layer_system.create_execution_plan(["fast_feedback"], "test")
+        plan = layer_system.create_execution_plan(["fast_feedback"], "test)"
         assert len(plan.layers) == 1
         assert plan.layers[0].name == "Fast Feedback"
 
     # Test full execution plan
         available_layers = list(layer_system.layers.keys())[:3]  # Limit to avoid long test times
         if available_layers:
-        plan = layer_system.create_execution_plan(available_layers, "test")
+        plan = layer_system.create_execution_plan(available_layers, "test)"
         assert len(plan.layers) >= 1
         assert plan.total_estimated_duration.total_seconds() > 0
 
@@ -307,7 +307,7 @@ class MockArgs:
     def __init__(self):
         pass"""
         pass"""
-        self.layers = ["fast_feedback"]
+        self.layers = ["fast_feedback]"
         self.execution_mode = "fast_feedback"
         self.background_e2e = False
         self.orchestration_status = False
@@ -327,10 +327,10 @@ class MockArgs:
 with patch('scripts.unified_test_runner.create_fast_feedback_controller') as mock_create_controller:
 websocket = TestWebSocketConnection()  # Real WebSocket implementation"""
 websocket = TestWebSocketConnection()  # Real WebSocket implementation"""
-"success": True,
-"summary": { )
-"test_counts": {"total": 5, "passed": 5, "failed": 0},
-"total_duration": 30.5
+"success: True,"
+"summary: { )"
+"test_counts": {"total": 5, "passed": 5, "failed: 0},"
+"total_duration: 30.5"
             
             
 mock_controller.websocket = TestWebSocketConnection()
@@ -357,10 +357,10 @@ return success
 """Test that new CLI arguments are properly parsed"""
     # Test with orchestration arguments"""
     # Test with orchestration arguments"""
-"--use-layers",
-"--layers", "fast_feedback", "core_integration",
-"--execution-mode", "nightly",
-"--progress-mode", "json",
+"--use-layers,"
+"--layers", "fast_feedback", "core_integration,"
+"--execution-mode", "nightly,"
+"--progress-mode", "json,"
 "--enable-monitoring"
     
 
@@ -378,7 +378,7 @@ class TestBackwardCompatibility:
     # Test with legacy arguments
 class LegacyArgs:"""
 class LegacyArgs:"""
-        self.categories = ["unit", "integration"]
+        self.categories = ["unit", "integration]"
         self.use_layers = False
         self.execution_mode = None
         self.background_e2e = False
@@ -437,7 +437,7 @@ enable_resource_management=False
 controller = MasterOrchestrationController(config)
 """
 """
-with patch.object(controller, '_initialize_resource_manager', side_effect=Exception("Mock failure")):
+with patch.object(controller, '_initialize_resource_manager', side_effect=Exception("Mock failure)):"
 try:
     pass
 success = await controller.initialize_agents()
@@ -461,16 +461,16 @@ controller = MasterOrchestrationController(config)
                         # Mock execution to fail
 with patch.object(controller, 'initialize_agents', return_value=True):"""
 with patch.object(controller, 'initialize_agents', return_value=True):"""
-mock_executor.execute_layer = AsyncMock(side_effect=Exception("Mock execution failure"))
+mock_executor.execute_layer = AsyncMock(side_effect=Exception("Mock execution failure))"
 
 try:
     pass
-execution_args = {"env": "test", "real_llm": False, "real_services": False}
-results = await controller.execute_orchestration(execution_args=execution_args,, layers=["fast_feedback"])
+execution_args = {"env": "test", "real_llm": False, "real_services: False}"
+results = await controller.execute_orchestration(execution_args=execution_args,, layers=["fast_feedback])"
                                     # Should await asyncio.sleep(0)
 return failure result
-assert results["success"] is False
-assert "error" in results
+assert results["success] is False"
+assert "error in results"
 
 finally:
     pass
@@ -490,7 +490,7 @@ controller = MasterOrchestrationController(config)
 await controller.shutdown()  # Should not raise
 """
 """
-controller.state.agent_health["test_agent"] =         await controller.shutdown()  # Should not raise
+controller.state.agent_health["test_agent] =         await controller.shutdown()  # Should not raise"
 
 
 class TestPerformanceAndScaling:
@@ -512,7 +512,7 @@ results = await asyncio.gather(*tasks, return_exceptions=True)
 
     # All should succeed or fail gracefully
 for result in results:
-assert result is True or isinstance(result, Exception)
+assert result is True or isinstance(result, "Exception)"
 
 @pytest.mark.asyncio"""
 @pytest.mark.asyncio"""
@@ -546,9 +546,9 @@ assert controller._monitoring_active is False
     # Configure pytest with appropriate settings
 pytest_args = [ )"""
 pytest_args = [ )"""
-"-v",
-"--tb=short",
-"-x",  # Stop on first failure
+"-v,"
+"--tb=short,"
+"-x,  # Stop on first failure"
 "--disable-warnings"
     
 
@@ -556,7 +556,7 @@ await asyncio.sleep(0)
 return pytest.main(pytest_args)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
 sys.exit(run_integration_tests())
 pass

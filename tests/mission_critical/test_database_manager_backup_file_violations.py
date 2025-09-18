@@ -35,7 +35,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class DatabaseManagerBackupFileViolationsTests(SSotBaseTestCase):
-    ""Test suite to detect DatabaseManager SSOT backup file violations.
+    ""Test suite to detect DatabaseManager SSOT backup file violations."
 
     def test_no_backup_files_exist(self):
         MUST FAIL if any database_manager backup files exist.""
@@ -115,7 +115,7 @@ class DatabaseManagerBackupFileViolationsTests(SSotBaseTestCase):
             )
 
     def test_database_manager_import_consistency(self):
-        ""MUST FAIL if imports reference non-existent backup files.
+        ""MUST FAIL if imports reference non-existent backup files."
 
         Scans all Python files for import statements that reference
         DatabaseManager backup files that should not exist.
@@ -161,7 +161,7 @@ class DatabaseManagerBackupFileViolationsTests(SSotBaseTestCase):
         Validates that the single DatabaseManager implementation exists in
         the designated SSOT location: netra_backend/app/db/database_manager.py
         
-        expected_path = Path(__file__).parent.parent.parent / netra_backend / "app / db" / database_manager.py
+        expected_path = Path(__file__).parent.parent.parent / netra_backend / "app / db / database_manager.py"
 
         if not expected_path.exists():
             pytest.fail(
@@ -194,7 +194,7 @@ class DatabaseManagerBackupFileViolationsTests(SSotBaseTestCase):
         project_root = Path(__file__).parent.parent.parent
 
         # Canonical location
-        canonical_path = project_root / netra_backend" / "app / db / database_manager.py
+        canonical_path = project_root / netra_backend" / app / db / database_manager.py"
 
         # Find all DatabaseManager implementations
         all_implementations = []

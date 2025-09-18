@@ -48,12 +48,12 @@ class BusinessValueWebSocketValidator:
     Validates WebSocket events deliver substantive business value through authenticated connections.
     
     CRITICAL: This class enforces CLAUDE.md authentication mandates and business value requirements.
-""
+"""
     
     def __init__(self):
         "Initialize with MANDATORY authentication helper."""
         self.env = get_env()
-        self.environment = self.env.get(TEST_ENV", "test)
+        self.environment = self.env.get(TEST_ENV", test)"
         
         # CLAUDE.md COMPLIANT: Use SSOT authentication helper - MANDATORY
         self.auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
@@ -106,7 +106,7 @@ class BusinessValueWebSocketValidator:
                 type: "agent_execution_request,"
                 message: test_prompt,
                 user_id: ftest-user-{uuid.uuid4().hex[:8]},
-                "thread_id": ftest-thread-{uuid.uuid4().hex[:8]},
+                "thread_id: ftest-thread-{uuid.uuid4().hex[:8]},"
                 timestamp: datetime.now(timezone.utc).isoformat(),
                 require_substantive_response: True  # Business requirement flag
             }
@@ -133,7 +133,7 @@ class BusinessValueWebSocketValidator:
                 "critical_events_complete: event_validation[all_events_received],"""
                 performance_within_limits: total_time <= self.max_total_flow_seconds,
                 total_execution_time: total_time,
-                "business_metrics": self.business_metrics,
+                "business_metrics: self.business_metrics,"
                 event_details: event_validation,
                 business_analysis: business_analysis,
                 claude_md_compliant: True,  # Confirms SSOT auth usage
@@ -149,7 +149,7 @@ class BusinessValueWebSocketValidator:
                 business_value_delivered: False,
                 critical_events_complete: False,
                 performance_within_limits: False,
-                "error": str(e),
+                "error: str(e),"
                 claude_md_compliant: False,  # Failed to use SSOT auth properly
                 revenue_impact_positive: False,
                 total_execution_time: time.time() - validation_start
@@ -205,7 +205,7 @@ class BusinessValueWebSocketValidator:
                         event_timeline.append({
                             type: event_type,
                             timestamp: event_time,
-                            "latency_ms": (event_time - sequence_start) * 1000,
+                            "latency_ms: (event_time - sequence_start) * 1000,"
                             content: event_data.get(content, ),
                             business_relevant": self._is_business_relevant_event(event_data)"
                         }
@@ -214,7 +214,7 @@ class BusinessValueWebSocketValidator:
                         if event_type == agent_thinking:
                             reasoning_visible = len(event_data.get("content, )) > 20"
                         elif event_type == tool_executing:
-                            tool_transparency_shown = tool in event_data.get("content", ).lower()
+                            tool_transparency_shown = tool in event_data.get("content, ).lower()"
                         elif event_type == tool_completed:
                             actionable_results_delivered = len(event_data.get(content, ")) > self.min_substantive_response_chars"
                         
@@ -238,7 +238,7 @@ class BusinessValueWebSocketValidator:
             event_timeline: event_timeline,
             business_transparency: business_transparency,
             reasoning_visible: reasoning_visible,
-            "tool_transparency_shown": tool_transparency_shown,
+            "tool_transparency_shown: tool_transparency_shown,"
             actionable_results_delivered: actionable_results_delivered,
             total_sequence_time: time.time() - sequence_start,
             sequence_within_performance_limits: all([
@@ -272,7 +272,7 @@ class BusinessValueWebSocketValidator:
         
         # Check for substantive content
         total_content_length = 0
-        actionable_keywords = [analyze, "recommend", strategy, trend, insight, data", solution, "optimize]
+        actionable_keywords = [analyze, "recommend", strategy, trend, insight, data", solution, optimize]"
         actionable_mentions = 0
         
         for event in timeline:
@@ -286,7 +286,7 @@ class BusinessValueWebSocketValidator:
         
         # Business value scoring
         business_analysis[substantive_response] = total_content_length >= self.min_substantive_response_chars
-        business_analysis["actionable_insights_count"] = actionable_mentions
+        business_analysis["actionable_insights_count] = actionable_mentions"
         business_analysis[response_quality_score] = min(1.0, total_content_length / 200.0)  # Scale to 1.0
         
         # UX Quality Assessment
@@ -296,7 +296,7 @@ class BusinessValueWebSocketValidator:
             else:
                 business_analysis[chat_ux_quality] = good
         elif event_validation[all_events_received]:
-            business_analysis["chat_ux_quality"] = acceptable
+            business_analysis["chat_ux_quality] = acceptable"
         else:
             business_analysis[chat_ux_quality] = poor
         
@@ -312,14 +312,14 @@ class BusinessValueWebSocketValidator:
     def _is_business_relevant_event(self, event_data: Dict[str, Any) -> bool:
         Check if event contains business-relevant information.""
         content = event_data.get(content, ).lower()
-        business_keywords = [market, trend", analysis, "data, insight, strategy, recommendation]
+        business_keywords = [market, trend", analysis, data, insight, strategy, recommendation]"
         return any(keyword in content for keyword in business_keywords)
 
 
 # CLAUDE.md COMPLIANT TEST CASES
 @pytest.mark.e2e
 class WebSocketBusinessValueAuthenticatedTests:
-    ""
+    """
     CLAUDE.md COMPLIANT: WebSocket Business Value Tests with MANDATORY Authentication
     
     ALL tests use SSOT E2EAuthHelper as mandated by CLAUDE.md Section 6.
@@ -350,18 +350,18 @@ class WebSocketBusinessValueAuthenticatedTests:
         results = await self.validator.validate_authenticated_websocket_business_value(business_prompt)
         
         # CLAUDE.md COMPLIANCE ASSERTIONS - MUST NOT BE BYPASSED
-        assert results["authentication_compliant"],  FAIL:  CLAUDE.md VIOLATION: Authentication not compliant
-        assert results[claude_md_compliant],  FAIL:  CLAUDE.md VIOLATION: SSOT auth helper not used
+        assert results["authentication_compliant"], " FAIL:  CLAUDE.md VIOLATION: Authentication not compliant"
+        assert results[claude_md_compliant], " FAIL:  CLAUDE.md VIOLATION: SSOT auth helper not used"
         
         # BUSINESS VALUE ASSERTIONS - Revenue protection
         assert results[business_value_delivered"], [U+1F4B0] Business value not delivered - chat experience inadequate"
         assert results["revenue_impact_positive], [U+1F4C8] No positive revenue impact - AI response lacks actionable insights"
         
         # CRITICAL EVENT SEQUENCE ASSERTIONS
-        assert results[critical_events_complete],  CHART:  Critical WebSocket events incomplete - chat UX compromised
+        assert results[critical_events_complete], " CHART:  Critical WebSocket events incomplete - chat UX compromised"
         
         # PERFORMANCE ASSERTIONS
-        assert results["performance_within_limits"], f[U+23F0] Performance violation: {results['total_execution_time']:.1f}s > {self.validator.max_total_flow_seconds}s
+        assert results["performance_within_limits"], "f[U+23F0] Performance violation: {results['total_execution_time']:.1f}s > {self.validator.max_total_flow_seconds}s"
         
         # BUSINESS METRICS VALIDATION
         business_metrics = results[business_metrics]
@@ -408,15 +408,15 @@ class WebSocketBusinessValueAuthenticatedTests:
             
             # CLAUDE.md compliance checks per user
             assert results[authentication_compliant], f" FAIL:  User {i+1} authentication not compliant"
-            assert results[business_value_delivered], f[U+1F4B0] User {i+1} business value not delivered
+            assert results[business_value_delivered], "f[U+1F4B0] User {i+1} business value not delivered"
             
             if results[revenue_impact_positive]:
                 total_revenue_impact += 1
                 successful_sessions += 1
         
         # Multi-user business success criteria
-        assert successful_sessions >= len(user_prompts) * 0.8, f CHART:  Only {successful_sessions}/{len(user_prompts)} sessions delivered business value
-        assert total_revenue_impact >= 2, f[U+1F4B0] Only {total_revenue_impact} sessions had positive revenue impact
+        assert successful_sessions >= len(user_prompts) * 0.8, "f CHART:  Only {successful_sessions}/{len(user_prompts)} sessions delivered business value"
+        assert total_revenue_impact >= 2, "f[U+1F4B0] Only {total_revenue_impact} sessions had positive revenue impact"
         
         print(f" PASS:  CLAUDE.md COMPLIANT: Multi-user business isolation PASSED)"
         print(f[U+1F465] Successful sessions: {successful_sessions}/{len(user_prompts)}")  "
@@ -424,7 +424,7 @@ class WebSocketBusinessValueAuthenticatedTests:
     
     @pytest.mark.asyncio
     async def test_authenticated_performance_under_business_load(self):
-    ""
+    """
         CLAUDE.md COMPLIANT: Test WebSocket performance under business load with MANDATORY authentication.
         
         Validates:
@@ -465,7 +465,7 @@ class WebSocketBusinessValueAuthenticatedTests:
             if results[business_value_delivered]:
                 business_value_delivered_count += 1
             
-            if "business_analysis" in results:
+            if "business_analysis in results:"
                 total_response_quality += results[business_analysis][response_quality_score]
         
         # Business load performance assertions
@@ -474,9 +474,9 @@ class WebSocketBusinessValueAuthenticatedTests:
         avg_response_quality = total_response_quality / len(results_list) if results_list else 0
         
         # Performance requirements for business viability
-        assert auth_success_rate >= 0.9, f[U+1F510] Authentication success rate {auth_success_rate:.1%} below 90% requirement
-        assert business_success_rate >= 0.8, f[U+1F4B0] Business value delivery rate {business_success_rate:.1%} below 80% requirement
-        assert total_time <= 60.0, f[U+23F0] Load test took {total_time:.1f}s, requirement <= 60s
+        assert auth_success_rate >= 0.9, "f[U+1F510] Authentication success rate {auth_success_rate:.1%} below 90% requirement"
+        assert business_success_rate >= 0.8, "f[U+1F4B0] Business value delivery rate {business_success_rate:.1%} below 80% requirement"
+        assert total_time <= 60.0, "f[U+23F0] Load test took {total_time:.1f}s, requirement <= 60s"
         assert avg_response_quality >= 0.4, f" CHART:  Average response quality {avg_response_quality:.2f} below 0.4 requirement"
         
         print(f PASS:  CLAUDE.md COMPLIANT: Performance under business load PASSED)
@@ -487,7 +487,7 @@ class WebSocketBusinessValueAuthenticatedTests:
 
 
 if __name__ == __main__:
-    ""
+    """
     Direct execution for development testing.
     
     CLAUDE.md COMPLIANT: Uses SSOT authentication for all tests.
@@ -495,7 +495,7 @@ if __name__ == __main__:
     async def main():
         validator = BusinessValueWebSocketValidator()
         
-        print("[U+1F680] Starting CLAUDE.md COMPLIANT WebSocket Business Value Validation")
+        print("[U+1F680] Starting CLAUDE.md COMPLIANT WebSocket Business Value Validation)"
         print([U+1F510] Using MANDATORY SSOT Authentication)
         
         results = await validator.validate_authenticated_websocket_business_value()

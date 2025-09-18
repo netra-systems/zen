@@ -91,12 +91,12 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         await emitter.notify_agent_completed(agent_name='test_agent', result={'success': True}, execution_time_ms=1500)
         
         # Validate all events were emitted
-        assert len(self.emitted_events) == 5, fExpected 5 events, got {len(self.emitted_events)}
+        assert len(self.emitted_events) == 5, "fExpected 5 events, got {len(self.emitted_events)}"
         
         # Validate event types
         expected_events = {'agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed'}
         emitted_event_types = {event['event_type'] for event in self.emitted_events}
-        assert emitted_event_types == expected_events, fMissing events: {expected_events - emitted_event_types}
+        assert emitted_event_types == expected_events, "fMissing events: {expected_events - emitted_event_types}"
         
         print( PASS:  All 5 critical WebSocket events emitted successfully"")
         
@@ -123,7 +123,7 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         
         # Test tool dispatcher creation
         tool_dispatcher = engine.get_tool_dispatcher()
-        assert tool_dispatcher is not None, Tool dispatcher should not be None
+        assert tool_dispatcher is not None, "Tool dispatcher should not be None"
         
         # Test tool execution (this will fail to find the tool but should emit events)
         try:
@@ -192,9 +192,9 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         )
         
         # Validate that all components are connected
-        assert engine.websocket_emitter is not None, WebSocket emitter not set
+        assert engine.websocket_emitter is not None, "WebSocket emitter not set"
         assert engine.agent_factory is not None, Agent factory not set""
-        assert engine.context == context, User context not set correctly
+        assert engine.context == context, "User context not set correctly"
         
         # Validate tool dispatcher is created
         tool_dispatcher = engine.get_tool_dispatcher()

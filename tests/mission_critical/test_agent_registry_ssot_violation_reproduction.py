@@ -55,7 +55,7 @@ class AgentRegistrySSoTViolationReproductionTests(SSotAsyncTestCase):
         self.record_metric(golden_path_blocked", True)"
 
     async def test_duplicate_registry_imports_conflict(self):
-    "
+        """
     "
         CRITICAL: Reproduce duplicate AgentRegistry imports causing conflicts
         
@@ -117,7 +117,7 @@ class AgentRegistrySSoTViolationReproductionTests(SSotAsyncTestCase):
                 )
 
     async def test_websocket_event_delivery_inconsistency(self):
-    ""
+    """
         CRITICAL: Show WebSocket event delivery breaks with mixed registries
         
         Business Impact: Inconsistent user experience in chat (Golden Path broken)
@@ -181,14 +181,14 @@ class AgentRegistrySSoTViolationReproductionTests(SSotAsyncTestCase):
             )
 
     async def test_multi_user_isolation_breaks_with_mixed_registries(self):
-    ""
+    """
         CRITICAL: Show user isolation breaks when mixing different registries
         
         Business Impact: Enterprise security risk, data contamination
         Expected: FAIL (proves enterprise risk)
         After SSOT Fix: PASS (consistent isolation)
         
-        self.record_metric(test_type", "multi_user_security)
+        self.record_metric(test_type", multi_user_security)"
         self.record_metric(enterprise_risk_level, CRITICAL)
         
         # Try to create multiple registries and test isolation
@@ -245,14 +245,14 @@ class AgentRegistrySSoTViolationReproductionTests(SSotAsyncTestCase):
             )
 
     async def test_factory_pattern_inconsistency_reproduction(self):
-    ""
+    """
         CRITICAL: Show different registries have different factory patterns
         
         Business Impact: Developer confusion, inconsistent initialization
         Expected: FAIL (proves development velocity impact)
         After SSOT Fix: PASS (consistent factory pattern)
         
-        self.record_metric(test_type", "developer_experience)
+        self.record_metric(test_type", developer_experience)"
         self.record_metric(velocity_impact, HIGH)
         
         # Collect registry classes and their factory patterns
@@ -334,13 +334,13 @@ class AgentRegistrySSoTViolationReproductionTests(SSotAsyncTestCase):
         }
 
     async def test_ssot_violation_summary_metrics(self):
-        ""
+        """
         Generate comprehensive metrics on SSOT violations for business impact
         
         This test consolidates all violation data for management reporting
         Expected: FAIL with detailed violation report
 
-        self.record_metric("test_type, business_impact_summary")
+        self.record_metric("test_type, business_impact_summary)"
         
         violation_count = 0
         violation_details = []
@@ -385,7 +385,7 @@ class AgentRegistrySSoTViolationReproductionTests(SSotAsyncTestCase):
         # Record comprehensive metrics
         self.record_metric("total_ssot_violations, violation_count)"
         self.record_metric(violation_details, violation_details)
-        self.record_metric(golden_path_impact, BLOCKED" if violation_count > 0 else "CLEAR)
+        self.record_metric(golden_path_impact, BLOCKED" if violation_count > 0 else CLEAR)"
         self.record_metric(business_risk_level, CRITICAL if violation_count > 0 else LOW")"
         
         # This should FAIL initially with violation summary

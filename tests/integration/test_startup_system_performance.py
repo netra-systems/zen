@@ -10,10 +10,10 @@ class TestWebSocketConnection:
 """
         """Send JSON message.""""""
         """Send JSON message.""""""
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -62,7 +62,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
         self.temp_dir = tempfile.mkdtemp()"""
         backend_dir = Path(self.temp_dir) / "netra_backend" / "app"
         backend_dir.mkdir(parents=True, exist_ok=True)
-        (backend_dir / "main.py").touch()  # Create main.py file
+        (backend_dir / "main.py).touch()  # Create main.py file"
 
         frontend_dir = Path(self.temp_dir) / "frontend"
         frontend_dir.mkdir(parents=True, exist_ok=True)
@@ -89,7 +89,7 @@ essential_env = {'DATABASE_URL': 'postgresql://test:test@localhost:5433/test',, 
         # Mock: Component isolation for testing without external dependencies
         launcher = DevLauncher(self.config)
         result = launcher.check_environment()
-        assert isinstance(result, bool)
+        assert isinstance(result, "bool)"
 
         pass"""
         pass"""

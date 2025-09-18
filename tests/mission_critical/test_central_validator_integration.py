@@ -31,7 +31,7 @@ from shared.isolated_environment import get_env
 
     # Test staging environment
 original_env = get_env().get(ENVIRONMENT)
-get_env().set(ENVIRONMENT", "staging, test)
+get_env().set(ENVIRONMENT", staging, test)"
 
     # Clear any existing JWT secrets to force hard failure
 get_env().delete(JWT_SECRET_STAGING)"
@@ -57,7 +57,7 @@ else:
 def test_backend_service_uses_central_validator_for_jwt():
     "Test backend service delegates JWT secret to central validator."
 pass
-print(" PASS:  Testing backend service central validator integration for JWT...")
+print(" PASS:  Testing backend service central validator integration for JWT...)"
 
     # Import backend service
 from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretManager
@@ -65,7 +65,7 @@ from shared.isolated_environment import get_env
 
     # Test production environment
 original_env = get_env().get(ENVIRONMENT)
-get_env().set("ENVIRONMENT, production", test)
+get_env().set("ENVIRONMENT, production, test)"
 
     # Clear any existing JWT secrets to force hard failure
 get_env().delete(JWT_SECRET_STAGING)"
@@ -99,7 +99,7 @@ from shared.isolated_environment import get_env
 
     # Test staging environment
 original_env = get_env().get(ENVIRONMENT)
-get_env().set(ENVIRONMENT", "staging, test)
+get_env().set(ENVIRONMENT", staging, test)"
 
     # Clear database configuration to force hard failure
 get_env().delete(DATABASE_HOST)"
@@ -112,12 +112,12 @@ try:
     secret_manager.get_database_credentials()
 raise AssertionError(Expected ValueError for missing database configuration)
 except ValueError as e:
-    assert (DATABASE_HOST" in str(e) or "DATABASE_PASSWORD in str(e))
+    assert (DATABASE_HOST" in str(e) or DATABASE_PASSWORD in str(e))"
 print(   PASS:  Backend service properly uses central validator for database credentials)
 finally:
                 # Restore environment
 if original_env:
-    get_env().set("ENVIRONMENT, original_env, test")
+    get_env().set("ENVIRONMENT, original_env, test)"
 else:
     get_env().delete(ENVIRONMENT)
 
@@ -147,7 +147,7 @@ try:
 raise AssertionError(Expected ValueError for missing Redis configuration")"
 except ValueError as e:
     assert (REDIS_HOST in str(e) or REDIS_PASSWORD in str(e))
-    print("   PASS:  Backend service properly uses central validator for Redis credentials")
+    print("   PASS:  Backend service properly uses central validator for Redis credentials)"
 finally:
                 # Restore environment
 if original_env:
@@ -232,7 +232,7 @@ finally:
 
 def test_development_environment_allows_defaults():
     "Test that development environment still allows reasonable defaults."
-    print(" PASS:  Testing development environment allows reasonable defaults...")
+    print(" PASS:  Testing development environment allows reasonable defaults...)"
 
 from shared.configuration import get_central_validator
 
@@ -274,13 +274,13 @@ validator2 = get_central_validator()
 
     # Should be the same singleton instance
 assert validator1 is validator2
-print("   PASS:  Central validator is properly used as singleton SSOT")
+print("   PASS:  Central validator is properly used as singleton SSOT)"
 
 
 def run_all_tests():
     Run all central validator integration tests.""
     print( ALERT:  Central Configuration Validator Integration Test Suite)
-print(=" * 70")
+print(=" * 70)"
 
 tests = [
 test_auth_service_uses_central_validator_for_jwt,
@@ -307,7 +307,7 @@ failed += 1
 print(formatted_string)
 
 if failed == 0:
-    print(" PASS:  All central validator integration tests PASSED")
+    print(" PASS:  All central validator integration tests PASSED)"
 print( CELEBRATION:  Central configuration validator successfully integrated across all services)"
 print( CELEBRATION:  Central configuration validator successfully integrated across all services)"
 return True

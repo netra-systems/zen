@@ -37,7 +37,7 @@ logger = central_logger.get_logger(__name__)
 
 
 class UserExecutionEngineIsolationTests(SSotBaseTestCase):
-    ""Test UserExecutionEngine multi-user isolation functionality.
+    ""Test UserExecutionEngine multi-user isolation functionality."
     
     def setup_method(self, method):
         Set up test environment for isolation testing.""
@@ -110,7 +110,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 self.assertEqual(engine2.get_user_context().user_id, user2_id, Engine2 should have user2 context)
                 
                 # Test 2: State manipulation isolation
-                engine1.set_agent_state(test_agent", "user1_state)
+                engine1.set_agent_state(test_agent", user1_state)"
                 engine2.set_agent_state(test_agent, user2_state)
                 
                 # States should be isolated
@@ -118,8 +118,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 self.assertEqual(engine2.get_agent_state(test_agent"), user2_state)"
                 
                 # Test 3: Result storage isolation
-                engine1.set_agent_result(test_result, {user: user1", "data: secret1)
-                engine2.set_agent_result(test_result, {user": "user2, data: secret2)
+                engine1.set_agent_result(test_result, {user: user1", data: secret1)"
+                engine2.set_agent_result(test_result, {user": user2, data: secret2)"
                 
                 result1 = engine1.get_agent_result(test_result")"
                 result2 = engine2.get_agent_result(test_result)
@@ -236,7 +236,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 
             except Exception as e:
                 logger.error(fConcurrent operation failed for user {user_index}: {e})
-                return {user_index": user_index, "error: str(e)}
+                return {user_index": user_index, error: str(e)}"
         
         async def test_concurrency():
             # Run multiple users concurrently
@@ -283,7 +283,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
         self.assertTrue(result, Concurrent user operations should work without interference)
     
     def test_websocket_event_routing_isolation(self):
-        ""Test that WebSocket events are routed only to the correct users.
+        ""Test that WebSocket events are routed only to the correct users."
         logger.info(📡 WEBSOCKET TEST: Validating WebSocket event routing isolation)"
         logger.info(📡 WEBSOCKET TEST: Validating WebSocket event routing isolation)"
         
@@ -350,7 +350,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 
                 # Trigger WebSocket events for both users
                 await websocket_emitter1.notify_agent_started(test_agent1", {test: user1_event)"
-                await websocket_emitter2.notify_agent_started("test_agent2, {test": user2_event)
+                await websocket_emitter2.notify_agent_started("test_agent2, {test: user2_event)"
                 
                 await websocket_emitter1.notify_agent_thinking(test_agent1, "User 1 thinking, 1)"
                 await websocket_emitter2.notify_agent_thinking(test_agent2", User 2 thinking, 1)"
@@ -513,7 +513,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                     # Add some state and data
                     engine.set_agent_state(ftest_agent_{i}, fstate_{i})
                     engine.set_agent_result(ftest_result_{i), {
-                        "large_data: x" * 1000,  # 1KB of data
+                        "large_data: x * 1000,  # 1KB of data"
                         iteration: i,
                         user_id: user_id"
                         user_id: user_id"

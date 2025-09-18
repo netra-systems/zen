@@ -46,7 +46,7 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
         # Mock environment properly - return a mock object that has get method
         mock_env_dict = MagicMock()
         mock_env_dict.get.side_effect = lambda key, default=None: {
-            ENVIRONMENT": "staging,
+            ENVIRONMENT": staging,"
             AUTH_CLIENT_TIMEOUT: 30
         }.get(key, default)
         self.mock_env.return_value = mock_env_dict
@@ -108,7 +108,7 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio  
     async def test_websocket_179_second_latency_reproduction(self):
-        ""
+        """
         REPRODUCTION TEST: 179-second WebSocket latency due to auth timeout waits.
         
         This test reproduces the reported issue where WebSocket connections
@@ -310,7 +310,7 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_auth_service_healthy_but_websocket_fails(self):
-    ""
+    """
         REPRODUCTION TEST: Auth service healthy but WebSocket still fails.
         
         This test reproduces the specific case where auth service responds
@@ -327,7 +327,7 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
                 valid: True,""
                 "user_id: test_user,"
                 email: test@example.com,
-                "permissions: [user:read"]
+                "permissions: [user:read]"
             }
         
         # Mock WebSocket-specific timeout behavior

@@ -10,10 +10,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -62,7 +62,7 @@ class ValidationError(Exception):
     def __init__(self, errors):
         pass
         self.errors = errors
-        super().__init__("Validation failed")
+        super().__init__("Validation failed)"
 
 class ErrorHandler:
     async def handle_exception(self, exception):
@@ -139,21 +139,21 @@ error_handler = ErrorHandler()
 
 with patch.object(error_handler, 'handle_exception') as mock_handle:
 mock_handle.return_value = { }
-"error_id": "err_123",
-"handled": True,
-"logged": True
+"error_id": "err_123,"
+"handled: True,"
+"logged: True"
             
 
             # Simulate unhandled exception
 try:
     pass
-raise ValueError("Unexpected error")
+raise ValueError("Unexpected error)"
 except Exception as e:
     pass
 result = await error_handler.handle_exception(e)
 
-assert result["handled"] is True
-assert result["logged"] is True
+assert result["handled] is True"
+assert result["logged] is True"
 
                     # Test 107: Validation error handling
 @pytest.mark.asyncio
@@ -163,21 +163,21 @@ pass
 error_handler = ErrorHandler()
 
 validation_errors = [ ]
-{"field": "email", "message": "Invalid email format"},
-{"field": "age", "message": "Must be between 0 and 120"}
+{"field": "email", "message": "Invalid email format},"
+{"field": "age", "message": "Must be between 0 and 120}"
                         
 
 with patch.object(error_handler, 'handle_validation_errors') as mock_validate:
 mock_validate.return_value = { }
-"status": "validation_failed",
-"errors": validation_errors,
+"status": "validation_failed,"
+"errors: validation_errors,"
 "error_code": "VALIDATION_ERROR"
                             
 
 result = await error_handler.handle_validation_errors(validation_errors)
 
 assert result["status"] == "validation_failed"
-assert len(result["errors"]) == 2
+assert len(result["errors]) == 2"
 
                             # Test 108: Retry mechanism with exponential backoff
 @pytest.mark.asyncio
@@ -192,9 +192,9 @@ nonlocal attempt_count
 attempt_count += 1
 if attempt_count < 3:
     pass
-raise ConnectionError("Service unavailable")
+raise ConnectionError("Service unavailable)"
 await asyncio.sleep(0)
-return {"success": True}
+return {"success: True}"
 
         # Mock: Async component isolation for testing without real async operations
 result = await error_handler.retry_with_backoff( )
@@ -203,7 +203,7 @@ max_retries=3,
 base_delay=1
         
 
-assert result["success"] is True
+assert result["success] is True"
 assert attempt_count == 3
 
         # Test 109: Error aggregation and reporting
@@ -214,25 +214,25 @@ pass
 error_handler = ErrorHandler()
 
 errors = [ ]
-ApplicationError("Error 1", code="ERR001"),
-ApplicationError("Error 2", code="ERR002"),
-ApplicationError("Error 3", code="ERR001")  # Duplicate code
+ApplicationError("Error 1", code="ERR001),"
+ApplicationError("Error 2", code="ERR002),"
+ApplicationError("Error 3", code="ERR001)  # Duplicate code"
             
 
 with patch.object(error_handler, 'aggregate_errors') as mock_aggregate:
 mock_aggregate.return_value = { }
-"total_errors": 3,
-"unique_errors": 2,
-"error_summary": { }
-"ERR001": 2,
-"ERR002": 1
+"total_errors: 3,"
+"unique_errors: 2,"
+"error_summary: { }"
+"ERR001: 2,"
+"ERR002: 1"
                 
                 
 
 result = await error_handler.aggregate_errors(errors)
 
-assert result["total_errors"] == 3
-assert result["unique_errors"] == 2
+assert result["total_errors] == 3"
+assert result["unique_errors] == 2"
 
                 # Test 110: Dead letter queue handling
 @pytest.mark.asyncio
@@ -241,23 +241,23 @@ assert result["unique_errors"] == 2
 error_handler = ErrorHandler()
 
 failed_message = { }
-"id": "msg_123",
-"content": "Failed to process",
-"attempts": 5,
+"id": "msg_123,"
+"content": "Failed to process,"
+"attempts: 5,"
 "last_error": "Timeout"
                     
 
 with patch.object(error_handler, 'send_to_dlq') as mock_dlq:
 mock_dlq.return_value = { }
-"queued": True,
-"dlq_id": "dlq_456",
-"retry_after": datetime.now(timezone.utc) + timedelta(hours=1)
+"queued: True,"
+"dlq_id": "dlq_456,"
+"retry_after: datetime.now(timezone.utc) + timedelta(hours=1)"
                         
 
 result = await error_handler.send_to_dlq(failed_message)
 
-assert result["queued"] is True
-assert "dlq_id" in result
+assert result["queued] is True"
+assert "dlq_id in result"
 
                         # Test 111: Error notification and alerting
 @pytest.mark.asyncio
@@ -267,22 +267,22 @@ pass
 error_handler = ErrorHandler()
 
 critical_error = ApplicationError( )
-"Database connection lost",
-code="CRITICAL_DB_ERROR",
+"Database connection lost,"
+code="CRITICAL_DB_ERROR,"
 severity="critical"
                             
 
 with patch.object(error_handler, 'send_alert') as mock_alert:
 mock_alert.return_value = { }
-"alert_sent": True,
-"channels": ["email", "slack", "pagerduty"],
+"alert_sent: True,"
+"channels": ["email", "slack", "pagerduty],"
 "alert_id": "alert_789"
                                 
 
 result = await error_handler.send_alert(critical_error)
 
-assert result["alert_sent"] is True
-assert "pagerduty" in result["channels"]
+assert result["alert_sent] is True"
+assert "pagerduty" in result["channels]"
 
                                 # Test 112: Structured error logging
 @pytest.mark.asyncio
@@ -291,26 +291,26 @@ assert "pagerduty" in result["channels"]
 logging_service = LoggingService()
 
 error_context = { }
-"user_id": "user_123",
-"request_id": "req_456",
-"endpoint": "/api/users",
+"user_id": "user_123,"
+"request_id": "req_456,"
+"endpoint": "/api/users,"
 "method": "POST"
                                     
 
 with patch.object(logging_service, 'log_error') as mock_log:
 mock_log.return_value = { }
-"logged": True,
-"log_id": "log_123",
-"timestamp": datetime.now(timezone.utc).isoformat()
+"logged: True,"
+"log_id": "log_123,"
+"timestamp: datetime.now(timezone.utc).isoformat()"
                                         
 
 result = await logging_service.log_error( )
-"User creation failed",
+"User creation failed,"
 context=error_context,
 level="ERROR"
                                         
 
-assert result["logged"] is True
+assert result["logged] is True"
 mock_log.assert_called_once()
 
                                         # Test 113: Graceful degradation
@@ -322,14 +322,14 @@ error_handler = ErrorHandler()
 
 with patch.object(error_handler, 'handle_service_failure') as mock_degrade:
 mock_degrade.return_value = { }
-"degraded_mode": True,
-"fallback_service": "cache",
-"features_disabled": ["real_time_updates", "advanced_search"]
+"degraded_mode: True,"
+"fallback_service": "cache,"
+"features_disabled": ["real_time_updates", "advanced_search]"
                                                 
 
-result = await error_handler.handle_service_failure("search_service")
+result = await error_handler.handle_service_failure("search_service)"
 
-assert result["degraded_mode"] is True
+assert result["degraded_mode] is True"
 assert result["fallback_service"] == "cache"
 
                                                 # Test 114: Error recovery strategies
@@ -339,24 +339,24 @@ assert result["fallback_service"] == "cache"
 error_handler = ErrorHandler()
 
 strategies = { }
-"retry": {"max_attempts": 3, "delay": 1},
-"fallback": {"service": "backup_service"},
-"circuit_break": {"threshold": 5, "timeout": 30}
+"retry": {"max_attempts": 3, "delay: 1},"
+"fallback": {"service": "backup_service},"
+"circuit_break": {"threshold": 5, "timeout: 30}"
                                                     
 
 with patch.object(error_handler, 'apply_recovery_strategy') as mock_recover:
 mock_recover.return_value = { }
-"recovered": True,
-"strategy_used": "fallback",
-"recovery_time_ms": 150
+"recovered: True,"
+"strategy_used": "fallback,"
+"recovery_time_ms: 150"
                                                         
 
 result = await error_handler.apply_recovery_strategy( )
-Exception("Service error"),
+Exception("Service error),"
 strategies
                                                         
 
-assert result["recovered"] is True
+assert result["recovered] is True"
 assert result["strategy_used"] == "fallback"
 
                                                         # Test 115: Error correlation and tracing
@@ -371,16 +371,16 @@ span_id = "span_456"
 
 with patch.object(error_handler, 'correlate_errors') as mock_correlate:
 mock_correlate.return_value = { }
-"trace_id": trace_id,
-"related_errors": 3,
-"services_affected": ["auth", "api", "database"],
+"trace_id: trace_id,"
+"related_errors: 3,"
+"services_affected": ["auth", "api", "database],"
 "root_cause": "network_timeout"
                                                                 
 
 result = await error_handler.correlate_errors(trace_id)
 
-assert result["related_errors"] == 3
-assert "database" in result["services_affected"]
+assert result["related_errors] == 3"
+assert "database" in result["services_affected]"
 
                                                                 # Test 116: Rate limiting error responses
 @pytest.mark.asyncio
@@ -390,16 +390,16 @@ error_handler = ErrorHandler()
 
 with patch.object(error_handler, 'check_error_rate_limit') as mock_limit:
 mock_limit.return_value = { }
-"rate_limited": True,
-"retry_after": 60,
-"limit": 100,
-"remaining": 0
+"rate_limited: True,"
+"retry_after: 60,"
+"limit: 100,"
+"remaining: 0"
                                                                         
 
-result = await error_handler.check_error_rate_limit("client_123")
+result = await error_handler.check_error_rate_limit("client_123)"
 
-assert result["rate_limited"] is True
-assert result["retry_after"] == 60
+assert result["rate_limited] is True"
+assert result["retry_after] == 60"
 
                                                                         # Test 117: Error budget tracking
 @pytest.mark.asyncio
@@ -410,16 +410,16 @@ error_handler = ErrorHandler()
 
 with patch.object(error_handler, 'check_error_budget') as mock_budget:
 mock_budget.return_value = { }
-"budget_remaining": 0.1,  # 10% remaining
-"errors_this_period": 450,
-"budget_exhausted": False,
-"alert_threshold_reached": True
+"budget_remaining: 0.1,  # 10% remaining"
+"errors_this_period: 450,"
+"budget_exhausted: False,"
+"alert_threshold_reached: True"
                                                                                 
 
-result = await error_handler.check_error_budget("api_service")
+result = await error_handler.check_error_budget("api_service)"
 
-assert result["budget_remaining"] == 0.1
-assert result["alert_threshold_reached"] is True
+assert result["budget_remaining] == 0.1"
+assert result["alert_threshold_reached] is True"
 
                                                                                 # Test 118: Compensation transactions
 @pytest.mark.asyncio
@@ -428,24 +428,24 @@ assert result["alert_threshold_reached"] is True
 error_handler = ErrorHandler()
 
 failed_transaction = { }
-"id": "tx_123",
-"operations": [ ]
-{"type": "debit", "amount": 100, "account": "acc_1"},
-{"type": "credit", "amount": 100, "account": "acc_2"}
+"id": "tx_123,"
+"operations: [ ]"
+{"type": "debit", "amount": 100, "account": "acc_1},"
+{"type": "credit", "amount": 100, "account": "acc_2}"
                                                                                     
                                                                                     
 
 with patch.object(error_handler, 'compensate_transaction') as mock_compensate:
 mock_compensate.return_value = { }
-"compensated": True,
-"reversed_operations": 2,
+"compensated: True,"
+"reversed_operations: 2,"
 "compensation_id": "comp_456"
                                                                                         
 
 result = await error_handler.compensate_transaction(failed_transaction)
 
-assert result["compensated"] is True
-assert result["reversed_operations"] == 2
+assert result["compensated] is True"
+assert result["reversed_operations] == 2"
 
                                                                                         # Test 119: Error deduplication
 @pytest.mark.asyncio
@@ -455,22 +455,22 @@ pass
 error_handler = ErrorHandler()
 
 duplicate_errors = [ ]
-ApplicationError("Connection timeout", code="TIMEOUT"),
-ApplicationError("Connection timeout", code="TIMEOUT"),
-ApplicationError("Connection timeout", code="TIMEOUT")
+ApplicationError("Connection timeout", code="TIMEOUT),"
+ApplicationError("Connection timeout", code="TIMEOUT),"
+ApplicationError("Connection timeout", code="TIMEOUT)"
                                                                                             
 
 with patch.object(error_handler, 'deduplicate_errors') as mock_dedup:
 mock_dedup.return_value = { }
-"unique_errors": 1,
-"total_occurrences": 3,
-"deduplication_ratio": 0.67
+"unique_errors: 1,"
+"total_occurrences: 3,"
+"deduplication_ratio: 0.67"
                                                                                                 
 
 result = await error_handler.deduplicate_errors(duplicate_errors)
 
-assert result["unique_errors"] == 1
-assert result["total_occurrences"] == 3
+assert result["unique_errors] == 1"
+assert result["total_occurrences] == 3"
 
                                                                                                 # Test 120: Error context preservation
 @pytest.mark.asyncio
@@ -479,32 +479,32 @@ assert result["total_occurrences"] == 3
 error_handler = ErrorHandler()
 
 original_context = { }
-"user_id": "user_123",
-"session_id": "session_456",
-"request_path": "/api/orders",
-"timestamp": datetime.now(timezone.utc).isoformat()
+"user_id": "user_123,"
+"session_id": "session_456,"
+"request_path": "/api/orders,"
+"timestamp: datetime.now(timezone.utc).isoformat()"
                                                                                                     
 
 with patch.object(error_handler, 'wrap_with_context') as mock_wrap:
 mock_wrap.return_value = { }
-"error": "Processing failed",
-"context": original_context,
-"stack_trace": ["frame1", "frame2", "frame3"],
-"propagated_through": ["service_a", "service_b"]
+"error": "Processing failed,"
+"context: original_context,"
+"stack_trace": ["frame1", "frame2", "frame3],"
+"propagated_through": ["service_a", "service_b]"
                                                                                                         
 
 try:
     pass
-raise Exception("Processing failed")
+raise Exception("Processing failed)"
 except Exception as e:
     pass
 result = await error_handler.wrap_with_context(e, original_context)
 
 assert result["context"]["user_id"] == "user_123"
-assert len(result["propagated_through"]) == 2
+assert len(result["propagated_through]) == 2"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
-pytest.main([__file__, "-v"])
+pytest.main([__file__, "-v])"
 pass

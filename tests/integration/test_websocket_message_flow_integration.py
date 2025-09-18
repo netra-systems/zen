@@ -65,7 +65,7 @@ except ImportError:
 
 # User Context Management
 try:
-    from netra_backend.app.services.user_execution_context import (
+    from netra_backend.app.services.user_execution_context import ()
         UserExecutionContext,
         create_isolated_execution_context,
         managed_user_context
@@ -103,7 +103,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
         ]
 
     async def teardown_method(self, method):
-        ""Cleanup WebSocket connections and test data
+        ""Cleanup WebSocket connections and test data"
         # Close all WebSocket connections
         for connection in self.websocket_connections:
             try:
@@ -122,7 +122,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(25)
     async def test_websocket_agent_registry_integration(self):
-    ""
+    """
         Test WebSocket integration with Agent Registry
         COVERS: Agent Registry (11.48% coverage gap - 740/836 lines missing)
         
@@ -150,7 +150,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
         # Verify WebSocket registration
         assert registry._websocket_manager is not None
-        assert hasattr(registry._websocket_manager, 'send_agent_event')
+        assert hasattr(registry._websocket_manager, "'send_agent_event')"
 
         # Test agent event sending through registry
         test_event = {
@@ -319,7 +319,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(25)
     async def test_websocket_agent_execution_engine_integration(self):
-    ""
+    """
         Test WebSocket integration with Agent Execution Engine
         COVERS: User Execution Engine (13.69% coverage - 555/643 lines missing)
         
@@ -434,7 +434,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.timeout(20)
     async def test_websocket_error_handling_and_recovery(self):
-    ""
+    """
         Test WebSocket error handling and recovery mechanisms
         COVERS: WebSocket error scenarios and system resilience
         
@@ -517,7 +517,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
             # Verify agent instance has WebSocket integration
             assert agent_instance is not None
-            assert hasattr(agent_instance, '_websocket_bridge') or hasattr(agent_instance, 'websocket_bridge')
+            assert hasattr(agent_instance, "'_websocket_bridge') or hasattr(agent_instance, 'websocket_bridge')"
 
             # Test agent instance WebSocket event sending
             await agent_instance.send_status_update('Agent instance created successfully')
@@ -529,11 +529,11 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
             # Verify agent instance event structure
             assert 'type' in received_data
             assert received_data.get('user_id') == user_id
-            assert 'Agent instance' in received_data.get('message', '')
+            assert 'Agent instance' in received_data.get('message', "'')"
 
     @pytest.mark.timeout(20)
     async def test_websocket_message_serialization_and_deserialization(self):
-    ""
+    """
         Test WebSocket message serialization/deserialization with complex data
         COVERS: WebSocket message format consistency and data integrity
         
@@ -584,7 +584,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
         # Verify complex data integrity
         assert received_data['type'] == 'tool_completed'
         assert received_data['user_id'] == user_id
-        assert received_data['data']['nested_object']['array'] == [1, 2, 3, 'string', {'nested_again': True}]
+        assert received_data['data']['nested_object']['array'] == [1, "2, 3, 'string', {'nested_again': True}]"
         assert received_data['data']['nested_object']['unicode'] == 'Special characters: áéíóú 中文 🚀'
         assert received_data['data']['metadata']['execution_time'] == 1.234
         assert received_data['data']['metadata']['memory_usage'] == 67890
@@ -652,7 +652,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
         # Should handle at least 80% of messages successfully
         success_rate = received_count / message_count
-        assert success_rate >= 0.8, fSuccess rate {success_rate} below 80%
+        assert success_rate >= 0.8, "fSuccess rate {success_rate} below 80%"
 
         # Performance should be reasonable (less than 20 seconds for 50 messages)
         assert total_duration < 20.0, fTotal duration {total_duration}s too slow""

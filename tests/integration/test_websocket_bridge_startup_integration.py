@@ -50,7 +50,7 @@ class MockApp:
 
 
 class MockAppState:
-    "Mock app state that simulates FastAPI's app.state"'
+    "Mock app state that simulates FastAPI's app.state'"
     
     def __init__(self):
         self.agent_websocket_bridge: Optional[AgentWebSocketBridge] = None
@@ -113,7 +113,7 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         assert isinstance(self.app.state.agent_websocket_bridge, AgentWebSocketBridge), Bridge is wrong type""
         
         # Validate bridge has connection pool
-        assert bridge._connection_pool is not None, Bridge missing connection pool
+        assert bridge._connection_pool is not None, "Bridge missing connection pool"
         
         logger.info( PASS:  WebSocket bridge properly initialized and stored in app.state")"
         return True
@@ -158,7 +158,7 @@ class WebSocketBridgeStartupIntegrationTestSuite:
             # Validate bridge has expected interface
             expected_methods = ['emit_event', 'broadcast_event']
             for method in expected_methods:
-                assert hasattr(websocket_bridge, method), fBridge missing method: {method}
+                assert hasattr(websocket_bridge, "method), fBridge missing method: {method}"
             
         except Exception as e:
             pytest.fail(f FAIL:  WebSocket bridge integration failed: {e})
@@ -173,12 +173,12 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         Validates:
         - ExecutionEngineFactory constructor receives bridge
         - Factory can create UserExecutionEngine with WebSocket emitter
-        - No "WebSocket bridge not available" errors occur
+        - No "WebSocket bridge not available errors occur"
 
         logger.info("[U+1F9EA] TEST 3: ExecutionEngineFactory bridge integration)"
         
         # Ensure bridge is available
-        assert self.app.state.agent_websocket_bridge is not None, Bridge not available
+        assert self.app.state.agent_websocket_bridge is not None, "Bridge not available"
         
         # Create ExecutionEngineFactory with bridge (as startup does)
         try:
@@ -189,11 +189,11 @@ class WebSocketBridgeStartupIntegrationTestSuite:
             # Store in app state as startup does
             self.app.state.execution_engine_factory = execution_factory
             
-            logger.info( PASS:  ExecutionEngineFactory created with WebSocket bridge)""
+            logger.info("PASS:  ExecutionEngineFactory created with WebSocket bridge))"
             
             # Validate factory has bridge reference
             assert execution_factory._websocket_bridge is not None, Factory missing websocket_bridge""
-            assert execution_factory._websocket_bridge is self.app.state.agent_websocket_bridge, Bridge reference mismatch
+            assert execution_factory._websocket_bridge is self.app.state.agent_websocket_bridge, "Bridge reference mismatch"
             
         except Exception as e:
             pytest.fail(f FAIL:  ExecutionEngineFactory initialization failed: {e}")"
@@ -245,17 +245,17 @@ class WebSocketBridgeStartupIntegrationTestSuite:
             
             emitter = UserWebSocketEmitter(user_execution_context)
             
-            logger.info( PASS:  UserWebSocketEmitter created successfully)""
+            logger.info("PASS:  UserWebSocketEmitter created successfully))"
             
             # Validate emitter configuration
             assert emitter._context.user_id == context.user_id, "Emitter user_id mismatch"
-            assert emitter._context.thread_id == context.thread_id, Emitter thread_id mismatch
+            assert emitter._context.thread_id == context.thread_id, "Emitter thread_id mismatch"
             assert emitter._context.run_id == context.run_id, "Emitter run_id mismatch"
             
         except Exception as e:
             pytest.fail(f FAIL:  WebSocket emitter creation failed: {e})
             
-        logger.info( PASS:  UserExecutionContext can create WebSocket emitters via factory)""
+        logger.info("PASS:  UserExecutionContext can create WebSocket emitters via factory))"
         return True
 
     async def test_05_end_to_end_agent_websocket_event_flow(self):
@@ -319,8 +319,8 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         # Test sending all 5 critical WebSocket events
         critical_events = [
             (agent_started", {message: Agent began processing your request),"
-            ("agent_thinking, {message": Agent is analyzing the problem),
-            (tool_executing, {"tool: analysis_tool", message: Running analysis),
+            ("agent_thinking, {message: Agent is analyzing the problem),"
+            (tool_executing, {"tool: analysis_tool, message: Running analysis),"
             ("tool_completed, {tool": analysis_tool, result: Analysis complete),""
             (agent_completed", {message: Agent has completed processing)"
         ]
@@ -446,7 +446,7 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         await self.teardown_test_environment()
         
         # Generate summary
-        success_rate = (test_results["passed_tests) / test_results[total_tests") * 100
+        success_rate = (test_results["passed_tests) / test_results[total_tests) * 100"
         test_results[success_rate] = success_rate
         test_results[overall_status] = "PASSED if success_rate == 100 else FAILED"
         
@@ -463,7 +463,7 @@ class WebSocketBridgeStartupIntegrationTestSuite:
 # FastAPI-style test functions for pytest compatibility
 @pytest.mark.asyncio
 async def test_websocket_bridge_startup_integration_suite():
-    ""
+    """
     Main integration test for WebSocket bridge startup flow
     
     This test addresses WHY #4 from Five Whys analysis by providing comprehensive
@@ -474,7 +474,7 @@ async def test_websocket_bridge_startup_integration_suite():
     results = await suite.run_all_tests()
     
     # Assert overall success
-    assert results["overall_status) == PASSED", (
+    assert results["overall_status) == PASSED, ("
         fWebSocket bridge startup integration failed: 
         f{results['failed_tests']}/{results['total_tests']} tests failed
     )

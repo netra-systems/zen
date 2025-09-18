@@ -51,14 +51,14 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SsotTestMetric
 from shared.isolated_environment import get_env
 
 # Core WebSocket System Under Test
-from netra_backend.app.websocket_core.gcp_initialization_validator import (
+from netra_backend.app.websocket_core.gcp_initialization_validator import ()
     GCPWebSocketInitializationValidator,
     GCPReadinessState,
     GCPReadinessResult,
     create_gcp_websocket_validator
 )
 
-from netra_backend.app.websocket_core.service_readiness_validator import (
+from netra_backend.app.websocket_core.service_readiness_validator import ()
     ServiceReadinessValidator,
     create_service_readiness_validator,
     websocket_readiness_guard
@@ -85,7 +85,7 @@ class MissionCriticalWebSocketTester:
         timeout_seconds: float = 10.0,
         expect_success: bool = True
     ) -> Dict[str, Any]:
-""
+"""
         Test WebSocket connection with detailed error tracking.
         
         Returns connection result with timing and error details.
@@ -285,7 +285,7 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
     
     @pytest.mark.asyncio
     async def test_race_condition_detection_before_fix(self):
-        "
+        """
         "
         CRITICAL: Detect the startup race condition that causes 1011 errors.
         
@@ -362,7 +362,7 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
     
     @pytest.mark.asyncio
     async def test_complete_startup_sequence_with_supervisor_creation(self):
-    "
+        """
     "
         CRITICAL: Validate complete startup sequence creates agent_supervisor correctly.
         
@@ -529,7 +529,7 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
     
     @pytest.mark.asyncio
     async def test_1011_error_prevention_validation(self):
-        "
+        """
         "
         CRITICAL: Validate that 1011 errors are prevented by the fix.
         
@@ -684,7 +684,7 @@ class WebSocketAgentInteractionFlowTests(SSotAsyncTestCase):
     "Mission critical tests for complete WebSocket agent interaction flow."
     
     def setUp(self):
-        ""Set up end-to-end WebSocket agent flow testing.
+        ""Set up end-to-end WebSocket agent flow testing."
         super().setUp()
         self.test_metrics = SsotTestMetrics()
         self.test_metrics.start_timing()
@@ -730,7 +730,7 @@ class WebSocketAgentInteractionFlowTests(SSotAsyncTestCase):
         # Mock complete agent infrastructure
         app.state.agent_supervisor = type('MockSupervisor', (), {
             'process_user_message': lambda msg: fProcessed: {msg},
-            'execute_agent_workflow': lambda: [agent_started, "agent_thinking, agent_completed"]
+            'execute_agent_workflow': lambda: [agent_started, "agent_thinking, agent_completed]"
         }()
         
         app.state.thread_service = type('MockThreadService', (), {
@@ -858,7 +858,7 @@ class WebSocketAgentInteractionFlowTests(SSotAsyncTestCase):
         )
         
         self.test_metrics.record_custom(agent_workflow_success_rate, workflow_success_rate)
-        self.test_metrics.record_custom("agent_workflow_validated", True)
+        self.test_metrics.record_custom("agent_workflow_validated, True)"
 
 
 if __name__ == '__main__':

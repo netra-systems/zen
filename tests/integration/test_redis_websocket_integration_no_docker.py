@@ -58,7 +58,7 @@ class TestRedisWebSocketIntegration(SSotAsyncTestCase):
             TESTING: "true,"
             ENVIRONMENT": test,"
             TEST_DISABLE_REDIS: false,
-            REDIS_URL": "redis://localhost:6381/0,
+            REDIS_URL": redis://localhost:6381/0,"
             WEBSOCKET_HOST: localhost,
             WEBSOCKET_PORT: "8001"
         }
@@ -114,12 +114,12 @@ class TestRedisWebSocketIntegration(SSotAsyncTestCase):
         
         # Create WebSocket state data
         websocket_state = {
-            "connection_id: fconn_{uuid.uuid4().hex[:8]}",
+            "connection_id: fconn_{uuid.uuid4().hex[:8]},"
             user_id: self.test_user_id,
             run_id: self.test_run_id,""
             "status: connected,"
             last_activity: time.time(),
-            agent_status": "ready
+            agent_status": ready"
         }
         
         # Store WebSocket state in Redis
@@ -143,7 +143,7 @@ class TestRedisWebSocketIntegration(SSotAsyncTestCase):
         
         # Simulate agent execution state
         agent_state = {
-            "agent_type: supervisor",
+            "agent_type: supervisor,"
             execution_phase: tool_execution,
             current_tool: search","
             "progress: 0.6,"
@@ -180,11 +180,11 @@ class TestRedisWebSocketIntegration(SSotAsyncTestCase):
         
         # Simulate WebSocket event sequence
         events = [
-            {"type: agent_started, timestamp: time.time(), data: {"agent: supervisor"}},"
-            {type: agent_thinking, timestamp: time.time() + 1, data": {"phase: analysis}},
-            {type: tool_executing, "timestamp: time.time() + 2, data": {tool: search}},
-            {type: tool_completed", "timestamp: time.time() + 3, data: {tool: search, "result: success"}},
-            {type: agent_completed, timestamp: time.time() + 4, data": {"status: completed}}
+            {"type: agent_started, timestamp: time.time(), "data": {""agent: supervisor""}},"
+            {"type": agent_thinking, timestamp: time.time() + 1, data": {phase: analysis}},"
+            {"type": tool_executing, "timestamp: time.time() + 2, data: {tool: search}},"
+            {"type": tool_completed", "timestamp: time.time() + 3, "data": {"tool: search, "result: success"}},"
+            {"type": agent_completed, timestamp: time.time() + 4, data": {status: completed}}"
         ]
         
         # Store events in Redis as a sequence
@@ -211,7 +211,7 @@ class TestRedisWebSocketIntegration(SSotAsyncTestCase):
         # Verify event sequence
         self.assertEqual(len(stored_events), 5, "Should retrieve all 5 events)"
         self.assertEqual(stored_events[0][type], agent_started)
-        self.assertEqual(stored_events[-1][type"], "agent_completed)
+        self.assertEqual(stored_events[-1][type"], agent_completed)"
     
     async def test_redis_websocket_manager_integration(self):
         Test WebSocket manager properly integrates with Redis for state.""
@@ -295,7 +295,7 @@ class TestRedisWebSocketIntegration(SSotAsyncTestCase):
         sessions = [
             (session_1, fuser_1_{uuid.uuid4().hex[:4]}),
             (session_2, fuser_2_{uuid.uuid4().hex[:4]}),
-            (session_3", f"user_3_{uuid.uuid4().hex[:4]})
+            (session_3", fuser_3_{uuid.uuid4().hex[:4]})"
         ]
         
         await asyncio.gather(*[
@@ -323,7 +323,7 @@ class TestRedisWebSocketIntegration(SSotAsyncTestCase):
         
         if redis_manager.is_connected and can_execute:
             # Test normal operation
-            test_data = {"websocket: test", circuit_breaker: functional}
+            test_data = {"websocket: test, circuit_breaker: functional}"
             stored = await redis_manager.set(test:circuit:websocket, json.dumps(test_data))""
             self.assertTrue(stored, Should store data when circuit breaker is closed")"
             
@@ -413,14 +413,14 @@ class TestRedisWebSocketErrorRecovery(SSotAsyncTestCase):
         self.assertIsInstance(set_result, bool, Set should return boolean gracefully)
     
     async def test_websocket_event_delivery_redis_fallback(self):
-        ""Test WebSocket event delivery has proper fallback when Redis fails.
+        ""Test WebSocket event delivery has proper fallback when Redis fails."
         # This test verifies that WebSocket events can still be delivered
         # even if Redis state storage fails
         
         events_to_test = [
-            {type: agent_started", "data: {fallback_test: True}},
-            {type: agent_thinking, "data: {phase": fallback_analysis}},
-            {type: "agent_completed, data": {status: completed_with_fallback}}
+            {"type": agent_started", ""data": {"fallback_test: True}},"
+            {"type": agent_thinking, ""data": {"phase": fallback_analysis}},"
+            {"type": "agent_completed, data: {status: completed_with_fallback}}"
         ]
         
         # Test storing events with fallback handling

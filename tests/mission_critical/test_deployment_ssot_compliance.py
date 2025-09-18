@@ -62,7 +62,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         
         # Project paths
         self.project_root = Path(__file__).parent.parent.parent
-        self.unified_runner_path = self.project_root / tests" / "unified_test_runner.py
+        self.unified_runner_path = self.project_root / tests" / unified_test_runner.py"
         self.scripts_dir = self.project_root / scripts
         
         # Mission critical parameters
@@ -79,14 +79,14 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         self.record_metric(test_category, "mission_critical)"
         self.record_metric(ssot_focus", deployment_compliance)"
         self.record_metric(business_impact, critical)
-        self.record_metric(arr_dependency", "500k+)
+        self.record_metric(arr_dependency", 500k+)"
         
         # CRITICAL: Validate UnifiedTestRunner exists
         assert self.unified_runner_path.exists(), \
             fMISSION CRITICAL FAILURE: UnifiedTestRunner not found at {self.unified_runner_path}
     
     def test_mission_critical_ssot_refactor_preserves_all_deployment_functionality(self):
-    ""
+    """
         MISSION CRITICAL: Test that SSOT refactor preserves ALL deployment functionality.
         
         This test MUST pass or deployment is BLOCKED.
@@ -176,7 +176,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
             try:
                 # Use subprocess to search for pattern
                 result = subprocess.run([
-                    grep", "-r, -n, pattern, str(self.project_root)
+                    grep", -r, -n, pattern, str(self.project_root)"
                 ], capture_output=True, text=True, timeout=60)
                 
                 if result.returncode == 0:
@@ -224,7 +224,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
             )
     
     def test_mission_critical_golden_path_preserved_post_ssot_refactor(self):
-        "
+        """
         "
         MISSION CRITICAL: Test that Golden Path is preserved post-SSOT refactor.
         
@@ -303,7 +303,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
             )
     
     def test_mission_critical_deployment_backwards_compatibility_guarantee(self):
-        "
+        """
         "
         MISSION CRITICAL: Test deployment backwards compatibility guarantee.
         
@@ -453,7 +453,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
             elif component == health_check_validation:"
                 component_preserved = health" in runner_source.lower()"
             elif component == error_logging:
-                component_preserved = any(keyword in runner_source.lower() for keyword in [logging", "log, error]
+                component_preserved = any(keyword in runner_source.lower() for keyword in [logging", log, error]"
             
             error_handling_preservation[component] = {
                 'preserved': component_preserved,
@@ -551,7 +551,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         # Look for frontend deployment logic in UnifiedTestRunner
         runner_source = self.unified_runner_path.read_text(encoding='utf-8')
         
-        frontend_indicators = ["frontend, web", static, build]
+        frontend_indicators = ["frontend, web, static, build]"
         frontend_found = any(indicator in runner_source.lower() for indicator in frontend_indicators)
         
         return {
@@ -564,7 +564,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         Check that backend deployment is preserved.""
         runner_source = self.unified_runner_path.read_text(encoding='utf-8')
         
-        backend_indicators = [backend, api, server", "run]
+        backend_indicators = [backend, api, server", run]"
         backend_found = any(indicator in runner_source.lower() for indicator in backend_indicators)
         
         return {
@@ -592,7 +592,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         # WebSocket functionality is critical for Golden Path
         runner_source = self.unified_runner_path.read_text(encoding='utf-8')
         
-        websocket_indicators = [websocket, "ws, realtime", events]
+        websocket_indicators = [websocket, "ws, realtime, events]"
         websocket_found = any(indicator in runner_source.lower() for indicator in websocket_indicators)
         
         return {
@@ -615,7 +615,7 @@ class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
         }
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

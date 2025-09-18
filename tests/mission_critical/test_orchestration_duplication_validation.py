@@ -54,7 +54,7 @@ class OrchestrationViolation:
 
 
 class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
-    ""
+    """
     Test suite to reproduce and validate orchestration duplication violations.
     
     This test is DESIGNED TO FAIL until SSOT orchestration consolidation is complete,
@@ -106,7 +106,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
         }
 
     def scan_file_for_orchestration_violations(self, file_path: Path) -> List[OrchestrationViolation]:
-        ""
+        """
         Scan a Python file for orchestration duplication violations.
         
         Detects:
@@ -135,7 +135,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
                     
         except Exception as e:
             # Log but don't fail on individual file errors'
-            print(f"Warning: Could not scan {file_path}: {e}")
+            print(f"Warning: Could not scan {file_path}: {e})"
             
         return violations
 
@@ -188,7 +188,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
         return None
 
     def analyze_class_definition(self, file_path: Path, node: ast.ClassDef, lines: List[str) -> Optional[OrchestrationViolation):
-        ""Analyze class definitions for orchestration duplication.
+        ""Analyze class definitions for orchestration duplication."
         class_name = node.name.lower()
         
         # Check for orchestration-related classes
@@ -303,7 +303,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
         return all_violations
 
     def validate_ssot_orchestration_functionality(self) -> Dict[str, Any]:
-        "
+        """
         "
         Validate that SSOT orchestration system exists and provides required functionality.
         This should PASS even before remediation.
@@ -352,7 +352,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
         return validation_results
 
     def test_reproduce_orchestration_duplication_violations(self):
-    "
+        """
     "
         REPRODUCTION TEST: This test WILL FAIL until violations are remediated.
         
@@ -381,7 +381,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
         )
 
     def test_validate_ssot_orchestration_functionality(self):
-    ""
+    """
         VALIDATION TEST: This test should PASS both before and after remediation.
         
         Validates that SSOT orchestration system exists and provides required functionality.
@@ -406,7 +406,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
         )
 
     def test_orchestration_ssot_pattern_compliance(self):
-    "
+        """
     "
         COMPLIANCE TEST: Validates detection of SSOT-compliant orchestration patterns.
         

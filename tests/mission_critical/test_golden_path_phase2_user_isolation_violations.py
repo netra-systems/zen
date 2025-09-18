@@ -29,7 +29,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.agent_instance_factory import (
+from netra_backend.app.agents.supervisor.agent_instance_factory import ()
     AgentInstanceFactory,
     create_agent_instance_factory,
     get_agent_instance_factory  # This should now raise an error
@@ -87,7 +87,7 @@ class MockAgent(BaseAgent):
         return self.contamination_marker
         
     def has_cross_user_contamination(self, expected_user_id: str) -> bool:
-        "Check if this agent has been contaminated by another user's data."'
+        "Check if this agent has been contaminated by another user's data.'"
         if not self.user_context:
             return True  # No user context is contamination
             
@@ -146,7 +146,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
             metadata={'test_suffix': suffix, 'created_for': user_id}
 
     async def test_deprecated_singleton_factory_raises_error(self):
-    ""
+    """
         TEST 1: Verify deprecated singleton factory is completely disabled.
         
         CRITICAL: The get_agent_instance_factory() function must raise an error
@@ -168,7 +168,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         logger.info(✅ PASS: Deprecated singleton factory correctly raises security error)
 
     async def test_ssot_factory_provides_user_isolation(self):
-    ""
+    """
         TEST 2: Verify SSOT factory provides proper user isolation.
         
         CRITICAL: create_agent_instance_factory(user_context) must create
@@ -216,7 +216,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         logger.info(✅ PASS: SSOT factory provides proper user isolation)
 
     async def test_concurrent_user_execution_isolation(self):
-        "
+        """
         "
         TEST 3: Verify concurrent user executions remain isolated.
         
@@ -291,7 +291,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         logger.info(✅ PASS: Concurrent user executions remain properly isolated)
 
     async def test_factory_memory_isolation(self):
-    ""
+    """
         TEST 4: Verify factory instances don't share memory state.'
         
         CRITICAL: Each factory instance should have completely separate
@@ -344,7 +344,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         logger.info(✅ PASS: Factory instances have proper memory isolation)
 
     async def test_user_context_binding_validation(self):
-    ""
+    """
         TEST 5: Verify user context binding is mandatory and enforced.
         
         CRITICAL: Factories must require user context and fail gracefully
@@ -377,7 +377,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         logger.info(✅ PASS: User context binding is properly validated)
 
     async def test_resource_cleanup_isolation(self):
-    ""
+    """
         TEST 6: Verify resource cleanup doesn't affect other users.'
         
         CRITICAL: When one user's context is cleaned up, other users'
@@ -425,7 +425,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         logger.info(✅ PASS: Resource cleanup maintains proper isolation)"
 
     async def test_golden_path_contamination_prevention(self):
-        "
+        """
         "
         TEST 7: Golden Path end-to-end contamination prevention.
         
@@ -491,7 +491,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         logger.info(✅ PASS: Golden Path maintains perfect user isolation)"
 
     async def test_performance_isolation_under_load(self):
-    "
+        """
     "
         TEST 8: Verify isolation holds under concurrent load.
         

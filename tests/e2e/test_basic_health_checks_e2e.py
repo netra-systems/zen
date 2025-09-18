@@ -31,20 +31,20 @@ def health_check_config():
     pass
 """Configuration for health check tests."""
 return { }
-"services": { }
-"backend": { }
-"url": "http://localhost:8000",
-"health_path": "/health",
-"timeout": 5.0
+"services: { }"
+"backend: { }"
+"url": "http://localhost:8000,"
+"health_path": "/health,"
+"timeout: 5.0"
 },
-"auth": { }
-"url": "http://localhost:8080",
-"health_path": "/health",
-"timeout": 5.0
+"auth: { }"
+"url": "http://localhost:8080,"
+"health_path": "/health,"
+"timeout: 5.0"
     
 },
-"connection_timeout": 2.0,
-"max_retries": 2
+"connection_timeout: 2.0,"
+"max_retries: 2"
     
 
 
@@ -58,21 +58,21 @@ class TestBasicHealthChecker:
 
     async def check_service_connectivity(self, service_name: str, service_config: Dict[str, Any]) -> Dict[str, Any]:
         """Check if service is accessible and healthy."""
-        url = service_config["url"]
-        health_path = service_config["health_path"]
-        timeout = service_config.get("timeout", 5.0)
+        url = service_config["url]"
+        health_path = service_config["health_path]"
+        timeout = service_config.get("timeout, 5.0)"
 
         health_url = ""
 
         result = { }
-        "service": service_name,
-        "url": health_url,
-        "accessible": False,
-        "healthy": False,
-        "response_time": None,
-        "status_code": None,
-        "error": None,
-        "health_data": None
+        "service: service_name,"
+        "url: health_url,"
+        "accessible: False,"
+        "healthy: False,"
+        "response_time: None,"
+        "status_code: None,"
+        "error: None,"
+        "health_data: None"
     
 
         try:
@@ -87,7 +87,7 @@ class TestBasicHealthChecker:
 
         timeout_config = aiohttp.ClientTimeout( )
         total=timeout,
-        connect=self.config.get("connection_timeout", 2.0)
+        connect=self.config.get("connection_timeout, 2.0)"
         
 
         start_time = time.time()
@@ -97,18 +97,18 @@ class TestBasicHealthChecker:
         timeout=timeout_config
         ) as session:
         async with session.get(health_url) as response:
-        result["response_time"] = time.time() - start_time
-        result["status_code"] = response.status
-        result["accessible"] = True
+        result["response_time] = time.time() - start_time"
+        result["status_code] = response.status"
+        result["accessible] = True"
 
         if response.status == 200:
         try:
         health_data = await response.json()
-        result["health_data"] = health_data
-        result["healthy"] = True
+        result["health_data] = health_data"
+        result["healthy] = True"
         except Exception as parse_error:
         result["error"] = ""
-        result["healthy"] = False
+        result["healthy] = False"
         else:
         result["error"] = ""
 
@@ -125,7 +125,7 @@ class TestBasicHealthChecker:
         """Check all configured services."""
         tasks = []
 
-        for service_name, service_config in self.config["services"].items():
+        for service_name, service_config in self.config["services].items():"
         task = self.check_service_connectivity(service_name, service_config)
         tasks.append((service_name, task))
 
@@ -136,9 +136,9 @@ class TestBasicHealthChecker:
         results[service_name] = result
         except Exception as e:
         results[service_name] = { }
-        "service": service_name,
-        "accessible": False,
-        "healthy": False,
+        "service: service_name,"
+        "accessible: False,"
+        "healthy: False,"
         "error": ""
                     
 
@@ -147,19 +147,19 @@ class TestBasicHealthChecker:
     def get_service_summary(self, results: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         """Get summary of service health check results."""
         total_services = len(results)
-        accessible_services = sum(1 for r in results.values() if r.get("accessible", False))
-        healthy_services = sum(1 for r in results.values() if r.get("healthy", False))
+        accessible_services = sum(1 for r in results.values() if r.get("accessible, False))"
+        healthy_services = sum(1 for r in results.values() if r.get("healthy, False))"
 
         return { }
-        "total_services": total_services,
-        "accessible_services": accessible_services,
-        "healthy_services": healthy_services,
-        "accessibility_rate": accessible_services / total_services if total_services > 0 else 0.0,
-        "health_rate": healthy_services / total_services if total_services > 0 else 0.0,
-        "all_accessible": accessible_services == total_services,
-        "all_healthy": healthy_services == total_services,
-        "any_accessible": accessible_services > 0,
-        "any_healthy": healthy_services > 0
+        "total_services: total_services,"
+        "accessible_services: accessible_services,"
+        "healthy_services: healthy_services,"
+        "accessibility_rate: accessible_services / total_services if total_services > 0 else 0.0,"
+        "health_rate: healthy_services / total_services if total_services > 0 else 0.0,"
+        "all_accessible: accessible_services == total_services,"
+        "all_healthy: healthy_services == total_services,"
+        "any_accessible: accessible_services > 0,"
+        "any_healthy: healthy_services > 0"
     
 
 
@@ -178,10 +178,10 @@ tester = TestBasicHealthChecker(health_check_config)
         # This should not fail - we're testing the test infrastructure'
 assert tester is not None
 assert tester.config is not None
-assert "services" in tester.config
+assert "services in tester.config"
 
         # Verify service configuration
-services = tester.config["services"]
+services = tester.config["services]"
 assert len(services) > 0, "Should have at least one service configured"
 
 for service_name, service_config in services.items():
@@ -203,7 +203,7 @@ results = await tester.check_all_services()
 
                 # Test passes regardless of results - we're validating the test infrastructure'
 assert results is not None
-assert isinstance(results, dict)
+assert isinstance(results, "dict)"
 
                 # Log results for debugging
 summary = tester.get_service_summary(results)
@@ -232,17 +232,17 @@ if result.get('response_time'):
 @pytest.fixture
 # @pytest.fixture
     async def test_auth_service_health_if_running(self, health_check_config):
-"""Test auth service health if it's running."""'
+"""Test auth service health if it's running.""'"
 tester = TestBasicHealthChecker(health_check_config)
 
                                 # Check only auth service
-auth_config = health_check_config["services"]["auth"]
-result = await tester.check_service_connectivity("auth", auth_config)
+auth_config = health_check_config["services"]["auth]"
+result = await tester.check_service_connectivity("auth, auth_config)"
 
                                 # If service is accessible, validate the health response
-if result["accessible"] and result["healthy"]:
+if result["accessible"] and result["healthy]:"
     pass
-health_data = result["health_data"]
+health_data = result["health_data]"
 
                                     # Validate health response structure
 assert "status" in health_data, "Health response should include status"
@@ -269,24 +269,24 @@ else:
 @pytest.fixture
 # @pytest.fixture
     async def test_backend_service_health_if_running(self, health_check_config):
-"""Test backend service health if it's running."""'
+"""Test backend service health if it's running.""'"
 pass
 tester = TestBasicHealthChecker(health_check_config)
 
                                             # Check only backend service
-backend_config = health_check_config["services"]["backend"]
-result = await tester.check_service_connectivity("backend", backend_config)
+backend_config = health_check_config["services"]["backend]"
+result = await tester.check_service_connectivity("backend, backend_config)"
 
                                             # If service is accessible, validate the health response
-if result["accessible"] and result["healthy"]:
+if result["accessible"] and result["healthy]:"
     pass
-health_data = result["health_data"]
+health_data = result["health_data]"
 
                                                 # Validate health response structure
 assert "status" in health_data, "Health response should include status"
 
                                                 # Backend should have more detailed health info
-expected_fields = ["status", "timestamp"]
+expected_fields = ["status", "timestamp]"
 for field in expected_fields:
 assert field in health_data, ""
 
@@ -294,7 +294,7 @@ print(f" )"
 [SUCCESS] Backend service is running and healthy:")"
 print("")
 print("")
-if "version" in health_data:
+if "version in health_data:"
     print("")
 else:
     print("")
@@ -316,15 +316,15 @@ assert session is not None
 
                                                                     # Test configuration handling
 assert health_check_config is not None
-assert "services" in health_check_config
+assert "services in health_check_config"
 
                                                                     # Test results can be structured properly
 test_result = { }
-"framework_test": True,
-"async_support": True,
-"http_client_support": True,
-"config_support": True,
-"timestamp": time.time()
+"framework_test: True,"
+"async_support: True,"
+"http_client_support: True,"
+"config_support: True,"
+"timestamp: time.time()"
                                                                     
 
 assert all(test_result.values()), "All framework components should be working"
@@ -340,20 +340,20 @@ async def run_basic_health_checks():
 """Standalone function to run basic health checks."""
 pass
 config = { }
-"services": { }
-"backend": { }
-"url": "http://localhost:8000",
-"health_path": "/health",
-"timeout": 5.0
+"services: { }"
+"backend: { }"
+"url": "http://localhost:8000,"
+"health_path": "/health,"
+"timeout: 5.0"
 },
-"auth": { }
-"url": "http://localhost:8080",
-"health_path": "/health",
-"timeout": 5.0
+"auth: { }"
+"url": "http://localhost:8080,"
+"health_path": "/health,"
+"timeout: 5.0"
     
 },
-"connection_timeout": 2.0,
-"max_retries": 2
+"connection_timeout: 2.0,"
+"max_retries: 2"
     
 
 tester = TestBasicHealthChecker(config)
@@ -362,13 +362,13 @@ summary = tester.get_service_summary(results)
 
 await asyncio.sleep(0)
 return { }
-"results": results,
-"summary": summary,
-"success": summary["any_accessible"]
+"results: results,"
+"summary: summary,"
+"success": summary["any_accessible]"
     
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
         # Allow running this test file directly
 import asyncio
 

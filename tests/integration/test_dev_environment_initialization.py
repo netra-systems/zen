@@ -65,10 +65,10 @@ class TestDevEnvironmentInitialization:
         self.project_root = Path(self.temp_dir)
 
     # Create minimal project structure
-        (self.project_root / "app").mkdir(exist_ok=True)
-        (self.project_root / "auth_service").mkdir(exist_ok=True)
-        (self.project_root / "frontend").mkdir(exist_ok=True)
-        (self.project_root / "dev_launcher").mkdir(exist_ok=True)
+        (self.project_root / "app).mkdir(exist_ok=True)"
+        (self.project_root / "auth_service).mkdir(exist_ok=True)"
+        (self.project_root / "frontend).mkdir(exist_ok=True)"
+        (self.project_root / "dev_launcher).mkdir(exist_ok=True)"
 
     # Essential environment for testing
         self.test_env = { }
@@ -131,7 +131,7 @@ class TestDevEnvironmentInitialization:
 
                     # Test startup optimizer initialization
         optimizer = launcher.startup_optimizer
-        assert isinstance(optimizer, StartupOptimizer)
+        assert isinstance(optimizer, "StartupOptimizer)"
 
                     # Test environment validation
         env_validator = launcher.environment_validator
@@ -170,7 +170,7 @@ class TestDevEnvironmentInitialization:
                             # Register test startup steps
         test_steps = [ ]
         StartupStep( )
-        name="env_check",
+        name="env_check,"
         func=lambda x: None True,
         dependencies=[],
         parallel=True,
@@ -178,17 +178,17 @@ class TestDevEnvironmentInitialization:
         cache_key="env_validation"
         ),
         StartupStep( )
-        name="db_init",
+        name="db_init,"
         func=lambda x: None True,
-        dependencies=["env_check"],
+        dependencies=["env_check],"
         parallel=True,
         timeout=10,
         cache_key="db_connections"
         ),
         StartupStep( )
-        name="service_start",
+        name="service_start,"
         func=lambda x: None True,
-        dependencies=["db_init"],
+        dependencies=["db_init],"
         parallel=False,  # Services must start sequentially
         timeout=15
                             
@@ -199,16 +199,16 @@ class TestDevEnvironmentInitialization:
                             # Test optimized sequence execution
         start_time = time.time()
         results = optimizer.execute_optimized_sequence( )
-        ["env_check", "db_init", "service_start"]
+        ["env_check", "db_init", "service_start]"
                             
         execution_time = time.time() - start_time
 
                             # Validate results
         assert len(results) == 3
-        for step_name in ["env_check", "db_init", "service_start"]:
+        for step_name in ["env_check", "db_init", "service_start]:"
         assert step_name in results
         result = results[step_name]
-        assert isinstance(result, StepResult)
+        assert isinstance(result, "StepResult)"
         assert result.success
         assert result.duration >= 0
 
@@ -217,10 +217,10 @@ class TestDevEnvironmentInitialization:
 
                                 # Test timing report
         timing_report = optimizer.get_timing_report()
-        assert "total_startup_time" in timing_report
-        assert "step_timings" in timing_report
-        assert "step_results" in timing_report
-        assert timing_report["total_startup_time"] > 0
+        assert "total_startup_time in timing_report"
+        assert "step_timings in timing_report"
+        assert "step_results in timing_report"
+        assert timing_report["total_startup_time] > 0"
 
                                 # Cleanup
         optimizer.cleanup()
@@ -256,25 +256,25 @@ class TestDevEnvironmentInitialization:
 
     # Register services (should use correct grace periods)
         health_monitor.register_service( )
-        "backend",
+        "backend,"
         mock_backend_health,
         max_failures=3
     
         health_monitor.register_service( )
-        "frontend",
+        "frontend,"
         mock_frontend_health,
         max_failures=3
     
         health_monitor.register_service( )
-        "auth_service",
+        "auth_service,"
         mock_auth_health,
         max_failures=3
     
 
     # Verify grace periods are set correctly
-        backend_status = health_monitor.get_status("backend")
-        frontend_status = health_monitor.get_status("frontend")
-        auth_status = health_monitor.get_status("auth_service")
+        backend_status = health_monitor.get_status("backend)"
+        frontend_status = health_monitor.get_status("frontend)"
+        auth_status = health_monitor.get_status("auth_service)"
 
         assert backend_status.grace_period_seconds == 30  # Backend: 30s
         assert frontend_status.grace_period_seconds == 90  # Frontend: 90s
@@ -288,19 +288,19 @@ class TestDevEnvironmentInitialization:
 
     # Test grace period status
         grace_status = health_monitor.get_grace_period_status()
-        assert "backend" in grace_status
-        assert "frontend" in grace_status
-        assert grace_status["backend"]["grace_period_seconds"] == 30
-        assert grace_status["frontend"]["grace_period_seconds"] == 90
+        assert "backend in grace_status"
+        assert "frontend in grace_status"
+        assert grace_status["backend"]["grace_period_seconds] == 30"
+        assert grace_status["frontend"]["grace_period_seconds] == 90"
 
     # Mark services as ready
         test_ports = {8001, 8002}
-        health_monitor.mark_service_ready("backend", process_pid=12345, ports=test_ports)
-        health_monitor.mark_service_ready("frontend", process_pid=12346, ports={3001})
+        health_monitor.mark_service_ready("backend, process_pid=12345, ports=test_ports)"
+        health_monitor.mark_service_ready("frontend, process_pid=12346, ports={3001})"
 
     # Verify ready state
-        backend_status = health_monitor.get_status("backend")
-        frontend_status = health_monitor.get_status("frontend")
+        backend_status = health_monitor.get_status("backend)"
+        frontend_status = health_monitor.get_status("frontend)"
 
         assert backend_status.ready_confirmed
         assert frontend_status.ready_confirmed
@@ -310,10 +310,10 @@ class TestDevEnvironmentInitialization:
 
     # Test cross-service health status
         cross_service_status = health_monitor.get_cross_service_health_status()
-        assert "services" in cross_service_status
-        assert "cross_service_integration" in cross_service_status
-        assert "backend" in cross_service_status["services"]
-        assert "frontend" in cross_service_status["services"]
+        assert "services in cross_service_status"
+        assert "cross_service_integration in cross_service_status"
+        assert "backend" in cross_service_status["services]"
+        assert "frontend" in cross_service_status["services]"
 
     async def test_auto_recovery_mechanisms(self):
         '''
@@ -331,41 +331,41 @@ class TestDevEnvironmentInitialization:
         health_monitor = HealthMonitor(check_interval=1)  # Fast for testing
 
             # Track recovery calls
-        recovery_called = {"test_service_1": False, "test_service_2": False}
-        failure_count = {"test_service_1": 0, "test_service_2": 0}
+        recovery_called = {"test_service_1": False, "test_service_2: False}"
+        failure_count = {"test_service_1": 0, "test_service_2: 0}"
 
     def failing_backend_health():
         pass
-        failure_count["test_service_1"] += 1
+        failure_count["test_service_1] += 1"
         await asyncio.sleep(0)
-        return failure_count["test_service_1"] > 3  # Fail first 3 times
+        return failure_count["test_service_1] > 3  # Fail first 3 times"
 
     def backend_recovery():
         pass
-        recovery_called["test_service_1"] = True
-        failure_count["test_service_1"] = 0  # Reset on recovery
+        recovery_called["test_service_1] = True"
+        failure_count["test_service_1] = 0  # Reset on recovery"
 
     def failing_frontend_health():
         pass
-        failure_count["test_service_2"] += 1
-        return failure_count["test_service_2"] > 2  # Fail first 2 times
+        failure_count["test_service_2] += 1"
+        return failure_count["test_service_2] > 2  # Fail first 2 times"
 
     def frontend_recovery():
         pass
-        recovery_called["test_service_2"] = True
-        failure_count["test_service_2"] = 0
+        recovery_called["test_service_2] = True"
+        failure_count["test_service_2] = 0"
 
     # Register services with recovery actions and short grace periods for testing
     # Note: Use custom service names to avoid hardcoded grace period overrides
         health_monitor.register_service( )
-        "test_service_1",
+        "test_service_1,"
         failing_backend_health,
         recovery_action=backend_recovery,
         max_failures=3,
         grace_period_seconds=1  # Very short for testing
     
         health_monitor.register_service( )
-        "test_service_2",
+        "test_service_2,"
         failing_frontend_health,
         recovery_action=frontend_recovery,
         max_failures=2,
@@ -373,8 +373,8 @@ class TestDevEnvironmentInitialization:
     
 
     # Mark as ready and enable monitoring
-        health_monitor.mark_service_ready("test_service_1")
-        health_monitor.mark_service_ready("test_service_2")
+        health_monitor.mark_service_ready("test_service_1)"
+        health_monitor.mark_service_ready("test_service_2)"
 
     # Start monitoring
         health_monitor.start()
@@ -387,7 +387,7 @@ class TestDevEnvironmentInitialization:
         start_time = time.time()
 
         while time.time() - start_time < max_wait:
-        if recovery_called["test_service_1"] and recovery_called["test_service_2"]:
+        if recovery_called["test_service_1"] and recovery_called["test_service_2]:"
         break
         await asyncio.sleep(0.5)
 
@@ -399,8 +399,8 @@ class TestDevEnvironmentInitialization:
         assert recovery_called["test_service_2"], "Service 2 recovery should have been called"
 
             # Verify health status shows monitoring is working
-        service1_status = health_monitor.get_status("test_service_1")
-        service2_status = health_monitor.get_status("test_service_2")
+        service1_status = health_monitor.get_status("test_service_1)"
+        service2_status = health_monitor.get_status("test_service_2)"
 
             # Services should be in monitoring state (recovery was triggered)
         assert service1_status.state == ServiceState.MONITORING
@@ -437,13 +437,13 @@ class TestDevEnvironmentInitialization:
 
                         # Should discover test database connections
         connection_status = db_connector.get_connection_status()
-        assert isinstance(connection_status, dict)
+        assert isinstance(connection_status, "dict)"
 
                         # Test secret loader configuration
         secret_loader = SecretLoader(project_root=self.project_root)
 
                         # Should handle environment secrets
-        assert hasattr(secret_loader, 'project_root')
+        assert hasattr(secret_loader, "'project_root')"
 
                         # Test service discovery configuration
         service_discovery = ServiceDiscovery(self.project_root)
@@ -457,16 +457,16 @@ class TestDevEnvironmentInitialization:
 
         assert backend_info is not None
         assert frontend_info is not None
-        assert backend_info["port"] == 8001
-        assert frontend_info["port"] == 3001
+        assert backend_info["port] == 8001"
+        assert frontend_info["port] == 3001"
         assert backend_info["api_url"] == "http://localhost:8001"
         assert frontend_info["url"] == "http://localhost:3001"
 
                         # Test CORS origins
         origins = service_discovery.get_all_service_origins()
         assert len(origins) >= 2  # At least backend and frontend
-        assert "http://localhost:8001" in origins
-        assert "http://localhost:3001" in origins
+        assert "http://localhost:8001 in origins"
+        assert "http://localhost:3001 in origins"
 
     async def test_startup_timing_and_performance(self):
         '''
@@ -517,9 +517,9 @@ class TestDevEnvironmentInitialization:
 
                                     # Register some quick test steps
         test_steps = [ ]
-        StartupStep("quick_step_1", lambda x: None True, [], parallel=True),
-        StartupStep("quick_step_2", lambda x: None True, [], parallel=True),
-        StartupStep("quick_step_3", lambda x: None True, ["quick_step_1"], parallel=True)
+        StartupStep("quick_step_1, lambda x: None True, [], parallel=True),"
+        StartupStep("quick_step_2, lambda x: None True, [], parallel=True),"
+        StartupStep("quick_step_3", lambda x: None True, ["quick_step_1], parallel=True)"
                                     
         optimizer.register_steps(test_steps)
 
@@ -572,11 +572,11 @@ class TestDevEnvironmentInitialization:
 
                                                 # Environment validation should report issues but not crash
         env_result = launcher.check_environment()
-        assert isinstance(env_result, bool)
+        assert isinstance(env_result, "bool)"
 
                                                 # Database validation should handle missing connections
         db_result = await launcher._validate_databases()
-        assert isinstance(db_result, bool)
+        assert isinstance(db_result, "bool)"
 
                                                 # Health monitor should handle missing services gracefully
         health_monitor = launcher.health_monitor
@@ -584,16 +584,16 @@ class TestDevEnvironmentInitialization:
                                                 # Register a failing service
     def always_fail():
         pass
-        raise Exception("Simulated service failure")
+        raise Exception("Simulated service failure)"
 
         health_monitor.register_service( )
-        "failing_service",
+        "failing_service,"
         always_fail,
         max_failures=1
     
 
     # Should handle service failure gracefully
-        status = health_monitor.get_status("failing_service")
+        status = health_monitor.get_status("failing_service)"
         assert status is not None
         assert status.state == ServiceState.STARTING
 
@@ -625,27 +625,27 @@ class TestDevEnvironmentInitialization:
 
                 # Should complete within reasonable time
         assert validation_time < 30.0
-        assert isinstance(validation_result, bool)
+        assert isinstance(validation_result, "bool)"
 
                 # Test connection status reporting
         status = db_connector.get_connection_status()
-        assert isinstance(status, dict)
+        assert isinstance(status, "dict)"
 
         for conn_name, conn_info in status.items():
-        assert "type" in conn_info
-        assert "status" in conn_info
-        assert "failure_count" in conn_info
-        assert "retry_count" in conn_info
-        assert "last_check" in conn_info
+        assert "type in conn_info"
+        assert "status in conn_info"
+        assert "failure_count in conn_info"
+        assert "retry_count in conn_info"
+        assert "last_check in conn_info"
 
                     # Test health summary
         health_summary = db_connector.get_health_summary()
-        assert isinstance(health_summary, str)
+        assert isinstance(health_summary, "str)"
         assert len(health_summary) > 0
 
                     # Test health status integration
         all_healthy = db_connector.is_all_healthy()
-        assert isinstance(all_healthy, bool)
+        assert isinstance(all_healthy, "bool)"
 
                     # Cleanup
         await db_connector.stop_health_monitoring()
@@ -673,28 +673,28 @@ class TestDevEnvironmentEdgeCases:
         optimizer2 = StartupOptimizer(cache_manager)
 
             # Register identical steps in both optimizers
-        test_step = StartupStep("concurrent_test", lambda x: None True, [])
+        test_step = StartupStep("concurrent_test, lambda x: None True, [])"
         optimizer1.register_step(test_step)
         optimizer2.register_step(test_step)
 
             # Execute concurrently
     async def run_optimizer(opt, name):
         await asyncio.sleep(0)
-        return opt.execute_optimized_sequence(["concurrent_test"])
+        return opt.execute_optimized_sequence(["concurrent_test])"
 
     # Run both optimizers concurrently
         results = await asyncio.gather( )
-        run_optimizer(optimizer1, "opt1"),
-        run_optimizer(optimizer2, "opt2"),
+        run_optimizer(optimizer1, "opt1),"
+        run_optimizer(optimizer2, "opt2),"
         return_exceptions=True
     
 
     # Both should complete successfully
         assert len(results) == 2
         for result in results:
-        assert not isinstance(result, Exception)
-        assert "concurrent_test" in result
-        assert result["concurrent_test"].success
+        assert not isinstance(result, "Exception)"
+        assert "concurrent_test in result"
+        assert result["concurrent_test].success"
 
         # Cleanup
         optimizer1.cleanup()
@@ -708,10 +708,10 @@ class TestDevEnvironmentEdgeCases:
             # Register a service that will fail
     def failing_service():
         pass
-        raise Exception("Service startup failed")
+        raise Exception("Service startup failed)"
 
         health_monitor.register_service( )
-        "cleanup_test_service",
+        "cleanup_test_service,"
         failing_service,
         max_failures=1
     
@@ -751,7 +751,7 @@ class TestDevEnvironmentEdgeCases:
 
             # Should provide fix suggestions
         suggestions = env_validator.get_fix_suggestions(result)
-        assert isinstance(suggestions, list)
+        assert isinstance(suggestions, "list)"
         assert len(suggestions) > 0
 
 
@@ -796,7 +796,7 @@ pass
                     # Skip if not in development environment
 if env.get('ENVIRONMENT') != 'development':
     pass
-pytest.skip("End-to-end test only runs in development environment")
+pytest.skip("End-to-end test only runs in development environment)"
 
 try:
     pass
@@ -846,10 +846,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True

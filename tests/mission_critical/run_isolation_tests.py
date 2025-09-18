@@ -54,11 +54,11 @@ def parse_isolation_test_args():
     
     # Core isolation test options
     parser.add_argument("--real-services, action=store_true, help=Use real services instead of mocks)"
-    parser.add_argument(--concurrent-load", type=int, default=10, help="Number of concurrent users to simulate)
+    parser.add_argument(--concurrent-load", type=int, default=10, help=Number of concurrent users to simulate)"
     parser.add_argument(--test-duration, type=int, help=Test duration in seconds)
-    parser.add_argument(--verbose, "-v, action=store_true", help=Verbose output)
+    parser.add_argument(--verbose, "-v, action=store_true, help=Verbose output)"
     parser.add_argument(--fail-fast, action=store_true, help=Stop on first failure")"
-    parser.add_argument(--isolation-level, choices=[user, session, request"], default="user, help=Isolation level to test)
+    parser.add_argument(--isolation-level, choices=[user, session, request"], default=user, help=Isolation level to test)"
     parser.add_argument(--data-contamination-check, action=store_true, help="Check for data contamination)"
     parser.add_argument(--cache-isolation-check, action=store_true, help=Check cache isolation)"
     parser.add_argument(--cache-isolation-check, action=store_true, help=Check cache isolation)"
@@ -68,7 +68,7 @@ def parse_isolation_test_args():
 
 
 def main():
-    ""Main entry point with deprecation wrapper.
+    ""Main entry point with deprecation wrapper."
     show_deprecation_warning()
     
     # Parse all isolation test arguments
@@ -80,7 +80,7 @@ def main():
     unified_runner = project_root / tests / unified_test_runner.py"
     
     if not unified_runner.exists():
-        print(f"ERROR: UnifiedTestRunner not found at {unified_runner})")
+        print(f"ERROR: UnifiedTestRunner not found at {unified_runner}))"
         print(Falling back to original isolation test runner...)"
         print(Falling back to original isolation test runner...)"
         return execute_fallback_isolation_tests()
@@ -118,12 +118,12 @@ def main():
         # Add any unknown arguments
         cmd.extend(unknown_args)
         
-        print(f"Executing isolation tests via UnifiedTestRunner:)")
+        print(f"Executing isolation tests via UnifiedTestRunner:))"
         print(f   {' '.join(cmd")})"
         print()
         print(WARNING: These tests are EXPECTED TO FAIL initially!")"
         print(   They are designed to expose critical security vulnerabilities:)
-        print("   1. ClickHouse cache contamination between users")
+        print("   1. ClickHouse cache contamination between users)"
         print(   2. Redis key collision between users)"
         print(   2. Redis key collision between users)"
         print("   3. Missing user context propagation)"

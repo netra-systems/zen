@@ -98,7 +98,7 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
     
     def test_02_import_ambiguity_in_codebase(self):
         "TEST EXPECTED TO FAIL: Codebase should not have ambiguous imports."
-        print("\n=== TEST 2: Codebase Import Ambiguity Analysis ===")
+        print("\n=== TEST 2: Codebase Import Ambiguity Analysis ===)"
         
         # Scan Python files for AgentRegistry imports
         import_usages = self._scan_codebase_for_agent_registry_imports()
@@ -114,13 +114,13 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
                     import_patterns[pattern] = []
                 import_patterns[pattern].append((file_path, import_line))
         
-        print(f"Import patterns found: {len(import_patterns)})")
+        print(f"Import patterns found: {len(import_patterns)}))"
         for pattern, usages in import_patterns.items():
             print(f  Pattern '{pattern}': {len(usages")} usages)"
             for file_path, import_line in usages[:3]:  # Show first 3 examples
                 print(f    {file_path}: {import_line.strip()})
             if len(usages) > 3:
-                print(f    ... and {len(usages") - 3} more")
+                print(f    ... and {len(usages") - 3} more)"
         
         # EXPECTED FAILURE: Multiple import patterns indicate SSOT violation
         self.assertEqual(len(import_patterns), 1,
@@ -153,7 +153,7 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
             # Extract documented import path
             lines = ssot_content.split('\n')
             registry_lines = [line for line in lines if 'AgentRegistry' in line]
-            print(f"SSOT registry entries for AgentRegistry: {len(registry_lines)})")
+            print(f"SSOT registry entries for AgentRegistry: {len(registry_lines)}))"
             
             for line in registry_lines[:5]:  # Show first 5
                 print(f  {line.strip(")})"
@@ -224,14 +224,14 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
             except Exception as e:
                 resolution_results[module_path] = fERROR: {e}"
                 resolution_results[module_path] = fERROR: {e}"
-                print(f"Resolution failed for {module_path}: {e})")
+                print(f"Resolution failed for {module_path}: {e}))"
         
         # Check for consistent resolution
         resolved_paths = [path for path in resolution_results.values() 
                          if path and not path.startswith(ERROR:)]
         unique_paths = set(resolved_paths)
         
-        print(f"Unique resolved paths: {len(unique_paths)}")
+        print(f"Unique resolved paths: {len(unique_paths)})"
         for path in unique_paths:
             print(f  {path})
         

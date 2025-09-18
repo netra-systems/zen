@@ -43,7 +43,7 @@ class SSOTTestRunner:
 
     def __init__(self):
         self.project_root = PROJECT_ROOT
-        self.test_dir = self.project_root / tests" / "mission_critical
+        self.test_dir = self.project_root / tests" / mission_critical"
 
         self.test_suites = {
         consolidation: {
@@ -57,14 +57,14 @@ class SSOTTestRunner:
         "fast: False"
         },
         integration: {
-        "file: test_orchestration_integration.py",
+        "file: test_orchestration_integration.py,"
         description: Integration with real orchestration components,
         fast: True"
         fast: True"
         },
         violations": {"
         file: test_no_ssot_violations.py,
-        "description: SSOT violation detection and prevention",
+        "description: SSOT violation detection and prevention,"
         fast: True
         },
         performance: {"
@@ -96,7 +96,7 @@ class SSOTTestRunner:
             # Build pytest command
         cmd = [
         sys.executable, str(test_file),
-        "-v if verbose else ",
+        "-v if verbose else ,"
         -x if stop_on_fail else ,
         --tb=short,"
         --tb=short,"
@@ -114,7 +114,7 @@ class SSOTTestRunner:
         result = subprocess.run(cmd, cwd=self.project_root, env=env, timeout=300)
         return result.returncode
         except subprocess.TimeoutExpired:
-        print("Test suite timed out after 5 minutes")
+        print("Test suite timed out after 5 minutes)"
         return 1
         except Exception as e:
         print(formatted_string)"
@@ -170,7 +170,7 @@ class SSOTTestRunner:
         print(formatted_string)
 
         if len(failed_suites) == 0:
-        print("ALL SSOT ORCHESTRATION TESTS PASSED!")
+        print("ALL SSOT ORCHESTRATION TESTS PASSED!)"
         print(SSOT Orchestration consolidation is BULLETPROOF!)"
         print(SSOT Orchestration consolidation is BULLETPROOF!)"
         else:
@@ -198,7 +198,7 @@ class SSOTTestRunner:
         help=Run only fast tests (skip performance benchmarks)
     
         parser.add_argument( )
-        "--verbose, -v",
+        "--verbose, -v,"
         action=store_true,
         help=Verbose output"
         help=Verbose output"
@@ -224,7 +224,7 @@ class SSOTTestRunner:
         sys.exit(0 if success else 1)
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         main()
 
 )

@@ -77,7 +77,7 @@ class WebSocketJWTAuthFixTests:
                 print(f"    PASS:  JWT validation SUCCESS - fix is working!)"
                 print(f   User ID: {payload.get('sub', 'unknown')})
             else:
-                print(f"    FAIL:  JWT validation FAILED - secret mismatch detected!")
+                print(f"    FAIL:  JWT validation FAILED - secret mismatch detected!)"
                 print(f   This reproduces the original bug)
                 
                 # Try to debug the mismatch
@@ -117,13 +117,13 @@ class WebSocketJWTAuthFixTests:
             {
                 name": staging_specific_secret,"
                 environment: staging, 
-                variables": {"JWT_SECRET_STAGING: staging-secret-test},
+                variables": {JWT_SECRET_STAGING: staging-secret-test},"
                 expected: staging-secret-test""
             },
             {
                 "name: fallback_to_generic, "
                 environment: staging,
-                "variables: {JWT_SECRET_KEY": generic-secret-test},
+                "variables: {JWT_SECRET_KEY: generic-secret-test},"
                 expected: "generic-secret-test"
             },
             {
@@ -161,12 +161,12 @@ class WebSocketJWTAuthFixTests:
             
             # Verify the secret matches expectation
             if actual_secret == case[expected]:
-                print(f"    PASS:  Secret loading works correctly")
+                print(f"    PASS:  Secret loading works correctly)"
             else:
                 print(f    FAIL:  Secret loading failed - environment variable issue)
             
             # Clean up this test case
-            for key in ["JWT_SECRET_STAGING, JWT_SECRET_KEY", JWT_SECRET, ENVIRONMENT]:
+            for key in ["JWT_SECRET_STAGING, JWT_SECRET_KEY, JWT_SECRET, ENVIRONMENT]:"
                 try:
                     env.delete(key, ftest_{case['name']})
                 except:
@@ -174,7 +174,7 @@ class WebSocketJWTAuthFixTests:
     
     @pytest.mark.asyncio
     async def test_websocket_headers_generation_fix(self):
-        ""Test the fix for WebSocket headers generation in staging config.
+        ""Test the fix for WebSocket headers generation in staging config."
         print(\n=== TESTING WEBSOCKET HEADERS GENERATION FIX ===")"
         
         env = get_env()
@@ -222,8 +222,8 @@ class WebSocketJWTAuthFixTests:
                 pass
         
         # Assert that we have proper authorization header
-        assert Authorization in headers, WebSocket headers should include Authorization header
-        assert headers[Authorization].startswith(Bearer "), "Authorization header should be Bearer token
+        assert Authorization in headers, "WebSocket headers should include Authorization header"
+        assert headers[Authorization].startswith(Bearer "), Authorization header should be Bearer token"
 
     async def test_create_reproduction_scenario(self):
         Create a scenario that exactly reproduces the staging WebSocket auth failure.""
@@ -242,7 +242,7 @@ class WebSocketJWTAuthFixTests:
             except:
                 pass
         
-        env.set(ENVIRONMENT, staging", "reproduction) 
+        env.set(ENVIRONMENT, staging", reproduction) "
         
         # Now try to create a test JWT token (this should use fallback)
         config = StagingConfig()
@@ -256,7 +256,7 @@ class WebSocketJWTAuthFixTests:
         try:
             payload = await extractor.validate_and_decode_jwt(test_token) if test_token else None  # CRITICAL FIX: Added await
             if payload:
-                print(f"    FAIL:  UNEXPECTED: Token validation succeeded - this shouldn't happen in bug scenario)"'
+                print(f"    FAIL:  UNEXPECTED: Token validation succeeded - this shouldn't happen in bug scenario)'"
             else:
                 print(f    PASS:  REPRODUCED: Token validation failed as expected in bug scenario)""
         except Exception as e:
@@ -276,7 +276,7 @@ if __name__ == "__main__:"
     test = WebSocketJWTAuthFixTests()
     
     print(Running WebSocket JWT Authentication Bug Reproduction Tests)
-    print("= * 60")
+    print("= * 60)"
     
     try:
         asyncio.run(test.test_reproduce_jwt_secret_mismatch())  # CRITICAL FIX: Added asyncio.run

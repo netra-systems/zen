@@ -37,8 +37,8 @@ auth_url = "http://localhost:8081"
     # Common SQL injection payloads
 sql_payloads = [ ]
 ""; DROP TABLE users; --","
-"1' OR '1'='1",
-"1'; SELECT * FROM users WHERE '1'='1",
+"1' OR '1'='1,"
+"1'; SELECT * FROM users WHERE '1'='1,"
 "admin"--","
 "" UNION SELECT null, version(), null--","
 "" OR 1=1#","
@@ -51,15 +51,15 @@ injection_vulnerabilities = []
 async with aiohttp.ClientSession() as session:
         # Test injection in various endpoints
 test_endpoints = [ ]
-{"url": "", "param": "user_id"},
-{"url": "", "param": "email"},
-{"url": "", "param": "search"},
-{"url": "", "param": "query"}
+{"url": "", "param": "user_id},"
+{"url": "", "param": "email},"
+{"url": "", "param": "search},"
+{"url": "", "param": "query}"
         
 
 for endpoint_info in test_endpoints:
-url = endpoint_info["url"]
-param_name = endpoint_info["param"]
+url = endpoint_info["url]"
+param_name = endpoint_info["param]"
 
 for payload in sql_payloads:
 try:
@@ -70,14 +70,14 @@ response_text = await response.text()
 
                         # Look for SQL error messages that might indicate vulnerability
 sql_error_indicators = [ ]
-"SQL syntax error",
-"mysql_fetch_array",
-"ORA-1756",
-"Microsoft OLE DB Provider",
-"PostgreSQL query failed",
-"Warning: pg_",
-"valid MySQL result",
-"MySqlClient.",
+"SQL syntax error,"
+"mysql_fetch_array,"
+"ORA-1756,"
+"Microsoft OLE DB Provider,"
+"PostgreSQL query failed,"
+"Warning: pg_,"
+"valid MySQL result,"
+"MySqlClient.,"
 "System.Data.SqlClient.SqlException"
                         
 
@@ -93,7 +93,7 @@ break
                                 # This would require more sophisticated timing analysis in real implementation
 
                                 # Test POST request with injection in JSON body
-if endpoint_info["url"].endswith("/run_agent"):
+if endpoint_info["url"].endswith("/run_agent):"
     pass
 json_payload = {param_name: payload}
 async with session.post(url, json=json_payload) as response:
@@ -112,11 +112,11 @@ pass
 
                                                     # Report findings
 if injection_vulnerabilities:
-    print(" ALERT:  SECURITY VULNERABILITY - SQL Injection Risks:")
+    print(" ALERT:  SECURITY VULNERABILITY - SQL Injection Risks:)"
 for vuln in injection_vulnerabilities:
     print("")
 else:
-    print(" PASS:  No SQL injection vulnerabilities detected in tested endpoints")
+    print(" PASS:  No SQL injection vulnerabilities detected in tested endpoints)"
 
                                                                 # This test should identify any SQL injection vulnerabilities
 assert not injection_vulnerabilities, ""
@@ -138,12 +138,12 @@ backend_url = "http://localhost:8000"
 
                                                                     # Common XSS payloads
 xss_payloads = [ ]
-"<script>alert('XSS')</script>",
-"javascript:alert('XSS')",
-"<img src=x onerror=alert('XSS')>",
-"<svg onload=alert('XSS')>",
+"<script>alert('XSS')</script>,"
+"javascript:alert('XSS'),"
+"<img src=x onerror=alert('XSS')>,"
+"<svg onload=alert('XSS')>,"
 "";alert("XSS");//","
-"<iframe src='javascript:alert("XSS")'></iframe>",
+"<iframe src='javascript:alert("XSS")'></iframe>,"
 ""><script>alert("XSS")</script>","
 "<body onload=alert('XSS')>"
                                                                     
@@ -164,11 +164,11 @@ for payload in xss_payloads:
 try:
                                                                                     # Test in various parameters
 test_params = [ ]
-{"name": payload},
-{"title": payload},
-{"content": payload},
-{"query": payload},
-{"message": payload}
+{"name: payload},"
+{"title: payload},"
+{"content: payload},"
+{"query: payload},"
+{"message: payload}"
                                                                                     
 
 for params in test_params:
@@ -178,20 +178,20 @@ if response.status == 200:
 response_text = await response.text()
 
                                                                                                 # Check if the payload is reflected without proper encoding
-if payload in response_text and "<script>" in payload:
+if payload in response_text and "<script> in payload:"
     pass
 xss_vulnerabilities.append( )
 ""
                                                                                                     
 
                                                                                                     # Test POST requests with JSON payloads
-if url.endswith("/run_agent"):
+if url.endswith("/run_agent):"
     pass
 async with session.post(url, json=params) as response:
 if response.status == 200:
     pass
 response_text = await response.text()
-if payload in response_text and "<script>" in payload:
+if payload in response_text and "<script> in payload:"
     pass
 xss_vulnerabilities.append( )
 ""
@@ -203,11 +203,11 @@ pass
 
                                                                                                                         # Report findings
 if xss_vulnerabilities:
-    print(" ALERT:  SECURITY VULNERABILITY - XSS Risks:")
+    print(" ALERT:  SECURITY VULNERABILITY - XSS Risks:)"
 for vuln in xss_vulnerabilities:
     print("")
 else:
-    print(" PASS:  No XSS vulnerabilities detected in tested endpoints")
+    print(" PASS:  No XSS vulnerabilities detected in tested endpoints)"
 
                                                                                                                                     # This test should identify any XSS vulnerabilities
 assert not xss_vulnerabilities, ""
@@ -254,18 +254,18 @@ bypass_vulnerabilities.append( )
 
                                                                                                                                                                 # Test with invalid/malformed tokens
 malformed_tokens = [ ]
-"Bearer invalid_token",
-"Bearer ",
-"Bearer null",
-"Bearer undefined",
-"Bearer admin",
-"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid",
-"Authorization: Bearer token",  # Wrong header format
+"Bearer invalid_token,"
+"Bearer ,"
+"Bearer null,"
+"Bearer undefined,"
+"Bearer admin,"
+"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid,"
+"Authorization: Bearer token,  # Wrong header format"
 "Basic admin:admin"
                                                                                                                                                                 
 
 for token in malformed_tokens:
-headers = {"Authorization": token}
+headers = {"Authorization: token}"
 async with session.get(url, headers=headers) as response:
 if response.status == 200:
     pass
@@ -274,7 +274,7 @@ bypass_vulnerabilities.append( )
                                                                                                                                                                             
 
                                                                                                                                                                             # Test parameter pollution
-async with session.get("formatted_string") as response:
+async with session.get("formatted_string) as response:"
 if response.status == 200:
     pass
 bypass_vulnerabilities.append("")
@@ -282,7 +282,7 @@ bypass_vulnerabilities.append("")
                                                                                                                                                                                     # Test HTTP method bypass
 if url.startswith(backend_url):
     pass
-for method in ["POST", "PUT", "DELETE", "PATCH"]:
+for method in ["POST", "PUT", "DELETE", "PATCH]:"
 async with session.request(method, url) as response:
 if response.status == 200:
     pass
@@ -296,11 +296,11 @@ pass
 
                                                                                                                                                                                                         # Report findings
 if bypass_vulnerabilities:
-    print(" ALERT:  SECURITY VULNERABILITY - Authentication Bypass:")
+    print(" ALERT:  SECURITY VULNERABILITY - Authentication Bypass:)"
 for vuln in bypass_vulnerabilities:
     print("")
 else:
-    print(" PASS:  No authentication bypass vulnerabilities detected")
+    print(" PASS:  No authentication bypass vulnerabilities detected)"
 
                                                                                                                                                                                                                     # This test should identify authentication bypass issues
 assert not bypass_vulnerabilities, ""
@@ -341,12 +341,12 @@ start_time = asyncio.get_event_loop().time()
                                                                                                                                                                                                                                     # Make 20 requests as quickly as possible
 tasks = []
 for i in range(20):
-if url.endswith("/login"):
+if url.endswith("/login):"
                                                                                                                                                                                                                                             # For login endpoint, use POST with dummy credentials
-task = session.post(url, json={"email": "test@example.com", "password": "test"})
-elif url.endswith("/run_agent"):
+task = session.post(url, json={"email": "test@example.com", "password": "test})"
+elif url.endswith("/run_agent):"
                                                                                                                                                                                                                                                 # For agent endpoint, use POST with dummy query
-task = session.post(url, json={"query": "test query"})
+task = session.post(url, json={"query": "test query})"
 else:
     pass
 task = session.get(url)
@@ -391,21 +391,21 @@ rate_limiting_issues.append( )
 
 except Exception as e:
                                                                                                                                                                                                                                                                                 # Connection errors might indicate rate limiting working
-if "Connection" in str(e):
+if "Connection in str(e):"
     print("")
 
                                                                                                                                                                                                                                                                                     # Report findings
 if rate_limiting_issues:
-    print(" ALERT:  SECURITY GAP - Rate Limiting Issues:")
+    print(" ALERT:  SECURITY GAP - Rate Limiting Issues:)"
 for issue in rate_limiting_issues:
     print("")
 
                                                                                                                                                                                                                                                                                             # For now, skip this test as it identifies coverage gaps
-pytest.skip("Rate limiting not fully implemented - security gap identified")
+pytest.skip("Rate limiting not fully implemented - security gap identified)"
 else:
-    print(" PASS:  Rate limiting appears to be properly configured")
+    print(" PASS:  Rate limiting appears to be properly configured)"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                                                                                                                                                                                                                                                                                     # Run individual tests for debugging
 asyncio.run(test_sql_injection_prevention())

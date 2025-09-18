@@ -27,7 +27,7 @@ sys.path.insert(0, str(project_root))
 
 
 class CloudRunURLComplianceTests:
-    ""Mission critical tests to prevent direct Cloud Run URL regression
+    ""Mission critical tests to prevent direct Cloud Run URL regression"
     
     # FORBIDDEN: Direct Cloud Run URL patterns
     FORBIDDEN_PATTERNS = [
@@ -89,7 +89,7 @@ class CloudRunURLComplianceTests:
         return config_files
     
     def test_no_direct_cloudrun_urls_in_e2e_tests(self, e2e_test_files):
-    "
+        """
     "
         MISSION CRITICAL: E2E tests must NOT use direct Cloud Run URLs
         
@@ -145,7 +145,7 @@ class CloudRunURLComplianceTests:
             pytest.fail(error_msg)
     
     def test_core_config_uses_load_balancer_endpoints(self, core_config_files):
-        ""
+        """
         MISSION CRITICAL: Core configuration files must use load balancer endpoints
         
         Validates URLConstants and E2E config use proper staging domains.
@@ -190,7 +190,7 @@ class CloudRunURLComplianceTests:
             pytest.fail(error_msg)
     
     def test_staging_tests_use_proper_domains(self, e2e_test_files):
-    "
+        """
     "
         Validate that tests referencing staging use proper load balancer domains
         
@@ -242,7 +242,7 @@ class CloudRunURLComplianceTests:
             pytest.skip(error_msg)
     
     def test_load_balancer_compliance_validation_exists(self):
-    "
+        """
     "
         Ensure compliance validation script exists and is executable
         "
@@ -274,7 +274,7 @@ class CloudRunURLComplianceTests:
         )
     
     def test_migration_script_exists_and_functional(self):
-    "
+        """
     "
         Ensure URL migration script exists for future remediation
         "

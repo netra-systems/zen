@@ -155,7 +155,7 @@ class Issue847StagingWebSocketConnectivityTests(unittest.TestCase):
             self.assertTrue(health_accessible, fStaging health endpoint accessible: {results})
 
     def test_staging_websocket_endpoint_accessibility(self):
-        ""
+        """
         Test that staging WebSocket endpoint is accessible for connections.
 
         Expected: PASS if WebSocket endpoint is accessible, FAIL if not

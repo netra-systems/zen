@@ -119,7 +119,7 @@ class AuthenticationTestSuite:
         self.metrics: List[UserJourneyMetrics] = []
         self.session = self._create_resilient_session()
         self.base_urls = {
-        auth": "http://localhost:8081,
+        auth": http://localhost:8081,"
         backend: http://localhost:8000
     
 
@@ -165,7 +165,7 @@ class AuthenticationTestSuite:
         return False
 
                 # Step 2: Login Authentication
-        login_data = {email: signup_data[email], "password: signup_data[password"]}
+        login_data = {email: signup_data[email], "password: signup_data[password]}"
         response = self.session.post(formatted_string,
         json=login_data, timeout=10)
 
@@ -183,7 +183,7 @@ class AuthenticationTestSuite:
         metrics.steps_completed.append(token_validation_success)
 
                         # Step 4: Chat Initiation
-        chat_data = {message: "Hello, I need help with AI optimization, tier": tier}
+        chat_data = {message: "Hello, I need help with AI optimization, tier: tier}"
         response = self.session.post(formatted_string,
         json=chat_data, headers=headers, timeout=30)
         if response.status_code == 200:
@@ -320,7 +320,7 @@ class AuthenticationTestSuite:
         sub: user_id,"
         iat": int(now.timestamp()),"
         exp: int((now + timedelta(minutes=30)).timestamp()),
-        token_type": "access,
+        token_type": access,"
         iss: netra-auth-service,
         aud: "netra-platform"
             
@@ -368,7 +368,7 @@ class AuthenticationTestSuite:
         user_id = formatted_string
 
         # Test session creation
-        login_data = {email: "formatted_string, password": TestPass123!}
+        login_data = {email: "formatted_string, password: TestPass123!}"
         login_response = self.session.post(formatted_string, json=login_data)
 
         if login_response.status_code != 200:
@@ -409,7 +409,7 @@ class AuthenticationTestSuite:
 
         # Test MFA verification endpoint
         mfa_verify_response = self.session.post(formatted_string,
-        json={user_id: user_id, "code: 123456"}
+        json={user_id: user_id, "code: 123456}"
 
         # Accept structured responses (even if MFA not fully implemented)
         return (mfa_setup_response.status_code in [200, 400, 404] and )
@@ -429,7 +429,7 @@ class AuthenticationTestSuite:
         # Create expired token
         past_time = datetime.now(timezone.utc) - timedelta(minutes=30)
         expired_payload = {
-        "sub: test_user",
+        "sub: test_user,"
         iat: int(past_time.timestamp()),
         exp: int((past_time + timedelta(minutes=15)).timestamp()),"
         exp: int((past_time + timedelta(minutes=15)).timestamp()),"
@@ -470,7 +470,7 @@ class AuthenticationTestSuite:
         user_id = formatted_string
 
         # Login
-        login_data = {email: formatted_string", "password: TestPass123!}
+        login_data = {email: formatted_string", password: TestPass123!}"
         login_response = self.session.post(formatted_string, json=login_data)
 
         if login_response.status_code != 200:
@@ -512,16 +512,16 @@ class AuthenticationTestSuite:
         permission_tests = [
         {permissions": [read], endpoint: /user/profile, expected": 200},"
         {permissions": [read], endpoint: /user/profile, expected": 200},"
-        {permissions: [read, write], endpoint": "/user/settings, expected: 200},
-        {permissions: [admin], "endpoint: /admin/users", expected: 200},
-        {permissions: ["read], endpoint": /admin/users, expected: 403}
+        {permissions: [read, write], endpoint": /user/settings, expected: 200},"
+        {permissions: [admin], "endpoint: /admin/users, expected: 200},"
+        {permissions: ["read], endpoint: /admin/users, expected: 403}"
         
 
         results = []
         for test in permission_tests:
             # Create token with specific permissions
         payload = {
-        "sub: formatted_string",
+        "sub: formatted_string,"
         iat: int(datetime.now(timezone.utc).timestamp()),
         exp: int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),"
         exp: int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),"
@@ -529,7 +529,7 @@ class AuthenticationTestSuite:
             
 
         token = jwt.encode(payload, secret, algorithm=HS256)
-        headers = {Authorization": "formatted_string}
+        headers = {Authorization": formatted_string}"
 
             # Test access to endpoint
         response = self.session.get(formatted_string,
@@ -563,7 +563,7 @@ class AuthenticationTestSuite:
 
         # Step 2: Registration with onboarding data
         registration_data = {
-        email": "formatted_string,
+        email": formatted_string,"
         password: SecureOnboardingPass123!,
         company: "Test Company Inc,"
         use_case": AI optimization,"
@@ -617,12 +617,12 @@ class AuthenticationTestSuite:
         user_id = formatted_string
 
         # Simulate power user login
-        login_data = {email: "formatted_string, password": PowerUser123!}
+        login_data = {email: "formatted_string, password: PowerUser123!}"
         login_response = self.session.post(formatted_string, json=login_data)
 
         if login_response.status_code == 200:
         tokens = login_response.json()
-        headers = {"Authorization: formatted_string"}
+        headers = {"Authorization: formatted_string}"
 
             # Test advanced features
         advanced_features = [
@@ -656,7 +656,7 @@ class AuthenticationTestSuite:
         user_id = "formatted_string"
 
         # Test free tier limits
-        login_data = {email: formatted_string, password": "FreeUser123!}
+        login_data = {email: formatted_string, password": FreeUser123!}"
         login_response = self.session.post(formatted_string, json=login_data)
 
         if login_response.status_code == 200:
@@ -683,7 +683,7 @@ class AuthenticationTestSuite:
         return False
 
     def test_premium_tier_features(self) -> bool:
-        ""Test premium tier exclusive features.
+        ""Test premium tier exclusive features."
         try:
         user_id = formatted_string"
         user_id = formatted_string"
@@ -729,7 +729,7 @@ class AuthenticationTestSuite:
         user_id = formatted_string
 
         # Enterprise user simulation
-        login_data = {email": "formatted_string, password: EnterpriseUser123!}
+        login_data = {email": formatted_string, password: EnterpriseUser123!}"
         login_response = self.session.post(formatted_string, json=login_data)"
         login_response = self.session.post(formatted_string, json=login_data)"
 
@@ -739,11 +739,11 @@ class AuthenticationTestSuite:
 
             # Test enterprise features
         enterprise_tests = [
-        {endpoint: /api/v1/admin/team-management, "method: GET"},
+        {endpoint: /api/v1/admin/team-management, "method: GET},"
         {endpoint: /api/v1/compliance/audit-logs, method: GET"},"
         {"endpoint: /api/v1/billing/enterprise-report, method: GET},"
-        {"endpoint: /api/v1/security/sso-config", method: GET},
-        {endpoint: /api/v1/customization/branding", "method: GET}
+        {"endpoint: /api/v1/security/sso-config, method: GET},"
+        {endpoint: /api/v1/customization/branding", method: GET}"
             
 
         results = []
@@ -771,7 +771,7 @@ class AuthenticationTestSuite:
         try:
         user_id = "formatted_string"
 
-        login_data = {email: formatted_string, password": "BillingTest123!}
+        login_data = {email: formatted_string, password": BillingTest123!}"
         login_response = self.session.post(formatted_string, json=login_data)
 
         if login_response.status_code == 200:
@@ -919,7 +919,7 @@ class AuthenticationTestSuite:
         user_id = formatted_string
 
         # Login and set preferences
-        login_data = {email": "formatted_string, password: PrefsTest123!}
+        login_data = {email": formatted_string, password: PrefsTest123!}"
         login_response = self.session.post(formatted_string, json=login_data)"
         login_response = self.session.post(formatted_string, json=login_data)"
 
@@ -930,7 +930,7 @@ class AuthenticationTestSuite:
             # Set user preferences
         preferences = {
         theme: dark,
-        "language: en",
+        "language: en,"
         notifications: True,
         ai_model_preference: "gpt-4,"
         dashboard_layout": compact"
@@ -982,7 +982,7 @@ class AuthenticationTestSuite:
 
         try:
         # Login
-        login_data = {email: formatted_string, "password: LoadTest123!"}
+        login_data = {email: formatted_string, "password: LoadTest123!}"
         login_response = self.session.post(formatted_string, json=login_data)
 
         if login_response.status_code == 200:
@@ -993,14 +993,14 @@ class AuthenticationTestSuite:
         actions = [
         self.session.get(formatted_string", headers=headers),"
         self.session.post(formatted_string,
-        json={message": "Load test message}, headers=headers),
+        json={message": Load test message}, headers=headers),"
         self.session.get(formatted_string, headers=headers)
             
 
         duration = time.time() - user_start
         success = all(r.status_code in [200, 404] for r in actions)
 
-        return {success: success, duration": duration, "user: user_id}
+        return {success: success, duration": duration, user: user_id}"
 
         except Exception as e:
         return {success: False, duration: time.time() - user_start, error": str(e)}"
@@ -1037,13 +1037,13 @@ class AuthenticationTestSuite:
         # Perform sustained operations
         for i in range(100):
         user_id = formatted_string
-        login_data = {email: "formatted_string, password": MemoryTest123!}
+        login_data = {email: "formatted_string, password: MemoryTest123!}"
 
         try:
         response = self.session.post(formatted_string, json=login_data)
         if response.status_code == 200:
         tokens = response.json()
-        headers = {"Authorization: formatted_string"}
+        headers = {"Authorization: formatted_string}"
 
                     # Perform memory-intensive operations
         self.session.get(formatted_string, headers=headers)
@@ -1093,7 +1093,7 @@ class AuthenticationTestSuite:
             # Simulate concurrent operations
     def perform_operation():
         pass
-        login_data = {email": "formatted_string, password: ResourceTest123!}
+        login_data = {email": formatted_string, password: ResourceTest123!}"
         try:
         response = self.session.post(formatted_string, json=login_data)"
         response = self.session.post(formatted_string, json=login_data)"
@@ -1211,7 +1211,7 @@ class AuthenticationTestSuite:
         error_rate": len([item for item in [)) / total_metrics,"
         tier_distribution: {
         tier: len([item for item in [))
-        for tier in [free", "premium, enterprise]
+        for tier in [free", premium, enterprise]"
         
         },
         business_value: {"
@@ -1233,7 +1233,7 @@ class AuthenticationTestSuite:
         print(= * 60)
 
         auth_tests = {
-        "complete_signup_login_chat_flow": suite.test_complete_signup_login_chat_flow,
+        "complete_signup_login_chat_flow: suite.test_complete_signup_login_chat_flow,"
         jwt_token_generation_and_validation: suite.test_jwt_token_generation_and_validation,
         token_refresh_during_active_chat: suite.test_token_refresh_during_active_chat,
         cross_service_authentication: suite.test_cross_service_authentication,
@@ -1263,7 +1263,7 @@ class AuthenticationTestSuite:
         Run all user journey tests.
         print("")
          + = * 60)
-        print("RUNNING USER JOURNEY TESTS")
+        print("RUNNING USER JOURNEY TESTS)"
         print(= * 60)"
         print(= * 60)"
 
@@ -1288,7 +1288,7 @@ class AuthenticationTestSuite:
         print("")
         result = test_func()
         results[test_name] = result
-        status = [U+2713] PASSED" if result else "[U+2717] FAILED
+        status = [U+2713] PASSED" if result else [U+2717] FAILED"
         print(formatted_string)
         except Exception as e:
         results[test_name] = False
@@ -1319,7 +1319,7 @@ class AuthenticationTestSuite:
         result = test_func()
         duration = time.time() - start_time
         results[test_name] = result
-        status = "[U+2713] PASSED" if result else [U+2717] FAILED
+        status = "[U+2713] PASSED if result else [U+2717] FAILED"
         print()
         except Exception as e:
         results[test_name] = False
@@ -1328,7 +1328,7 @@ class AuthenticationTestSuite:
         return results
 
     def main():
-        ""Run comprehensive JWT secret synchronization and authentication test suite.
+        ""Run comprehensive JWT secret synchronization and authentication test suite."
         print(COMPREHENSIVE JWT SECRET SYNCHRONIZATION AND AUTHENTICATION TEST SUITE)
         print(=" * 80)"
         print(Testing critical revenue paths and user value delivery")"
@@ -1357,7 +1357,7 @@ class AuthenticationTestSuite:
 
         print("")
          + = * 80)
-        print("COMPREHENSIVE TEST RESULTS SUMMARY")
+        print("COMPREHENSIVE TEST RESULTS SUMMARY)"
         print(= * 80)"
         print(= * 80)"
 
@@ -1412,7 +1412,7 @@ class AuthenticationTestSuite:
         traceback.print_exc()
         return False
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         success = main()
         sys.exit(0 if success else 1)
         pass

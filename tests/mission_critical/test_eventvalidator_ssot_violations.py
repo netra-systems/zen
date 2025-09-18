@@ -51,13 +51,13 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
         self.sample_valid_event = {
             "type: agent_started,"
             run_id: test-run-123,
-            "agent_name: test-agent",
+            "agent_name: test-agent,"
             timestamp: datetime.now(timezone.utc).isoformat(),
-            payload: {"status: started", agent: test-agent}
+            payload: {"status: started, agent: test-agent}"
         }
         
         self.sample_invalid_event = {
-            "type: agent_started",
+            "type: agent_started,"
             # Missing required fields: run_id, agent_name, timestamp, payload
         }
         
@@ -66,7 +66,7 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
         self.test_connection_id = conn-ssot-test"
         
     def test_multiple_eventvalidator_implementations_exist(self):
-    "
+        """
     "
         Test that multiple EventValidator implementations exist - proving SSOT violation.
         
@@ -95,7 +95,7 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
                 "criticality: unified_result.criticality.value if hasattr(unified_result.criticality, 'value') else str(unified_result.criticality)"
             }
             logger.info(f[U+2713] UnifiedEventValidator found and tested)
-            print(f"DEBUG: UnifiedEventValidator found - {unified_result.is_valid}")
+            print(f"DEBUG: UnifiedEventValidator found - {unified_result.is_valid})"
         except ImportError as e:
             logger.error(f FAIL:  Cannot import UnifiedEventValidator: {e})
             print(fDEBUG: UnifiedEventValidator import failed: {e}")"
@@ -198,7 +198,7 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             )
         
     def test_eventvalidator_result_inconsistency(self):
-        "
+        """
         "
         Test that different validators give inconsistent results - proving SSOT violation.
         
@@ -221,7 +221,7 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             unified_validator = UnifiedEventValidator()
             unified_result = unified_validator.validate_event(invalid_event, self.test_user_id)
             results.append({
-                validator": "UnifiedEventValidator,
+                validator": UnifiedEventValidator,"
                 is_valid: unified_result.is_valid,
                 has_business_value_score: hasattr(unified_result, 'business_value_score'),"
                 has_business_value_score: hasattr(unified_result, 'business_value_score'),"
@@ -255,7 +255,7 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             second_result = results[1]
             
             inconsistencies = []
-            if first_result["has_business_value_score] != second_result[has_business_value_score"]:
+            if first_result["has_business_value_score] != second_result[has_business_value_score]:"
                 inconsistencies.append(business_value_score capability differs)
             if first_result[has_revenue_impact] != second_result["has_revenue_impact]:"
                 inconsistencies.append(revenue_impact capability differs")"
@@ -276,7 +276,7 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
                 )
         
     def test_golden_path_impact_validation(self):
-    "
+        """
     "
         Test that SSOT violations impact Golden Path functionality.
         

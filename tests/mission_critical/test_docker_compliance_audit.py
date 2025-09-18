@@ -93,7 +93,7 @@ class DockerComplianceAuditor:
         self.manager = get_default_manager()
 
     def audit_file_for_docker_commands(self, file_path: Path) -> List[Dict]:
-        ""Check a file for direct docker/docker-compose commands
+        ""Check a file for direct docker/docker-compose commands"
         violations = []
 
     # Skip non-Python and non-script files for command analysis
@@ -371,7 +371,7 @@ class DockerComplianceInfrastructureTests:
         self.logger.info(""
 
     # Performance assertions
-        assert files_per_second > 50, formatted_string
+        assert files_per_second > 50, "formatted_string"
         assert memory_per_file < 0.5, formatted_string"
         assert memory_per_file < 0.5, formatted_string"
         assert audit_duration < 30000, formatted_string"
@@ -438,9 +438,9 @@ class DockerComplianceInfrastructureTests:
         self.logger.info(formatted_string")"
 
                         # Accuracy assertions
-        assert accuracy_rate >= 90, formatted_string
+        assert accuracy_rate >= 90, "formatted_string"
         assert false_positive_rate <= 0.1, formatted_string""
-        assert false_negative_rate <= 0.5, formatted_string
+        assert false_negative_rate <= 0.5, "formatted_string"
 
         return {
         'accuracy_rate': accuracy_rate,
@@ -460,7 +460,7 @@ class DockerComplianceInfrastructureTests:
         test_violations = [
         {
         'name': 'subprocess_docker_call',
-        code": "import subprocess
+        code": import subprocess"
         subprocess.run([docker, ps),
         'expected_fix': 'manager.execute_docker_command'
         },
@@ -499,7 +499,7 @@ class DockerComplianceInfrastructureTests:
         'remediation_generated': len(remediation_script) > 0,
         'quality_score': remediation_quality['score'],
         'contains_expected_fix': remediation_quality['contains_expected_fix'],
-        remediation_lines": len(remediation_script.split(" ))
+        remediation_lines": len(remediation_script.split( ))"
         ))
                 
 
@@ -521,7 +521,7 @@ class DockerComplianceInfrastructureTests:
         self.logger.info(""
 
                         # Effectiveness assertions
-        assert effectiveness_rate >= 80, formatted_string
+        assert effectiveness_rate >= 80, "formatted_string"
         assert avg_quality >= 6.0, formatted_string"
         assert avg_quality >= 6.0, formatted_string"
 
@@ -626,9 +626,9 @@ class DockerComplianceInfrastructureTests:
         self.logger.info(""
 
                                             # Performance assertions
-        assert success_rate >= 95, formatted_string
+        assert success_rate >= 95, "formatted_string"
         assert avg_monitoring_time < 1000, ""
-        assert max_monitoring_time < 5000, formatted_string
+        assert max_monitoring_time < 5000, "formatted_string"
         assert failed_cycles == 0, formatted_string"
         assert failed_cycles == 0, formatted_string"
 
@@ -739,7 +739,7 @@ class DockerComplianceInfrastructureTests:
         self.logger.info(""
 
                                     # Risk assertions - adjust based on acceptable risk levels
-        assert overall_risk_level in ['LOW', 'MEDIUM'], formatted_string
+        assert overall_risk_level in ['LOW', "'MEDIUM'], formatted_string"
         assert avg_risk_score < 7.0, formatted_string"
         assert avg_risk_score < 7.0, formatted_string"
         assert estimated_remediation_hours < 40, formatted_string"
@@ -851,7 +851,7 @@ class DockerComplianceInfrastructureTests:
         self.logger.info(formatted_string")"
 
                                                         # Cross-platform assertions
-        assert cross_platform_compliance >= 95, formatted_string
+        assert cross_platform_compliance >= 95, "formatted_string"
 
                                                         # Ensure at least one Docker Compose file exists
         existing_compose_files = [item for item in []]
@@ -877,7 +877,7 @@ class DockerComplianceInfrastructureTests:
         return categories
 
     def _create_compliance_test_cases(self) -> List[Dict[str, Any]]:
-        ""Create test cases for compliance violation detection.
+        ""Create test cases for compliance violation detection."
         return [
         {
         'name': 'compliant_code',
@@ -890,7 +890,7 @@ class DockerComplianceInfrastructureTests:
         {
         'name': 'subprocess_violation',
         code: import subprocess
-        subprocess.run(["docker", ps),
+        subprocess.run(["docker, ps),"
         'expected_violations': 1
         },
         {
@@ -904,13 +904,13 @@ class DockerComplianceInfrastructureTests:
         'name': 'multiple_violations',
         code: import subprocess
         import os
-        subprocess.run([docker, "ps")
+        subprocess.run([docker, "ps)"
         os.system(docker stop container),
         'expected_violations': 2
         },
         {
         'name': 'commented_violation',
-        code: # subprocess.run(["docker", ps)
+        code: # subprocess.run(["docker, ps)"
         print(This is fine),
         'expected_violations': 0
     
@@ -951,7 +951,7 @@ class DockerComplianceInfrastructureTests:
     # Print report
         print(")"
          + =*80)
-        print("DOCKER MANAGEMENT COMPLIANCE AUDIT REPORT")
+        print("DOCKER MANAGEMENT COMPLIANCE AUDIT REPORT)"
         print(=*80)
         print()
         print(formatted_string")"
@@ -980,7 +980,7 @@ class DockerComplianceInfrastructureTests:
         print()
 
                         # Fail test if compliance score is below threshold
-        assert report['compliance_score'] >= 95, formatted_string
+        assert report['compliance_score'] >= 95, "formatted_string"
 
                         # Verify frontend integration
         frontend_checks = report['frontend_integration']

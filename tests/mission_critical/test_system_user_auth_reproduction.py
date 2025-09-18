@@ -93,7 +93,7 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
         Expected Failure: 403 'Not authenticated' for 'system' user
         Location: netra_backend.app.dependencies.get_request_scoped_db_session
         
-        This test demonstrates the root cause: hardcoded "system" user lacks
+        This test demonstrates the root cause: hardcoded "system user lacks"
         proper service authentication headers required by enhanced middleware.
 
         logger.info(" ALERT:  REPRODUCING: Current system user 403 authentication failure)"
@@ -128,7 +128,7 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
             # Validate this is the expected authentication failure
             error_message = str(e).lower()
             
-            if "not authenticated in error_message or 403" in error_message:
+            if "not authenticated in error_message or 403 in error_message:"
                 logger.info(
                     f PASS:  REPRODUCED: Expected authentication failure in {execution_time:.3f}s: {e}
                 )
@@ -186,14 +186,14 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
             logger.info(fService headers generated in {execution_time:.3f}s: {service_headers})
             
             # Validate headers are missing or invalid (demonstrating the issue)
-            if not service_headers or not service_headers.get(X-Service-ID") or not service_headers.get("X-Service-Secret):
+            if not service_headers or not service_headers.get(X-Service-ID") or not service_headers.get(X-Service-Secret):"
                 logger.info( PASS:  REPRODUCED: Missing service authentication headers)
                 
                 self.record_metric(missing_service_auth_headers, {"
                 self.record_metric(missing_service_auth_headers, {"
                     headers_present": bool(service_headers),"
                     service_id_present: bool(service_headers.get(X-Service-ID) if service_headers else False),
-                    "service_secret_present: bool(service_headers.get(X-Service-Secret") if service_headers else False),
+                    "service_secret_present: bool(service_headers.get(X-Service-Secret) if service_headers else False),"
                     execution_time: execution_time
                 }
                 
@@ -241,7 +241,7 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     def test_middleware_rejects_system_user_without_service_headers(self):
-        ""
+        """
         Test that authentication middleware properly rejects system user requests
         that lack service authentication headers.
         

@@ -58,8 +58,8 @@ class SSOTWebSocketAuthenticationComplianceTests:
     async def test_unified_authentication_service_ssot_compliance(self):
         Test that UnifiedAuthenticationService is SSOT for all authentication.""
         auth_service = get_unified_auth_service()
-        assert isinstance(auth_service, UnifiedAuthenticationService)
-        assert hasattr(auth_service, '_auth_client')
+        assert isinstance(auth_service, "UnifiedAuthenticationService)"
+        assert hasattr(auth_service, "'_auth_client')"
         auth_service2 = get_unified_auth_service()
         assert auth_service is auth_service2
         print(' PASS:  SSOT COMPLIANCE: UnifiedAuthenticationService is properly configured as SSOT')
@@ -68,15 +68,15 @@ class SSOTWebSocketAuthenticationComplianceTests:
     async def test_websocket_authenticator_uses_ssot(self):
         "Test that WebSocket authenticator uses SSOT authentication service."""
         ws_authenticator = get_websocket_authenticator()
-        assert isinstance(ws_authenticator, UnifiedWebSocketAuthenticator)
-        assert hasattr(ws_authenticator, '_auth_service')
+        assert isinstance(ws_authenticator, "UnifiedWebSocketAuthenticator)"
+        assert hasattr(ws_authenticator, "'_auth_service')"
         auth_service = get_unified_auth_service()
         assert ws_authenticator._auth_service is auth_service
         print(' PASS:  SSOT COMPLIANCE: WebSocket authenticator properly uses unified auth service')
 
     @pytest.mark.asyncio
     async def test_websocket_authentication_success_flow(self, mock_websocket):
-        ""Test successful WebSocket authentication using SSOT implementation.
+        ""Test successful WebSocket authentication using SSOT implementation."
         with patch('netra_backend.app.clients.auth_client_core.AuthServiceClient.validate_token') as mock_validate:
             mock_validate.return_value = {'valid': True, 'user_id': 'test-user-123', 'email': 'test@example.com', 'permissions': ['read', 'write']}
             auth_result = await authenticate_websocket_ssot(mock_websocket)
@@ -221,7 +221,7 @@ class SSOTWebSocketAuthenticationEndToEndTests:
 
     @pytest.mark.asyncio
     async def test_full_websocket_auth_flow_integration(self):
-        ""Test complete WebSocket authentication flow with real services.
+        ""Test complete WebSocket authentication flow with real services."
         pytest.importorskip('test_framework.conftest_real_services', reason='Requires real services')
         from test_framework.ssot.websocket import create_authenticated_websocket_connection
         try:

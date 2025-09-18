@@ -142,7 +142,7 @@ class MockWebSocketBridge:
     async def emit_agent_thinking(self, reasoning: str):
         "Emit agent thinking event."""
         event = {
-            "type: agent_thinking",
+            "type: agent_thinking,"
             reasoning: reasoning,
             timestamp: datetime.now(timezone.utc).isoformat(),""
             "user_id: getattr(self.user_context, 'user_id', 'unknown')"
@@ -174,7 +174,7 @@ class MockWebSocketBridge:
     async def emit_agent_completed(self, result: Dict[str, Any], agent_type: str = None):
         "Emit agent completed event."""
         event = {
-            "type: agent_completed",
+            "type: agent_completed,"
             agent_type: agent_type,
             result: result,""
             "timestamp: datetime.now(timezone.utc).isoformat(),"
@@ -235,7 +235,7 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                 business_impact="Agent Registry cannot be imported - complete system failure,"
                 fix_complexity=critical,
                 technical_details={
-                    missing_components: [AgentRegistry", "UnifiedToolDispatcher, UserExecutionContext]
+                    missing_components: [AgentRegistry", UnifiedToolDispatcher, UserExecutionContext]"
                 }
     
     def capture_integration_gap(
@@ -249,7 +249,7 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
         fix_complexity: str = medium,
         technical_details: Optional[Dict[str, Any]] = None
     ):
-        ""Capture structured integration gap for analysis.
+        ""Capture structured integration gap for analysis."
         gap = AgentRegistryIntegrationGap(
             test_name=test_name,
             gap_type=gap_type,
@@ -276,7 +276,7 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
     
     @pytest.mark.integration
     async def test_agent_registry_websocket_manager_initialization_gap(self):
-    ""
+    """
         Test Agent Registry WebSocket manager initialization gap.
         
         EXPECTED TO FAIL: This should expose missing WebSocket manager initialization
@@ -460,7 +460,7 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                 # EXPECTED: Should fail with bridge creation error
                 error_message = str(bridge_error).lower()
                 
-                bridge_error_patterns = [bridge, factory, websocket, "creation, integration"]
+                bridge_error_patterns = [bridge, factory, websocket, "creation, integration]"
                 is_bridge_error = any(pattern in error_message for pattern in bridge_error_patterns)
                 
                 if is_bridge_error:
@@ -578,7 +578,7 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                         await websocket_bridge.emit_agent_started(agent_type=data, message=Testing event emission")"
                                         await websocket_bridge.emit_agent_thinking(reasoning="Testing WebSocket integration)"
                                         await websocket_bridge.emit_tool_executing(tool_name=test_tool, parameters={test: True)
-                                        await websocket_bridge.emit_tool_completed(tool_name=test_tool", result={"success: True)
+                                        await websocket_bridge.emit_tool_completed(tool_name=test_tool", result={success: True)"
                                         await websocket_bridge.emit_agent_completed(result={test: completed}, agent_type=data)""
                                         
                                         # Check if events were properly emitted
@@ -699,7 +699,7 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
     
     @pytest.mark.integration
     async def test_agent_registry_multi_user_websocket_isolation_gap(self):
-    ""
+    """
         Test Agent Registry multi-user WebSocket isolation gap.
         
         EXPECTED TO FAIL: This should expose multi-user isolation failures
@@ -804,7 +804,7 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                     # Test event isolation by emitting events for each user
                                     try:
                                         await alice_bridge.emit_agent_started(agent_type=triage, message=Alice's agent started)'
-                                        await bob_bridge.emit_agent_started(agent_type="triage, message=Bob's agent started")'
+                                        await bob_bridge.emit_agent_started(agent_type="triage, message=Bob's agent started)'"
                                         
                                         # Check event isolation
                                         alice_events = getattr(alice_bridge, 'events_emitted', [)
@@ -950,7 +950,7 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
     
     @pytest.mark.integration
     async def test_agent_registry_integration_gap_analysis(self):
-    ""
+    """
         Generate comprehensive Agent Registry integration gap analysis.
         
         This test analyzes all captured integration gaps and generates a structured
@@ -990,7 +990,7 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
         # Print categorized analysis
         print(f\nINTEGRATION GAPS BY COMPONENT:)
         for component, gaps in gap_categories.items():
-            print(f"  {component.upper()}: {len(gaps)} gaps")
+            print(f"  {component.upper()}: {len(gaps)} gaps)"
             for gap in gaps:
                 status = EXPECTED if gap.expected_gap else UNEXPECTED
                 severity = gap.fix_complexity.upper()
@@ -1057,7 +1057,7 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
         
         # Verify that we successfully captured integration gaps
         assert len(self.integration_gaps) > 0, No integration gaps were exposed - tests may need revision""
-        assert len(expected_gaps) > 0, No expected gaps captured - integration gap detection not working
+        assert len(expected_gaps) > 0, "No expected gaps captured - integration gap detection not working"
         
         # Store report as class attribute for potential further use
         self.integration_gap_report = integration_gap_report
@@ -1112,13 +1112,13 @@ if __name__ == __main__":"
             # Generate analysis report
             report = await test_instance.test_agent_registry_integration_gap_analysis()
             
-            print(f" PASS:  Agent Registry integration gap testing completed")
+            print(f" PASS:  Agent Registry integration gap testing completed)"
             print(f    ->  {report['total_gaps']} integration gaps captured)
-            print(f"    ->  {report['critical_gaps']} critical gaps requiring immediate attention")
+            print(f"    ->  {report['critical_gaps']} critical gaps requiring immediate attention)"
             print(f    ->  {report['expected_gaps']} expected gaps successfully exposed)
             
         except Exception as e:
-            print(f"[U+2717] Agent Registry integration gap testing encountered issues: {e}")
+            print(f"[U+2717] Agent Registry integration gap testing encountered issues: {e})"
             raise
     
     # Run tests if executed directly

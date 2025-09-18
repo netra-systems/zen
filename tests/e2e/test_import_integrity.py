@@ -51,30 +51,30 @@ class ImportIntegrityValidator:
 
     # Critical directories to test
         self.target_directories = [ ]
-        "app",
-        "auth_service",
-        "dev_launcher",
-        "test_framework",
+        "app,"
+        "auth_service,"
+        "dev_launcher,"
+        "test_framework,"
         "tests"
     
 
     # Required packages that must be available
         self.required_packages = { }
-        "fastapi", "pytest", "httpx", "pydantic", "sqlalchemy",
-        "asyncio", "uvicorn", "click", "asyncpg", "psycopg2",
-        "redis", "openai", "anthropic", "google", "websockets",
+        "fastapi", "pytest", "httpx", "pydantic", "sqlalchemy,"
+        "asyncio", "uvicorn", "click", "asyncpg", "psycopg2,"
+        "redis", "openai", "anthropic", "google", "websockets,"
         "alembic", "boto3", "prometheus_client", "structlog"
     
 
     # Files/patterns to skip (known to be safe to skip)
         self.skip_patterns = { }
-        "__pycache__",
-        ".pyc",
-        ".git",
-        "node_modules",
-        ".pytest_cache",
-        "temp",
-        "logs",
+        "__pycache__,"
+        ".pyc,"
+        ".git,"
+        "node_modules,"
+        ".pytest_cache,"
+        "temp,"
+        "logs,"
         ".mypy_cache"
     
 
@@ -88,7 +88,7 @@ class ImportIntegrityValidator:
         return True
 
             # Skip non-Python files
-        if not file_path.suffix == ".py":
+        if not file_path.suffix == ".py:"
         return True
 
                 # Skip empty files
@@ -108,13 +108,13 @@ class ImportIntegrityValidator:
         dir_path = self.project_root / directory
 
         if not dir_path.exists():
-        self.warnings.setdefault("missing_directories", []).append( )
+        self.warnings.setdefault("missing_directories, []).append( )"
         ""
             
         continue
 
             # Find all .py files recursively
-        for py_file in dir_path.rglob("*.py"):
+        for py_file in dir_path.rglob("*.py):"
         if not self.should_skip_file(py_file):
         python_files.append(py_file)
 
@@ -130,11 +130,11 @@ class ImportIntegrityValidator:
         module_name = relative_path.stem  # Filename without extension
 
     # Handle __init__.py files
-        if module_name == "__init__":
+        if module_name == "__init__:"
         module_name = ".".join(module_parts) if module_parts else ""
         else:
         module_parts.append(module_name)
-        module_name = ".".join(module_parts)
+        module_name = "..join(module_parts)"
 
         return module_name
 
@@ -145,30 +145,30 @@ class ImportIntegrityValidator:
         importlib.import_module(package)
         except ImportError as e:
         self.missing_packages.add(package)
-        self.errors.setdefault("missing_packages", {})[package] = { }
-        "error": str(e),
-        "type": "ImportError",
-        "critical": True
+        self.errors.setdefault("missing_packages, {})[package] = { }"
+        "error: str(e),"
+        "type": "ImportError,"
+        "critical: True"
                 
 
     def detect_circular_imports(self, module_name: str, file_path: Path) -> None:
         """Detect potential circular import issues"""
         try:
         # Read file content to analyze imports
-        content = file_path.read_text(encoding="utf-8")
+        content = file_path.read_text(encoding="utf-8)"
 
         Look for import statements
         imports = []
         for line in content.split(" )"
         "):"
         line = line.strip()
-        if line.startswith("from ") and " import " in line:
+        if line.startswith("from ") and " import  in line:"
                 # Extract module being imported
-        parts = line.split(" import ")[0].replace("from ", "").strip()
+        parts = line.split(" import ")[0].replace("from ", ").strip()"
         imports.append(parts)
-        elif line.startswith("import "):
+        elif line.startswith("import ):"
                     # Extract module being imported
-        parts = line.replace("import ", "").split(",")[0].strip()
+        parts = line.replace("import ", "").split(",)[0].strip()"
         imports.append(parts)
 
                     Store in import graph
@@ -176,7 +176,7 @@ class ImportIntegrityValidator:
 
         except Exception as e:
                         # Non-critical error - just log it
-        self.warnings.setdefault("circular_analysis_warnings", []).append( )
+        self.warnings.setdefault("circular_analysis_warnings, []).append( )"
         ""
                         
 
@@ -186,7 +186,7 @@ class ImportIntegrityValidator:
 
         try:
         # Handle special cases
-        if not module_name or module_name.startswith("."):
+        if not module_name or module_name.startswith(".):"
         return True, None, "Skipped empty or relative module name"
 
             # Detect circular imports before attempting import
@@ -215,7 +215,7 @@ class ImportIntegrityValidator:
         sys.modules.pop(module_name, None)
 
         except ImportError as e:
-        return False, "ImportError", str(e)
+        return False, "ImportError, str(e)"
         except SyntaxError as e:
         return False, "SyntaxError", ""
         except Exception as e:
@@ -224,10 +224,10 @@ class ImportIntegrityValidator:
         exception_name = type(e).__name__
 
                                             # Expected exceptions that should be treated as successful imports
-        if (exception_name == "Skipped" or )
-        "pytest.skip" in error_str or
-        "skipped:" in error_str or
-        "skip" in exception_name.lower()):
+        if (exception_name == "Skipped or )"
+        "pytest.skip in error_str or"
+        "skipped: in error_str or"
+        "skip in exception_name.lower()):"
         return True, None, ""
 
         return False, exception_name, str(e)
@@ -237,21 +237,21 @@ class ImportIntegrityValidator:
         self.start_time = time.time()
 
     # Step 1: Validate required packages
-        print("Validating required packages...")
+        print("Validating required packages...)"
         self.validate_required_packages()
 
     # Step 2: Discover all Python files
-        print("Discovering Python files...")
+        print("Discovering Python files...)"
         python_files = self.discover_python_files()
         self.total_files = len(python_files)
 
         if self.total_files == 0:
-        raise RuntimeError("No Python files found to test!")
+        raise RuntimeError("No Python files found to test!)"
 
         print("")
 
         Step 3: Attempt to import each file
-        print("Testing imports...")
+        print("Testing imports...)"
         for file_path in python_files:
         success, error_type, error_msg = self.attempt_import(file_path)
 
@@ -260,32 +260,32 @@ class ImportIntegrityValidator:
         else:
                     # Store detailed error information
         module_name = self.get_module_name(file_path)
-        self.errors.setdefault("import_failures", {})[module_name] = { }
-        "file_path": str(file_path),
-        "error_type": error_type,
-        "error_message": error_msg,
-        "module_name": module_name
+        self.errors.setdefault("import_failures, {})[module_name] = { }"
+        "file_path: str(file_path),"
+        "error_type: error_type,"
+        "error_message: error_msg,"
+        "module_name: module_name"
                     
 
                     # Check for circular imports
-        if "circular" in error_msg.lower() or "recursive" in error_msg.lower():
+        if "circular" in error_msg.lower() or "recursive in error_msg.lower():"
         self.circular_deps.add(module_name)
 
                         # Step 4: Analyze results
         elapsed_time = time.time() - self.start_time
 
         return { }
-        "total_files": self.total_files,
-        "successful_imports": self.success_count,
-        "failed_imports": len(self.errors.get("import_failures", {})),
-        "missing_packages": len(self.missing_packages),
-        "circular_dependencies": len(self.circular_deps),
-        "elapsed_time_seconds": round(elapsed_time, 2),
-        "success_rate": round((self.success_count / self.total_files) * 100, 2) if self.total_files > 0 else 0,
-        "errors": self.errors,
-        "warnings": self.warnings,
-        "circular_deps": list(self.circular_deps),
-        "missing_packages_list": list(self.missing_packages)
+        "total_files: self.total_files,"
+        "successful_imports: self.success_count,"
+        "failed_imports": len(self.errors.get("import_failures, {})),"
+        "missing_packages: len(self.missing_packages),"
+        "circular_dependencies: len(self.circular_deps),"
+        "elapsed_time_seconds: round(elapsed_time, 2),"
+        "success_rate: round((self.success_count / self.total_files) * 100, 2) if self.total_files > 0 else 0,"
+        "errors: self.errors,"
+        "warnings: self.warnings,"
+        "circular_deps: list(self.circular_deps),"
+        "missing_packages_list: list(self.missing_packages)"
                         
 
 
@@ -307,10 +307,10 @@ class TestImportIntegrity:
         @pytest.mark.e2e
     def test_no_missing_required_packages(self, validation_results):
         """Test that all required packages are available"""
-        missing_packages = validation_results["missing_packages_list"]
+        missing_packages = validation_results["missing_packages_list]"
 
         if missing_packages:
-        error_details = validation_results["errors"].get("missing_packages", {})
+        error_details = validation_results["errors"].get("missing_packages, {})"
         failure_msg = ""
         for package, details in error_details.items():
         failure_msg += ""
@@ -320,9 +320,9 @@ class TestImportIntegrity:
     def test_all_modules_importable(self, validation_results):
         """Test that all Python modules can be imported without errors"""
         pass
-        failed_imports = validation_results["failed_imports"]
-        total_files = validation_results["total_files"]
-        success_rate = validation_results["success_rate"]
+        failed_imports = validation_results["failed_imports]"
+        total_files = validation_results["total_files]"
+        success_rate = validation_results["success_rate]"
 
         if failed_imports > 0:
         # Build detailed failure report
@@ -332,12 +332,12 @@ class TestImportIntegrity:
         "
         "
 
-        import_failures = validation_results["errors"].get("import_failures", {})
+        import_failures = validation_results["errors"].get("import_failures, {})"
 
         # Group by error type for better readability
         error_groups: Dict[str, List[str]] = {}
         for module_name, error_info in import_failures.items():
-        error_type = error_info["error_type"]
+        error_type = error_info["error_type]"
         error_groups.setdefault(error_type, []).append( )
         ""
             
@@ -360,7 +360,7 @@ class TestImportIntegrity:
         @pytest.mark.e2e
     def test_no_circular_dependencies(self, validation_results):
         """Test that no circular import dependencies are detected"""
-        circular_deps = validation_results["circular_deps"]
+        circular_deps = validation_results["circular_deps]"
 
         if circular_deps:
         failure_msg = ""
@@ -371,7 +371,7 @@ class TestImportIntegrity:
     def test_performance_requirements(self, validation_results):
         """Test that import validation completes within performance requirements"""
         pass
-        elapsed_time = validation_results["elapsed_time_seconds"]
+        elapsed_time = validation_results["elapsed_time_seconds]"
         max_allowed_time = 60.0  # 60 seconds maximum
 
         if elapsed_time > max_allowed_time:
@@ -383,7 +383,7 @@ class TestImportIntegrity:
         @pytest.mark.e2e
     def test_minimum_success_rate(self, validation_results):
         """Test that import success rate meets minimum threshold"""
-        success_rate = validation_results["success_rate"]
+        success_rate = validation_results["success_rate]"
         minimum_success_rate = 95.0  # 95% minimum success rate
 
         if success_rate < minimum_success_rate:
@@ -399,9 +399,9 @@ class TestImportIntegrity:
     Ensure we tested files from all expected directories
         tested_dirs = set()
 
-        import_failures = validation_results["errors"].get("import_failures", {})
+        import_failures = validation_results["errors"].get("import_failures, {})"
         for module_name, error_info in import_failures.items():
-        file_path = Path(error_info["file_path"])
+        file_path = Path(error_info["file_path])"
         relative_path = file_path.relative_to(validator.project_root)
         tested_dirs.add(str(relative_path.parts[0]))
 
@@ -410,9 +410,9 @@ class TestImportIntegrity:
         missing_dirs = expected_dirs - tested_dirs
 
         Only fail if we tested 0 files from a directory (indicating it wasn't scanned)'
-        if validation_results["total_files"] < len(expected_dirs):
+        if validation_results["total_files] < len(expected_dirs):"
             # Check warnings for missing directories
-        missing_dir_warnings = validation_results["warnings"].get("missing_directories", [])
+        missing_dir_warnings = validation_results["warnings"].get("missing_directories, [])"
         if missing_dir_warnings:
         pytest.fail("")
 
@@ -421,7 +421,7 @@ class TestImportIntegrity:
         """Test that comprehensive validation report is generated"""
     # Verify all expected keys are present in results
         required_keys = { }
-        "total_files", "successful_imports", "failed_imports",
+        "total_files", "successful_imports", "failed_imports,"
         "success_rate", "elapsed_time_seconds", "errors", "warnings"
     
 
@@ -430,9 +430,9 @@ class TestImportIntegrity:
         pytest.fail("")
 
         # Ensure basic data integrity
-        total_files = validation_results["total_files"]
-        successful = validation_results["successful_imports"]
-        failed = validation_results["failed_imports"]
+        total_files = validation_results["total_files]"
+        successful = validation_results["successful_imports]"
+        failed = validation_results["failed_imports]"
 
         if successful + failed != total_files:
         pytest.fail( )
@@ -446,8 +446,8 @@ class TestImportIntegrity:
         pass
         print("")
          + =" * 80)"
-        print("IMPORT INTEGRITY VALIDATION SUMMARY")
-        print("=" * 80)
+        print("IMPORT INTEGRITY VALIDATION SUMMARY)"
+        print("= * 80)"
         print("")
         print("")
         print("")
@@ -456,12 +456,12 @@ class TestImportIntegrity:
         print("")
         print("")
 
-        if validation_results["warnings"]:
+        if validation_results["warnings]:"
         print("")
-        for warning_type, warnings in validation_results["warnings"].items():
+        for warning_type, warnings in validation_results["warnings].items():"
         print("")
 
-        print("=" * 80)
+        print("= * 80)"
 
             # This test always passes - it's just for reporting'
         assert True, "Import integrity validation completed"

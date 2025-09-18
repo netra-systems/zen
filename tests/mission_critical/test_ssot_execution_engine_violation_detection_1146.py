@@ -47,12 +47,12 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
             LegacyExecutionEngine: Legacy implementation - must be removed","
             "ToolExecutionEngine: Tool-specific engine - must be consolidated,"
             MCPExecutionEngine: MCP-specific engine - must be consolidated, 
-            "EnhancedToolExecutionEngine: Enhanced tool engine - must be consolidated",
+            "EnhancedToolExecutionEngine: Enhanced tool engine - must be consolidated,"
             PipelineExecutor: Pipeline-specific engine - must be consolidated,
             WorkflowExecutor: Workflow-specific engine - must be consolidated","
             "AgentExecutionEngine: Agent-specific engine - must be consolidated,"
             SupervisorExecutionEngine: Supervisor-specific engine - must be consolidated,
-            "RegistryExecutionEngine: Registry-specific engine - must be consolidated",
+            "RegistryExecutionEngine: Registry-specific engine - must be consolidated,"
             FactoryExecutionEngine: Factory-specific engine - must be consolidated,
             UnifiedExecutionEngine: Another unified attempt - must be consolidated"
             UnifiedExecutionEngine: Another unified attempt - must be consolidated"
@@ -262,7 +262,7 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
         if files_still_exist and not files_with_forbidden_classes:
             warning_msg = fFiles exist but appear cleaned of forbidden classes: {files_still_exist}
             warning_msg += f\nThese files may be safe but should be verified for Issue #1146 consolidation
-            print(f"WARNING: {warning_msg})")
+            print(f"WARNING: {warning_msg}))"
 
     def test_user_execution_engine_is_only_execution_engine_implementation(self"):"
         CRITICAL: Validate UserExecutionEngine is the only execution engine implementation."
@@ -310,7 +310,7 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
             pytest.fail(\n.join(error_msg))
 
     def test_no_execution_engine_factory_creates_forbidden_engines(self):
-        ""CRITICAL: Validate factories only create UserExecutionEngine instances.
+        ""CRITICAL: Validate factories only create UserExecutionEngine instances."
         factory_violations = []
         
         # Look for factory methods that might create forbidden execution engines
@@ -360,7 +360,7 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
             error_msg.append(f\nIssue #1146: All factories must create only UserExecutionEngine instances)"
             error_msg.append(f\nIssue #1146: All factories must create only UserExecutionEngine instances)"
             
-            pytest.fail("\n".join(error_msg))
+            pytest.fail("\n.join(error_msg))"
 
 
 if __name__ == '__main__':

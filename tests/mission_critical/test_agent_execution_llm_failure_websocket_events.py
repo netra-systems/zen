@@ -133,7 +133,7 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
     @pytest.mark.no_skip  # NEVER skip this test
     @pytest.mark.real_services
     async def test_all_websocket_events_sent_during_complete_llm_outage(self, real_services_fixture):
-        ""
+        """
         MISSION CRITICAL: All 5 WebSocket events MUST be sent even during complete LLM outage.
         
         This is the most critical test - if LLM APIs are completely down,
@@ -222,7 +222,7 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
     @pytest.mark.no_skip
     @pytest.mark.real_services
     async def test_websocket_events_during_cascading_llm_timeouts(self, real_services_fixture):
-        "
+        """
         "
         MISSION CRITICAL: WebSocket events must continue during cascading timeouts.
         
@@ -538,7 +538,7 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
         
         # Should show both failures and eventual success
         assert simulator.failed_calls > 0, "Should have some failed calls before recovery"
-        assert simulator.successful_calls > 0, Should have successful calls after recovery
+        assert simulator.successful_calls > 0, "Should have successful calls after recovery"
         
         # Agent should eventually complete successfully
         completion_events = [event for event in events if event.get('type') == 'agent_completed']
@@ -550,7 +550,7 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
         
         # Final result should indicate success, not error
         status = completion_data.get('status', '').lower()
-        assert status != 'failed', fFinal completion should not be failed status: {status}
+        assert status != 'failed', "fFinal completion should not be failed status: {status}"
         
         logger.info(fRecovery scenario validated: {simulator.failed_calls} failures, {simulator.successful_calls} successes")"
 

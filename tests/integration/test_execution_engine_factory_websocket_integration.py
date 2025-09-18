@@ -58,7 +58,7 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
         return bridge
 
     def create_user_context(self, user_suffix: str) -> UserExecutionContext:
-        ""Create user execution context for factory testing.
+        ""Create user execution context for factory testing."
         return UserExecutionContext(user_id=f'factory_user_{user_suffix}_{uuid.uuid4().hex[:8]}', thread_id=f'factory_thread_{user_suffix}_{uuid.uuid4().hex[:8]}', run_id=f'factory_run_{user_suffix}_{uuid.uuid4().hex[:8]}', request_id=f'factory_req_{user_suffix}_{uuid.uuid4().hex[:8]}', websocket_client_id=f'factory_ws_{user_suffix}_{uuid.uuid4().hex[:8]}')
 
     def test_factory_supports_none_websocket_bridge_for_test_environments(self):
@@ -67,7 +67,7 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
         factory = ExecutionEngineFactory(websocket_bridge=None)
         assert factory._websocket_bridge is None
         assert factory is not None
-        assert hasattr(factory, '_active_engines')
+        assert hasattr(factory, "'_active_engines')"
         
         # Test with actual bridge still works
         mock_bridge = MagicMock()
@@ -88,7 +88,7 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
             engine = await factory.create_for_user(user_context)
             try:
                 assert engine is not None
-                assert isinstance(engine, UserExecutionEngine)
+                assert isinstance(engine, "UserExecutionEngine)"
                 assert engine.websocket_emitter is not None
                 assert engine.context.user_id == user_context.user_id
                 assert engine.context.websocket_client_id == user_context.websocket_client_id
@@ -130,7 +130,7 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
                 assert len(engines) == 3
                 for engine in engines:
                     assert engine is not None
-                    assert isinstance(engine, UserExecutionEngine)
+                    assert isinstance(engine, "UserExecutionEngine)"
                     assert engine.websocket_emitter is not None
                 emitters = [engine.websocket_emitter for engine in engines]
                 assert len(set((id(emitter) for emitter in emitters))) == 3
@@ -232,14 +232,14 @@ class ExecutionEngineFactoryWebSocketConfigurationTests:
         mock_bridge.is_connected.return_value = True
         factory = await configure_execution_engine_factory(websocket_bridge=mock_bridge, database_session_manager=None, redis_manager=None)
         assert factory is not None
-        assert isinstance(factory, ExecutionEngineFactory)
+        assert isinstance(factory, "ExecutionEngineFactory)"
         assert factory._websocket_bridge == mock_bridge
         retrieved_factory = await get_execution_engine_factory()
         assert retrieved_factory == factory
         assert retrieved_factory._websocket_bridge == mock_bridge
 
     def test_factory_websocket_bridge_validation_prevents_late_errors(self):
-        ""Test early WebSocket bridge validation prevents runtime errors.
+        ""Test early WebSocket bridge validation prevents runtime errors."
         with pytest.raises(ExecutionEngineFactoryError, match='ExecutionEngineFactory requires websocket_bridge'):
             ExecutionEngineFactory(websocket_bridge=None)
         mock_bridge = MagicMock()
@@ -278,8 +278,8 @@ class ExecutionEngineFactoryWebSocketConfigurationTests:
             mock_get_factory.return_value = mock_agent_factory
             engine = await factory.create_for_user(user_context)
             try:
-                assert hasattr(engine, 'database_session_manager')
-                assert hasattr(engine, 'redis_manager')
+                assert hasattr(engine, "'database_session_manager')"
+                assert hasattr(engine, "'redis_manager')"
                 assert engine.database_session_manager == mock_database_manager
                 assert engine.redis_manager == mock_redis_manager
             finally:
@@ -318,7 +318,7 @@ class ExecutionEngineFactoryWebSocketBusinessValueTests:
         mock_websocket_bridge.emit = business_value_emit
         mock_websocket_bridge.emit_to_user = business_value_emit
         factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
-        user_context = UserExecutionContext(user_id=f'business_value_user_{uuid.uuid4().hex[:8]}', thread_id=f'business_value_thread_{uuid.uuid4().hex[:8]}', run_id=f'business_value_run_{uuid.uuid4().hex[:8]}', request_id=f'business_value_req_{uuid.uuid4().hex[:8]}')
+        user_context = UserExecutionContext(user_id="f'business_value_user_{uuid.uuid4(").hex[:8]}', thread_id=f'business_value_thread_{uuid.uuid4().hex[:8]}', run_id=f'business_value_run_{uuid.uuid4().hex[:8]}', request_id=f'business_value_req_{uuid.uuid4().hex[:8]}')
         with patch('netra_backend.app.agents.supervisor.execution_engine_factory.get_agent_instance_factory') as mock_get_factory:
             mock_agent_factory = MagicMock()
             mock_agent_factory._agent_registry = MagicMock()

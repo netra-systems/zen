@@ -9,10 +9,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         self._closed = True
         self.is_connected = False
@@ -71,14 +71,14 @@ class SecureJWTGenerator:
         exp_time = now - timedelta(minutes=expired_minutes_ago)
 
         payload = { )
-        "sub": user_id,
-        "iat": now - timedelta(minutes=expired_minutes_ago + 15),  # Issued before expiry
-        "exp": exp_time,
-        "email": "formatted_string",
-        "permissions": permissions or ["read"],
-        "token_type": "access",
-        "iss": self.issuer,
-        "jti": str(uuid.uuid4())  # Unique token ID for tracking
+        "sub: user_id,"
+        "iat: now - timedelta(minutes=expired_minutes_ago + 15),  # Issued before expiry"
+        "exp: exp_time,"
+        "email": "formatted_string,"
+        "permissions": permissions or ["read],"
+        "token_type": "access,"
+        "iss: self.issuer,"
+        "jti: str(uuid.uuid4())  # Unique token ID for tracking"
     
 
         token = jwt.encode(payload, self.secret, algorithm=self.algorithm)
@@ -96,14 +96,14 @@ class SecureJWTGenerator:
         exp_time = now + timedelta(minutes=expires_in_minutes)
 
         payload = { )
-        "sub": user_id,
-        "iat": now,
-        "exp": exp_time,
-        "email": "formatted_string",
-        "permissions": permissions or ["read"],
-        "token_type": "access",
-        "iss": self.issuer,
-        "jti": str(uuid.uuid4())
+        "sub: user_id,"
+        "iat: now,"
+        "exp: exp_time,"
+        "email": "formatted_string,"
+        "permissions": permissions or ["read],"
+        "token_type": "access,"
+        "iss: self.issuer,"
+        "jti: str(uuid.uuid4())"
     
 
         return jwt.encode(payload, self.secret, algorithm=self.algorithm)
@@ -114,14 +114,14 @@ class SecureJWTGenerator:
         exp_time = now + timedelta(seconds=expires_in_seconds)
 
         payload = { )
-        "sub": user_id,
-        "iat": now,
-        "exp": exp_time,
-        "email": "formatted_string",
-        "permissions": ["read"],
-        "token_type": "access",
-        "iss": self.issuer,
-        "jti": str(uuid.uuid4())
+        "sub: user_id,"
+        "iat: now,"
+        "exp: exp_time,"
+        "email": "formatted_string,"
+        "permissions": ["read],"
+        "token_type": "access,"
+        "iss: self.issuer,"
+        "jti: str(uuid.uuid4())"
     
 
         return jwt.encode(payload, self.secret, algorithm=self.algorithm)
@@ -133,14 +133,14 @@ class SecureJWTGenerator:
         exp_time = now - timedelta(minutes=5)
 
         payload = { )
-        "sub": user_id,
-        "exp": exp_time,
-        "iat": now - timedelta(minutes=20),
-        "malformed": True
+        "sub: user_id,"
+        "exp: exp_time,"
+        "iat: now - timedelta(minutes=20),"
+        "malformed: True"
     
 
     # Use wrong secret to create invalid signature
-        return jwt.encode(payload, "wrong-secret", algorithm=self.algorithm)
+        return jwt.encode(payload, "wrong-secret, algorithm=self.algorithm)"
 
     def validate_token(self, token: str) -> Optional[Dict]:
         """Validate token for testing purposes."""
@@ -148,9 +148,9 @@ class SecureJWTGenerator:
         payload = jwt.decode(token, self.secret, algorithms=[self.algorithm])
         return payload
         except jwt.ExpiredSignatureError:
-        return {"error": "expired", "type": "ExpiredSignatureError"}
+        return {"error": "expired", "type": "ExpiredSignatureError}"
         except jwt.InvalidTokenError as e:
-        return {"error": "invalid", "type": type(e).__name__, "message": str(e)}
+        return {"error": "invalid", "type": type(e).__name__, "message: str(e)}"
 
 
 class SecurityAuditLogger:
@@ -164,16 +164,16 @@ class SecurityAuditLogger:
     async def log_expired_token_attempt(self, event_data: Dict[str, Any]):
         """Log expired token access attempt."""
         event = { )
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "event_type": "expired_token_attempt",
-        "severity": "HIGH",
-        "user_id": event_data.get("user_id"),
-        "source_ip": event_data.get("source_ip", "127.0.0.1"),
-        "token_fingerprint": event_data.get("token_fingerprint"),
-        "expiry_time": event_data.get("expiry_time"),
-        "attempt_time": event_data.get("attempt_time"),
-        "user_agent": event_data.get("user_agent"),
-        "session_id": event_data.get("session_id")
+        "timestamp: datetime.now(timezone.utc).isoformat(),"
+        "event_type": "expired_token_attempt,"
+        "severity": "HIGH,"
+        "user_id": event_data.get("user_id),"
+        "source_ip": event_data.get("source_ip", "127.0.0.1),"
+        "token_fingerprint": event_data.get("token_fingerprint),"
+        "expiry_time": event_data.get("expiry_time),"
+        "attempt_time": event_data.get("attempt_time),"
+        "user_agent": event_data.get("user_agent),"
+        "session_id": event_data.get("session_id)"
     
 
         self.security_events.append(event)
@@ -184,27 +184,27 @@ class SecurityAuditLogger:
     async def log_successful_token_refresh(self, event_data: Dict[str, Any]):
         """Log successful token refresh event."""
         event = { )
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "event_type": "token_refresh_success",
-        "severity": "INFO",
-        "user_id": event_data.get("user_id"),
-        "old_token_fingerprint": event_data.get("old_token_fingerprint"),
-        "new_token_fingerprint": event_data.get("new_token_fingerprint")
+        "timestamp: datetime.now(timezone.utc).isoformat(),"
+        "event_type": "token_refresh_success,"
+        "severity": "INFO,"
+        "user_id": event_data.get("user_id),"
+        "old_token_fingerprint": event_data.get("old_token_fingerprint),"
+        "new_token_fingerprint": event_data.get("new_token_fingerprint)"
     
 
         self.security_events.append(event)
 
     async def _analyze_suspicious_patterns(self, event: Dict[str, Any]):
         """Analyze events for suspicious patterns and trigger alerts."""
-        user_id = event.get("user_id")
-        source_ip = event.get("source_ip")
+        user_id = event.get("user_id)"
+        source_ip = event.get("source_ip)"
 
     # Track repeated attempts by user
         user_key = "formatted_string"
         if user_key not in self.suspicious_patterns:
         self.suspicious_patterns[user_key] = []
 
-        self.suspicious_patterns[user_key].append(event["timestamp"])
+        self.suspicious_patterns[user_key].append(event["timestamp])"
 
         # Clean old events (keep last hour)
         recent_events = [ )
@@ -221,13 +221,13 @@ class SecurityAuditLogger:
 
         if len(recent_attempts) >= 5:
         alert = { )
-        "alert_type": "repeated_expired_token_attempts",
-        "severity": "CRITICAL",
-        "user_id": user_id,
-        "source_ip": source_ip,
-        "attempt_count": len(recent_attempts),
-        "time_window": "10_minutes",
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "alert_type": "repeated_expired_token_attempts,"
+        "severity": "CRITICAL,"
+        "user_id": "user_id,"
+        "source_ip: source_ip,"
+        "attempt_count: len(recent_attempts),"
+        "time_window": "10_minutes,"
+        "timestamp: datetime.now(timezone.utc).isoformat()"
             
         self.alert_triggers.append(alert)
 
@@ -242,12 +242,12 @@ class SecurityAuditLogger:
     async def log_session_event(self, user_id: str, session_id: str, event_type: str, details: Dict[str, Any] = None):
         """Log session-related event."""
         event = { )
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "event_type": event_type,
-        "severity": "INFO",
-        "user_id": user_id,
-        "session_id": session_id,
-        "details": details or {}
+        "timestamp: datetime.now(timezone.utc).isoformat(),"
+        "event_type: event_type,"
+        "severity": "INFO,"
+        "user_id": "user_id,"
+        "session_id: session_id,"
+        "details: details or {}"
     
 
         self.security_events.append(event)
@@ -275,21 +275,21 @@ class SecureWebSocketTestClient:
         # Validate token before attempting connection
         token_validation = self.jwt_generator.validate_token(self.token)
 
-        if token_validation and "error" in token_validation:
+        if token_validation and "error in token_validation:"
             Extract user ID from token for logging
         try:
-        unverified_payload = jwt.decode(self.token, options={"verify_signature": False})
-        user_id = unverified_payload.get("sub", "unknown_user")
+        unverified_payload = jwt.decode(self.token, options={"verify_signature: False})"
+        user_id = unverified_payload.get("sub", "unknown_user)"
         except Exception:
         user_id = "unknown_user"
 
                     # Log expired token attempt
                     # Removed problematic line: await self.audit_logger.log_expired_token_attempt({)
-        "user_id": user_id,
-        "token_fingerprint": hashlib.sha256(self.token.encode()).hexdigest()[:16],
-        "expiry_time": "expired",
-        "attempt_time": datetime.now(timezone.utc).isoformat(),
-        "source_ip": headers.get("X-Forwarded-For", "127.0.0.1") if headers else "127.0.0.1",
+        "user_id": "user_id,"
+        "token_fingerprint: hashlib.sha256(self.token.encode()).hexdigest()[:16],"
+        "expiry_time": "expired,"
+        "attempt_time: datetime.now(timezone.utc).isoformat(),"
+        "source_ip": headers.get("X-Forwarded-For", "127.0.0.1") if headers else "127.0.0.1,"
         "user_agent": headers.get("User-Agent", "TestClient") if headers else "TestClient"
                     
 
@@ -297,12 +297,12 @@ class SecureWebSocketTestClient:
         connection_time = time.time() - connection_start
 
         return False, { )
-        "error": "authentication_failed",
-        "error_code": 401,
-        "message": "Authentication failed: Token expired",
-        "connection_time": connection_time,
-        "token_error": token_validation["error"],
-        "rejected_immediately": connection_time < 0.1
+        "error": "authentication_failed,"
+        "error_code: 401,"
+        "message": "Authentication failed: Token expired,"
+        "connection_time: connection_time,"
+        "token_error": token_validation["error],"
+        "rejected_immediately: connection_time < 0.1"
                     
 
                     # Mock successful connection for valid tokens
@@ -311,9 +311,9 @@ class SecureWebSocketTestClient:
         connection_time = time.time() - connection_start
 
         return True, { )
-        "success": True,
-        "connection_time": connection_time,
-        "session_established": True
+        "success: True,"
+        "connection_time: connection_time,"
+        "session_established: True"
                     
 
         except Exception as e:
@@ -321,9 +321,9 @@ class SecureWebSocketTestClient:
         self.last_error = str(e)
 
         return False, { )
-        "error": "connection_failed",
-        "message": str(e),
-        "connection_time": connection_time
+        "error": "connection_failed,"
+        "message: str(e),"
+        "connection_time: connection_time"
                         
 
     async def disconnect(self):
@@ -360,8 +360,8 @@ class TokenRefreshService:
 
         Extract user ID from expired token (without validation)
         try:
-        unverified_payload = jwt.decode(expired_token, options={"verify_signature": False})
-        user_id = unverified_payload.get("sub")
+        unverified_payload = jwt.decode(expired_token, options={"verify_signature: False})"
+        user_id = unverified_payload.get("sub)"
         except Exception:
         return None
 
@@ -378,15 +378,15 @@ class TokenRefreshService:
 
                     # Log successful refresh
                     # Removed problematic line: await self.audit_logger.log_successful_token_refresh({)
-        "user_id": user_id,
-        "old_token_fingerprint": old_token_hash,
-        "new_token_fingerprint": hashlib.sha256(new_access_token.encode()).hexdigest()[:16]
+        "user_id": "user_id,"
+        "old_token_fingerprint: old_token_hash,"
+        "new_token_fingerprint: hashlib.sha256(new_access_token.encode()).hexdigest()[:16]"
                     
 
         return { )
-        "access_token": new_access_token,
-        "refresh_token": new_refresh_token,
-        "expires_in": 900  # 15 minutes
+        "access_token: new_access_token,"
+        "refresh_token: new_refresh_token,"
+        "expires_in: 900  # 15 minutes"
                     
 
     def is_token_invalidated(self, token: str) -> bool:
@@ -401,13 +401,13 @@ class TokenRefreshService:
         """Create token with tampered expiry time."""
         try:
         # Decode without verification to get payload
-        payload = jwt.decode(original_token, options={"verify_signature": False})
+        payload = jwt.decode(original_token, options={"verify_signature: False})"
 
         # Modify expiry to future time
-        payload["exp"] = datetime.now(timezone.utc) + timedelta(hours=1)
+        payload["exp] = datetime.now(timezone.utc) + timedelta(hours=1)"
 
         # Re-encode with wrong secret (will fail validation)
-        return jwt.encode(payload, "wrong-secret", algorithm="HS256")
+        return jwt.encode(payload, "wrong-secret", algorithm="HS256)"
         except Exception:
         return "tampered.expiry.token"
 
@@ -415,9 +415,9 @@ class TokenRefreshService:
     def create_tampered_token_user(original_token: str) -> str:
         """Create token with tampered user ID."""
         try:
-        payload = jwt.decode(original_token, options={"verify_signature": False})
-        payload["sub"] = "admin_user"  # Elevate to admin
-        return jwt.encode(payload, "wrong-secret", algorithm="HS256")
+        payload = jwt.decode(original_token, options={"verify_signature: False})"
+        payload["sub"] = "admin_user  # Elevate to admin"
+        return jwt.encode(payload, "wrong-secret", algorithm="HS256)"
         except Exception:
         return "tampered.user.token"
 
@@ -425,9 +425,9 @@ class TokenRefreshService:
     def create_tampered_token_permissions(original_token: str) -> str:
         """Create token with tampered permissions."""
         try:
-        payload = jwt.decode(original_token, options={"verify_signature": False})
-        payload["permissions"] = ["read", "write", "admin", "delete"]  # Elevate permissions
-        return jwt.encode(payload, "wrong-secret", algorithm="HS256")
+        payload = jwt.decode(original_token, options={"verify_signature: False})"
+        payload["permissions"] = ["read", "write", "admin", "delete]  # Elevate permissions"
+        return jwt.encode(payload, "wrong-secret", algorithm="HS256)"
         except Exception:
         return "tampered.permissions.token"
 
@@ -455,19 +455,19 @@ class TokenRefreshService:
         @pytest.fixture
     def expired_token(jwt_generator):
         """Expired token fixture."""
-        return jwt_generator.create_expired_token("test_user_123", expired_minutes_ago=5)
+        return jwt_generator.create_expired_token("test_user_123, expired_minutes_ago=5)"
 
 
         @pytest.fixture
     def valid_token(jwt_generator):
         """Valid token fixture."""
-        return jwt_generator.create_valid_token("test_user_123")
+        return jwt_generator.create_valid_token("test_user_123)"
 
 
         @pytest.fixture
     def near_expiry_token(jwt_generator):
         """Near expiry token fixture."""
-        return jwt_generator.create_near_expiry_token("test_user_123", expires_in_seconds=10)
+        return jwt_generator.create_near_expiry_token("test_user_123, expires_in_seconds=10)"
 
 
     # Streaming and Network Simulation Classes
@@ -560,17 +560,17 @@ class NetworkSimulator:
     async def apply_condition(self, condition_name: str, duration: float = 0.0) -> None:
         """Apply a network condition for specified duration."""
         if condition_name not in self.conditions:
-        raise ValueError("formatted_string")
+        raise ValueError("formatted_string)"
 
         self.active_condition = condition_name
         condition = self.conditions[condition_name]
 
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
         if duration > 0:
         await asyncio.sleep(duration)
         self.active_condition = None
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
     async def simulate_disconnect(self, connection, delay: float = 0.0) -> None:
         """Simulate a network disconnection."""
@@ -578,9 +578,9 @@ class NetworkSimulator:
         await asyncio.sleep(delay)
 
         disconnect_event = { )
-        "timestamp": time.time(),
-        "condition": self.active_condition,
-        "delay": delay
+        "timestamp: time.time(),"
+        "condition: self.active_condition,"
+        "delay: delay"
         
         self.disconnect_events.append(disconnect_event)
 
@@ -590,7 +590,7 @@ class NetworkSimulator:
         elif hasattr(connection, '_simulate_disconnect'):
         await connection._simulate_disconnect()
 
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
     def should_drop_packet(self) -> bool:
         """Check if current packet should be dropped."""
@@ -620,10 +620,10 @@ class NetworkSimulator:
     def response_configs():
         """Response configuration fixture."""
         return { )
-        "text": {"type": ResponseType.TEXT, "chunk_size": 100, "total_chunks": 20},
-        "json": {"type": ResponseType.JSON, "chunk_size": 200, "total_chunks": 15},
-        "multipart": {"type": ResponseType.MULTIPART, "chunk_size": 150, "total_chunks": 25},
-        "binary": {"type": ResponseType.BINARY, "chunk_size": 512, "total_chunks": 10}
+        "text": {"type": ResponseType.TEXT, "chunk_size": 100, "total_chunks: 20},"
+        "json": {"type": ResponseType.JSON, "chunk_size": 200, "total_chunks: 15},"
+        "multipart": {"type": ResponseType.MULTIPART, "chunk_size": 150, "total_chunks: 25},"
+        "binary": {"type": ResponseType.BINARY, "chunk_size": 512, "total_chunks: 10}"
     
 
 ]]

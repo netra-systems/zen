@@ -98,7 +98,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
     @pytest.mark.real_services
     @pytest.mark.mission_critical
     async def test_system_wide_mock_response_elimination_all_tiers(self, real_services_fixture, free_tier_user, mid_tier_user, enterprise_user, fortune_500_user):
-    ""
+    """
         FAILING TEST: Prove ANY user tier can receive mock responses system-wide
         
         Business Impact: Even free tier receiving mock responses damages platform
@@ -137,7 +137,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                 },
                 {
                     name: Heavy System Load,
-                    prompt": "Generate comprehensive analysis report, 
+                    prompt": Generate comprehensive analysis report, "
                     simulate_overload: True
                 },
                 {
@@ -146,7 +146,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                     corrupt_context: True
                 },
                 {
-                    name": "Tool Execution Failure,
+                    name": Tool Execution Failure,"
                     prompt: Run complex data transformation,
                     force_tool_failure: True"
                     force_tool_failure: True"
@@ -167,7 +167,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                             request_id: f"mock-test-{uuid.uuid4()},"
                             prompt": scenario[prompt],"
                             context: {
-                                "customer_tier: tier_name.lower().replace( ", _),
+                                "customer_tier: tier_name.lower().replace( , _),"
                                 test_scenario: scenario["name]"
                             },
                             **{k: v for k, v in scenario.items() if k not in ['name', 'prompt']}
@@ -332,7 +332,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                     user_id: enterprise_user.user_id,"
                     "thread_id: ftest-ws-authenticity-{uuid.uuid4()},"
                     request_id: fws-auth-test-{uuid.uuid4()},
-                    "prompt: Perform complex AI analysis requiring multiple model calls",
+                    "prompt: Perform complex AI analysis requiring multiple model calls,"
                     force_llm_cascade_failure: True,  # Force failure but expect events
                     expect_agent_thinking_events: True,"
                     expect_agent_thinking_events: True,"
@@ -368,7 +368,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                 
                 # Check if final response is a fallback/mock
                 mock_patterns_in_response = [
-                    i apologize, "encountered an error, fallback response",
+                    i apologize, "encountered an error, fallback response,"
                     unable to process, something went wrong, "please try again"
                 ]
                 
@@ -402,7 +402,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                     event_str = str(event).lower()
                     if is_fallback_response and any(claim in event_str for claim in [authentic", real ai, processing complete):"
                         authenticity_violations.append({
-                            "violation: Event claims authenticity but response is fallback",
+                            "violation: Event claims authenticity but response is fallback,"
                             evidence: fEvent contains authenticity claims but final response is mock,
                             misleading_event: event,"
                             misleading_event: event,"
@@ -443,7 +443,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                 
         except Exception as e:
             logger.error(fWebSocket authenticity test failed: {str(e)})
-            if connection" in str(e).lower() and "failed in str(e).lower():
+            if connection" in str(e).lower() and failed in str(e).lower():"
                 pytest.fail(
                     fWEBSOCKET CONNECTION FAILURE WITH GENERIC MESSAGE: 
                     fConnection error itself contains inauthentic language: {str(e)}
@@ -453,7 +453,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
     @pytest.mark.real_services
     @pytest.mark.mission_critical  
     async def test_competitive_scenario_mock_detection(self, real_services_fixture, enterprise_user):
-        ""
+        """
         FAILING TEST: Prove mock responses appear during competitive evaluations
         
         Business Impact: Generic responses during competitive demos immediately
@@ -473,12 +473,12 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                     competitive_evaluation: True,
                     live_audience": True,"
                     deal_size: 500000,
-                    decision_makers_present: ["CTO, CFO", CEO]
+                    decision_makers_present: ["CTO, CFO, CEO]"
                 }
             },
             {
                 scenario: Proof of Concept,
-                prompt": "Show real-time analysis capabilities compared to competitor X,
+                prompt": Show real-time analysis capabilities compared to competitor X,"
                 context: {
                     poc_environment: True,"
                     poc_environment: True,"
@@ -512,7 +512,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                     payload = {
                         user_id": enterprise_user.user_id,"
                         thread_id: fcompetitive-{scenario_data['scenario'].lower().replace(' ', '-')},
-                        "request_id: fcomp-test-{uuid.uuid4()}",
+                        "request_id: fcomp-test-{uuid.uuid4()},"
                         prompt: scenario_data[prompt],
                         context: scenario_data[context"],"
                         # Simulate system stress during competitive demo
@@ -570,11 +570,11 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                         if detected_competitive_issues:
                             failure = {
                                 scenario: scenario_data[scenario],
-                                deal_size: scenario_data["context][deal_size"],
+                                deal_size: scenario_data["context][deal_size],"
                                 detected_issues: detected_competitive_issues,
                                 response_content": response_content[:300],"
                                 competitive_damage: fLost ${scenario_data['context']['deal_size']} deal opportunity,
-                                audience_impact: scenario_data[context").get("decision_makers_present, [Key decision makers)
+                                audience_impact: scenario_data[context").get(decision_makers_present, [Key decision makers)"
                             }
                             competitive_failures.append(failure)
                             
@@ -624,7 +624,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
     @pytest.mark.real_services
     @pytest.mark.mission_critical
     async def test_high_arr_customer_mock_protection(self, real_services_fixture, fortune_500_user):
-        "
+        """
         "
         FAILING TEST: Prove highest-value customers can receive mock responses
         
@@ -641,7 +641,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
         high_stakes_scenarios = [
             {
                 scenario: SEC Filing Data Request,
-                prompt": "Provide auditable financial analysis data for SEC 10-K filing,
+                prompt": Provide auditable financial analysis data for SEC 10-K filing,"
                 stakes: Regulatory compliance violation if inauthentic,
                 context: {"
                 context: {"
@@ -664,7 +664,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
             {
                 scenario": Investor Relations Call,"
                 prompt: Create market analysis for investor relations quarterly call,
-                stakes": "Stock price impact if analysts receive inauthentic data,
+                stakes": Stock price impact if analysts receive inauthentic data,"
                 context: {
                     investor_relations: True,"
                     investor_relations: True,"
@@ -673,7 +673,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                 }
             },
             {
-                scenario": "Competitive Intelligence,
+                scenario": Competitive Intelligence,"
                 prompt: Analyze competitor positioning for strategic planning session,
                 stakes: "Strategic disadvantage if generic competitive analysis,"
                 context": {"
@@ -697,7 +697,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                         user_id: fortune_500_user.user_id,"
                         "thread_id: ffortune500-{scenario_data['scenario'].lower().replace(' ', '-')},"
                         request_id: ff500-test-{uuid.uuid4()},
-                        "prompt: scenario_data[prompt"],
+                        "prompt: scenario_data[prompt],"
                         context: {
                             **scenario_data[context],"
                             **scenario_data[context],"
@@ -724,7 +724,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                         unacceptable_patterns_for_fortune500 = [
                             # Any generic language is unacceptable
                             i apologize,
-                            "i'm sorry, "'
+                            "i'm sorry, '"
                             unfortunately,
                             please try again,"
                             please try again,"
@@ -763,13 +763,13 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                         
                         if detected_unacceptable:
                             failure = {
-                                "scenario: scenario_data[scenario"],
+                                "scenario: scenario_data[scenario],"
                                 stakes: scenario_data[stakes],
                                 arr_value: 1500000,"
                                 arr_value: 1500000,"
                                 detected_unacceptable_patterns": detected_unacceptable,"
                                 response_content: response_content[:400],
-                                business_consequence": "Immediate contract cancellation risk,
+                                business_consequence": Immediate contract cancellation risk,"
                                 reputation_impact: Severe damage to platform credibility
                             }
                             fortune_500_failures.append(failure)
@@ -793,7 +793,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
             total_arr_at_risk = sum(f[arr_value] for f in fortune_500_failures)
             
             failure_evidence = {
-                test_name": "Fortune 500 Customer Mock Protection,
+                test_name": Fortune 500 Customer Mock Protection,"
                 customer_tier: Fortune 500 ($1.5M ARR),
                 failures_count: len(fortune_500_failures),"
                 failures_count: len(fortune_500_failures),"

@@ -52,7 +52,7 @@ class SSOTViolationDetectionTests:
         
     @pytest.mark.asyncio
     async def test_ssot_violation_structure_difference(self):
-    ""
+    """
         CRITICAL TEST: Expose SSOT violation through structure comparison.
         
         This test should FAIL initially because the test framework
@@ -154,7 +154,7 @@ if __name__ == __main__:
     async def run_test():
         try:
             await test_instance.test_ssot_violation_structure_difference()
-            print("\n CELEBRATION:  TEST PASSED - SSOT compliance verified!")
+            print("\n CELEBRATION:  TEST PASSED - SSOT compliance verified!)"
         except AssertionError as e:
             print(f\n ALERT:  TEST FAILED - SSOT violation detected: {e})"
             print(f\n ALERT:  TEST FAILED - SSOT violation detected: {e})"

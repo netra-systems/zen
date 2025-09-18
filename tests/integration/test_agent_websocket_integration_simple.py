@@ -34,9 +34,9 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
         self.services = real_services_fixture
         self.test_user_id = f'test_user_{uuid.uuid4().hex[:8]}'
         self.test_thread_id = f'thread_{uuid.uuid4().hex[:8]}'
-        assert real_services_fixture, 'Real services fixture required - no mocks allowed per CLAUDE.md'
-        assert 'db' in real_services_fixture, 'Real database required for integration testing'
-        assert 'redis' in real_services_fixture, 'Real Redis required for integration testing'
+        assert real_services_fixture, "'Real services fixture required - no mocks allowed per CLAUDE.md'"
+        assert 'db' in real_services_fixture, "'Real database required for integration testing'"
+        assert 'redis' in real_services_fixture, "'Real Redis required for integration testing'"
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -56,8 +56,8 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                     response_data = json.loads(response)
-                    assert response_data, 'Received empty response from WebSocket'
-                    assert 'type' in response_data, 'Response missing message type'
+                    assert response_data, "'Received empty response from WebSocket'"
+                    assert 'type' in response_data, "'Response missing message type'"
                 except asyncio.TimeoutError:
                     pass
         except Exception as e:
@@ -66,7 +66,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_database_connectivity(self, real_services_fixture):
-    ""
+    """
         Test database connectivity for agent context storage.
         
         Validates that the database integration required for agent
@@ -76,7 +76,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
         test_data = {'user_id': self.test_user_id, 'context_type': 'agent_execution', 'data': {'test': 'integration_test'}, 'created_at': datetime.utcnow()}
         try:
             result = await db.execute('SELECT 1 as test')
-            assert result, 'Database connection failed'
+            assert result, "'Database connection failed'"
         except Exception as e:
             pytest.fail(f'Database connectivity test failed: {e}')
 
@@ -95,9 +95,9 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
         try:
             await redis.set(test_key, test_value, ex=60)
             retrieved_value = await redis.get(test_key)
-            assert retrieved_value, 'Failed to retrieve data from Redis'
+            assert retrieved_value, "'Failed to retrieve data from Redis'"
             retrieved_data = json.loads(retrieved_value.decode() if isinstance(retrieved_value, bytes) else retrieved_value)
-            assert retrieved_data['user_id'] == self.test_user_id, 'Redis data integrity check failed'
+            assert retrieved_data['user_id'] == self.test_user_id, "'Redis data integrity check failed'"
             await redis.delete(test_key)
         except Exception as e:
             pytest.fail(f'Redis connectivity test failed: {e}')
@@ -105,7 +105,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_services_health_check(self, real_services_fixture):
-    ""
+    """
         Test overall health of required services for agent-websocket integration.
         
         This validates the complete infrastructure stack needed for
@@ -113,9 +113,9 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
         
         required_services = ['db', 'redis']
         for service_name in required_services:
-            assert service_name in real_services_fixture, f'Required service missing: {service_name}'
+            assert service_name in real_services_fixture, "f'Required service missing: {service_name}'"
             service = real_services_fixture[service_name]
-            assert service, f'Service {service_name} is not initialized'
+            assert service, "f'Service {service_name} is not initialized'"
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -129,18 +129,18 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
         critical_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
         for event_type in critical_events:
             event_structure = {'type': event_type, 'user_id': self.test_user_id, 'thread_id': self.test_thread_id, 'data': {}, 'timestamp': datetime.utcnow().isoformat()}
-            assert event_structure['type'], f'Event {event_type} missing type field'
-            assert event_structure['user_id'], f'Event {event_type} missing user_id field'
-            assert event_structure['thread_id'], f'Event {event_type} missing thread_id field'
-            assert event_structure['timestamp'], f'Event {event_type} missing timestamp field'
+            assert event_structure['type'], "f'Event {event_type} missing type field'"
+            assert event_structure['user_id'], "f'Event {event_type} missing user_id field'"
+            assert event_structure['thread_id'], "f'Event {event_type} missing thread_id field'"
+            assert event_structure['timestamp'], "f'Event {event_type} missing timestamp field'"
             serialized = json.dumps(event_structure)
             deserialized = json.loads(serialized)
-            assert deserialized['type'] == event_type, f'Event {event_type} serialization failed'
+            assert deserialized['type'] == event_type, "f'Event {event_type} serialization failed'"
 
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_multi_user_isolation_preparation(self, real_services_fixture):
-    ""
+    """
         Test multi-user isolation infrastructure for concurrent agent execution.
         
         Validates that the infrastructure supports the factory patterns
@@ -154,10 +154,10 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
         for i, context in enumerate(user_contexts):
             for j, other_context in enumerate(user_contexts):
                 if i != j:
-                    assert context['user_id'] != other_context['user_id'], f'User ID collision between contexts {i} and {j}'
-                    assert context['request_id'] != other_context['request_id'], f'Request ID collision between contexts {i} and {j}'
-                    assert context['thread_id'] != other_context['thread_id'], f'Thread ID collision between contexts {i} and {j}'
-                    assert context['session_id'] != other_context['session_id'], f'Session ID collision between contexts {i} and {j}'
+                    assert context['user_id'] != other_context['user_id'], "f'User ID collision between contexts {i} and {j}'"
+                    assert context['request_id'] != other_context['request_id'], "f'Request ID collision between contexts {i} and {j}'"
+                    assert context['thread_id'] != other_context['thread_id'], "f'Thread ID collision between contexts {i} and {j}'"
+                    assert context['session_id'] != other_context['session_id'], "f'Session ID collision between contexts {i} and {j}'"
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

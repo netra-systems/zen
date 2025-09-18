@@ -74,12 +74,12 @@ class ContainerMetrics:
 
     def to_dict(self) -> Dict[str, Any]:
         return { }
-        "startup_time": self.startup_time,
-        "memory_usage_mb": self.memory_usage_mb,
-        "cpu_usage_percent": self.cpu_usage_percent,
-        "disk_usage_mb": self.disk_usage_mb,
-        "container_names": self.container_names,
-        "image_sizes_mb": self.image_sizes_mb
+        "startup_time: self.startup_time,"
+        "memory_usage_mb: self.memory_usage_mb,"
+        "cpu_usage_percent: self.cpu_usage_percent,"
+        "disk_usage_mb: self.disk_usage_mb,"
+        "container_names: self.container_names,"
+        "image_sizes_mb: self.image_sizes_mb"
     
 
 
@@ -90,9 +90,9 @@ class AlpineRegularSwitchingTestSuite:
     def docker_available(self):
         """Check if Docker is available for integration tests."""
         try:
-        result = subprocess.run(["docker", "version"], capture_output=True, timeout=10)
+        result = subprocess.run(["docker", "version], capture_output=True, timeout=10)"
         if result.returncode != 0:
-        pytest.skip("Docker not available")
+        pytest.skip("Docker not available)"
         return True
         except Exception as e:
         pytest.skip("")
@@ -102,9 +102,9 @@ class AlpineRegularSwitchingTestSuite:
         """Check if docker-compose is available."""
         pass
         try:
-        result = subprocess.run(["docker-compose", "version"], capture_output=True, timeout=10)
+        result = subprocess.run(["docker-compose", "version], capture_output=True, timeout=10)"
         if result.returncode != 0:
-        pytest.skip("Docker Compose not available")
+        pytest.skip("Docker Compose not available)"
         return True
         except Exception as e:
         pytest.skip("")
@@ -127,7 +127,7 @@ class AlpineRegularSwitchingTestSuite:
         pass
         try:
         # Find and stop containers with test_id prefix
-        cmd = ["docker", "ps", "-a", "--filter", "", "--format", "{{.Names}}"]
+        cmd = ["docker", "ps", "-a", "--filter", "", "--format", "{{.Names}}]"
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
         if result.returncode == 0 and result.stdout.strip():
@@ -135,7 +135,7 @@ class AlpineRegularSwitchingTestSuite:
         ")"
         for name in container_names:
         if name.strip():
-        subprocess.run(["docker", "rm", "-f", name.strip()],
+        subprocess.run(["docker", "rm", "-f, name.strip()],"
         capture_output=True, timeout=10)
         except Exception as e:
         logger.warning("")
@@ -149,10 +149,10 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
         isolated_test_environment):
         """Test complete switching cycle: Regular -> Alpine -> Regular."""
         test_id = isolated_test_environment
-        services = ["postgres", "redis"]
+        services = ["postgres", "redis]"
 
     # Phase 1: Start with regular containers
-        logger.info("Phase 1: Starting regular containers")
+        logger.info("Phase 1: Starting regular containers)"
         manager_regular = UnifiedDockerManager( )
         environment_type=EnvironmentType.SHARED,
         test_id="",
@@ -171,7 +171,7 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
         regular_metrics.startup_time = regular_startup_time
 
     # Phase 2: Switch to Alpine containers
-        logger.info("Phase 2: Switching to Alpine containers")
+        logger.info("Phase 2: Switching to Alpine containers)"
         asyncio.run(manager_regular.graceful_shutdown())
 
         manager_alpine = UnifiedDockerManager( )
@@ -195,7 +195,7 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
         self._verify_alpine_containers(manager_alpine, services)
 
     # Phase 3: Switch back to regular containers
-        logger.info("Phase 3: Switching back to regular containers")
+        logger.info("Phase 3: Switching back to regular containers)"
         asyncio.run(manager_alpine.graceful_shutdown())
 
         manager_regular_2 = UnifiedDockerManager( )
@@ -219,7 +219,7 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
         asyncio.run(manager_regular_2.graceful_shutdown())
 
     # Log performance comparison
-        logger.info("Sequential Switching Performance Report:")
+        logger.info("Sequential Switching Performance Report:)"
         logger.info("")
         logger.info("")
         logger.info("")
@@ -238,19 +238,19 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
         test_id = isolated_test_environment
 
     # Start with regular containers and insert test data
-        logger.info("Starting regular containers and inserting test data")
+        logger.info("Starting regular containers and inserting test data)"
         manager_regular = UnifiedDockerManager( )
         environment_type=EnvironmentType.SHARED,
         test_id="",
         use_alpine=False
     
 
-        success = asyncio.run(manager_regular.start_services_smart(["postgres", "redis"], wait_healthy=True))
+        success = asyncio.run(manager_regular.start_services_smart(["postgres", "redis], wait_healthy=True))"
         assert success, "Failed to start regular containers for data test"
 
     # Insert test data
         test_data = { }
-        "postgres": "INSERT INTO test_table (data) VALUES ('regular_test_data')",
+        "postgres": "INSERT INTO test_table (data) VALUES ('regular_test_data'),"
         "redis": "SET test_key 'regular_test_value'"
     
 
@@ -258,14 +258,14 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
         asyncio.run(manager_regular.graceful_shutdown())
 
     # Switch to Alpine and verify data persistence
-        logger.info("Switching to Alpine containers and verifying data persistence")
+        logger.info("Switching to Alpine containers and verifying data persistence)"
         manager_alpine = UnifiedDockerManager( )
         environment_type=EnvironmentType.SHARED,
         test_id="",
         use_alpine=True
     
 
-        success = asyncio.run(manager_alpine.start_services_smart(["postgres", "redis"], wait_healthy=True))
+        success = asyncio.run(manager_alpine.start_services_smart(["postgres", "redis], wait_healthy=True))"
         assert success, "Failed to start Alpine containers for data test"
 
     # Verify test data is accessible
@@ -273,7 +273,7 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
 
     # Insert additional data in Alpine containers
         alpine_data = { }
-        "postgres": "INSERT INTO test_table (data) VALUES ('alpine_test_data')",
+        "postgres": "INSERT INTO test_table (data) VALUES ('alpine_test_data'),"
         "redis": "SET alpine_key 'alpine_test_value'"
     
 
@@ -281,14 +281,14 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
         asyncio.run(manager_alpine.graceful_shutdown())
 
     # Switch back to regular and verify all data
-        logger.info("Switching back to regular containers and verifying all data")
+        logger.info("Switching back to regular containers and verifying all data)"
         manager_regular_2 = UnifiedDockerManager( )
         environment_type=EnvironmentType.SHARED,
         test_id="",
         use_alpine=False
     
 
-        success = asyncio.run(manager_regular_2.start_services_smart(["postgres", "redis"], wait_healthy=True))
+        success = asyncio.run(manager_regular_2.start_services_smart(["postgres", "redis], wait_healthy=True))"
         assert success, "Failed to start regular containers for final data verification"
 
     # Verify both original and Alpine-inserted data
@@ -314,7 +314,7 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
         container_info = manager.get_enhanced_container_status(services)
         for service, info in container_info.items():
         # Check if image name contains 'alpine' or if it's an Alpine-based image'
-        assert any(keyword in info.image.lower() for keyword in ['alpine', 'minimal']), \
+        assert any(keyword in info.image.lower() for keyword in ['alpine', "'minimal']), \"
         ""
 
     def _collect_container_metrics(self, manager: UnifiedDockerManager, services: List[str]) -> ContainerMetrics:
@@ -332,8 +332,8 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
 
         for service, info in container_info.items():
             # Get container stats
-        cmd = ["docker", "stats", "--no-stream", "--format",
-        "{{.MemUsage}},{{.CPUPerc}}", info.name]
+        cmd = ["docker", "stats", "--no-stream", "--format,"
+        "{{.MemUsage}},{{.CPUPerc}}, info.name]"
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
         if result.returncode == 0:
@@ -341,19 +341,19 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
         if stats_line:
         mem_usage, cpu_perc = stats_line.split(',')
 
-                    # Parse memory usage (e.g., "45.2MiB / 512MiB")
+                    # Parse memory usage (e.g., "45.2MiB / 512MiB)"
         if '/' in mem_usage:
         mem_str = mem_usage.split(' / ')[0].strip()
         mem_mb = self._parse_memory_string(mem_str)
         total_memory += mem_mb
 
-                        # Parse CPU percentage (e.g., "1.25%")
+                        # Parse CPU percentage (e.g., "1.25%)"
         if '%' in cpu_perc:
         cpu_val = float(cpu_perc.replace('%', '').strip())
         total_cpu += cpu_val
 
                             # Get image size
-        img_cmd = ["docker", "images", info.image, "--format", "{{.Size}}"]
+        img_cmd = ["docker", "images", info.image, "--format", "{{.Size}}]"
         img_result = subprocess.run(img_cmd, capture_output=True, text=True, timeout=10)
         if img_result.returncode == 0 and img_result.stdout.strip():
         size_str = img_result.stdout.strip()
@@ -393,23 +393,23 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
         if 'postgres' in test_data:
             # First create table if it doesn't exist'
         create_cmd = [ ]
-        "docker", "exec", "",
-        "psql", "-U", "netra", "-d", "netra", "-c",
+        "docker", "exec", ","
+        "psql", "-U", "netra", "-d", "netra", "-c,"
         "CREATE TABLE IF NOT EXISTS test_table (id SERIAL PRIMARY KEY, data TEXT);"
             
         subprocess.run(create_cmd, capture_output=True, timeout=10)
 
             # Insert data
         insert_cmd = [ ]
-        "docker", "exec", "",
-        "psql", "-U", "netra", "-d", "netra", "-c", test_data['postgres']
+        "docker", "exec", ","
+        "psql", "-U", "netra", "-d", "netra", "-c, test_data['postgres']"
             
         subprocess.run(insert_cmd, capture_output=True, timeout=10)
 
         if 'redis' in test_data:
         redis_cmd = [ ]
-        "docker", "exec", "",
-        "redis-cli", test_data['redis']
+        "docker", "exec", ","
+        "redis-cli, test_data['redis']"
                 
         subprocess.run(redis_cmd, capture_output=True, timeout=10)
 
@@ -425,8 +425,8 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
         if 'postgres' in test_data:
             # Query data
         query_cmd = [ ]
-        "docker", "exec", "",
-        "psql", "-U", "netra", "-d", "netra", "-t", "-c",
+        "docker", "exec", ","
+        "psql", "-U", "netra", "-d", "netra", "-t", "-c,"
         "SELECT COUNT(*) FROM test_table;"
             
         result = subprocess.run(query_cmd, capture_output=True, text=True, timeout=10)
@@ -437,7 +437,7 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
         if 'redis' in test_data:
                 # Get data
         redis_cmd = [ ]
-        "docker", "exec", "",
+        "docker", "exec", ","
         "redis-cli", "EXISTS", "test_key"
                 
         result = subprocess.run(redis_cmd, capture_output=True, text=True, timeout=10)
@@ -457,10 +457,10 @@ class TestParallelExecution(AlpineRegularSwitchingTestSuite):
         isolated_test_environment):
         """Test running Alpine and regular containers simultaneously."""
         test_id = isolated_test_environment
-        services = ["postgres", "redis"]
+        services = ["postgres", "redis]"
 
     # Start both container types in parallel
-        logger.info("Starting Alpine and regular containers in parallel")
+        logger.info("Starting Alpine and regular containers in parallel)"
 
         manager_regular = UnifiedDockerManager( )
         environment_type=EnvironmentType.SHARED,
@@ -528,12 +528,12 @@ class TestParallelExecution(AlpineRegularSwitchingTestSuite):
         isolated_test_environment):
         """Test resource contention when running multiple container types."""
         test_id = isolated_test_environment
-        services = ["postgres", "redis"]
+        services = ["postgres", "redis]"
 
     # Start multiple instances to test resource handling
         managers = []
         for i in range(3):
-        for container_type in ["regular", "alpine"]:
+        for container_type in ["regular", "alpine]:"
         use_alpine = container_type == "alpine"
         manager = UnifiedDockerManager( )
         environment_type=EnvironmentType.SHARED,
@@ -556,7 +556,7 @@ class TestParallelExecution(AlpineRegularSwitchingTestSuite):
         await asyncio.sleep(0)
         return results
 
-        logger.info("Starting multiple container instances to test resource contention")
+        logger.info("Starting multiple container instances to test resource contention)"
         results = asyncio.run(start_all())
 
         # At least some should succeed (graceful degradation)
@@ -586,7 +586,7 @@ class TestParallelExecution(AlpineRegularSwitchingTestSuite):
         ports[service] = info.ports[0]  # Take first port
         else:
                     # Use service-specific default ports
-        default_ports = {"postgres": 5432, "redis": 6379, "backend": 8000, "auth": 8081}
+        default_ports = {"postgres": 5432, "redis": 6379, "backend": 8000, "auth: 8081}"
         ports[service] = default_ports.get(service, 8000)
         except Exception as e:
         logger.warning("")
@@ -599,15 +599,15 @@ class TestParallelExecution(AlpineRegularSwitchingTestSuite):
         """Test that parallel containers operate independently."""
         try:
         # Insert different data in each environment
-        regular_data = {"postgres": "INSERT INTO test_table (data) VALUES ('regular_parallel_data')"}
-        alpine_data = {"postgres": "INSERT INTO test_table (data) VALUES ('alpine_parallel_data')"}
+        regular_data = {"postgres": "INSERT INTO test_table (data) VALUES ('regular_parallel_data')}"
+        alpine_data = {"postgres": "INSERT INTO test_table (data) VALUES ('alpine_parallel_data')}"
 
         # Setup tables in both
         for manager in [manager_regular, manager_alpine]:
         project_name = manager._get_project_name()
         create_cmd = [ ]
-        "docker", "exec", "",
-        "psql", "-U", "netra", "-d", "netra", "-c",
+        "docker", "exec", ","
+        "psql", "-U", "netra", "-d", "netra", "-c,"
         "CREATE TABLE IF NOT EXISTS test_table (id SERIAL PRIMARY KEY, data TEXT);"
             
         subprocess.run(create_cmd, capture_output=True, timeout=10)
@@ -633,10 +633,10 @@ class TestPerformanceComparison(AlpineRegularSwitchingTestSuite):
         isolated_test_environment):
         """Compare startup times between Alpine and regular containers."""
         test_id = isolated_test_environment
-        services = ["postgres", "redis"]
+        services = ["postgres", "redis]"
         iterations = 3  # Multiple iterations for reliable metrics
 
-        startup_times = {"regular": [], "alpine": []}
+        startup_times = {"regular": [], "alpine: []}"
 
         for iteration in range(iterations):
         logger.info("")
@@ -653,7 +653,7 @@ class TestPerformanceComparison(AlpineRegularSwitchingTestSuite):
         regular_time = time.time() - start_time
 
         assert success, ""
-        startup_times["regular"].append(regular_time)
+        startup_times["regular].append(regular_time)"
         asyncio.run(manager_regular.graceful_shutdown())
 
         # Wait between tests to ensure clean state
@@ -671,18 +671,18 @@ class TestPerformanceComparison(AlpineRegularSwitchingTestSuite):
         alpine_time = time.time() - start_time
 
         assert success, ""
-        startup_times["alpine"].append(alpine_time)
+        startup_times["alpine].append(alpine_time)"
         asyncio.run(manager_alpine.graceful_shutdown())
 
         # Wait between iterations
         time.sleep(2)
 
         # Calculate averages
-        avg_regular = sum(startup_times["regular"]) / len(startup_times["regular"])
-        avg_alpine = sum(startup_times["alpine"]) / len(startup_times["alpine"])
+        avg_regular = sum(startup_times["regular"]) / len(startup_times["regular])"
+        avg_alpine = sum(startup_times["alpine"]) / len(startup_times["alpine])"
 
         # Log detailed performance report
-        logger.info("Startup Time Performance Report:")
+        logger.info("Startup Time Performance Report:)"
         logger.info("")
         logger.info("")
         logger.info("")
@@ -695,11 +695,11 @@ class TestPerformanceComparison(AlpineRegularSwitchingTestSuite):
         isolated_test_environment):
         """Compare memory usage between Alpine and regular containers."""
         test_id = isolated_test_environment
-        services = ["postgres", "redis"]
+        services = ["postgres", "redis]"
 
-        memory_results = {"regular": [], "alpine": []}
+        memory_results = {"regular": [], "alpine: []}"
 
-        for container_type in ["regular", "alpine"]:
+        for container_type in ["regular", "alpine]:"
         use_alpine = container_type == "alpine"
 
         manager = UnifiedDockerManager( )
@@ -723,11 +723,11 @@ class TestPerformanceComparison(AlpineRegularSwitchingTestSuite):
         asyncio.run(manager.graceful_shutdown())
 
             # Calculate averages
-        avg_regular_memory = sum(memory_results["regular"]) / len(memory_results["regular"])
-        avg_alpine_memory = sum(memory_results["alpine"]) / len(memory_results["alpine"])
+        avg_regular_memory = sum(memory_results["regular"]) / len(memory_results["regular])"
+        avg_alpine_memory = sum(memory_results["alpine"]) / len(memory_results["alpine])"
 
             # Log performance report
-        logger.info("Memory Usage Performance Report:")
+        logger.info("Memory Usage Performance Report:)"
         logger.info("")
         logger.info("")
 
@@ -743,11 +743,11 @@ class TestPerformanceComparison(AlpineRegularSwitchingTestSuite):
         isolated_test_environment):
         """Compare CPU usage between Alpine and regular containers."""
         test_id = isolated_test_environment
-        services = ["postgres", "redis"]
+        services = ["postgres", "redis]"
 
-        cpu_results = {"regular": [], "alpine": []}
+        cpu_results = {"regular": [], "alpine: []}"
 
-        for container_type in ["regular", "alpine"]:
+        for container_type in ["regular", "alpine]:"
         use_alpine = container_type == "alpine"
 
         manager = UnifiedDockerManager( )
@@ -770,11 +770,11 @@ class TestPerformanceComparison(AlpineRegularSwitchingTestSuite):
         asyncio.run(manager.graceful_shutdown())
 
             # Calculate averages
-        avg_regular_cpu = sum(cpu_results["regular"]) / len(cpu_results["regular"])
-        avg_alpine_cpu = sum(cpu_results["alpine"]) / len(cpu_results["alpine"])
+        avg_regular_cpu = sum(cpu_results["regular"]) / len(cpu_results["regular])"
+        avg_alpine_cpu = sum(cpu_results["alpine"]) / len(cpu_results["alpine])"
 
             # Log performance report
-        logger.info("CPU Usage Performance Report:")
+        logger.info("CPU Usage Performance Report:)"
         logger.info("")
         logger.info("")
 
@@ -793,7 +793,7 @@ class TestErrorRecovery(AlpineRegularSwitchingTestSuite):
         isolated_test_environment):
         """Test fallback from Alpine to regular containers when Alpine fails."""
         test_id = isolated_test_environment
-        services = ["postgres"]
+        services = ["postgres]"
 
     # Simulate Alpine failure by using invalid compose file
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -825,7 +825,7 @@ class TestErrorRecovery(AlpineRegularSwitchingTestSuite):
         - "5434:5432"
         ''')'
 
-        with patch.dict(os.environ, {"PROJECT_ROOT": str(temp_path)}):
+        with patch.dict(os.environ, {"PROJECT_ROOT: str(temp_path)}):"
                                         # Try Alpine first (should fail)
         manager_alpine = UnifiedDockerManager( )
         environment_type=EnvironmentType.SHARED,
@@ -838,7 +838,7 @@ class TestErrorRecovery(AlpineRegularSwitchingTestSuite):
         assert not success, "Alpine containers should fail with invalid image"
 
                                         # Fallback to regular containers
-        logger.info("Alpine failed as expected, falling back to regular containers")
+        logger.info("Alpine failed as expected, falling back to regular containers)"
         manager_regular = UnifiedDockerManager( )
         environment_type=EnvironmentType.SHARED,
         test_id="",
@@ -865,14 +865,14 @@ class TestErrorRecovery(AlpineRegularSwitchingTestSuite):
     
 
     # Start services (may partially succeed)
-        asyncio.run(manager_alpine.start_services_smart(["postgres"], wait_healthy=False))
+        asyncio.run(manager_alpine.start_services_smart(["postgres], wait_healthy=False))"
 
     # Force cleanup
         asyncio.run(manager_alpine.graceful_shutdown())
 
     # Verify cleanup was successful
         project_name = manager_alpine._get_project_name()
-        cmd = ["docker", "ps", "-a", "--filter", "", "--format", "{{.Names}}"]
+        cmd = ["docker", "ps", "-a", "--filter", "", "--format", "{{.Names}}]"
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
         remaining_containers = result.stdout.strip().split(" )"
@@ -888,7 +888,7 @@ class TestErrorRecovery(AlpineRegularSwitchingTestSuite):
         use_alpine=False
     
 
-        success = asyncio.run(manager_fresh.start_services_smart(["postgres"], wait_healthy=True))
+        success = asyncio.run(manager_fresh.start_services_smart(["postgres], wait_healthy=True))"
         assert success, "Should be able to start fresh containers after cleanup"
 
         asyncio.run(manager_fresh.graceful_shutdown())
@@ -897,7 +897,7 @@ class TestErrorRecovery(AlpineRegularSwitchingTestSuite):
         isolated_test_environment):
         """Test recovery from partial deployments."""
         test_id = isolated_test_environment
-        services = ["postgres", "redis"]
+        services = ["postgres", "redis]"
 
     # Start with one service type
         manager = UnifiedDockerManager( )
@@ -907,11 +907,11 @@ class TestErrorRecovery(AlpineRegularSwitchingTestSuite):
     
 
     # Start only one service first
-        success = asyncio.run(manager.start_services_smart(["postgres"], wait_healthy=True))
+        success = asyncio.run(manager.start_services_smart(["postgres], wait_healthy=True))"
         assert success, "Failed to start first service"
 
     # Add second service (simulating incremental deployment)
-        success = asyncio.run(manager.start_services_smart(["redis"], wait_healthy=True))
+        success = asyncio.run(manager.start_services_smart(["redis], wait_healthy=True))"
         assert success, "Failed to add second service"
 
     # Verify both services are running
@@ -936,11 +936,11 @@ class TestMigrationPaths(AlpineRegularSwitchingTestSuite):
         use_alpine=False
     
 
-        success = asyncio.run(manager_regular.start_services_smart(["postgres", "redis"], wait_healthy=True))
+        success = asyncio.run(manager_regular.start_services_smart(["postgres", "redis], wait_healthy=True))"
         assert success, "Failed to start regular services"
 
     # Insert test data
-        self._insert_test_data(manager_regular, {"postgres": "INSERT INTO test_table (data) VALUES ('gradual_test')"})
+        self._insert_test_data(manager_regular, {"postgres": "INSERT INTO test_table (data) VALUES ('gradual_test')})"
         asyncio.run(manager_regular.graceful_shutdown())
 
     # Migrate one service to Alpine
@@ -951,7 +951,7 @@ class TestMigrationPaths(AlpineRegularSwitchingTestSuite):
     
 
     # Start only Redis with Alpine (partial migration)
-        success = asyncio.run(manager_alpine_partial.start_services_smart(["redis"], wait_healthy=True))
+        success = asyncio.run(manager_alpine_partial.start_services_smart(["redis], wait_healthy=True))"
         assert success, "Failed to start Alpine Redis"
 
     # Start Postgres with regular (keeping it regular)
@@ -961,15 +961,15 @@ class TestMigrationPaths(AlpineRegularSwitchingTestSuite):
         use_alpine=False
     
 
-        success = asyncio.run(manager_regular_partial.start_services_smart(["postgres"], wait_healthy=True))
+        success = asyncio.run(manager_regular_partial.start_services_smart(["postgres], wait_healthy=True))"
         assert success, "Failed to start regular Postgres"
 
     # Verify mixed environment works
-        self._verify_container_functionality(manager_alpine_partial, ["redis"])
-        self._verify_container_functionality(manager_regular_partial, ["postgres"])
+        self._verify_container_functionality(manager_alpine_partial, ["redis])"
+        self._verify_container_functionality(manager_regular_partial, ["postgres])"
 
     # Verify data persistence
-        self._verify_test_data(manager_regular_partial, {"postgres": "INSERT INTO test_table (data) VALUES ('gradual_test')"})
+        self._verify_test_data(manager_regular_partial, {"postgres": "INSERT INTO test_table (data) VALUES ('gradual_test')})"
 
     # Cleanup
         asyncio.run(manager_alpine_partial.graceful_shutdown())
@@ -979,10 +979,10 @@ class TestMigrationPaths(AlpineRegularSwitchingTestSuite):
         isolated_test_environment):
         """Test rollback from Alpine to regular containers."""
         test_id = isolated_test_environment
-        services = ["postgres", "redis"]
+        services = ["postgres", "redis]"
 
     # Start with Alpine containers
-        logger.info("Phase 1: Starting with Alpine containers")
+        logger.info("Phase 1: Starting with Alpine containers)"
         manager_alpine = UnifiedDockerManager( )
         environment_type=EnvironmentType.SHARED,
         test_id="",
@@ -993,12 +993,12 @@ class TestMigrationPaths(AlpineRegularSwitchingTestSuite):
         assert success, "Failed to start Alpine containers"
 
     # Insert data and verify functionality
-        alpine_data = {"postgres": "INSERT INTO test_table (data) VALUES ('alpine_rollback_test')"}
+        alpine_data = {"postgres": "INSERT INTO test_table (data) VALUES ('alpine_rollback_test')}"
         self._insert_test_data(manager_alpine, alpine_data)
         self._verify_container_functionality(manager_alpine, services)
 
     # Simulate issue requiring rollback
-        logger.info("Phase 2: Simulating issue and performing rollback")
+        logger.info("Phase 2: Simulating issue and performing rollback)"
         asyncio.run(manager_alpine.graceful_shutdown())
 
     # Rollback to regular containers
@@ -1033,7 +1033,7 @@ class TestCICDIntegration(AlpineRegularSwitchingTestSuite):
         test_id = isolated_test_environment
 
     # Test with FORCE_ALPINE=true
-        with patch.dict(os.environ, {"FORCE_ALPINE": "true", "CI": "true"}):
+        with patch.dict(os.environ, {"FORCE_ALPINE": "true", "CI": "true}):"
         manager_forced_alpine = UnifiedDockerManager( )
         environment_type=EnvironmentType.SHARED,
         test_id="",
@@ -1044,7 +1044,7 @@ class TestCICDIntegration(AlpineRegularSwitchingTestSuite):
         assert "alpine" in compose_file.lower(), "Should select Alpine compose file when FORCE_ALPINE=true"
 
         # Test with FORCE_ALPINE=false
-        with patch.dict(os.environ, {"FORCE_ALPINE": "false", "CI": "true"}):
+        with patch.dict(os.environ, {"FORCE_ALPINE": "false", "CI": "true}):"
         manager_forced_regular = UnifiedDockerManager( )
         environment_type=EnvironmentType.SHARED,
         test_id="",
@@ -1058,10 +1058,10 @@ class TestCICDIntegration(AlpineRegularSwitchingTestSuite):
         isolated_test_environment):
         """Test CI-specific optimizations with different container types."""
         test_id = isolated_test_environment
-        services = ["postgres"]  # Minimal services for CI
+        services = ["postgres]  # Minimal services for CI"
 
     # Simulate CI environment
-        with patch.dict(os.environ, {"CI": "true", "BUILD_MODE": "test"}):
+        with patch.dict(os.environ, {"CI": "true", "BUILD_MODE": "test}):"
 
         # Test Alpine optimization for CI
         manager_ci_alpine = UnifiedDockerManager( )
@@ -1096,7 +1096,7 @@ class TestCICDIntegration(AlpineRegularSwitchingTestSuite):
         asyncio.run(manager_ci_regular.graceful_shutdown())
 
         # Log CI performance comparison
-        logger.info("CI Performance Comparison:")
+        logger.info("CI Performance Comparison:)"
         logger.info("")
         logger.info("")
         logger.info("")
@@ -1108,10 +1108,10 @@ class TestCICDIntegration(AlpineRegularSwitchingTestSuite):
 
     # Test configurations that might be used by unified test runner
         configs = [ ]
-        {"use_alpine": True, "rebuild_images": False},
-        {"use_alpine": False, "rebuild_images": False},
-        {"use_alpine": True, "rebuild_images": True},
-        {"use_alpine": False, "rebuild_images": True}
+        {"use_alpine": True, "rebuild_images: False},"
+        {"use_alpine": False, "rebuild_images: False},"
+        {"use_alpine": True, "rebuild_images: True},"
+        {"use_alpine": False, "rebuild_images: True}"
     
 
         for i, config in enumerate(configs):
@@ -1120,23 +1120,23 @@ class TestCICDIntegration(AlpineRegularSwitchingTestSuite):
         manager = UnifiedDockerManager( )
         environment_type=EnvironmentType.SHARED,
         test_id="",
-        use_alpine=config["use_alpine"],
-        rebuild_images=config["rebuild_images"]
+        use_alpine=config["use_alpine],"
+        rebuild_images=config["rebuild_images]"
         
 
         # Start minimal services
-        success = asyncio.run(manager.start_services_smart(["postgres"], wait_healthy=True))
+        success = asyncio.run(manager.start_services_smart(["postgres], wait_healthy=True))"
         assert success, ""
 
         # Verify functionality
-        self._verify_container_functionality(manager, ["postgres"])
+        self._verify_container_functionality(manager, ["postgres])"
 
         # Verify container type matches configuration
-        container_info = manager.get_enhanced_container_status(["postgres"])
-        postgres_info = container_info.get("postgres")
+        container_info = manager.get_enhanced_container_status(["postgres])"
+        postgres_info = container_info.get("postgres)"
 
-        if config["use_alpine"]:
-        assert any(keyword in postgres_info.image.lower() for keyword in ['alpine', 'minimal']), \
+        if config["use_alpine]:"
+        assert any(keyword in postgres_info.image.lower() for keyword in ['alpine', "'minimal']), \"
         ""
         else:
                 # Regular containers should not have 'alpine' in image name
@@ -1146,14 +1146,14 @@ class TestCICDIntegration(AlpineRegularSwitchingTestSuite):
         asyncio.run(manager.graceful_shutdown())
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
                     # Run all tests with comprehensive reporting
         pytest.main([ ])
         __file__,
-        "-v",
-        "--tb=short",
-        "--strict-markers",
-        "--disable-warnings",
-        "-m", "not performance",  # Skip performance tests by default for speed
-        "--durations=10"  # Show slowest 10 tests
+        "-v,"
+        "--tb=short,"
+        "--strict-markers,"
+        "--disable-warnings,"
+        "-m", "not performance,  # Skip performance tests by default for speed"
+        "--durations=10  # Show slowest 10 tests"
                     

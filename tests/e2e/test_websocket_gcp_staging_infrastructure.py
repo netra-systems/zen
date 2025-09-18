@@ -67,7 +67,7 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
         self.auth_timeout = 10.0
 
     async def test_gcp_load_balancer_preserves_authorization_header(self):
-        ""
+        """
         CRITICAL: Test that GCP Load Balancer preserves Authorization header for WebSocket.
         
         This is the PRIMARY REGRESSION PREVENTION test for the infrastructure failure
@@ -117,7 +117,7 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
         print(f' PASS:  CRITICAL TEST PASSED: GCP Load Balancer preserves Authorization headers')
 
     async def test_gcp_load_balancer_preserves_e2e_bypass_header(self):
-    ""
+    """
         CRITICAL: Test that GCP Load Balancer preserves X-E2E-Bypass header.
         
         This validates E2E testing headers are forwarded through the Load Balancer,
@@ -221,7 +221,7 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
         self.assertGreater(len(successful_attempts), 0, f'WebSocket reconnection should succeed with preserved auth. Attempts: {connection_attempts}')
 
     async def test_multi_user_websocket_isolation_in_gcp(self):
-    ""
+    """
         CRITICAL: Test multi-user WebSocket isolation through GCP infrastructure.
         
         This validates that GCP Load Balancer preserves user context isolation,
@@ -315,7 +315,7 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
 
 @pytest.mark.e2e
 class GCPWebSocketInfrastructureResilienceTests(SSotBaseTestCase, unittest.TestCase):
-    ""
+    """
     Tests for GCP WebSocket infrastructure resilience and error handling.
     
     These tests validate proper behavior under various failure conditions
@@ -323,14 +323,14 @@ class GCPWebSocketInfrastructureResilienceTests(SSotBaseTestCase, unittest.TestC
     
 
     def setup_method(self, method=None):
-        ""Set up resilience test environment.
+        ""Set up resilience test environment."
         super().setup_method(method)
         self.staging_config = StagingTestConfig()
         self.e2e_helper = E2EWebSocketAuthHelper(environment='staging')
         self.staging_websocket_url = self.staging_config.urls.websocket_url
 
     async def test_websocket_gcp_timeout_resilience(self):
-    ""
+    """
         Test WebSocket resilience to GCP Cloud Run timeout limitations.
         
         This validates proper handling of GCP-specific timeout constraints

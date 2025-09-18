@@ -38,7 +38,7 @@ class TestDevelopmentAuth:
 
     @classmethod
     def setup_class(cls):
-        ""Setup test environment
+        ""Setup test environment"
         cls.env = IsolatedEnvironment.get_instance()
 
         # Ensure we're in development mode'
@@ -47,7 +47,7 @@ class TestDevelopmentAuth:
         # Set required secrets for development (must be at least 32 chars)
         cls.env.set("SERVICE_SECRET, dev-service-secret-for-testing-purposes-only)"
         cls.env.set(JWT_SECRET_KEY, dev-jwt-secret-for-testing-only-must-be-32-chars)
-        cls.env.set("SERVICE_ID, test-service-id")
+        cls.env.set("SERVICE_ID, test-service-id)"
 
         # Clear any cached secrets
         SharedJWTSecretManager.clear_cache()
@@ -71,7 +71,7 @@ class TestDevelopmentAuth:
         shared_secret = SharedJWTSecretManager.get_jwt_secret()
 
         # They should be the same
-        assert auth_secret == shared_secret, JWT secrets are not synchronized!
+        assert auth_secret == shared_secret, "JWT secrets are not synchronized!"
 
         logger.info(✅ JWT secrets are synchronized)"
         logger.info(✅ JWT secrets are synchronized)"
@@ -87,7 +87,7 @@ class TestDevelopmentAuth:
             email=test@example.com,"
             permissions=["read, write]"
 
-        assert token is not None, Failed to generate token
+        assert token is not None, "Failed to generate token"
         assert isinstance(token, str), Token should be a string""
 
         logger.info(f✅ Token generated successfully: {token[:20]}...)
@@ -175,7 +175,7 @@ class TestDevelopmentAuth:
             try:
                 auth_response = await client.get(f"{self.auth_url}/health)"
                 logger.info(fAuth service health: {auth_response.status_code})
-                assert auth_response.status_code == 200, fAuth service unhealthy: {auth_response.status_code}
+                assert auth_response.status_code == 200, "fAuth service unhealthy: {auth_response.status_code}"
             except (httpx.ConnectError, httpx.RequestError) as e:
                 logger.warning(fAuth service connection failed: {e}")"
 
@@ -191,7 +191,7 @@ class TestDevelopmentAuth:
 
     @pytest.mark.asyncio
     async def test_login_flow(self):
-        ""Test complete login flow
+        ""Test complete login flow"
         logger.info(Testing login flow...)"
         logger.info(Testing login flow...)"
 
@@ -215,7 +215,7 @@ class TestDevelopmentAuth:
 
                     # Login
                     login_data = {
-                        username": register_data["email],
+                        username": register_data[email],"
                         password: register_data[password]
                     }
 
@@ -228,7 +228,7 @@ class TestDevelopmentAuth:
                     if login_response.status_code == 200:
                         result = login_response.json()
                         assert "access_token in result, No access token in response"
-                        assert token_type in result, No token type in response
+                        assert token_type in result, "No token type in response"
                         logger.info("✅ Login successful)"
                     else:
                         logger.warning(fLogin failed: {login_response.status_code})

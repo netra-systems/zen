@@ -56,7 +56,7 @@ class UserContextResult:
 
 
 class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
-    ""Test suite validating Redis SSOT factory pattern implementation.
+    ""Test suite validating Redis SSOT factory pattern implementation."
 
     def setUp(self):
         Set up test environment.""
@@ -84,7 +84,7 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
         # Test multiple import patterns
         import_tests = [
             (netra_backend.app.redis_manager, redis_manager),
-            ("netra_backend.app.redis_manager, redis_manager"),  # Test twice
+            ("netra_backend.app.redis_manager, redis_manager),  # Test twice"
         ]
 
         for module_path, attr_name in import_tests:
@@ -163,7 +163,7 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
         self.logger.info(Testing user context isolation)
 
         # Simulate multiple users
-        user_sessions = [user_001, user_002", "user_003, user_004]
+        user_sessions = [user_001, user_002", user_003, user_004]"
         isolation_results = []
 
         async def simulate_user_session(user_id: str):
@@ -299,7 +299,7 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
 
                 # Perform multiple Redis operations
                 operations = [
-                    redis_manager.set(fpool_test_{operation_id}_{i}", f"value_{i}, ex=30)
+                    redis_manager.set(fpool_test_{operation_id}_{i}", fvalue_{i}, ex=30)"
                     for i in range(5)
                 ]
 
@@ -353,7 +353,7 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
         avg_operation_time = sum(r[operation_time] for r in connection_results) / len(connection_results)
 
         pool_evidence = {
-            test_name": "connection_pool_consolidation,
+            test_name": connection_pool_consolidation,"
             total_operations: num_operations,
             successful_operations: successful_operations,"
             successful_operations: successful_operations,"
@@ -467,7 +467,7 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
         )
 
     def _get_memory_usage(self) -> float:
-        ""Get current process memory usage in MB.
+        ""Get current process memory usage in MB."
         process = psutil.Process()
         return process.memory_info().rss / 1024 / 1024
 

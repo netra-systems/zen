@@ -131,7 +131,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
             os.environ[key] = value
     
     def tearDown(self):
-        ""Clean up test environment and restore original state.
+        ""Clean up test environment and restore original state."
         # Restore original environment variables
         for key, original_value in self.original_env.items():
             if original_value is None:
@@ -149,7 +149,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_startup_memory_leak_prevention_with_strategic_mocking(self):
-    ""
+    """
         Test startup doesn't create memory leaks - Issue #601 FIX Applied.'
         
         CRITICAL FIX: Mock `_run_comprehensive_validation()` to prevent deadlock
@@ -179,7 +179,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
                     await asyncio.sleep(0.1)  # Minimal async delay
 
                 async def mock_validation_fix():
-                    ""CRITICAL FIX: Mock validation to prevent _run_comprehensive_validation deadlock.
+                    ""CRITICAL FIX: Mock validation to prevent _run_comprehensive_validation deadlock."
                     app.state.startup_complete = True
                     await asyncio.sleep(0.1)
                 
@@ -202,7 +202,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
                 
                 # Verify startup completed quickly (no deadlock)
                 startup_duration = end_time - start_time
-                assert startup_duration < 5.0, fStartup took too long: {startup_duration}s (possible deadlock)
+                assert startup_duration < 5.0, "fStartup took too long: {startup_duration}s (possible deadlock)"
                 
                 # Verify startup completion flag is set
                 assert app.state.startup_complete is True, fStartup completion flag not set in cycle {cycle}""
@@ -256,7 +256,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_startup_phase_timeout_prevention(self):
-        ""Test that startup phases complete within reasonable time limits.
+        ""Test that startup phases complete within reasonable time limits."
         if not BACKEND_IMPORTS_AVAILABLE:
             pytest.skip(Backend imports not available for testing)"
             pytest.skip(Backend imports not available for testing)"
@@ -302,12 +302,12 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
         total_duration = time.time() - start_time
 
         # Validate timing requirements
-        assert total_duration < 5.0, fTotal startup took too long: {total_duration}s
+        assert total_duration < 5.0, "fTotal startup took too long: {total_duration}s"
         
         # Validate individual phase timing
         for phase, duration in phase_durations.items():
             max_allowed = 1.0  # 1 second max per phase
-            assert duration < max_allowed, fPhase {phase} took too long: {duration}s
+            assert duration < max_allowed, "fPhase {phase} took too long: {duration}s"
         
         print(f✅ TIMEOUT PREVENTION VALIDATED:"")
         print(f   - Total startup time: {total_duration:.3f}s)
@@ -378,7 +378,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
         for result in results:
             if isinstance(result, dict) and result.get('success'):
                 successful_instances += 1
-                assert result['startup_complete'] is True, fInstance {result['instance_id']} startup not complete
+                assert result['startup_complete'] is True, "fInstance {result['instance_id']} startup not complete"
             elif isinstance(result, Exception):
                 pytest.fail(f"Concurrent startup failed with exception: {result})"
             else:
@@ -396,10 +396,10 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
             fConcurrent startup memory increase too high: {memory_increase / 1024 / 1024:.2f}MB"
             fConcurrent startup memory increase too high: {memory_increase / 1024 / 1024:.2f}MB"
         
-        print(f"✅ CONCURRENT STARTUP ISOLATION VALIDATED:)")
+        print(f"✅ CONCURRENT STARTUP ISOLATION VALIDATED:))"
         print(f   - Concurrent instances: {concurrent_instances})"
         print(f   - Concurrent instances: {concurrent_instances})"
-        print(f"   - Successful instances: {successful_instances})")
+        print(f"   - Successful instances: {successful_instances}))"
         print(f   - Memory increase: {memory_increase / 1024 / 1024:.2f}MB)"
         print(f   - Memory increase: {memory_increase / 1024 / 1024:.2f}MB)"
 
@@ -462,7 +462,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
 
         # Validate resource cleanup
         successful_cleanup_tests = sum(1 for test in resource_cleanup_tests if test.get('success'))
-        assert successful_cleanup_tests == 3, fOnly {successful_cleanup_tests}/3 cleanup tests succeeded
+        assert successful_cleanup_tests == 3, "fOnly {successful_cleanup_tests}/3 cleanup tests succeeded"
         
         # Verify no thread leaks
         final_thread_count = threading.active_count()
@@ -479,7 +479,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_deterministic_startup_validation_fix_verification(self"):"
-        "
+        """
         "
         Verify that Issue #601 fix prevents the original hanging problem.
         
@@ -560,22 +560,22 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
             if test.get('success'):
                 assert test['duration'] < 2.0, fRun {test['test_run']} took too long: {test['duration']}s"
                 assert test['duration'] < 2.0, fRun {test['test_run']} took too long: {test['duration']}s"
-                assert test['validation_called'], fRun {test['test_run']} validation mock not called
+                assert test['validation_called'], "fRun {test['test_run']} validation mock not called"
                 assert test['startup_complete'], fRun {test['test_run']} startup not completed"
                 assert test['startup_complete'], fRun {test['test_run']} startup not completed"
                 assert test['fix_applied'], f"Run {test['test_run']} fix not properly applied"
         
         print(f✅ ISSUE #601 FIX VERIFICATION COMPLETED:)
-        print(f"   - Test runs: {len(validation_fix_tests)}")
+        print(f"   - Test runs: {len(validation_fix_tests)})"
         print(f   - Successful runs: {successful_runs})
-        print(f"   - Average duration: {sum(t['duration'] for t in validation_fix_tests if t.get('success')) / successful_runs:.3f}s")
+        print(f"   - Average duration: {sum(t['duration'] for t in validation_fix_tests if t.get('success')) / successful_runs:.3f}s)"
         print(f   - Strategic validation mocking: WORKING)
-        print(f"   - Deadlock prevention: VALIDATED")
+        print(f"   - Deadlock prevention: VALIDATED)"
 
 
 # Execution guard for direct test running
 if __name__ == __main__:
-    ""
+    """
     Direct execution for Issue #601 validation
     
     Run with: python tests/mission_critical/test_deterministic_startup_memory_leak_fixed.py
@@ -583,7 +583,7 @@ if __name__ == __main__:
     
     print(=*80")"
     print(ISSUE #601 FIX VALIDATION - Deterministic Startup Memory Leak Prevention)
-    print(="*80")
+    print(="*80)"
     print(Testing strategic validation mocking to prevent deadlocks...)"
     print(Testing strategic validation mocking to prevent deadlocks...)"
     print(Business Impact: $500K+ ARR platform reliability validation")"
@@ -625,7 +625,7 @@ if __name__ == __main__:
             for test, error in result.failures:
                 print(f  - {test}: {error})
         if result.errors:
-            print("Errors:")
+            print("Errors:)"
             for test, error in result.errors:
                 print(f  - {test}: {error})"
                 print(f  - {test}: {error})"

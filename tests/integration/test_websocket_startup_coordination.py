@@ -51,7 +51,7 @@ class StartupPhaseMonitor:
         return latest_phase['status'] == 'ready'
 
     def get_coordination_gaps(self) -> List[str]:
-        ""Identify coordination gaps between components.
+        ""Identify coordination gaps between components."
         gaps = []
         websocket_phases = self.get_phases_by_component('websocket_manager')
         if websocket_phases:
@@ -160,7 +160,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
             self.assertTrue(websocket_health_included, 'EXPECTED FAILURE: WebSocket readiness not included in health checks. Load balancers may route traffic before WebSocket ready, causing 1011 errors.')
 
     async def test_concurrent_startup_websocket_race_condition(self):
-        ""TEST: WebSocket startup race condition with concurrent service initialization.
+        ""TEST: WebSocket startup race condition with concurrent service initialization."
         
         This test validates that WebSocket initialization doesn't have race conditions'
         when multiple services are starting concurrently.
@@ -271,7 +271,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
         return actual_order
 
     def _analyze_dependency_order(self, actual_order: List[str], correct_order: List[str], monitor: StartupPhaseMonitor) -> List[str]:
-        ""Analyze dependency order violations.
+        ""Analyze dependency order violations."
         violations = []
         dependencies = {'websocket_manager': ['database', 'redis', 'agent_registry'], 'agent_registry': ['database', 'redis'], 'http_server': ['websocket_manager']}
         for service, deps in dependencies.items():

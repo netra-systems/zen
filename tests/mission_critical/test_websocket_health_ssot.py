@@ -58,7 +58,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 class WebSocketHealthSSotTests(SSotAsyncTestCase):
-    ""Mission Critical: WebSocket Health Check SSOT Integration Tests
+    ""Mission Critical: WebSocket Health Check SSOT Integration Tests"
     
     These tests validate the health check endpoints during factory pattern migration:
     1. Health check endpoint functionality preservation
@@ -80,7 +80,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
         logger.info(f[HEALTH CHECK TEST] Setup complete for health validation)
 
     def teardown_method(self, method):
-        ""Clean up health check test environment.
+        ""Clean up health check test environment."
         super().teardown_method(method)
         logger.info([HEALTH CHECK TEST] Teardown complete)"
         logger.info([HEALTH CHECK TEST] Teardown complete)"
@@ -117,9 +117,9 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             execution_time = time.time() - start_time
             
             # CRITICAL: Health check must return structured data
-            assert isinstance(health_result, dict), Health check must return dictionary
+            assert isinstance(health_result, "dict), Health check must return dictionary"
             assert "status in health_result, Health check missing required 'status' field"
-            assert timestamp in health_result, Health check missing required 'timestamp' field
+            assert timestamp in health_result, "Health check missing required 'timestamp' field"
             
             logger.info(f[HEALTH CHECK SUCCESS] Health check completed in {execution_time:.2f}s)
             logger.info(f[HEALTH STATUS] Status: {health_result.get('status')}")"
@@ -128,7 +128,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             valid_statuses = [healthy, unhealthy, degraded]"
             valid_statuses = [healthy, unhealthy, degraded]"
             actual_status = health_result.get(status")"
-            assert actual_status in valid_statuses, fInvalid health status: {actual_status}
+            assert actual_status in valid_statuses, "fInvalid health status: {actual_status}"
             
             # Test timestamp validity
             timestamp_str = health_result.get(timestamp)"
@@ -159,7 +159,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
                         logger.info(f"[COMPONENT STATUS] {component}: {component_status})"
                         
                         # Component status should be boolean or have meaningful status
-                        assert isinstance(component_status, (bool, str, dict)), fComponent {component} has invalid status type
+                        assert isinstance(component_status, "(bool, str, dict)), fComponent {component} has invalid status type"
                 
                 # At least one component should be reporting status
                 assert len(components) > 0, Health check must report component status"
@@ -258,22 +258,22 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
                         
                         # Validate config value types and ranges
                         if config_key == "heartbeat_interval:"
-                            assert isinstance(config_value, (int, float)), fInvalid heartbeat_interval type: {type(config_value)}
-                            assert 10 <= config_value <= 300, fInvalid heartbeat_interval range: {config_value}
+                            assert isinstance(config_value, "(int, float)), fInvalid heartbeat_interval type: {type(config_value)}"
+                            assert 10 <= config_value <= 300, "fInvalid heartbeat_interval range: {config_value}"
                             
                         elif config_key == connection_timeout":"
-                            assert isinstance(config_value, (int, float)), fInvalid connection_timeout type: {type(config_value)}
-                            assert 60 <= config_value <= 3600, fInvalid connection_timeout range: {config_value}
+                            assert isinstance(config_value, "(int, float)), fInvalid connection_timeout type: {type(config_value)}"
+                            assert 60 <= config_value <= 3600, "fInvalid connection_timeout range: {config_value}"
                             
                         elif config_key == "max_message_size:"
-                            assert isinstance(config_value, int), fInvalid max_message_size type: {type(config_value)}
-                            assert config_value >= 1024, fInvalid max_message_size: {config_value}
+                            assert isinstance(config_value, "int), fInvalid max_message_size type: {type(config_value)}"
+                            assert config_value >= 1024, "fInvalid max_message_size: {config_value}"
                             
                         elif config_key == compression_enabled":"
-                            assert isinstance(config_value, bool), fInvalid compression_enabled type: {type(config_value)}
+                            assert isinstance(config_value, "bool), fInvalid compression_enabled type: {type(config_value)}"
                 
                 # At least basic config should be present
-                assert heartbeat_interval in ws_config, Missing critical heartbeat_interval config
+                assert heartbeat_interval in ws_config, "Missing critical heartbeat_interval config"
                 
                 logger.info([CONFIG VALIDATION SUCCESS] All configuration parameters valid")"
             
@@ -362,7 +362,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
                     if consolidation_complete" in ssot_stats:"
                         consolidation_status = ssot_stats[consolidation_complete]
                         logger.info(f[CONSOLIDATION STATUS] Consolidation complete: {consolidation_status}")"
-                        assert isinstance(consolidation_status, bool), Consolidation status must be boolean
+                        assert isinstance(consolidation_status, "bool), Consolidation status must be boolean"
                     
                     if ssot_compliance in ssot_stats:"
                     if ssot_compliance in ssot_stats:"
@@ -374,7 +374,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
                         original_lines = ssot_stats[original_total_lines]"
                         original_lines = ssot_stats[original_total_lines]"
                         logger.info(f[MIGRATION METRIC] Original total lines: {original_lines}")"
-                        assert isinstance(original_lines, (int, str)), Original lines must be int or string
+                        assert isinstance(original_lines, "(int, str)), Original lines must be int or string"
                 
                 # Check for active component information
                 if active_components" in stats_result:"
@@ -456,10 +456,10 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             try:
                 health_result = await asyncio.wait_for(websocket_route.websocket_health_check(), timeout=10)
                 health_status = health_result.get(status) if isinstance(health_result, dict) else error
-                endpoints_tested.append({endpoint: health_check", "status: health_status, success: True)
+                endpoints_tested.append({endpoint: health_check", status: health_status, success: True)"
                 logger.info(f[HEALTH CHECK] Status: {health_status})
             except Exception as e:
-                endpoints_tested.append({endpoint: "health_check, status": failed, error: str(e), success: False}
+                endpoints_tested.append({endpoint: "health_check, status: failed, error: str(e), success: False}"
                 logger.error(f[HEALTH CHECK FAILED] {e}")"
             
             # 2. Configuration Endpoint  
@@ -470,7 +470,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
                 endpoints_tested.append({endpoint": config, status: config_status, success: True)"
                 logger.info(f[CONFIG] Status: {config_status}")"
             except Exception as e:
-                endpoints_tested.append({endpoint: config, status: failed", "error: str(e), success: False}
+                endpoints_tested.append({endpoint: config, status: failed", error: str(e), success: False}"
                 logger.error(f[CONFIG FAILED] {e})
             
             # 3. Statistics Endpoint
@@ -480,7 +480,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
                 endpoints_tested.append({endpoint": stats, status: stats_status, success: True)"
                 logger.info(f[STATS] Status: {stats_status}")"
             except Exception as e:
-                endpoints_tested.append({endpoint: stats, status: failed", "error: str(e), success: False}
+                endpoints_tested.append({endpoint: stats, status: failed", error: str(e), success: False}"
                 logger.error(f[STATS FAILED] {e})
             
             # Production readiness assessment
@@ -498,7 +498,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
                 logger.info(f    ✅ {endpoint['endpoint']}: {endpoint['status']})"
                 
             for endpoint in failed_endpoints:
-                logger.warning(f"    ❌ {endpoint['endpoint']}: {endpoint.get('error', 'unknown error')})")
+                logger.warning(f"    ❌ {endpoint['endpoint']}: {endpoint.get('error', 'unknown error')}))"
             
             # Production readiness criteria:
             # - At least health check must work (critical for load balancer)
@@ -542,7 +542,7 @@ if __name__ == "__main__:"
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print(MIGRATION NOTICE: This file previously used direct pytest execution.)
-    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
     print(For more info: reports/TEST_EXECUTION_GUIDE.md)"
     print(For more info: reports/TEST_EXECUTION_GUIDE.md)"
 

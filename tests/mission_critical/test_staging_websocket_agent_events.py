@@ -196,7 +196,7 @@ class StagingWebSocketEventValidator:
             report.extend([", ERRORS:] + [f  - {e) for e in self.errors]"
 
         if self.warnings:
-            report.extend([", WARNINGS:"] + [f  - {w) for w in self.warnings]
+            report.extend([", WARNINGS:] + [f  - {w) for w in self.warnings]"
 
         report.append(= * 80)
         return "\n.join(report)"
@@ -241,7 +241,7 @@ class StagingWebSocketFlowTests:
             name=E2E Test User""
         )
 
-        assert connected, Failed to connect to staging WebSocket with authentication
+        assert connected, "Failed to connect to staging WebSocket with authentication"
         assert self.helper.is_connected, Helper should report connected state"
         assert self.helper.is_connected, Helper should report connected state"
         assert self.helper.current_token is not None, "Should have authentication token"
@@ -270,7 +270,7 @@ class StagingWebSocketFlowTests:
                 event_type=data.get(type),
                 data=data,
                 timestamp=time.time(),
-                thread_id=data.get("thread_id, unknown")
+                thread_id=data.get("thread_id, unknown)"
             )
             validator.record_event(event)
             logger.info(fStaging event: {event.event_type})
@@ -306,7 +306,7 @@ class StagingWebSocketFlowTests:
         if not is_valid:
             logger.error(validator.generate_staging_report())
 
-        assert is_valid, fStaging WebSocket validation failed: {failures}
+        assert is_valid, "fStaging WebSocket validation failed: {failures}"
 
         logger.info(fPASS: Agent flow completed successfully in staging:)
         logger.info(f  - Duration: {flow_result['duration']:.2f}s")"
@@ -328,7 +328,7 @@ class StagingWebSocketFlowTests:
 
         # Test connection with SSL validation
         connected = await self.helper.connect_with_auth()
-        assert connected, Failed to connect to staging WebSocket with SSL/TLS
+        assert connected, "Failed to connect to staging WebSocket with SSL/TLS"
 
         # Send a test message to verify the connection works
         success = await self.helper.send_message(
@@ -363,7 +363,7 @@ class StagingWebSocketFlowTests:
 
         # Attempt reconnection
         reconnected = await self.helper.connect_with_auth(force_refresh=False)
-        assert reconnected, Failed to reconnect to staging WebSocket
+        assert reconnected, "Failed to reconnect to staging WebSocket"
         assert self.helper.websocket != original_connection, Should have new WebSocket connection"
         assert self.helper.websocket != original_connection, Should have new WebSocket connection"
 
@@ -373,7 +373,7 @@ class StagingWebSocketFlowTests:
             data={test: after_reconnection},
             thread_id="reconnect-test"
         )
-        assert success, Reconnected WebSocket should work
+        assert success, "Reconnected WebSocket should work"
 
         logger.info(PASS: Staging WebSocket reconnection working)"
         logger.info(PASS: Staging WebSocket reconnection working)"
@@ -388,7 +388,7 @@ class StagingWebSocketFlowTests:
 
         # Connect to staging
         connected = await self.helper.connect_with_auth()
-        assert connected, Failed to connect for performance test
+        assert connected, "Failed to connect for performance test"
 
         # Send multiple messages to test throughput
         message_count = 50
@@ -412,7 +412,7 @@ class StagingWebSocketFlowTests:
         logger.info(fThroughput: {messages_per_second:.1f} messages/second")"
 
         # Performance assertions (lenient for staging)
-        assert successful_sends >= message_count * 0.9, fToo many failed sends: {successful_sends}/{message_count}
+        assert successful_sends >= message_count * 0.9, "fToo many failed sends: {successful_sends}/{message_count}"
         assert messages_per_second > 10, fThroughput too low: {messages_per_second:.1f} msg/s"
         assert messages_per_second > 10, fThroughput too low: {messages_per_second:.1f} msg/s"
 
@@ -459,7 +459,7 @@ class StagingRegressionPreventionTests:
 
         assert Authorization" in headers, Missing Authorization header"
         assert headers[Authorization].startswith(Bearer ), Authorization header should use Bearer token""
-        assert headers[Authorization].endswith(token), Authorization header should contain correct token
+        assert headers[Authorization].endswith(token), "Authorization header should contain correct token"
 
         # Test connection works with these headers
         connected = await self.helper.connect_with_auth()
@@ -483,7 +483,7 @@ class StagingRegressionPreventionTests:
         # Send invalid message to trigger error handling
         success = await self.helper.send_message(
             message_type=invalid_test_message","
-            data={invalid: data, "should_cause: graceful_handling"},
+            data={invalid: data, "should_cause: graceful_handling},"
             thread_id=error-test
         )
 
@@ -498,7 +498,7 @@ class StagingRegressionPreventionTests:
         # Should still be able to send valid messages
         valid_success = await self.helper.send_message(
             message_type=ping,
-            data={"test: after_error"},
+            data={"test: after_error},"
             thread_id=after-error-test
         )
         assert valid_success, Should be able to send valid messages after error"

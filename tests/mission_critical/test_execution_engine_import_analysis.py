@@ -173,7 +173,7 @@ class ExecutionEngineImportAnalysisTests(SSotBaseTestCase):
         )
     
     def test_validate_import_path_resolution(self):
-        ""Validate all ExecutionEngine import paths can be resolved - MAY FAIL.
+        ""Validate all ExecutionEngine import paths can be resolved - MAY FAIL."
         logger.info(🔍 IMPORT ANALYSIS: Validating import path resolution)"
         logger.info(🔍 IMPORT ANALYSIS: Validating import path resolution)"
         
@@ -288,7 +288,7 @@ class ExecutionEngineImportAnalysisTests(SSotBaseTestCase):
                             for alias in node.names:
                                 violation_type = self._check_import_violation(alias.name)
                                 if violation_type:
-                                    illegal_imports.append((
+                                    illegal_imports.append(()
                                         str(py_file), node.lineno,
                                         fimport {alias.name}, violation_type
                                     ))
@@ -298,7 +298,7 @@ class ExecutionEngineImportAnalysisTests(SSotBaseTestCase):
                                 violation_type = self._check_import_violation(node.module)
                                 if violation_type:
                                     names = [alias.name for alias in node.names]
-                                    illegal_imports.append((
+                                    illegal_imports.append(()
                                         str(py_file), node.lineno,
                                         ffrom {node.module} import {', '.join(names)}, violation_type"
                                         ffrom {node.module} import {', '.join(names)}, violation_type"
@@ -335,7 +335,7 @@ class ExecutionEngineImportAnalysisTests(SSotBaseTestCase):
                 # Check for execution engine usage without proper imports
                 if 'execution_engine' in content.lower() or 'ExecutionEngine' in content:
                     # Check if file uses execution engines but lacks canonical imports
-                    has_canonical_import = any(
+                    has_canonical_import = any()
                         canonical_module in content
                         for canonical_module in self.canonical_imports.values()
                     )
@@ -343,17 +343,17 @@ class ExecutionEngineImportAnalysisTests(SSotBaseTestCase):
                     if not has_canonical_import:
                         # Determine what should be imported based on usage
                         if 'UserExecutionEngine' in content or 'user_execution_engine' in content:
-                            missing_imports.append((
+                            missing_imports.append(()
                                 str(py_file), 'UserExecutionEngine',
                                 File uses UserExecutionEngine but lacks canonical import
                             ))
                         elif 'ExecutionEngineFactory' in content:
-                            missing_imports.append((
+                            missing_imports.append(()
                                 str(py_file), 'ExecutionEngineFactory',
                                 "File uses ExecutionEngineFactory but lacks canonical import"
                             ))
                         elif 'ExecutionEngine' in content:
-                            missing_imports.append((
+                            missing_imports.append(()
                                 str(py_file), 'UserExecutionEngine',
                                 File uses ExecutionEngine but should use UserExecutionEngine
                             ))
@@ -364,7 +364,7 @@ class ExecutionEngineImportAnalysisTests(SSotBaseTestCase):
         return missing_imports
     
     def _find_circular_import_dependencies(self) -> List[List[str]]:
-        ""Find circular import dependencies in execution engine modules.
+        ""Find circular import dependencies in execution engine modules."
         # This is a simplified circular dependency detector
         # In a real implementation, this would use more sophisticated graph analysis
         execution_engine_modules = []

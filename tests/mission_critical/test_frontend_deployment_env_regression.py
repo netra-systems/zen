@@ -58,14 +58,14 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         "critical: True"
         },
         NEXT_PUBLIC_API_URL: {
-        "description: Main backend API endpoint",
+        "description: Main backend API endpoint,"
         example: https://api.staging.netrasystems.ai,
         critical: True"
         critical: True"
         },
         NEXT_PUBLIC_AUTH_URL": {"
         description: Auth service primary endpoint,
-        "example: https://auth.staging.netrasystems.ai",
+        "example: https://auth.staging.netrasystems.ai,"
         critical: True
         },
         NEXT_PUBLIC_WS_URL: {"
@@ -85,14 +85,14 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         "critical: True"
         },
         NEXT_PUBLIC_AUTH_API_URL: {
-        "description: Auth API specific endpoint",
+        "description: Auth API specific endpoint,"
         example: https://auth.staging.netrasystems.ai,
         critical: True"
         critical: True"
         },
         NEXT_PUBLIC_BACKEND_URL": {"
         description: Backend fallback endpoint,
-        "example: https://api.staging.netrasystems.ai",
+        "example: https://api.staging.netrasystems.ai,"
         critical: True
         },
         NEXT_PUBLIC_FRONTEND_URL: {"
@@ -112,14 +112,14 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         "critical: False"
         },
         NEXT_PUBLIC_GTM_ENABLED: {
-        "description: Enable/disable GTM tracking",
+        "description: Enable/disable GTM tracking,"
         example: true,
         critical: False"
         critical: False"
         },
         NEXT_PUBLIC_GTM_DEBUG": {"
         description: GTM debug mode,
-        "example: false",
+        "example: false,"
         critical: False
     
     
@@ -307,7 +307,7 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         print()
         SEARCH:  Testing WebSocket URL consistency...)
 
-        deployer = GCPDeployer(project_id="netra-staging")
+        deployer = GCPDeployer(project_id="netra-staging)"
 
         frontend_service = None
         for service in deployer.services:
@@ -516,7 +516,7 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
 
     def main("):"
         "Run the frontend deployment environment regression tests."
-        print("= * 80")
+        print("= * 80)"
         print( ALERT:  MISSION CRITICAL: Frontend Deployment Environment Regression Test)"
         print( ALERT:  MISSION CRITICAL: Frontend Deployment Environment Regression Test)"
         print("= * 80)"
@@ -551,7 +551,7 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         return 0 if result.wasSuccessful() else 1
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         sys.exit(main())
         pass
 

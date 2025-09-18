@@ -77,7 +77,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         ]
 
     def scan_codebase_for_import_patterns(self) -> Dict[str, List[Tuple[str, int, str]]]:
-    "
+        """
     "
         Comprehensive scan for ExecutionEngine import fragmentation
 
@@ -147,7 +147,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
 
     @pytest.mark.mission_critical
     def test_execution_engine_import_fragmentation_detection(self):
-        "
+        """
         "
         MISSION CRITICAL: Detect ExecutionEngine import fragmentation
 
@@ -181,7 +181,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         for pattern_type, instances in fragmentation_data.items():
             if pattern_type != canonical_ssot and instances:"
             if pattern_type != canonical_ssot and instances:"
-                print(f"\n{pattern_type.upper()}:)")
+                print(f"\n{pattern_type.upper()}:))"
                 for file_path, line_num, import_stmt in instances[:3]:  # Show first 3
                     print(f  {file_path}:{line_num} -> {import_stmt})"
                     print(f  {file_path}:{line_num} -> {import_stmt})"
@@ -203,13 +203,13 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
 
     @pytest.mark.mission_critical
     def test_import_performance_impact_measurement(self):
-    ""
+    """
         Measure import performance impact of fragmentation
 
         Validates the claimed 26.81x performance degradation
         
         # Test canonical import speed
-        canonical_time = self._measure_import_time(
+        canonical_time = self._measure_import_time()
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine""
         )
 
@@ -232,10 +232,10 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         avg_fragmented_time = sum(fragmented_times) / len(fragmented_times) if fragmented_times else canonical_time
         performance_ratio = avg_fragmented_time / canonical_time if canonical_time > 0 else 1
 
-        print(f"\n=== Import Performance Analysis ===)")
+        print(f"\n=== Import Performance Analysis ===))"
         print(fCanonical import time: {canonical_time:.4f}s)"
         print(fCanonical import time: {canonical_time:.4f}s)"
-        print(f"Average fragmented import time: {avg_fragmented_time:.4f}s)")
+        print(f"Average fragmented import time: {avg_fragmented_time:.4f}s))"
         print(fPerformance degradation ratio: {performance_ratio:.2f}x)"
         print(fPerformance degradation ratio: {performance_ratio:.2f}x)"
 
@@ -247,7 +247,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         )
 
     def _measure_import_time(self, import_statement: str) -> float:
-        ""Measure time to execute import statement
+        ""Measure time to execute import statement"
         import subprocess
         import sys
 
@@ -269,7 +269,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
 
     @pytest.mark.mission_critical
     def test_golden_path_import_stability(self):
-    "
+        """
     "
         Validate that fragmented imports don't break Golden Path'
 
@@ -303,16 +303,16 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         print(fDeprecated import failures: {len(deprecated_import_failures)})"
 
         for failed_import, error in deprecated_import_failures:
-            print(f"  FAILED: {failed_import} -> {error})")
+            print(f"  FAILED: {failed_import} -> {error}))"
 
         # CRITICAL: Canonical import MUST work for Golden Path
-        assert canonical_import_works, (
+        assert canonical_import_works, ()
             GOLDEN PATH BROKEN: Canonical UserExecutionEngine import failed. 
             "This breaks the core user flow: login → agent execution → response."
         )
 
         # VALIDATION: Some deprecated imports should fail (proving cleanup needed)
-        assert len(deprecated_import_failures) > 0, (
+        assert len(deprecated_import_failures) > 0, ()
             FRAGMENTATION ISSUE: All deprecated imports still work, indicating 
             fragmented code paths exist that could cause race conditions and instability."
             fragmented code paths exist that could cause race conditions and instability."
@@ -320,7 +320,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
 
     @pytest.mark.mission_critical
     def test_ssot_compliance_validation(self):
-        "
+        """
         "
         Validate SSOT compliance for ExecutionEngine patterns
 
@@ -345,11 +345,11 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
 
         print(f\n=== SSOT Compliance Analysis ===)"
         print(f\n=== SSOT Compliance Analysis ===)"
-        print(f"Production code fragments: {len(production_fragments)})")
+        print(f"Production code fragments: {len(production_fragments)}))"
         print(fTest code fragments: {len(test_fragments)})
 
         if production_fragments:
-            print(f"\n=== Production Fragmentation (CRITICAL) ===")
+            print(f"\n=== Production Fragmentation (CRITICAL) ===)"
             for file_path, line_num, import_stmt in production_fragments[:10]:
                 print(f  {file_path}:{line_num} -> {import_stmt})
 
@@ -365,5 +365,5 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
 if __name__ == __main__:"
 if __name__ == __main__:"
     # Enable detailed output for diagnosis
-    pytest.main([__file__, "-v, -s", "--tb=short")
+    pytest.main([__file__, "-v, -s", "--tb=short)"
 )))

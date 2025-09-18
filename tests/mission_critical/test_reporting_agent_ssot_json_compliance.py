@@ -32,8 +32,8 @@ class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
     
     def setUp(self):
         # Use absolute paths from the test framework directory structure
-        self.reporting_agent_path = Path(__file__).parent.parent.parent / "netra_backend / app" / agents / reporting_sub_agent.py
-        self.unified_json_handler_path = Path(__file__).parent.parent.parent / netra_backend / app" / "core / serialization / unified_json_handler.py
+        self.reporting_agent_path = Path(__file__).parent.parent.parent / "netra_backend / app / agents / reporting_sub_agent.py"
+        self.unified_json_handler_path = Path(__file__).parent.parent.parent / netra_backend / app" / core / serialization / unified_json_handler.py"
         
         # Ensure files exist for testing
         self.assertTrue(self.reporting_agent_path.exists(), fReportingSubAgent not found at {self.reporting_agent_path}")"
@@ -122,7 +122,7 @@ class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
                      ReportingSubAgent must import from SSOT unified_json_handler module)
     
     def test_reporting_agent_cache_methods_use_ssot_json(self):
-        ""CRITICAL: Cache methods MUST use SSOT JSON serialization.
+        ""CRITICAL: Cache methods MUST use SSOT JSON serialization."
         
         EXPECTED: FAIL NOW - Cache methods use direct json.loads/dumps
         EXPECTED: PASS AFTER - Cache methods use UnifiedJSONSerializer
@@ -204,7 +204,7 @@ class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
         
         # Should have no custom JSON error handling outside SSOT
         self.assertEqual([), violations,
-                        f"Duplicate JSON error handling found (should use SSOT JSONErrorFixer): {violations}")
+                        f"Duplicate JSON error handling found (should use SSOT JSONErrorFixer): {violations})"
 
 
 if __name__ == '__main__':

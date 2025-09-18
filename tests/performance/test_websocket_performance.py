@@ -10,10 +10,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -117,7 +117,7 @@ assert pool.total_connections == num_users
                 # Send events to all users concurrently
 send_tasks = []
 for emitter in emitters:
-    event = {"type": "test", "data": {"user": emitter.user_id}}
+    event = {"type": "test", "data": {"user: emitter.user_id}}"
 send_tasks.append(emitter.emit(event))
 
 start_time = time.time()
@@ -144,13 +144,13 @@ ws.state = Magic        ws.state.name = "OPEN"
 
 emitter = await factory.create_user_emitter( )
 user_id=user_id,
-session_id="perf-session",
+session_id="perf-session,"
 websocket=ws
                             
 
                             # Send many events
 events = [ ]
-{"type": "", "data": {"index": i}}
+{"type": "", "data": {"index: i}}"
 for i in range(num_events)
                             
 
@@ -195,16 +195,16 @@ add_time = time.time() - start_time
 start_time = time.time()
 
 for i in range(num_users):
-    await pool.broadcast_to_user("", {"type": "test"})
+    await pool.broadcast_to_user("", {"type": "test})"
 
 broadcast_time = time.time() - start_time
 
 measurements.append({ })
-"users": num_users,
-"add_time": add_time,
-"broadcast_time": broadcast_time,
-"avg_add": add_time / num_users,
-"avg_broadcast": broadcast_time / num_users
+"users: num_users,"
+"add_time: add_time,"
+"broadcast_time: broadcast_time,"
+"avg_add: add_time / num_users,"
+"avg_broadcast: broadcast_time / num_users"
                                                 
 
                                                 # Cleanup for next iteration
@@ -217,7 +217,7 @@ for i in range(1, len(measurements)):
 curr = measurements[i]
 
                                                         # Average times shouldn't increase dramatically'
-scaling_factor = curr["avg_add"] / prev["avg_add"]
+scaling_factor = curr["avg_add"] / prev["avg_add]"
 assert scaling_factor < 2  # Less than 2x increase
 
 @pytest.mark.asyncio
@@ -246,7 +246,7 @@ emitters.append(emitter)
                                                                 # Send many events
 for emitter in emitters:
     for j in range(events_per_user):
-        await emitter.emit({"type": "", "data": {"index": j}})
+        await emitter.emit({"type": "", "data": {"index: j}})"
 
                                                                         # Check memory after load
 gc.collect()  # Force garbage collection
@@ -286,13 +286,13 @@ ws.state = Magic        ws.state.name = "OPEN"
 
 emitter = await factory.create_user_emitter( )
 user_id=user_id,
-session_id="latency-session",
+session_id="latency-session,"
 websocket=ws
     
 
     # Measure latency for each event
 for i in range(num_samples):
-    event = {"type": "", "data": {"index": i}}
+    event = {"type": "", "data": {"index: i}}"
 
 start_time = time.time()
 await emitter.emit(event)
@@ -334,7 +334,7 @@ emitter.max_queue_size = queue_size * 2  # Ensure no overflow
 start_time = time.time()
 
 for i in range(queue_size):
-    emitter.queue_event({"type": "", "data": {"index": i}})
+    emitter.queue_event({"type": "", "data": {"index: i}})"
 
 queue_time = time.time() - start_time
 
@@ -385,7 +385,7 @@ start_time = time.time()
 
 async def broadcast_to_user(user_id, emitter, count):
     for i in range(count):
-        await emitter.emit({"type": "", "data": {"user": user_id}})
+        await emitter.emit({"type": "", "data": {"user: user_id}})"
 
 tasks = [ ]
 broadcast_to_user(user_id, emitter, broadcasts_per_user)
@@ -475,10 +475,10 @@ while time.time() - start_time < duration_seconds:
 tasks = []
 for emitter in emitters:
     event = { }
-"type": "stress_test",
-"data": { }
-"timestamp": time.time(),
-"count": event_count
+"type": "stress_test,"
+"data: { }"
+"timestamp: time.time(),"
+"count: event_count"
                                                         
                                                         
 tasks.append(emitter.emit(event))

@@ -24,7 +24,7 @@ import pytest
 from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.config import TEST_USERS
-from tests.e2e.websocket_resilience_core import (
+from tests.e2e.websocket_resilience_core import ()
     WebSocketResilienceTestCore, WebSocketStateRecoveryManager, MessageContinuityValidator, AgentErrorSimulator,
     WebSocketResilienceTestCore,
     WebSocketStateRecoveryManager,
@@ -45,7 +45,7 @@ class WebSocketReconnectionWithStateRecoveryTests:
     
     @pytest.fixture  
     def state_manager(self):
-        ""Initialize state recovery manager.
+        ""Initialize state recovery manager."
         return WebSocketStateRecoveryManager()
     
     @pytest.fixture
@@ -74,14 +74,14 @@ class WebSocketReconnectionWithStateRecoveryTests:
             
             # Reconnect and validate state recovery
             reconnected = await client.connect()
-            assert reconnected, Failed to reconnect after drop
+            assert reconnected, "Failed to reconnect after drop"
             
             recovery_result = await state_manager.validate_state_recovery(client, user_id)
             continuity_result = await continuity_validator.validate_message_continuity(client, user_id)
             
             # Validate results
             assert recovery_result["state_recovered], State not recovered"
-            assert continuity_result[messages_preserved], Message continuity broken
+            assert continuity_result[messages_preserved], "Message continuity broken"
             
             await client.close()
         except Exception as e:
@@ -130,7 +130,7 @@ class ErrorMessageToUserNotificationRecoveryTests:
             
             # Simulate agent failure
             failure_data = await error_simulator.simulate_agent_failure(client, user_id)
-            assert failure_data[error_triggered"], "Agent failure not triggered
+            assert failure_data[error_triggered"], Agent failure not triggered"
             
             # Validate error propagation
             error_response = failure_data.get(error_response)
@@ -143,8 +143,8 @@ class ErrorMessageToUserNotificationRecoveryTests:
             
             # Test retry mechanism
             retry_result = await error_simulator.test_retry_mechanism(client, user_id)
-            assert retry_result[retry_attempted], Retry mechanism not triggered
-            assert retry_result[retry_successful"], "Retry was not successful
+            assert retry_result[retry_attempted], "Retry mechanism not triggered"
+            assert retry_result[retry_successful"], Retry was not successful"
             
             await client.close()
         except Exception as e:
@@ -161,14 +161,14 @@ class ErrorMessageToUserNotificationRecoveryTests:
         async def mock_send(self, message):
             return True
         async def mock_receive(self, **kwargs):
-            return {type: error, message: "test error}"
+            return {"type": error, message: "test error}"
         
         mock_client = type('MockClient', (), {'send': mock_send, 'receive': mock_receive}()
         failure_data = await error_simulator.simulate_agent_failure(mock_client, user_id)
         
         assert error_triggered" in failure_data"
         assert failure_type in failure_data
-        assert failure_data[failure_type"] == "agent_processing_error
+        assert failure_data[failure_type"] == agent_processing_error"
     
     @pytest.mark.e2e
     async def test_error_recovery_within_time_limit(self, test_core, error_simulator):
@@ -184,7 +184,7 @@ class ErrorMessageToUserNotificationRecoveryTests:
             await error_simulator.test_retry_mechanism(client, user_id)
             
             total_time = time.time() - start_time
-            assert total_time < 5.0, fError recovery took {total_time:.2f}s, exceeding 5s limit
+            assert total_time < 5.0, "fError recovery took {total_time:.2f}s, exceeding 5s limit"
             
             await client.close()
         except Exception as e:

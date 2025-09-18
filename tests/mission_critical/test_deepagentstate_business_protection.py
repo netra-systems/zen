@@ -37,7 +37,7 @@ class DeepAgentStateBusinessProtectionTests(SSotAsyncTestCase):
             {"id: enterprise-alpha", mrr: 15000, tier: Enterprise},"
             {id": enterprise-beta, mrr: 22000, tier: Enterprise Plus"},"
             {id": enterprise-beta, mrr: 22000, tier: Enterprise Plus"},"
-            {id: enterprise-gamma, mrr: 18000, tier": "Enterprise}
+            {id: enterprise-gamma, mrr: 18000, tier": Enterprise}"
         ]
 
     @pytest.mark.mission_critical
@@ -79,7 +79,7 @@ class DeepAgentStateBusinessProtectionTests(SSotAsyncTestCase):
                 continue
 
             # Validate customer can access their own data
-            if result.get("customer_id) != customer[id"]:
+            if result.get("customer_id) != customer[id]:"
                 business_critical_violations.append(
                     f🚨 IDENTITY CRISIS: {customer['id']} cannot access their own account
                 )
@@ -127,7 +127,7 @@ IMMEDIATE ACTION REQUIRED: Fix Issue #871 DeepAgentState SSOT violations
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_golden_path_chat_revenue_protection(self):
-    "
+        """
     "
         MISSION CRITICAL: Golden Path chat functionality delivers 90% of platform value
 
@@ -139,7 +139,7 @@ IMMEDIATE ACTION REQUIRED: Fix Issue #871 DeepAgentState SSOT violations
         # Test Golden Path for high-value customer scenario
         high_value_customer = {
             id: mvp-customer-prime,
-            subscription": "enterprise-premium,
+            subscription": enterprise-premium,"
             monthly_spend: 25000
         }
 
@@ -234,7 +234,7 @@ CRITICAL: Fix Issue #871 to restore chat functionality and protect revenue
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_ssot_compliance_deployment_gate(self):
-        "
+        """
         "
         MISSION CRITICAL: SSOT compliance gate for deployment approval
 
@@ -331,8 +331,8 @@ ACTION REQUIRED: Complete Issue #871 DeepAgentState SSOT remediation
 
         # Simulate multiple customer scenarios to test trust boundaries
         customer_scenarios = [
-            {id: healthcare-customer, "data_type: patient-pii", sensitivity: HIPAA},
-            {id: finance-customer", "data_type: trading-data, sensitivity: SOX},
+            {id: healthcare-customer, "data_type: patient-pii, sensitivity: HIPAA},"
+            {id: finance-customer", data_type: trading-data, sensitivity: SOX},"
             {"id: tech-customer", data_type: proprietary-code, sensitivity: trade-secret"}"
         ]
 
@@ -429,7 +429,7 @@ REMEDIATION: Complete Issue #871 SSOT fixes to restore customer trust
                 state.__dict__.update({
                     'customer_tier': customer_data[tier"],"
                     'monthly_revenue': customer_data[mrr],
-                    'enterprise_features': [advanced_analytics, "custom_integration, priority_support"]
+                    'enterprise_features': [advanced_analytics, "custom_integration, priority_support]"
                 }
 
             return {
@@ -442,7 +442,7 @@ REMEDIATION: Complete Issue #871 SSOT fixes to restore customer trust
             }
 
         except Exception as e:
-            return {customer_id: customer_data[id], execution_success": False, "error: str(e)}
+            return {customer_id: customer_data[id], execution_success": False, error: str(e)}"
 
     async def _execute_sensitive_customer_scenario(self, scenario: Dict[str, str) -> Dict[str, Any):
         Execute customer scenario with sensitive data"
@@ -477,6 +477,6 @@ REMEDIATION: Complete Issue #871 SSOT fixes to restore customer trust
             return {
                 customer_id": scenario[id],"
                 processing_success: False,
-                "error": str(e)
+                "error: str(e)"
             }
 )))))))))))))

@@ -37,7 +37,7 @@ from shared.isolated_environment import get_env
 
 # Auth service imports
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from netra_backend.app.auth_integration.auth import (
+from netra_backend.app.auth_integration.auth import ()
     get_current_user,
     _validate_token_with_auth_service,
     check_auth_service_health,
@@ -134,7 +134,7 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
         health_status = await check_auth_service_health()
 
         self.assertIsInstance(health_status, dict, Health status should be a dictionary)
-        self.assertIn(status", health_status, "Health status should include status field)
+        self.assertIn(status", health_status, Health status should include status field)"
         self.assertIn(endpoint, health_status, Health status should include endpoint field)
 
         logger.info(f🏥 Auth service health: {health_status['status']} at {health_status['endpoint']})"
@@ -214,7 +214,7 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
 
         # Test environment-specific timeout configuration
         env = get_env()
-        environment = env.get("ENVIRONMENT, development").lower()
+        environment = env.get("ENVIRONMENT, development).lower()"
 
         # Validate timeout configuration based on environment
         if environment == staging:
@@ -235,7 +235,7 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
 
         try:
             # This will likely fail because auth service is not running in no-docker environment
-            validation_result = await _validate_token_with_auth_service(test_token.replace("Bearer , "))
+            validation_result = await _validate_token_with_auth_service(test_token.replace("Bearer , ))"
 
             if validation_result and validation_result.get(valid):
                 logger.info(✅ Auth service validation succeeded unexpectedly)"
@@ -261,8 +261,8 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
         # Test user context with different user scenarios
         test_users = [
             {"user_id: user-1, email: user1@example.com},"
-            {"user_id: user-2", email: user2@example.com},
-            {user_id: system", "email: system@service},
+            {"user_id: user-2, email: user2@example.com},"
+            {user_id: system", email: system@service},"
         ]
 
         for user_data in test_users:
@@ -288,7 +288,7 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
 
         # Check critical auth configuration
         auth_config = {
-            AUTH_SERVICE_URL": env.get("AUTH_SERVICE_URL),
+            AUTH_SERVICE_URL": env.get(AUTH_SERVICE_URL),"
             SERVICE_ID: env.get(SERVICE_ID),
             SERVICE_SECRET: bool(env.get("SERVICE_SECRET)),  # Don't log secret value"
             JWT_SECRET_KEY": bool(env.get(JWT_SECRET_KEY)),"
@@ -311,7 +311,7 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
             logger.warning(⚠️ SERVICE_SECRET not configured - auth service communication will fail)
 
     async def test_golden_path_auth_requirements(self):
-        ""Test authentication requirements for the Golden Path.
+        ""Test authentication requirements for the Golden Path."
         self._track_test_execution(golden_path_auth_requirements)"
         self._track_test_execution(golden_path_auth_requirements)"
 
@@ -345,7 +345,7 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
         # Test 4: Auth service health
         try:
             health_status = await check_auth_service_health()
-            auth_healthy = health_status.get(status) in [healthy", "degraded]
+            auth_healthy = health_status.get(status) in [healthy", degraded]"
             logger.info(f  4. Auth service health: {'✅' if auth_healthy else '❌'})
         except Exception as e:
             logger.info(f"  4. Auth service health: ❌ ({e})"
@@ -380,7 +380,7 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
 
 # Issue #1176 Phase 2: Standalone test execution
 if __name__ == __main__:
-    ""
+    """
     Standalone execution for Issue #1176 Phase 2 validation.
 
     This ensures the test can be run independently to validate
@@ -424,7 +424,7 @@ if __name__ == __main__:
             for test_method in test_methods:
                 test_name = test_method.__name__
                 try:
-                    print(f"\n🧪 Running {test_name}...)")
+                    print(f"\n🧪 Running {test_name}...))"
                     await test_method(")"
                     print(f✅ {test_name} PASSED)
                     test_results.append((test_name, "PASSED, None))"
@@ -447,14 +447,14 @@ if __name__ == __main__:
         passed_count = sum(1 for _, status, _ in results if status == PASSED)
         failed_count = len(results) - passed_count
 
-        print(\n + =" * 60")
+        print(\n + =" * 60)"
         print(f🏁 Issue #1176 Phase 2 Results:)
         print(f   Total tests: {len(results)})"
         print(f   Total tests: {len(results)})"
-        print(f"   Passed: {passed_count})")
+        print(f"   Passed: {passed_count}))"
         print(f   Failed: {failed_count})"
         print(f   Failed: {failed_count})"
-        print(f"   Duration: {standalone_duration:.3f}s)")
+        print(f"   Duration: {standalone_duration:.3f}s))"
         print(f   Execution: {'✅ REAL' if standalone_duration > 0.1 else '❌ FAKE'})"
         print(f   Execution: {'✅ REAL' if standalone_duration > 0.1 else '❌ FAKE'})"
 
@@ -471,5 +471,5 @@ if __name__ == __main__:
         sys.exit(0 if failed_count == 0 else 1)
 
     except Exception as e:
-        print(f"❌ Test execution failed: {e}")
+        print(f"❌ Test execution failed: {e})"
         sys.exit(1")"

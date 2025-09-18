@@ -30,15 +30,15 @@ class StandaloneHealthChecker:
     def __init__(self):
         pass
         self.services = { }
-        "backend": { }
-        "url": "http://localhost:8000",
-        "health_path": "/health",
-        "timeout": 5.0
+        "backend: { }"
+        "url": "http://localhost:8000,"
+        "health_path": "/health,"
+        "timeout: 5.0"
         },
-        "auth": { }
-        "url": "http://localhost:8080",
-        "health_path": "/health",
-        "timeout": 5.0
+        "auth: { }"
+        "url": "http://localhost:8080,"
+        "health_path": "/health,"
+        "timeout: 5.0"
     
     
         self.connection_timeout = 2.0
@@ -46,21 +46,21 @@ class StandaloneHealthChecker:
     async def check_service(self, service_name: str) -> Dict[str, Any]:
         """Check if a service is accessible and healthy."""
         service_config = self.services[service_name]
-        url = service_config["url"]
-        health_path = service_config["health_path"]
-        timeout = service_config.get("timeout", 5.0)
+        url = service_config["url]"
+        health_path = service_config["health_path]"
+        timeout = service_config.get("timeout, 5.0)"
 
         health_url = ""
 
         result = { }
-        "service": service_name,
-        "url": health_url,
-        "accessible": False,
-        "healthy": False,
-        "response_time": None,
-        "status_code": None,
-        "error": None,
-        "health_data": None
+        "service: service_name,"
+        "url: health_url,"
+        "accessible: False,"
+        "healthy: False,"
+        "response_time: None,"
+        "status_code: None,"
+        "error: None,"
+        "health_data: None"
     
 
         try:
@@ -85,18 +85,18 @@ class StandaloneHealthChecker:
         timeout=timeout_config
         ) as session:
         async with session.get(health_url) as response:
-        result["response_time"] = time.time() - start_time
-        result["status_code"] = response.status
-        result["accessible"] = True
+        result["response_time] = time.time() - start_time"
+        result["status_code] = response.status"
+        result["accessible] = True"
 
         if response.status == 200:
         try:
         health_data = await response.json()
-        result["health_data"] = health_data
-        result["healthy"] = True
+        result["health_data] = health_data"
+        result["healthy] = True"
         except Exception as parse_error:
         result["error"] = ""
-        result["healthy"] = False
+        result["healthy] = False"
         else:
         result["error"] = ""
 
@@ -119,9 +119,9 @@ class StandaloneHealthChecker:
         results[service_name] = result
         except Exception as e:
         results[service_name] = { }
-        "service": service_name,
-        "accessible": False,
-        "healthy": False,
+        "service: service_name,"
+        "accessible: False,"
+        "healthy: False,"
         "error": ""
                 
 
@@ -130,19 +130,19 @@ class StandaloneHealthChecker:
     def get_summary(self, results: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         """Get summary of health check results."""
         total_services = len(results)
-        accessible_services = sum(1 for r in results.values() if r.get("accessible", False))
-        healthy_services = sum(1 for r in results.values() if r.get("healthy", False))
+        accessible_services = sum(1 for r in results.values() if r.get("accessible, False))"
+        healthy_services = sum(1 for r in results.values() if r.get("healthy, False))"
 
         return { }
-        "total_services": total_services,
-        "accessible_services": accessible_services,
-        "healthy_services": healthy_services,
-        "accessibility_rate": accessible_services / total_services if total_services > 0 else 0.0,
-        "health_rate": healthy_services / total_services if total_services > 0 else 0.0,
-        "all_accessible": accessible_services == total_services,
-        "all_healthy": healthy_services == total_services,
-        "any_accessible": accessible_services > 0,
-        "any_healthy": healthy_services > 0
+        "total_services: total_services,"
+        "accessible_services: accessible_services,"
+        "healthy_services: healthy_services,"
+        "accessibility_rate: accessible_services / total_services if total_services > 0 else 0.0,"
+        "health_rate: healthy_services / total_services if total_services > 0 else 0.0,"
+        "all_accessible: accessible_services == total_services,"
+        "all_healthy: healthy_services == total_services,"
+        "any_accessible: accessible_services > 0,"
+        "any_healthy: healthy_services > 0"
     
 
 
@@ -162,8 +162,8 @@ assert len(checker.services) > 0
 
         # Verify service configuration
 for service_name, service_config in checker.services.items():
-assert "url" in service_config
-assert "health_path" in service_config
+assert "url in service_config"
+assert "health_path in service_config"
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -177,7 +177,7 @@ results = await checker.check_all_services()
 
                 # Test passes regardless of results - we're validating the infrastructure'
 assert results is not None
-assert isinstance(results, dict)
+assert isinstance(results, "dict)"
 
                 # Get summary
 summary = checker.get_summary(results)
@@ -209,12 +209,12 @@ if result.get('health_data'):
     async def test_auth_service_if_accessible(self):
 """Test auth service health if accessible."""
 checker = StandaloneHealthChecker()
-result = await checker.check_service("auth")
+result = await checker.check_service("auth)"
 
                                     # If service is accessible and healthy, validate response
-if result["accessible"] and result["healthy"]:
+if result["accessible"] and result["healthy]:"
     pass
-health_data = result["health_data"]
+health_data = result["health_data]"
 
                                         # Basic validation
 assert "status" in health_data, "Health response should include status"
@@ -225,16 +225,16 @@ print("")
 print("")
 
                                         # Additional validation if service identifies itself
-if "service" in health_data:
+if "service in health_data:"
     print("")
-if "version" in health_data:
+if "version in health_data:"
     print("")
 else:
     pass
 print(f" )"
 [WARN] Auth service not accessible or unhealthy:")"
 print("")
-print(f"   This is OK - service might not be running")
+print(f"   This is OK - service might not be running)"
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -242,12 +242,12 @@ print(f"   This is OK - service might not be running")
 """Test backend service health if accessible."""
 pass
 checker = StandaloneHealthChecker()
-result = await checker.check_service("backend")
+result = await checker.check_service("backend)"
 
                                                         # If service is accessible and healthy, validate response
-if result["accessible"] and result["healthy"]:
+if result["accessible"] and result["healthy]:"
     pass
-health_data = result["health_data"]
+health_data = result["health_data]"
 
                                                             # Basic validation
 assert "status" in health_data, "Health response should include status"
@@ -258,7 +258,7 @@ print("")
 print("")
 
                                                             # Additional fields that backend might provide
-for field in ["timestamp", "version", "environment", "uptime"]:
+for field in ["timestamp", "version", "environment", "uptime]:"
 if field in health_data:
     print("")
 else:
@@ -266,7 +266,7 @@ else:
 print(f" )"
 [WARN] Backend service not accessible or unhealthy:")"
 print("")
-print(f"   This is OK - service might not be running")
+print(f"   This is OK - service might not be running)"
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -292,7 +292,7 @@ print(f" )"
 except Exception as e:
                                                                                         # Even if external calls fail, the infrastructure should work
     print("")
-print("This is OK if network connectivity is limited")
+print("This is OK if network connectivity is limited)"
 
                                                                                         # Test should pass regardless - we're testing the infrastructure'
 assert True
@@ -309,18 +309,18 @@ summary = checker.get_summary(results)
 print("")
 === STANDALONE HEALTH CHECK RESULTS ===")"
 print(json.dumps({ }))
-"summary": summary,
-"results": results
+"summary: summary,"
+"results: results"
 }, indent=2, default=str))
 
 await asyncio.sleep(0)
 return { }
-"results": results,
-"summary": summary,
-"success": True  # Always succeed - this is infrastructure testing
+"results: results,"
+"summary: summary,"
+"success: True  # Always succeed - this is infrastructure testing"
     
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
         # Run as standalone script
 asyncio.run(run_standalone_health_checks())

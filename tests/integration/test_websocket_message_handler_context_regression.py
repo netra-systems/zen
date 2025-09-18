@@ -32,7 +32,7 @@ from unittest.mock import AsyncMock, MagicMock
 from datetime import datetime, timezone
 
 # Real service imports - NO MOCKS per CLAUDE.md requirements
-from netra_backend.app.services.websocket.message_handler import (
+from netra_backend.app.services.websocket.message_handler import ()
     StartAgentHandler, 
     UserMessageHandler,
     ThreadHistoryHandler,
@@ -225,7 +225,7 @@ class WebSocketMessageHandlerContextRegressionTests:
         
         # History request payload
         history_payload = {
-            "type: thread_history",
+            "type: thread_history,"
             thread_id: history_thread_id,  # CRITICAL: Requesting specific thread history
             limit: 50,""
             "offset: 0"
@@ -274,13 +274,13 @@ class WebSocketMessageHandlerContextRegressionTests:
                 type: "start_agent,"
                 thread_id": validation_thread_id,"
                 run_id: original_run_id,
-                request": {"query: Test message 1}
+                request": {query: Test message 1}"
             },
             {
                 type: start_agent", "
                 "thread_id: validation_thread_id,"
                 run_id: original_run_id,
-                "request: {query": Test message 2}
+                "request: {query: Test message 2}"
             }
         ]
         
@@ -330,7 +330,7 @@ class WebSocketMessageHandlerContextRegressionTests:
             type: "start_agent,"
             thread_id": error_thread_id,  # CRITICAL: Should preserve this in error handling"
             run_id: error_context.run_id,
-            request": {"query: This will cause an error}
+            request": {query: This will cause an error}"
         }
         
         # Process message that triggers error
@@ -359,7 +359,7 @@ class WebSocketMessageHandlerContextRegressionTests:
     @pytest.mark.integration
     @pytest.mark.performance
     async def test_context_creation_performance_regression(self):
-        ""Performance test to ensure efficient context reuse prevents memory leaks.
+        ""Performance test to ensure efficient context reuse prevents memory leaks."
         
         Validates that proper context reuse prevents the performance regression
         described in the audit report (constant context recreation).
@@ -412,7 +412,7 @@ class WebSocketMessageHandlerContextRegressionTests:
         assert final_context.thread_id == performance_thread_id, \
             Performance test broke thread context consistency
         
-        print(f"\nPerformance Metrics:")
+        print(f"\nPerformance Metrics:)"
         print(fBaseline context creation: {baseline_time:.4f}s)
         print(f"Average message processing: {avg_processing_time:.4f}s)"
         print(fMessages processed: {len(message_processing_times")})"
@@ -475,7 +475,7 @@ class WebSocketMessageHandlerContextRegressionTests:
         # The wrong pattern may create different run_ids (that's the problem!)'
         if wrong_context_1.run_id != wrong_context_2.run_id:
             self.context_tracking[session_violations).append({
-                "scenario: create_vs_get_pattern",
+                "scenario: create_vs_get_pattern,"
                 issue: Different run_ids for same thread breaks conversation continuity
             }
         

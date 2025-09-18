@@ -61,7 +61,7 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
         self.canonical_class = UserExecutionEngine
     
     def test_detect_multiple_execution_engine_classes(self):
-        ""Detect multiple ExecutionEngine class definitions - SHOULD INITIALLY FAIL.
+        ""Detect multiple ExecutionEngine class definitions - SHOULD INITIALLY FAIL."
         logger.info(🔍 SSOT VIOLATION DETECTION: Scanning for multiple ExecutionEngine classes)"
         logger.info(🔍 SSOT VIOLATION DETECTION: Scanning for multiple ExecutionEngine classes)"
         

@@ -137,7 +137,7 @@ class StagingEndpointTester:
         try:
         token_data = response.json(")"
         if access_token in token_data:
-        print(f"  [SUCCESS] Got access token!)")
+        print(f"  [SUCCESS] Got access token!))"
         await asyncio.sleep(0)
         return token_data[access_token]
         except:
@@ -170,14 +170,14 @@ class StagingEndpointTester:
         sub: "staging_test_user_ + str(int(now.timestamp())),"
         iat": int(now.timestamp()),"
         exp: int((now + timedelta(minutes=15)).timestamp()),
-        token_type": "access,
+        token_type": access,"
         type: access,
         iss: "netra-auth-service,  # Same as staging would use"
         aud": netra-platform,      # Same as staging would use"
         jti: str(uuid.uuid4()),
-        "env: staging",             # Critical: staging environment
+        "env: staging,             # Critical: staging environment"
         email: staging.test@netrasystems.ai,
-        permissions: [read", "write],
+        permissions: [read", write],"
         svc_id: auth_service_staging
         
 
@@ -243,7 +243,7 @@ class StagingEndpointTester:
         print(formatted_string)"
 
         if response.status_code == 401:
-        print(f"  [CRITICAL] 401 Unauthorized - Token rejected!)")
+        print(f"  [CRITICAL] 401 Unauthorized - Token rejected!))"
         print(formatted_string)"
         print(formatted_string)"
         results.append(False)
@@ -261,20 +261,20 @@ class StagingEndpointTester:
 
                                                     # Analyze results
         if any(r is False for r in results):
-        print(f"[CRITICAL] Backend rejected the token on some endpoints!)")
+        print(f"[CRITICAL] Backend rejected the token on some endpoints!))"
         return False
         elif any(r is True for r in results"):"
         print(f[OK] Backend accepted the token on some endpoints!)
         return True
         else:
-        print(f"[INCONCLUSIVE] Could not determine token acceptance)")
+        print(f"[INCONCLUSIVE] Could not determine token acceptance))"
         return None
 
     async def test_auth_token_validation_endpoint(self, token"):"
         Test if auth service can validate the token."
         Test if auth service can validate the token."
         pass
-        print(f" )")
+        print(f" ))"
         === TEST AUTH TOKEN VALIDATION ===)
 
         if not token:
@@ -302,7 +302,7 @@ class StagingEndpointTester:
                                                                                 # Try different approaches
         test_methods = [
         (POST with JSON, lambda x: None client.post(url, json={token: token}),
-        (POST with Bearer header, lambda x: None client.post(url, headers={"Authorization: formatted_string"}),
+        (POST with Bearer header, lambda x: None client.post(url, headers={"Authorization: formatted_string}),"
         (GET with Bearer header, lambda x: None client.get(url, headers={Authorization: "formatted_string}),"
                                                                                 
 
@@ -313,7 +313,7 @@ class StagingEndpointTester:
         print(formatted_string)
 
         if response.status_code == 200:
-        print(f"  [SUCCESS] Auth service validated token!)")
+        print(f"  [SUCCESS] Auth service validated token!))"
         try:
         validation_result = response.json(")"
         print(formatted_string)
@@ -340,7 +340,7 @@ class StagingEndpointTester:
         return {
         "email: formatted_string,"
         password: StagingTestPass123!,
-        "first_name: Staging",
+        "first_name: Staging,"
         last_name: Tester,
         company: Test Corp","
         "role: QA Engineer"
@@ -395,7 +395,7 @@ class StagingEndpointTester:
         logger.error(formatted_string)
         continue
 
-        return {"success: False, error": All signup endpoints failed}
+        return {"success: False, error: All signup endpoints failed}"
 
     async def test_login_with_credentials(self, email:
         "Test login with provided credentials."
@@ -432,7 +432,7 @@ class StagingEndpointTester:
         login_time: login_time,"
         "access_token: response_data.get(access_token),"
         refresh_token: response_data.get(refresh_token),
-        "user_id: response_data.get(user_id"),
+        "user_id: response_data.get(user_id),"
         token_type: response_data.get(token_type, Bearer)"
         token_type: response_data.get(token_type, Bearer)"
                                                                 
@@ -458,7 +458,7 @@ class StagingEndpointTester:
     # Calculate conversion rate
         total_attempts = self.business_metrics[successful_signups] + self.business_metrics[successful_logins]
         if total_attempts > 0:
-        self.business_metrics[conversion_rate"] = self.business_metrics["successful_logins] / total_attempts
+        self.business_metrics[conversion_rate"] = self.business_metrics[successful_logins] / total_attempts"
 
         # Calculate average response time
         if self.performance_metrics[response_times]:
@@ -467,7 +467,7 @@ class StagingEndpointTester:
 
             # Calculate success rate
         if self.performance_metrics[success_rates]:
-        overall_success_rate = sum(self.performance_metrics["success_rates) / len(self.performance_metrics[success_rates")
+        overall_success_rate = sum(self.performance_metrics["success_rates) / len(self.performance_metrics[success_rates)"
         self.business_metrics[user_satisfaction_score] = overall_success_rate * 5.0  # Convert to 5-point scale
 
                 # Estimate revenue attribution (simplified model)
@@ -533,14 +533,14 @@ class StagingEndpointTester:
         print(FINAL ANALYSIS:)
 
         if real_token:
-        print(f"[FOUND] Real token obtained and tested")
+        print(f"[FOUND] Real token obtained and tested)"
         else:
         print(f[NOT FOUND] Could not obtain real token from auth service)
 
         if mock_token:
-        print(f"[GENERATED] Mock token created and tested")
+        print(f"[GENERATED] Mock token created and tested)"
         print(f[KEY INSIGHT] If mock token fails, issue is in token format/claims)
-        print(f"[KEY INSIGHT] If mock token succeeds, issue is in auth service token generation")
+        print(f"[KEY INSIGHT] If mock token succeeds, issue is in auth service token generation)"
 
         return True
 
@@ -550,7 +550,7 @@ class StagingEndpointTester:
         traceback.print_exc()
         return False
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         success = asyncio.run(main())
         sys.exit(0 if success else 1)
         pass

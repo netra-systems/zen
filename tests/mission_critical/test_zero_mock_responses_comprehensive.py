@@ -14,16 +14,16 @@ from typing import Any, Dict, List
 from netra_backend.app.agents.chat_orchestrator.model_cascade import ModelCascade
 from netra_backend.app.agents.enhanced_execution_agent import EnhancedExecutionAgent
 from netra_backend.app.agents.data.unified_data_agent import UnifiedDataAgent, UnifiedDataAgentFactory
-from netra_backend.app.services.service_initialization.unified_service_initializer import (
+from netra_backend.app.services.service_initialization.unified_service_initializer import ()
     UnifiedServiceInitializer,
     UnifiedServiceException
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.services.websocket.transparent_websocket_events import (
+from netra_backend.app.services.websocket.transparent_websocket_events import ()
     TransparentWebSocketBridge,
     WebSocketEventType
 )
-from netra_backend.app.services.error_handling.user_tier_aware_handler import (
+from netra_backend.app.services.error_handling.user_tier_aware_handler import ()
     UserTierAwareErrorHandler,
     ErrorSeverity
 )
@@ -54,7 +54,7 @@ class MockResponseEliminationTestSuite:
         context.user_tier = user_tier
         context.user_metadata = {
             arr_value: 1500000 if user_tier == enterprise else 0,
-            account_manager_email: am@test.com" if user_tier == "enterprise else None
+            account_manager_email: am@test.com" if user_tier == enterprise else None"
         }
         context.metadata = {user_request: test request}
         
@@ -71,7 +71,7 @@ class MockResponseEliminationTestSuite:
         return context
     
     def mock_failure(self, scenario: str):
-        ""Context manager to mock specific failure scenarios.
+        ""Context manager to mock specific failure scenarios."
         class FailureMocker:
             def __init__(self, scenario):
                 self.scenario = scenario
@@ -172,7 +172,7 @@ class MockResponseEliminationTestSuite:
                         for pattern in mock_patterns:
                             if pattern.lower() in response_text.lower():
                                 self.mock_responses_detected.append({
-                                    "component: ModelCascade",
+                                    "component: ModelCascade,"
                                     scenario: scenario,
                                     pattern: pattern,"
                                     pattern: pattern,"
@@ -190,23 +190,23 @@ class MockResponseEliminationTestSuite:
                     assert I apologize not in str(e)"
                     assert I apologize not in str(e)"
                     assert encountered an error" not in str(e)"
-                    assert hasattr(e, 'error_context')
-                    assert e.should_retry in [True, False]
+                    assert hasattr(e, "'error_context')"
+                    assert e.should_retry in [True, "False]"
                     results[scenario] = CORRECT_EXCEPTION
                     
                 except Exception as e:
                     # Check that even unhandled exceptions don't contain mock patterns'
                     error_str = str(e)
-                    mock_patterns = [I apologize", "encountered an error, fallback response]
+                    mock_patterns = [I apologize", encountered an error, fallback response]"
                     for pattern in mock_patterns:
-                        assert pattern not in error_str, fMock pattern '{pattern}' found in exception: {error_str}
+                        assert pattern not in error_str, "fMock pattern '{pattern}' found in exception: {error_str}"
                     results[scenario] = UNHANDLED_EXCEPTION""
         
         self.test_results[model_cascade] = results
         
         # Verify all scenarios either returned real responses or proper exceptions
         for scenario, result in results.items():
-            assert result in [REAL_RESPONSE, "CORRECT_EXCEPTION, UNHANDLED_EXCEPTION"], \
+            assert result in [REAL_RESPONSE, "CORRECT_EXCEPTION, UNHANDLED_EXCEPTION], \"
                 fScenario {scenario} had unexpected result: {result}
         
         print(f   PASS:  ModelCascade test passed: {len(results)} scenarios tested)"
@@ -236,7 +236,7 @@ class MockResponseEliminationTestSuite:
         results = {}
         
         for scenario in failure_scenarios:
-            print(f"  Testing scenario: {scenario})")
+            print(f"  Testing scenario: {scenario}))"
             
             context = self.create_test_context()
             
@@ -277,7 +277,7 @@ class MockResponseEliminationTestSuite:
                 except UnifiedServiceException as e:
                     # This is correct - should raise exception instead of template response
                     assert Processing completed with fallback" not in str(e)"
-                    assert hasattr(e, 'error_context')
+                    assert hasattr(e, "'error_context')"
                     results[scenario] = CORRECT_EXCEPTION
                     
                 except Exception as e:
@@ -295,7 +295,7 @@ class MockResponseEliminationTestSuite:
         return results
     
     async def test_unified_data_agent_no_fabricated_data(self):
-        "Test that UnifiedDataAgent never returns fabricated data." 
+        "Test that UnifiedDataAgent never returns fabricated data. "
         print(\n[U+1F9EA] Testing UnifiedDataAgent fabricated data elimination...)"
         print(\n[U+1F9EA] Testing UnifiedDataAgent fabricated data elimination...)"
         
@@ -318,7 +318,7 @@ class MockResponseEliminationTestSuite:
             with self.mock_failure(scenario):
                 try:
                     result = await agent.fetch_metrics(
-                        metrics=[latency_ms, "throughput, success_rate"],
+                        metrics=[latency_ms, "throughput, success_rate],"
                         context=context
                     )
                     
@@ -349,7 +349,7 @@ class MockResponseEliminationTestSuite:
                 except UnifiedServiceException as e:
                     # This is correct - should raise exception instead of fabricated data
                     assert _generate_fallback_data not in str(e)
-                    assert hasattr(e, 'error_context')
+                    assert hasattr(e, "'error_context')"
                     results[scenario] = CORRECT_EXCEPTION"
                     results[scenario] = CORRECT_EXCEPTION"
                     
@@ -427,7 +427,7 @@ class MockResponseEliminationTestSuite:
             try:
                 await initializer.initialize_for_context(
                     context=context,
-                    required_services={llm_manager", "model_cascade}
+                    required_services={llm_manager", model_cascade}"
             except UnifiedServiceException:
                 pass  # Expected
         
@@ -442,14 +442,14 @@ class MockResponseEliminationTestSuite:
         # Should NOT have misleading events during failure
         misleading_events = [agent_thinking, tool_executing, "agent_completed]"
         for misleading_event in misleading_events:
-            assert misleading_event not in event_types, fMisleading event '{misleading_event}' sent during failure
+            assert misleading_event not in event_types, "fMisleading event '{misleading_event}' sent during failure"
         
         # Verify event content is transparent
         for event in self.websocket_events_captured:
             if event.get(type) == service_unavailable":"
                 assert "reason in event, Service unavailable event missing reason"
-                assert event.get(reason) is not None, Service unavailable reason is None
-                assert len(event.get("reason, ")) > 0, Service unavailable reason is empty
+                assert event.get(reason) is not None, "Service unavailable reason is None"
+                assert len(event.get("reason, )) > 0, Service unavailable reason is empty"
         
         print(f   PASS:  WebSocket transparency test passed: {len(event_types)} events verified)"
         print(f   PASS:  WebSocket transparency test passed: {len(event_types)} events verified)"
@@ -503,7 +503,7 @@ class MockResponseEliminationTestSuite:
         mock_patterns = ["I apologize, encountered an error, fallback response]"
         for pattern in mock_patterns:
             assert pattern not in enterprise_msg.lower(), fMock pattern in enterprise response: {pattern}""
-            assert pattern not in free_msg.lower(), fMock pattern in free response: {pattern}
+            assert pattern not in free_msg.lower(), "fMock pattern in free response: {pattern}"
         
         print(   PASS:  User tier handling test passed)"
         print(   PASS:  User tier handling test passed)"
@@ -533,10 +533,10 @@ class MockResponseEliminationTestSuite:
             )
         
         # Verify initialization result transparency
-        assert hasattr(result, 'status')
-        assert hasattr(result, 'services_ready')
-        assert hasattr(result, 'services_failed')
-        assert hasattr(result, 'can_process_requests')
+        assert hasattr(result, "'status')"
+        assert hasattr(result, "'services_ready')"
+        assert hasattr(result, "'services_failed')"
+        assert hasattr(result, "'can_process_requests')"
         
         # Verify WebSocket events provided transparency
         initialization_events = [e for e in self.websocket_events_captured 
@@ -546,13 +546,13 @@ class MockResponseEliminationTestSuite:
         
         # Check that events contain meaningful information
         for event in initialization_events:
-            assert service_name in event, Service initialization event missing service_name
+            assert service_name in event, "Service initialization event missing service_name"
             assert timestamp in event, Service initialization event missing timestamp"
             assert timestamp in event, Service initialization event missing timestamp"
             if event.get("type) == service_unavailable:"
-                assert reason in event, Service unavailable event missing reason
+                assert reason in event, "Service unavailable event missing reason"
         
-        print(f"   PASS:  Service initialization transparency test passed: {len(initialization_events)} events")
+        print(f"   PASS:  Service initialization transparency test passed: {len(initialization_events)} events)"
         return {initialization_events: len(initialization_events)}
     
     async def run_comprehensive_test_suite(self) -> Dict[str, Any]:
@@ -581,7 +581,7 @@ class MockResponseEliminationTestSuite:
             try:
                 result = await test_method()
                 test_results[test_method.__name__] = {
-                    "status: PASSED",
+                    "status: PASSED,"
                     details: result
                 }
             except Exception as e:
@@ -593,7 +593,7 @@ class MockResponseEliminationTestSuite:
         
         # Final validation
         total_tests = len(test_methods)
-        passed_tests = len([r for r in test_results.values() if r[status"] == "PASSED]
+        passed_tests = len([r for r in test_results.values() if r[status"] == PASSED]"
         
         print(\n + =*70)
         print( CHART:  FINAL RESULTS")"
@@ -621,7 +621,7 @@ class MockResponseEliminationTestSuite:
             print(\n FAIL:  MISSION FAILURE: Mock responses still present")"
             print([U+1F4B8] Business Risk: $4.1M ARR at continued risk)
         
-        print("=*70")
+        print("=*70)"
         
         return {
             business_success: business_success,
@@ -645,12 +645,12 @@ async def test_zero_mock_responses_comprehensive():
     
     # Assert business success
     assert results[business_success"], fMock responses still present: {results['mock_response_details']}"
-    assert results[mock_responses_detected] == 0, Mock responses detected in system
+    assert results[mock_responses_detected] == 0, "Mock responses detected in system"
     assert results[tests_passed] == results["total_tests], Not all tests passed"
 
 
 if __name__ == __main__:
-    ""Direct execution for development testing.
+    ""Direct execution for development testing."
     async def main():
         test_suite = MockResponseEliminationTestSuite()
         results = await test_suite.run_comprehensive_test_suite()

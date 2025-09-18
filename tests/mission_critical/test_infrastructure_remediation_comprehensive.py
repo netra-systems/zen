@@ -40,7 +40,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.database_test_utilities import DatabaseTestUtilities
 
 # Infrastructure Remediation Components
-from netra_backend.app.infrastructure.remediation_validator import (
+from netra_backend.app.infrastructure.remediation_validator import ()
     InfrastructureRemediationValidator,
     ValidationPhase,
     RemediationValidationReport
@@ -83,7 +83,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         logger.info([U+1F3C1] INFRASTRUCTURE REMEDIATION TEST SUITE COMPLETE)
 
     async def test_unified_remediation_validator_creation(self):
-        ""Test that remediation validator can be created and initialized
+        ""Test that remediation validator can be created and initialized"
         logger.info([U+1F527] Testing remediation validator creation)"
         logger.info([U+1F527] Testing remediation validator creation)"
         
@@ -160,7 +160,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         self.assertIn("websocket_auth, health_report)"
         
         # Each component should have status and details
-        for component in [vpc_connectivity, service_discovery, database_connectivity", "websocket_auth]:
+        for component in [vpc_connectivity, service_discovery, database_connectivity", websocket_auth]:"
             component_health = health_report[component]
             self.assertIsInstance(component_health, dict)
             self.assertIn(status, component_health)
@@ -221,7 +221,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         logger.info( PASS:  WebSocket authentication integration functional)
 
     async def test_user_context_isolation_with_remediation(self):
-        ""Test user context isolation works correctly with remediation
+        ""Test user context isolation works correctly with remediation"
         logger.info([U+1F465] Testing user context isolation with remediation)"
         logger.info([U+1F465] Testing user context isolation with remediation)"
         
@@ -335,7 +335,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         # Verify all phases were tested
         missing_phases = expected_phases - tested_phases
         if missing_phases:
-            logger.warning(f" WARNING: [U+FE0F] Missing validation phases: {missing_phases})")
+            logger.warning(f" WARNING: [U+FE0F] Missing validation phases: {missing_phases}))"
         
         # Should have tested major phases
         critical_phases = {
@@ -355,7 +355,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         logger.info(f PASS:  Validation phase coverage: {len(tested_phases)}/{len(expected_phases)} phases tested)
 
     async def test_golden_path_business_impact_validation(self):
-        ""Test Golden Path business impact validation
+        ""Test Golden Path business impact validation"
         logger.info([U+1F4B0] Testing Golden Path business impact validation)"
         logger.info([U+1F4B0] Testing Golden Path business impact validation)"
         
@@ -389,8 +389,8 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         # Golden Path status should reference business impact
         self.assertIn($500K, validation_report.golden_path_status)
         
-        logger.info( PASS:  Golden Path business impact validation confirmed)"
-        logger.info( PASS:  Golden Path business impact validation confirmed)"
+        logger.info("PASS:  Golden Path business impact validation confirmed))"
+        logger.info("PASS:  Golden Path business impact validation confirmed))"
 
     async def test_remediation_component_integration(self):
         "Test that all remediation components integrate correctly"
@@ -455,8 +455,8 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         
         # Should have WebSocket event testing
         if websocket_event_results:
-            logger.info( PASS:  WebSocket event testing found in validation)"
-            logger.info( PASS:  WebSocket event testing found in validation)"
+            logger.info("PASS:  WebSocket event testing found in validation))"
+            logger.info("PASS:  WebSocket event testing found in validation))"
         else:
             logger.warning( WARNING: [U+FE0F] No specific WebSocket event delivery tests found")"
         
@@ -496,7 +496,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         # Check for graceful degradation testing
         degradation_results = [
             result for result in continuity_results
-            if degradation" in result.test_name or "recovery in result.test_name
+            if degradation" in result.test_name or recovery in result.test_name"
         ]
         
         if degradation_results:
@@ -514,7 +514,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
 
 # Standalone test runner for mission critical validation
 async def run_mission_critical_infrastructure_remediation_test():
-    "
+        """
     "
     Run mission critical infrastructure remediation test standalone
     

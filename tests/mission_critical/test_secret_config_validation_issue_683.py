@@ -41,7 +41,7 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
         self.original_env = self.env.get_all()
 
     def teardown_method(self, method):
-        ""Clean up test environment.
+        ""Clean up test environment."
         # Restore original environment
         current_env = self.env.get_all()
         for key in list(current_env.keys()):
@@ -52,7 +52,7 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
         super().teardown_method(method)
 
     def test_secret_config_missing_required_secrets_staging(self):
-    ""
+    """
         REPRODUCER: Test secret configuration validation failure when required secrets are missing.
 
         This reproduces the actual staging environment issue where SecretConfig
@@ -110,7 +110,7 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
             assert missing required secret in str(exc_info.value) or validation failed in str(exc_info.value)
 
     def test_secret_config_project_id_resolution_failure(self):
-        ""
+        """
         REPRODUCER: Test SecretReference project ID resolution failure in staging.
 
         This reproduces the issue where SecretReference._get_project_id_safe()
@@ -137,7 +137,7 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
         )
 
     def test_secret_config_validation_with_partial_secrets(self):
-        ""
+        """
         REPRODUCER: Test validation failure with partially configured secrets.
 
         This reproduces staging issues where some secrets are configured but others are missing,
@@ -168,7 +168,7 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
         )
 
     def test_unified_secrets_manager_staging_initialization(self):
-        "
+        """
         "
         REPRODUCER: Test UnifiedSecretsManager initialization failure in staging environment.
 
@@ -204,7 +204,7 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
 
         # Verify the error indicates staging configuration issue
         error_message = str(exc_info.value).lower()
-        assert any(keyword in error_message for keyword in ['missing', 'empty', 'not found', 'staging')
+        assert any(keyword in error_message for keyword in ['missing', "'empty', 'not found', 'staging')"
 
     def test_secret_config_environment_isolation_failure(self):
         pass
@@ -257,7 +257,7 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
                 )
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

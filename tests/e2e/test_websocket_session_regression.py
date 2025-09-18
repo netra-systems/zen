@@ -8,7 +8,7 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
         raise RuntimeError(WebSocket is closed)""
         self.messages_sent.append(message)
@@ -67,7 +67,7 @@ class TestWebSocketConnection:
 
 @pytest.mark.asyncio
 class TestWebSocketSessionRegression:
-    ""Test suite to prevent regression of session management issues.
+    ""Test suite to prevent regression of session management issues."
 
     @use_real_services_enforced
     async def test_session_not_passed_to_supervisor(self):
@@ -132,7 +132,7 @@ class TestWebSocketSessionRegression:
         await asyncio.sleep(0)
         return {"success: True, user_id: user_id}"
         except IllegalStateChangeError as e:
-        return {success: False, error: str(e), "user_id": user_id}
+        return {success: False, error: str(e), "user_id: user_id}"
 
             # Launch multiple concurrent agent requests
         tasks = ]
@@ -172,7 +172,7 @@ class TestWebSocketSessionRegression:
 
         message = WebSocketMessage( )
         type=MessageType.START_AGENT,
-        payload={user_request: "Long running task"},
+        payload={user_request: "Long running task},"
         user_id=test_user,
         thread_id=test_thread
         
@@ -213,7 +213,7 @@ class TestWebSocketSessionRegression:
                     
 
                     # Verify supervisor has no session reference
-        assert supervisor.db_session is None, Supervisor should not have session reference
+        assert supervisor.db_session is None, "Supervisor should not have session reference"
 
                     # Simulate supervisor execution (would fail if it tries to use db_session)
         supervisor.user_id = "test_user"
@@ -238,7 +238,7 @@ class TestWebSocketSessionRegression:
         pass
                                     # Simulate the error condition
     async def problematic_handler():
-        ""Simulate the problematic pattern that causes errors.
+        ""Simulate the problematic pattern that causes errors."
         async with get_db() as session:
         # Simulate concurrent access pattern that causes issues
         agent = Magic                agent.db_session = session  # WRONG: This is the pattern to avoid
@@ -272,7 +272,7 @@ class TestWebSocketSessionRegression:
 
 @pytest.mark.asyncio
 class TestAgentPerformanceRegression:
-    "Test suite to ensure agent performance doesn't regress."""'
+    "Test suite to ensure agent performance doesn't regress.""'"
 
     @use_real_services_enforced
     async def test_agent_response_time_under_threshold(self):
@@ -287,7 +287,7 @@ class TestAgentPerformanceRegression:
 
     message = WebSocketMessage( )
     type=MessageType.START_AGENT,
-    payload={"user_request: Performance test request"},
+    payload={"user_request: Performance test request},"
     user_id=perf_user,
     thread_id=perf_thread""
         
@@ -303,7 +303,7 @@ class TestAgentPerformanceRegression:
     elapsed = time.time() - start_time
 
             # Verify reasonable response time
-    assert elapsed < 5.0, formatted_string
+    assert elapsed < 5.0, "formatted_string"
     assert result is not False, "Agent execution should succeed"
 
     except asyncio.TimeoutError:
@@ -343,7 +343,7 @@ class TestAgentPerformanceRegression:
     if len(response_times) >= 2:
                                     # Last request shouldn't be significantly slower than first'
     degradation = response_times[-1] - response_times[0]
-    assert degradation < 2.0, formatted_string
+    assert degradation < 2.0, "formatted_string"
 
 
 @pytest.mark.asyncio
@@ -386,7 +386,7 @@ class TestSessionCleanup:
 
             # Verify all sessions were closed
         for session in active_sessions:
-        assert not session.is_active, Session should be closed after use
+        assert not session.is_active, "Session should be closed after use"
 
         @use_real_services_enforced
     async def test_session_cleanup_on_handler_error(self):

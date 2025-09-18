@@ -76,7 +76,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
 
         # CRITICAL SUCCESS CRITERIA for Issue #962 resolution
         self.success_criteria = {
-            zero_deprecated_imports": "No deprecated configuration imports remain,
+            zero_deprecated_imports": No deprecated configuration imports remain,"
             single_config_manager: Only one configuration manager accessible,
             perfect_auth_sync: "100% authentication configuration synchronization,"
             golden_path_works": Golden Path authentication flow works end-to-end,"
@@ -84,7 +84,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         }
 
     async def test_zero_configuration_ssot_violations_remaining(self):
-        ""
+        """
         MISSION CRITICAL TEST: Validate ZERO configuration SSOT violations remain
 
         SUCCESS CRITERIA:
@@ -97,7 +97,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         Any remaining SSOT violations indicate potential for configuration fragmentation
         that could cause authentication failures, directly blocking $500K+ ARR Golden Path.
 
-        print(f"\n=== MISSION CRITICAL: Final SSOT Configuration Compliance Validation ===")
+        print(f"\n=== MISSION CRITICAL: Final SSOT Configuration Compliance Validation ===)"
         print(fTesting Issue #962 complete resolution - DEPLOYMENT GATE)
 
         # PHASE 1: Scan for any remaining deprecated imports
@@ -113,10 +113,10 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         total_violations = len(deprecated_imports) + len(multiple_managers) + len(config_inconsistencies)
 
         # PHASE 5: Generate final compliance report
-        print(f"\n=== ISSUE #962 FINAL COMPLIANCE REPORT ===)")
+        print(f"\n=== ISSUE #962 FINAL COMPLIANCE REPORT ===))"
         print(fDeprecated imports found: {len(deprecated_imports")})"
         print(fMultiple config managers: {len(multiple_managers)})
-        print(fConfiguration inconsistencies: {len(config_inconsistencies")}")
+        print(fConfiguration inconsistencies: {len(config_inconsistencies")})"
         print(fTOTAL SSOT VIOLATIONS: {total_violations})
 
         if deprecated_imports:
@@ -128,13 +128,13 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
                 print(f... and {len(deprecated_imports) - 5} more)"
 
         if multiple_managers:
-            print(f"\n--- MULTIPLE CONFIG MANAGERS (DEPLOYMENT BLOCKERS) ---)")
+            print(f"\n--- MULTIPLE CONFIG MANAGERS (DEPLOYMENT BLOCKERS) ---))"
             for mgr in multiple_managers:
                 print(fBLOCKER: {mgr})"
                 print(fBLOCKER: {mgr})"
 
         if config_inconsistencies:
-            print(f"\n--- CONFIGURATION INCONSISTENCIES (DEPLOYMENT BLOCKERS) ---)")
+            print(f"\n--- CONFIGURATION INCONSISTENCIES (DEPLOYMENT BLOCKERS) ---))"
             for incon in config_inconsistencies:
                 print(fBLOCKER: {incon})"
                 print(fBLOCKER: {incon})"
@@ -151,9 +151,9 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         )
 
         # SUCCESS: Issue #962 fully resolved
-        print(f"\n✅ MISSION CRITICAL SUCCESS: Issue #962 FULLY RESOLVED")
+        print(f"\n✅ MISSION CRITICAL SUCCESS: Issue #962 FULLY RESOLVED)"
         print(f✅ Zero configuration SSOT violations remaining)
-        print(f"✅ Production deployment gate: PASS)")
+        print(f"✅ Production deployment gate: PASS))"
 
     async def test_golden_path_configuration_stability_end_to_end(self"):"
         
@@ -213,15 +213,15 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
 
         print(f\n=== GOLDEN PATH CONFIGURATION STABILITY RESULTS ===)"
         print(f\n=== GOLDEN PATH CONFIGURATION STABILITY RESULTS ===)"
-        print(f"Success Rate: {success_rate:.1f}%)")
+        print(f"Success Rate: {success_rate:.1f}%))"
         print(fSuccessful Steps: {successful_steps}/{total_steps})"
         print(fSuccessful Steps: {successful_steps}/{total_steps})"
-        print(f"Failed Steps: {len(golden_path_failures)})")
+        print(f"Failed Steps: {len(golden_path_failures)}))"
 
         if golden_path_failures:
             print(f\n--- GOLDEN PATH FAILURES (REVENUE BLOCKERS) ---)
             for failure in golden_path_failures:
-                print(f"REVENUE BLOCKER: {failure}")
+                print(f"REVENUE BLOCKER: {failure})"
 
         # CRITICAL BUSINESS ASSERTION - Golden Path must be perfect
         self.assertEqual(
@@ -235,7 +235,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         # SUCCESS: Golden Path works perfectly
         print(f\n✅ MISSION CRITICAL SUCCESS: Golden Path 100% stable with SSOT configuration)"
         print(f\n✅ MISSION CRITICAL SUCCESS: Golden Path 100% stable with SSOT configuration)"
-        print(f"✅ $500K+ ARR Golden Path fully protected from configuration failures)")
+        print(f"✅ $500K+ ARR Golden Path fully protected from configuration failures))"
 
     async def test_authentication_configuration_eliminates_race_conditions(self):
         
@@ -274,7 +274,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
                 race_condition_results[test_name] = no_race_condition
 
                 if no_race_condition:
-                    print(f"✅ {test_name}: No race condition detected)")
+                    print(f"✅ {test_name}: No race condition detected))"
                 else:
                     print(f❌ {test_name}: Race condition detected)"
                     print(f❌ {test_name}: Race condition detected)"
@@ -296,7 +296,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         print(fRace Conditions Remaining: {len(race_condition_failures)})
 
         if race_condition_failures:
-            print(f\n--- REMAINING RACE CONDITIONS (DEPLOYMENT BLOCKERS") ---")
+            print(f\n--- REMAINING RACE CONDITIONS (DEPLOYMENT BLOCKERS") ---)"
             for failure in race_condition_failures:
                 print(fDEPLOYMENT BLOCKER: {failure})
 
@@ -363,7 +363,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         for path in deprecated_paths:
             try:
                 module = importlib.import_module(path)
-                deprecated_funcs = ["get_unified_config, UnifiedConfigurationManager"]
+                deprecated_funcs = ["get_unified_config, UnifiedConfigurationManager]"
                 for func in deprecated_funcs:
                     if hasattr(module, func):
                         multiple_managers.append(f{path}.{func})
@@ -408,7 +408,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
             return False
 
     async def _test_jwt_configuration_perfect(self) -> bool:
-        ""Test JWT configuration is perfect.
+        ""Test JWT configuration is perfect."
         try:
             from netra_backend.app.config import get_config
             config = get_config()
@@ -435,7 +435,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         try:
             from netra_backend.app.config import get_config
             config = get_config()
-            oauth_keys = ["OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET", OAUTH_REDIRECT_URI]
+            oauth_keys = ["OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_REDIRECT_URI]"
             return all(config.get(key) for key in oauth_keys)
         except Exception:
             return False
@@ -452,7 +452,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
             return False
 
     async def _test_authentication_flow_end_to_end(self) -> bool:
-        ""Test authentication flow end-to-end.
+        ""Test authentication flow end-to-end."
         try:
             from netra_backend.app.config import get_config
             config = get_config()
@@ -466,7 +466,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
             return False
 
     async def _test_websocket_configuration_stable(self) -> bool:
-        ""Test WebSocket configuration stability.
+        ""Test WebSocket configuration stability."
         try:
             from netra_backend.app.config import get_config
             config = get_config()
@@ -517,7 +517,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
             return False
 
     async def _load_config_concurrent(self) -> str:
-        ""Load configuration concurrently for race condition testing.
+        ""Load configuration concurrently for race condition testing."
         from netra_backend.app.config import get_config
         config = get_config()
         return str(config.get(JWT_SECRET_KEY, "))"
@@ -527,7 +527,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         return await self._test_config_load_race_conditions()
 
     async def _test_database_connection_race_conditions(self) -> bool:
-        ""Test for database connection race conditions.
+        ""Test for database connection race conditions."
         return await self._test_config_load_race_conditions()
 
     async def _test_service_startup_race_conditions(self) -> bool:
@@ -538,10 +538,10 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
 if __name__ == __main__:
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.)"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
-    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md)"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

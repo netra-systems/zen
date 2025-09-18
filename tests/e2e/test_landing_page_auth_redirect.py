@@ -74,13 +74,13 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         self.auth_redirect_times.append(redirect_time)
 
             # This assertion SHOULD FAIL - redirect should be fast
-        assert redirect_time <= 200, ( )
+        assert redirect_time <= 200, "( )"
         ""
         f"Slow auth state detection causes poor user experience."
             
 
             # This assertion SHOULD FAIL - should redirect to login
-        assert redirect_target == '/login', ( )
+        assert redirect_target == '/login', "( )"
         ""
         f"Landing page authentication logic is not working correctly."
             
@@ -117,13 +117,13 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         self.auth_redirect_times.append(redirect_time)
 
                     # This assertion SHOULD FAIL - redirect should be fast
-        assert redirect_time <= 200, ( )
+        assert redirect_time <= 200, "( )"
         ""
         f"Auth state detection performance issue affecting authenticated users."
                     
 
                     # This assertion SHOULD FAIL - should redirect to chat
-        assert redirect_target == '/chat', ( )
+        assert redirect_target == '/chat', "( )"
         ""
         f"Landing page fails to handle authenticated users correctly."
                     
@@ -158,7 +158,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         redirects_during_loading.append("")
 
                                     # This assertion SHOULD FAIL - no redirects should happen while loading
-        assert len(redirects_during_loading) == 0, ( )
+        assert len(redirects_during_loading) == 0, "( )"
         ""
         ""
                                     
@@ -207,7 +207,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         if prev == curr and prev in ['/login', '/chat']]
 
                                                 # This assertion SHOULD FAIL due to redirect loops
-        assert len(loops) == 0, ( )
+        assert len(loops) == 0, "( )"
         ""
         f"Rapid auth state changes are causing unstable routing behavior."
                                                 
@@ -255,7 +255,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         inconsistencies.append("")
 
                                                                 # This assertion SHOULD FAIL due to mock inconsistencies
-        assert len(inconsistencies) == 0, ( )
+        assert len(inconsistencies) == 0, "( )"
         "" +
         "
         "
@@ -299,7 +299,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         final_redirect = logout_redirects[-1]
 
                                                                                 # This assertion SHOULD FAIL if logout doesn't redirect properly'
-        assert final_redirect == '/login', ( )
+        assert final_redirect == '/login', "( )"
         ""
         ""
         f"Landing page not handling logout transitions correctly."
@@ -348,6 +348,6 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         print("")
 
 
-        if __name__ == "__main__":
-        pytest.main([__file__, "-v"])
+        if __name__ == "__main__:"
+        pytest.main([__file__, "-v])"
         pass

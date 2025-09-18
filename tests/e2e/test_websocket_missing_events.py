@@ -42,7 +42,7 @@ class WebSocketMissingEventsTests:
     
     @pytest.fixture
     async def websocket_client(self):
-        ""Get WebSocket client with proper configuration.
+        ""Get WebSocket client with proper configuration."
         config = UnifiedTestConfig()
         ws_client = WebSocketTestClient(config.endpoints.ws_url)
         try:
@@ -93,15 +93,15 @@ class WebSocketMissingEventsTests:
             
             # Required fields per SPEC/websocket_communication.xml
             assert "thought in payload, agent_thinking missing 'thought' field"
-            assert isinstance(payload[thought], str), thought must be string
+            assert isinstance(payload[thought], "str), thought must be string"
             assert payload[thought].strip(), thought cannot be empty""
             
             assert "agent_name in payload, agent_thinking missing 'agent_name' field"
-            assert isinstance(payload[agent_name], str), agent_name must be string
+            assert isinstance(payload[agent_name], "str), agent_name must be string"
             
             # Optional fields
             if "step_number in payload:"
-                assert isinstance(payload[step_number], int), step_number must be integer
+                assert isinstance(payload[step_number], "int), step_number must be integer"
             if total_steps in payload:""
                 assert isinstance(payload["total_steps], int), total_steps must be integer"
     
@@ -112,7 +112,7 @@ class WebSocketMissingEventsTests:
         await websocket_client.send_message({
             type: user_message, 
             payload: {""
-                "content: Generate a detailed analysis report with multiple sections"
+                "content": "Generate a detailed analysis report with multiple sections""
             }
         }
         
@@ -151,13 +151,13 @@ class WebSocketMissingEventsTests:
             
             # Required fields per spec
             assert content" in payload, fpartial_result {i} missing 'content' field"
-            assert isinstance(payload[content], str), fcontent must be string in event {i}
+            assert isinstance(payload[content], "str), fcontent must be string in event {i}"
             
             assert agent_name in payload, f"partial_result {i} missing 'agent_name' field"
             assert isinstance(payload[agent_name], str), f"agent_name must be string in event {i}"
             
-            assert is_complete in payload, fpartial_result {i} missing 'is_complete' field
-            assert isinstance(payload[is_complete], bool), fis_complete must be boolean in event {i}
+            assert is_complete in payload, "fpartial_result {i} missing 'is_complete' field"
+            assert isinstance(payload[is_complete], "bool), fis_complete must be boolean in event {i}"
             
             # Accumulate content to verify streaming
             accumulated_content += payload[content"]"
@@ -213,13 +213,13 @@ class WebSocketMissingEventsTests:
             # Required fields per spec
             assert tool_name in payload, f"tool_executing {i} missing 'tool_name' field"
             assert isinstance(payload[tool_name], str), f"tool_name must be string in event {i}"
-            assert payload[tool_name].strip(), ftool_name cannot be empty in event {i}
+            assert payload[tool_name].strip(), "ftool_name cannot be empty in event {i}"
             
-            assert agent_name in payload, ftool_executing {i} missing 'agent_name' field
-            assert isinstance(payload[agent_name"], str), f"agent_name must be string in event {i}
+            assert agent_name in payload, "ftool_executing {i} missing 'agent_name' field"
+            assert isinstance(payload[agent_name"], str), fagent_name must be string in event {i}"
             
-            assert timestamp in payload, ftool_executing {i} missing 'timestamp' field
-            assert isinstance(payload[timestamp], (int, float)), ftimestamp must be number in event {i}
+            assert timestamp in payload, "ftool_executing {i} missing 'timestamp' field"
+            assert isinstance(payload[timestamp], "(int, float)), ftimestamp must be number in event {i}"
     
     @pytest.mark.e2e
     async def test_final_report_event_implementation(self, websocket_client):
@@ -262,21 +262,21 @@ class WebSocketMissingEventsTests:
         payload = final_report_event[payload]
         
         # Required fields per SPEC/websocket_communication.xml
-        assert report" in payload, "final_report missing 'report' field
-        assert isinstance(payload[report], dict), report must be object
+        assert report" in payload, final_report missing 'report' field"
+        assert isinstance(payload[report], "dict), report must be object"
         assert payload[report], "report cannot be empty"
         
         assert total_duration_ms" in payload, final_report missing 'total_duration_ms' field"
-        assert isinstance(payload[total_duration_ms], (int, float)), total_duration_ms must be number
-        assert payload[total_duration_ms"] > 0, "total_duration_ms must be positive
+        assert isinstance(payload[total_duration_ms], "(int, float)), total_duration_ms must be number"
+        assert payload[total_duration_ms"] > 0, total_duration_ms must be positive"
         
         # Optional fields validation
         if agent_metrics in payload:
             assert isinstance(payload[agent_metrics], list), agent_metrics must be array""
         if "recommendations in payload:"
-            assert isinstance(payload[recommendations], list), recommendations must be array
+            assert isinstance(payload[recommendations], "list), recommendations must be array"
         if action_plan" in payload:"
-            assert isinstance(payload[action_plan], list), action_plan must be array
+            assert isinstance(payload[action_plan], "list), action_plan must be array"
     
     @pytest.mark.e2e
     async def test_missing_events_workflow_completeness(self, websocket_client):
@@ -291,7 +291,7 @@ class WebSocketMissingEventsTests:
         
         # Track all event types received
         received_events = set()
-        missing_events = {agent_thinking, partial_result", "tool_executing, final_report}
+        missing_events = {agent_thinking, partial_result", tool_executing, final_report}"
         timeout = 35.0
         start_time = asyncio.get_event_loop().time()
         
@@ -339,7 +339,7 @@ class WebSocketMissingEventsTests:
         await websocket_client.send_message({
             "type: user_message,"
             payload: {
-                content": "Test logical event sequence with multi-step analysis
+                content": Test logical event sequence with multi-step analysis"
             }
         }
         
@@ -383,7 +383,7 @@ class WebSocketMissingEventsTests:
             if tool_indices and completed_indices:
                 last_tool = max(tool_indices)
                 first_completion = min(completed_indices)
-                assert last_tool < first_completion, tool_executing should complete before agent_completed
+                assert last_tool < first_completion, "tool_executing should complete before agent_completed"
         
         # Partial results should be ordered
         partial_events = [e for e in events_sequence if e[type] == partial_result"]"
@@ -395,11 +395,11 @@ class WebSocketMissingEventsTests:
                 last_incomplete = max(i for i, complete in enumerate(completion_states) if not complete) if False in completion_states else -1
                 first_complete = min(i for i, complete in enumerate(completion_states) if complete)
                 if last_incomplete >= 0:
-                    assert last_incomplete < first_complete, incomplete partial_results should come before complete ones
+                    assert last_incomplete < first_complete, "incomplete partial_results should come before complete ones"
     
     # Helper methods (each  <= 8 lines)
     def _extract_event_by_type(self, events: List[Dict], event_type: str) -> Optional[Dict]:
-        ""Extract first event of specified type from events list.
+        ""Extract first event of specified type from events list."
         for event in events:
             if event.get(type) == event_type:""
                 return event
@@ -409,7 +409,7 @@ class WebSocketMissingEventsTests:
         "Validate event payload has non-empty required fields."""
         payload = event.get("payload, {)"
         for field in required_fields:
-            assert field in payload, fMissing required field: {field}
+            assert field in payload, "fMissing required field: {field}"
             assert payload[field], fField {field} cannot be empty""
 
 """

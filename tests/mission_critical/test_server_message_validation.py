@@ -38,7 +38,7 @@ class ServerMessageValidationTests(SSotBaseTestCase):
         # This should pass with current implementation
         flat_event = {
             type: agent_started,
-            "user_id: test-user-123",
+            "user_id: test-user-123,"
             thread_id: test-thread-456, 
             timestamp: self.test_timestamp"
             timestamp: self.test_timestamp"
@@ -55,14 +55,14 @@ class ServerMessageValidationTests(SSotBaseTestCase):
         server_message = {
             type": agent_started,"
             payload: {
-                "user_id: test-user-123",
+                "user_id: test-user-123,"
                 thread_id: test-thread-456,
                 timestamp: self.test_timestamp,"
                 timestamp: self.test_timestamp,"
                 status": started,"
                 agent_name: supervisor
             },
-            sender": "system,
+            sender": system,"
             timestamp: self.test_timestamp
         }
         
@@ -77,12 +77,12 @@ class ServerMessageValidationTests(SSotBaseTestCase):
         self.assertEqual(len(self.validator.errors), 0, Should have no validation errors)
     
     def test_tool_executing_server_message_format_now_passes(self):
-        ""Test tool_executing event in ServerMessage format now passes after fix.
+        ""Test tool_executing event in ServerMessage format now passes after fix."
         server_message = {
             type: tool_executing","
             "payload: {"
                 tool_name: search_data,
-                parameters": {"query: test search},
+                parameters": {query: test search},"
                 timestamp: self.test_timestamp,"
                 timestamp: self.test_timestamp,"
                 sub_agent_name": data_helper"
@@ -127,7 +127,7 @@ class ServerMessageValidationTests(SSotBaseTestCase):
         "Test that validator can handle both formats after fix."
         # This test now passes after implementing the fix
         flat_event = {
-            "type: agent_thinking",
+            "type: agent_thinking,"
             reasoning: Analyzing user request,
             timestamp: self.test_timestamp"
             timestamp: self.test_timestamp"
@@ -136,7 +136,7 @@ class ServerMessageValidationTests(SSotBaseTestCase):
         server_message = {
             type": agent_thinking,"
             payload: {
-                "reasoning: Analyzing user request",
+                "reasoning: Analyzing user request,"
                 timestamp: self.test_timestamp,
                 agent_name: "supervisor"
             },
@@ -164,14 +164,14 @@ class ServerMessageValidationTests(SSotBaseTestCase):
         server_messages = [
             {
                 type: agent_started,
-                payload: {"user_id: test-user", status: started},
-                "sender: system",
+                payload: {"user_id: test-user, status: started},"
+                "sender: system,"
                 timestamp: self.test_timestamp
             },
             {
                 type: "tool_executing,"
                 payload": {tool_name: search, parameters: {}},"
-                sender": "system,
+                sender": system,"
                 timestamp: self.test_timestamp
             }
         ]
@@ -190,6 +190,6 @@ class ServerMessageValidationTests(SSotBaseTestCase):
         self.assertIn(tool_executing", report)"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     unittest.main()
 }

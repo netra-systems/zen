@@ -19,7 +19,7 @@ import pytest
 import asyncio
 from unittest.mock import Mock, patch, AsyncMock
 from netra_backend.app.db.clickhouse import ClickHouseService, get_clickhouse_service
-from netra_backend.app.db.transaction_errors import (
+from netra_backend.app.db.transaction_errors import ()
     TableNotFoundError, CacheError, ConnectionError, TimeoutError,
     PermissionError, SchemaError, classify_error
 )
@@ -46,7 +46,7 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
         with pytest.raises(TableNotFoundError) as exc_info:
             await self.service.execute(
                 INSERT INTO user_analytics (user_id, action, timestamp) VALUES (%s, %s, %s)","
-                {user_id: user123, action: login", "timestamp: 2024-1-1},
+                {user_id: user123, action: login", timestamp: 2024-1-1},"
                 user_id=user123,
                 operation_context=analytics_collection""
             )
@@ -73,7 +73,7 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
         with pytest.raises(PermissionError) as exc_info:
             await self.service.execute(
                 SELECT SUM(revenue) FROM revenue_metrics WHERE date >= %s,
-                {"date: 2024-1-1"},
+                {"date: 2024-1-1},"
                 user_id=admin_user,
                 operation_context=revenue_calculation"
                 operation_context=revenue_calculation"
@@ -140,7 +140,7 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
 
         self.service._client = mock_client
 
-        large_dataset = [{id: i, "data: fbatch_data_{i}"} for i in range(1000)]
+        large_dataset = [{id: i, "data: fbatch_data_{i}} for i in range(1000)]"
 
         # Batch processing failure should raise specific exception
         with pytest.raises(TableNotFoundError) as exc_info:
@@ -175,7 +175,7 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
         with pytest.raises(PermissionError):
             await self.service.execute(
                 SELECT * FROM tenant_data WHERE tenant_id = %s,
-                {"tenant_id: tenant_a"},
+                {"tenant_id: tenant_a},"
                 user_id=tenant_a_user,
                 operation_context=tenant_data_access"
                 operation_context=tenant_data_access"
@@ -229,7 +229,7 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
         # and trigger infrastructure scaling before customer impact
 
     async def test_data_consistency_exception_classification(self):
-        ""MISSION CRITICAL: Data consistency issues must be properly classified.
+        ""MISSION CRITICAL: Data consistency issues must be properly classified."
         # Test scenario: Data integrity problems need specific error handling
         mock_client = AsyncMock()
         mock_client.execute.side_effect = Exception(Cache corruption detected during data validation)"

@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 
 
 class E2EMigrationDetectionUtility:
-    ""Utility class for detecting BaseE2ETest usage and migration issues.
+    ""Utility class for detecting BaseE2ETest usage and migration issues."
     
     def __init__(self):
         Initialize migration detection utility.""
@@ -87,7 +87,7 @@ class E2EMigrationDetectionUtility:
         return test_files
     
     def parse_python_file_ast(self, file_path: Path) -> Tuple[ast.Module, bool]:
-    "
+        """
     "
         Parse Python file using AST.
         
@@ -111,7 +111,7 @@ class E2EMigrationDetectionUtility:
             return None, False
     
     def extract_imports_from_ast(self, tree: ast.Module) -> Dict[str, List[str]]:
-    "
+        """
     "
         Extract all import statements from AST.
         
@@ -137,7 +137,7 @@ class E2EMigrationDetectionUtility:
         return imports
     
     def extract_class_definitions_from_ast(self, tree: ast.Module) -> List[Dict[str, Any]]:
-    ""
+    """
         Extract class definitions and their inheritance.
         
         Args:
@@ -168,7 +168,7 @@ class E2EMigrationDetectionUtility:
         return classes
     
     def detect_basee2etest_violations(self, file_path: Path) -> Dict[str, List[str]]:
-        ""
+        """
         Detect BaseE2ETest inheritance violations in a file.
         
         Args:
@@ -306,13 +306,13 @@ class E2EMigrationValidationTests(SSotBaseTestCase):
                 fSee SSOT_MIGRATION_GUIDE.md for migration instructions."
             )
             
-            assert False, failure_message
+            assert False, "failure_message"
         
         # Test PASSES when no violations detected
         logger.info(f PASS:  MIGRATION VALIDATION PASSED: No BaseE2ETest inheritance violations in {len(e2e_files)} E2E files)
         
     def test_all_e2e_tests_use_ssot_base_classes(self):
-        "
+        """
         "
         Validate all E2E tests inherit from SSotBaseTestCase or SSotAsyncTestCase.
         
@@ -394,13 +394,13 @@ class E2EMigrationValidationTests(SSotBaseTestCase):
                 fSOLUTION: Ensure all test classes inherit from SSotBaseTestCase or SSotAsyncTestCase
             )
             
-            assert False, failure_message
+            assert False, "failure_message"
         
         logger.info(f PASS:  SSOT COMPLIANCE PASSED: {len(valid_ssot_classes)} E2E test classes use SSOT base classes)"
         logger.info(f PASS:  SSOT COMPLIANCE PASSED: {len(valid_ssot_classes)} E2E test classes use SSOT base classes)"
     
     def test_migrated_tests_use_isolated_environment(self):
-    "
+        """
     "
         Ensure migrated tests use IsolatedEnvironment vs direct os.environ access.
         
@@ -451,7 +451,7 @@ class E2EMigrationValidationTests(SSotBaseTestCase):
         logger.info(f PASS:  ENVIRONMENT CHECK COMPLETED: {clean_files} files have clean environment usage)"
         
     def test_no_basee2etest_imports_detected(self):
-    "
+        """
     "
         FAIL if BaseE2ETest is imported anywhere in E2E tests.
         
@@ -493,13 +493,13 @@ class E2EMigrationValidationTests(SSotBaseTestCase):
                 fSOLUTION: Remove BaseE2ETest imports and use SSOT base classes
             )
             
-            assert False, failure_message
+            assert False, "failure_message"
         
         logger.info(f PASS:  IMPORT VALIDATION PASSED: No BaseE2ETest imports detected in {len(e2e_files)} E2E files)"
         logger.info(f PASS:  IMPORT VALIDATION PASSED: No BaseE2ETest imports detected in {len(e2e_files)} E2E files)"
     
     def test_migration_validation_comprehensive_report(self):
-    "
+        """
     "
         Generate comprehensive migration validation report.
         
@@ -551,8 +551,8 @@ class E2EMigrationValidationTests(SSotBaseTestCase):
             self.record_metric(fmigration_report_{key}, value)
         
         # Log comprehensive report
-        logger.info(f"
-        logger.info(f"
+        logger.info(f"")
+        logger.info(f"")
 E2E MIGRATION VALIDATION COMPREHENSIVE REPORT
 ============================================
 Total E2E Files Scanned: {migration_report['total_files_scanned']}
@@ -569,7 +569,7 @@ Total Violations: {total_violations}
         ")"
         
         # This test always passes - it's informational'
-        assert True, Migration validation report generated successfully
+        assert True, "Migration validation report generated successfully"
 
 
 if __name__ == __main__":"

@@ -36,7 +36,7 @@ os.environ.update({
 
 
 class MockWebSocketBridge:
-    ""Minimal mock WebSocket bridge that captures events.
+    ""Minimal mock WebSocket bridge that captures events."
     
     def __init__(self):
         self.events_captured = []
@@ -58,11 +58,11 @@ class MockWebSocketBridge:
         return True
         
     async def notify_tool_completed(self, run_id: str, agent_name: str, tool_name: str, result: Dict = None, **kwargs):
-        self.events_captured.append({type: tool_completed, run_id: run_id, "agent_name: agent_name, tool_name": tool_name)
+        self.events_captured.append({"type": tool_completed, run_id: run_id, "agent_name: agent_name, tool_name: tool_name)"
         return True
     
     async def notify_agent_completed(self, run_id: str, agent_name: str, **kwargs):
-        self.events_captured.append({type: agent_completed, "run_id: run_id, agent_name": agent_name)
+        self.events_captured.append({"type": agent_completed, "run_id: run_id, agent_name: agent_name)"
         return True
     
     def get_events_for_run(self, run_id: str) -> List[Dict]:
@@ -78,7 +78,7 @@ class MinimalTestAgent:
         self.bridge_was_set = False
     
     def set_websocket_bridge(self, bridge):
-        ""Set WebSocket bridge and track that it was set.
+        ""Set WebSocket bridge and track that it was set."
         self._websocket_bridge = bridge
         self.bridge_was_set = True
     
@@ -108,7 +108,7 @@ class MinimalTestAgent:
         if self._websocket_bridge:
             await self._websocket_bridge.notify_agent_started(run_id, self.name)
             await self.emit_thinking(Processing request, run_id)
-            await self.emit_tool_executing(test_tool, {param": "value}, run_id)
+            await self.emit_tool_executing(test_tool, {param": value}, run_id)"
             await self.emit_tool_completed(test_tool, {result: success"}, run_id)"
             await self._websocket_bridge.notify_agent_completed(run_id, self.name)
         
@@ -149,7 +149,7 @@ class WebSocketBridgeMinimalTests(unittest.IsolatedAsyncioTestCase):
         await agent.emit_thinking(Test thinking, run_id)"
         await agent.emit_thinking(Test thinking, run_id)"
         await agent.emit_tool_executing("test_tool, {param: value}, run_id)"
-        await agent.emit_tool_completed(test_tool", {"result: success}, run_id)
+        await agent.emit_tool_completed(test_tool", {result: success}, run_id)"
         
         # Verify events were captured
         events = bridge.get_events_for_run(run_id)
@@ -163,7 +163,7 @@ class WebSocketBridgeMinimalTests(unittest.IsolatedAsyncioTestCase):
         
         # Verify event content
         thinking_event = events[0]
-        self.assertEqual(thinking_event["message], Test thinking")
+        self.assertEqual(thinking_event["message], Test thinking)"
         self.assertEqual(thinking_event[agent_name], EventTestAgent)
     
     async def test_full_agent_lifecycle_events(self):
@@ -220,7 +220,7 @@ class WebSocketBridgeMinimalTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(bridge.events_captured), 15)  # 3 runs  x  5 events each
     
     async def test_no_bridge_graceful_handling(self):
-        ""CRITICAL: Agent must handle missing bridge gracefully.
+        ""CRITICAL: Agent must handle missing bridge gracefully."
         agent = MinimalTestAgent(NoBridgeAgent)"
         agent = MinimalTestAgent(NoBridgeAgent)"
         
@@ -271,7 +271,7 @@ class WebSocketBridgeMinimalTests(unittest.IsolatedAsyncioTestCase):
     def test_synchronous_bridge_setup(self):
         "CRITICAL: Bridge setup must work synchronously."
         bridge = MockWebSocketBridge()
-        agent = MinimalTestAgent("SyncAgent")
+        agent = MinimalTestAgent("SyncAgent)"
         
         # Synchronous bridge setup
         agent.set_websocket_bridge(bridge)

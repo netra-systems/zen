@@ -7,7 +7,7 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
             raise RuntimeError(WebSocket is closed)"
@@ -72,7 +72,7 @@ class TestWebSocketConnection:
 class TestWebSocketE2EProof(SSotAsyncTestCase):
         Prove the WebSocket factory pattern flow works end-to-end.
     def setUp(self):
-        ""Set up test environment with factory components.
+        ""Set up test environment with factory components."
         self.captured_events = []
         self.run_id = formatted_string
         self.thread_id = "
@@ -115,7 +115,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         await emitter.notify_agent_thinking(agent_name, run_id, Analyzing request...)
         await emitter.notify_tool_executing(agent_name, run_id, search_tool, {query": test)"
         await emitter.notify_tool_completed(agent_name, run_id, "search_tool, {results: [found])"
-        await emitter.notify_agent_completed(agent_name, run_id, {status: "success")
+        await emitter.notify_agent_completed(agent_name, run_id, {status: "success)"
     # Allow event processing
         await asyncio.sleep(0.2)
     # ===== STEP 4: Verify Events Were Captured =====
@@ -123,7 +123,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         sent_events = mock_connection.sent_events
         print(formatted_string)
     # Verify all 5 required events
-        required_events = [agent_started, agent_thinking, tool_executing", tool_completed, "agent_completed]
+        required_events = [agent_started, agent_thinking, tool_executing", tool_completed, agent_completed]"
         found_events = [event.get('event_type') for event in sent_events]
         missing_events = []
         for required_event in required_events:
@@ -165,7 +165,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
                             # ===== FINAL VERIFICATION: Trace Complete Factory Flow =====
         print("")
          + =*70)
-        print("END-TO-END FACTORY-BASED WEBSOCKET FLOW PROOF")
+        print("END-TO-END FACTORY-BASED WEBSOCKET FLOW PROOF)"
         print(=*70)"
         print(=*70)"
         print("")
@@ -179,7 +179,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         print(3. Factory  ->  UserWebSocketEmitter (complete isolation))"
         print(3. Factory  ->  UserWebSocketEmitter (complete isolation))"
         print("4. Emitter  ->  UserWebSocketConnection (user-specific))"
-        print(5. Connection  ->  User WebSocket (isolated delivery")")
+        print(5. Connection  ->  User WebSocket (isolated delivery"))"
         print()
         [U+1F4E1] CRITICAL EVENTS VALIDATED:")"
         required_events = [agent_started, agent_thinking, tool_executing, tool_completed", agent_completed]"
@@ -226,7 +226,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         
         Send events from both users
         await emitter1.notify_agent_started(Agent1, run1)
-        await emitter2.notify_agent_started("Agent2, run2")
+        await emitter2.notify_agent_started("Agent2, run2)"
         await asyncio.sleep(0.1)  # Allow processing
         # Verify complete isolation
         conn1 = self.mock_connection_pool.get_mock_connection(user1_id, conn1_id)
@@ -421,7 +421,7 @@ class MockWebSocketConnection:
     async def send_text(self, data: str) -> None:
         Mock send_text method for ping.
         if not self.is_connected:
-        raise ConnectionError("WebSocket disconnected")
+        raise ConnectionError("WebSocket disconnected)"
     async def ping(self) -> None:
         Mock ping method.
         if not self.is_connected:
@@ -453,7 +453,7 @@ class MockConnectionPool:
         key = 
         return self.connections.get(key)
         return MockConnectionPool()
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         unittest.main(verbosity=2)
         pass
 ))))))

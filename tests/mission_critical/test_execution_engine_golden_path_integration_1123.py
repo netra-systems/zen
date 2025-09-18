@@ -32,7 +32,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.user_execution_context import (
+from netra_backend.app.services.user_execution_context import ()
     UserExecutionContext, create_defensive_user_execution_context
 )
 
@@ -155,7 +155,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
         
         try:
             # Import SSOT factory
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 get_execution_engine_factory
             )
             
@@ -273,7 +273,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
         
         try:
             # Import SSOT factory
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 get_execution_engine_factory
             )
             
@@ -433,7 +433,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
         Validate SSOT factory access."
         Validate SSOT factory access."
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 get_execution_engine_factory
             )
             
@@ -445,7 +445,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
     async def _validate_execution_engine_creation(self) -> Dict[str, Any]:
         "Validate execution engine creation."
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 get_execution_engine_factory
             )
             
@@ -566,7 +566,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
             }
     
     def _assess_customer_impact(self, failure_count: int) -> Dict[str, str]:
-        ""Assess customer impact of integration failures.
+        ""Assess customer impact of integration failures."
         if failure_count > 2:
             return {
                 'level': 'CRITICAL',

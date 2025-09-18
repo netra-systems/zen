@@ -40,7 +40,7 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
         return Path(__file__).parent.parent.parent
 
     def test_logging_config_migration_completion(self):
-        "
+        """
         "
         CRITICAL: Ensure all files have migrated from deprecated logging_config.
 
@@ -116,7 +116,7 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
             )
 
     def test_auth_service_import_consistency(self):
-        "
+        """
         "
         CRITICAL: Ensure consistent auth service import patterns across codebase.
 
@@ -145,7 +145,7 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
 
         # Search in key directories
         search_paths = [
-            self.project_root / netra_backend" / "app,
+            self.project_root / netra_backend" / app,"
             self.project_root / auth_service,
             self.project_root / shared"
             self.project_root / shared"
@@ -206,7 +206,7 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
             )
 
     def test_configuration_import_migration(self):
-        "
+        """
         "
         CRITICAL: Ensure all files use SSOT configuration patterns.
 
@@ -234,7 +234,7 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
         ]
 
         search_paths = [
-            self.project_root / netra_backend" / "app,
+            self.project_root / netra_backend" / app,"
             self.project_root / auth_service,
             self.project_root / shared"
             self.project_root / shared"
@@ -292,7 +292,7 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
             )
 
     def test_websocket_import_consistency(self):
-        "
+        """
         "
         CRITICAL: Ensure WebSocket imports use SSOT patterns consistently.
 
@@ -319,7 +319,7 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
         ]
 
         search_paths = [
-            self.project_root / netra_backend" / "app,
+            self.project_root / netra_backend" / app,"
             self.project_root / shared
         ]
 
@@ -396,7 +396,7 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
                 continue
 
             for py_file in search_path.rglob(*.py):
-                if py_file.name.startswith(__") or "test in py_file.name.lower():
+                if py_file.name.startswith(__") or test in py_file.name.lower():"
                     continue
 
                 try:

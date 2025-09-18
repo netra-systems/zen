@@ -84,7 +84,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                 {
                     "type: user_message,"
                     payload: {
-                        content": "I need urgent help with data analysis for board meeting,
+                        content": I need urgent help with data analysis for board meeting,"
                         priority: high,
                         business_critical: True"
                         business_critical: True"
@@ -99,7 +99,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                     payload: {"
                         "message: Generate quarterly revenue analysis,"
                         turn_id: frevenue_turn_{int(time.time())},
-                        "business_impact: high",
+                        "business_impact: high,"
                         user_request: Generate quarterly revenue analysis
                     },
                     timestamp: time.time()"
@@ -177,7 +177,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                     # Track critical business events
                     if isinstance(data, dict):
                         event_type = data.get(event") or data.get(type)"
-                        if event_type in [agent_started, agent_thinking, tool_executing", "tool_completed, agent_completed]:
+                        if event_type in [agent_started, agent_thinking, tool_executing", tool_completed, agent_completed]:"
                             self.critical_events_received.append(event_type)
                 
                 async def send_text(self, data):
@@ -189,7 +189,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                         parsed_data = json.loads(data) if isinstance(data, str) else data
                         if isinstance(parsed_data, dict):
                             event_type = parsed_data.get(event") or parsed_data.get(type)"
-                            if event_type in [agent_started, agent_thinking, tool_executing", "tool_completed, agent_completed]:
+                            if event_type in [agent_started, agent_thinking, tool_executing", tool_completed, agent_completed]:"
                                 self.critical_events_received.append(event_type)
                     except:
                         pass
@@ -201,10 +201,10 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                 type: agent_request","
                 "payload: {"
                     message: Analyze customer churn risk for enterprise accounts,
-                    turn_id": f"business_critical_{int(time.time())},
+                    turn_id": fbusiness_critical_{int(time.time())},"
                     require_multi_agent: True,
                     real_llm: False,  # Use mock for reliability
-                    business_priority": "critical,
+                    business_priority": critical,"
                     revenue_impact: high
                 },
                 timestamp: time.time(),"
@@ -224,7 +224,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             self.assertTrue(result, "BUSINESS CRITICAL: Agent request failed - REVENUE IMPACT!)"
             
             # BUSINESS CRITICAL: Must deliver all 5 critical events
-            expected_critical_events = [agent_started, agent_thinking, tool_executing, "tool_completed, agent_completed"]
+            expected_critical_events = [agent_started, agent_thinking, tool_executing, "tool_completed, agent_completed]"
             delivered_critical_events = len(business_websocket.critical_events_received)
             
             self.business_protection_metrics[critical_events_delivered] = delivered_critical_events
@@ -284,10 +284,10 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                     message: {"
                         "type: agent_request,"
                         payload: {
-                            message": "Analyze top customer satisfaction metrics,
+                            message": Analyze top customer satisfaction metrics,"
                             turn_id: fcustomer_analysis_{int(time.time())},
                             require_multi_agent: False,
-                            "business_function: customer_success",
+                            "business_function: customer_success,"
                             urgency: medium
                         },
                         timestamp: time.time()"
@@ -368,7 +368,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             business_critical_message = {
                 type": user_message,"
                 payload: {
-                    "content: Emergency: System outage affecting customer operations",
+                    "content": "Emergency: System outage affecting customer operations","
                     priority: critical,
                     business_impact: severe"
                     business_impact: severe"
@@ -419,7 +419,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
                 mock_websocket.client_state = connected
                 
                 business_message = {
-                    type": "agent_request,
+                    type": agent_request,"
                     payload: {
                         message: fBusiness analysis request from user {user_id_suffix}","
                         "turn_id: fconcurrent_business_{user_id_suffix}_{int(time.time())},"
@@ -503,7 +503,7 @@ class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
             self.business_protection_metrics[business_continuity_score] = business_continuity_score
             
             business_summary = {
-                business_protection_status: "PROTECTED if business_continuity_score >= 80 else AT RISK",
+                business_protection_status: "PROTECTED if business_continuity_score >= 80 else AT RISK,"
                 business_continuity_score: business_continuity_score,
                 critical_functionality_preserved": preserved_functionality,"
                 revenue_impacting_failures: revenue_failures,

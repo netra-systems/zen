@@ -90,13 +90,13 @@ class DatabaseConnectivityValidator:
         connection_time = time.time() - start_time
 
         # Get server version
-        version_result = await conn.fetchval("SELECT version()")
+        version_result = await conn.fetchval("SELECT version())"
         await conn.close()
 
         result.update({ })
         'success': True,
         'connection_time': connection_time,
-        'server_version': version_result[:50] + "..." if len(version_result) > 50 else version_result
+        'server_version': version_result[:50] + "... if len(version_result) > 50 else version_result"
         
 
         except Exception as e:
@@ -132,7 +132,7 @@ class DatabaseConnectivityValidator:
 
         # Get server version
         cursor = conn.cursor()
-        cursor.execute("SELECT version()")
+        cursor.execute("SELECT version())"
         version_result = cursor.fetchone()[0]
         cursor.close()
         conn.close()
@@ -140,7 +140,7 @@ class DatabaseConnectivityValidator:
         result.update({ })
         'success': True,
         'connection_time': connection_time,
-        'server_version': version_result[:50] + "..." if len(version_result) > 50 else version_result
+        'server_version': version_result[:50] + "... if len(version_result) > 50 else version_result"
         
 
         except Exception as e:
@@ -230,7 +230,7 @@ class DatabaseConnectivityValidator:
         
 
         # Test basic connectivity
-        version_result = client.execute("SELECT version()")[0][0]
+        version_result = client.execute("SELECT version())[0][0]"
         connection_time = time.time() - start_time
 
         result.update({ })
@@ -277,7 +277,7 @@ print("")
 print("")
 print("")
 print("")
-print("" if result['connection_time'] else "N/A")
+print("" if result['connection_time'] else "N/A)"
 
 if result['success']:
     print("")
@@ -285,7 +285,7 @@ else:
     print("")
 
                 # Assert connectivity works
-assert result['success'], ( )
+assert result['success'], "( )"
 f"PostgreSQL asyncpg connectivity FAILED:"
 "
 "
@@ -298,10 +298,10 @@ f"PostgreSQL asyncpg connectivity FAILED:"
 f"This indicates the PostgreSQL database is not accessible with the "
 ""
 ""
-f"2. User "{config["user"]}" exists and has access"
+f"2. User {config[""user"]}" exists and has access"
 "
 "
-f"3. Database "{config["database"]}" exists"
+f"3. Database {config[""database"]}" exists"
 "
 "
 f"4. Network connectivity is available"
@@ -310,7 +310,7 @@ f"4. Network connectivity is available"
                         # Validate reasonable connection time (should be under 1 second for local)
 if result['connection_time']:
     pass
-assert result['connection_time'] < 2.0, ( )
+assert result['connection_time'] < 2.0, "( )"
 ""
                             
 
@@ -335,7 +335,7 @@ print("")
 print("")
 print("")
 print("")
-print("" if result['connection_time'] else "N/A")
+print("" if result['connection_time'] else "N/A)"
 
 if result['success']:
     print("")
@@ -343,7 +343,7 @@ else:
     print("")
 
             # Assert connectivity works
-assert result['success'], ( )
+assert result['success'], "( )"
 f"PostgreSQL psycopg2 connectivity FAILED:"
 "
 "
@@ -378,7 +378,7 @@ print("")
 print("")
 print("")
 print("")
-print("" if result['connection_time'] else "N/A")
+print("" if result['connection_time'] else "N/A)"
 
 if result['success']:
     print("")
@@ -386,7 +386,7 @@ else:
     print("")
 
             # ClickHouse is now properly configured for local development
-assert result['success'], ( )
+assert result['success'], "( )"
 f"ClickHouse HTTP connectivity FAILED:"
 "
 "
@@ -403,7 +403,7 @@ f"This indicates ClickHouse is not accessible via HTTP interface. Ensure:"
 f"2. HTTP interface is enabled"
 "
 "
-f"3. User "{config["user"]}" has proper authentication"
+f"3. User {config[""user"]}" has proper authentication"
 "
 "
 ""
@@ -429,7 +429,7 @@ print("")
 print("")
 print("")
 print("")
-print("" if result['connection_time'] else "N/A")
+print("" if result['connection_time'] else "N/A)"
 
 if result['success']:
     print("")
@@ -437,7 +437,7 @@ else:
     print("")
 
             # ClickHouse is now properly configured for local development
-assert result['success'], ( )
+assert result['success'], "( )"
 f"ClickHouse native connectivity FAILED:"
 "
 "
@@ -488,15 +488,15 @@ print("")
 print("")
 
     # Validate port consistency
-assert async_port == expected_port, ( )
+assert async_port == expected_port, "( )"
 ""
     
 
-assert sync_port == expected_port, ( )
+assert sync_port == expected_port, "( )"
 ""
     
 
-assert async_port == sync_port, ( )
+assert async_port == sync_port, "( )"
 ""
     
 
@@ -568,18 +568,18 @@ if clickhouse_config['host']:
 print("")
 else:
     pass
-print(f"ClickHouse: [U+23ED][U+FE0F] SKIPPED (not configured)")
+print(f"ClickHouse: [U+23ED][U+FE0F] SKIPPED (not configured))"
 
 print("")
 
 if health_results['issues']:
     pass
-print(f"Issues Found:")
+print(f"Issues Found:)"
 for issue in health_results['issues']:
     print("")
 
                                             # Assert overall health
-assert health_results['overall_health'], ( )
+assert health_results['overall_health'], "( )"
 f"DATABASE HEALTH CHECK FAILED:"
 "
 "
@@ -618,7 +618,7 @@ if postgres_url:
     print("")
 
             # The manager should be able to provide a valid PostgreSQL URL
-assert postgres_url, ( )
+assert postgres_url, "( )"
 "DatabaseConfigManager could not provide PostgreSQL URL. "
 "This indicates issues with the database configuration setup."
             
@@ -633,7 +633,7 @@ except Exception as ch_error:
 
 except ImportError:
     pass
-pytest.skip("DatabaseConfigManager not available in this environment")
+pytest.skip("DatabaseConfigManager not available in this environment)"
 except Exception as e:
     pass
 pytest.fail("")
@@ -674,11 +674,11 @@ class TestDatabaseConfigurationRegression:
         async_port = tester.extract_port_from_url(async_url)
         sync_port = tester.extract_port_from_url(sync_url)
 
-        assert async_port == test_port, ( )
+        assert async_port == test_port, "( )"
         ""
         
 
-        assert sync_port == test_port, ( )
+        assert sync_port == test_port, "( )"
         ""
         
 
@@ -713,7 +713,7 @@ class TestDatabaseConfigurationRegression:
         clickhouse_user = env.get('CLICKHOUSE_USER', 'default')
         assert clickhouse_user, "ClickHouse user must be configured"
 
-        print(f"ClickHouse Authentication Config:")
+        print(f"ClickHouse Authentication Config:)"
         print("")
         print("")
         print("")
@@ -753,21 +753,21 @@ class TestDatabaseConfigurationRegression:
         if original_url:
         env.set('DATABASE_URL', original_url)
         else:
-        env.set('DATABASE_URL', "sqlite+aiosqlite:///test_auth.db")
+        env.set('DATABASE_URL', "sqlite+aiosqlite:///test_auth.db)"
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
                         # Run diagnostic when executed directly
         import asyncio
 
     async def main():
         pass
-        print("=== DATABASE CONNECTIVITY VALIDATION ===")
+        print("=== DATABASE CONNECTIVITY VALIDATION ===)"
         validator = DatabaseConnectivityValidator()
 
     # Test PostgreSQL
         postgres_config = validator.get_postgres_config()
-        print(""port"]}")
+        print(""port"]})"
 
         asyncpg_result = await validator.validate_postgres_asyncpg(postgres_config)
         print("")

@@ -31,7 +31,7 @@ class DatabaseManagerPhase1BaselineTests:
         "Verify primary DatabaseManager can be imported successfully."
         from netra_backend.app.db.database_manager import DatabaseManager
         assert DatabaseManager is not None
-        assert hasattr(DatabaseManager, '__init__')
+        assert hasattr(DatabaseManager, "'__init__')"
         print(✅ DatabaseManager import successful")"
 
     def test_database_manager_instantiation(self):
@@ -69,11 +69,11 @@ class DatabaseManagerPhase1BaselineTests:
             manager = DatabaseManager()
             
             # Check essential methods exist
-            assert hasattr(manager, 'initialize')
-            assert hasattr(manager, 'get_session') 
-            assert hasattr(manager, 'close_all')  # Actual method name
-            assert hasattr(manager, 'health_check')
-            assert hasattr(manager, 'get_engine')
+            assert hasattr(manager, "'initialize')"
+            assert hasattr(manager, "'get_session') "
+            assert hasattr(manager, "'close_all')  # Actual method name"
+            assert hasattr(manager, "'health_check')"
+            assert hasattr(manager, "'get_engine')"
             print(✅ Essential DatabaseManager methods exist")"
 
     @pytest.mark.asyncio
@@ -107,7 +107,7 @@ class DatabaseManagerPhase1BaselineTests:
             print(⚠️  get_database_manager function not found - may need creation)
 
     def test_database_manager_configuration_access(self):
-        ""Verify DatabaseManager accesses configuration correctly.
+        ""Verify DatabaseManager accesses configuration correctly."
         # DatabaseManager may use singleton pattern or may already have config loaded
         # Just verify that we can access the config through the existing system
         try:
@@ -137,7 +137,7 @@ if __name__ == "__main__:"
         asyncio.run(test_instance.test_database_manager_basic_methods_exist())
         asyncio.run(test_instance.test_database_manager_multiple_instances())
         
-        print("\n🎉 Phase 1 Validation Complete - DatabaseManager baseline is healthy!")
+        print("\n🎉 Phase 1 Validation Complete - DatabaseManager baseline is healthy!)"
         print(✅ Ready to proceed with Phase 2 (duplicate removal)")"
         
     except Exception as e:

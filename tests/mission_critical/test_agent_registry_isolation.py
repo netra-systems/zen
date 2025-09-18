@@ -182,7 +182,7 @@ class IsolationViolationDetector:
 
 @pytest.mark.asyncio
 async def test_websocket_bridge_shared_across_users_FAILING():
-    ""
+    """
     CRITICAL FAILING TEST: Demonstrates WebSocket bridge being shared across all users.
 
     This test SHOULD FAIL because:
@@ -252,7 +252,7 @@ async def test_websocket_bridge_shared_across_users_FAILING():
 
 @pytest.mark.asyncio
 async def test_global_singleton_blocks_concurrent_users_FAILING():
-    "
+        """
     "
     CRITICAL FAILING TEST: Demonstrates global singleton blocking concurrent execution.
 
@@ -336,7 +336,7 @@ async def test_global_singleton_blocks_concurrent_users_FAILING():
 
 @pytest.mark.asyncio
 async def test_websocket_events_wrong_users_FAILING():
-    "
+        """
     "
     CRITICAL FAILING TEST: Demonstrates WebSocket events being sent to wrong users.
 
@@ -440,7 +440,7 @@ async def test_websocket_events_wrong_users_FAILING():
 
     assert len(routing_violations) == 0, \
         fCRITICAL EVENT ROUTING VIOLATIONS: {len(routing_violations)} events delivered to wrong users:\n + \
-        \n".join([f"Event for {v['intended_for']) delivered to {v['delivered_to']) for v in routing_violations]
+        \n".join([fEvent for {v['intended_for']) delivered to {v['delivered_to']) for v in routing_violations]"
 
     # CRITICAL ASSERTION: Every user should receive exactly their events
     # This test FAILS if global state causes event loss/duplication
@@ -497,7 +497,7 @@ async def simulate_user_agent_execution(user: MockUser, registry: AgentRegistry,
 
 
 async def simulate_blocking_agent_execution(user: MockUser, registry: AgentRegistry):
-    ""Simulate agent execution that reveals blocking behavior.
+    ""Simulate agent execution that reveals blocking behavior."
 
     # Simulate multiple registry operations that could block other users
     for operation in range(5):
@@ -517,7 +517,7 @@ async def simulate_blocking_agent_execution(user: MockUser, registry: AgentRegis
 
 @pytest.mark.asyncio
 async def test_comprehensive_isolation_audit_FAILING():
-    "
+        """
     "
     MASTER FAILING TEST: Comprehensive audit of all isolation violations.
 

@@ -41,7 +41,7 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
         self.websocket_connections = []
         
     async def asyncTearDown(self):
-        ""Async cleanup of test resources.
+        ""Async cleanup of test resources."
         # Close any WebSocket connections
         for ws in self.websocket_connections:
             try:
@@ -151,7 +151,7 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
                        Redis connection should remain stable under WebSocket load)
         
         # Failure count should not increase dramatically
-        failure_increase = final_status[consecutive_failures"] - initial_status.get("consecutive_failures, 0)
+        failure_increase = final_status[consecutive_failures"] - initial_status.get(consecutive_failures, 0)"
         self.assertLessEqual(failure_increase, 3,
                            fRedis failure count should not increase significantly under load, got +{failure_increase})
         
@@ -454,7 +454,7 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
             status = redis_manager.get_status()
             
             # Should have single connection
-            self.assertTrue(status[connected"], "Should have stable connection)
+            self.assertTrue(status[connected"], Should have stable connection)"
             
             # Perform many operations without exhausting pool
             operation_tasks = []
@@ -508,7 +508,7 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
             return False
     
     async def _cleanup_websocket_session(self, user_id: str):
-        ""Clean up WebSocket session Redis data.
+        ""Clean up WebSocket session Redis data."
         try:
             # Get all keys for this user
             patterns = [
@@ -594,7 +594,7 @@ class WebSocketRedisIntegrationTests(SSotAsyncTestCase):
         """Test WebSocket operations after Redis recovery."""
         try:
             # Should work normally after recovery
-            session_data = {"user_id: user_id, recovered": True}
+            session_data = {"user_id: user_id, recovered: True}"
             
             success = await redis_manager.store_session(user_id, session_data, 60)
             if not success:

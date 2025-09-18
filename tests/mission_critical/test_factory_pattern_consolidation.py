@@ -284,7 +284,7 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
         logger.info("🔗 INTEGRATION TEST: Validating ExecutionEngineFactory integration patterns)"
         
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 ExecutionEngineFactory,
                 get_execution_engine_factory,
                 configure_execution_engine_factory
@@ -491,7 +491,7 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
         return any(pattern in file_str for pattern in skip_patterns)
     
     def _extract_class_name(self, line: str) -> str:
-        ""Extract class name from class definition line.
+        ""Extract class name from class definition line."
         try:
             class_part = line.split('class ')[1]
             if '(' in class_part:

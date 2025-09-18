@@ -222,7 +222,7 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.integration
     async def test_websocket_event_content_validation(self):
-    "
+        """
     "
         Test that WebSocket events contain required content fields.
         
@@ -429,7 +429,7 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.integration
     async def test_websocket_event_timing_performance(self):
-    "
+        """
     "
         Test that WebSocket events are sent with acceptable timing and performance.
         
@@ -501,7 +501,7 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
                     fEvent sending overhead too high: {event_overhead:.2%})
             
             print(fINFO: WebSocket event timing test PASSED. 
-                           f"Execution: {total_execution_time:.3f}s, Events: {len(events)}")
+                           f"Execution: {total_execution_time:.3f}s, Events: {len(events)})"
             
         except Exception as e:
             self.fail(fWebSocket event timing test FAILED: {e})
@@ -509,7 +509,7 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.integration
     async def test_websocket_events_error_scenarios(self):
-    ""
+    """
         Test that WebSocket events are still sent correctly in error scenarios.
         
         Error handling is critical - users need to know when agents fail.
@@ -569,7 +569,7 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
             
             # It's good (but not required) if error is indicated in events'
             if error_indicated:
-                print("INFO: Error properly indicated in WebSocket events")
+                print("INFO: Error properly indicated in WebSocket events)"
             else:
                 print(WARNING: Error not explicitly indicated in events - consider improving error reporting)"
                 print(WARNING: Error not explicitly indicated in events - consider improving error reporting)"
@@ -638,7 +638,7 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
                 }
                 
         except Exception as e:
-            print(f"ERROR: Error in simulate_complete_agent_execution: {e})")
+            print(f"ERROR: Error in simulate_complete_agent_execution: {e}))"
             raise
 
     async def _simulate_agent_execution_with_error(self, engine, user_data):

@@ -190,7 +190,7 @@ class TriageStartFailureReproductionTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_triage_start_session_pattern_isolation(self):
-    "
+        """
     "
         Isolate the exact session pattern that causes triage start failure.
         
@@ -275,7 +275,7 @@ class TriageStartFailureReproductionTests(SSotAsyncTestCase):
                 async with session_context as db_session:  # FIXED LINE!
                     # Validate session is available for agent operations
                     assert db_session is not None
-                    assert hasattr(db_session, 'execute')
+                    assert hasattr(db_session, "'execute')"
                     
                     # Simulate successful supervisor creation (lines 133-137)
                     app_state = self.mock_websocket.scope['app'].state

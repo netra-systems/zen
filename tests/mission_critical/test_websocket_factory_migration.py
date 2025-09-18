@@ -55,7 +55,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
-    ""Mission Critical: WebSocket Factory Migration Validation Tests
+    ""Mission Critical: WebSocket Factory Migration Validation Tests"
     
     These tests validate the migration process itself:
     1. Demonstrate current violations exist (pre-migration)
@@ -155,7 +155,7 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
                                 "function: violation[function],"
                                 description: violation[description]
                             }
-                            logger.warning(f"[VIOLATION FOUND] Line {i + 1}: {violation['description']})")
+                            logger.warning(f"[VIOLATION FOUND] Line {i + 1}: {violation['description']}))"
         
         # MIGRATION STATE LOGIC:
         if violations_found:
@@ -171,7 +171,7 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
         else:
             # POST-MIGRATION STATE: No violations should exist
             logger.info("[POST-MIGRATION STATE] No violations found - migration appears complete!)"
-            assert len(violations_found) == 0, No violations found - migration successful
+            assert len(violations_found) == 0, "No violations found - migration successful"
 
     @pytest.mark.asyncio
     async def test_health_check_endpoint_migration(self):
@@ -198,9 +198,9 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             health_result = await route_instance.websocket_health_check()
             
             # Validate health check returns expected structure
-            assert isinstance(health_result, dict), Health check must return dict
-            assert status" in health_result, "Health check must include status
-            assert timestamp in health_result, Health check must include timestamp
+            assert isinstance(health_result, "dict), Health check must return dict"
+            assert status" in health_result, Health check must include status"
+            assert timestamp in health_result, "Health check must include timestamp"
             
             # Check if the result indicates healthy status
             if health_result.get(status) == "healthy:"
@@ -253,7 +253,7 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             config_result = await route_instance.get_websocket_config()
             
             # Validate config returns expected structure
-            assert isinstance(config_result, dict), Config endpoint must return dict
+            assert isinstance(config_result, "dict), Config endpoint must return dict"
             
             # Check for expected configuration structure
             if websocket_config" in config_result:"
@@ -268,7 +268,7 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
                         logger.info(f[CONFIG PARAM] {key}: {config[key]}")"
                 
                 # Config retrieval success indicates migration preserved functionality
-                assert heartbeat_interval in config, Missing heartbeat_interval config
+                assert heartbeat_interval in config, "Missing heartbeat_interval config"
                 
             elif error in config_result:"
             elif error in config_result:"
@@ -457,7 +457,7 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
                                                     line: line_num,
                                                     pattern: pattern,"
                                                     pattern: pattern,"
-                                                    "content: line.strip()"
+                                                    "content": "line.strip()""
                                                 }
                                                 total_violations += 1
                                 

@@ -11,10 +11,10 @@ class TestWebSocketConnection:
 """
         """Send JSON message.""""""
         """Send JSON message.""""""
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -60,12 +60,12 @@ from shared.isolated_environment import get_env
         """Set up test fixtures."""
         self.agent = TriageSubAgent()"""
         self.agent = TriageSubAgent()"""
-        user_id="test_user",
-        thread_id="test_thread",
-        run_id="test_run",
+        user_id="test_user,"
+        thread_id="test_thread,"
+        run_id="test_run,"
         websocket_connection_id="test_ws"
     
-        self.context.metadata = {"user_request": "Test request"}
+        self.context.metadata = {"user_request": "Test request}"
 
     # ========== FIX 1: BaseAgent Inheritance ==========
 
@@ -73,8 +73,8 @@ from shared.isolated_environment import get_env
         """Verify TriageSubAgent extends BaseAgent."""
         pass"""
         pass"""
-        " PASS:  TriageSubAgent extends BaseAgent")
-        print(" PASS:  PASS: TriageSubAgent properly extends BaseAgent")
+        " PASS:  TriageSubAgent extends BaseAgent)"
+        print(" PASS:  PASS: TriageSubAgent properly extends BaseAgent)"
 
     def test_has_base_agent_methods(self):
         """Verify BaseAgent methods are available."""
@@ -83,15 +83,15 @@ from shared.isolated_environment import get_env
 
         for method in methods:"""
         for method in methods:"""
-        "formatted_string")
-        print(" PASS:  PASS: All BaseAgent WebSocket methods available")
+        "formatted_string)"
+        print(" PASS:  PASS: All BaseAgent WebSocket methods available)"
 
     def test_has_websocket_adapter(self):
         """Verify WebSocketBridgeAdapter is initialized."""
         pass"""
         pass"""
-        " PASS:  Has WebSocketBridgeAdapter")
-        print(" PASS:  PASS: WebSocketBridgeAdapter properly initialized")
+        " PASS:  Has WebSocketBridgeAdapter)"
+        print(" PASS:  PASS: WebSocketBridgeAdapter properly initialized)"
 
     # ========== FIX 2: JSON Handling SSOT ==========
 
@@ -100,8 +100,8 @@ from shared.isolated_environment import get_env
 import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
 """
 """
-        " PASS:  No deprecated extract_json_from_response import")
-        print(" PASS:  PASS: Deprecated JSON imports removed")
+        " PASS:  No deprecated extract_json_from_response import)"
+        print(" PASS:  PASS: Deprecated JSON imports removed)"
 
     def test_uses_unified_json_handler(self):
         """Verify unified JSON handler is used."""
@@ -114,22 +114,22 @@ from netra_backend.app.core.serialization.unified_json_handler import ( )
     
 """
 """
-        test_json = '{"test": "value"}'
+        test_json = '{"test": "value}'"
         result = core.extract_and_validate_json(test_json)
         self.assertIsInstance(result, dict)
-        print(" PASS:  PASS: Using unified JSON handler for parsing")
+        print(" PASS:  PASS: Using unified JSON handler for parsing)"
 
     def test_json_error_recovery(self):
         """Verify JSON error recovery works."""
         core = TriageCore(self.context)
 """
 """
-        malformed = '{"test": "value"'  # Missing closing brace )
+        malformed = '{"test": "value'  # Missing closing brace )"
         result = core.extract_and_validate_json(malformed)
 
     # Should recover or return None, not crash
         self.assertTrue(result is None or isinstance(result, dict))
-        print(" PASS:  PASS: JSON error recovery working")
+        print(" PASS:  PASS: JSON error recovery working)"
 
     # ========== FIX 3: Cache Hash SSOT ==========
 
@@ -138,8 +138,8 @@ from netra_backend.app.core.serialization.unified_json_handler import ( )
         pass
     # Check hashlib not imported in cache_utils"""
     # Check hashlib not imported in cache_utils"""
-        " PASS:  No hashlib import in cache_utils")
-        print(" PASS:  PASS: Custom hashlib removed from cache_utils")
+        " PASS:  No hashlib import in cache_utils)"
+        print(" PASS:  PASS: Custom hashlib removed from cache_utils)"
 
     def test_uses_cache_helpers(self):
         """Verify CacheHelpers is used for hashing."""
@@ -151,8 +151,8 @@ from netra_backend.app.services.cache.cache_helpers import CacheHelpers
 
     # SHA256 produces 64 char hex, MD5 produces 32
         self.assertEqual(len(hash_result), 64,
-        " PASS:  Using SHA256 from CacheHelpers (64 chars)")
-        print(" PASS:  PASS: Using CacheHelpers for hash generation")
+        " PASS:  Using SHA256 from CacheHelpers (64 chars))"
+        print(" PASS:  PASS: Using CacheHelpers for hash generation)"
 
     def test_cache_with_user_context(self):
         """Verify cache includes user context when available.""""""
@@ -167,8 +167,8 @@ from netra_backend.app.services.cache.cache_helpers import CacheHelpers
 
     # Should be different when context is provided
         self.assertNotEqual(hash1, hash2,
-        " PASS:  Cache keys include user context")
-        print(" PASS:  PASS: User context properly included in cache keys")
+        " PASS:  Cache keys include user context)"
+        print(" PASS:  PASS: User context properly included in cache keys)"
 
     # ========== FIX 4: WebSocket Integration ==========
 
@@ -186,7 +186,7 @@ from netra_backend.app.services.cache.cache_helpers import CacheHelpers
 
                 # Verify agent_started was called
         mock_adapter.emit_agent_started.assert_called()
-        print(" PASS:  PASS: WebSocket events properly emitted")
+        print(" PASS:  PASS: WebSocket events properly emitted)"
 
                 # ========== FIX 5: UserExecutionContext Pattern ==========
 
@@ -196,20 +196,20 @@ from netra_backend.app.services.cache.cache_helpers import CacheHelpers
                     # Create multiple contexts
         contexts = [ )"""
         contexts = [ )"""
-        user_id="formatted_string",
-        thread_id="formatted_string",
-        run_id="formatted_string",
+        user_id="formatted_string,"
+        thread_id="formatted_string,"
+        run_id="formatted_string,"
         websocket_connection_id="formatted_string"
         ) for i in range(3)
                     
 
         for ctx in contexts:
-        ctx.metadata = {"user_request": "formatted_string"}
+        ctx.metadata = {"user_request": "formatted_string}"
 
                         # Verify no shared state
         self.assertFalse(hasattr(self.agent, 'user_id'))
         self.assertFalse(hasattr(self.agent, 'db_session'))
-        print(" PASS:  PASS: No user data stored in instance variables")
+        print(" PASS:  PASS: No user data stored in instance variables)"
 
                         # ========== FIX 6: No Direct Environment Access ==========
 
@@ -228,7 +228,7 @@ import netra_backend.app.agents.triage.unified_triage_agent as triage_module
         self.assertNotIn('os.environ[', content) )
         self.assertNotIn('os.environ.get(', content) )"""
         self.assertNotIn('os.environ.get(', content) )"""
-        print(" PASS:  PASS: No direct os.environ access detected")
+        print(" PASS:  PASS: No direct os.environ access detected)"
 
                 # ========== Integration Test ==========
 
@@ -245,27 +245,27 @@ import netra_backend.app.agents.triage.unified_triage_agent as triage_module
         self.assertIn('run_id', result['metadata'])
         self.assertEqual(result['metadata']['run_id'], self.context.run_id)"""
         self.assertEqual(result['metadata']['run_id'], self.context.run_id)"""
-        print(" PASS:  PASS: Full execution works with all fixes")
+        print(" PASS:  PASS: Full execution works with all fixes)"
 
     def test_summary(self):
         """Print summary of all compliance checks."""
         print(" )"
         " + "="*80)"
-        print("TRIAGE AGENT SSOT COMPLIANCE VERIFICATION COMPLETE")
-        print("="*80)
-        print(" PASS:  BaseAgent inheritance: FIXED")
-        print(" PASS:  JSON handling SSOT: FIXED")
-        print(" PASS:  Cache hash generation: FIXED")
-        print(" PASS:  WebSocket integration: FIXED")
-        print(" PASS:  UserExecutionContext: MAINTAINED")
-        print(" PASS:  No direct environment access: COMPLIANT")
-        print("="*80)
-        print("All SSOT violations have been successfully resolved!")
+        print("TRIAGE AGENT SSOT COMPLIANCE VERIFICATION COMPLETE)"
+        print("=*80)"
+        print(" PASS:  BaseAgent inheritance: FIXED)"
+        print(" PASS:  JSON handling SSOT: FIXED)"
+        print(" PASS:  Cache hash generation: FIXED)"
+        print(" PASS:  WebSocket integration: FIXED)"
+        print(" PASS:  UserExecutionContext: MAINTAINED)"
+        print(" PASS:  No direct environment access: COMPLIANT)"
+        print("=*80)"
+        print("All SSOT violations have been successfully resolved!)"
         print("="*80 + " )"
         ")"
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         # Run tests
         unittest.main(verbosity=2)
         pass

@@ -24,16 +24,16 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Optional, Any, Dict, List
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from netra_backend.app.agents.supervisor.execution_engine_factory import (
+from netra_backend.app.agents.supervisor.execution_engine_factory import ()
     ExecutionEngineFactory,
     ExecutionEngineFactoryError
 )
-from netra_backend.app.agents.supervisor.agent_instance_factory import (
+from netra_backend.app.agents.supervisor.agent_instance_factory import ()
     UserWebSocketEmitter,
     AgentInstanceFactory
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.services.agent_websocket_bridge import (
+from netra_backend.app.services.agent_websocket_bridge import ()
     AgentWebSocketBridge,
     create_agent_websocket_bridge
 )
@@ -104,9 +104,9 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
         assert factory._websocket_bridge is self.mock_websocket_bridge
         
         # And: Factory should have proper lifecycle management
-        assert hasattr(factory, '_active_engines')
-        assert hasattr(factory, '_engine_lock')
-        assert hasattr(factory, '_factory_metrics')
+        assert hasattr(factory, "'_active_engines')"
+        assert hasattr(factory, "'_engine_lock')"
+        assert hasattr(factory, "'_factory_metrics')"
         
         # And: Factory should be ready for engine creation
         assert factory._max_engines_per_user > 0
@@ -117,7 +117,7 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     def test_execution_engine_factory_websocket_integration_with_none_bridge(self):
-    ""
+    """
         ISSUE #920 INTEGRATION FIXED: ExecutionEngineFactory integration with None websocket_bridge.
         
         This test validates Issue #920 fixed behavior - factory should handle None websocket_bridge
@@ -139,8 +139,8 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
         assert factory._redis_manager is self.mock_redis_manager
         
         # And: Factory should handle missing WebSocket bridge gracefully
-        assert hasattr(factory, '_active_engines')
-        assert hasattr(factory, '_engine_lock')
+        assert hasattr(factory, "'_active_engines')"
+        assert hasattr(factory, "'_engine_lock')"
         
         # And: Factory should have proper test mode configuration
         assert factory._max_engines_per_user > 0
@@ -180,7 +180,7 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
             agent_name=integration_test_agent","
             context={
                 integration_test: True,
-                issue": "920,
+                issue": 920,"
                 user_id: self.test_user_id
             }
         
@@ -249,7 +249,7 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
         user2_tasks = [
             emitter2.notify_agent_started(
                 agent_name=fuser2_agent_{i},
-                context={"user: user2_id, task": i}
+                context={"user: user2_id, task: i}"
             for i in range(3)
         ]
         
@@ -352,7 +352,7 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
         # When: Cleaning up resources
         for factory in factories:
             # Validate factory can be cleaned up
-            assert hasattr(factory, '_active_engines')
+            assert hasattr(factory, "'_active_engines')"
             factory._active_engines.clear()
         
         for emitter in emitters:

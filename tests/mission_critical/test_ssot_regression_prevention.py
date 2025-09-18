@@ -344,10 +344,10 @@ class SSOTRegressionPreventionTests:
         if isolation_failures:
             logger.error(f"WebSocket isolation failures: {isolation_failures[:10]})"
         
-        assert len(isolation_failures) == 0, fWebSocket isolation failed: {len(isolation_failures)} failures detected
+        assert len(isolation_failures) == 0, "fWebSocket isolation failed: {len(isolation_failures)} failures detected"
     
     def test_agent_registry_isolation_concurrent_execution(self):
-    ""
+    """
         ISOLATION CRITICAL: Test agent registry isolation between concurrent executions.
         Verifies each execution context has isolated agent registries with no state sharing.
         
@@ -466,10 +466,10 @@ class SSOTRegressionPreventionTests:
         if isolation_failures:
             logger.error(fAgent registry isolation failures: {isolation_failures[:10]})
         
-        assert len(isolation_failures) == 0, fAgent registry isolation failed: {len(isolation_failures)} failures detected
+        assert len(isolation_failures) == 0, "fAgent registry isolation failed: {len(isolation_failures)} failures detected"
     
     async def test_race_condition_prevention_concurrent_state_access(self):
-    ""
+    """
         ISOLATION CRITICAL: Test race condition prevention in concurrent state access.
         Verifies state management prevents race conditions and maintains data integrity.
         
@@ -521,7 +521,7 @@ class SSOTRegressionPreventionTests:
                         pipe.watch(shared_state_key)
                         pipe.multi()
                         pipe.set(shared_state_key, str(new_value))
-                        pipe.set(foperation:{operation_id}", f"updated_to_{new_value})
+                        pipe.set(foperation:{operation_id}", fupdated_to_{new_value})"
                         
                         try:
                             result = pipe.execute()
@@ -621,10 +621,10 @@ class SSOTRegressionPreventionTests:
         
         # Allow detected race conditions (they should be handled properly)
         # But fail on critical consistency failures
-        assert len(critical_failures) == 0, fCritical race condition failures detected: {len(critical_failures)} failures
+        assert len(critical_failures) == 0, "fCritical race condition failures detected: {len(critical_failures)} failures"
     
     async def test_security_boundary_validation_user_isolation(self):
-        "
+        """
         "
         SECURITY CRITICAL: Test security boundary validation between isolated users.
         Verifies users cannot access each other's data or execute unauthorized operations.'
@@ -811,10 +811,10 @@ class SSOTRegressionPreventionTests:
         if security_failures:
             logger.error(fCRITICAL: Security boundary breaches detected: {security_failures})
         
-        assert len(security_failures) == 0, fCRITICAL SECURITY FAILURE: {len(security_failures)} boundary breaches detected
+        assert len(security_failures) == 0, "fCRITICAL SECURITY FAILURE: {len(security_failures)} boundary breaches detected"
     
     async def test_database_session_isolation_transaction_boundaries(self):
-    ""
+    """
         ISOLATION CRITICAL: Test database session isolation with transaction boundaries.
         Verifies each session has proper transaction isolation with no data leakage.
         
@@ -823,7 +823,7 @@ class SSOTRegressionPreventionTests:
         isolation_failures = []
         
         async def session_transaction_operations(session_id):
-            ""Perform database transactions within an isolated session.
+            ""Perform database transactions within an isolated session."
             failures = []
             
             try:
@@ -1166,7 +1166,7 @@ class SSOTRegressionPreventionTests:
         assert len(performance_failures) <= 5, fToo many performance failures: {len(performance_failures)} detected"
     
     def test_prevent_dependency_violations(self):
-    "
+        """
     "
         DEPENDENCY CRITICAL: Prevent dependency violations in SSOT framework.
         This ensures SSOT doesn't introduce unwanted dependencies.'
@@ -1258,7 +1258,7 @@ class SSOTRegressionPreventionTests:
                         fSSOT framework dependency violations: {violations}")"
     
     def test_prevent_circular_import_violations(self):
-    "
+        """
     "
         IMPORT CRITICAL: Prevent circular import violations.
         This ensures the SSOT framework doesn't create circular dependencies.'
@@ -1475,7 +1475,7 @@ class SSOTContinuousComplianceTests:
         logger.info(fCompleted continuous compliance test cleanup (ID: {self.test_id})
     
     def test_continuous_system_health_real_services(self):
-    ""
+    """
         HEALTH CRITICAL: Continuously monitor system health with REAL services.
         This test runs regularly to ensure all real service components are healthy.
         
@@ -1549,7 +1549,7 @@ class SSOTContinuousComplianceTests:
             sync_redis_client.hset(test_hash, field2, value2)
             
             all_fields = sync_redis_client.hgetall(test_hash)
-            if len(all_fields) != 2 or all_fields.get(field1") != "value1:
+            if len(all_fields) != 2 or all_fields.get(field1") != value1:"
                 health_issues.append({
                     'service': 'redis',
                     'issue': 'hash_operation_failure',
@@ -1849,8 +1849,8 @@ class SSOTContinuousComplianceTests:
         
         # Verify regression thresholds
         assert len(critical_regressions) == 0, fCritical system regressions detected: {critical_regressions}""
-        assert len(performance_regressions) <= 2, fToo many performance regressions: {performance_regressions}
-        assert len(regression_issues) <= 5, fToo many total regression issues: {len(regression_issues)} detected
+        assert len(performance_regressions) <= 2, "fToo many performance regressions: {performance_regressions}"
+        assert len(regression_issues) <= 5, "fToo many total regression issues: {len(regression_issues)} detected"
     
     def _check_real_service_health(self):
         "Check real service health metrics."
@@ -2073,7 +2073,7 @@ class SSOTContinuousComplianceTests:
         
         critical_leakages = [v for v in leakage_violations if 'leakage' in v.get('issue', '')]
         
-        assert len(critical_leakages) == 0, fCRITICAL: Data leakage detected in {len(critical_leakages)} cases
+        assert len(critical_leakages) == 0, "fCRITICAL: Data leakage detected in {len(critical_leakages)} cases"
         assert len(leakage_violations) == 0, fTotal isolation violations: {len(leakage_violations)} detected""
 
     def test_stress_test_concurrent_user_isolation_boundaries(self):
@@ -2283,7 +2283,7 @@ class SSOTContinuousComplianceTests:
             logger.warning(fStress test issues detected: {len(isolation_stress_failures)} total issues")"
         
         # Verify stress test isolation integrity
-        assert len(critical_failures) == 0, fCRITICAL: Isolation failed under stress: {len(critical_failures)} critical failures
+        assert len(critical_failures) == 0, "fCRITICAL: Isolation failed under stress: {len(critical_failures)} critical failures"
         assert operations_per_second >= 10, fStress test performance too low: {operations_per_second} ops/sec"
         assert operations_per_second >= 10, fStress test performance too low: {operations_per_second} ops/sec"
         assert len(isolation_stress_failures) <= 20, f"Too many stress test issues: {len(isolation_stress_failures)} detected"
@@ -2317,7 +2317,7 @@ if __name__ == '__main__':
     try:
         run_websocket_tests()
     except Exception as e:
-        logger.error(f"WebSocket test execution failed: {e}")
+        logger.error(f"WebSocket test execution failed: {e})"
     
     # Run the synchronous tests
     # MIGRATED: Use SSOT unified test runner

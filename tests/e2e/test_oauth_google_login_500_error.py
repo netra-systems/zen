@@ -28,10 +28,10 @@ class TestOAuthGoogleLogin500Error:
         """Get auth service URL from environment or use default"""
     # Check multiple possible sources for the auth service URL
         from shared.isolated_environment import get_env
-        auth_url = get_env().get("AUTH_SERVICE_URL")
+        auth_url = get_env().get("AUTH_SERVICE_URL)"
         if auth_url:
         url = auth_url
-        elif get_env().get("ENVIRONMENT") == "test":
+        elif get_env().get("ENVIRONMENT") == "test:"
         url = "http://127.0.0.1:8001"
         else:
         url = "http://localhost:8081"
@@ -46,7 +46,7 @@ class TestOAuthGoogleLogin500Error:
         async with httpx.AsyncClient() as client:
         for i in range(max_retries):
         try:
-        response = await client.get("formatted_string")
+        response = await client.get("formatted_string)"
         if response.status_code == 200:
         logger.info("")
         return True
@@ -76,23 +76,23 @@ pytest.skip("")
 
                                         # Clear any OAuth credentials to ensure we test the error case
                                         # Save original values to restore later
-original_client_id = os.environ.get("GOOGLE_CLIENT_ID")
-original_client_secret = os.environ.get("GOOGLE_CLIENT_SECRET")
+original_client_id = os.environ.get("GOOGLE_CLIENT_ID)"
+original_client_secret = os.environ.get("GOOGLE_CLIENT_SECRET)"
 
                                         # Remove OAuth credentials to trigger the error
-if "GOOGLE_CLIENT_ID" in os.environ:
+if "GOOGLE_CLIENT_ID in os.environ:"
     pass
-del os.environ["GOOGLE_CLIENT_ID"]
-if "GOOGLE_CLIENT_SECRET" in os.environ:
+del os.environ["GOOGLE_CLIENT_ID]"
+if "GOOGLE_CLIENT_SECRET in os.environ:"
     pass
-del os.environ["GOOGLE_CLIENT_SECRET"]
+del os.environ["GOOGLE_CLIENT_SECRET]"
 
 try:
                                                     # Attempt to initiate Google OAuth login
 async with httpx.AsyncClient(follow_redirects=False) as client:
 response = await client.get( )
 "",
-params={"provider": "google"}
+params={"provider": "google}"
                                                         
 
                                                         # Verify we get a 500 error as seen in the browser
@@ -108,16 +108,16 @@ logger.info("")
                                                             # Check if it has the detailed error format
 if isinstance(response_data, dict):
     pass
-if "detail" in response_data:
+if "detail in response_data:"
                                                                     # Could be a simple detail message or a complex error object
-detail = response_data["detail"]
-if isinstance(detail, dict) and "error" in detail:
+detail = response_data["detail]"
+if isinstance(detail, dict) and "error in detail:"
     pass
 assert detail["error"] == "OAUTH_CONFIGURATION_BROKEN"
 else:
                                                                             # Simple error message format
 logger.info("")
-elif "error" in response_data:
+elif "error in response_data:"
                                                                                 # Direct error format
 assert response_data["error"] == "OAUTH_CONFIGURATION_BROKEN"
 except Exception as e:
@@ -125,16 +125,16 @@ except Exception as e:
 logger.warning("")
                                                                                     # That's okay, we got the 500 error which is what we're testing
 
-logger.info(f"[SUCCESS] Successfully reproduced 500 error when OAuth credentials are missing")
+logger.info(f"[SUCCESS] Successfully reproduced 500 error when OAuth credentials are missing)"
 
 finally:
                                                                                         # Restore original environment variables
 if original_client_id:
     pass
-os.environ["GOOGLE_CLIENT_ID"] = original_client_id
+os.environ["GOOGLE_CLIENT_ID] = original_client_id"
 if original_client_secret:
     pass
-os.environ["GOOGLE_CLIENT_SECRET"] = original_client_secret
+os.environ["GOOGLE_CLIENT_SECRET] = original_client_secret"
 
 @pytest.mark.asyncio
     async def test_google_oauth_login_with_placeholder_credentials_returns_500(self, auth_service_url:
@@ -151,8 +151,8 @@ pass
 pytest.skip("")
 
                                                                                                         # Save original values
-original_client_id = os.environ.get("GOOGLE_CLIENT_ID")
-original_client_secret = os.environ.get("GOOGLE_CLIENT_SECRET")
+original_client_id = os.environ.get("GOOGLE_CLIENT_ID)"
+original_client_secret = os.environ.get("GOOGLE_CLIENT_SECRET)"
 
                                                                                                         # Set placeholder credentials that should be rejected
 os.environ["GOOGLE_CLIENT_ID"] = "your-google-client-id-here"
@@ -163,7 +163,7 @@ try:
 async with httpx.AsyncClient(follow_redirects=False) as client:
 response = await client.get( )
 "",
-params={"provider": "google"}
+params={"provider": "google}"
                                                                                                                 
 
                                                                                                                 # Should get 500 error for placeholder credentials
@@ -177,38 +177,38 @@ logger.info("")
                                                                                                                     # Check various error formats
 if isinstance(response_data, dict):
     pass
-if "detail" in response_data and isinstance(response_data["detail"], dict):
+if "detail" in response_data and isinstance(response_data["detail], dict):"
     pass
-detail = response_data["detail"]
-if "error" in detail:
+detail = response_data["detail]"
+if "error in detail:"
     pass
 assert detail["error"] == "OAUTH_CONFIGURATION_BROKEN"
-if "errors" in detail:
+if "errors in detail:"
     pass
-assert any("placeholder" in str(error).lower() for error in detail["errors"])
-elif "error" in response_data:
+assert any("placeholder" in str(error).lower() for error in detail["errors])"
+elif "error in response_data:"
     pass
 assert response_data["error"] == "OAUTH_CONFIGURATION_BROKEN"
 except Exception as e:
     pass
 logger.warning("")
 
-logger.info(f"[SUCCESS] Placeholder credentials correctly rejected with 500 error")
+logger.info(f"[SUCCESS] Placeholder credentials correctly rejected with 500 error)"
 
 finally:
                                                                                                                                                 # Restore original environment variables
 if original_client_id:
     pass
-os.environ["GOOGLE_CLIENT_ID"] = original_client_id
+os.environ["GOOGLE_CLIENT_ID] = original_client_id"
 else:
     pass
-os.environ.pop("GOOGLE_CLIENT_ID", None)
+os.environ.pop("GOOGLE_CLIENT_ID, None)"
 if original_client_secret:
     pass
-os.environ["GOOGLE_CLIENT_SECRET"] = original_client_secret
+os.environ["GOOGLE_CLIENT_SECRET] = original_client_secret"
 else:
     pass
-os.environ.pop("GOOGLE_CLIENT_SECRET", None)
+os.environ.pop("GOOGLE_CLIENT_SECRET, None)"
 
 @pytest.mark.asyncio
     async def test_google_oauth_login_with_valid_credentials_succeeds(self, auth_service_url:
@@ -225,8 +225,8 @@ pass
 pytest.skip("")
 
                                                                                                                                                                         # Save original values
-original_client_id = os.environ.get("GOOGLE_CLIENT_ID")
-original_client_secret = os.environ.get("GOOGLE_CLIENT_SECRET")
+original_client_id = os.environ.get("GOOGLE_CLIENT_ID)"
+original_client_secret = os.environ.get("GOOGLE_CLIENT_SECRET)"
 
 try:
                                                                                                                                                                             # Set valid development OAuth credentials
@@ -237,16 +237,16 @@ os.environ["GOOGLE_CLIENT_SECRET"] = "GOCSPX-1234567890abcdefghijk"
 async with httpx.AsyncClient(follow_redirects=False) as client:
 response = await client.get( )
 "",
-params={"provider": "google"}
+params={"provider": "google}"
                                                                                                                                                                                 
 
                                                                                                                                                                                 # Should get 302 redirect to Google OAuth, not a 500 error
 assert response.status_code == 302, ""
 
                                                                                                                                                                                 # Verify redirect is to Google OAuth
-location = response.headers.get("location", "")
+location = response.headers.get("location", ")"
 assert "accounts.google.com" in location, ""
-assert "oauth2" in location
+assert "oauth2 in location"
 
 logger.info("")
 
@@ -254,19 +254,19 @@ finally:
                                                                                                                                                                                     # Restore original environment variables
 if original_client_id:
     pass
-os.environ["GOOGLE_CLIENT_ID"] = original_client_id
+os.environ["GOOGLE_CLIENT_ID] = original_client_id"
 else:
     pass
-os.environ.pop("GOOGLE_CLIENT_ID", None)
+os.environ.pop("GOOGLE_CLIENT_ID, None)"
 if original_client_secret:
     pass
-os.environ["GOOGLE_CLIENT_SECRET"] = original_client_secret
+os.environ["GOOGLE_CLIENT_SECRET] = original_client_secret"
 else:
     pass
-os.environ.pop("GOOGLE_CLIENT_SECRET", None)
+os.environ.pop("GOOGLE_CLIENT_SECRET, None)"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                                                                                                                                                                                         # Run the test directly
 import sys
 
@@ -280,16 +280,16 @@ format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 test_instance = TestOAuthGoogleLogin500Error()
 
                                                                                                                                                                                                         # Run test without credentials (reproduces the 500 error)
-asyncio.run(test_instance.test_google_oauth_login_without_credentials_returns_500("http://localhost:8081"))
+asyncio.run(test_instance.test_google_oauth_login_without_credentials_returns_500("http://localhost:8081))"
 
 print("")
 [SUCCESS] Successfully reproduced the 500 error when OAuth credentials are missing!")"
 print("")
 To fix this issue in development:")"
-print("1. Run: python scripts/setup_dev_oauth.py")
-print("2. Or set these environment variables:")
-print("   GOOGLE_CLIENT_ID=304612253870-bqie9nvlaokfc2noos1nu5st614vlqam.apps.googleusercontent.com")
-print("   GOOGLE_CLIENT_SECRET=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")
-print("3. Restart the auth service: python scripts/dev_launcher.py")
+print("1. Run: python scripts/setup_dev_oauth.py)"
+print("2. Or set these environment variables:)"
+print("   GOOGLE_CLIENT_ID=304612253870-bqie9nvlaokfc2noos1nu5st614vlqam.apps.googleusercontent.com)"
+print("   GOOGLE_CLIENT_SECRET=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)"
+print("3. Restart the auth service: python scripts/dev_launcher.py)"
 
 )

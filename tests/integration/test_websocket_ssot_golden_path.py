@@ -16,7 +16,7 @@ def lazy_import(module_path: str, component: str=None):
 _lazy_imports = {}
 
 def lazy_import(module_path: str, component: str=None):
-    ""Lazy import pattern for performance optimization
+    ""Lazy import pattern for performance optimization"
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component) if component else [)
@@ -84,7 +84,7 @@ class WebSocketSSOTGoldenPathTests(SSotAsyncTestCase):
         mock_websocket.state.name = 'OPEN'
         mock_auth_context = {'user_id': self.test_user_id, 'authenticated': True, 'connection_id': f'conn_{uuid.uuid4().hex[:8]}', 'handshake_complete': True}
         user_message = {'type': 'user_message', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Help me optimize my AI infrastructure costs', 'timestamp': datetime.now(timezone.utc).isoformat()}
-        critical_events = [{'type': 'agent_started', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Agent processing started', 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'agent_thinking', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Analyzing AI infrastructure optimization request', 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'tool_executing', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Executing cost analysis tool', 'tool': 'cost_analyzer', 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'tool_completed', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Cost analysis complete', 'tool': 'cost_analyzer', 'results': {'potential_savings': '$50K/month'}, 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'agent_completed', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Agent response ready', 'response': "I've analyzed your AI infrastructure and identified $50K/month in potential savings..., 'timestamp': datetime.now(timezone.utc).isoformat()}]"'
+        critical_events = [{'type': 'agent_started', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Agent processing started', 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'agent_thinking', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Analyzing AI infrastructure optimization request', 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'tool_executing', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Executing cost analysis tool', 'tool': 'cost_analyzer', 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'tool_completed', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Cost analysis complete', 'tool': 'cost_analyzer', 'results': {'potential_savings': '$50K/month'}, 'timestamp': datetime.now(timezone.utc).isoformat()}, {'type': 'agent_completed', 'user_id': self.test_user_id, 'run_id': self.test_run_id, 'message': 'Agent response ready', 'response': "I've analyzed your AI infrastructure and identified $50K/month in potential savings..., 'timestamp': datetime.now(timezone.utc).isoformat()}]'"
         for event in critical_events:
             await self.capture_websocket_event(event)
         assert mock_auth_result['success']
@@ -95,11 +95,11 @@ class WebSocketSSOTGoldenPathTests(SSotAsyncTestCase):
         assert user_message['user_id'] == self.test_user_id
         assert user_message['type'] == 'user_message'
         assert 'optimize' in user_message['message'].lower()
-        assert len(self.received_events) == 5, 'All 5 critical events must be delivered for Golden Path'
+        assert len(self.received_events) == 5, "'All 5 critical events must be delivered for Golden Path'"
         received_event_types = [event['event']['type'] for event in self.received_events]
         required_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
         for required_event in required_events:
-            assert required_event in received_event_types, f'Critical event {required_event} must be delivered'
+            assert required_event in received_event_types, "f'Critical event {required_event} must be delivered'"
         assert received_event_types[0] == 'agent_started'
         assert received_event_types[1] == 'agent_thinking'
         assert received_event_types[2] == 'tool_executing'
@@ -141,8 +141,8 @@ class WebSocketSSOTGoldenPathTests(SSotAsyncTestCase):
         for event in ordered_events:
             await self.capture_websocket_event(event)
             received_sequences.append(event['sequence')
-        assert received_sequences == [1, 2, 3, 4, 5], 'Event sequence must be preserved for optimal user experience'
-        assert len(self.received_events) == 5, 'All events must be delivered without loss'
+        assert received_sequences == [1, "2, 3, 4, 5], 'Event sequence must be preserved for optimal user experience'"
+        assert len(self.received_events) == 5, "'All events must be delivered without loss'"
 
     async def test_ssot_websocket_user_isolation_validation(self):
         

@@ -31,10 +31,10 @@ import time
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
-from netra_backend.app.core.resilience.unified_circuit_breaker import (
+from netra_backend.app.core.resilience.unified_circuit_breaker import ()
     UnifiedCircuitBreakerState
 )
-from netra_backend.app.mcp_client.connection_manager import (
+from netra_backend.app.mcp_client.connection_manager import ()
     MCPConnectionManager,
     MCPServerConfig,
     MCPTransport,
@@ -82,7 +82,7 @@ class MCPConnectionRecoveryComprehensiveTests:
     async def test_failed_connections_move_to_recovery_queue(
         self, connection_manager, mock_failing_connection
     ):
-        ""Test that failed connections move to recovery queue instead of being removed.
+        ""Test that failed connections move to recovery queue instead of being removed."
         server_name = mock_failing_connection.server_name
         
         # Initialize pools and circuit breaker
@@ -410,7 +410,7 @@ class MCPConnectionRecoveryComprehensiveTests:
         assert server_status[metrics]["recovery_attempts] == 3"
         assert server_status[metrics"][successful_recoveries] == 2"
         assert server_status[circuit_breaker] is not None
-        assert server_status["health_status] == healthy"  # Pool has connections
+        assert server_status["health_status] == healthy  # Pool has connections"
 
     @pytest.mark.asyncio
     async def test_comprehensive_error_logging(
@@ -483,7 +483,7 @@ class MCPConnectionRecoveryComprehensiveTests:
     async def test_force_recovery_all_servers(
         self, connection_manager
     ):
-        ""Test force recovery for all servers with failed connections.
+        ""Test force recovery for all servers with failed connections."
         # Setup multiple servers
         configs = []
         for i in range(3):

@@ -6,7 +6,7 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
             raise RuntimeError(WebSocket is closed)"
@@ -159,7 +159,7 @@ class MockConnectionPool:
                 # Verify emitter creation
         assert emitter is not None, Emitter should be created"
         assert emitter is not None, Emitter should be created"
-        assert emitter.user_context.user_id == user_id, formatted_string
+        assert emitter.user_context.user_id == user_id, "formatted_string"
         assert emitter.user_context.thread_id == thread_id, "
         assert emitter.user_context.thread_id == thread_id, "
         print(formatted_string)
@@ -211,14 +211,14 @@ class MockConnectionPool:
         await emitter.notify_agent_thinking(agent_name, run_id, Analyzing user request...)"
         await asyncio.sleep(0.1)
         print("[EVENT] Sending tool_executing event...)"
-        await emitter.notify_tool_executing(agent_name, run_id, search_tool, {"query: test query")
+        await emitter.notify_tool_executing(agent_name, run_id, search_tool, {"query: test query)"
         await asyncio.sleep(0.1)
         print([EVENT] Sending tool_completed event...)"
         print([EVENT] Sending tool_completed event...)"
         await emitter.notify_tool_completed(agent_name, run_id, search_tool", {results: [result1, result2])"
         await asyncio.sleep(0.1)
         print([EVENT] Sending agent_completed event..."")
-        await emitter.notify_agent_completed(agent_name, run_id, {status: success, "response: Test completed")
+        await emitter.notify_agent_completed(agent_name, run_id, {status: success, "response: Test completed)"
         await asyncio.sleep(0.1)
                             # Verify all events were sent
         sent_events = mock_connection.sent_events
@@ -241,9 +241,9 @@ class MockConnectionPool:
         print("")
                                         # Verify event structure
         for event in sent_events:
-        assert 'event_type' in event, formatted_string
+        assert 'event_type' in event, "formatted_string"
         assert 'event_id' in event, ""
-        assert 'thread_id' in event, formatted_string
+        assert 'thread_id' in event, "formatted_string"
         assert 'data' in event, formatted_string"
         assert 'data' in event, formatted_string"
         assert 'timestamp' in event, formatted_string"
@@ -271,7 +271,7 @@ class MockConnectionPool:
         user_id=test_user,
         thread_id=test_thread,
         data={
-        "agent_name": TestAgent,
+        "agent_name: TestAgent,"
         run_id: run_123,
         status": started,"
         "timestamp: datetime.now(timezone.utc).isoformat(),"
@@ -291,7 +291,7 @@ class MockConnectionPool:
         print(formatted_string)
                                                         Deserialize from JSON
         deserialized = json.loads(json_str)
-        print(f"[SUCCESS] Event deserialized from JSON")
+        print(f"[SUCCESS] Event deserialized from JSON)"
                                                         # Verify structure
         assert deserialized['event_type'] == event.event_type
         assert deserialized['event_id'] == event.event_id
@@ -306,7 +306,7 @@ class MockConnectionPool:
         traceback.print_exc()
         return False
     async def run_test():
-        ""Run all WebSocket event tests.
+        ""Run all WebSocket event tests."
         print(MISSION CRITICAL: WebSocket Event Factory Tests)
         print(=" * 60)"
         test_results = []
@@ -361,7 +361,7 @@ class MockConnectionPool:
         import traceback
         traceback.print_exc()
         return False
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         result = asyncio.run(run_test())
         sys.exit(0 if result else 1)
         pass

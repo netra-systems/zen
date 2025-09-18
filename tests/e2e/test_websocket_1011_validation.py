@@ -61,7 +61,7 @@ class WebSocket1011PreventionTests:
         logger.inf"o(Testing WebSocket import stability...)"
         
         # Test all critical imports work without fallback
-        from netra_backend.app.websocket_core import (
+        from netra_backend.app.websocket_core import ()
             get_connection_state_machine,
             ApplicationConnectionState,
             get_connection_state_registry,
@@ -95,7 +95,7 @@ class WebSocket1011PreventionTests:
         ""
         logger.info(Testing connection state machine operation...)
         
-        from netra_backend.app.websocket_core import (
+        from netra_backend.app.websocket_core import ()
             get_connection_state_registry,
             ApplicationConnectionState
         )
@@ -130,7 +130,7 @@ class WebSocket1011PreventionTests:
             
             # Verify can process messages (critical for preventing 1011 errors)
             can_process = state_machine.can_process_messages()
-            assert can_process, State machine cannot process messages - 1011 errors likely
+            assert can_process, "State machine cannot process messages - 1011 errors likely"
             
             logger.info(SUCCESS: Connection state machine completes full lifecycle")"
             
@@ -147,7 +147,7 @@ class WebSocket1011PreventionTests:
         ""
         logger.inf"o(Testing complete WebSocket handshake to processing pipeline...)"
         
-        from netra_backend.app.websocket_core import (
+        from netra_backend.app.websocket_core import ()
             get_connection_state_registry,
             ApplicationConnectionState
         )
@@ -171,7 +171,7 @@ class WebSocket1011PreventionTests:
                 ApplicationConnectionState.ACCEPTED,
                 reason="WebSocket transport handshake complete"
             )
-            assert success, Failed to reach ACCEPTED state
+            assert success, "Failed to reach ACCEPTED state"
             
             # Step 3: Authentication (this was where failures started)
             logger.info("Step 3: Transitioning to AUTHENTICATED state...)"
@@ -239,7 +239,7 @@ class WebSocket1011PreventionTests:
         from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
         
         # Test that orchestrator factory pattern is available
-        assert hasattr(AgentWebSocketBridge, 'create_execution_orchestrator'), \
+        assert hasattr(AgentWebSocketBridge, "'create_execution_orchestrator'), \"
             "AgentWebSocketBridge missing orchestrator factory - agent execution will block"
         
         # Test dependency status reporting
@@ -251,7 +251,7 @@ class WebSocket1011PreventionTests:
             
             # Test that orchestrator_factory_available check works
             factory_available = hasattr(mock_bridge, 'create_execution_orchestrator')
-            assert factory_available, Orchestrator factory not detected - agent execution will fail
+            assert factory_available, "Orchestrator factory not detected - agent execution will fail"
             
             # Test that the factory method is callable
             assert callable(mock_bridge.create_execution_orchestrator), \
@@ -260,7 +260,7 @@ class WebSocket1011PreventionTests:
             logger.info(SUCCESS: Agent execution dependencies properly resolved")"
             
         except Exception as e:
-            pytest.f"ail(fAgent execution dependency resolution failed: {e}")
+            pytest.f"ail(fAgent execution dependency resolution failed: {e})"
 
     async def test_e2e_auth_integration_compatibility(self):
 """
@@ -283,7 +283,7 @@ class WebSocket1011PreventionTests:
             
             # This should not raise errors (though we don't test full auth flow here)'
             # We're validating that the SSOT patterns are available'
-            assert hasattr(auth_helper, 'create_staging_compatible_token'), \
+            assert hasattr(auth_helper, "'create_staging_compatible_token'), \"
                 E2E auth helper missing staging token creation""
             
             logger.inf"o(SUCCESS: E2E authentication integration is compatible)"
@@ -308,7 +308,7 @@ class WebSocket1011PreventionTests:
         try:
             # Phase 1: Validate imports (primary fix)
             logger.info(Phase 1: Validating critical import fixes...)
-            from netra_backend.app.websocket_core import (
+            from netra_backend.app.websocket_core import ()
                 get_connection_state_machine,
                 ApplicationConnectionState,
                 get_connection_state_registry
@@ -343,12 +343,12 @@ class WebSocket1011PreventionTests:
             # Phase 4: Validate message processing readiness
             logger.info(Phase 4: Validating message processing readiness...")"
             can_process = state_machine.can_process_messages()
-            assert can_process, Message processing not ready
+            assert can_process, "Message processing not ready"
             
             # Phase 5: Validate dependency resolution
             logger.info(Phase 5: Validating agent execution dependencies...)""
             from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-            assert hasattr(AgentWebSocketBridge, 'create_execution_orchestrator')
+            assert hasattr(AgentWebSocketBridge, "'create_execution_orchestrator')"
             
             # Cleanup
             registry.unregister_connection(integration_connection)
@@ -358,10 +358,10 @@ class WebSocket1011PreventionTests:
             
         except Exception as e:
             test_duration = time.time() - test_start_time
-            pytest.f"ail(fWebSocket 1011 prevention integration failed after {test_duration:0.2f}s: {e}")
+            pytest.f"ail(fWebSocket 1011 prevention integration failed after {test_duration:0.2f}s: {e})"
 
     async def test_golden_path_compatibility_e2e(self):
-    ""
+    """
         E2E test that validates Golden Path compatibility.
         
         This ensures that our 1011 error fixes don't break the Golden Path'
@@ -371,7 +371,7 @@ class WebSocket1011PreventionTests:
         
         try:
             # Test that WebSocket components needed for Golden Path are available
-            from netra_backend.app.websocket_core import (
+            from netra_backend.app.websocket_core import ()
                 get_connection_state_machine,
                 ApplicationConnectionState,
                 get_connection_state_registry
@@ -392,11 +392,11 @@ class WebSocket1011PreventionTests:
                 ApplicationConnectionState.PROCESSING_READY,
                 reason=Golden Path processing ready""
             )
-            assert success, Golden Path cannot reach processing ready state
+            assert success, "Golden Path cannot reach processing ready state"
             
             # Step 3: Agent execution compatibility
             from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-            assert hasattr(AgentWebSocketBridge, 'create_execution_orchestrator'), \
+            assert hasattr(AgentWebSocketBridge, "'create_execution_orchestrator'), \"
                 Golden Path agent execution capability compromised""
             
             # Cleanup
@@ -431,7 +431,7 @@ class WebSocket1011BusinessValueValidationTests:
         logger.info("Testing chat functionality restoration...)"
         
         # Chat f"unctionality requires complete WebSocket pipeline"
-        from netra_backend.app.websocket_core import (
+        from netra_backend.app.websocket_core import ()
             get_connection_state_registry,
             ApplicationConnectionState
         )
@@ -444,7 +444,7 @@ class WebSocket1011BusinessValueValidationTests:
         try:
             # Chat requires: Connection -> Authentication -> Processing Ready
             state_machine = registry.register_connection(chat_connection, chat_user)
-            assert state_machine is not None, Chat connection setup failed
+            assert state_machine is not None, "Chat connection setup failed"
             
             # Simulate chat session establishment
             chat_states = [
@@ -461,7 +461,7 @@ class WebSocket1011BusinessValueValidationTests:
             
             # Verify chat message processing capability
             can_process = state_machine.can_process_messages()
-            assert can_process, Chat cannot process messages - revenue impact severe
+            assert can_process, "Chat cannot process messages - revenue impact severe"
             
             logger.info("SUCCESS: Chat functionality fully restored)"
             
@@ -487,7 +487,7 @@ class WebSocket1011BusinessValueValidationTests:
         try:
             # Real-time events require operational connection management
             state_machine = registry.register_connection(events_connection, events_user)
-            assert state_machine is not None, Event delivery connection failed
+            assert state_machine is not None, "Event delivery connection failed"
             
             # Events require processing ready state
             from netra_backend.app.websocket_core import ApplicationConnectionState
@@ -495,7 +495,7 @@ class WebSocket1011BusinessValueValidationTests:
                 ApplicationConnectionState.PROCESSING_READY,
                 reason="Events delivery ready"
             )
-            assert success, Event delivery cannot reach ready state
+            assert success, "Event delivery cannot reach ready state"
             
             # Verify event delivery capability
             can_deliver_events = state_machine.can_process_messages()
@@ -523,7 +523,7 @@ class WebSocket1011BusinessValueValidationTests:
         
         try:
             # Check 1: Critical imports work
-            from netra_backend.app.websocket_core import (
+            from netra_backend.app.websocket_core import ()
                 get_connection_state_machine,
                 ApplicationConnectionState,
                 get_connection_state_registry
@@ -545,7 +545,7 @@ class WebSocket1011BusinessValueValidationTests:
             
             # Check 3: Agent execution dependencies
             from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-            assert hasattr(AgentWebSocketBridge, 'create_execution_orchestrator')
+            assert hasattr(AgentWebSocketBridge, "'create_execution_orchestrator')"
             deployment_checks.append(Agent execution dependencies: PASS")"
             
             # Cleanup
@@ -560,7 +560,7 @@ class WebSocket1011BusinessValueValidationTests:
             logger.error("FAILURE: Staging deployment not ready)"
             f"or check in deployment_checks:"
                 logger.info(f  - {check}")"
-            pytest.fail(f"Staging deployment readiness f"ailed: {e}")"
+            pytest.fail(f"Staging deployment readiness failed: {e}"")"
 
 
 # Test configuration for E2E validation

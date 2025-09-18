@@ -103,7 +103,7 @@ class WebSocketMessageAlignmentTest:
 
 @pytest.mark.asyncio
     async def test_all_backend_message_types():
-        ""Test that all backend MessageType enum values can be sent without frontend parse errors.
+        ""Test that all backend MessageType enum values can be sent without frontend parse errors."
 
 
 tester = WebSocketMessageAlignmentTest()

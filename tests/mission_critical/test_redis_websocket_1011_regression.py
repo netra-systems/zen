@@ -69,7 +69,7 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
             TESTING: "true,"
             ENVIRONMENT": test,"
             TEST_DISABLE_REDIS: false,
-            REDIS_URL": "redis://localhost:6381/0,
+            REDIS_URL": redis://localhost:6381/0,"
             WEBSOCKET_HOST: localhost,
             WEBSOCKET_PORT: "8001"
         }
@@ -178,7 +178,7 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
                     )
                     return True
                 else:
-                    logger.warning(f"Failed to store connection state for {connection_id})")
+                    logger.warning(f"Failed to store connection state for {connection_id}))"
                     return False
                     
             except Exception as e:
@@ -252,11 +252,11 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
         
         # Simulate the 5 critical WebSocket events that must be delivered
         critical_events = [
-            {type: agent_started, data: {agent": "supervisor, run_id: self.test_session_id}},
-            {type: agent_thinking, "data: {phase": analysis, progress: 0.2}},
-            {type: tool_executing", "data: {tool: search, status: "running}},"
-            {type: tool_completed, data: {"tool: search", result: success}},
-            {"type: agent_completed", data: {status: completed, final_result": "success}}
+            {"type": agent_started, "data": {"agent": "supervisor, run_id: self.test_session_id}},"
+            {"type": agent_thinking, ""data": {"phase": analysis, progress: 0.2}},"
+            {"type": tool_executing", ""data": {"tool: search, status: "running"}},"
+            {"type": tool_completed, "data": {""tool: search", result: success}},"
+            {"type: agent_completed", "data": {"status: completed, final_result": "success}}"
         ]
         
         # Store events in Redis with proper state management
@@ -323,7 +323,7 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
                     run_id: user_run_id,"
                     "session_id: self.test_session_id,"
                     status: active,
-                    websocket_connection": "established
+                    websocket_connection": established"
                 }
                 
                 session_key = fregression:{self.test_session_id}:user:{user_id}
@@ -331,9 +331,9 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
                 
                 # Simulate agent events for this user
                 user_events = [
-                    {type: agent_started", "user_id: user_id, run_id: user_run_id},
-                    {type: agent_thinking, "user_id: user_id, run_id": user_run_id},
-                    {type: agent_completed, user_id: user_id, run_id": user_run_id}"
+                    {"type": agent_started", user_id: user_id, run_id: user_run_id},"
+                    {"type": agent_thinking, "user_id: user_id, run_id: user_run_id},"
+                    {"type": agent_completed, user_id: user_id, run_id": user_run_id}"
                 ]
                 
                 for event in user_events:
@@ -386,7 +386,7 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
                 session_id: self.test_session_id,"
                 "critical_websocket_data: must_survive_reconnection,"
                 user_count: 5,
-                active_agents": ["supervisor, data_helper]
+                active_agents": [supervisor, data_helper]"
             }
             
             state_key = fregression:{self.test_session_id}:critical_state

@@ -27,17 +27,17 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
     # Set up test environment
-env.set('DATABASE_URL', 'postgresql://test_user:test_pass@localhost:5433/netra_test', "test")
-env.set('REDIS_URL', 'redis://localhost:6381', "test")
-env.set('TESTING', 'true', "test")
-env.set('AUTH_TEST_MODE', 'true', "test")
-env.set('USE_REAL_SERVICES', 'true', "test")
+env.set('DATABASE_URL', 'postgresql://test_user:test_pass@localhost:5433/netra_test', "test)"
+env.set('REDIS_URL', 'redis://localhost:6381', "test)"
+env.set('TESTING', 'true', "test)"
+env.set('AUTH_TEST_MODE', 'true', "test)"
+env.set('USE_REAL_SERVICES', 'true', "test)"
 
 
 def test_database_connection_no_auth_errors():
     pass
-"""Test that database connections don't produce authentication error logs."""'
-print("Testing database connectivity first...")
+"""Test that database connections don't produce authentication error logs.""'"
+print("Testing database connectivity first...)"
 
     # Test basic database connectivity first
 try:
@@ -47,16 +47,16 @@ postgres_url = 'postgresql://test_user:test_pass@localhost:5433/netra_test'
 
 with psycopg.connect(postgres_url, connect_timeout=5) as conn:
 with conn.cursor() as cur:
-cur.execute("SELECT 1")
+cur.execute("SELECT 1)"
 result = cur.fetchone()
 assert result[0] == 1, "Database connectivity test failed"
-print(" PASS:  Basic database connectivity test passed")
+print(" PASS:  Basic database connectivity test passed)"
 except Exception as e:
     print("")
-print("Skipping test - requires PostgreSQL on localhost:5433")
+print("Skipping test - requires PostgreSQL on localhost:5433)"
 return
 
-print("Testing auth service database connection logs...")
+print("Testing auth service database connection logs...)"
 
                     # Capture all log output
 log_capture = StringIO()
@@ -85,22 +85,22 @@ try:
     pass
 from auth_service.auth_core.database.connection import AuthDatabase
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-print(" PASS:  Auth service imports successful")
+print(" PASS:  Auth service imports successful)"
 except ImportError as import_error:
     print("")
 return
 
                                 # Create database instance
 auth_db = AuthDatabase()
-print(" PASS:  AuthDatabase instance created")
+print(" PASS:  AuthDatabase instance created)"
 
                                 # Try to initialize database connection
 try:
     pass
 asyncio.run(asyncio.wait_for(auth_db.initialize(), timeout=10.0))
-print(" PASS:  Database initialization completed")
+print(" PASS:  Database initialization completed)"
 except asyncio.TimeoutError:
-    print(" WARNING: [U+FE0F]  Database initialization timed out (may be expected in test environment)")
+    print(" WARNING: [U+FE0F]  Database initialization timed out (may be expected in test environment))"
 except Exception as init_error:
     print("")
 
@@ -109,12 +109,12 @@ log_output = log_capture.getvalue()
 
                                             # Check for auth-related error messages that shouldn't be there'
 unwanted_auth_patterns = [ ]
-"authentication failed",
-"password authentication failed",
-"SCRAM authentication",
-"SSL connection has been closed",
-"no pg_hba.conf entry",
-"password authentication failed for user",
+"authentication failed,"
+"password authentication failed,"
+"SCRAM authentication,"
+"SSL connection has been closed,"
+"no pg_hba.conf entry,"
+"password authentication failed for user,"
                                             
 
 found_auth_issues = []
@@ -129,7 +129,7 @@ found_auth_issues.append("")
 
                                                             # Report results
 if found_auth_issues:
-    print(" FAIL:  Found authentication error logs that indicate auth issues:")
+    print(" FAIL:  Found authentication error logs that indicate auth issues:)"
 for issue in found_auth_issues:
     print("")
 print("")
@@ -137,7 +137,7 @@ Full log output:")"
 print(log_output)
 return False
 else:
-    print(" PASS:  No authentication error patterns found in logs")
+    print(" PASS:  No authentication error patterns found in logs)"
 
                                                                         # Test basic database operations if possible
 try:
@@ -146,13 +146,13 @@ if hasattr(auth_db, 'get_session'):
     async def test_db_op():
 async with auth_db.get_session() as session:
 from sqlalchemy import text
-result = await session.execute(text("SELECT 1 as test_value"))
+result = await session.execute(text("SELECT 1 as test_value))"
 await asyncio.sleep(0)
 return result.scalar()
 
 test_result = asyncio.run(test_db_op())
 if test_result == 1:
-    print(" PASS:  Database operation test passed")
+    print(" PASS:  Database operation test passed)"
 else:
     print("")
 except Exception as op_error:
@@ -182,9 +182,9 @@ except Exception as cleanup_error:
 
 def test_database_manager_no_credential_logging():
     pass
-"""Test that DatabaseManager URL building doesn't log credentials."""'
+"""Test that DatabaseManager URL building doesn't log credentials.""'"
 pass
-print("Testing DatabaseManager credential logging...")
+print("Testing DatabaseManager credential logging...)"
 
     # Capture all log output
 log_capture = StringIO()
@@ -211,23 +211,23 @@ try:
 try:
     pass
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-print(" PASS:  AuthDatabaseManager import successful")
+print(" PASS:  AuthDatabaseManager import successful)"
 except ImportError as import_error:
     print("")
 return False
 
                     # Test various URL transformations with different credential patterns
 test_urls = [ ]
-"postgresql://user:password123@localhost/dbname",
-"postgresql+asyncpg://user:secret456@host/db?sslmode=require",
-"postgres://admin:pass789@cloudsql/database",
-"postgresql://test_user:test_pass@localhost:5433/netra_test",
+"postgresql://user:password123@localhost/dbname,"
+"postgresql+asyncpg://user:secret456@host/db?sslmode=require,"
+"postgres://admin:pass789@cloudsql/database,"
+"postgresql://test_user:test_pass@localhost:5433/netra_test,"
                     
 
 try:
     pass
 manager = AuthDatabaseManager()
-print(" PASS:  AuthDatabaseManager instance created")
+print(" PASS:  AuthDatabaseManager instance created)"
 except Exception as manager_error:
     print("")
 return False
@@ -235,7 +235,7 @@ return False
 for i, url in enumerate(test_urls):
                                 # Set environment variable
 original_url = env.get('DATABASE_URL')
-env.set('DATABASE_URL', url, "test")
+env.set('DATABASE_URL', url, "test)"
 
 try:
                                     # Test various URL generation methods
@@ -255,16 +255,16 @@ finally:
                                                         # Restore original URL
 if original_url:
     pass
-env.set('DATABASE_URL', original_url, "test")
+env.set('DATABASE_URL', original_url, "test)"
 elif 'DATABASE_URL' in os.environ:
     pass
-env.delete('DATABASE_URL', "test")
+env.delete('DATABASE_URL', "test)"
 
                                                                 # Get captured logs
 log_output = log_capture.getvalue()
 
                                                                 # Check that passwords/credentials aren't logged'
-credentials = ["password123", "secret456", "pass789", "test_pass"]
+credentials = ["password123", "secret456", "pass789", "test_pass]"
 found_credentials = []
 
 for credential in credentials:
@@ -278,7 +278,7 @@ found_credentials.append("")
 
                                                                                 # Report results
 if found_credentials:
-    print(" FAIL:  Found credentials in logs (security issue):")
+    print(" FAIL:  Found credentials in logs (security issue):)"
 for cred in found_credentials:
     print("")
 print("")
@@ -286,7 +286,7 @@ Full log output:")"
 print(log_output)
 return False
 else:
-    print(" PASS:  No credentials found in logs")
+    print(" PASS:  No credentials found in logs)"
 return True
 
 finally:
@@ -298,47 +298,47 @@ logger.handlers = handlers
 def main():
     pass
 """Main test runner."""
-print("=" * 60)
-print("STANDALONE DATABASE AUTH LOGGING TEST")
-print("=" * 60)
+print("= * 60)"
+print("STANDALONE DATABASE AUTH LOGGING TEST)"
+print("= * 60)"
 print()
 
 success_count = 0
 total_tests = 2
 
-print("Test 1: Database connection auth error logging")
-print("-" * 50)
+print("Test 1: Database connection auth error logging)"
+print("- * 50)"
 if test_database_connection_no_auth_errors():
     pass
 success_count += 1
-print(" PASS:  PASS: Database connection auth logging test")
+print(" PASS:  PASS: Database connection auth logging test)"
 else:
-    print(" FAIL:  FAIL: Database connection auth logging test")
+    print(" FAIL:  FAIL: Database connection auth logging test)"
 print()
 
-print("Test 2: Database manager credential logging")
-print("-" * 50)
+print("Test 2: Database manager credential logging)"
+print("- * 50)"
 if test_database_manager_no_credential_logging():
     pass
 success_count += 1
-print(" PASS:  PASS: Database manager credential logging test")
+print(" PASS:  PASS: Database manager credential logging test)"
 else:
-    print(" FAIL:  FAIL: Database manager credential logging test")
+    print(" FAIL:  FAIL: Database manager credential logging test)"
 print()
 
-print("=" * 60)
+print("= * 60)"
 print("")
-print("=" * 60)
+print("= * 60)"
 
 if success_count == total_tests:
-    print(" CELEBRATION:  All tests passed! Database auth logging is working correctly.")
+    print(" CELEBRATION:  All tests passed! Database auth logging is working correctly.)"
 return True
 else:
-    print(" WARNING: [U+FE0F]  Some tests failed. Review the output above for details.")
+    print(" WARNING: [U+FE0F]  Some tests failed. Review the output above for details.)"
 return False
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
 success = main()
 sys.exit(0 if success else 1)

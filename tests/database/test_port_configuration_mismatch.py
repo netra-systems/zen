@@ -71,7 +71,7 @@ class DatabasePortConfigurationTester:
 
                 # Handle cases without explicit port (defaults to 5432)
         if '@pytest.fixture[1].split('/')[0]:'
-        return "5432"  # PostgreSQL default
+        return "5432  # PostgreSQL default"
 
         return "UNKNOWN_FORMAT"
         except Exception:
@@ -155,12 +155,12 @@ class TestDatabasePortConfigurationMismatch:
         print("")
 
         if result['issues']:
-        print(f"Issues Found:")
+        print(f"Issues Found:)"
         for issue in result['issues']:
         print("")
 
                     # This assertion should FAIL initially, exposing the mismatch
-        assert result['overall_consistent'], ( )
+        assert result['overall_consistent'], "( )"
         f"DATABASE PORT CONFIGURATION MISMATCH DETECTED:"
         "
         "
@@ -200,7 +200,7 @@ class TestDatabasePortConfigurationMismatch:
         print("")
 
         # This should pass since 5432 is the default
-        assert result['overall_consistent'], ( )
+        assert result['overall_consistent'], "( )"
         ""
         
 
@@ -239,7 +239,7 @@ class TestDatabasePortConfigurationMismatch:
         if not result['overall_consistent']:
         all_consistent = False
 
-        assert all_consistent, ( )
+        assert all_consistent, "( )"
         f"Port configuration inconsistencies found across multiple ports. "
         f"This indicates the DatabaseURLBuilder has systematic issues with "
         f"non-standard port configurations."
@@ -290,7 +290,7 @@ try:
 conn = await asyncpg.connect(async_connection_url, timeout=2)
 await conn.close()
 async_works = True
-print("[OK] Async connection successful")
+print("[OK] Async connection successful)"
 except Exception as e:
     pass
 async_works = False
@@ -305,7 +305,7 @@ try:
 conn = await asyncpg.connect(sync_connection_url, timeout=2)
 await conn.close()
 sync_works = True
-print("[OK] Sync URL connection successful")
+print("[OK] Sync URL connection successful)"
 except Exception as e:
     pass
 sync_works = False
@@ -328,13 +328,13 @@ f"- Sync URL (wrong port) fails to connect"
                                                                 
 elif not async_works and not sync_works:
     pass
-pytest.skip("Database not available for connectivity test")
+pytest.skip("Database not available for connectivity test)"
 else:
-    print("Both connections work - database may be running on both ports")
+    print("Both connections work - database may be running on both ports)"
 
 except ImportError:
     pass
-pytest.skip("asyncpg not available for connectivity test")
+pytest.skip("asyncpg not available for connectivity test)"
 
 
 class TestDatabaseURLBuilderPortLogic:
@@ -364,7 +364,7 @@ class TestDatabaseURLBuilderPortLogic:
 
         print(f" )"
         === DEVELOPMENT BUILDER ANALYSIS ===")"
-        print(f"Environment variables:")
+        print(f"Environment variables:)"
         print("")
         print("")
 
@@ -403,12 +403,12 @@ class TestDatabaseURLBuilderPortLogic:
         print("")
 
     # The bug: sync URL should use the same port as async URL
-        assert async_port == env_vars['POSTGRES_PORT'], ( )
+        assert async_port == env_vars['POSTGRES_PORT'], "( )"
         ""
     
 
     # This assertion should FAIL, exposing the bug
-        assert sync_port == env_vars['POSTGRES_PORT'], ( )
+        assert sync_port == env_vars['POSTGRES_PORT'], "( )"
         f"SYNC URL PORT MISMATCH BUG:"
         "
         "
@@ -433,7 +433,7 @@ class TestDatabaseURLBuilderPortLogic:
         pass
         from shared.isolated_environment import get_env
 
-        print("=== DATABASE PORT CONFIGURATION DIAGNOSIS ===")
+        print("=== DATABASE PORT CONFIGURATION DIAGNOSIS ===)"
 
         env = get_env()
         env_vars = env.get_all()
@@ -468,6 +468,6 @@ class TestDatabaseURLBuilderPortLogic:
         print("")
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
                     # Run diagnostic when executed directly
         diagnose_port_configuration()

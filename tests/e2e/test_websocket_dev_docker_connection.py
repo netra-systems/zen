@@ -36,7 +36,7 @@ class TestWebSocketConnection:
     "Test harness for WebSocket connection issues."""
 
     def setup_method(self):
-        ""Setup method called before each test method.
+        """Setup method called before each test method."
         self.base_url = http://localhost:8000""
         self.ws_url = ws://localhost:8000/ws""
         self.connection_errors = []
@@ -54,7 +54,7 @@ class TestWebSocketConnection:
         print(")"
         self.connection_errors.append(error_msg)
         self.error_logs.append({)
-        type": "websocket_error,
+        type": websocket_error,"
         message: error_msg,
         timestamp: time.time()""
     
@@ -64,15 +64,16 @@ class TestWebSocketConnection:
         pass
         print("")
         if close_status_code:
-        self.error_logs.append({)
-        type: "websocket_close,"
-        code": close_status_code,"
-        message: close_msg,
-        timestamp": time.time()"
+            self.error_logs.append({
+                "type": "websocket_close",
+                "code": close_status_code,
+                "message": close_msg,
+                "timestamp": time.time()
+            })
         
 
     def on_open(self, ws):
-        Handle WebSocket open.""
+        """Handle WebSocket open."""
         print(WebSocket connection opened")"
 
         @pytest.mark.websocket
@@ -114,10 +115,11 @@ class TestWebSocketConnection:
         error_msg = "formatted_string"
         print(formatted_string)""
         self.connection_errors.append(error_msg)
-        self.error_logs.append({)
-        "type: connection_exception,"""
-        message: error_msg,
-        timestamp": time.time()"
+        self.error_logs.append({
+            "type": "connection_exception",
+            "message": error_msg,
+            "timestamp": time.time()
+        })
             
 
         return }
@@ -139,7 +141,7 @@ class TestWebSocketConnection:
         # Note: We avoid setting explicit Origin headers to prevent conflicts with
         # the websocket-client library's automatic Origin header generation'
         test_cases = ]
-        ("Default connection", {),  # Let client set origin automatically
+        ("Default connection, {),  # Let client set origin automatically"
         (Test endpoint, {endpoint: /ws/test),  # Try test endpoint
         
 
@@ -162,7 +164,7 @@ class TestWebSocketConnection:
         error_msg = 
         print(formatted_string)
         cors_issues.append({)
-        "test": description,
+        "test: description,"
         endpoint: endpoint,
         error: str(e),
         timestamp: time.time()
@@ -182,7 +184,7 @@ class TestWebSocketConnection:
 
         @pytest.mark.websocket
     def test_backend_availability(self) -> Dict[str, Any]:
-        ""Check if backend services are running.
+        """Check if backend services are running."
         print()
         Checking backend service availability...)""
 
@@ -264,19 +266,19 @@ class TestWebSocketDevDockerConnection:
         all_errors = {
         "backend_status: backend_status,"""
         connection_errors: connection_result[connection_errors],
-        error_logs": connection_result["error_logs],
+        error_logs": connection_result[error_logs],"
         cors_issues: cors_result[cors_issues]
         
 
         # Print summary
         print(")"
          + =*60)
-        print("WebSocket Connection Test Summary")
+        print("WebSocket Connection Test Summary)"
         print(=*60)
 
         if connection_result[connection_errors]:
         print(formatted_string)
-        for error in connection_result["connection_errors"]:
+        for error in connection_result["connection_errors]:"
         print(formatted_string)
 
         if cors_result[cors_issues]:
@@ -302,11 +304,11 @@ class TestWebSocketDevDockerConnection:
         formatted_string
                                 
 
-        assert backend_status.get(backend_http, {}.get(available), ( )
+        assert backend_status.get(backend_http, "{}.get(available), ( )"
         "Backend HTTP service is not available"
                                 
 
-        assert backend_status.get(websocket_endpoint, {}.get(reachable), ( )
+        assert backend_status.get(websocket_endpoint, "{}.get(reachable), ( )"
         WebSocket endpoint is not reachable
                                 
 
@@ -323,7 +325,7 @@ class TestWebSocketCORSValidation:
     # Test basic WebSocket connectivity without explicit Origin headers
     # This avoids the duplicate Origin header issue with websocket-client library
         test_cases = ]
-        ("Basic connection", ws://localhost:8000/ws, True, Main WebSocket endpoint),
+        ("Basic connection, ws://localhost:8000/ws, True, Main WebSocket endpoint),"
         (Test endpoint, ws://localhost:8000/ws/test", True, Test WebSocket endpoint (no auth)),"
     
 
@@ -382,7 +384,7 @@ class TestWebSocketCORSValidation:
 
                                                 # Try to send a test message
         import json
-        test_msg = json.dumps({type: ping")"
+        test_msg = json.dumps({"type": ping")"
         ws.send(test_msg)
         response = ws.recv()
 
@@ -399,7 +401,7 @@ class TestWebSocketCORSValidation:
         except Exception as e:
         error_msg = str(e)
         connection_attempts.append({)
-        "attempt": attempt + 1,
+        "attempt: attempt + 1,"
         success: False,
         error: error_msg
                                                     
@@ -416,7 +418,7 @@ class TestWebSocketCORSValidation:
         assert not all_failed, ( ")"
          +
         
-        .join(["error, Unknown error")} ))
+        .join(["error, Unknown error)} ))"
         for a in connection_attempts if not a[success]]
                                                             
 

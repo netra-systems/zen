@@ -1,4 +1,4 @@
-"""Test to verify staging auth configuration doesn't expose dev login"""'
+"""Test to verify staging auth configuration doesn't expose dev login""'"
 
 import os
 import pytest
@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 
     # Simulate staging environment
 staging_env = { }
-"ENVIRONMENT": "staging",
-"AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+"ENVIRONMENT": "staging,"
+"AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai,"
 "FRONTEND_URL": "https://staging.netrasystems.ai"
     
 
@@ -64,12 +64,12 @@ class MockRequest:
         "Dev login endpoint should NOT be exposed in staging environment"
 
         # Verify other endpoints are correct for staging
-        assert "staging" in config_response.endpoints.login, \
+        assert "staging in config_response.endpoints.login, \"
         ""
-        assert "staging" in config_response.endpoints.callback, \
+        assert "staging in config_response.endpoints.callback, \"
         ""
 
-        logger.info(f"[U+2713] Staging auth config correctly configured - no dev login exposed")
+        logger.info(f"[U+2713] Staging auth config correctly configured - no dev login exposed)"
 
         except Exception as e:
             # Config might fail due to missing OAuth credentials, but that's ok'
@@ -94,14 +94,14 @@ class MockRequest:
     def __init__(self):
         pass
         self.client = type('obj', (object), {'host': '127.0.0.1'})()
-        self.headers = {"user-agent": "test"}
+        self.headers = {"user-agent": "test}"
         self.cookies = {}
 
         mock_request = MockRequest()
         client_info = { }
-        "ip": "127.0.0.1",
-        "user_agent": "test",
-        "session_id": None
+        "ip": "127.0.0.1,"
+        "user_agent": "test,"
+        "session_id: None"
     
 
     # Attempt dev login in staging - should fail
@@ -109,10 +109,10 @@ class MockRequest:
         await dev_login(mock_request, client_info)
 
         assert exc_info.value.status_code == 403
-        assert "strictly forbidden" in str(exc_info.value.detail).lower()
-        assert "staging" in str(exc_info.value.detail).lower()
+        assert "strictly forbidden in str(exc_info.value.detail).lower()"
+        assert "staging in str(exc_info.value.detail).lower()"
 
-        logger.info("[U+2713] Dev login correctly blocked in staging environment")
+        logger.info("[U+2713] Dev login correctly blocked in staging environment)"
 
 @pytest.mark.asyncio
     async def test_production_auth_config_no_dev_login():
@@ -139,9 +139,9 @@ frontend_url = AuthConfig.get_frontend_url()
 assert auth_url == "https://auth.netrasystems.ai", ""
 assert frontend_url == "https://netrasystems.ai", ""
 
-logger.info("[U+2713] Production environment correctly detected")
+logger.info("[U+2713] Production environment correctly detected)"
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
 import asyncio
 

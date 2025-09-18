@@ -303,7 +303,7 @@ class SSotImportComplianceTests(SSotBaseTestCase):
         # ASSERTION: All WebSocketNotifier imports should use canonical source
         # (Allow some flexibility during migration, but log violations)
         if violations:
-            logger.warning(f"Found {len(violations)} non-canonical WebSocketNotifier imports)")
+            logger.warning(f"Found {len(violations)} non-canonical WebSocketNotifier imports))"
             logger.warning(These should be migrated to canonical SSOT source during next refactoring)
 
         # CRITICAL ASSERTION: Must have at least one canonical import
@@ -315,7 +315,7 @@ class SSotImportComplianceTests(SSotBaseTestCase):
         logger.info(✅ WebSocketNotifier import consistency validated)
 
     def test_circular_dependency_prevention(self):
-        "Test that WebSocketNotifier imports don't create circular dependencies."'
+        "Test that WebSocketNotifier imports don't create circular dependencies.'"
         logger.info(Testing circular dependency prevention)
 
         # Test key import paths for circular dependencies
@@ -359,7 +359,7 @@ class SSotImportComplianceTests(SSotBaseTestCase):
                 logger.error(f"  {failure['module']}: {failure['type']} - {failure['error']})"
 
         # CRITICAL ASSERTION: All critical imports must succeed
-        assert len(import_failures) == 0, (
+        assert len(import_failures) == 0, ()
             fImport failures detected (possible circular dependencies): {import_failures}"
             fImport failures detected (possible circular dependencies): {import_failures}"
         )
@@ -367,7 +367,7 @@ class SSotImportComplianceTests(SSotBaseTestCase):
         logger.info(✅ Circular dependency prevention validated)
 
     def test_agent_websocket_bridge_has_single_websocket_notifier(self):
-        ""Test that agent_websocket_bridge.py has exactly one WebSocketNotifier class.
+        ""Test that agent_websocket_bridge.py has exactly one WebSocketNotifier class."
         logger.info(Testing agent_websocket_bridge.py for single WebSocketNotifier class)"
         logger.info(Testing agent_websocket_bridge.py for single WebSocketNotifier class)"
 
@@ -406,7 +406,7 @@ class SSotImportComplianceTests(SSotBaseTestCase):
             pytest.fail(fError analyzing agent_websocket_bridge.py: {e})
 
     def test_generate_import_compliance_report(self):
-        ""Generate comprehensive import compliance report.
+        ""Generate comprehensive import compliance report."
         logger.info(Generating import compliance report)"
         logger.info(Generating import compliance report)"
 

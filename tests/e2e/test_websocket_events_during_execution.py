@@ -47,7 +47,7 @@ class MockWebSocketConnection:
         self.business_value_events = []
 
     async def send(self, message: str):
-        ""Mock sending message to WebSocket.
+        ""Mock sending message to WebSocket."
         try:
             event_data = json.loads(message)
             self.events_received.append({'timestamp': datetime.now(timezone.utc), 'event_data': event_data, 'user_id': self.user_id, 'connection_id': self.connection_id}
@@ -130,7 +130,7 @@ class MockWebSocketBridge:
             self.business_value_metrics['critical_events_delivered'] += 1
 
     def get_business_value_metrics(self) -> Dict[str, Any]:
-        ""Get business value metrics.
+        ""Get business value metrics."
         return {**self.business_value_metrics, 'users_served_count': len(self.business_value_metrics['users_served'], 'connections_active': len([c for c in self.connections.values() if c.connected]}
 
 @pytest.mark.e2e
@@ -248,7 +248,7 @@ class WebSocketEventsE2ETests(SSotBaseTestCase):
                     assert len(user_events) >= 3
                     for event in user_events:
                         assert event['user_id'] == user_context.user_id
-                        assert f'concurrent_agent_user_{i}' in event.get('agent_name', '')
+                        assert f'concurrent_agent_user_{i}' in event.get('agent_name', "'')"
                 all_connections = [connection for _, connection, _ in user_engines]
                 all_events = []
                 for connection in all_connections:
@@ -318,10 +318,10 @@ class WebSocketEventsE2ETests(SSotBaseTestCase):
         websocket_id = WebSocketID(authenticated_user_context.websocket_client_id)
         agent_started_event = StronglyTypedWebSocketEvent(event_type='agent_started', priority=WebSocketEventPriority.HIGH, user_id=user_id, thread_id=thread_id, request_id=request_id, websocket_id=websocket_id, data={'agent_name': 'strongly_typed_agent', 'business_value': True, 'authenticated_execution': True)
         agent_thinking_event = StronglyTypedWebSocketEvent(event_type='agent_thinking', priority=WebSocketEventPriority.NORMAL, user_id=user_id, thread_id=thread_id, request_id=request_id, websocket_id=websocket_id, data={'agent_name': 'strongly_typed_agent', 'thinking': 'Processing with strong type safety', 'step_number': 1)
-        assert isinstance(agent_started_event.user_id, UserID)
-        assert isinstance(agent_started_event.thread_id, ThreadID)
-        assert isinstance(agent_started_event.request_id, RequestID)
-        assert isinstance(agent_started_event.websocket_id, WebSocketID)
+        assert isinstance(agent_started_event.user_id, "UserID)"
+        assert isinstance(agent_started_event.thread_id, "ThreadID)"
+        assert isinstance(agent_started_event.request_id, "RequestID)"
+        assert isinstance(agent_started_event.websocket_id, "WebSocketID)"
         assert agent_started_event.priority == WebSocketEventPriority.HIGH
         legacy_started = agent_started_event.to_legacy_dict()
         assert legacy_started['event_type'] == 'agent_started'
@@ -338,7 +338,7 @@ class WebSocketEventsE2ETests(SSotBaseTestCase):
             assert str(event.request_id) == authenticated_user_context.request_id
             assert str(event.websocket_id) == authenticated_user_context.websocket_client_id
             legacy_dict = event.to_legacy_dict()
-            assert isinstance(legacy_dict, dict)
+            assert isinstance(legacy_dict, "dict)"
             assert 'event_type' in legacy_dict
             assert 'user_id' in legacy_dict
 if __name__ == '__main__':

@@ -40,7 +40,7 @@ from netra_backend.app.websocket_core.event_validator import AgentEventValidator
 
 
 class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
-    ""
+    """
     CRITICAL: Tests the exact lines that failed due to missing import time
     
     This test class targets the specific circuit breaker authentication code in
@@ -63,7 +63,7 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
             from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuth
             
             # The import should succeed - failure here means regression
-            assert UnifiedWebSocketAuth is not None, UnifiedWebSocketAuth class not accessible
+            assert UnifiedWebSocketAuth is not None, "UnifiedWebSocketAuth class not accessible"
             
             # Create instance to trigger any import issues during initialization
             auth_instance = UnifiedWebSocketAuth()
@@ -80,7 +80,7 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.unit
     async def test_circuit_breaker_time_calls_exact_lines(self):
-        "
+        """
         "
         CRITICAL: Tests the exact lines that called time.time() and failed.
         
@@ -131,7 +131,7 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
         try:
             from netra_backend.app.websocket_core.unified_websocket_auth import WebSocketAuthResult
             mock_result = WebSocketAuthResult(success=True, user_id=test_user)
-            mock_e2e_context = {is_e2e_testing": True, user_id: "test_user}
+            mock_e2e_context = {is_e2e_testing": True, user_id: test_user}"
             
             await auth._cache_concurrent_token_result(mock_e2e_context, mock_result)
             print(PASS: _cache_concurrent_token_result time.time() call works)
@@ -143,7 +143,7 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.integration
     async def test_circuit_breaker_state_transitions_with_time(self):
-    ""
+    """
         CRITICAL: Tests circuit breaker state transitions that use time.time().
         
         This validates the exact business logic that was broken by missing import time.
@@ -165,7 +165,7 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
             
             # Should now be OPEN
             state = await auth._check_circuit_breaker()
-            assert state == OPEN, Circuit breaker should be OPEN after failures
+            assert state == OPEN, "Circuit breaker should be OPEN after failures"
             
             # Manipulate time to test HALF_OPEN transition (line 485: time.time() comparison)
             original_reset_timeout = auth._circuit_breaker["reset_timeout]"
@@ -201,13 +201,13 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.integration
     async def test_concurrent_token_cache_timing_logic(self):
-    ""
+    """
         CRITICAL: Tests concurrent token cache timing that uses time.time().
         
         This validates the exact caching logic (lines 534, 570) that was broken
         by the missing import time.
 
-        from netra_backend.app.websocket_core.unified_websocket_auth import (
+        from netra_backend.app.websocket_core.unified_websocket_auth import ()
             UnifiedWebSocketAuth, 
             WebSocketAuthResult
         )
@@ -216,7 +216,7 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
         
         try:
             # Test cache storage with timestamp (line 570: time.time())
-            mock_result = WebSocketAuthResult(success=True, user_id="test_user")
+            mock_result = WebSocketAuthResult(success=True, user_id="test_user)"
             e2e_context = {
                 is_e2e_testing: True,
                 user_id: test_user,
@@ -229,14 +229,14 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
             # Check cache retrieval with timing validation (line 534: time.time() comparison)
             cached_result = await auth._check_concurrent_token_cache(e2e_context)
             assert cached_result is not None, "Cached result should be retrievable"
-            assert cached_result.success == True, Cached result should match original
+            assert cached_result.success == True, "Cached result should match original"
             
             # Test cache expiry logic (manipulate time comparison)
             # Create an expired cache entry by manipulating timestamps
             cache_key = auth._generate_cache_key(e2e_context)
             if cache_key in auth._circuit_breaker[concurrent_token_cache]:
                 # Set timestamp to past (older than 300 seconds)
-                auth._circuit_breaker[concurrent_token_cache][cache_key]["timestamp"] = time.time() - 400
+                auth._circuit_breaker[concurrent_token_cache][cache_key]["timestamp] = time.time() - 400"
                 
                 # Should return None for expired cache (line 534 comparison)
                 expired_result = await auth._check_concurrent_token_cache(e2e_context)
@@ -252,7 +252,7 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
     @pytest.mark.mission_critical  
     @pytest.mark.regression
     def test_import_time_regression_simulation(self):
-        "
+        """
         "
         CRITICAL: Simulates the exact regression to prove tests would catch it.
         
@@ -286,7 +286,7 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.e2e
     async def test_full_websocket_auth_flow_with_circuit_breaker(self"):"
-        "
+        """
         "
         CRITICAL: Full WebSocket authentication flow with circuit breaker timing.
         
@@ -315,10 +315,10 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
             try:
                 result = await auth.authenticate_websocket_connection(
                     websocket=mock_websocket,
-                    e2e_context={"is_e2e_testing": True, user_id: test_user}
+                    e2e_context={"is_e2e_testing: True, user_id: test_user}"
                 
                 # Should succeed without NameError
-                assert result is not None, Authentication should not fail with import error
+                assert result is not None, "Authentication should not fail with import error"
                 
                 print(PASS: Full WebSocket auth flow with circuit breaker timing works")"
                 
@@ -341,7 +341,7 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.smoke
     async def test_basic_websocket_import_sanity(self):
-        "
+        """
         "
         Mission Critical: Basic WebSocket import sanity check.
         
@@ -356,7 +356,7 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
             
             # Test basic functionality
             timestamp = get_current_timestamp()
-            assert timestamp > 0, get_current_timestamp should work
+            assert timestamp > 0, "get_current_timestamp should work"
             
             # Test with mock WebSocket
             from unittest.mock import MagicMock
@@ -375,7 +375,7 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.integration
     async def test_websocket_exception_handler_import_stability(self):
-    "
+        """
     "
         Mission Critical: Exception handler import stability.
         
@@ -404,7 +404,7 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
                 type: "agent_request,"
                 data: {
                     agent_type: FORCE_EXCEPTION_AGENT,
-                    "query": This should trigger an exception to test handler
+                    "query: This should trigger an exception to test handler"
                 }
             }
             
@@ -434,7 +434,7 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.e2e
     async def test_chat_flow_import_regression_prevention(self):
-    ""
+    """
         Mission Critical: Prevent chat flow import regression.
         
         This test ensures chat functionality never regresses due to import issues.
@@ -471,7 +471,7 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
             required_events = [
                 agent_started,
                 agent_thinking, 
-                "tool_executing",
+                "tool_executing,"
                 tool_completed,
                 agent_completed
             ]
@@ -500,7 +500,7 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.performance
     async def test_import_system_performance_baseline(self):
-    ""
+    """
         Mission Critical: Import system performance baseline.
         
         Monitors import performance to detect degradation that could lead
@@ -511,7 +511,7 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
             {
                 "module: netra_backend.app.websocket_core.utils,"
                 function: is_websocket_connected,
-                "max_time_ms": 100
+                "max_time_ms: 100"
             },
             {
                 module: netra_backend.app.websocket_core.utils, 
@@ -521,7 +521,7 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
             {
                 "module: shared.isolated_environment,"
                 function: get_env,
-                "max_time_ms": 75
+                "max_time_ms: 75"
             }
         ]
         
@@ -561,7 +561,7 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.concurrent
     async def test_concurrent_websocket_import_stability(self):
-    ""
+    """
         Mission Critical: Concurrent WebSocket import stability.
         
         Tests import stability under concurrent load (production scenario).
@@ -607,7 +607,7 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
             
             if import_failures:
                 failure_summary = \n.join(import_failures)
-                pytest.fail(f"CRITICAL: Concurrent import failures detected:\n{failure_summary}")
+                pytest.fail(f"CRITICAL: Concurrent import failures detected:\n{failure_summary})"
                 
         finally:
             # Cleanup all connections
@@ -641,7 +641,7 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
                 if time in error_msg and not defined in error_msg:
                     raise Exception(fImport failure in {connection_id}: {error_msg})
             
-            return {"connection_id": connection_id, success: True}
+            return {"connection_id: connection_id, success: True}"
             
         except Exception as e:
             if time in str(e):
@@ -675,7 +675,7 @@ class CloudRunEnvironmentCompatibilityTests(BaseTestCase):
                     from shared.isolated_environment import get_env
                     env_result = get_env()
                     
-                    assert env_result is not None, fget_env failed for {env}
+                    assert env_result is not None, "fget_env failed for {env}"
                     
                     # Test WebSocket utils with this environment
                     from netra_backend.app.websocket_core.utils import is_websocket_connected
@@ -686,7 +686,7 @@ class CloudRunEnvironmentCompatibilityTests(BaseTestCase):
                     
                     # This previously failed with time not defined in staging/production
                     result = is_websocket_connected(mock_ws)
-                    assert result is not None, fis_websocket_connected failed for {env}
+                    assert result is not None, "fis_websocket_connected failed for {env}"
                     
                 except NameError as e:
                     if time in str(e):
@@ -696,7 +696,7 @@ class CloudRunEnvironmentCompatibilityTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.smoke
     def test_critical_module_availability(self):
-    "
+        """
     "
         Test availability of critical modules that caused failures.
         
@@ -726,7 +726,7 @@ class CloudRunEnvironmentCompatibilityTests(BaseTestCase):
                     # Test that UnifiedWebSocketAuth can be instantiated without NameError
                     auth_class = getattr(module, UnifiedWebSocketAuth)
                     auth_instance = auth_class()
-                    assert auth_instance is not None, UnifiedWebSocketAuth instantiation failed
+                    assert auth_instance is not None, "UnifiedWebSocketAuth instantiation failed"
                 
                 print(fPASS: Module {module_name} available and functional)
                 
@@ -742,7 +742,7 @@ class CloudRunEnvironmentCompatibilityTests(BaseTestCase):
                 raise
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # Run mission-critical tests with strict failure requirements
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

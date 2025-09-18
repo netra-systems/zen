@@ -174,7 +174,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         
         # Test canonical factory import
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 ExecutionEngineFactory, 
                 get_execution_engine_factory
             )
@@ -272,7 +272,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         )
     
     def _find_all_execution_engine_factories(self) -> List[Tuple[str, str, str]]:
-        ""Find all ExecutionEngineFactory class definitions in the codebase.
+        ""Find all ExecutionEngineFactory class definitions in the codebase."
         factories = []
         
         # Scan Python files for ExecutionEngineFactory classes
@@ -479,7 +479,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         }
     
     def _assess_golden_path_risk(self) -> Dict[str, Any]:
-        ""Assess Golden Path risk from factory fragmentation.
+        ""Assess Golden Path risk from factory fragmentation."
         factory_count = len(self.factory_implementations)
         violation_count = len(self.ssot_factory_violations)
         

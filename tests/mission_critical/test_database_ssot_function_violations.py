@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
-    ""
+    """
     Test suite to detect and validate DatabaseManager SSOT function violations.
     
     These tests reproduce the exact GitHub Issue #204 error where WebSocket 
@@ -60,7 +60,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
         self._function_calls_attempted = []
         
     def test_websocket_can_access_database_via_ssot_methods(self):
-        "
+        """
         "
         UPDATED TO USE SSOT: WebSocket can access database via correct SSOT methods
         
@@ -82,8 +82,8 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             assert manager is not None, get_database_manager returned None""
             database_manager_success = True
             self.record_metric(get_database_manager_success, True)
-            logger.info( PASS:  get_database_manager() works - SSOT method available)"
-            logger.info( PASS:  get_database_manager() works - SSOT method available)"
+            logger.info("PASS:  get_database_manager() works - SSOT method available))"
+            logger.info("PASS:  get_database_manager() works - SSOT method available))"
             
         except ImportError as e:
             logger.error(f" FAIL:  get_database_manager not available: {e})"
@@ -159,7 +159,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
         logger.info( PASS:  SSOT REMEDIATION SUCCESSFUL: WebSocket can access database via SSOT methods")"
     
     def test_get_database_manager_replacement_works(self):
-    "
+        """
     "
         DESIGNED TO PASS: Verify get_database_manager is correct replacement
         
@@ -177,7 +177,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             self._function_calls_attempted.append(get_database_manager")"
             
             manager = get_database_manager()
-            assert manager is not None, get_database_manager returned None
+            assert manager is not None, "get_database_manager returned None"
             self.record_metric(get_database_manager_success, True)"
             self.record_metric(get_database_manager_success, True)"
             
@@ -214,7 +214,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             raise
     
     def test_database_manager_has_session_factory_methods(self):
-    ""
+    """
         DESIGNED TO PASS: Verify DatabaseManager provides session creation
         
         This test ensures that DatabaseManager has the methods that WebSocket
@@ -276,7 +276,7 @@ class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
             raise
     
     def test_websocket_factory_database_integration_works(self):
-    ""
+    """
         DESIGNED TO PASS: Verify WebSocket factory can access database after SSOT fix
         
         This test validates that WebSocket factory can successfully create
@@ -342,7 +342,7 @@ if __name__ == __main__:
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print(MIGRATION NOTICE: This file previously used direct pytest execution.")"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)
-    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md)"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

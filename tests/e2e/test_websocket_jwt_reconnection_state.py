@@ -40,7 +40,7 @@ class ReconnectionPhase(Enum):
 
 @dataclass
 class JWTSessionState:
-    ""JWT WebSocket session state for reconnection testing.
+    ""JWT WebSocket session state for reconnection testing."
     user_id: str
     access_token: str
     thread_id: str
@@ -82,7 +82,7 @@ class WebSocketJWTReconnectionerTests:
         session_state = JWTSessionState(
             user_id=user_id, access_token=access_token,
             thread_id=fthread_{user_id}_{int(time.time())},
-            agent_context={current_task: data_analysis", "phase: initial},
+            agent_context={current_task: data_analysis", phase: initial},"
             message_queue=[], connection_id=fconn_{uuid.uuid4().hex[:8]},
             session_timestamp=datetime.now(timezone.utc)
         )
@@ -96,9 +96,9 @@ class WebSocketJWTReconnectionerTests:
     async def simulate_session_activity(self, session_state: JWTSessionState) -> Dict[str, Any]:
         "Simulate active session with messages and state updates."""
         test_messages = [
-            {type": "agent_start, content: Beginning data analysis task},
-            {type: "user_input, content": Analyze quarterly sales data},
-            {type: agent_progress, content": "Processing data... 30% complete}
+            {type": agent_start, content: Beginning data analysis task},"
+            {"type": "user_input, content: Analyze quarterly sales data},"
+            {"type": agent_progress, content": Processing data... 30% complete}"
         ]
         
         activity_result = await self.reconnection_fixture.send_session_messages(
@@ -116,9 +116,9 @@ class WebSocketJWTReconnectionerTests:
         disconnect_start = time.time()
         
         pending_messages = [
-            {type: user_input, content: Please continue with analysis"},"
+            {"type": user_input, content: Please continue with analysis"},"
             {"type: system_update, content: Data processing continued},"
-            {"type: agent_progress", content: Analysis 60% complete}
+            {"type: agent_progress, content: Analysis 60% complete}"
         ]
         session_state.message_queue.extend(pending_messages)
         
@@ -169,7 +169,7 @@ class WebSocketJWTReconnectionerTests:
 @pytest.mark.asyncio
 @pytest.mark.e2e
 class WebSocketJWTReconnectionStateTests:
-    ""Test Suite: WebSocket JWT Reconnection State Management.
+    ""Test Suite: WebSocket JWT Reconnection State Management."
     
     @pytest.fixture
     def jwt_reconnection_tester(self):
@@ -233,8 +233,8 @@ class WebSocketJWTReconnectionStateTests:
         await jwt_reconnection_tester.simulate_session_activity(session_state)
         session_state.agent_context.update({
             "workspace: {files: [data.csv, analysis.py]},"
-            "execution_state: {current_step": 3, total_steps: 5},
-            user_preferences: {"format: detailed", notifications: True}
+            "execution_state: {current_step: 3, total_steps: 5},"
+            user_preferences: {"format: detailed, notifications: True}"
         }
         
         await jwt_reconnection_tester.execute_controlled_disconnection(session_state)
@@ -256,12 +256,12 @@ class WebSocketJWTReconnectionStateTests:
             performance_results.append(metrics.total_cycle_time)
         
         max_time, avg_time = max(performance_results), sum(performance_results) / len(performance_results)
-        assert max_time < 2.0, fMax reconnection time {max_time:.2f}s exceeds 2s requirement
+        assert max_time < 2.0, "fMax reconnection time {max_time:.2f}s exceeds 2s requirement"
         assert avg_time < 1.5, fAverage reconnection time {avg_time:.2f}s exceeds 1.5s target""
     
     @pytest.mark.e2e
     async def test_concurrent_reconnection_isolation(self, jwt_reconnection_tester):
-        "Test Case 6: Concurrent user reconnections don't interfere."""'
+        "Test Case 6: Concurrent user reconnections don't interfere.""'"
         user_sessions = []
         for i in range(2):
             user_id = f{TEST_USERS['enterprise'].id}_concurrent_{i}""
@@ -276,8 +276,8 @@ class WebSocketJWTReconnectionStateTests:
         results = await asyncio.gather(*reconnection_tasks, return_exceptions=True)
         
         for i, result in enumerate(results):
-            assert not isinstance(result, Exception), fReconnection {i} failed: {result}
-            assert result[success], fReconnection {i} unsuccessful
+            assert not isinstance(result, "Exception), fReconnection {i} failed: {result}"
+            assert result[success], "fReconnection {i} unsuccessful"
             assert result[session_isolated], f"Session {i} isolation compromised"
     
     async def _execute_full_reconnection_cycle(self, tester, session_state):

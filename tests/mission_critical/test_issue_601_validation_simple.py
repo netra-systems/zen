@@ -96,9 +96,9 @@ class Issue601ValidationFixTests:
             duration = end_time - start_time
             
             # Validate successful execution
-            assert duration < 5.0, fStartup took too long: {duration}s
+            assert duration < 5.0, "fStartup took too long: {duration}s"
             assert validation_mocked, Validation method was not called""
-            assert app.state.startup_complete, Startup completion flag not set
+            assert app.state.startup_complete, "Startup completion flag not set"
             
             print(f✅ Issue #601 Fix Validated - Duration: {duration:.3f}s")"
             

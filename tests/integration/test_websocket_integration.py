@@ -52,7 +52,7 @@ async def auth_helper():
 
 @pytest.fixture
 async def authenticated_websocket_client(auth_helper):
-    ""Provide WebSocket TestClient with proper authentication.
+    ""Provide WebSocket TestClient with proper authentication."
     # Get auth headers from helper
     token = auth_helper._get_valid_token()
     headers = auth_helper.get_websocket_headers(token)
@@ -123,7 +123,7 @@ async def test_websocket_send_receive_echo(authenticated_websocket_client):
     with client.websocket_connect(/ws, headers=headers) as websocket:
         # Wait for connection established
         connection_data = websocket.receive_json()
-        assert connection_data[type"] == "connection_established
+        assert connection_data[type"] == connection_established"
         
         # Send echo message
         echo_message = {
@@ -175,7 +175,7 @@ async def test_websocket_agent_message_fallback(authenticated_websocket_client):
         
         # Send chat message that should trigger agent response
         chat_message = {
-            type": "chat,
+            type": chat,"
             content: Hello from integration test!,
             thread_id: f"test-thread-{int(time.time())},"
             user_id: user_id""
@@ -184,7 +184,7 @@ async def test_websocket_agent_message_fallback(authenticated_websocket_client):
         
         # Should receive at least one agent event (fallback handler should respond)
         events_received = []
-        expected_events = [agent_started, agent_thinking, tool_executing, tool_completed", "agent_completed]
+        expected_events = [agent_started, agent_thinking, tool_executing, tool_completed", agent_completed]"
         
         # Try to receive a few events
         for _ in range(6):  # Try to receive up to 6 events (5 agent events + maybe others)
@@ -211,7 +211,7 @@ async def test_websocket_multiple_connections_isolation():
     helper1 = E2EWebSocketAuthHelper(environment=test_environment)
     helper2 = E2EWebSocketAuthHelper(environment=test_environment)
     
-    token1 = helper1.create_test_jwt_token(user_id="user-1, email=user1@test.com")
+    token1 = helper1.create_test_jwt_token(user_id="user-1, email=user1@test.com)"
     token2 = helper2.create_test_jwt_token(user_id=user-2, email=user2@test.com) 
     
     headers1 = helper1.get_websocket_headers(token1)
@@ -274,7 +274,7 @@ async def test_websocket_error_handling(authenticated_websocket_client):
         assert FORMAT_ERROR in error_response.get(error_code, ")"
         
         # Connection should still be alive after error
-        websocket.send_json({type: ping)
+        websocket.send_json({"type: ping)"
         ping_response = websocket.receive_json()
         assert ping_response[type] == pong""
 

@@ -32,7 +32,7 @@ Style = Colors
 STAGING_CONFIG = {
     backend_url": http://localhost:8002,"
     ws_url: ws://localhost:8002/ws,
-    auth_url": "http://localhost:8083,
+    auth_url": http://localhost:8083,"
     test_user: {
         email: test@example.com","
         "password: test123"""
@@ -63,7 +63,7 @@ class WebSocketEventCapture:
         print(f{Fore.CYAN}COMPREHENSIVE WEBSOCKET AGENT EVENT CAPTURE)""
         print(f"{Fore.CYAN}Running on STAGING Environment)"
         print(f{Fore.CYAN}Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
-        print("=*80 + \n")
+        print("=*80 + \n)"
         
     def print_event(self, event: Dict[str, Any):
         Pretty print a WebSocket event""
@@ -134,7 +134,7 @@ class WebSocketEventCapture:
 
 async def authenticate(session: aiohttp.ClientSession") -> str:"
     "Authenticate and get access token"""
-    print(f"{Fore.YELLOW}Authenticating with staging environment...{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}Authenticating with staging environment...{Style.RESET_ALL})"
     
     # Try to login or register
     login_url = f{STAGING_CONFIG['auth_url']}/auth/login
@@ -184,7 +184,7 @@ async def run_agent_and_capture_events():
             
             # Send initial message to trigger agent
             test_message = {
-                type": "message,
+                type": message,"
                 content: Analyze the performance of my AI infrastructure,
                 timestamp: time.time()""
             }
@@ -314,7 +314,7 @@ async def main():
         print(f{Fore.RED}{Style.BRIGHT}[U+2717] FAILURE: Some WebSocket events missing{Style.RESET_ALL}"")""
         return 1
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     exit_code = asyncio.run(main())
     exit(exit_code)
 

@@ -329,7 +329,7 @@ class WebSocketConnectivityTester:
             raise RuntimeError(Failed to establish basic WebSocket connection)
     
     async def _establish_websocket_connection(self, connection_id: str) -> Optional[WebSocketConnection]:
-        ""Establish a WebSocket connection with comprehensive error handling.
+        ""Establish a WebSocket connection with comprehensive error handling."
         if not self.websocket_url:
             return None
         
@@ -428,7 +428,7 @@ class WebSocketConnectivityTester:
             # Send test message
             test_message = {
                 type: test,
-                "data: fHello from {connection.connection_id}",
+                "data: fHello from {connection.connection_id},"
                 timestamp: time.time(),
                 sequence: 1""
             }
@@ -471,7 +471,7 @@ class WebSocketConnectivityTester:
             self.metrics.errors.append(error_msg)
     
     async def _test_websocket_authentication(self):
-        ""Phase 3: Test WebSocket authentication flows.
+        ""Phase 3: Test WebSocket authentication flows."
         logger.info(Phase 3: Testing WebSocket authentication)""
         
         # Test unauthenticated connection
@@ -684,7 +684,7 @@ class WebSocketConnectivityTester:
             # Send multiple messages and track delivery
             for i in range(message_count):
                 message = {
-                    "type: delivery_test",
+                    "type: delivery_test,"
                     sequence: i,
                     data: f"Message {i},"
                     timestamp: time.time()""
@@ -748,7 +748,7 @@ class WebSocketConnectivityTester:
         try:
             # Send message requiring acknowledgment
             ack_message = {
-                type": "require_ack,
+                type": require_ack,"
                 id: str(uuid.uuid4()),
                 data: This message requires acknowledgment","
                 "timestamp: time.time()"""
@@ -820,7 +820,7 @@ class WebSocketConnectivityTester:
                 
                 # Send message after reconnection
                 post_reconnect_message = {
-                    type": "post_reconnect,
+                    type": post_reconnect,"
                     data: Message after reconnection,
                     timestamp: time.time()""
                 }
@@ -1031,7 +1031,7 @@ class WebSocketConnectivityTester:
             # Send initial message
             initial_message = {
                 type: before_reconnect,
-                "data: Message before reconnection test",
+                "data: Message before reconnection test,"
                 timestamp: time.time()
             }
             
@@ -1083,8 +1083,8 @@ class WebSocketConnectivityTester:
             
             # Send state setup message
             state_message = {
-                type": "set_state,
-                state: {user_id: test_user, "session: test_session"},
+                type": set_state,"
+                state: {user_id: test_user, "session: test_session},"
                 timestamp: time.time()
             }
             
@@ -1408,7 +1408,7 @@ class WebSocketConnectivityRealtimeFeaturesTests:
         metrics = await tester.run_comprehensive_websocket_test()
         
         # Validate core requirements
-        assert len(metrics.errors) == 0, fWebSocket test had errors: {metrics.errors}
+        assert len(metrics.errors) == 0, "fWebSocket test had errors: {metrics.errors}"
         
         # Validate connection success rate
         connection_success_rate = metrics.connection_success_rate
@@ -1422,12 +1422,12 @@ class WebSocketConnectivityRealtimeFeaturesTests:
         # Validate performance
         avg_latency = metrics.average_latency
         if avg_latency > 0:
-            assert avg_latency < 2.0, fAverage message latency too high: {avg_latency:.3f}s
+            assert avg_latency < 2.0, "fAverage message latency too high: {avg_latency:.3f}s"
         
         # Validate reconnection capability
         if metrics.reconnection_attempts > 0:
             reconnection_success_rate = metrics.reconnection_success_rate
-            assert reconnection_success_rate >= 75.0, fReconnection success rate too low: {reconnection_success_rate:.1f}%
+            assert reconnection_success_rate >= 75.0, "fReconnection success rate too low: {reconnection_success_rate:.1f}%"
         
         # Validate concurrent connection handling
         if metrics.max_concurrent_connections > 0:
@@ -1438,7 +1438,7 @@ class WebSocketConnectivityRealtimeFeaturesTests:
         if metrics.auth_attempts > 0:
             auth_success_rate = (metrics.successful_auth / metrics.auth_attempts) * 100
             # Authentication may not be fully implemented, so allow lower success rate
-            assert auth_success_rate >= 0.0, fAuth success rate: {auth_success_rate:.1f}%
+            assert auth_success_rate >= 0.0, "fAuth success rate: {auth_success_rate:.1f}%"
         
         # Log comprehensive results
         logger.info(=== WEBSOCKET CONNECTIVITY AND REAL-TIME TEST RESULTS ===)

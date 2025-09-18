@@ -103,10 +103,10 @@ class TestUserExecutionContextValidation:
     def test_context_creation_with_valid_data(self):
         """Test UserExecutionContext creation with valid data."""
         context = UserExecutionContext( )
-        user_id="user_123",
-        thread_id="thread_456",
-        run_id="run_789",
-        request_id="req_012",
+        user_id="user_123,"
+        thread_id="thread_456,"
+        run_id="run_789,"
+        request_id="req_012,"
         websocket_connection_id="conn_345"
     
 
@@ -120,9 +120,9 @@ class TestUserExecutionContextValidation:
         """Test UserExecutionContext creation without WebSocket ID."""
         pass
         context = UserExecutionContext( )
-        user_id="user_123",
-        thread_id="thread_456",
-        run_id="run_789",
+        user_id="user_123,"
+        thread_id="thread_456,"
+        run_id="run_789,"
         request_id="req_012"
     
 
@@ -130,73 +130,73 @@ class TestUserExecutionContextValidation:
 
     def test_context_validation_rejects_none_user_id(self):
         """Test context validation fails for None user_id."""
-        with pytest.raises(ValueError, match="UserExecutionContext.user_id cannot be None"):
+        with pytest.raises(ValueError, match="UserExecutionContext.user_id cannot be None):"
         UserExecutionContext( )
         user_id=None,
-        thread_id="thread_456",
-        run_id="run_789",
+        thread_id="thread_456,"
+        run_id="run_789,"
         request_id="req_012"
         
 
     def test_context_validation_rejects_empty_user_id(self):
         """Test context validation fails for empty user_id."""
         pass
-        with pytest.raises(ValueError, match="UserExecutionContext.user_id cannot be empty"):
+        with pytest.raises(ValueError, match="UserExecutionContext.user_id cannot be empty):"
         UserExecutionContext( )
         user_id="",
-        thread_id="thread_456",
-        run_id="run_789",
+        thread_id="thread_456,"
+        run_id="run_789,"
         request_id="req_012"
         
 
     def test_context_validation_rejects_placeholder_user_id(self):
         """Test context validation fails for placeholder user_id."""
-        with pytest.raises(ValueError, match="UserExecutionContext.user_id cannot be the string 'None'"):
+        with pytest.raises(ValueError, match="UserExecutionContext.user_id cannot be the string 'None'):"
         UserExecutionContext( )
-        user_id="None",
-        thread_id="thread_456",
-        run_id="run_789",
+        user_id="None,"
+        thread_id="thread_456,"
+        run_id="run_789,"
         request_id="req_012"
         
 
     def test_context_validation_rejects_none_thread_id(self):
         """Test context validation fails for None thread_id."""
         pass
-        with pytest.raises(ValueError, match="UserExecutionContext.thread_id cannot be None"):
+        with pytest.raises(ValueError, match="UserExecutionContext.thread_id cannot be None):"
         UserExecutionContext( )
-        user_id="user_123",
+        user_id="user_123,"
         thread_id=None,
-        run_id="run_789",
+        run_id="run_789,"
         request_id="req_012"
         
 
     def test_context_validation_rejects_empty_thread_id(self):
         """Test context validation fails for empty thread_id."""
-        with pytest.raises(ValueError, match="UserExecutionContext.thread_id cannot be empty"):
+        with pytest.raises(ValueError, match="UserExecutionContext.thread_id cannot be empty):"
         UserExecutionContext( )
-        user_id="user_123",
+        user_id="user_123,"
         thread_id="",
-        run_id="run_789",
+        run_id="run_789,"
         request_id="req_012"
         
 
     def test_context_validation_rejects_none_run_id(self):
         """Test context validation fails for None run_id."""
         pass
-        with pytest.raises(ValueError, match="UserExecutionContext.run_id cannot be None"):
+        with pytest.raises(ValueError, match="UserExecutionContext.run_id cannot be None):"
         UserExecutionContext( )
-        user_id="user_123",
-        thread_id="thread_456",
+        user_id="user_123,"
+        thread_id="thread_456,"
         run_id=None,
         request_id="req_012"
         
 
     def test_context_validation_rejects_empty_run_id(self):
         """Test context validation fails for empty run_id."""
-        with pytest.raises(ValueError, match="UserExecutionContext.run_id cannot be empty"):
+        with pytest.raises(ValueError, match="UserExecutionContext.run_id cannot be empty):"
         UserExecutionContext( )
-        user_id="user_123",
-        thread_id="thread_456",
+        user_id="user_123,"
+        thread_id="thread_456,"
         run_id="",
         request_id="req_012"
         
@@ -204,50 +204,50 @@ class TestUserExecutionContextValidation:
     def test_context_validation_rejects_placeholder_run_id(self):
         """Test context validation fails for placeholder run_id."""
         pass
-        with pytest.raises(ValueError, match="UserExecutionContext.run_id cannot be 'registry'"):
+        with pytest.raises(ValueError, match="UserExecutionContext.run_id cannot be 'registry'):"
         UserExecutionContext( )
-        user_id="user_123",
-        thread_id="thread_456",
-        run_id="registry",
+        user_id="user_123,"
+        thread_id="thread_456,"
+        run_id="registry,"
         request_id="req_012"
         
 
     def test_context_validation_rejects_none_request_id(self):
         """Test context validation fails for None request_id."""
-        with pytest.raises(ValueError, match="UserExecutionContext.request_id cannot be None"):
+        with pytest.raises(ValueError, match="UserExecutionContext.request_id cannot be None):"
         UserExecutionContext( )
-        user_id="user_123",
-        thread_id="thread_456",
-        run_id="run_789",
+        user_id="user_123,"
+        thread_id="thread_456,"
+        run_id="run_789,"
         request_id=None
         
 
     def test_context_validation_rejects_empty_request_id(self):
         """Test context validation fails for empty request_id."""
         pass
-        with pytest.raises(ValueError, match="UserExecutionContext.request_id cannot be empty"):
+        with pytest.raises(ValueError, match="UserExecutionContext.request_id cannot be empty):"
         UserExecutionContext( )
-        user_id="user_123",
-        thread_id="thread_456",
-        run_id="run_789",
+        user_id="user_123,"
+        thread_id="thread_456,"
+        run_id="run_789,"
         request_id=""
         
 
     def test_context_to_dict_conversion(self):
         """Test UserExecutionContext to_dict conversion."""
         context = UserExecutionContext( )
-        user_id="user_123",
-        thread_id="thread_456",
-        run_id="run_789",
-        request_id="req_012",
+        user_id="user_123,"
+        thread_id="thread_456,"
+        run_id="run_789,"
+        request_id="req_012,"
         websocket_connection_id="conn_345"
     
 
         expected_dict = { }
-        "user_id": "user_123",
-        "thread_id": "thread_456",
-        "run_id": "run_789",
-        "request_id": "req_012",
+        "user_id": "user_123,"
+        "thread_id": "thread_456,"
+        "run_id": "run_789,"
+        "request_id": "req_012,"
         "websocket_connection_id": "conn_345"
     
 
@@ -259,14 +259,14 @@ class TestUserExecutionContextValidation:
         long_user_id = "very_long_user_id_that_should_be_truncated_for_security"
         context = UserExecutionContext( )
         user_id=long_user_id,
-        thread_id="thread_456",
-        run_id="run_789",
+        thread_id="thread_456,"
+        run_id="run_789,"
         request_id="req_012"
     
 
         str_repr = str(context)
     # Should truncate long user_id for security
-        assert "very_lon..." in str_repr
+        assert "very_lon... in str_repr"
         assert long_user_id not in str_repr  # Full user_id should not appear
 
 
@@ -276,9 +276,9 @@ class TestAgentExecuteMethodMigration:
 class TestAgent(BaseAgent):
         """Test agent implementation for migration testing."""
 
-    def __init__(self, test_mode: str = "new"):
+    def __init__(self, test_mode: str = "new):"
         pass
-        super().__init__(name="TestAgent")
+        super().__init__(name="TestAgent)"
         self.test_mode = test_mode
         self.execution_calls = []
 
@@ -290,7 +290,7 @@ class TestAgent(BaseAgent):
         'stream_updates': stream_updates,
         'timestamp': datetime.now(timezone.utc)
     
-        return {"status": "success", "method": "context_based", "user_id": context.user_id}
+        return {"status": "success", "method": "context_based", "user_id: context.user_id}"
 
     async def execute_core_logic(self, execution_context) -> Dict[str, Any]:
         """Legacy core logic method."""
@@ -299,14 +299,14 @@ class TestAgent(BaseAgent):
         'execution_context': execution_context,
         'timestamp': datetime.now(timezone.utc)
     
-        return {"status": "success", "method": "core_logic"}
+        return {"status": "success", "method": "core_logic}"
 
 class LegacyAgent(BaseAgent):
-        """Legacy agent that hasn't been migrated (should fail tests)."""'
+        """Legacy agent that hasn't been migrated (should fail tests).""'"
 
     def __init__(self):
         pass
-        super().__init__(name="LegacyAgent")
+        super().__init__(name="LegacyAgent)"
 
     # Intentionally no execute_with_context or execute_core_logic implementation
 
@@ -315,9 +315,9 @@ class LegacyAgent(BaseAgent):
 """Test agent execute method with valid UserExecutionContext."""
 agent = self.TestAgent()
 context = UserExecutionContext( )
-user_id="test_user",
-thread_id="test_thread",
-run_id="test_run",
+user_id="test_user,"
+thread_id="test_thread,"
+run_id="test_run,"
 request_id="test_request"
         
 
@@ -336,40 +336,40 @@ assert agent.execution_calls[0]["method"] == "execute_with_context"
 pass
 agent = self.TestAgent()
 
-with pytest.raises(TypeError, match="Expected UserExecutionContext"):
-await agent.execute({"invalid": "context"})
+with pytest.raises(TypeError, match="Expected UserExecutionContext):"
+await agent.execute({"invalid": "context})"
 
 @pytest.mark.asyncio
     async def test_agent_execute_validates_session_isolation(self):
 """Test agent execute method validates session isolation."""
 agent = self.TestAgent()
 context = UserExecutionContext( )
-user_id="test_user",
-thread_id="test_thread",
-run_id="test_run",
+user_id="test_user,"
+thread_id="test_thread,"
+run_id="test_run,"
 request_id="test_request"
                     
 
                     # Mock the session isolation validation to fail
 with patch.object(agent, '_validate_session_isolation') as mock_validate:
-mock_validate.side_effect = SessionIsolationError("Session isolation violated")
+mock_validate.side_effect = SessionIsolationError("Session isolation violated)"
 
 with pytest.raises(SessionIsolationError):
 await agent.execute(context)
 
 @pytest.mark.asyncio
     async def test_legacy_agent_execute_fails_appropriately(self):
-"""Test legacy agent that hasn't implemented new execute pattern fails."""'
+"""Test legacy agent that hasn't implemented new execute pattern fails.""'"
 pass
 agent = self.LegacyAgent()
 context = UserExecutionContext( )
-user_id="test_user",
-thread_id="test_thread",
-run_id="test_run",
+user_id="test_user,"
+thread_id="test_thread,"
+run_id="test_run,"
 request_id="test_request"
                                 
 
-with pytest.raises(NotImplementedError, match="must implement execute_with_context"):
+with pytest.raises(NotImplementedError, match="must implement execute_with_context):"
 await agent.execute(context)
 
 @pytest.mark.asyncio
@@ -378,7 +378,7 @@ await agent.execute(context)
 
 class ParentAgent(BaseAgent):
     def __init__(self):
-        super().__init__(name="ParentAgent")
+        super().__init__(name="ParentAgent)"
         self.subagent_contexts = []
 
     async def execute_with_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
@@ -391,19 +391,19 @@ class ParentAgent(BaseAgent):
     
         self.subagent_contexts.append(subagent_context)
         await asyncio.sleep(0)
-        return {"parent_result": "success", "subagent_context_created": True}
+        return {"parent_result": "success", "subagent_context_created: True}"
 
         parent_agent = ParentAgent()
         context = UserExecutionContext( )
-        user_id="test_user",
-        thread_id="test_thread",
-        run_id="test_run",
+        user_id="test_user,"
+        thread_id="test_thread,"
+        run_id="test_run,"
         request_id="test_request"
     
 
         result = await parent_agent.execute(context)
 
-        assert result["subagent_context_created"]
+        assert result["subagent_context_created]"
         assert len(parent_agent.subagent_contexts) == 1
 
         subagent_context = parent_agent.subagent_contexts[0]
@@ -430,16 +430,16 @@ class TestSessionIsolationBetweenRequests:
 
         # Create contexts for two different users
 context1 = UserExecutionContext( )
-user_id="user_1",
-thread_id="thread_1",
-run_id="run_1",
+user_id="user_1,"
+thread_id="thread_1,"
+run_id="run_1,"
 request_id="req_1"
         
 
 context2 = UserExecutionContext( )
-user_id="user_2",
-thread_id="thread_2",
-run_id="run_2",
+user_id="user_2,"
+thread_id="thread_2,"
+run_id="run_2,"
 request_id="req_2"
         
 
@@ -512,10 +512,10 @@ request_id=""
 session_mgr = DatabaseSessionManager(context)
 await asyncio.sleep(0)
 return { }
-"user_id": user_id,
-"context_id": id(context),
-"session_mgr_id": id(session_mgr),
-"session_user": session_mgr.context.user_id
+"user_id": "user_id,"
+"context_id: id(context),"
+"session_mgr_id: id(session_mgr),"
+"session_user: session_mgr.context.user_id"
     
 
     # Create concurrent sessions for different users
@@ -527,8 +527,8 @@ for i in range(10)
 results = await asyncio.gather(*tasks)
 
     # Verify all sessions are unique and properly isolated
-session_ids = [r["session_mgr_id"] for r in results]
-context_ids = [r["context_id"] for r in results]
+session_ids = [r["session_mgr_id] for r in results]"
+context_ids = [r["context_id] for r in results]"
 
 assert len(set(session_ids)) == 10, "All session managers should be unique"
 assert len(set(context_ids)) == 10, "All contexts should be unique"
@@ -547,17 +547,17 @@ from netra_backend.app.dependencies import mark_session_as_global
 mark_session_as_global(session)
 
                 # Validation should detect this and fail
-with pytest.raises(SessionIsolationError, match="must be request-scoped"):
-validate_session_is_request_scoped(session, "test_global_detection")
+with pytest.raises(SessionIsolationError, match="must be request-scoped):"
+validate_session_is_request_scoped(session, "test_global_detection)"
 
 @pytest.mark.asyncio
     async def test_user_execution_context_session_integration(self):
 """Test UserExecutionContext integration with database sessions."""
 
 context = UserExecutionContext( )
-user_id="integration_user",
-thread_id="integration_thread",
-run_id="integration_run",
+user_id="integration_user,"
+thread_id="integration_thread,"
+run_id="integration_run,"
 request_id="integration_request"
                         
 
@@ -585,7 +585,7 @@ class TestConcurrentUserHandling:
 
 class IsolationTestAgent(BaseAgent):
     def __init__(self):
-        super().__init__(name="IsolationTestAgent")
+        super().__init__(name="IsolationTestAgent)"
         self.user_data = {}  # This should be isolated per execution
 
     async def execute_with_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
@@ -605,8 +605,8 @@ class IsolationTestAgent(BaseAgent):
 
         await asyncio.sleep(0)
         return { }
-        "user_id": context.user_id,
-        "secret": user_secret,
+        "user_id": "context.user_id,"
+        "secret: user_secret,"
         "data_integrity": "verified"
             
 
@@ -638,8 +638,8 @@ class IsolationTestAgent(BaseAgent):
         for result in results:
         assert result["data_integrity"] == "verified"
         assert result["user_id"] not in user_ids_seen, "User ID collision detected"
-        user_ids_seen.add(result["user_id"])
-        assert result["secret"].startswith("")
+        user_ids_seen.add(result["user_id])"
+        assert result["secret"].startswith(")"
 
 @pytest.mark.asyncio
     async def test_concurrent_context_creation(self):
@@ -682,20 +682,20 @@ assert len(set(request_ids)) == 50, "All request IDs should be unique"
 
 class MemoryTestAgent(BaseAgent):
     def __init__(self):
-        super().__init__(name="MemoryTestAgent")
+        super().__init__(name="MemoryTestAgent)"
 
     async def execute_with_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
     # Allocate user-specific memory
-        user_memory_block = "X" * 1000000  # 1MB per user
+        user_memory_block = "X * 1000000  # 1MB per user"
 
     # Process with memory allocation
         await asyncio.sleep(0.5)
 
         await asyncio.sleep(0)
         return { }
-        "user_id": context.user_id,
-        "memory_block_size": len(user_memory_block),
-        "memory_allocated": True
+        "user_id": "context.user_id,"
+        "memory_block_size: len(user_memory_block),"
+        "memory_allocated: True"
     
 
         import psutil
@@ -727,7 +727,7 @@ class MemoryTestAgent(BaseAgent):
 
     # Verify execution succeeded
         assert len(results) == 30
-        assert all(r["memory_allocated"] for r in results)
+        assert all(r["memory_allocated] for r in results)"
 
     # Memory should not have increased excessively (indicates proper cleanup)
         assert memory_increase < 15.0, ""
@@ -748,16 +748,16 @@ malicious_contexts = [ ]
 ("user_1", "thread_1", "run_1", ""; INSERT INTO admin_users VALUES ("hacker"); --"),"
 
         # Script injection attempts
-("<script>alert('xss')</script>", "thread_1", "run_1", "req_1"),
-("user_1", "<script>steal_data()</script>", "run_1", "req_1"),
+("<script>alert('xss')</script>", "thread_1", "run_1", "req_1),"
+("user_1", "<script>steal_data()</script>", "run_1", "req_1),"
 
         # Path traversal attempts
-("../../../etc/passwd", "thread_1", "run_1", "req_1"),
-("user_1", "../../../../root/.ssh/id_rsa", "run_1", "req_1"),
+("../../../etc/passwd", "thread_1", "run_1", "req_1),"
+("user_1", "../../../../root/.ssh/id_rsa", "run_1", "req_1),"
 
         # Command injection attempts
-("user_1; rm -rf /", "thread_1", "run_1", "req_1"),
-("user_1", "thread_1", "run_1`whoami`", "req_1"),
+("user_1; rm -rf /", "thread_1", "run_1", "req_1),"
+("user_1", "thread_1", "run_1`whoami`", "req_1),"
         
 
 for user_id, thread_id, run_id, request_id in malicious_contexts:
@@ -786,10 +786,10 @@ pass
 """Test context handles excessively large field values."""
 
                         # Very large strings
-large_user_id = "user_" + "X" * 10000
-large_thread_id = "thread_" + "Y" * 10000
-large_run_id = "run_" + "Z" * 10000
-large_request_id = "req_" + "W" * 10000
+large_user_id = "user_" + "X * 10000"
+large_thread_id = "thread_" + "Y * 10000"
+large_run_id = "run_" + "Z * 10000"
+large_request_id = "req_" + "W * 10000"
 
                         # Context should handle large values without crashing
 context = UserExecutionContext( )
@@ -809,10 +809,10 @@ assert len(context.request_id) > 10000
 """Test context handles Unicode and special characters properly."""
 
 unicode_contexts = [ ]
-("[U+7528][U+6237]123", "[U+7EBF][U+7A0B]456", "[U+8FD0][U+884C]789", "[U+8BF7][U+6C42]12"),  # Chinese
-("[U+645][U+633][U+062A][U+062E][U+062F][U+645]123", "[U+645][U+648][U+636][U+648][U+639]456", "[U+062A][U+634][U+063A][U+064A][U+644]789", "[U+637][U+644][U+628]12"),  # Arabic
-("[U+043F]o[U+043B][U+044C][U+437]ovate[U+043B][U+044C]123", "[U+043F]otok456", "[U+437]a[U+043F]uck789", "[U+437]a[U+043F]poc012"),  # Russian
-("[U+1F464]user123", "[U+1F9F5]thread456", "[U+1F3C3]run789", "[U+1F4DD]req012"),  # Emojis
+("[U+7528][U+6237]123", "[U+7EBF][U+7A0B]456", "[U+8FD0][U+884C]789", "[U+8BF7][U+6C42]12),  # Chinese"
+("[U+645][U+633][U+062A][U+062E][U+062F][U+645]123", "[U+645][U+648][U+636][U+648][U+639]456", "[U+062A][U+634][U+063A][U+064A][U+644]789", "[U+637][U+644][U+628]12),  # Arabic"
+("[U+043F]o[U+043B][U+044C][U+437]ovate[U+043B][U+044C]123", "[U+043F]otok456", "[U+437]a[U+043F]uck789", "[U+437]a[U+043F]poc012),  # Russian"
+("[U+1F464]user123", "[U+1F9F5]thread456", "[U+1F3C3]run789", "[U+1F4DD]req012),  # Emojis"
 ("user )"
 123", "thread\t456", "run\r789", "req\12"),  # Control chars"
 ('user'123', 'thread'456', 'run\\789', 'req/12'),  # Special chars
@@ -830,10 +830,10 @@ request_id=request_id
 
                                     # Verify round-trip integrity
 context_dict = context.to_dict()
-assert context_dict["user_id"] == user_id
-assert context_dict["thread_id"] == thread_id
-assert context_dict["run_id"] == run_id
-assert context_dict["request_id"] == request_id
+assert context_dict["user_id] == user_id"
+assert context_dict["thread_id] == thread_id"
+assert context_dict["run_id] == run_id"
+assert context_dict["request_id] == request_id"
 
 except ValueError:
                                         # Some control characters might be rejected
@@ -846,17 +846,17 @@ pass
 
 extreme_contexts = [ ]
                                             # Very long strings
-("a" * 1000000, "b" * 1000000, "c" * 1000000, "d" * 1000000),
+("a" * 1000000, "b" * 1000000, "c" * 1000000, "d * 1000000),"
 
                                             # Numbers as strings (should be treated as strings)
-("123456789", "987654321", "555666777", "111222333"),
+("123456789", "987654321", "555666777", "111222333),"
 
                                             # Boolean-like strings (should be treated as strings)
-("true", "false", "True", "False"),
-("yes", "no", "on", "of""thread": true}', '{"run": 123}', '{"req": null}'),'
+("true", "false", "True", "False),"
+("yes", "no", "on", "of"thread"": true}', '{"run": 123}', '{"req: null}'),'"
 
                                             # XML-like strings (should be treated as literal strings)
-("<user>test</user>", "<thread>456</thread>", "<run>789</run>", "<req>12</req>"),
+("<user>test</user>", "<thread>456</thread>", "<run>789</run>", "<req>12</req>),"
                                             
 
 for user_id, thread_id, run_id, request_id in extreme_contexts:
@@ -882,42 +882,42 @@ class FullyMigratedAgent(BaseAgent):
 
     def __init__(self):
         pass
-        super().__init__(name="FullyMigratedAgent")
+        super().__init__(name="FullyMigratedAgent)"
 
     async def execute_with_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
         await asyncio.sleep(0)
-        return {"status": "migrated", "user_id": context.user_id}
+        return {"status": "migrated", "user_id: context.user_id}"
 
 class PartiallyMigratedAgent(BaseAgent):
         """Agent with some legacy methods still present."""
 
     def __init__(self):
         pass
-        super().__init__(name="PartiallyMigratedAgent")
+        super().__init__(name="PartiallyMigratedAgent)"
         self.has_legacy_methods = True  # Flag to indicate legacy presence
 
     async def execute_with_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
-        return {"status": "partially_migrated", "user_id": context.user_id}
+        return {"status": "partially_migrated", "user_id: context.user_id}"
 
     # Legacy method that should not exist after migration
     async def execute_legacy(self, state, run_id: str = "", stream_updates: bool = False):
         pass
         await asyncio.sleep(0)
-        return {"status": "legacy_called"}
+        return {"status": "legacy_called}"
 
     def test_detect_fully_migrated_agent(self):
         """Test detection of fully migrated agent."""
         agent = self.FullyMigratedAgent()
 
     # Check for new method presence
-        assert hasattr(agent, 'execute_with_context')
-        assert callable(getattr(agent, 'execute_with_context'))
+        assert hasattr(agent, "'execute_with_context')"
+        assert callable(getattr(agent, "'execute_with_context'))"
 
     # Check for absence of legacy indicators
-        assert not hasattr(agent, 'has_legacy_methods')
+        assert not hasattr(agent, "'has_legacy_methods')"
 
     Verify inheritance from BaseAgent
-        assert isinstance(agent, BaseAgent)
+        assert isinstance(agent, "BaseAgent)"
 
     def test_detect_partially_migrated_agent(self):
         """Test detection of partially migrated agent."""
@@ -925,14 +925,14 @@ class PartiallyMigratedAgent(BaseAgent):
         agent = self.PartiallyMigratedAgent()
 
     # Should have new methods
-        assert hasattr(agent, 'execute_with_context')
+        assert hasattr(agent, "'execute_with_context')"
 
     # But also has legacy indicators
-        assert hasattr(agent, 'has_legacy_methods')
+        assert hasattr(agent, "'has_legacy_methods')"
         assert agent.has_legacy_methods
 
     # Should have legacy execute method
-        assert hasattr(agent, 'execute_legacy')
+        assert hasattr(agent, "'execute_legacy')"
 
     def test_scan_for_legacy_patterns(self):
         """Test scanning agent classes for legacy patterns."""
@@ -975,8 +975,8 @@ class PartiallyMigratedAgent(BaseAgent):
                     # Test partially migrated agent
         partially_migrated_indicators = scan_agent_for_legacy_patterns(self.PartiallyMigratedAgent)
         assert len(partially_migrated_indicators) > 0, "Partially migrated agent should have legacy patterns"
-        assert "Legacy method: execute_legacy" in partially_migrated_indicators
-        assert "Legacy attribute: has_legacy_methods" in partially_migrated_indicators
+        assert "Legacy method: execute_legacy in partially_migrated_indicators"
+        assert "Legacy attribute: has_legacy_methods in partially_migrated_indicators"
 
 @pytest.mark.asyncio
     async def test_prevent_legacy_method_calls(self):
@@ -985,9 +985,9 @@ agent = self.PartiallyMigratedAgent()
 
                         # New method should work
 context = UserExecutionContext( )
-user_id="test_user",
-thread_id="test_thread",
-run_id="test_run",
+user_id="test_user,"
+thread_id="test_thread,"
+run_id="test_run,"
 request_id="test_request"
                         
 
@@ -998,7 +998,7 @@ assert result["status"] == "partially_migrated"
                         # In a real system, we might want to add warnings or restrictions
 if hasattr(agent, 'execute_legacy'):
     pass
-logger.warning("Agent still has legacy execute_legacy method - should be removed")
+logger.warning("Agent still has legacy execute_legacy method - should be removed)"
 
 
 class TestAPIEndpointUpdates:
@@ -1022,16 +1022,16 @@ request_id=""
     
 
     # Test context creation with minimal parameters
-context1 = create_context_from_api_request("api_user_1")
+context1 = create_context_from_api_request("api_user_1)"
 assert context1.user_id == "api_user_1"
 assert context1.thread_id is not None
 assert context1.run_id is not None
-assert context1.request_id.startswith("api_req_")
+assert context1.request_id.startswith("api_req_)"
 
     # Test context creation with all parameters
 context2 = create_context_from_api_request( )
-"api_user_2",
-"custom_thread_123",
+"api_user_2,"
+"custom_thread_123,"
 "custom_run_456"
     
 assert context2.user_id == "api_user_2"
@@ -1056,25 +1056,25 @@ run_id=run_id or ""
         
 except ValueError as e:
     pass
-return {"error": str(e), "status": "invalid_context"}
+return {"error": str(e), "status": "invalid_context}"
 
             # Test with invalid user_id
 result1 = safe_create_context_from_api("")  # Empty user_id
-if isinstance(result1, dict) and "error" in result1:
+if isinstance(result1, dict) and "error in result1:"
     pass
-assert "user_id cannot be empty" in result1["error"]
+assert "user_id cannot be empty" in result1["error]"
 
                 # Test with None user_id
 result2 = safe_create_context_from_api(None)
-if isinstance(result2, dict) and "error" in result2:
+if isinstance(result2, dict) and "error in result2:"
     pass
-assert "user_id cannot be None" in result2["error"]
+assert "user_id cannot be None" in result2["error]"
 
                     # Test with placeholder user_id
-result3 = safe_create_context_from_api("None")
-if isinstance(result3, dict) and "error" in result3:
+result3 = safe_create_context_from_api("None)"
+if isinstance(result3, dict) and "error in result3:"
     pass
-assert "cannot be the string 'None'" in result3["error"]
+assert "cannot be the string 'None'" in result3["error]"
 
 
 class TestIntegrationFullRequestFlow:
@@ -1093,7 +1093,7 @@ class IntegrationTestAgent(BaseAgent):
 
     def __init__(self):
         pass
-        super().__init__(name="IntegrationTestAgent")
+        super().__init__(name="IntegrationTestAgent)"
         self.execution_log = []
 
     async def execute_with_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
@@ -1101,16 +1101,16 @@ class IntegrationTestAgent(BaseAgent):
 
     # Log execution start
         self.execution_log.append({ })
-        "phase": "start",
-        "user_id": context.user_id,
-        "run_id": context.run_id,
-        "timestamp": datetime.now(timezone.utc)
+        "phase": "start,"
+        "user_id": "context.user_id,"
+        "run_id: context.run_id,"
+        "timestamp: datetime.now(timezone.utc)"
     
 
     # Simulate WebSocket events
         if stream_updates:
-        await self.emit_thinking("Starting integration test execution")
-        await self.emit_progress("Processing user request", is_complete=False)
+        await self.emit_thinking("Starting integration test execution)"
+        await self.emit_progress("Processing user request, is_complete=False)"
 
         # Simulate work with proper error handling
         try:
@@ -1126,32 +1126,32 @@ class IntegrationTestAgent(BaseAgent):
 
             # Log successful execution
         self.execution_log.append({ })
-        "phase": "success",
-        "user_id": context.user_id,
-        "run_id": context.run_id,
-        "sub_context_created": True,
-        "timestamp": datetime.now(timezone.utc)
+        "phase": "success,"
+        "user_id": "context.user_id,"
+        "run_id: context.run_id,"
+        "sub_context_created: True,"
+        "timestamp: datetime.now(timezone.utc)"
             
 
         if stream_updates:
-        await self.emit_progress("Execution completed successfully", is_complete=True)
+        await self.emit_progress("Execution completed successfully, is_complete=True)"
 
         await asyncio.sleep(0)
         return { }
-        "status": "success",
-        "user_id": context.user_id,
-        "run_id": context.run_id,
-        "sub_context_run_id": sub_context.run_id,
-        "execution_log": self.execution_log
+        "status": "success,"
+        "user_id": "context.user_id,"
+        "run_id: context.run_id,"
+        "sub_context_run_id: sub_context.run_id,"
+        "execution_log: self.execution_log"
                 
 
         except Exception as e:
         self.execution_log.append({ })
-        "phase": "error",
-        "user_id": context.user_id,
-        "run_id": context.run_id,
-        "error": str(e),
-        "timestamp": datetime.now(timezone.utc)
+        "phase": "error,"
+        "user_id": "context.user_id,"
+        "run_id: context.run_id,"
+        "error: str(e),"
+        "timestamp: datetime.now(timezone.utc)"
                     
 
         if stream_updates:
@@ -1165,9 +1165,9 @@ class IntegrationTestAgent(BaseAgent):
 
                             # Step 1: Create UserExecutionContext (simulating API request)
 context = UserExecutionContext( )
-user_id="integration_user",
-thread_id="integration_thread",
-run_id="integration_run",
+user_id="integration_user,"
+thread_id="integration_thread,"
+run_id="integration_run,"
 request_id="integration_request"
                             
 
@@ -1184,11 +1184,11 @@ assert result["run_id"] == "integration_run"
 assert result["sub_context_run_id"] == "integration_run_sub"
 
                             # Verify execution log
-execution_log = result["execution_log"]
+execution_log = result["execution_log]"
 assert len(execution_log) == 2  # start and success phases
 assert execution_log[0]["phase"] == "start"
 assert execution_log[1]["phase"] == "success"
-assert execution_log[1]["sub_context_created"]
+assert execution_log[1]["sub_context_created]"
 
 @pytest.mark.asyncio
     async def test_concurrent_integration_flows(self):
@@ -1223,16 +1223,16 @@ assert len(results) == concurrent_users
 
 for result in results:
 assert result["status"] == "success"
-assert result["user_id"] is not None
-assert result["run_id"] is not None
-assert result["sub_context_run_id"] is not None
-assert len(result["execution_log"]) == 2
+assert result["user_id] is not None"
+assert result["run_id] is not None"
+assert result["sub_context_run_id] is not None"
+assert len(result["execution_log]) == 2"
 
         # Verify user isolation
-user_ids = [r["user_id"] for r in results]
+user_ids = [r["user_id] for r in results]"
 assert len(set(user_ids)) == concurrent_users, "User isolation violated"
 
-run_ids = [r["run_id"] for r in results]
+run_ids = [r["run_id] for r in results]"
 assert len(set(run_ids)) == concurrent_users, "Run ID collision detected"
 
 
@@ -1279,14 +1279,14 @@ assert context.request_id is not None
 class PerformanceTestAgent(BaseAgent):
     def __init__(self):
         pass
-        super().__init__(name="PerformanceTestAgent")
+        super().__init__(name="PerformanceTestAgent)"
 
     async def execute_with_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
     # Minimal processing to measure overhead
         await asyncio.sleep(0)
         return { }
-        "user_id": context.user_id,
-        "execution_time": time.time()
+        "user_id": "context.user_id,"
+        "execution_time: time.time()"
     
 
         agent = PerformanceTestAgent()
@@ -1318,7 +1318,7 @@ class PerformanceTestAgent(BaseAgent):
 
 @pytest.mark.asyncio
     async def test_memory_usage_performance(self):
-"""Test memory usage doesn't degrade with new context approach."""'
+"""Test memory usage doesn't degrade with new context approach.""'"
 
 import psutil
 process = psutil.Process()
@@ -1359,13 +1359,13 @@ assert memory_recovered > (context_memory_usage * 0.8), ""
 class ScalabilityTestAgent(BaseAgent):
     def __init__(self):
         pass
-        super().__init__(name="ScalabilityTestAgent")
+        super().__init__(name="ScalabilityTestAgent)"
 
     async def execute_with_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
     # Simulate light processing
         await asyncio.sleep(0.1)  # 1ms processing time
         await asyncio.sleep(0)
-        return {"user_id": context.user_id, "processed": True}
+        return {"user_id": "context.user_id", "processed: True}"
 
     async def execute_concurrent_batch(batch_size: int) -> Tuple[float, bool]:
         """Execute a batch of concurrent agents and measure performance."""
@@ -1388,7 +1388,7 @@ class ScalabilityTestAgent(BaseAgent):
         end_time = time.time()
 
         total_time = end_time - start_time
-        all_successful = all(r["processed"] for r in results)
+        all_successful = all(r["processed] for r in results)"
 
         return total_time, all_successful
 
@@ -1401,10 +1401,10 @@ class ScalabilityTestAgent(BaseAgent):
         avg_time_per_execution = total_time / batch_size
 
         performance_results.append({ })
-        "batch_size": batch_size,
-        "total_time": total_time,
-        "avg_time_per_execution": avg_time_per_execution,
-        "all_successful": all_successful
+        "batch_size: batch_size,"
+        "total_time: total_time,"
+        "avg_time_per_execution: avg_time_per_execution,"
+        "all_successful: all_successful"
         
 
         # Performance assertions for each batch size
@@ -1412,8 +1412,8 @@ class ScalabilityTestAgent(BaseAgent):
         assert avg_time_per_execution < 0.1, ""
 
         # Verify scalability (performance shouldn't degrade significantly with larger batches)'
-        small_batch_avg = performance_results[0]["avg_time_per_execution"]
-        large_batch_avg = performance_results[-1]["avg_time_per_execution"]
+        small_batch_avg = performance_results[0]["avg_time_per_execution]"
+        large_batch_avg = performance_results[-1]["avg_time_per_execution]"
 
         # Allow some degradation but not excessive
         performance_degradation = large_batch_avg / small_batch_avg
@@ -1421,13 +1421,13 @@ class ScalabilityTestAgent(BaseAgent):
 
 
         # Test execution configuration
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
             # Configure test execution
         pytest.main([ ])
         __file__,
-        "-v",
-        "--tb=short",
-        "--asyncio-mode=auto",
-        "-x",  # Stop on first failure to identify issues quickly
-            # "--log-cli-level=INFO",  # Enable for detailed logging
+        "-v,"
+        "--tb=short,"
+        "--asyncio-mode=auto,"
+        "-x,  # Stop on first failure to identify issues quickly"
+            # "--log-cli-level=INFO,  # Enable for detailed logging"
             

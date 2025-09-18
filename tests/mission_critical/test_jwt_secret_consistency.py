@@ -56,12 +56,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 # SSOT imports
 from shared.isolated_environment import get_env
-from shared.jwt_secret_manager import (
+from shared.jwt_secret_manager import ()
     get_unified_jwt_secret, 
     get_jwt_secret_manager, 
     validate_unified_jwt_config
 )
-from test_framework.ssot.e2e_auth_helper import (
+from test_framework.ssot.e2e_auth_helper import ()
     E2EAuthHelper, 
     E2EAuthConfig,
     validate_jwt_token,
@@ -193,7 +193,7 @@ class JWTSecretConsistencyValidator:
             return False
     
     def test_cross_service_token_validation(self) -> bool:
-        "
+        """
         "
         Test that JWT tokens validate consistently across auth service and backend.
         
@@ -304,7 +304,7 @@ class JWTSecretConsistencyValidator:
                 logger.error(f FAIL:  {service_name} JWT validation: FAILED (403) - JWT SECRET MISMATCH)
                 return False
             else:
-                logger.warning(f" WARNING: [U+FE0F] {service_name} unexpected response: {response.status_code})")
+                logger.warning(f" WARNING: [U+FE0F] {service_name} unexpected response: {response.status_code}))"
                 return True  # Don't fail on unexpected responses'
                 
         except requests.exceptions.RequestException as e:
@@ -312,7 +312,7 @@ class JWTSecretConsistencyValidator:
             return True  # Service unavailable is not a JWT secret issue
     
     def test_hex_string_secret_acceptance(self) -> bool:
-    "
+        """
     "
         Test that HEX string secrets are properly accepted.
         
@@ -365,7 +365,7 @@ class JWTSecretConsistencyValidator:
             return False
     
     def test_token_rotation_consistency(self) -> bool:
-        ""
+        """
         Test JWT secret rotation scenarios maintain service continuity.
         
         This validates that secret rotation doesn't cause service disruption'
@@ -421,7 +421,7 @@ class JWTSecretConsistencyValidator:
             return False
     
     def test_silent_failure_detection(self) -> bool:
-    "
+        """
     "
         Test detection of silent authentication failures.
         
@@ -435,7 +435,7 @@ class JWTSecretConsistencyValidator:
             # Test scenarios that could cause silent failures
             test_scenarios = [
                 {
-                    "name: empty_secret",
+                    "name: empty_secret,"
                     secret: ,
                     expected_failure: True"
                     expected_failure: True"
@@ -452,7 +452,7 @@ class JWTSecretConsistencyValidator:
                 },
                 {
                     name: too_short_secret,
-                    "secret: short",
+                    "secret: short,"
                     expected_failure: True
                 },
                 {
@@ -509,7 +509,7 @@ class JWTSecretConsistencyValidator:
             return False
     
     def generate_comprehensive_report(self) -> Dict[str, Any]:
-        ""
+        """
         Generate comprehensive JWT secret consistency validation report.
         
         Returns:
@@ -523,7 +523,7 @@ class JWTSecretConsistencyValidator:
         critical_issues = [issue for issue in self.consistency_issues if "CRITICAL in issue]"
         warning_issues = [issue for issue in self.consistency_issues if WARNING in issue or  WARNING: [U+FE0F] in issue]
         
-        criticality_level = CRITICAL if critical_issues else ("WARNING if warning_issues else PASSED")
+        criticality_level = CRITICAL if critical_issues else ("WARNING if warning_issues else PASSED)"
         
         return {
             summary: {
@@ -576,7 +576,7 @@ class JWTSecretConsistencyValidator:
 
 
 class JWTSecretConsistencyTests(SSotBaseTestCase):
-    ""
+    """
     P0 Mission Critical Test Suite: JWT Secret Consistency
     
     These tests MUST pass before any deployment to prevent cascade authentication
@@ -585,7 +585,7 @@ class JWTSecretConsistencyTests(SSotBaseTestCase):
     
     @pytest.fixture(autouse=True)
     def setup_test_environment(self):
-        ""Set up test environment for JWT consistency validation.
+        ""Set up test environment for JWT consistency validation."
         self.environment = os.getenv(TEST_ENV, test")"
         self.validator = JWTSecretConsistencyValidator(self.environment)
         
@@ -594,7 +594,7 @@ class JWTSecretConsistencyTests(SSotBaseTestCase):
         jwt_manager.clear_cache()
     
     def test_unified_jwt_secret_resolution_consistency(self):
-    "
+        """
     "
         CRITICAL: Test unified JWT secret resolution consistency.
         
@@ -611,10 +611,10 @@ class JWTSecretConsistencyTests(SSotBaseTestCase):
             issues = \n.join(self.validator.consistency_issues)
             pytest.fail(fJWT secret resolution consistency FAILED:\n{issues}")"
         
-        assert result, Unified JWT secret resolution must be consistent across all services
+        assert result, "Unified JWT secret resolution must be consistent across all services"
     
     def test_cross_service_jwt_token_validation(self):
-        "
+        """
         "
         CRITICAL: Test JWT token validation across auth service and backend.
         
@@ -636,7 +636,7 @@ class JWTSecretConsistencyTests(SSotBaseTestCase):
         assert result, JWT tokens must validate consistently across all services"
     
     def test_hex_string_secret_acceptance(self):
-    "
+        """
     "
         CRITICAL: Test HEX string secret acceptance.
         
@@ -653,10 +653,10 @@ class JWTSecretConsistencyTests(SSotBaseTestCase):
             issues = \n.join(self.validator.consistency_issues)
             pytest.fail(fHEX string secret acceptance FAILED:\n{issues}")"
         
-        assert result, HEX string secrets must be properly accepted, not rejected as invalid
+        assert result, "HEX string secrets must be properly accepted, not rejected as invalid"
     
     def test_jwt_secret_rotation_consistency(self):
-        "
+        """
         "
         CRITICAL: Test JWT secret rotation maintains service continuity.
         
@@ -678,7 +678,7 @@ class JWTSecretConsistencyTests(SSotBaseTestCase):
         assert result, JWT secret rotation must maintain service continuity"
     
     def test_silent_authentication_failure_detection(self):
-    "
+        """
     "
         CRITICAL: Test detection of silent authentication failures.
         
@@ -695,10 +695,10 @@ class JWTSecretConsistencyTests(SSotBaseTestCase):
             issues = \n.join(self.validator.consistency_issues)
             pytest.fail(fSilent failure detection FAILED:\n{issues}")"
         
-        assert result, Silent authentication failures must be properly detected
+        assert result, "Silent authentication failures must be properly detected"
     
     def test_real_service_jwt_integration(self):
-        "
+        """
         "
         INTEGRATION: Test JWT consistency with real services if available.
         
@@ -722,7 +722,7 @@ class JWTSecretConsistencyTests(SSotBaseTestCase):
             assert test_token, E2E auth helper must create valid JWT token""
             
             parts = test_token.split('.')
-            assert len(parts) == 3, JWT token must have valid structure (3 parts)
+            assert len(parts) == 3, "JWT token must have valid structure (3 parts)"
             
             # Test JWT validation through E2E helper
             validation_result = asyncio.run(
@@ -801,7 +801,7 @@ class JWTSecretConsistencyTests(SSotBaseTestCase):
         logger.info(= * 80)
         
         # Assert overall system health
-        if summary["criticality_level] == CRITICAL":
+        if summary["criticality_level] == CRITICAL:"
             pytest.fail(
                 fJWT secret consistency validation CRITICAL FAILURE. 
                 fCritical issues: {len(report['critical_issues']). 
@@ -810,13 +810,13 @@ class JWTSecretConsistencyTests(SSotBaseTestCase):
         
         assert report is not None, JWT validation report must be generated"
         assert report is not None, JWT validation report must be generated"
-        assert summary[total_tests] > 0, JWT validation must execute tests
+        assert summary[total_tests] > 0, "JWT validation must execute tests"
 
 
 # Standalone execution for direct testing
 if __name__ == "__main__:"
     print(P0 MISSION CRITICAL: JWT SECRET CONSISTENCY VALIDATION)
-    print("= * 60")
+    print("= * 60)"
     print(Testing JWT secret synchronization to prevent cascade failures)"
     print(Testing JWT secret synchronization to prevent cascade failures)"
     print("= * 60)"
@@ -837,7 +837,7 @@ if __name__ == "__main__:"
     
     # Execute tests
     for test_name, test_func in tests:
-        print(f"\n SEARCH:  Running: {test_name})")
+        print(f"\n SEARCH:  Running: {test_name}))"
         try:
             result = test_func()
             status =  PASS:  PASSED if result else  FAIL:  FAILED
@@ -863,15 +863,15 @@ if __name__ == "__main__:"
         print(   Address warnings before production deployment)
         exit_code = 0
     else:
-        print(" PASS:  JWT SECRET CONSISTENCY: VALIDATION PASSED")
+        print(" PASS:  JWT SECRET CONSISTENCY: VALIDATION PASSED)"
         print(   System ready for deployment)"
         print(   System ready for deployment)"
         exit_code = 0
     
-    print(f"   Overall Success Rate: {success_rate:.1%})")
+    print(f"   Overall Success Rate: {success_rate:.1%}))"
     print(f   Estimated MRR Protection: {report['business_impact']['estimated_mrr_at_risk']})"
     print(f   Estimated MRR Protection: {report['business_impact']['estimated_mrr_at_risk']})"
-    print("=" * 60)
+    print("= * 60)"
     
     sys.exit(exit_code")"
 

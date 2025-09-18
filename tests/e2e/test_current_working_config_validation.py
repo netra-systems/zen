@@ -26,9 +26,9 @@ class WorkingConfigValidator:
     def __init__(self):
         pass
         self.services = { }
-        "auth": { }
-        "port": 8001,  # CORRECTED: Auth service is actually running on 8001
-        "url": "http://localhost:8001",
+        "auth: { }"
+        "port: 8001,  # CORRECTED: Auth service is actually running on 8001"
+        "url": "http://localhost:8001,"
         "health_endpoint": "/health"
     
     
@@ -38,13 +38,13 @@ class WorkingConfigValidator:
         """Validate a single service is accessible."""
         service_config = self.services[service_name]
         result = { }
-        "service_name": service_name,
-        "port": service_config["port"],
-        "accessible": False,
-        "healthy": False,
-        "response_time_ms": None,
-        "service_info": None,
-        "error": None
+        "service_name: service_name,"
+        "port": service_config["port],"
+        "accessible: False,"
+        "healthy: False,"
+        "response_time_ms: None,"
+        "service_info: None,"
+        "error: None"
     
 
         try:
@@ -56,22 +56,22 @@ class WorkingConfigValidator:
         async with httpx.AsyncClient(timeout=10.0) as client:
         response = await client.get(url)
 
-        result["response_time_ms"] = (time.time() - start_time) * 1000
-        result["accessible"] = True
+        result["response_time_ms] = (time.time() - start_time) * 1000"
+        result["accessible] = True"
 
         if response.status_code == 200:
-        result["healthy"] = True
+        result["healthy] = True"
         try:
         service_info = response.json()
-        result["service_info"] = service_info
+        result["service_info] = service_info"
 
                     # Validate service identity
-        service_field = service_info.get("service", "").lower()
+        service_field = service_info.get("service", ").lower()"
         if service_name.lower() in service_field:
-        result["service_identity_confirmed"] = True
+        result["service_identity_confirmed] = True"
         else:
-        result["service_identity_confirmed"] = False
-        result["actual_service"] = service_field
+        result["service_identity_confirmed] = False"
+        result["actual_service] = service_field"
         except Exception:
         result["service_info"] = ""
         else:
@@ -94,16 +94,16 @@ class WorkingConfigValidator:
         results[service_name] = await self.validate_service(service_name)
 
         # Calculate overall status
-        healthy_services = sum(1 for result in results.values() if result["healthy"])
-        accessible_services = sum(1 for result in results.values() if result["accessible"])
+        healthy_services = sum(1 for result in results.values() if result["healthy])"
+        accessible_services = sum(1 for result in results.values() if result["accessible])"
 
         overall_result = { }
-        "total_services": len(self.services),
-        "healthy_services": healthy_services,
-        "accessible_services": accessible_services,
-        "all_healthy": healthy_services == len(self.services),
-        "core_services_healthy": results.get("auth", {}).get("healthy", False),  # Only auth service in current config
-        "service_results": results
+        "total_services: len(self.services),"
+        "healthy_services: healthy_services,"
+        "accessible_services: accessible_services,"
+        "all_healthy: healthy_services == len(self.services),"
+        "core_services_healthy": results.get("auth", {}).get("healthy, False),  # Only auth service in current config"
+        "service_results: results"
         
 
         return overall_result
@@ -111,10 +111,10 @@ class WorkingConfigValidator:
     async def validate_websocket_endpoint(self) -> Dict[str, Any]:
         """Validate WebSocket endpoint is accessible (basic connectivity test)."""
         result = { }
-        "websocket_url": self.websocket_url,
-        "endpoint_accessible": False,
-        "connection_time_ms": None,
-        "error": None
+        "websocket_url: self.websocket_url,"
+        "endpoint_accessible: False,"
+        "connection_time_ms: None,"
+        "error: None"
     
 
         try:
@@ -130,14 +130,14 @@ class WorkingConfigValidator:
         timeout=5.0
         ) as websocket:
         connection_time = (time.time() - start_time) * 1000
-        result["connection_time_ms"] = connection_time
-        result["endpoint_accessible"] = True
+        result["connection_time_ms] = connection_time"
+        result["endpoint_accessible] = True"
         except websockets.exceptions.WebSocketException as e:
                     # WebSocket connection might fail due to auth requirements, which is expected
-        if "401" in str(e) or "unauthorized" in str(e).lower():
-        result["endpoint_accessible"] = True  # Endpoint exists, just requires auth
-        result["requires_auth"] = True
-        result["connection_time_ms"] = (time.time() - start_time) * 1000
+        if "401" in str(e) or "unauthorized in str(e).lower():"
+        result["endpoint_accessible] = True  # Endpoint exists, just requires auth"
+        result["requires_auth] = True"
+        result["connection_time_ms] = (time.time() - start_time) * 1000"
         else:
         result["error"] = ""
 
@@ -182,11 +182,11 @@ port = service_result['port']
 response_time = service_result.get('response_time_ms', 0)
 
 print("")
-print("" if response_time else "   No response time")
+print("" if response_time else "   No response time)"
 
 if service_result.get('service_identity_confirmed'):
     pass
-print(f"    PASS:  Service identity confirmed")
+print(f"    PASS:  Service identity confirmed)"
 elif 'actual_service' in service_result:
     print("")
 
@@ -205,7 +205,7 @@ if auth_result['accessible']:
 assert auth_result['port'] == 8001, ""
 
 if auth_result['healthy']:
-    print(" PASS:  Auth service is healthy on correct port 8001")
+    print(" PASS:  Auth service is healthy on correct port 8001)"
 else:
     print("")
                                                                             # Don't fail if service is accessible but not perfectly healthy'
@@ -215,7 +215,7 @@ pytest.fail("")
 
                                                                                 # Validate service identity
 if auth_result.get('service_identity_confirmed'):
-    print(" PASS:  Service identity confirmed as auth-service")
+    print(" PASS:  Service identity confirmed as auth-service)"
 else:
     print("")
 
@@ -241,7 +241,7 @@ print("")
 print("")
 
 if result.get('requires_auth'):
-    print(" PASS:  WebSocket endpoint requires authentication (expected)")
+    print(" PASS:  WebSocket endpoint requires authentication (expected))"
 
 if result.get('connection_time_ms'):
     print("")
@@ -253,8 +253,8 @@ if result['error']:
                                                                                                         # Even if it requires authentication (which is expected)
 if not result['endpoint_accessible'] and result['error']:
                                                                                                             # If there's a connection error, it might be because services aren't running
-if "connection" in result['error'].lower() or "endpoint not accessible" in result['error'].lower():
-    print(" WARNING: [U+FE0F]  WebSocket endpoint not accessible - this may indicate backend service issues")
+if "connection" in result['error'].lower() or "endpoint not accessible in result['error'].lower():"
+    print(" WARNING: [U+FE0F]  WebSocket endpoint not accessible - this may indicate backend service issues)"
                                                                                                                 # Don't fail the test if services aren't fully running yet
 pytest.skip("")
 else:
@@ -280,8 +280,8 @@ print(f" )"
 === SERVICE RESPONSE TIMING VALIDATION ===")"
 
 timing_requirements = { }
-"auth": 2000,    # Auth should respond within 2s for WebSocket handshakes
-"backend": 5000  # Backend can be a bit slower
+"auth: 2000,    # Auth should respond within 2s for WebSocket handshakes"
+"backend: 5000  # Backend can be a bit slower"
                                                                                                                         
 
 for service_name, service_result in results['service_results'].items():
@@ -299,24 +299,24 @@ assert response_time < max_time, \
 
 if response_time < max_time / 2:
     pass
-print(f"    PASS:  Excellent response time")
+print(f"    PASS:  Excellent response time)"
 else:
     pass
-print(f"    PASS:  Acceptable response time")
+print(f"    PASS:  Acceptable response time)"
 else:
     pass
-print(f"    WARNING: [U+FE0F]  Service not healthy, timing not validated")
+print(f"    WARNING: [U+FE0F]  Service not healthy, timing not validated)"
 else:
     print("")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
 async def main():
 pass
 validator = WorkingConfigValidator()
 
-print("=== VALIDATING CURRENT WORKING CONFIGURATION ===")
+print("=== VALIDATING CURRENT WORKING CONFIGURATION ===)"
 
     # Test all services
 results = await validator.validate_all_services()

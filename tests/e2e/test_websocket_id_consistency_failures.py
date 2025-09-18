@@ -41,7 +41,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.types.core_types import UserID, ThreadID, WebSocketID, ConnectionID
 
 # Backend WebSocket components that need validation
-from netra_backend.app.websocket_core.websocket_manager_factory import (
+from netra_backend.app.websocket_core.websocket_manager_factory import ()
     create_websocket_manager, 
     WebSocketManagerFactory,
     IsolatedWebSocketManager
@@ -128,7 +128,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                         client_id_violations.append(fDuplicate WebSocket client IDs found: {client_id})""
                 
             except Exception as e:
-                client_id_violations.append(f"WebSocket manager creation failed for user {i}: {e})"
+                client_id_violations.append(f""WebSocket manager creation failed" for user {i}: {e})"
         
         # This test SHOULD FAIL due to client ID violations
         assert len(client_id_violations) > 0, (
@@ -167,10 +167,10 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                 {"method: manager_factory, id: fws_conn_{uuid.uuid4().hex[:8]}},  # Current violation"
                 
                 # Scenario 3: WebSocket bridge connection
-                {"method: bridge_connection", id: uuid.uuid4().hex},  # Current violation
+                {"method: bridge_connection, id: uuid.uuid4().hex},  # Current violation"
                 
                 # Scenario 4: Client-generated connection ID
-                {method: "client_generated, id": fclient_{uuid.uuid4()}},  # Current violation
+                {method: "client_generated, id: fclient_{uuid.uuid4()}},  # Current violation"
             ]
             
             for scenario in connection_scenarios:
@@ -227,7 +227,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio 
     async def test_websocket_thread_routing_violations_SHOULD_FAIL(self):
-    ""
+    """
         EXPECTED TO FAIL: WebSocket routing fails due to thread/run ID format inconsistencies.
         
         This test exposes failures in WebSocket message routing when thread IDs
@@ -239,14 +239,14 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
         # Simulate different ID format scenarios that cause routing failures
         routing_scenarios = [
             {
-                name": "uuid_thread_ssot_run,
+                name": uuid_thread_ssot_run,"
                 thread_id: str(uuid.uuid4()),  # Raw UUID (violation)
                 run_id: UnifiedIdGenerator.generate_base_id(run"),  # SSOT compliant"
                 "expected_routing: should_fail"
             },
             {
                 name: ssot_thread_uuid_run, 
-                "thread_id: UnifiedIdGenerator.generate_base_id(session"),  # SSOT compliant
+                "thread_id: UnifiedIdGenerator.generate_base_id(session),  # SSOT compliant"
                 run_id: str(uuid.uuid4()),  # Raw UUID (violation)
                 expected_routing: "should_fail"
             },
@@ -275,8 +275,8 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                 # Test WebSocket routing with mixed ID formats
                 test_message = {
                     type: agent_started","
-                    "data: {message: test routing},"
-                    thread_id": scenario["thread_id],
+                    ""data": {"message: test routing"},"
+                    thread_id": scenario[thread_id],"
                     run_id: scenario[run_id],
                     routing_test: scenario["name]"
                 }
@@ -319,7 +319,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_multi_user_websocket_isolation_violations_SHOULD_FAIL(self):
-    ""
+    """
         EXPECTED TO FAIL: Multi-user WebSocket isolation fails due to ID inconsistencies.
         
         This test validates that inconsistent ID formats cause user isolation
@@ -376,7 +376,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             for i, (context, manager) in enumerate(ws_managers):
                 message = {
                     type: isolation_test,
-                    data": {"sender_user: i, private_data: fsecret_{i}},
+                    data": {sender_user: i, private_data: fsecret_{i}},"
                     user_id: context.user_id,
                     "thread_id: context.thread_id,"
                     timestamp: datetime.utcnow().isoformat()
@@ -470,7 +470,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_message_id_violations_SHOULD_FAIL(self):
-    ""
+    """
         EXPECTED TO FAIL: WebSocket messages contain IDs in inconsistent formats.
         
         This test validates that WebSocket messages contain properly formatted
@@ -488,7 +488,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                 name: "agent_started_raw_uuid,"
                 message": {"
                     type: agent_started,
-                    "data: {agent_id": str(uuid.uuid4())},  # VIOLATION: Raw UUID
+                    ""data": {"agent_id": str(uuid.uuid4())},  # VIOLATION: Raw UUID"
                     user_id: str(uuid.uuid4()),  # VIOLATION: Raw UUID
                     thread_id: str(uuid.uuid4()),  # VIOLATION: Raw UUID""
                     "run_id: str(uuid.uuid4()),  # VIOLATION: Raw UUID"
@@ -496,7 +496,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                 }
             },
             {
-                "name: tool_executing_mixed_format",
+                "name: tool_executing_mixed_format,"
                 message: {
                     type: "tool_executing,"
                     data": {"
@@ -553,7 +553,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                 try:
                     await ws_manager.send_to_user(message)
                 except Exception as send_error:
-                    if format" in str(send_error).lower() or "id in str(send_error).lower():
+                    if format" in str(send_error).lower() or id in str(send_error).lower():"
                         message_violations.append(f{scenario_name} message send failed due to ID format: {send_error})
             
             except Exception as e:
@@ -577,7 +577,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_ssot_compliance_SHOULD_PASS_AFTER_MIGRATION(self):
-    ""
+    """
         This test should PASS after migration validates SSOT compliance in WebSocket components.
         
         # Create user context with SSOT-compliant IDs
@@ -602,7 +602,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                 )
                 
                 # Should follow structured format
-                assert '_' in id_value, fWebSocket manager {field} should be structured: {id_value}
+                assert '_' in id_value, "fWebSocket manager {field} should be structured: {id_value}"
         
         # Test SSOT-compliant message sending
         compliant_message = {
@@ -648,7 +648,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             
             # All user IDs should be unique and SSOT-compliant
             user_ids = [ctx.user_id for ctx in user_contexts]
-            assert len(set(user_ids)) == len(user_ids), All user IDs should be unique
+            assert len(set(user_ids)) == len(user_ids), "All user IDs should be unique"
             
             for user_id in user_ids:
                 assert not self.id_patterns['uuid_v4'].match(user_id), f"User ID should not be raw UUID: {user_id}"
@@ -668,7 +668,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                         try:
                             is_active = manager.is_connection_active(other_user_id)
                             # Should return False due to user isolation
-                            assert not is_active, fManager {i} should not see user {j}'s connections'
+                            assert not is_active, "fManager {i} should not see user {j}'s connections'"
                         except Exception:
                             # Exception is also acceptable - indicates proper isolation
                             pass
@@ -704,7 +704,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                 self.id_patterns['uuid_v4'].match(forbidden_id) or
                 any(self.id_patterns['uuid_v4'].match(part) for part in forbidden_id.split('_'))
             )
-            assert should_be_detected, fForbidden pattern should be detectable: {forbidden_id}
+            assert should_be_detected, "fForbidden pattern should be detectable: {forbidden_id}"
         
         # Define acceptable SSOT patterns
         acceptable_patterns = [
@@ -717,7 +717,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
         # All acceptable patterns should be SSOT-compliant
         for acceptable_id in acceptable_patterns:
             assert not self.id_patterns['uuid_v4'].match(acceptable_id), fSSOT pattern should not be raw UUID: {acceptable_id}""
-            assert self.id_patterns['ssot_structured'].match(acceptable_id), fShould match SSOT format: {acceptable_id}
+            assert self.id_patterns['ssot_structured'].match(acceptable_id), "fShould match SSOT format: {acceptable_id}"
 
     # =============================================================================
     # PERFORMANCE AND CONSISTENCY TESTS
@@ -755,7 +755,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             
             # Check uniqueness
             assert len(set(all_user_ids)) == len(all_user_ids), All user IDs should be unique under load""
-            assert len(set(all_thread_ids)) == len(all_thread_ids), All thread IDs should be unique under load
+            assert len(set(all_thread_ids)) == len(all_thread_ids), "All thread IDs should be unique under load"
             assert len(set(all_run_ids)) == len(all_run_ids), All run IDs should be unique under load""
             
             # Check format consistency
@@ -785,7 +785,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_integration_health_check(self):
-    ""
+    """
         Health check to validate basic WebSocket integration works.
         This test should always pass to ensure basic functionality.
         
@@ -800,19 +800,19 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
             
             # Test basic operations
             manager_stats = ws_manager.get_manager_stats()
-            assert 'user_context' in manager_stats, Manager stats should include user context
+            assert 'user_context' in manager_stats, "Manager stats should include user context"
             
             # Cleanup
             await ws_manager.cleanup_all_connections()
             
-            print(f"WebSocket integration health check passed")
+            print(f"WebSocket integration health check passed)"
             
         except Exception as e:
             pytest.fail(fWebSocket integration health check failed: {e})
 
     @pytest.mark.asyncio  
     async def test_websocket_factory_pattern_validation(self):
-    ""
+    """
         Test WebSocket factory pattern produces consistent ID formats.
         
         This test validates that the WebSocketManagerFactory creates managers
@@ -845,7 +845,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
                     if field in user_data:
                         id_value = user_data[field]
                         assert isinstance(id_value, str), f"Factory manager {i} {field} should be string"
-                        assert len(id_value) > 0, fFactory manager {i} {field} should not be empty
+                        assert len(id_value) > 0, "fFactory manager {i} {field} should not be empty"
             
             # Cleanup
             for manager in managers:

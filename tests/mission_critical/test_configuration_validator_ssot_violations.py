@@ -65,13 +65,13 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
         self.env_patcher.start()
 
     def tearDown(self):
-        ""Clean up test environment.
+        ""Clean up test environment."
         super().tearDown()
         if hasattr(self, 'env_patcher'):
             self.env_patcher.stop()
 
     def test_oauth_validation_inconsistency_reproduction(self):
-    ""
+    """
         Test OAuth validation consistency across different ConfigurationValidator implementations.
         
         POST-CONSOLIDATION: This test now verifies that all validators provide CONSISTENT results
@@ -163,7 +163,7 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
         )
 
     def test_environment_detection_duplication_reproduction(self):
-    "
+        """
     "
         Test environment detection duplication across ConfigurationValidator implementations.
         
@@ -329,7 +329,7 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
         )
 
     def test_database_config_pattern_conflicts_reproduction(self):
-    "
+        """
     "
         Test database configuration pattern conflicts across ConfigurationValidator implementations.
         
@@ -425,7 +425,7 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
         )
 
     def test_golden_path_configuration_failures_reproduction(self):
-    ""
+    """
         Test Golden Path configuration failures due to SSOT violations.
         
         Reproduces end-to-end configuration failures that impact the Golden Path
@@ -518,7 +518,7 @@ if __name__ == __main__:
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print(MIGRATION NOTICE: This file previously used direct pytest execution.")"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)
-    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md)"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

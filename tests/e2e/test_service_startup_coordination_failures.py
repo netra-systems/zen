@@ -11,10 +11,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -154,9 +154,9 @@ class TestServiceStartupSequencing(SSotAsyncTestCase):
         all_dependencies_ready = True  # This should be True
 
         self.assertTrue(startup_successful,
-        "Startup coordination should succeed within timeout")
+        "Startup coordination should succeed within timeout)"
         self.assertTrue(all_dependencies_ready,
-        "All service dependencies should be ready before dependent starts")
+        "All service dependencies should be ready before dependent starts)"
 
         @pytest.mark.e2e
     def test_parallel_startup_where_possible(self):
@@ -193,7 +193,7 @@ class TestServiceStartupSequencing(SSotAsyncTestCase):
 
             # All infrastructure services should start at the same time
         self.assertEqual(len(set(start_times)), 1,
-        "Infrastructure services should start in parallel")
+        "Infrastructure services should start in parallel)"
 
 
 class TestReadinessCheckCoordination(SSotAsyncTestCase):
@@ -243,7 +243,7 @@ class TestReadinessCheckCoordination(SSotAsyncTestCase):
     # FAILING ASSERTION: Backend should not be ready if dependencies are unstable
         if service_readiness['auth']['stable_for'] < 15:  # Less than minimum stability time
         self.assertEqual(backend_ready_response.status_code, 503,
-        "Backend should not be ready when dependencies are unstable")
+        "Backend should not be ready when dependencies are unstable)"
 
         @pytest.mark.e2e
     def test_readiness_check_cascade_prevention(self):
@@ -282,12 +282,12 @@ class TestReadinessCheckCoordination(SSotAsyncTestCase):
         # FAILING ASSERTION: Service should recover after temporary failure
         final_state = readiness_results[-1]
         self.assertTrue(final_state,
-        "Service should be ready after temporary failure recovery")
+        "Service should be ready after temporary failure recovery)"
 
         # FAILING ASSERTION: Dependent services should also recover
         recovery_detected = any(readiness_results[1:])  # Recovery after initial failure
         self.assertTrue(recovery_detected,
-        "System should detect and recover from temporary failures")
+        "System should detect and recover from temporary failures)"
 
         @pytest.mark.e2e
     def test_readiness_check_performance_impact(self):
@@ -378,12 +378,12 @@ class TestServiceDiscoveryCoordination(SSotAsyncTestCase):
 
     # FAILING ASSERTION: Service discovery should be available immediately
         self.assertIsNotNone(discovered_backend,
-        "Backend service should be discoverable immediately after startup")
+        "Backend service should be discoverable immediately after startup)"
 
     # FAILING ASSERTION: Discovered URLs should be reachable
         api_url = discovered_backend.get('api_url')
         self.assertIsNotNone(api_url,
-        "Discovered service should have reachable API URL")
+        "Discovered service should have reachable API URL)"
 
         @pytest.mark.e2e
     def test_service_discovery_update_propagation(self):
@@ -419,12 +419,12 @@ class TestServiceDiscoveryCoordination(SSotAsyncTestCase):
 
     # FAILING ASSERTION: Update should be detected quickly
         self.assertNotEqual(initial_backend, updated_backend,
-        "Service discovery should detect backend port change")
+        "Service discovery should detect backend port change)"
 
     # FAILING ASSERTION: Update propagation should be automatic
         update_propagated = False  # This should be True in working system
         self.assertTrue(update_propagated,
-        "Discovery updates should automatically propagate to dependent services")
+        "Discovery updates should automatically propagate to dependent services)"
 
         @pytest.mark.e2e
     def test_service_discovery_failure_fallback(self):
@@ -453,7 +453,7 @@ class TestServiceDiscoveryCoordination(SSotAsyncTestCase):
         mock_exists.return_value = False
         elif scenario == 'invalid_json':
         mock_exists.return_value = True
-        mock_json_load.side_effect = json.JSONDecodeError("Invalid JSON", "doc", 0)
+        mock_json_load.side_effect = json.JSONDecodeError("Invalid JSON", "doc, 0)"
         elif scenario == 'empty_file':
         mock_exists.return_value = True
         mock_json_load.return_value = {}
@@ -555,7 +555,7 @@ class TestStartupErrorRecovery(SSotAsyncTestCase):
         simultaneous_retries = len(all_delays) - len(set(all_delays))
 
         self.assertEqual(simultaneous_retries, 0,
-        "Services should not retry simultaneously to avoid resource contention")
+        "Services should not retry simultaneously to avoid resource contention)"
 
         @pytest.mark.e2e
     def test_startup_recovery_state_management(self):
@@ -595,9 +595,9 @@ class TestStartupErrorRecovery(SSotAsyncTestCase):
         state_consistency_validated = False  # This should be True
 
         self.assertTrue(recovery_coordinator_exists,
-        "Should have central recovery state coordinator")
+        "Should have central recovery state coordinator)"
         self.assertTrue(state_consistency_validated,
-        "Recovery state consistency should be validated")
+        "Recovery state consistency should be validated)"
 
 
         if __name__ == '__main__':

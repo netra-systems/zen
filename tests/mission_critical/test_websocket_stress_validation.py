@@ -48,12 +48,12 @@ from loguru import logger
 from shared.isolated_environment import get_env, IsolatedEnvironment
 from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
 from tests.mission_critical.websocket_real_test_base import requires_docker, require_docker_services
-from tests.mission_critical.websocket_monitoring_utils import (
+from tests.mission_critical.websocket_monitoring_utils import ()
     WebSocketMonitoringOrchestrator, EventMetrics, RealTimeEventMonitor
 )
 
 # Import WebSocket test utilities
-from tests.mission_critical.test_websocket_event_validation_suite import (
+from tests.mission_critical.test_websocket_event_validation_suite import ()
     WebSocketConnectionManager, ValidationTestConfig, create_test_agent_message, 
     create_mock_auth_token, EventType
 )
@@ -65,7 +65,7 @@ from tests.mission_critical.test_websocket_event_validation_suite import (
 
 @dataclass
 class StressTestConfig:
-    ""Configuration for WebSocket stress testing.
+    ""Configuration for WebSocket stress testing."
     
     # Connection stress parameters
     max_concurrent_connections: int = 25
@@ -146,7 +146,7 @@ class StressTestMonitor:
         logger.info(Stress test monitoring stopped)
     
     def _monitor_resources(self):
-        ""Monitor system resources continuously.
+        ""Monitor system resources continuously."
         while self._monitoring_active:
             current_time = time.time()
             
@@ -367,7 +367,7 @@ class WebSocketStressTestRunner:
             self.monitor.stop_monitoring()
     
     async def _create_delayed_connection(self, user_id: str, auth_token: str, delay: float) -> Optional[Tuple]:
-        ""Create a connection with specified delay.
+        ""Create a connection with specified delay."
         try:
             if delay > 0:
                 await asyncio.sleep(delay)
@@ -390,7 +390,7 @@ class WebSocketStressTestRunner:
             return None
     
     async def run_message_throughput_test(self) -> Dict[str, Any]:
-        ""Test message throughput and latency under load.
+        ""Test message throughput and latency under load."
         logger.info(Starting message throughput stress test)"
         logger.info(Starting message throughput stress test)"
         
@@ -675,7 +675,7 @@ class WebSocketStressValidationTests:
         require_docker_services()
         
         manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
-        manager.start_services([backend", "auth, db, redis)
+        manager.start_services([backend", auth, db, redis)"
         yield manager
     
     @pytest.fixture
@@ -700,7 +700,7 @@ class WebSocketStressValidationTests:
         
         # Validate connection timing
         if performance[connections][timing_stats]:
-            avg_connection_time = performance["connections][timing_stats"][avg_ms]
+            avg_connection_time = performance["connections][timing_stats][avg_ms]"
             assert avg_connection_time <= stress_config.max_connection_time_ms, \
                 fAverage connection time {avg_connection_time}ms exceeds {stress_config.max_connection_time_ms}ms"
                 fAverage connection time {avg_connection_time}ms exceeds {stress_config.max_connection_time_ms}ms"
@@ -719,7 +719,7 @@ class WebSocketStressValidationTests:
     @requires_docker
     @pytest.mark.asyncio
     async def test_message_throughput_stress(self, stress_runner, stress_config):
-        ""Test message throughput and latency under load.
+        ""Test message throughput and latency under load."
         logger.info(Testing message throughput under stress)"
         logger.info(Testing message throughput under stress)"
         
@@ -732,7 +732,7 @@ class WebSocketStressValidationTests:
             fThroughput {throughput:.1f} msgs/sec below minimum {stress_config.min_throughput_msgs_sec}
         
         # Validate latency
-        if performance["messages][latency_stats"]:
+        if performance["messages][latency_stats]:"
             avg_latency = performance[messages][latency_stats][avg_ms]"
             avg_latency = performance[messages][latency_stats][avg_ms]"
             assert avg_latency <= stress_config.max_message_latency_ms, \
@@ -757,7 +757,7 @@ class WebSocketStressValidationTests:
     @requires_docker
     @pytest.mark.asyncio
     async def test_memory_leak_detection(self, stress_runner, stress_config):
-        ""Test for memory leaks during extended WebSocket operation.
+        ""Test for memory leaks during extended WebSocket operation."
         logger.info(Testing for memory leaks during extended operation)"
         logger.info(Testing for memory leaks during extended operation)"
         
@@ -910,7 +910,7 @@ class WebSocketStressValidationTests:
             logger.error(Memory leak test failed)
         
         # Resilience test validation
-        if comprehensive_results["resilience_test][reconnection_success_rate"] < 80.0:
+        if comprehensive_results["resilience_test][reconnection_success_rate] < 80.0:"
             all_tests_passed = False
             logger.error(Resilience test failed)
         

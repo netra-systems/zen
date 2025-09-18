@@ -34,24 +34,24 @@ class TestStagingOAuthRedirectCritical:
     async with httpx.AsyncClient(follow_redirects=False) as client:
     response = await client.get( )
     "",
-    params={"return_url": "https://app.staging.netrasystems.ai/dashboard"}
+    params={"return_url": "https://app.staging.netrasystems.ai/dashboard}"
             
 
     assert response.status_code in [302, 303], "OAuth should redirect to Google"
 
-    location = response.headers.get("location", "")
+    location = response.headers.get("location", ")"
     assert "accounts.google.com" in location, "Should redirect to Google OAuth"
 
             Parse the redirect URI from Google OAuth URL
     parsed_url = urlparse(location)
     query_params = parse_qs(parsed_url.query)
-    redirect_uri = query_params.get("redirect_uri", [""])[0]
+    redirect_uri = query_params.get("redirect_uri", ["])[0]"
 
             # CRITICAL ASSERTION - Currently failing
-    assert "app.staging.netrasystems.ai" in redirect_uri, \
+    assert "app.staging.netrasystems.ai in redirect_uri, \"
     ""
 
-    assert "auth.staging.netrasystems.ai" not in redirect_uri, \
+    assert "auth.staging.netrasystems.ai not in redirect_uri, \"
     ""
 
     @pytest.fixture
@@ -70,20 +70,20 @@ class TestStagingOAuthRedirectCritical:
     auth_url = "https://netra-auth-service-701982941522.us-central1.run.app"
 
     async with httpx.AsyncClient() as client:
-    response = await client.get("formatted_string")
+    response = await client.get("formatted_string)"
     assert response.status_code == 200
 
     config = response.json()
-    redirect_uris = config.get("redirect_uris", [])
+    redirect_uris = config.get("redirect_uris, [])"
 
                     # CRITICAL ASSERTIONS - Currently failing
     assert len(redirect_uris) > 0, "OAuth config must have redirect URIs"
 
-    assert any("app.staging.netrasystems.ai/auth/callback" in uri for uri in redirect_uris), \
+    assert any("app.staging.netrasystems.ai/auth/callback in uri for uri in redirect_uris), \"
     ""
 
                     # Should NOT have localhost in staging
-    assert not any("localhost" in uri for uri in redirect_uris), \
+    assert not any("localhost in uri for uri in redirect_uris), \"
     ""
 
     @pytest.fixture
@@ -100,7 +100,7 @@ class TestStagingOAuthRedirectCritical:
     frontend_url = "https://app.staging.netrasystems.ai"
 
     async with httpx.AsyncClient(follow_redirects=False) as client:
-    response = await client.get("formatted_string")
+    response = await client.get("formatted_string)"
 
                             # Should not be 404
     assert response.status_code != 404, \
@@ -124,18 +124,18 @@ class TestStagingOAuthRedirectCritical:
     response = await client.options( )
     "",
     headers={ }
-    "Origin": origin,
-    "Access-Control-Request-Method": "POST",
+    "Origin: origin,"
+    "Access-Control-Request-Method": "POST,"
     "Access-Control-Request-Headers": "content-type"
                                     
                                     
 
-    allow_origin = response.headers.get("access-control-allow-origin")
-    assert allow_origin == origin or allow_origin == "*", \
+    allow_origin = response.headers.get("access-control-allow-origin)"
+    assert allow_origin == origin or allow_origin == "*, \"
     ""
 
-    allow_credentials = response.headers.get("access-control-allow-credentials")
-    assert allow_credentials == "true", \
+    allow_credentials = response.headers.get("access-control-allow-credentials)"
+    assert allow_credentials == "true, \"
     "CORS must allow credentials for auth"
 
 
@@ -165,16 +165,16 @@ class TestStagingAuthenticationE2E:
             # 1. Frontend initiates OAuth
     response = await client.get( )
     "",
-    params={"return_url": ""},
-    headers={"Referer": ""}
+    params={"return_url": "},"
+    headers={"Referer": "}"
             
 
-    assert response.status_code in [302, 303]
+    assert response.status_code in [302, "303]"
 
             # 2. Verify Google OAuth URL has correct redirect_uri
-    location = response.headers.get("location", "")
-    assert "redirect_uri=" in location
-    assert "app.staging.netrasystems.ai" in location, \
+    location = response.headers.get("location", ")"
+    assert "redirect_uri= in location"
+    assert "app.staging.netrasystems.ai in location, \"
     "OAuth must use app.staging subdomain for callback"
 
     @pytest.fixture
@@ -199,7 +199,7 @@ class TestStagingAuthenticationE2E:
                     # Try with a dummy token to see error type
     response = await client.get( )
     "",
-    headers={"Authorization": "Bearer dummy_token"}
+    headers={"Authorization": "Bearer dummy_token}"
                     
 
                     # Should be 401 (invalid token), not 403 (forbidden)
@@ -223,14 +223,14 @@ class TestStagingEnvironmentConfiguration:
         pass
     # These would be checked via GCP Secret Manager
         required_secrets = [ ]
-        "google-oauth-client-id-staging",
-        "google-oauth-client-secret-staging",
+        "google-oauth-client-id-staging,"
+        "google-oauth-client-secret-staging,"
         "oauth-hmac-secret-staging"
     
 
     # In real test, would verify these exist in Secret Manager
     # For now, we mark this as needing manual verification
-        pytest.skip("Requires Secret Manager access to verify")
+        pytest.skip("Requires Secret Manager access to verify)"
 
         @pytest.fixture
         @pytest.mark.critical
@@ -248,18 +248,18 @@ class TestStagingEnvironmentConfiguration:
         async with httpx.AsyncClient() as client:
         response = await client.post( )
         "",
-        json={"email": "dev@example.com", "password": "dev123"}
+        json={"email": "dev@example.com", "password": "dev123}"
             
 
         assert response.status_code == 403, \
         ""
 
-        assert "forbidden" in response.text.lower(), \
+        assert "forbidden in response.text.lower(), \"
         "Should explicitly state dev login is forbidden"
 
 
             # Pytest configuration for staging tests
-        pytest_plugins = ["pytest_asyncio"]
+        pytest_plugins = ["pytest_asyncio]"
 
 
     def pytest_configure(config):
@@ -275,16 +275,16 @@ class TestStagingEnvironmentConfiguration:
     
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         # Run critical failing tests to demonstrate issues
-        print("Running critical staging OAuth tests...")
-        print("These tests SHOULD be passing but are currently FAILING")
+        print("Running critical staging OAuth tests...)"
+        print("These tests SHOULD be passing but are currently FAILING)"
         print("This exposes critical authentication issues in staging )"
         ")"
 
         import subprocess
         result = subprocess.run( )
-        ["python", "-m", "pytest", __file__, "-v", "-m", "critical"],
+        ["python", "-m", "pytest", __file__, "-v", "-m", "critical],"
         capture_output=True,
         text=True
         
@@ -293,7 +293,7 @@ class TestStagingEnvironmentConfiguration:
         if result.returncode != 0:
         print("")
         [CRITICAL] Tests are failing - authentication is broken in staging!")"
-        print("The test suite correctly identifies these issues.")
+        print("The test suite correctly identifies these issues.)"
         else:
         print("")
         [OK] All critical tests passing")"

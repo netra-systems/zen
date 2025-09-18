@@ -39,7 +39,7 @@ class PartialDataHandlingTests:
     def partial_cost_optimization_request(self):
         "Request with partial cost data - enough to start but not complete."
         return {
-            user_request": "Our LLM costs are around $8K monthly using mostly GPT-4,
+            user_request": Our LLM costs are around $8K monthly using mostly GPT-4,"
             available_data: {
                 monthly_spend_estimate: 7000-9000","
                 "primary_model: gpt-4,"
@@ -84,7 +84,7 @@ class PartialDataHandlingTests:
         return {
             user_request": Need to handle 10x more AI requests, currently at 1000/day,"
             available_data: {
-                "current_volume: 1000 requests/day",
+                "current_volume: 1000 requests/day,"
                 target_scale: 10x,
                 timeline: 3 months"
                 timeline: 3 months"
@@ -103,11 +103,11 @@ class PartialDataHandlingTests:
     
     @pytest.fixture
     def partial_multi_model_request(self):
-        ""Request with partial multi-model usage data.
+        ""Request with partial multi-model usage data."
         return {
             user_request: Using OpenAI, Anthropic, and Cohere - costs are high","
             "available_data: {"
-                providers: [openai, anthropic", "cohere],
+                providers: [openai, anthropic", cohere],"
                 cost_concern: high,
                 general_use: "mixed_workloads"
             },
@@ -129,7 +129,7 @@ class PartialDataHandlingTests:
             user_request: "Reduce AI costs but quality is critical for our medical app,"
             available_data": {"
                 domain: healthcare,
-                "quality_priority: critical",
+                "quality_priority: critical,"
                 cost_optimization_needed: True
             },
             missing_data: ["
@@ -183,14 +183,14 @@ class PartialDataHandlingTests:
                         action: Switch non-critical requests to GPT-3.5-turbo","
                         "confidence: 0.70,"
                         estimated_savings: $1000-1500/month,
-                        implementation_time": "2-3 days,
+                        implementation_time": 2-3 days,"
                         caveat: Exact savings depend on request distribution
                     },
                     {
                         action: "Implement prompt optimization,"
                         confidence": 0.85,"
                         estimated_savings: $500-800/month,
-                        "implementation_time: 1-2 days",
+                        "implementation_time: 1-2 days,"
                         caveat: No quality impact, reduces token usage
                     }
                 ],
@@ -215,7 +215,7 @@ class PartialDataHandlingTests:
             assert result.success
             assert immediate_recommendations" in result.result"
             assert len(result.result[immediate_recommendations) >= 2
-            assert all(caveat" in rec for rec in result.result["immediate_recommendations)
+            assert all(caveat" in rec for rec in result.result[immediate_recommendations)"
             assert result.result[confidence_level] == medium
     
     @pytest.mark.asyncio
@@ -235,7 +235,7 @@ class PartialDataHandlingTests:
                             {
                                 "metric: target_latency,"
                                 question: What is your acceptable response time?,
-                                "why: Determines optimization approach",
+                                "why: Determines optimization approach,"
                                 example: < 1 second for customer-facing
                             }
                         ],
@@ -244,7 +244,7 @@ class PartialDataHandlingTests:
                             {
                                 metric": request_size_distribution,"
                                 question: Average request size?,
-                                why": "Affects batching strategy,
+                                why": Affects batching strategy,"
                                 example: 500-2000 tokens
                             }
                         ],
@@ -253,7 +253,7 @@ class PartialDataHandlingTests:
                             {
                                 "metric: infrastructure_details,"
                                 question: Current deployment setup?,
-                                "why: Identifies optimization options",
+                                "why: Identifies optimization options,"
                                 example: AWS, Kubernetes, etc.
                             }
                         ]
@@ -282,7 +282,7 @@ class PartialDataHandlingTests:
             assert result.success
             data_request = result.result.get("data_request, {)"
             assert priority_tiers in data_request
-            assert "critical in data_request[priority_tiers"]
+            assert "critical in data_request[priority_tiers]"
             assert quick_collection in data_request
     
     @pytest.mark.asyncio
@@ -325,7 +325,7 @@ class PartialDataHandlingTests:
             mock_llm.ask_structured_llm.return_value = {
                 "phased_plan: {"
                     phase_1_immediate: {
-                        "duration: 1 week",
+                        "duration: 1 week,"
                         actions: [
                             {
                                 action: "Deploy usage tracking across all models,"
@@ -333,7 +333,7 @@ class PartialDataHandlingTests:
                                 effort: 2 days
                             },
                             {
-                                action": "Implement basic model routing rules,
+                                action": Implement basic model routing rules,"
                                 purpose: Quick cost wins,
                                 effort: "3 days,"
                                 expected_impact": $500-1000/month savings"
@@ -414,20 +414,20 @@ class PartialDataHandlingTests:
         with patch.object(agent, 'llm_manager') as mock_llm:
             mock_llm.ask_structured_llm.return_value = {
                 optimization_approach: conservative,
-                rationale": "Healthcare domain with critical quality requirements,
+                rationale": Healthcare domain with critical quality requirements,"
                 recommendations: [
                     {
                         action: Optimize prompt engineering only","
                         "risk_level: minimal,"
                         quality_impact: none,
-                        "estimated_savings: 10-15%",
+                        "estimated_savings: 10-15%,"
                         confidence: 0.90
                     },
                     {
                         action: "Implement response caching for non-patient data,"
                         risk_level": low,"
                         quality_impact: none for cached content,
-                        estimated_savings": "5-10%,
+                        estimated_savings": 5-10%,"
                         confidence: 0.85
                     }
                 ],
@@ -436,14 +436,14 @@ class PartialDataHandlingTests:
                     {
                         action": Model switching,"
                         reason: Requires quality metrics and testing,
-                        potential_savings": "30-40%,
+                        potential_savings": 30-40%,"
                         data_needed: [quality_baselines, error_tolerance]"
                         data_needed: [quality_baselines, error_tolerance]"
                     }
                 ],
                 "testing_protocol: {"
                     required: True,
-                    "approach: A/B testing with quality monitoring",
+                    "approach: A/B testing with quality monitoring,"
                     rollback_ready: True
                 }
             }
@@ -544,7 +544,7 @@ class PartialDataHandlingTests:
             mock_emergency.return_value = {
                 immediate_actions: [
                     {
-                        "action: Implement rate limiting",
+                        "action: Implement rate limiting,"
                         timeline: Within 1 hour,
                         impact: Prevent further spikes"
                         impact: Prevent further spikes"
@@ -651,13 +651,13 @@ class PartialDataHandlingTests:
                 return ExecutionResult(
                     success=True,
                     result={
-                        data_request: {priority: medium, "items: [token_usage"]}
+                        data_request: {priority: medium, "items: [token_usage]}"
                     }
             elif agent_name == actions:
                 return ExecutionResult(
                     success=True,
                     result={
-                        phased_plan": {"phase_1: Immediate actions}
+                        phased_plan": {phase_1: Immediate actions}"
                     }
             elif agent_name == reporting:"
             elif agent_name == reporting:"
@@ -666,7 +666,7 @@ class PartialDataHandlingTests:
                     result={
                         summary": Delivered value with partial data,"
                         confidence: medium,
-                        next_steps": ["Provide requested data for full optimization]
+                        next_steps": [Provide requested data for full optimization]"
                     }
             
             return ExecutionResult(success=True, result={)
@@ -698,14 +698,14 @@ class PartialDataHandlingTests:
     
     @pytest.mark.asyncio
     async def test_websocket_events_for_partial_data(self):
-        ""Test that appropriate WebSocket events are sent for partial data scenarios.
+        ""Test that appropriate WebSocket events are sent for partial data scenarios."
         from netra_backend.app.services.websocket_manager import WebSocketManager
         
         websocket_manager = WebSocketManager()
         events_sent = []
         
         async def mock_send_event(event_type, data):
-            events_sent.append({type: event_type, data": data)"
+            events_sent.append({"type": event_type, data": data)"
         
         websocket_manager.send_event = mock_send_event
         
@@ -757,7 +757,7 @@ class PartialDataHandlingTests:
             },
             {
                 agent: data_helper,
-                scenario": "missing_critical_data,
+                scenario": missing_critical_data,"
                 expected_elements: [
                     prioritized requests,"
                     prioritized requests,"
@@ -770,7 +770,7 @@ class PartialDataHandlingTests:
         for test in test_prompts:
             # This would validate actual prompt templates in production
             # For now, we verify the structure exists
-            assert test[agent"] in ["triage, optimization, data_helper]
+            assert test[agent"] in ["triage, "optimization, data_helper]"
             assert len(test[expected_elements) >= 3"
             assert len(test[expected_elements) >= 3"
     
@@ -778,8 +778,8 @@ class PartialDataHandlingTests:
     async def test_confidence_calibration(self):
         "Test that confidence scores are well-calibrated to actual success rates."
         test_cases = [
-            {completeness": 0.20, "predicted_confidence: 0.25, actual_success_rate: 0.20},
-            {completeness: 0.45, predicted_confidence": 0.55, "actual_success_rate: 0.50},
+            {completeness": 0.20, predicted_confidence: 0.25, actual_success_rate: 0.20},"
+            {completeness: 0.45, predicted_confidence": 0.55, actual_success_rate: 0.50},"
             {completeness: 0.75, predicted_confidence: 0.80, actual_success_rate": 0.78},"
             {completeness: 0.90, predicted_confidence: 0.92, actual_success_rate: 0.90},"
             {completeness: 0.90, predicted_confidence: 0.92, actual_success_rate: 0.90},"
@@ -795,7 +795,7 @@ class PartialDataHandlingTests:
 
 # === Test Runner ===
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

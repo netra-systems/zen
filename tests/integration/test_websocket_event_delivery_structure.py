@@ -14,7 +14,7 @@ import json
 from unittest.mock import Mock, AsyncMock, patch
 from typing import Dict, Any, List, Optional
 
-from netra_backend.app.websocket_core.event_validator import (
+from netra_backend.app.websocket_core.event_validator import ()
     UnifiedEventValidator, ValidationResult, WebSocketEventMessage
 )
 from netra_backend.app.factories.websocket_bridge_factory import StandardWebSocketBridge
@@ -93,7 +93,7 @@ class WebSocketEventDeliveryStructureTests:
 
         validation_event = {
             type: tool_executing,
-            "run_id: run-123",
+            "run_id: run-123,"
             agent_name: test-agent,
             timestamp: 2025-9-14T12:0:00Z","
             "payload: {"
@@ -102,7 +102,7 @@ class WebSocketEventDeliveryStructureTests:
         }
 
         result = validator.validate_event(validation_event, test-user-123")"
-        assert result.is_valid, fDelivered event structure should be valid: {result.error_message}
+        assert result.is_valid, "fDelivered event structure should be valid: {result.error_message}"
 
     async def test_tool_completed_event_delivery_structure(self, bridge_factory, mock_websocket_manager):
         
@@ -114,7 +114,7 @@ class WebSocketEventDeliveryStructureTests:
         # Execute tool_completed notification
         tool_result = {
             analysis: Cost optimization potential: 23%,
-            "recommendations: [Switch to GPT-4o", Implement caching],
+            "recommendations: [Switch to GPT-4o, Implement caching],"
             confidence: 0.95""
         }
 
@@ -126,7 +126,7 @@ class WebSocketEventDeliveryStructureTests:
             execution_time_ms=1500.0
         )
 
-        assert success, Tool completed notification should succeed
+        assert success, "Tool completed notification should succeed"
 
         # Verify WebSocket manager was called
         assert mock_websocket_manager.send_event.called or mock_websocket_manager.emit_event.called, \
@@ -145,19 +145,19 @@ class WebSocketEventDeliveryStructureTests:
         # Validate flat structure - results should be at top level
         assert result in event_data or results in event_data, \
             "results should be at top level of event data"
-        assert tool_name in event_data, tool_name should be at top level
+        assert tool_name in event_data, "tool_name should be at top level"
         assert event_data[tool_name] == "data_analyzer, tool_name should have correct value"
 
         # Validate this event would pass validator
         validator = UnifiedEventValidator(validation_mode=realtime)
 
         validation_event = {
-            type": "tool_completed,
+            type": tool_completed,"
             run_id: run-123,
             agent_name: "test-agent,"
             timestamp": 2025-9-14T12:0:00Z,"
             payload: {
-                "results: event_data.get(result", event_data.get(results))
+                "results: event_data.get(result, event_data.get(results))"
             }
         }
 
@@ -175,23 +175,23 @@ class WebSocketEventDeliveryStructureTests:
         events_to_test = [
             {
                 method: notify_agent_started,
-                args: (run-123", "test-agent),
+                args: (run-123", test-agent),"
                 expected_fields: [agent_name]
             },
             {
-                method": "notify_agent_thinking,
-                args: (run-123, test-agent, {"reasoning: analyzing data"),
+                method": notify_agent_thinking,"
+                args: (run-123, test-agent, {"reasoning: analyzing data),"
                 expected_fields: [agent_name]
             },
             {
-                "method: notify_tool_executing",
-                args: (run-123, test-agent, data_analyzer", {"query: test),
+                "method: notify_tool_executing,"
+                args: (run-123, test-agent, data_analyzer", {query: test),"
                 expected_fields: [tool_name, "agent_name]"
             },
             {
                 method: notify_agent_completed,
-                args: ("run-123, test-agent", {result: analysis complete),
-                "expected_fields: [agent_name"]
+                args: ("run-123, test-agent, {result: analysis complete),"
+                "expected_fields: [agent_name]"
             }
         ]
 
@@ -257,7 +257,7 @@ class WebSocketEventDeliveryStructureTests:
 
         flat_tool_completed = {
             type: tool_completed,
-            run_id": "test-run-123,
+            run_id": test-run-123,"
             agent_name: test-agent,
             timestamp: "2025-9-14T12:0:00Z,"
             payload": {"
@@ -274,7 +274,7 @@ class WebSocketEventStructureMismatchDetectionTests:
     "Test detection and handling of structure mismatches."""
 
     def test_nested_structure_detection(self):
-    ""
+    """
         Test that nested structures are detected and rejected properly.
 
         This test validates that the validator correctly identifies when
@@ -316,7 +316,7 @@ class WebSocketEventStructureMismatchDetectionTests:
         # Event with structure that impacts business value
         bad_structure_event = {
             type: tool_completed,
-            run_id": "test-run-123,
+            run_id": test-run-123,"
             agent_name: test-agent,
             timestamp: "2025-9-14T12:0:00Z,"
             payload": {"
@@ -327,13 +327,13 @@ class WebSocketEventStructureMismatchDetectionTests:
 
         result = validator.validate_event(bad_structure_event, "test-user-123)"
 
-        assert not result.is_valid, Bad structure should be invalid
-        assert results in (result.error_message or "), "Should mention missing results
+        assert not result.is_valid, "Bad structure should be invalid"
+        assert results in (result.error_message or "), Should mention missing results"
 
         # Check business impact messaging
         error_msg = result.error_message or 
         assert any(keyword in error_msg.lower() for keyword in
-                  ["insights, actionable", value, transparency], \
+                  ["insights, actionable, value, transparency], \"
             Error should reference business impact""
 
     async def test_websocket_manager_format_validation(self):
@@ -385,8 +385,8 @@ class WebSocketEventStructureMismatchDetectionTests:
 
         # Validate flat structure requirements
         assert isinstance(event_data, dict), Event data should be dictionary""
-        assert tool_name in event_data, tool_name should be in event data
-        assert event_data["tool_name] == cost_analyzer", tool_name should match
+        assert tool_name in event_data, "tool_name should be in event data"
+        assert event_data["tool_name] == cost_analyzer", "tool_name should match"
 
     def test_event_validation_error_context(self):
         pass
@@ -402,7 +402,7 @@ class WebSocketEventStructureMismatchDetectionTests:
         problematic_event = {
             type": tool_executing,"
             run_id: test-run-123,
-            agent_name": "test-agent,
+            agent_name": test-agent,"
             timestamp: 2025-9-14T12:0:00Z,
             payload: {""
                 # Missing tool_name - structure issue
@@ -413,7 +413,7 @@ class WebSocketEventStructureMismatchDetectionTests:
 
         result = validator.validate_event(problematic_event, "test-user-123)"
 
-        assert not result.is_valid, Problematic event should be invalid
+        assert not result.is_valid, "Problematic event should be invalid"
 
         error_msg = result.error_message or ""
 
@@ -421,7 +421,7 @@ class WebSocketEventStructureMismatchDetectionTests:
         assert tool_name" in error_msg, Error should mention missing field"
 
         # Check business context is provided
-        business_context_keywords = [transparency, user, see", "tool]
+        business_context_keywords = [transparency, user, see", tool]"
         assert any(keyword in error_msg.lower() for keyword in business_context_keywords), \
             fError should provide business context: {error_msg}
 

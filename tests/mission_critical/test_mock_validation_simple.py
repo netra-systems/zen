@@ -46,7 +46,7 @@ async def test_simple_mock_detection():
         test_payload = {
             user_id": user.user_id,"
             prompt: Generate comprehensive data analysis for Fortune 500 company,
-            context: {test": "mock_detection}
+            context: {test": mock_detection}"
         }
         
         async with session.post(f{backend_url}/api/v1/chat, json=test_payload, headers=headers) as response:
@@ -88,7 +88,7 @@ async def test_fallback_detection("):"
         test_payload = {
             "user_id: user.user_id,"
             prompt: TRIGGER_FALLBACK_TEST_ * 100,  # Intentionally problematic
-            context: {"test: fallback_detection"}
+            context: {"test: fallback_detection}"
         }
         
         try:

@@ -211,7 +211,7 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn('file_id', result)
     
     async def test_corpus_analysis_operations(self):
-        ""Test corpus analysis functionality
+        ""Test corpus analysis functionality"
         from netra_backend.app.admin.corpus import CorpusAnalysisOperations
         
         analysis_ops = CorpusAnalysisOperations()
@@ -236,7 +236,7 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
     
     async def test_corpus_error_handling(self):
         Test error handling and compensation""
-        from netra_backend.app.admin.corpus import (
+        from netra_backend.app.admin.corpus import ()
             CorpusAdminError,
             DocumentUploadError,
             DocumentValidationError,
@@ -336,7 +336,7 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
     async def test_unified_corpus_admin_operations(self):
         Test unified corpus admin functionality"
         Test unified corpus admin functionality"
-        from netra_backend.app.admin.corpus import (
+        from netra_backend.app.admin.corpus import ()
             UnifiedCorpusAdmin,
             UnifiedCorpusAdminFactory,
             UserExecutionContext,
@@ -383,7 +383,7 @@ class CorpusAdminFactoryPatternTests(unittest.IsolatedAsyncioTestCase):
         "Test readiness for factory pattern implementation"
         
         # Test new factory pattern with UnifiedCorpusAdmin
-        from netra_backend.app.admin.corpus import (
+        from netra_backend.app.admin.corpus import ()
             UnifiedCorpusAdmin,
             UnifiedCorpusAdminFactory,
             UserExecutionContext,

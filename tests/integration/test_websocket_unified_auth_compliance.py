@@ -20,12 +20,12 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
 # SSOT imports from registry
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.unified_websocket_auth import (
+from netra_backend.app.websocket_core.unified_websocket_auth import ()
     UnifiedWebSocketAuthenticator,
     authenticate_websocket_ssot,
     get_websocket_authenticator
 )
-from netra_backend.app.services.unified_authentication_service import (
+from netra_backend.app.services.unified_authentication_service import ()
     get_unified_auth_service
 )
 
@@ -46,7 +46,7 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
         self.websocket_authenticator = UnifiedWebSocketAuthenticator()
         
     def create_mock_websocket(self, headers: Dict[str, str) -> Mock:
-        ""Create mock WebSocket with specific headers. 
+        ""Create mock WebSocket with specific headers. "
         websocket = Mock()
         websocket.headers = headers
         websocket.client = Mock()
@@ -59,7 +59,7 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
         return websocket
 
     async def test_websocket_uses_unified_auth_service(self):
-    "
+        """
     "
         Test that WebSocket authentication uses the unified auth service.
         
@@ -123,7 +123,7 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
         )
 
     async def test_no_auth_bypass_patterns(self):
-        "
+        """
         "
         Test that WebSocket authentication doesn't bypass unified patterns.'
         
@@ -332,7 +332,7 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
             raise AssertionError(f"SSOT import violations found:\n{violation_details})"
 
     async def test_websocket_auth_service_singleton_compliance(self):
-    "
+        """
     "
         Test that WebSocket authenticator follows singleton patterns correctly.
         
@@ -359,7 +359,7 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
                 auth_service1_type: type(auth_service1).__name__,
                 auth_service2_type: type(auth_service2).__name__,
                 auth_services_same_instance: auth_service1 is auth_service2,
-                "auth_services_same_type": type(auth_service1) == type(auth_service2)
+                "auth_services_same_type: type(auth_service1) == type(auth_service2)"
             }
         
         print(\n=== SINGLETON COMPLIANCE CHECK ===)
@@ -397,7 +397,7 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
             },
             {
                 "description: Invalid authorization header format,"
-                headers: {authorization: "InvalidFormat token"},
+                headers: {authorization: "InvalidFormat token},"
                 expected_error_pattern: AUTH
             },
             {
@@ -406,7 +406,7 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
                 expected_error_pattern: AUTH
             },
             {
-                "description": Malformed JWT token,
+                "description: Malformed JWT token,"
                 headers: {authorization: Bearer invalid.jwt.token"},"
                 expected_error_pattern: "AUTH"
             }
@@ -422,7 +422,7 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
                 
                 error_result = {
                     description: scenario[description],
-                    "success": result.success,
+                    "success: result.success,"
                     error_message: result.error_message,
                     error_code: result.error_code,
                     has_expected_pattern: scenario[expected_error_pattern"] in (result.error_code or ).upper() if result.error_code else False"
@@ -435,7 +435,7 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
                     "description: scenario[description],"
                     success: False,
                     exception: str(e),
-                    "exception_type": type(e).__name__,
+                    "exception_type: type(e).__name__,"
                     has_expected_pattern: scenario[expected_error_pattern] in str(e).upper()
                 }
                 
@@ -463,7 +463,7 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
             )
 
     async def test_websocket_auth_configuration_isolation(self):
-        "
+        """
         "
         Test that WebSocket auth configuration is properly isolated.
         
@@ -482,7 +482,7 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
         
         isolation_check = {
             original_service_type: original_service_type,
-            "current_service_type": current_service_type,
+            "current_service_type: current_service_type,"
             service_unchanged: original_unified_service is current_unified_service,
             service_type_unchanged: original_service_type == current_service_type,
             auth_instances_count: len(auth_instances),

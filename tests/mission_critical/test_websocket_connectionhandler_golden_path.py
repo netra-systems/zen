@@ -103,7 +103,7 @@ GOLDEN_PATH_CONFIG = {
 class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
     pass
     def create_user_context(self) -> UserExecutionContext:
-        ""Create isolated user execution context for golden path tests
+        ""Create isolated user execution context for golden path tests"
         return UserExecutionContext.from_request(
             user_id=test_user,"
             user_id=test_user,"
@@ -131,7 +131,7 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         self.env = get_env()
         
         # Determine environment - prefer staging for golden path tests
-        self.test_environment = self.env.get(TEST_ENV, self.env.get("ENVIRONMENT, staging"))
+        self.test_environment = self.env.get(TEST_ENV, self.env.get("ENVIRONMENT, staging))"
         logger.info(fSetting up golden path tests for environment: {self.test_environment})
         
         # CRITICAL: Initialize authenticated WebSocket helper
@@ -176,7 +176,7 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         super().teardown_method()
         
     async def _create_authenticated_connection(self) -> websockets.ServerConnection:
-        "
+        """
         "
         Create authenticated WebSocket connection using SSOT patterns.
         
@@ -227,12 +227,12 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         request_id = fgolden-path-{int(time.time())}-{agent_name}
         
         agent_request = {
-            type": "agent_execution,
+            type": agent_execution,"
             agent_name: agent_name,
             message: Please analyze the current system status and provide recommendations for optimization.","
             "request_id: request_id,"
             user_id: GOLDEN_PATH_CONFIG['problematic_user_id'],
-            "thread_id: fthread-{request_id}",
+            "thread_id: fthread-{request_id},"
             metadata: {
                 test_mode: True,"
                 test_mode: True,"
@@ -343,7 +343,7 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
     @pytest.mark.e2e
     @pytest.mark.auth_required
     async def test_authenticated_user_complete_chat_flow_gcp_staging(self):
-    "
+        """
     "
         MISSION CRITICAL: Tests complete authenticated chat flow in real environment.
         
@@ -437,8 +437,8 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         )
         
         # Success logging
-        logger.info( PASS:  GOLDEN PATH SUCCESS: Complete authenticated chat flow working)"
-        logger.info( PASS:  GOLDEN PATH SUCCESS: Complete authenticated chat flow working)"
+        logger.info("PASS:  GOLDEN PATH SUCCESS: Complete authenticated chat flow working))"
+        logger.info("PASS:  GOLDEN PATH SUCCESS: Complete authenticated chat flow working))"
         logger.info(f"   - Total responses: {results['total_responses']})"
         logger.info(f   - Events received: {results['all_events_received']})
         logger.info(f   - Response time: {total_time:.2f}s)
@@ -485,7 +485,7 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
                 agent_request = {
                     type": agent_execution,"
                     agent_name: data_analysis_agent,
-                    message": f"Concurrent user {user_index} requesting analysis,
+                    message": fConcurrent user {user_index} requesting analysis,"
                     request_id: request_id,
                     user_id: str(user_context.user_id),
                     thread_id": str(user_context.thread_id)"
@@ -594,8 +594,8 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
                 funder concurrent load.
             )
             
-        logger.info( PASS:  CONCURRENT GOLDEN PATH SUCCESS: All users received proper responses)"
-        logger.info( PASS:  CONCURRENT GOLDEN PATH SUCCESS: All users received proper responses)"
+        logger.info("PASS:  CONCURRENT GOLDEN PATH SUCCESS: All users received proper responses))"
+        logger.info("PASS:  CONCURRENT GOLDEN PATH SUCCESS: All users received proper responses))"
         
     def _log_golden_path_metrics(self):
         "Log detailed golden path performance metrics."
@@ -627,7 +627,7 @@ if __name__ == __main__:"
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print("MIGRATION NOTICE: This file previously used direct pytest execution.)"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")"
-    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md)"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

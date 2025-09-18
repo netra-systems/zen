@@ -16,10 +16,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -191,7 +191,7 @@ class TestIsolationMetricsCollector:
         creation_time = 150.5  # ms
 
     # Start request first
-        self.collector.start_request("user", request_id)
+        self.collector.start_request("user, request_id)"
 
     # Record creation time
         self.collector.record_instance_creation_time(request_id, creation_time)
@@ -237,7 +237,7 @@ assert self.collector._violation_counts[violation_type] == 1
 
 def test_concurrent_user_tracking(self):
     """Test concurrent user count tracking."""
-users = ["user1", "user2", "user3"]
+users = ["user1", "user2", "user3]"
 
     # Start requests for different users
 for i, user in enumerate(users):
@@ -247,14 +247,14 @@ for i, user in enumerate(users):
 assert self.collector.get_concurrent_users() == 3
 
         # Complete one request
-self.collector.complete_request("req_0")
+self.collector.complete_request("req_0)"
 
         # User should still be tracked if they have other requests
-self.collector.start_request("user1", "req_1b")  # Second request for user1
+self.collector.start_request("user1", "req_1b)  # Second request for user1"
 assert self.collector.get_concurrent_users() == 3
 
         # Complete all requests for user1
-self.collector.complete_request("req_1b")
+self.collector.complete_request("req_1b)"
 assert self.collector.get_concurrent_users() == 2  # user1 removed
 
 def test_recent_violations_filtering(self):
@@ -265,19 +265,19 @@ now = datetime.now(timezone.utc)
     # Create violations at different times
 old_violation = IsolationViolation( )
 timestamp=now - timedelta(hours=2),
-violation_type="old_violation",
+violation_type="old_violation,"
 severity=IsolationViolationSeverity.WARNING,
-user_id="user1",
-request_id="req1",
+user_id="user1,"
+request_id="req1,"
 description="Old violation"
     
 
 recent_violation = IsolationViolation( )
 timestamp=now - timedelta(minutes=30),
-violation_type="recent_violation",
+violation_type="recent_violation,"
 severity=IsolationViolationSeverity.ERROR,
-user_id="user2",
-request_id="req2",
+user_id="user2,"
+request_id="req2,"
 description="Recent violation"
     
 
@@ -348,16 +348,16 @@ result = await self.health_checker._check_request_isolation()
                 # Verify result
 assert result.check_name == "request_isolation"
 assert result.severity == HealthCheckSeverity.CRITICAL  # < 100%
-assert "95.5%" in result.message
+assert "95.5% in result.message"
 assert result.alert_required is True
-assert result.metrics["isolation_score"] == 95.5
+assert result.metrics["isolation_score] == 95.5"
 
 @pytest.mark.asyncio
     async def test_singleton_violations_check(self):
         """Test singleton violations health check."""
                     # Mock metrics collector with violations
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
-mock_collector.get_violation_counts.return_value = {"singleton_reuse": 3}
+mock_collector.get_violation_counts.return_value = {"singleton_reuse: 3}"
 
 self.health_checker._metrics_collector = mock_collector
 
@@ -367,7 +367,7 @@ result = await self.health_checker._check_singleton_violations()
                     # Verify result
 assert result.check_name == "singleton_violations"
 assert result.severity == HealthCheckSeverity.ERROR
-assert "3 metric violations" in result.message
+assert "3 metric violations in result.message"
 assert result.alert_required is True
 
 @pytest.mark.asyncio
@@ -377,8 +377,8 @@ pass
                         # Mock metrics collector
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
 mock_collector.get_violation_counts.return_value = { }
-"websocket_contamination": 0,
-"cross_user_events": 0
+"websocket_contamination: 0,"
+"cross_user_events: 0"
                         
 
 self.health_checker._metrics_collector = mock_collector
@@ -386,7 +386,7 @@ self.health_checker._metrics_collector = mock_collector
                         # Mock WebSocket connection monitor
 with patch('netra_backend.app.monitoring.isolation_health_checks.get_connection_monitor') as mock_get_monitor:
     websocket = TestWebSocketConnection()
-mock_monitor.get_stats.return_value = {"active_connections": 10}
+mock_monitor.get_stats.return_value = {"active_connections: 10}"
 mock_get_monitor.return_value = mock_monitor
 
                             # Run check
@@ -395,7 +395,7 @@ result = await self.health_checker._check_websocket_isolation()
                             # Verify result
 assert result.check_name == "websocket_isolation"
 assert result.severity == HealthCheckSeverity.HEALTHY
-assert "10 connections, no violations" in result.message
+assert "10 connections, no violations in result.message"
 assert result.alert_required is False
 
 @pytest.mark.asyncio
@@ -415,7 +415,7 @@ self.health_checker._metrics_collector = mock_collector
 health_status = await self.health_checker.perform_comprehensive_health_check()
 
                                 # Verify result
-assert isinstance(health_status, IsolationHealthStatus)
+assert isinstance(health_status, "IsolationHealthStatus)"
 assert health_status.overall_health in [ ]
 HealthCheckSeverity.HEALTHY,
 HealthCheckSeverity.WARNING,
@@ -436,13 +436,13 @@ mock_collector.get_violation_counts.return_value = {}
 self.health_checker._metrics_collector = mock_collector
 
                                     # Test valid check
-result = await self.health_checker.run_specific_check("singleton_violations")
+result = await self.health_checker.run_specific_check("singleton_violations)"
 assert result.check_name == "singleton_violations"
 
                                     # Test invalid check
-result = await self.health_checker.run_specific_check("invalid_check")
+result = await self.health_checker.run_specific_check("invalid_check)"
 assert result.severity == HealthCheckSeverity.ERROR
-assert "Unknown health check" in result.message
+assert "Unknown health check in result.message"
 
 @pytest.mark.asyncio
     async def test_memory_usage_check(self):
@@ -464,8 +464,8 @@ result = await self.health_checker._check_memory_usage()
                                             # Verify high memory usage detected
 assert result.check_name == "memory_usage"
 assert result.severity == HealthCheckSeverity.WARNING  # 85% is above 75% threshold
-assert "85.0%" in result.message
-assert result.metrics["memory_percent"] == 85.0
+assert "85.0% in result.message"
+assert result.metrics["memory_percent] == 85.0"
 
 
 class TestIsolationDashboardConfig:
@@ -480,35 +480,35 @@ class TestIsolationDashboardConfig:
         pass
         config = self.config_manager.get_default_config()
 
-        assert isinstance(config, DashboardConfig)
+        assert isinstance(config, "DashboardConfig)"
         assert config.dashboard_id == "isolation_monitoring"
         assert len(config.sections) > 0
 
     # Verify key sections exist
         section_ids = [s.section_id for s in config.sections]
-        assert "overview" in section_ids
-        assert "violations" in section_ids
-        assert "performance" in section_ids
-        assert "alerts" in section_ids
+        assert "overview in section_ids"
+        assert "violations in section_ids"
+        assert "performance in section_ids"
+        assert "alerts in section_ids"
 
     def test_role_based_config_customization(self):
         """Test dashboard customization for different user roles."""
     # Test admin config
-        admin_config = self.config_manager.get_config_for_user("admin_user", "admin")
+        admin_config = self.config_manager.get_config_for_user("admin_user", "admin)"
         assert len(admin_config.sections) >= 4  # Full configuration
 
     # Test operator config
-        ops_config = self.config_manager.get_config_for_user("ops_user", "operator")
+        ops_config = self.config_manager.get_config_for_user("ops_user", "operator)"
         assert ops_config.dashboard_id == "isolation_monitoring_ops"
         assert ops_config.global_refresh_interval == 15  # More frequent for ops
 
     # Test developer config
-        dev_config = self.config_manager.get_config_for_user("dev_user", "developer")
+        dev_config = self.config_manager.get_config_for_user("dev_user", "developer)"
 
     # Developer should have additional technical widgets
-        performance_section = next(s for s in dev_config.sections if s.section_id == "performance")
+        performance_section = next(s for s in dev_config.sections if s.section_id == "performance)"
         widget_ids = [w.widget_id for w in performance_section.widgets]
-        assert "gc_performance" in widget_ids
+        assert "gc_performance in widget_ids"
 
     def test_config_export(self):
         """Test dashboard configuration export to JSON."""
@@ -516,20 +516,20 @@ class TestIsolationDashboardConfig:
         config = self.config_manager.get_default_config()
         exported = self.config_manager.export_config(config)
 
-        assert isinstance(exported, dict)
-        assert exported["dashboard_id"] == config.dashboard_id
-        assert exported["title"] == config.title
-        assert "sections" in exported
+        assert isinstance(exported, "dict)"
+        assert exported["dashboard_id] == config.dashboard_id"
+        assert exported["title] == config.title"
+        assert "sections in exported"
 
     # Verify section structure
-        for section_data in exported["sections"]:
-        assert "section_id" in section_data
-        assert "widgets" in section_data
+        for section_data in exported["sections]:"
+        assert "section_id in section_data"
+        assert "widgets in section_data"
 
-        for widget_data in section_data["widgets"]:
-        assert "widget_id" in widget_data
-        assert "widget_type" in widget_data
-        assert "time_range" in widget_data
+        for widget_data in section_data["widgets]:"
+        assert "widget_id in widget_data"
+        assert "widget_type in widget_data"
+        assert "time_range in widget_data"
 
     def test_widget_data_source_mapping(self):
         """Test widget data source URL generation."""
@@ -563,7 +563,7 @@ class TestIsolationDashboardConfig:
         assert retrieved.dashboard_id == base_config.dashboard_id
 
     # Test non-existent config
-        none_config = self.config_manager.get_custom_config("non_existent")
+        none_config = self.config_manager.get_custom_config("non_existent)"
         assert none_config is None
 
 
@@ -595,7 +595,7 @@ self.metrics_collector.start_request(user_id, request_id)
 
                 # 2. Trigger violation
 await self.metrics_collector.record_isolation_violation( )
-"singleton_reuse",
+"singleton_reuse,"
 IsolationViolationSeverity.CRITICAL,
 request_id,
 user_id,
@@ -644,7 +644,7 @@ assert len(self.metrics_collector._active_users) == 10
                         # Trigger violations for some requests
 for i in range(0, 5):  # First 5 requests get violations
 await self.metrics_collector.record_isolation_violation( )
-"cross_request_state",
+"cross_request_state,"
 IsolationViolationSeverity.CRITICAL,
 requests[i],
 users[i],
@@ -677,14 +677,14 @@ self.health_checker._metrics_collector = self.metrics_collector
 
                                         # Start some activity
 for i in range(3):
-    self.metrics_collector.start_request("", "")
+    self.metrics_collector.start_request("", ")"
 
                                             # Record some violations
 await self.metrics_collector.record_isolation_violation( )
-"websocket_contamination",
+"websocket_contamination,"
 IsolationViolationSeverity.ERROR,
-"req_0",
-"user_0",
+"req_0,"
+"user_0,"
 "WebSocket event leaked to wrong user"
                                             
 
@@ -700,7 +700,7 @@ websocket_result = next( )
 r for r in health_status.check_results
 if r.check_name == "websocket_isolation"
                                             
-assert websocket_result.severity in [HealthCheckSeverity.CRITICAL, HealthCheckSeverity.ERROR]
+assert websocket_result.severity in [HealthCheckSeverity.CRITICAL, "HealthCheckSeverity.ERROR]"
 
 def test_dashboard_config_integration(self):
     """Test dashboard configuration integration with monitoring components."""
@@ -709,19 +709,19 @@ pass
 config = self.config_manager.get_default_config()
 
     # Verify config has widgets that map to monitoring endpoints
-overview_section = next(s for s in config.sections if s.section_id == "overview")
+overview_section = next(s for s in config.sections if s.section_id == "overview)"
 
     # Test data source mapping
 for widget in overview_section.widgets:
     data_source = self.config_manager.get_widget_data_source(widget)
-assert data_source.startswith("/monitoring/isolation/")
+assert data_source.startswith("/monitoring/isolation/)"
 
         # Verify alert widgets point to alerts endpoint
-alerts_section = next(s for s in config.sections if s.section_id == "alerts")
+alerts_section = next(s for s in config.sections if s.section_id == "alerts)"
 alert_widget = alerts_section.widgets[0]  # First alert widget
 
 alert_data_source = self.config_manager.get_widget_data_source(alert_widget)
-assert "/alerts" in alert_data_source
+assert "/alerts in alert_data_source"
 
 
 class TestIsolationMonitoringAPIEndpoints:
@@ -731,7 +731,7 @@ class TestIsolationMonitoringAPIEndpoints:
     def mock_current_user(self):
         """Mock current user for API tests."""
         await asyncio.sleep(0)
-        return {"user_id": "test_user_123", "role": "admin"}
+        return {"user_id": "test_user_123", "role": "admin}"
 
 @pytest.mark.asyncio
     async def test_isolation_health_endpoint(self, mock_current_user):
@@ -774,23 +774,23 @@ from netra_backend.app.routes.monitoring import get_isolation_violations
                 # Mock violations
 mock_violation = IsolationViolation( )
 timestamp=datetime.now(timezone.utc),
-violation_type="singleton_reuse",
+violation_type="singleton_reuse,"
 severity=IsolationViolationSeverity.CRITICAL,
-user_id="test_user",
-request_id="test_req",
+user_id="test_user,"
+request_id="test_req,"
 description="Test violation"
                 
 
 with patch('netra_backend.app.routes.monitoring.get_isolation_metrics_collector') as mock_get_collector:
     websocket = TestWebSocketConnection()  # Real WebSocket implementation
 mock_collector.get_recent_violations.return_value = [mock_violation]
-mock_collector.get_violation_counts.return_value = {"singleton_reuse": 1}
+mock_collector.get_violation_counts.return_value = {"singleton_reuse: 1}"
 mock_get_collector.return_value = mock_collector
 
                     # Call endpoint
 response = await get_isolation_violations( )
 hours=1,
-severity="critical",
+severity="critical,"
 current_user=mock_current_user
                     
 
@@ -809,29 +809,29 @@ from netra_backend.app.routes.monitoring import get_dashboard_config
 with patch('netra_backend.app.routes.monitoring.get_dashboard_config_manager') as mock_get_manager:
     websocket = TestWebSocketConnection()  # Real WebSocket implementation
 mock_config = DashboardConfig( )
-dashboard_id="test_dashboard",
-title="Test Dashboard",
-description="Test description",
+dashboard_id="test_dashboard,"
+title="Test Dashboard,"
+description="Test description,"
 sections=[]
                             
 mock_manager.get_config_for_user.return_value = mock_config
 mock_manager.export_config.return_value = { }
-"dashboard_id": "test_dashboard",
-"title": "Test Dashboard",
-"sections": []
+"dashboard_id": "test_dashboard,"
+"title": "Test Dashboard,"
+"sections: []"
                             
 mock_get_manager.return_value = mock_manager
 
                             # Call endpoint
 response = await get_dashboard_config( )
-role="admin",
+role="admin,"
 current_user=mock_current_user
                             
 
                             # Verify response
 assert response["role"] == "admin"
 assert response["user_id"] == "test_user_123"
-assert "config" in response
+assert "config in response"
 assert response["config"]["dashboard_id"] == "test_dashboard"
 
 
@@ -856,7 +856,7 @@ start_time = time.time()
 
             # Start many requests
 for i in range(num_requests):
-    self.collector.start_request("", "")
+    self.collector.start_request("", ")"
 
 tracking_time = time.time() - start_time
 
@@ -882,7 +882,7 @@ start_time = time.time()
                         # Record many violations
 for i in range(num_violations):
     await self.collector.record_isolation_violation( )
-"performance_test",
+"performance_test,"
 IsolationViolationSeverity.WARNING,
 "",
 "",
@@ -903,7 +903,7 @@ tracemalloc.start()
 
     # Generate significant activity
 for i in range(100):
-    self.collector.start_request("", "")
+    self.collector.start_request("", ")"
 self.collector.record_instance_creation_time("", float(i))
 
 current, peak = tracemalloc.get_traced_memory()
@@ -917,9 +917,9 @@ assert peak < 15 * 1024 * 1024     # 15MB peak
         # Test utilities and helpers
 
 def create_mock_violation( )
-violation_type: str = "test_violation",
+violation_type: str = "test_violation,"
 severity: IsolationViolationSeverity = IsolationViolationSeverity.WARNING,
-user_id: str = "test_user",
+user_id: str = "test_user,"
 request_id: str = "test_request"
 ) -> IsolationViolation:
 """Create mock isolation violation for testing."""
@@ -935,18 +935,18 @@ description=""
     
 
 def create_mock_health_result( )
-check_name: str = "test_check",
+check_name: str = "test_check,"
 severity: HealthCheckSeverity = HealthCheckSeverity.HEALTHY
 ) -> HealthCheckResult:
 """Create mock health check result for testing."""
 return HealthCheckResult( )
 check_name=check_name,
 severity=severity,
-status="test_status",
+status="test_status,"
 message="",
 timestamp=datetime.now(timezone.utc)
     
 
     # Integration with existing test framework
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--tb=short"])
+if __name__ == "__main__:"
+    pytest.main([__file__, "-v", "--tb=short])"

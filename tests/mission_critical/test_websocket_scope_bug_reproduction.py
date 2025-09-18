@@ -50,7 +50,7 @@ from fastapi import WebSocket
 
 
 class WebSocketScopeBugReproductionTests:
-    ""
+    """
     Reproduce exact WebSocket scope bug from issue #165.
     
     These tests are designed to FAIL with the exact NameError that occurs
@@ -60,7 +60,7 @@ class WebSocketScopeBugReproductionTests:
     @pytest.mark.mission_critical
     @pytest.mark.unit
     async def test_state_registry_scope_isolation_bug(self):
-    ""
+    """
         REPRODUCER: Test exact NameError at lines 1433,1452 due to scope bug.
         
         This test reproduces the exact conditions where state_registry is
@@ -87,7 +87,7 @@ class WebSocketScopeBugReproductionTests:
             mock_env.get.side_effect = lambda key, default=None: {
                 "ENVIRONMENT: staging,  # Use staging to trigger Cloud Run paths"
                 TESTING: 0,
-                "E2E_TESTING: 0", 
+                "E2E_TESTING: 0, "
                 PYTEST_RUNNING: 0
             }.get(key, default)
             mock_get_env.return_value = mock_env
@@ -136,7 +136,7 @@ class WebSocketScopeBugReproductionTests:
     @pytest.mark.mission_critical  
     @pytest.mark.unit
     async def test_websocket_connection_failure_rate(self):
-        ""
+        """
         REPRODUCER: Validate 100% connection failure rate due to scope bug.
         
         This test demonstrates that the scope bug causes ALL WebSocket 
@@ -206,14 +206,14 @@ class WebSocketScopeBugReproductionTests:
         logger.error(f"   [U+2022] Revenue at risk: $500K+ ARR (100% chat functionality blocked))"
         
         # This test should FAIL because we expect 100% failure rate
-        assert failure_rate == 100.0, fExpected 100% failure rate due to scope bug, got {failure_rate}%
+        assert failure_rate == 100.0, "fExpected 100% failure rate due to scope bug, got {failure_rate}%"
         assert name_errors > 0, Expected NameError for state_registry but none occurred"
         assert name_errors > 0, Expected NameError for state_registry but none occurred"
         
     @pytest.mark.mission_critical
     @pytest.mark.unit  
     async def test_scope_bug_error_recovery_path(self):
-        "
+        """
         "
         REPRODUCER: Test error path that triggers scope bug conditions.
         
@@ -229,14 +229,14 @@ class WebSocketScopeBugReproductionTests:
         test_scenarios = [
             {
                 name: ID_MISMATCH_EMERGENCY_RECOVERY,
-                description": "Connection ID mismatch triggers emergency recovery using state_registry,
+                description": Connection ID mismatch triggers emergency recovery using state_registry,"
                 preliminary_id: prelim_123,
                 final_id: "final_456,  # Different - triggers mismatch"
                 state_machine_exists": False  # Triggers state_registry.register_connection"
             },
             {
                 name: PASS_THROUGH_SUCCESS_NO_STATE,
-                "description: Pass-through success but no existing state machine found",
+                "description: Pass-through success but no existing state machine found,"
                 preliminary_id: same_123, 
                 final_id: same_123",  # Same - triggers success path"
                 "state_machine_exists: False  # But no state machine - triggers state_registry"
@@ -247,7 +247,7 @@ class WebSocketScopeBugReproductionTests:
             logger.info(f SEARCH:  Testing scenario: {scenario['name']})
             
             mock_websocket = AsyncMock(spec=WebSocket)
-            mock_websocket.headers = {"authorization: Bearer test_token"}
+            mock_websocket.headers = {"authorization: Bearer test_token}"
             mock_websocket.accept = AsyncMock()
             mock_websocket.close = AsyncMock()
             
@@ -309,7 +309,7 @@ class WebSocketScopeBugReproductionTests:
     @pytest.mark.mission_critical
     @pytest.mark.unit
     def test_scope_bug_static_analysis(self):
-    ""
+    """
         REPRODUCER: Static analysis of scope bug in websocket.py
         
         This test analyzes the actual source code to identify the exact
@@ -384,7 +384,7 @@ class WebSocketScopeBugReproductionTests:
             
         # This test should FAIL to document the scope bug
         assert len(found_problems) > 0, "Expected to find scope violations but none found"
-        assert state_registry_definition is not None, Expected to find state_registry definition
+        assert state_registry_definition is not None, "Expected to find state_registry definition"
         assert len(state_registry_references) > 0, Expected to find state_registry references"
         assert len(state_registry_references) > 0, Expected to find state_registry references"
         

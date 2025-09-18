@@ -42,7 +42,7 @@ class WebSocketMultiServiceTests:
     
     @pytest.fixture
     async def websocket_client(self, backend_client):
-        ""Get authenticated WebSocket client.
+        ""Get authenticated WebSocket client."
         token = await backend_client.get_jwt_token()
         ws_client = WebSocketTestClient()
         await ws_client.connect(token)
@@ -114,7 +114,7 @@ class WebSocketMultiServiceTests:
                 
                 # Verify message structure compliance
                 assert "type in event, Auth event missing type field"
-                assert payload in event, Auth event missing payload field
+                assert payload in event, "Auth event missing payload field"
     
     @pytest.mark.e2e
     async def test_service_independence_validation(self, websocket_client):
@@ -122,7 +122,7 @@ class WebSocketMultiServiceTests:
         # Trigger events that might involve multiple services
         await websocket_client.send_message({
             type: user_message,
-            payload": {"content: Test service independence with agent execution}
+            payload": {"content": "Test service independence with agent execution}"
         }
         
         # Track service origins of events
@@ -166,7 +166,7 @@ class WebSocketMultiServiceTests:
                     )
                 
                 # Should not expose service-internal implementation details
-                internal_fields = [_internal, private_", "__internal__]
+                internal_fields = [_internal, private_", __internal__]"
                 for field in internal_fields:
                     assert field not in str(payload), (
                         fService {service} exposing internal field {field} in WebSocket event
@@ -182,8 +182,8 @@ class WebSocketMultiServiceTests:
                 payload": {content: Agent task requiring auth verification}"
             },
             {
-                "type: service_health_check",
-                payload: {services: [main, auth", "frontend]}
+                "type: service_health_check,"
+                payload: {services: [main, auth", frontend]}"
             }
         ]
         
@@ -229,7 +229,7 @@ class WebSocketMultiServiceTests:
             
             # Should have proper message correlation
             request_type = result[request][type]
-            response_types = [r.get("type, ") for r in responses]
+            response_types = [r.get("type, ) for r in responses]"
             
             # Responses should be related to request
             assert any(
@@ -244,7 +244,7 @@ class WebSocketMultiServiceTests:
         "Test WebSocket continues working when individual services have issues."""
         # Trigger comprehensive workflow
         await websocket_client.send_message({
-            "type: user_message",
+            "type: user_message,"
             payload: {content: Test service failure isolation with comprehensive workflow}""
         }
         
@@ -284,7 +284,7 @@ class WebSocketMultiServiceTests:
         
         # Validate failure isolation
         participating_services = set(events_by_service.keys())
-        assert len(participating_services) >= 1, No service participation detected
+        assert len(participating_services) >= 1, "No service participation detected"
         
         # Even with some service errors, core functionality should continue
         if service_errors:
@@ -398,7 +398,7 @@ class WebSocketMultiServiceTests:
         # Test version compatibility with WebSocket events
         await websocket_client.send_message({
             type: version_compatibility_test,
-            "payload: {client_version": test_1.0.0}
+            "payload: {client_version: test_1.0.0}"
         }
         
         # Look for version compatibility responses
@@ -446,7 +446,7 @@ class WebSocketMultiServiceTests:
     
     # Helper methods (each  <= 8 lines)
     def _identify_service_origin(self, event: Dict[str, Any) -> str:
-        ""Identify which service originated the event.
+        ""Identify which service originated the event."
         payload = str(event.get(payload, {}).lower()""
         event_type = event.get(type", ).lower()"
         

@@ -108,7 +108,7 @@ class AuthPersistenceCoreTests:
                 thread_id=fthread_{user_id}","
                 run_id=str(uuid.uuid4()),
                 websocket_connection_id=fws_{user_id},
-                metadata={auth_token: valid_token, "user_data: fdata_{user_id}"}
+                metadata={auth_token: valid_token, "user_data: fdata_{user_id}}"
             results[user_id] = context
             await asyncio.sleep(0.1)  # Simulate some processing
             return context
@@ -169,7 +169,7 @@ class AuthPersistenceCoreTests:
             exp: datetime.utcnow() + timedelta(seconds=30),"
             iat": datetime.utcnow(),"
             session_id: session-1
-        }, "test-secret, algorithm=HS256")
+        }, "test-secret, algorithm=HS256)"
         
         # Refreshed token (same user, new expiry)
         refreshed_token = jwt.encode({
@@ -178,7 +178,7 @@ class AuthPersistenceCoreTests:
             exp: datetime.utcnow() + timedelta(hours=1),"
             "iat: datetime.utcnow(),"
             session_id: session-1  # Same session
-        }, test-secret", algorithm="HS256)
+        }, test-secret", algorithm=HS256)"
         
         # Decode both tokens
         original_claims = jwt.decode(original_token, test-secret, algorithms=[HS256)
@@ -188,7 +188,7 @@ class AuthPersistenceCoreTests:
         assert original_claims[sub"] == refreshed_claims[sub]"
         assert original_claims[session_id] == refreshed_claims[session_id]
         # But expiry should be updated
-        assert refreshed_claims[exp"] > original_claims["exp]
+        assert refreshed_claims[exp"] > original_claims[exp]"
 
 
 if __name__ == __main__":"

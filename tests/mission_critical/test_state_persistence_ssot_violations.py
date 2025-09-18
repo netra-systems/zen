@@ -35,7 +35,7 @@ class StatePersistenceSSotViolationsTests(SSotBaseTestCase):
     Reproduction tests that expose state persistence SSOT violations."
     
     def test_reproduction_demo_script_import_failure(self):
-    "
+        """
     "
         REPRODUCTION TEST: Exact import failure in scripts/demo_optimized_persistence.py:22
         
@@ -49,7 +49,7 @@ class StatePersistenceSSotViolationsTests(SSotBaseTestCase):
             from netra_backend.app.services.state_persistence_optimized import optimized_state_persistence
             
     def test_reproduction_integration_test_import_failure(self):
-    "
+        """
     "
         REPRODUCTION TEST: Import failure blocking test_3tier_persistence_integration.py
         
@@ -64,7 +64,7 @@ class StatePersistenceSSotViolationsTests(SSotBaseTestCase):
             from netra_backend.app.services.state_persistence_optimized import OptimizedStatePersistence
             
     def test_reproduction_multiple_persistence_modules_exist(self):
-    ""
+    """
         REPRODUCTION TEST: Validates that we have multiple persistence implementations
         
         This test documents the current state where we have:
@@ -89,14 +89,14 @@ class StatePersistenceSSotViolationsTests(SSotBaseTestCase):
             
         # Assert the current problematic state
         assert existing_module_found, Existing persistence service should be available""
-        assert not optimized_module_found, Optimized persistence should not exist yet (SSOT violation)
+        assert not optimized_module_found, "Optimized persistence should not exist yet (SSOT violation)"
         
         # This documents the SSOT violation: we have references to non-existent module
         pytest.fail(SSOT VIOLATION: References to non-existent optimized_state_persistence module break imports)"
         pytest.fail(SSOT VIOLATION: References to non-existent optimized_state_persistence module break imports)"
         
     def test_reproduction_documentation_references_broken_imports(self):
-    "
+        """
     "
         REPRODUCTION TEST: Documentation references non-existent modules
         
@@ -123,7 +123,7 @@ class StatePersistenceSSotViolationsTests(SSotBaseTestCase):
             pytest.fail(DOCUMENTATION MISSING: No documentation for referenced optimized persistence feature)"
             
     def test_reproduction_scripts_break_on_import(self):
-        "
+        """
         "
         REPRODUCTION TEST: Scripts directory has broken imports
         
@@ -154,7 +154,7 @@ class StatePersistenceSSotViolationsTests(SSotBaseTestCase):
             pytest.fail(SCRIPT MISSING: Referenced demo_optimized_persistence.py does not exist)"
 
     def test_golden_path_impact_assessment(self):
-    "
+        """
     "
         BUSINESS CRITICAL: Assess impact of SSOT violation on golden path
         
@@ -166,7 +166,7 @@ class StatePersistenceSSotViolationsTests(SSotBaseTestCase):
         ssot_violation_impact = {
             broken_imports": [netra_backend.app.services.state_persistence_optimized],"
             affected_scripts: [scripts/demo_optimized_persistence.py],
-            affected_tests": ["test_3tier_persistence_integration.py],
+            affected_tests": [test_3tier_persistence_integration.py],"
             business_impact: $500K+ ARR chat functionality at risk,
             golden_path_status: "BLOCKED by import failures"
         }
@@ -218,7 +218,7 @@ class StatePersistenceModuleStructureTests(SSotBaseTestCase):
                        fExisting: {existing_services}, Referenced: {referenced_services}")"
                      
     def test_consolidated_persistence_service_missing(self):
-    "
+        """
     "
         CONSOLIDATION TEST: No single consolidated persistence service exists
         

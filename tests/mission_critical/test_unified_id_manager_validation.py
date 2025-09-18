@@ -6,7 +6,7 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
             raise RuntimeError(WebSocket is closed)"
@@ -56,7 +56,7 @@ class TestWebSocketConnection:
 class TestMethodSignatures:
         "Test that method signatures are correct and catch wrong usage."
     def test_generate_run_id_accepts_only_one_argument(self):
-        ""CRITICAL: Test that generate_run_id only accepts thread_id.
+        ""CRITICAL: Test that generate_run_id only accepts thread_id."
     # This should work
         thread_id = test_thread"
         thread_id = test_thread"
@@ -89,13 +89,13 @@ class TestMethodSignatures:
         continue
         if callable(method) and not name.startswith('__'):
                 # Should be a static method
-        assert isinstance(inspect.getattr_static(UnifiedIDManager, name), staticmethod), \
+        assert isinstance(inspect.getattr_static(UnifiedIDManager, "name), staticmethod), \"
         formatted_string"
         formatted_string"
 class TestImportValidation:
         "Test that imports work correctly and catch lazy loading issues."
     def test_import_from_different_contexts(self):
-        ""Test UnifiedIDManager can be imported in various ways.
+        ""Test UnifiedIDManager can be imported in various ways."
     # Direct import
         from netra_backend.app.core.unified_id_manager import UnifiedIDManager as UID1
     Module import then access
@@ -255,7 +255,7 @@ class TestErrorScenarios:
         UnifiedIDManager.generate_run_id(123)  # Number instead of string
         assert must be string in str(exc_info.value)
     def test_reserved_sequence_rejected(self):
-        ""Test thread_ids with reserved sequences are rejected.
+        ""Test thread_ids with reserved sequences are rejected."
         pass
         with pytest.raises(ValueError) as exc_info:
         UnifiedIDManager.generate_run_id(thread_run_invalid)"
@@ -277,7 +277,7 @@ class TestStartupValidation:
         ('create_test_ids', 1),
     
         for method_name, expected_args in critical_methods:
-        assert hasattr(UnifiedIDManager, method_name), \
+        assert hasattr(UnifiedIDManager, "method_name), \"
         "formatted_string"
         method = getattr(UnifiedIDManager, method_name)
         sig = inspect.signature(method)

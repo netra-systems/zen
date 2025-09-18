@@ -107,7 +107,7 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                     self.performance_issues.append(fSlow engine creation: {creation_time:.3f}s)
                 
                 # Test engine state management
-                engine.set_agent_state("test_agent, initial_state")
+                engine.set_agent_state("test_agent, initial_state)"
                 self.assertEqual(engine.get_agent_state(test_agent), initial_state)
                 
                 # Test statistics

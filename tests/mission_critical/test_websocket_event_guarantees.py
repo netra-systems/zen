@@ -67,7 +67,7 @@ class WebSocketEventCollector:
         self.event_lock = asyncio.Lock()
     
     async def capture_event(self, event_type: str, run_id: str, agent_name: str, data: Dict[str, Any):
-        ""Capture a WebSocket event.
+        ""Capture a WebSocket event."
         async with self.event_lock:
             event = WebSocketEventCapture(
                 event_type=event_type,
@@ -129,7 +129,7 @@ class MockWebSocketBridge:
         }
     
     async def notify_tool_completed(self, run_id: str, agent_name: str, tool_name: str, result: Optional[Dict] = None):
-        ""Capture tool_completed event.
+        ""Capture tool_completed event."
         await self.collector.capture_event('tool_completed', run_id, agent_name, {
             'tool_name': tool_name, 'result': result
         }
@@ -350,7 +350,7 @@ class WebSocketEventGuaranteesTests:
                        Users need clear indication of what the AI is doing.)
     
     async def test_agent_thinking_event_violation_detection(self, event_collector, mock_bridge):
-        ""CRITICAL: Must detect missing agent_thinking events.
+        ""CRITICAL: Must detect missing agent_thinking events."
         
         This test MUST FAIL if agent_thinking events are not emitted.
         Real-time reasoning visibility is essential for user transparency.
@@ -479,7 +479,7 @@ class WebSocketEventGuaranteesTests:
                        Users need to receive the actual AI-generated value, not just completion notification.)
     
     async def test_concurrent_websocket_event_integrity(self, event_collector, mock_bridge):
-        ""CRITICAL: Must detect WebSocket event integrity issues under concurrent load.
+        ""CRITICAL: Must detect WebSocket event integrity issues under concurrent load."
         
         This test stresses concurrent event emission and MUST FAIL if
         events are lost, duplicated, or corrupted under load.
@@ -680,7 +680,7 @@ class WebSocketEventGuaranteesTests:
             result = event.data.get('result')
             if not result or not isinstance(result, dict):
                 pytest.fail(fCONTENT QUALITY VIOLATION: tool_completed event lacks meaningful 
-                           fresult data: {result}. Users need actionable tool outcomes.)
+                           fresult "data": {"result}. Users need actionable tool outcomes.)"
         
         # 4. agent_completed content validation
         completed_events = event_collector.get_events_by_type('agent_completed')
@@ -693,6 +693,6 @@ class WebSocketEventGuaranteesTests:
             # Final result should contain substantive information
             if 'status' not in result or 'final_result' not in result:
                 pytest.fail(fCONTENT STRUCTURE VIOLATION: agent_completed result missing 
-                           f"required fields (status, final_result): {result}")
+                           f"required fields (status, final_result): {result})"
 
 ))))))))))))))))))))

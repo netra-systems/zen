@@ -10,10 +10,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -65,20 +65,20 @@ class TestWebSocketConnection:
     def test_user_context() -> UserExecutionContext:
         """Create a test UserExecutionContext."""
         return UserExecutionContext.from_request( )
-        user_id="user_123",
-        thread_id="thread_456",
-        run_id="run_789",
-        request_id="req_" + str(uuid.uuid4())
+        user_id="user_123,"
+        thread_id="thread_456,"
+        run_id="run_789,"
+        request_id="req_ + str(uuid.uuid4())"
     
 
         @pytest.fixture
     def test_user_context_2() -> UserExecutionContext:
         """Create a second test UserExecutionContext for isolation tests."""
         return UserExecutionContext.from_request( )
-        user_id="user_999",
-        thread_id="thread_888",
-        run_id="run_777",
-        request_id="req_" + str(uuid.uuid4())
+        user_id="user_999,"
+        thread_id="thread_888,"
+        run_id="run_777,"
+        request_id="req_ + str(uuid.uuid4())"
     
 
         @pytest.fixture
@@ -89,10 +89,10 @@ class TestWebSocketConnection:
         timestamp=datetime.now(timezone.utc),
         event_type=EventType.CHAT_INTERACTION,
         event_category=EventCategory.USER_ACTION,
-        event_action="chat_message",
+        event_action="chat_message,"
         user_id=test_user_context.user_id,
         session_id=test_user_context.thread_id,
-        properties={"prompt_text": "Test message", "model_used": "gpt-4"}
+        properties={"prompt_text": "Test message", "model_used": "gpt-4}"
     
 
         @pytest.fixture
@@ -126,7 +126,7 @@ config = ProcessorConfig(require_user_context=True)
 processor = EventProcessor(mock_clickhouse, mock_redis, config)
 
         # Should fail without user context
-with pytest.raises(InvalidContextError, match="UserExecutionContext is mandatory"):
+with pytest.raises(InvalidContextError, match="UserExecutionContext is mandatory):"
 await processor.process_event(sample_analytics_event, user_context=None)
 
 @pytest.mark.asyncio
@@ -142,10 +142,10 @@ event_id=str(uuid.uuid4()),
 timestamp=datetime.now(timezone.utc),
 event_type=EventType.CHAT_INTERACTION,
 event_category=EventCategory.USER_ACTION,
-event_action="chat_message",
+event_action="chat_message,"
 user_id=test_user_context.user_id,
 session_id=test_user_context.thread_id,
-properties={"prompt_text": "Test message"}
+properties={"prompt_text": "Test message}"
                 
 
                 # Should fail with different user context
@@ -166,10 +166,10 @@ event_id=str(uuid.uuid4()),
 timestamp=datetime.now(timezone.utc),
 event_type=EventType.CHAT_INTERACTION,
 event_category=EventCategory.USER_ACTION,
-event_action="chat_message",
+event_action="chat_message,"
 user_id=test_user_context.user_id,
 session_id=test_user_context.thread_id,
-properties={"prompt_text": ""}
+properties={"prompt_text": "}"
                         
 events.append(event)
 
@@ -219,8 +219,8 @@ await asyncio.sleep(0)
 return "test_result"
 
             # Should fail without user context
-with pytest.raises(InvalidContextError, match="requires UserExecutionContext"):
-await manager.start_task("test_task", "Test Task", test_task)
+with pytest.raises(InvalidContextError, match="requires UserExecutionContext):"
+await manager.start_task("test_task", "Test Task, test_task)"
 
 @pytest.mark.asyncio
     async def test_task_manager_user_context_propagation(self, test_user_context):
@@ -238,10 +238,10 @@ await asyncio.sleep(0)
 return "test_result"
 
                         # Start task with context
-task = await manager.start_task("test_task", "Test Task", test_task, user_context=test_user_context)
+task = await manager.start_task("test_task", "Test Task, test_task, user_context=test_user_context)"
 
                         # Wait for completion
-result = await manager.wait_for_task("test_task", user_context=test_user_context)
+result = await manager.wait_for_task("test_task, user_context=test_user_context)"
 
 assert result == "test_result"
 assert received_context is not None
@@ -249,7 +249,7 @@ assert received_context.user_id == test_user_context.user_id
 
 @pytest.mark.asyncio
     async def test_task_manager_user_isolation(self, test_user_context, test_user_context_2):
-"""Test that users cannot access each other's tasks."""'
+"""Test that users cannot access each other's tasks.""'"
 manager = SecureBackgroundTaskManager(enforce_user_context=True)
 
     async def test_task():
@@ -257,14 +257,14 @@ await asyncio.sleep(0)
 return "test_result"
 
                                 # Start task for user 1
-task1 = await manager.start_task("user1_task", "User 1 Task", test_task, user_context=test_user_context)
+task1 = await manager.start_task("user1_task", "User 1 Task, test_task, user_context=test_user_context)"
 
                                 # User 2 should not be able to access user 1's task'
-task_access = manager.get_task("user1_task", user_context=test_user_context_2)
+task_access = manager.get_task("user1_task, user_context=test_user_context_2)"
 assert task_access is None
 
                                 # User 1 should be able to access their own task
-task_access = manager.get_task("user1_task", user_context=test_user_context)
+task_access = manager.get_task("user1_task, user_context=test_user_context)"
 assert task_access is not None
 
 def test_task_manager_list_tasks_isolation(self, test_user_context, test_user_context_2):
@@ -274,8 +274,8 @@ pass
 manager = SecureBackgroundTaskManager(enforce_user_context=True)
 
     # Create tasks for different users
-asyncio.run(manager.start_task("user1_task", "User 1 Task", lambda x: None "result1", user_context=test_user_context))
-asyncio.run(manager.start_task("user2_task", "User 2 Task", lambda x: None "result2", user_context=test_user_context_2))
+asyncio.run(manager.start_task("user1_task", "User 1 Task", lambda x: None "result1, user_context=test_user_context))"
+asyncio.run(manager.start_task("user2_task", "User 2 Task", lambda x: None "result2, user_context=test_user_context_2))"
 
     # User 1 should only see their tasks
 user1_tasks = manager.list_tasks(user_context=test_user_context)
@@ -349,8 +349,8 @@ class TestSecurityValidator:
 
     # Should detect violation
         result = validator.validate_background_task_context( )
-        task_name="test_task",
-        task_id="test_123",
+        task_name="test_task,"
+        task_id="test_123,"
         user_context=None,
         require_context=True
     
@@ -367,8 +367,8 @@ class TestSecurityValidator:
     # Should raise exception
         with pytest.raises(InvalidContextError):
         validator.validate_background_task_context( )
-        task_name="test_task",
-        task_id="test_123",
+        task_name="test_task,"
+        task_id="test_123,"
         user_context=None,
         require_context=True
         
@@ -378,12 +378,12 @@ class TestSecurityValidator:
         validator = BackgroundTaskSecurityValidator(enforce_strict_mode=True)
 
     # Whitelist task
-        validator.whitelist_task("system_task", "System maintenance task")
+        validator.whitelist_task("system_task", "System maintenance task)"
 
     # Should pass even without context
         result = validator.validate_background_task_context( )
-        task_name="system_task",
-        task_id="sys_123",
+        task_name="system_task,"
+        task_id="sys_123,"
         user_context=None,
         require_context=False
     
@@ -423,10 +423,10 @@ event_id=str(uuid.uuid4()),
 timestamp=datetime.now(timezone.utc),
 event_type=EventType.CHAT_INTERACTION,
 event_category=EventCategory.USER_ACTION,
-event_action="chat_message",
+event_action="chat_message,"
 user_id=test_user_context.user_id,
 session_id=test_user_context.thread_id,
-properties={"prompt_text": "User 1 message"}
+properties={"prompt_text": "User 1 message}"
         
 
 event2 = AnalyticsEvent( )
@@ -434,10 +434,10 @@ event_id=str(uuid.uuid4()),
 timestamp=datetime.now(timezone.utc),
 event_type=EventType.CHAT_INTERACTION,
 event_category=EventCategory.USER_ACTION,
-event_action="chat_message",
+event_action="chat_message,"
 user_id=test_user_context_2.user_id,
 session_id=test_user_context_2.thread_id,
-properties={"prompt_text": "User 2 message"}
+properties={"prompt_text": "User 2 message}"
         
 
         # Process events with correct contexts
@@ -472,20 +472,20 @@ return None
 
         # Start tasks for different users
 task1 = await manager.start_task( )
-"data_task_1", "User 1 Data Task",
-lambda x: None user_specific_task("secret_data", user_context=test_user_context),
+"data_task_1", "User 1 Data Task,"
+lambda x: None user_specific_task("secret_data, user_context=test_user_context),"
 user_context=test_user_context
         
 
 task2 = await manager.start_task( )
-"data_task_2", "User 2 Data Task",
-lambda x: None user_specific_task("secret_data", user_context=test_user_context_2),
+"data_task_2", "User 2 Data Task,"
+lambda x: None user_specific_task("secret_data, user_context=test_user_context_2),"
 user_context=test_user_context_2
         
 
         # Wait for completion
-result1 = await manager.wait_for_task("data_task_1", user_context=test_user_context)
-result2 = await manager.wait_for_task("data_task_2", user_context=test_user_context_2)
+result1 = await manager.wait_for_task("data_task_1, user_context=test_user_context)"
+result2 = await manager.wait_for_task("data_task_2, user_context=test_user_context_2)"
 
         # Verify data isolation
 assert result1 == ""
@@ -516,7 +516,7 @@ workflow_results = []
 async def analytics_task(event_data: Dict[str, Any], user_context: Optional[UserExecutionContext] = None):
     # Validate context
 validator.validate_background_task_context( )
-"analytics_processing",
+"analytics_processing,"
 "",
 user_context,
 require_context=True
@@ -536,7 +536,7 @@ return ""
 async def report_task(analytics_result: str, user_context: Optional[UserExecutionContext] = None):
     # Validate context
 validator.validate_background_task_context( )
-"report_generation",
+"report_generation,"
 "",
 user_context,
 require_context=True
@@ -553,7 +553,7 @@ await asyncio.sleep(0)
 return ""
 
     # Execute workflow
-event_data = {"prompt": "test message", "model": "gpt-4"}
+event_data = {"prompt": "test message", "model": "gpt-4}"
 
     # Step 1: Analytics processing
 analytics_result = await analytics_task(event_data, user_context=test_user_context)
@@ -572,9 +572,9 @@ assert report_result == ""
 assert len(validator.violations) == 0
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
-pytest.main([__file__, "-v", "-s"])
+pytest.main([__file__, "-v", "-s])"
 pass
 
 '''

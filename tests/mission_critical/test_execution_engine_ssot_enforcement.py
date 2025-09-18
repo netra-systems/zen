@@ -89,7 +89,7 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
         # Scan all Python files in netra_backend (excluding tests)
         for py_file in self.netra_backend_root.rglob(*.py):
             # Skip test files and __pycache__
-            if "test in str(py_file).lower() or __pycache__" in str(py_file):
+            if "test in str(py_file).lower() or __pycache__ in str(py_file):"
                 continue
                 
             try:
@@ -138,7 +138,7 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
         for class_def in execution_engine_classes:
             if UserExecutionEngine not in class_def:
                 # Allow interface definitions but not implementations
-                if Interface" not in class_def and "IExecutionEngine not in class_def:
+                if Interface" not in class_def and IExecutionEngine not in class_def:"
                     violations.append(class_def)
         
         self.assertLessEqual(
@@ -233,7 +233,7 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
                 # Check if factory methods exist and what they create
                 for attr_name in dir(factory_module):
                     attr = getattr(factory_module, attr_name)
-                    if callable(attr) and ("create in attr_name.lower() or get" in attr_name.lower()):
+                    if callable(attr) and ("create in attr_name.lower() or get in attr_name.lower()):"
                         # This is a factory method - validate it creates UserExecutionEngine
                         if hasattr(attr, '__annotations__'):
                             return_type = attr.__annotations__.get('return', None)
@@ -256,7 +256,7 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
         non_ssot_imports = []
         
         for py_file in self.netra_backend_root.rglob(*.py):
-            if "test in str(py_file).lower() or __pycache__" in str(py_file):
+            if "test in str(py_file).lower() or __pycache__ in str(py_file):"
                 continue
                 
             try:

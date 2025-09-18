@@ -80,7 +80,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
             self.logger.debug(f"Expected cache clear failure during SSOT violations: {e})"
 
     def test_config_manager_import_conflict_violation(self):
-        "
+        """
         "
         TEST: Configuration Manager Import Conflicts (DESIGNED TO FAIL)
 
@@ -107,7 +107,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
 
             try:
                 # Test 1: Import deprecated manager (should generate deprecation warning)
-                from netra_backend.app.core.configuration.base import (
+                from netra_backend.app.core.configuration.base import ()
     UnifiedConfigManager,
     get_config,
     get_config_value,
@@ -121,7 +121,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
 )
 
                 # Test 2: Import canonical manager
-                from netra_backend.app.core.configuration.base import (
+                from netra_backend.app.core.configuration.base import ()
                     UnifiedConfigManager as CanonicalManager
                 )
 
@@ -169,7 +169,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
                 self.logger.error(fSSOT Violation - Import Error: {error})
 
     def test_startup_race_condition_reproduction(self):
-        "
+        """
         "
         TEST: Startup Race Conditions from Configuration Manager Duplication (DESIGNED TO FAIL)
 
@@ -208,7 +208,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
 
                     try:
                         # Access deprecated manager
-                        from netra_backend.app.core.configuration.base import (
+                        from netra_backend.app.core.configuration.base import ()
     UnifiedConfigManager,
     get_config,
     get_config_value,
@@ -326,7 +326,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
             self.logger.error(f"  - {inconsistency})"
 
     def test_environment_access_ssot_violation(self):
-        "
+        """
         "
         TEST: Environment Access SSOT Violations (DESIGNED TO FAIL)
 
@@ -351,7 +351,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
         test_env_vars = {
             "DATABASE_POOL_SIZE: 15,"
             JWT_EXPIRE_MINUTES: 45,
-            "WEBSOCKET_PING_INTERVAL: 25",
+            "WEBSOCKET_PING_INTERVAL: 25,"
             AGENT_EXECUTION_TIMEOUT: 400
         }
 
@@ -361,7 +361,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
 
             try:
                 # Test deprecated manager environment access
-                from netra_backend.app.core.configuration.base import (
+                from netra_backend.app.core.configuration.base import ()
     UnifiedConfigManager,
     get_config,
     get_config_value,
@@ -389,7 +389,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
                 config_mapping = {
                     DATABASE_POOL_SIZE": database.pool_size,"
                     JWT_EXPIRE_MINUTES: security.jwt_expire_minutes,
-                    WEBSOCKET_PING_INTERVAL": "websocket.ping_interval,
+                    WEBSOCKET_PING_INTERVAL": websocket.ping_interval,"
                     AGENT_EXECUTION_TIMEOUT: agent.execution_timeout
                 }
 
@@ -479,7 +479,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
 
             try:
                 # Test deprecated manager JWT configuration
-                from netra_backend.app.core.configuration.base import (
+                from netra_backend.app.core.configuration.base import ()
     UnifiedConfigManager,
     get_config,
     get_config_value,
@@ -541,7 +541,7 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
                             )
 
                             # Critical JWT secret mismatch blocks Golden Path
-                            if config_key in ["security.jwt_secret, service_secret"]:
+                            if config_key in ["security.jwt_secret, service_secret]:"
                                 golden_path_blocked = True
                                 auth_failures.append(
                                     fCRITICAL: JWT secret mismatch for {config_key} blocks user authentication

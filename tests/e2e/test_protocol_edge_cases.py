@@ -10,10 +10,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -193,7 +193,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
         self.websocket_issues.extend(websocket_upgrade_failures)
 
-        assert len(websocket_upgrade_failures) == 0, ( )
+        assert len(websocket_upgrade_failures) == 0, "( )"
         "" +
         "
         "
@@ -280,7 +280,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         'issue': 'formatted_string'
                                 
 
-        assert len(oauth_redirect_failures) == 0, ( )
+        assert len(oauth_redirect_failures) == 0, "( )"
         "" +
         "
         "
@@ -378,7 +378,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
         self.cors_violations.extend(cors_configuration_failures)
 
-        assert len(cors_configuration_failures) == 0, ( )
+        assert len(cors_configuration_failures) == 0, "( )"
         "" +
         "
         "
@@ -505,7 +505,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
         self.asset_loading_failures.extend(asset_loading_issues)
 
-        assert len(asset_loading_issues) == 0, ( )
+        assert len(asset_loading_issues) == 0, "( )"
         "" +
         "
         "
@@ -607,7 +607,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         'issue': 'formatted_string'
                                 
 
-        assert len(service_worker_failures) == 0, ( )
+        assert len(service_worker_failures) == 0, "( )"
         "" +
         "
         "
@@ -716,7 +716,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
         self.redirect_problems.extend(redirect_websocket_issues)
 
-        assert len(redirect_websocket_issues) == 0, ( )
+        assert len(redirect_websocket_issues) == 0, "( )"
         "" +
         "
         "
@@ -818,7 +818,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         'issue': 'formatted_string'
                                 
 
-        assert len(certificate_validation_failures) == 0, ( )
+        assert len(certificate_validation_failures) == 0, "( )"
         "" +
         "
         "
@@ -931,7 +931,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         'issue': 'formatted_string'
                                     
 
-        assert len(lb_ssl_failures) == 0, ( )
+        assert len(lb_ssl_failures) == 0, "( )"
         "" +
         "
         "
@@ -1041,10 +1041,10 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         if '://' in pattern:
                 # Pattern like "https://*.staging.netrasystems.ai"
         wildcard_scheme = pattern.split('://')[0]
-        domain_part = pattern.split('://', 1)[1][2:]  # Remove "*." after the scheme
+        domain_part = pattern.split('://', 1)[1][2:]  # Remove "*. after the scheme"
         base_domain = domain_part.split('/')[0]  # Remove any path
         else:
-                    # Pattern like "*.staging.netrasystems.ai" (no scheme)
+                    # Pattern like "*.staging.netrasystems.ai (no scheme)"
         wildcard_scheme = origin_parsed.scheme  # Use origin"s scheme"
         domain_part = pattern[2:]  # Remove "*."
         base_domain = domain_part.split('/')[0]  # Remove any path
@@ -1328,6 +1328,6 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         print("")
 
 
-        if __name__ == "__main__":
-        pytest.main([__file__, "-v"])
+        if __name__ == "__main__:"
+        pytest.main([__file__, "-v])"
         pass

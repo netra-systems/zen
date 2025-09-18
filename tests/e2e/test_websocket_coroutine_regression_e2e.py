@@ -87,7 +87,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
         )
 
     async def test_complete_websocket_chat_flow_with_authentication(self):
-    ""
+    """
         CRITICAL: Test complete WebSocket chat flow with real authentication.
         
         This E2E test validates the complete business value flow:
@@ -122,7 +122,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                     type: "agent_request,"
                     data": {"
                         message: Test coroutine regression in full chat flow,
-                        "thread_id: fe2e-test-{int(time.time())}",
+                        "thread_id: fe2e-test-{int(time.time())},"
                         agent_type: general
                     }
                 }
@@ -203,12 +203,12 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
         try:
             async with websockets.connect(
                 websocket_url,
-                extra_headers={"Authorization: fBearer {user.token}"} as websocket:
+                extra_headers={"Authorization: fBearer {user.token}} as websocket:"
                 
                 # CRITICAL: Send message that triggers environment detection logic
                 env_test_message = {
                     type: system_info_request,
-                    data: {include_environment": True}"
+                    "data": {"include_environment": True"}"
                 }
                 
                 await websocket.send(json.dumps(env_test_message))
@@ -224,7 +224,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                 if "environment in response_data.get(data, {):"
                     env_value = response_data[data][environment]
                     self.assertIsInstance(env_value, str)
-                    self.assertIn(env_value, ["development, staging", production)
+                    self.assertIn(env_value, ["development, staging, production)"
                 
         except Exception as e:
             if coroutine in str(e).lower():""
@@ -328,7 +328,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                 
                 # CRITICAL: Send agent request to trigger all WebSocket events
                 agent_request = {
-                    "type: agent_request", 
+                    "type: agent_request, "
                     data: {
                         message: "Test agent events without coroutine errors,"
                         thread_id": fagent-events-e2e-{int(time.time())},"
@@ -405,8 +405,8 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
         
         # Test the exact E2E detection logic from websocket.py
         is_e2e_testing = (
-            self.env.get(E2E_TESTING", "0) == 1 or 
-            self.env.get(PYTEST_RUNNING, 0") == "1 or
+            self.env.get(E2E_TESTING", 0) == 1 or "
+            self.env.get(PYTEST_RUNNING, 0") == 1 or"
             self.env.get(STAGING_E2E_TEST, 0) == 1" or"
             self.env.get(E2E_OAUTH_SIMULATION_KEY) is not None or
             self.env.get(E2E_TEST_ENV) == "staging"
@@ -424,10 +424,10 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
         if environment in [staging", production]:"
             # This is the logic that was failing with coroutine errors
             e2e_flags = {
-                E2E_TESTING: self.env.get(E2E_TESTING, 0") == "1,
+                E2E_TESTING: self.env.get(E2E_TESTING, 0") == 1,"
                 PYTEST_RUNNING: self.env.get(PYTEST_RUNNING, 0) == "1, "
                 STAGING_E2E_TEST": self.env.get(STAGING_E2E_TEST, 0) == 1,"
-                E2E_OAUTH_SIMULATION_KEY": self.env.get("E2E_OAUTH_SIMULATION_KEY) is not None,
+                E2E_OAUTH_SIMULATION_KEY": self.env.get(E2E_OAUTH_SIMULATION_KEY) is not None,"
                 E2E_TEST_ENV: self.env.get(E2E_TEST_ENV) == staging""
             }
             
@@ -452,7 +452,7 @@ if __name__ == __main__:""
         "Run E2E tests with async support."""
         unittest.main()
     
-    if __name__ == "__main__":
+    if __name__ == "__main__:"
         run_e2e_tests()
 
 )))))

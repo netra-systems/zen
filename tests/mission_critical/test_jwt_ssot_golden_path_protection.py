@@ -47,9 +47,9 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
 
         # Golden Path test user
         self.golden_path_user = {
-            user_id": f"golden_path_user_{uuid.uuid4().hex[:8]},
+            user_id": fgolden_path_user_{uuid.uuid4().hex[:8]},"
             email: golden.path@netrasystems.ai,
-            permissions: [chat, agents", "read, write]
+            permissions: [chat, agents", read, write]"
         }
 
         # Test JWT token for Golden Path (mock but realistic format)
@@ -66,13 +66,13 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
 
         payload = {
             sub: user_data[user_id],
-            email": user_data["email],
+            email": user_data[email],"
             permissions: user_data[permissions],
             iat: int(time.time()),"
             iat: int(time.time()),"
             "exp: int(time.time()) + 3600,  # 1 hour"
             token_type: access,
-            iss": "netra-auth-service,
+            iss": netra-auth-service,"
             aud: netra-platform
         }
 
@@ -80,7 +80,7 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
         # In real SSOT implementation, this would come from auth service
         import base64
         header = base64.urlsafe_b64encode(
-            json.dumps({alg: "HS256, typ": JWT}.encode()
+            json.dumps({alg: "HS256, typ: JWT}.encode()"
         ).decode().rstrip('=')
 
         payload_encoded = base64.urlsafe_b64encode(
@@ -92,7 +92,7 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
         return f"{header}.{payload_encoded}.{signature}"
 
     async def test_login_to_ai_chat_flow_works_with_ssot_jwt(self):
-        "
+        """
         "
         Test complete Golden Path with SSOT JWT validation.
 
@@ -111,7 +111,7 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
             # Mock auth service responses for SSOT compatibility
             mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 valid: True,
-                "user_id: self.golden_path_user[user_id"],
+                "user_id: self.golden_path_user[user_id],"
                 email: self.golden_path_user[email],
                 permissions: self.golden_path_user[permissions"]"
             }
@@ -138,7 +138,7 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
             except ImportError as e:
                 # If import fails, test alternative path
                 self.record_metric(golden_path_jwt_validation_alternative, True)
-                print(f"Using alternative JWT validation path: {e})")
+                print(f"Using alternative JWT validation path: {e}))"
 
             # Step 3: Test WebSocket authentication with JWT
             websocket_auth_success = await self._test_websocket_authentication(")"
@@ -171,12 +171,12 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
             {
                 user_id: fuser_a_{uuid.uuid4().hex[:8]},
                 email: user.a@netrasystems.ai,
-                permissions": ["chat]
+                permissions": [chat]"
             },
             {
                 user_id: fuser_b_{uuid.uuid4().hex[:8]},
                 email: user.b@netrasystems.ai,
-                permissions": ["chat]
+                permissions": [chat]"
             }
         ]
 
@@ -193,7 +193,7 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
                         return {
                             valid": True,"
                             user_id: user[user_id],
-                            "email: user[email"],
+                            "email: user[email],"
                             permissions: user[permissions]
                         }
                 return {valid: False}"
@@ -235,7 +235,7 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
             self.record_metric(multi_user_authentication_success", True)"
 
     async def test_cross_service_jwt_consistency_with_ssot(self):
-    "
+        """
     "
         Test JWT consistency across services with SSOT.
 
@@ -251,7 +251,7 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
             # Mock consistent auth service response
             consistent_response = {
                 valid: True,
-                "user_id: self.golden_path_user[user_id"],
+                "user_id: self.golden_path_user[user_id],"
                 email: self.golden_path_user[email],
                 permissions: self.golden_path_user[permissions"],"
                 "token_type: access"
@@ -299,7 +299,7 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
             self.record_metric(auth_service_calls_count, mock_auth_client.validate_token_jwt.call_count)
 
     async def test_golden_path_performance_with_ssot_jwt(self):
-    ""
+    """
         Test Golden Path performance is not degraded by SSOT JWT.
 
         CRITICAL: SSOT consolidation must not slow down the Golden Path.
@@ -316,7 +316,7 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
                 valid: True,"
                 "user_id: self.golden_path_user[user_id],"
                 email: self.golden_path_user[email],
-                "permissions: self.golden_path_user[permissions"]
+                "permissions: self.golden_path_user[permissions]"
             }
 
             # Performance test: Multiple JWT validations (simulating real usage)
@@ -397,7 +397,7 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
                             user_id: auth_result.user_id,
                             timestamp: datetime.now(timezone.utc).isoformat(),"
                             timestamp: datetime.now(timezone.utc).isoformat(),"
-                            "data: {message: fTest {event_type} event}"
+                            ""data": {"message: fTest {event_type"} event}"
                         }
                         events_delivered.append(event_data)
 
@@ -408,7 +408,7 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
                         type: event_type,"
                         "user_id: self.golden_path_user[user_id],"
                         timestamp: datetime.now(timezone.utc).isoformat(),
-                        data": {"message: fTest {event_type} event}
+                        data": {message: fTest {event_type} event}"
                     }
                     events_delivered.append(event_data)
 
@@ -482,11 +482,11 @@ class JWTSSOTGoldenPathRegressionTests(SSotAsyncTestCase):
     def setup_method(self, method):
         "Setup for regression tests."
         super().setup_method(method)
-        self.set_env_var("ENVIRONMENT, test")
+        self.set_env_var("ENVIRONMENT, test)"
         self.set_env_var(TESTING, true)
 
     async def test_existing_jwt_tokens_remain_valid_during_migration(self):
-    ""
+    """
         Test that existing JWT tokens remain valid during SSOT migration.
 
         CRITICAL: Users should not be logged out during SSOT deployment.
@@ -508,7 +508,7 @@ class JWTSSOTGoldenPathRegressionTests(SSotAsyncTestCase):
                 valid: True,"
                 "user_id: existing_user,"
                 email: existing@netrasystems.ai,
-                "permissions: [chat"]
+                "permissions: [chat]"
             }
 
             # Test each token format works
@@ -527,7 +527,7 @@ class JWTSSOTGoldenPathRegressionTests(SSotAsyncTestCase):
             self.record_metric(legacy_token_compatibility", True)"
 
     async def test_error_handling_remains_robust_with_ssot(self):
-    "
+        """
     "
         Test error handling remains robust with SSOT JWT validation.
 
@@ -552,8 +552,8 @@ class JWTSSOTGoldenPathRegressionTests(SSotAsyncTestCase):
             # Mock auth service to properly reject invalid tokens
             def mock_validate_invalid(token):
                 if not token or len(str(token).split('.')) != 3:
-                    return {valid": False, "error: Invalid token format}
-                return {valid: False, error": "Token validation failed}
+                    return {valid": False, error: Invalid token format}"
+                return {valid: False, error": Token validation failed}"
 
             mock_auth_client.validate_token_jwt = AsyncMock(side_effect=mock_validate_invalid)
 
@@ -591,7 +591,7 @@ class JWTSSOTGoldenPathRegressionTests(SSotAsyncTestCase):
         return future.jwt.token"
 
     async def test_golden_path_monitoring_metrics_preserved(self):
-    "
+        """
     "
         Test that Golden Path monitoring metrics are preserved during SSOT migration.
 
@@ -636,7 +636,7 @@ class JWTSSOTGoldenPathRegressionTests(SSotAsyncTestCase):
             agent_execution_time: 2.5,"
             agent_execution_time: 2.5,"
             golden_path_completion_rate": 0.95,"
-            "user_session_duration": 1800.0
+            "user_session_duration: 1800.0"
         }
         return metric_values.get(metric_name, 0.0)
 

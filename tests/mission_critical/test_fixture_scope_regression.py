@@ -20,7 +20,7 @@ from typing import Any, Dict, List, Optional
 from shared.isolated_environment import IsolatedEnvironment
 
 # Real services fixtures with various scopes
-from test_framework.conftest_real_services import (
+from test_framework.conftest_real_services import ()
 real_services_function,
 real_services_session,
 real_services,
@@ -40,7 +40,7 @@ test_user_token
 
 
 # Environment and isolation
-from test_framework.environment_isolation import (
+from test_framework.environment_isolation import ()
 get_test_env_manager,
 isolated_test_session
 )
@@ -64,13 +64,13 @@ class TestFixtureScopeRegression:
 @pytest.mark.asyncio
 @pytest.mark.integration
     async def test_session_to_function_scope_conversion(self, real_services_function):
-    ""Test that real_services_function (converted from session scope) works correctly.
+    ""Test that real_services_function (converted from session scope) works correctly."
         # This test validates the core fix: converting session-scoped fixtures to function-scoped
         # to avoid pytest-asyncio ScopeMismatch errors
 
 assert real_services_function is not None
-assert hasattr(real_services_function, 'postgres')
-assert hasattr(real_services_function, 'redis')
+assert hasattr(real_services_function, "'postgres')"
+assert hasattr(real_services_function, "'redis')"
 
         # Test service availability
 await real_services_function.ensure_all_services_available()
@@ -92,7 +92,7 @@ assert redis_result.decode() == 'scope_test_value'
 pass
             # Validates that the backward compatibility alias doesn't break'
 assert real_services_session is not None
-assert hasattr(real_services_session, 'postgres')
+assert hasattr(real_services_session, "'postgres')"
 
             # Should work just like the main fixture
 await real_services_session.ensure_all_services_available()
@@ -169,10 +169,10 @@ assert real_http_client is not None
 
         # Test that client fixtures don't cause scope issues'
         # WebSocket client should be ready for connections
-assert hasattr(real_websocket_client, 'connect')
+assert hasattr(real_websocket_client, "'connect')"
 
         # HTTP client should be ready for requests
-assert hasattr(real_http_client, 'get') or hasattr(real_http_client, '_client')
+assert hasattr(real_http_client, "'get') or hasattr(real_http_client, '_client')"
 
         # Test they work with real services
 await real_services.ensure_all_services_available()
@@ -197,7 +197,7 @@ assert websocket_connection is not None
 await real_services.ensure_all_services_available()
 
             # WebSocket connection should be established
-assert hasattr(websocket_connection, 'send') or hasattr(websocket_connection, 'send_text')
+assert hasattr(websocket_connection, "'send') or hasattr(websocket_connection, 'send_text')"
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -206,7 +206,7 @@ self,
 real_services,
 api_client
 ):
-""Test API client fixture works with real services.
+""Test API client fixture works with real services."
 assert real_services is not None
 assert api_client is not None
 
@@ -214,7 +214,7 @@ assert api_client is not None
 await real_services.ensure_all_services_available()
 
                 # API client should be ready for requests
-assert hasattr(api_client, 'get') or hasattr(api_client, '_client')
+assert hasattr(api_client, "'get') or hasattr(api_client, '_client')"
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -290,7 +290,7 @@ assert conv_exists == True
 
 @pytest.mark.asyncio
     async def test_async_sync_fixture_mixing(self, real_services):
-    "Test mixing async and sync fixtures doesn't cause scope issues."'
+    "Test mixing async and sync fixtures doesn't cause scope issues.'"
                             # This is an async test using both async and sync fixtures
 assert real_services is not None
 
@@ -397,7 +397,7 @@ results = await asyncio.gather(*operations, return_exceptions=True)
 
     # Verify all operations succeeded
 for i, result in enumerate(results):
-    assert isinstance(result, dict)
+    assert isinstance(result, "dict)"
 assert result["operation_id] == i"
 assert result[db_result] == formatted_string
 assert result[redis_result] == "formatted_string"
@@ -411,7 +411,7 @@ assert result[redis_result] == "formatted_string"
 try:
                 # Intentionally cause an error
 await real_services.postgres.fetchval("SELECT invalid_function())"
-assert False, Should have raised an exception
+assert False, "Should have raised an exception"
 except Exception as e:
                     # Error should be caught, fixture should still be usable
 assert invalid_function in str(e) or function" in str(e).lower()"
@@ -478,7 +478,7 @@ class TestFixtureScopeEdgeCases:
 @pytest.mark.asyncio
 @pytest.mark.integration
     async def test_nested_async_context_managers(self, real_services):
-    ""Test nested async context managers don't cause scope issues.'
+    ""Test nested async context managers don't cause scope issues.'"
         # This pattern previously caused issues with session vs function scope
 
 async with real_services.postgres.connection() as outer_conn:
@@ -511,7 +511,7 @@ assert result == scope_test_data
 @pytest.mark.asyncio
 @pytest.mark.integration
     async def test_fixture_inheritance_compatibility(self, real_services, real_postgres):
-    ""Test fixture inheritance patterns work correctly.
+    ""Test fixture inheritance patterns work correctly."
                             real_postgres should be derived from real_services
 assert real_services.postgres == real_postgres
 
@@ -524,7 +524,7 @@ assert services_result == 'services_path'
 assert direct_result == 'direct_path'
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                 # Allow running this test directly
 pass
 

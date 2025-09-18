@@ -51,7 +51,7 @@ class ImportPatternViolation:
 
 
 class SSOTImportPatternViolationsTests(SSotBaseTestCase):
-    ""
+    """
     Mission Critical test suite to detect and validate SSOT import compliance.
     
     This test is designed to FAIL initially to expose current violations,
@@ -59,7 +59,7 @@ class SSOTImportPatternViolationsTests(SSotBaseTestCase):
     
     
     def setup_method(self, method):
-        ""Set up test environment.
+        ""Set up test environment."
         super().setup_method(method)
         self.project_root = Path(/Users/anthony/Desktop/netra-apex)"
         self.project_root = Path(/Users/anthony/Desktop/netra-apex)"
@@ -129,7 +129,7 @@ class SSOTImportPatternViolationsTests(SSotBaseTestCase):
         ]
         
     def test_detect_deprecated_base_imports(self):
-        "
+        """
         "
         CRITICAL: Detect deprecated test_framework.base imports.
         
@@ -156,7 +156,7 @@ class SSOTImportPatternViolationsTests(SSotBaseTestCase):
             )
             
     def test_detect_deprecated_mock_factory_imports(self):
-    "
+        """
     "
         HIGH: Detect deprecated mock factory imports.
         
@@ -206,7 +206,7 @@ class SSOTImportPatternViolationsTests(SSotBaseTestCase):
             )
             
     def test_detect_nonexistent_import_attempts(self):
-    "
+        """
     "
         MEDIUM: Detect attempts to import from non-existent paths.
         
@@ -364,7 +364,7 @@ BUSINESS IMPACT:
         for scan_dir in self._get_scan_directories():
             if scan_dir.exists():
                 violations.extend(
-                    self._scan_directory_for_import_patterns(
+                    self._scan_directory_for_import_patterns()
                         scan_dir, deprecated_type, patterns, replacement, severity
                     )
                 )
@@ -472,7 +472,7 @@ BUSINESS IMPACT:
         ]
         
     def _format_violations(self, violations: List[ImportPatternViolation) -> str:
-        ""Format violations for display.
+        ""Format violations for display."
         if not violations:
             return No violations found."
             return No violations found."
@@ -497,5 +497,5 @@ BUSINESS IMPACT:
         formatted = []
         for violation_type, count in sorted(violation_counts.items(), key=lambda x: x[1], reverse=True):
             formatted.append(f- {violation_type}: {count} violations)
-        return "\n".join(formatted)
+        return "\n.join(formatted)"
 ))

@@ -79,7 +79,7 @@ class StagingWebSocketAuthScopingE2ETests:
             websocket = E2EStagingWebSocket(jwt_token, user_context)
             try:
                 e2e_context = extract_e2e_context_from_websocket(websocket)
-                assert e2e_context is not None, 'E2E context must be created for staging environment'
+                assert e2e_context is not None, "'E2E context must be created for staging environment'"
                 assert e2e_context['is_e2e_testing'] is True
                 assert e2e_context['environment'] == 'staging'
                 assert e2e_context['bypass_enabled'] is True
@@ -87,8 +87,8 @@ class StagingWebSocketAuthScopingE2ETests:
                 assert detection_method['via_environment'] is True
                 assert detection_method['via_env_vars'] is True
                 auth_result = await authenticate_websocket_ssot(websocket, e2e_context=e2e_context)
-                assert isinstance(auth_result, WebSocketAuthResult)
-                assert auth_result.success is True, f'Authentication failed: {auth_result.error_message}'
+                assert isinstance(auth_result, "WebSocketAuthResult)"
+                assert auth_result.success is True, "f'Authentication failed: {auth_result.error_message}'"
                 assert auth_result.user_context is not None
                 assert auth_result.auth_result is not None
                 assert auth_result.user_context.user_id == user_context['user_id']
@@ -155,7 +155,7 @@ class StagingWebSocketAuthScopingE2ETests:
     @pytest.mark.performance
     @pytest.mark.asyncio
     async def test_staging_performance_regression_validation(self, authenticated_e2e_session):
-    ""
+    """
         E2E performance test to ensure scoping bug fix doesn't introduce regressions.'
         
         This test validates that authentication performance remains acceptable
@@ -194,7 +194,7 @@ class StagingWebSocketAuthScopingE2ETests:
                     total_end = time.perf_counter()
                     total_time = (total_end - total_start) * 1000
                     total_flow_times.append(total_time)
-                    assert auth_result.success is True, f'Performance test iteration {iteration} failed authentication'
+                    assert auth_result.success is True, "f'Performance test iteration {iteration} failed authentication'"
                 except UnboundLocalError as e:
                     if 'is_production' in str(e):
                         pytest.fail(f' ALERT:  PERFORMANCE TEST FAILURE: Scoping bug in iteration {iteration}: {e}')
@@ -206,12 +206,12 @@ class StagingWebSocketAuthScopingE2ETests:
         max_context_time = max(context_extraction_times)
         max_auth_time = max(auth_times)
         max_total_time = max(total_flow_times)
-        assert avg_context_time < 100.0, f'E2E context extraction too slow: {avg_context_time:.2f}ms average'
-        assert avg_auth_time < 500.0, f'Authentication too slow: {avg_auth_time:.2f}ms average'
-        assert avg_total_time < 1000.0, f'Total auth flow too slow: {avg_total_time:.2f}ms average'
-        assert max_context_time < 200.0, f'E2E context extraction max time too slow: {max_context_time:.2f}ms'
-        assert max_auth_time < 1000.0, f'Authentication max time too slow: {max_auth_time:.2f}ms'
-        assert max_total_time < 2000.0, f'Total auth flow max time too slow: {max_total_time:.2f}ms'
+        assert avg_context_time < 100.0, "f'E2E context extraction too slow: {avg_context_time:.2f}ms average'"
+        assert avg_auth_time < 500.0, "f'Authentication too slow: {avg_auth_time:.2f}ms average'"
+        assert avg_total_time < 1000.0, "f'Total auth flow too slow: {avg_total_time:.2f}ms average'"
+        assert max_context_time < 200.0, "f'E2E context extraction max time too slow: {max_context_time:.2f}ms'"
+        assert max_auth_time < 1000.0, "f'Authentication max time too slow: {max_auth_time:.2f}ms'"
+        assert max_total_time < 2000.0, "f'Total auth flow max time too slow: {max_total_time:.2f}ms'"
         performance_report = {'context_extraction': {'average_ms': round(avg_context_time, 2), 'max_ms': round(max_context_time, 2), 'all_times': [round(t, 2) for t in context_extraction_times]}, 'authentication': {'average_ms': round(avg_auth_time, 2), 'max_ms': round(max_auth_time, 2), 'all_times': [round(t, 2) for t in auth_times]}, 'total_flow': {'average_ms': round(avg_total_time, 2), 'max_ms': round(max_total_time, 2), 'all_times': [round(t, 2) for t in total_flow_times]}}
         print(f' PASS:  PERFORMANCE VALIDATION PASSED: {json.dumps(performance_report, indent=2)}')
 
@@ -240,7 +240,7 @@ class StagingWebSocketAuthScopingE2ETests:
         with patch('shared.isolated_environment.get_env', return_value=real_gcp_staging_env):
             try:
                 e2e_context = extract_e2e_context_from_websocket(websocket)
-                assert e2e_context is not None, 'E2E context must be created for real GCP staging'
+                assert e2e_context is not None, "'E2E context must be created for real GCP staging'"
                 assert e2e_context['is_e2e_testing'] is True
                 assert e2e_context['environment'] == 'staging'
                 assert e2e_context['google_cloud_project'] == 'netra-staging-gcp-real'
@@ -249,7 +249,7 @@ class StagingWebSocketAuthScopingE2ETests:
                 assert detection_method['via_environment'] is True
                 assert detection_method['via_env_vars'] is True
                 auth_result = await authenticate_websocket_ssot(websocket, e2e_context=e2e_context)
-                assert auth_result.success is True, f'GCP staging auth failed: {auth_result.error_message}'
+                assert auth_result.success is True, "f'GCP staging auth failed: {auth_result.error_message}'"
                 assert auth_result.user_context.user_id == user_context['user_id']
                 gcp_validation = {'gcp_project_detected': 'staging' in e2e_context['google_cloud_project'], 'cloud_run_service_detected': 'staging' in e2e_context['k_service'], 'environment_staging': e2e_context['environment'] == 'staging', 'e2e_bypass_enabled': e2e_context['bypass_enabled'] is True, 'authentication_success': auth_result.success}
                 print(f' PASS:  REAL GCP STAGING VALIDATION: {json.dumps(gcp_validation, indent=2)}')
@@ -295,7 +295,7 @@ class StagingScopingEdgeCasesTests:
         concurrent_staging_env = {'ENVIRONMENT': 'staging', 'GOOGLE_CLOUD_PROJECT': 'netra-staging-race-test', 'K_SERVICE': 'netra-backend-staging', 'PYTEST_XDIST_WORKER': 'gw0', 'CONCURRENT_E2E_SESSION_ID': 'race-test-session', 'E2E_TESTING': '1'}
 
         async def concurrent_auth_test(worker_id: int):
-            ""Single concurrent authentication test.""
+            """Single concurrent authentication test.""
 
             class ConcurrentWebSocket:
                 pass
@@ -333,8 +333,8 @@ class StagingScopingEdgeCasesTests:
             else:
                 error_count += 1
                 print(f' WARNING: [U+FE0F] Worker {worker_id} error: {result}')
-        assert success_count >= 8, f'Too many concurrent failures: {success_count}/10 succeeded'
-        assert scoping_bug_count == 0, f'Scoping bug in {scoping_bug_count} concurrent attempts'
+        assert success_count >= 8, "f'Too many concurrent failures: {success_count}/10 succeeded'"
+        assert scoping_bug_count == 0, "f'Scoping bug in {scoping_bug_count} concurrent attempts'"
         print(f' PASS:  CONCURRENT RACE CONDITION TEST: {success_count}/10 succeeded, {scoping_bug_count} scoping bugs')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

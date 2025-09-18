@@ -52,7 +52,7 @@ class WebSocketAuthTestRunner:
         # Ensure real services are used
         env.set(USE_REAL_SERVICES, true, e2e_websocket_auth)""
         env.set("TEST_DISABLE_MOCKS, true, e2e_websocket_auth)"
-        env.set(REAL_WEBSOCKET_TESTING", "true, e2e_websocket_auth)
+        env.set(REAL_WEBSOCKET_TESTING", true, e2e_websocket_auth)"
         return self
     
     async def cleanup_real_services(self):
@@ -62,7 +62,7 @@ class WebSocketAuthTestRunner:
         # Clean up environment
         env = get_env()
         env.delete(USE_REAL_SERVICES, e2e_websocket_auth)
-        env.delete(TEST_DISABLE_MOCKS", "e2e_websocket_auth)
+        env.delete(TEST_DISABLE_MOCKS", e2e_websocket_auth)"
         env.delete(REAL_WEBSOCKET_TESTING, e2e_websocket_auth)
     
     async def _close_all_connections(self):
@@ -73,7 +73,7 @@ class WebSocketAuthTestRunner:
         self.active_connections.clear()
     
     async def create_authenticated_websocket_connection(self, user_id: str = test-ws-user) -> tuple:
-        ""Create authenticated WebSocket connection using SSOT patterns.
+        ""Create authenticated WebSocket connection using SSOT patterns."
         
         CRITICAL: Uses real authentication - NO bypassing, NO mocking.
 
@@ -121,7 +121,7 @@ class WebSocketAuthTestRunner:
             if user_id" not in response_data.get(payload, {):"
                 raise AssertionError(fAuthenticated WebSocket missing user_id in response: {response_data})
         else:
-            if response_data.get("type) != auth_error":
+            if response_data.get("type) != auth_error:"
                 raise AssertionError(fExpected auth_error but got: {response_data})
         
         return response_data
@@ -301,7 +301,7 @@ async def test_websocket_token_refresh_flow(websocket_auth_runner):
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_websocket_multi_user_authentication(websocket_auth_runner):
-    ""Test multiple users authenticate simultaneously - REAL multi-user isolation.
+    ""Test multiple users authenticate simultaneously - REAL multi-user isolation."
     
     CRITICAL: Tests REAL multi-user WebSocket authentication with proper isolation.
 
@@ -309,7 +309,7 @@ async def test_websocket_multi_user_authentication(websocket_auth_runner):
     
     # Create multiple REAL authenticated WebSocket connections
     connections = {}
-    user_roles = ["admin-user, regular-user", guest-user]
+    user_roles = ["admin-user, regular-user, guest-user]"
     
     for user_role in user_roles:
         ws, token, headers = await websocket_auth_runner.create_authenticated_websocket_connection(
@@ -447,7 +447,7 @@ async def test_websocket_concurrent_auth_requests(websocket_auth_runner):
     auth_tasks = []
     for i in range(5):
         auth_msg = {
-            "type: auth_verify",
+            "type: auth_verify,"
             payload: {token: token, request_id: fconcurrent_{i}"},"
             "timestamp: datetime.now().isoformat()"""
         }
@@ -468,7 +468,7 @@ async def test_websocket_concurrent_auth_requests(websocket_auth_runner):
         raise AssertionError(fExpected 5 responses but got {len(responses)})
     
     for i, response in enumerate(responses):
-        if response.get("type) == auth_error":
+        if response.get("type) == auth_error:"
             raise AssertionError(fConcurrent request {i} failed with auth_error: {response})
         if not response.get(payload, {}.get(user_id):
             raise AssertionError(fConcurrent request {i} missing user_id: {response}")"
@@ -495,7 +495,7 @@ async def test_websocket_auth_state_recovery(websocket_auth_runner):
     
     # Store session state via REAL WebSocket
     state_msg = {
-        type": "store_state,
+        type": store_state,"
         payload: {test_data: recovery_validation_data_12345},""
         "timestamp: datetime.now().isoformat()"""
     }
@@ -519,7 +519,7 @@ async def test_websocket_auth_state_recovery(websocket_auth_runner):
     
     # Request REAL state recovery
     recovery_msg = {
-        "type: recover_state",
+        "type: recover_state,"
         payload: {token: token, session_recovery: True},""
         timestamp": datetime.now().isoformat()"
     }
@@ -581,7 +581,7 @@ async def test_websocket_auth_timeout_handling(websocket_auth_runner):
         
         # Validate response indicates proper timeout handling
         response_type = response_data.get(type)
-        if response_type not in ["auth_timeout, auth_success", timeout_handled]:
+        if response_type not in ["auth_timeout, auth_success, timeout_handled]:"
             raise AssertionError(fUnexpected response type for timeout test: {response_type})""
         
         timeout_handled = True

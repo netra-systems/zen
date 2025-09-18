@@ -16,7 +16,7 @@ def lazy_import(module_path: str, component: str=None):
 _lazy_imports = {}
 
 def lazy_import(module_path: str, component: str=None):
-    ""Lazy import pattern for performance optimization
+    ""Lazy import pattern for performance optimization"
     if module_path not in _lazy_imports:
         try:
             module = __import__(module_path, fromlist=[component) if component else [)
@@ -102,7 +102,7 @@ class WebSocketGracefulDegradationE2ETests:
                         message = await websocket.receive_text()
                         message_data = json.loads(message)
                         if message_data.get('content', '').lower() == 'hello':
-                            response = {'type': MessageType.AGENT_RESPONSE.value, 'content': {'content': "Hello! I'm currently running with limited capabilities due to service maintenance. I can provide basic responses but advanced AI features may be unavailable., 'type': 'fallback_response', 'degradation_level': DegradationLevel.MINIMAL.value, 'source': 'fallback_handler'}}"'
+                            response = {'type': MessageType.AGENT_RESPONSE.value, 'content': {'content': "Hello! I'm currently running with limited capabilities due to service maintenance. I can provide basic responses but advanced AI features may be unavailable., 'type': 'fallback_response', 'degradation_level': DegradationLevel.MINIMAL.value, 'source': 'fallback_handler'}}'"
                             await websocket.send_text(json.dumps(response))
                         elif 'agent' in message_data.get('content', '').lower():
                             response = {'type': MessageType.AGENT_RESPONSE.value, 'content': {'content': 'I apologize, but our advanced AI agents are temporarily unavailable due to system maintenance. I can help with basic information or you can try again shortly.', 'type': 'fallback_response', 'degradation_level': DegradationLevel.MINIMAL.value, 'source': 'fallback_handler'}}
@@ -280,7 +280,7 @@ async def test_business_continuity_validation_e2e():
                 assert notification['content']['degradation_context']['level'] == scenario['expected_level'].value
                 await websocket_client.send_json({'type': 'user_message', 'content': fBusiness continuity test: {scenario['name'])")"
                 response = await websocket_client.receive_json(timeout=5.0)
-                assert response is not None, fBUSINESS CONTINUITY FAILURE: No response in {scenario['name']}
+                assert response is not None, "fBUSINESS CONTINUITY FAILURE: No response in {scenario['name']}"
                 assert response['type'] == MessageType.AGENT_RESPONSE.value
                 assert 'business continuity maintained' in response['content']['content']
                 print(f PASS:  {scenario['name']}: Business continuity validated - user received response)""

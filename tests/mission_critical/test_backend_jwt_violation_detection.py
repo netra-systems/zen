@@ -85,7 +85,7 @@ class BackendJWTViolationDetector:
         self.target_ssot_score = 95   # Post-refactor target
         
     def detect_backend_jwt_secret_access_violation(self) -> bool:
-        ""
+        """
         VIOLATION TEST: Detect backend JWT secret access (SSOT violation).
         
         SSOT PRINCIPLE: Only auth service should handle JWT secrets.
@@ -149,7 +149,7 @@ class BackendJWTViolationDetector:
         return violation_found
     
     def detect_backend_jwt_validation_methods(self) -> bool:
-    "
+        """
     "
         VIOLATION TEST: Detect backend JWT validation methods (SSOT violation).
         
@@ -236,7 +236,7 @@ class BackendJWTViolationDetector:
         return violation_found
     
     def detect_websocket_auth_fallback_violations(self) -> bool:
-    ""
+    """
         VIOLATION TEST: Detect WebSocket authentication fallback logic (SSOT violation).
         
         SSOT PRINCIPLE: WebSocket auth should only use auth service.
@@ -317,7 +317,7 @@ class BackendJWTViolationDetector:
         return violation_found
     
     def test_ssot_compliance_baseline(self) -> Dict[str, Any]:
-    "
+        """
     "
         BASELINE TEST: Document current SSOT compliance score.
         
@@ -355,7 +355,7 @@ class BackendJWTViolationDetector:
         return baseline_report
     
     def generate_violation_inventory_report(self) -> Dict[str, Any]:
-    "
+        """
     "
         Generate comprehensive violation inventory report.
         
@@ -403,7 +403,7 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         logger.info(= * 60)
     
     def test_backend_jwt_secret_access_exists(self):
-    ""
+    """
         CRITICAL: Test backend JWT secret access violation exists.
         
         SSOT VIOLATION: Backend has JWT secret access in unified_secrets.py
@@ -434,7 +434,7 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         )
     
     def test_backend_has_jwt_validation_methods(self):
-        ""
+        """
         CRITICAL: Test backend JWT validation methods violation exists.
         
         SSOT VIOLATION: Backend has JWT validation in auth_client_core.py
@@ -464,7 +464,7 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         )
     
     def test_websocket_auth_fallback_logic_exists(self):
-    ""
+    """
         CRITICAL: Test WebSocket authentication fallback logic violation exists.
         
         SSOT VIOLATION: WebSocket routes may contain auth fallback patterns
@@ -490,7 +490,7 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         logger.info(fWebSocket auth fallback test result: {'VIOLATION EXISTS' if violation_exists else 'NO VIOLATION'})
     
     def test_ssot_compliance_baseline(self):
-        ""
+        """
         CRITICAL: Document SSOT compliance baseline for refactor validation.
         
         BASELINE: Current 40/100 score  ->  Target 95/100 after refactor
@@ -517,7 +517,7 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         
         # Assert baseline is documented (this should always pass)
         assert baseline_report is not None, "SSOT compliance baseline must be documented"
-        assert baseline_report['current_ssot_score'] >= 0, Compliance score must be valid
+        assert baseline_report['current_ssot_score'] >= 0, "Compliance score must be valid"
         assert baseline_report['total_violations'] >= 0, Violation count must be valid"
         assert baseline_report['total_violations'] >= 0, Violation count must be valid"
         
@@ -525,7 +525,7 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         self.detector.baseline_report = baseline_report
     
     def test_comprehensive_violation_inventory(self):
-        "
+        """
         "
         REPORTING: Generate comprehensive JWT SSOT violation inventory.
         
@@ -582,9 +582,9 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         logger.info("= * 80)"
         
         # Assert inventory is comprehensive
-        assert inventory_report is not None, Violation inventory must be generated
+        assert inventory_report is not None, "Violation inventory must be generated"
         assert inventory_report['total_violations'] >= 0, "Must document violations found"
-        assert len(inventory_report['refactor_requirements') > 0, Must provide refactor guidance
+        assert len(inventory_report['refactor_requirements') > 0, "Must provide refactor guidance"
         
         # Store inventory for external reference
         self.detector.inventory_report = inventory_report
@@ -597,7 +597,7 @@ if __name__ == __main__:"
     print(= * 80")"
     print(PHASE A: Documenting violations that exist (tests must PASS))
     print(REFACTOR VALIDATION: Tests must FAIL after violations removed)
-    print("BUSINESS PROTECTION: $500K+ ARR from JWT cascade failures")
+    print("BUSINESS PROTECTION: $500K+ ARR from JWT cascade failures)"
     print(= * 80)
     
     # Initialize detector
@@ -607,7 +607,7 @@ if __name__ == __main__:"
     tests = [
         (Backend JWT Secret Access, detector.detect_backend_jwt_secret_access_violation),
         (Backend JWT Validation Methods, detector.detect_backend_jwt_validation_methods),
-        ("WebSocket Auth Fallback Logic", detector.detect_websocket_auth_fallback_violations),
+        ("WebSocket Auth Fallback Logic, detector.detect_websocket_auth_fallback_violations),"
     ]
     
     # Execute tests
@@ -622,7 +622,7 @@ if __name__ == __main__:"
             else:
                 print(f   Result:  PASS:  NO VIOLATION (may already be fixed))
         except Exception as e:
-            print(f   Result:  FAIL:  ERROR - {str(e")}")
+            print(f   Result:  FAIL:  ERROR - {str(e")})"
     
     # Generate final report
     print(\n + = * 80)
@@ -630,11 +630,11 @@ if __name__ == __main__:"
     inventory_report = detector.generate_violation_inventory_report()
     
     print(VIOLATION DETECTION SUMMARY)
-    print("=" * 80)
+    print("= * 80)"
     print(f ALERT:  Total Violations Detected: {violation_count})
     print(f CHART:  SSOT Compliance Score: {baseline_report['current_ssot_score']}/100)
     print(f TARGET:  Target Score: {baseline_report['target_score']}/100)
-    print(f"[U+1F4B0] Business Impact: {inventory_report['business_protection']}")
+    print(f"[U+1F4B0] Business Impact: {inventory_report['business_protection']})"
     
     if violation_count > 0:
         print(\n PASS:  PHASE A SUCCESS: Violations documented and ready for refactor)

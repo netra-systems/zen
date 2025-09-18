@@ -62,7 +62,7 @@ except ImportError:
     class CustomerExperienceSimulator:
         @staticmethod  
         async def simulate_user_journey(scenario: str) -> Dict:
-            return {"journey_successful: False, failure_points": [All paths blocked]}
+            return {"journey_successful: False, failure_points: [All paths blocked]}"
     
     class RevenueImpactCalculator:
         @staticmethod
@@ -70,7 +70,7 @@ except ImportError:
             if failure_scope == complete_system:"
             if failure_scope == complete_system:"
                 return {"arr_at_risk: 500000, customer_segments_affected: [All]}"
-            return {arr_at_risk": 0, "customer_segments_affected: []}
+            return {arr_at_risk": 0, customer_segments_affected: []}"
 
 
 logger = logging.getLogger(__name__)
@@ -131,7 +131,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_revenue_generating_user_flow_completely_blocked(self):
-    "
+        """
     "
         MISSION CRITICAL FAILURE: Validate that revenue-generating user flows fail.
         
@@ -156,9 +156,9 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         # Test primary revenue-generating user workflows
         critical_revenue_flows = {
             AI Chat Interaction: {
-                description": "User sends message and receives AI response,
+                description": User sends message and receives AI response,"
                 arr_contribution: 450000,  # 90% of platform value
-                user_segments: [Free", "Early, Mid, Enterprise],
+                user_segments: [Free", Early, Mid, Enterprise],"
                 workflow_steps": ["
                     User authentication, 
                     WebSocket connection,"
@@ -185,7 +185,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
             Real-Time Progress Updates: {"
                 description": User sees real-time AI processing progress,"
                 arr_contribution: 200000,  # User engagement and trust
-                "user_segments: [All"], 
+                "user_segments: [All], "
                 workflow_steps: [
                     Progress event generation,"
                     Progress event generation,"
@@ -212,11 +212,11 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                     revenue_flow_failures.append({
                         flow_name": flow_name,"
                         description: flow_config[description],
-                        "arr_contribution: flow_config[arr_contribution"],
+                        "arr_contribution: flow_config[arr_contribution],"
                         user_segments_affected: flow_config[user_segments],
                         failure_points: flow_result[failure_points"],"
                         "business_impact: validation_result.get(business_impact, HIGH),"
-                        customer_impact": flow_result.get("customer_impact, Complete workflow failure)
+                        customer_impact": flow_result.get(customer_impact, Complete workflow failure)"
                     }
                     
                     # Update business metrics
@@ -229,7 +229,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
             except Exception as e:
                 revenue_flow_failures.append({
                     flow_name: flow_name,
-                    description": flow_config["description], 
+                    description": flow_config[description], "
                     arr_contribution: flow_config[arr_contribution],
                     user_segments_affected: flow_config["user_segments],"
                     failure_points": [fFlow simulation failed: {str(e)}],"
@@ -244,7 +244,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         if revenue_flow_failures:
             revenue_impact_analysis = {
                 total_flows_broken: len(revenue_flow_failures),
-                total_arr_at_risk": sum(f["arr_contribution] for f in revenue_flow_failures),
+                total_arr_at_risk": sum(f[arr_contribution] for f in revenue_flow_failures),"
                 unique_customer_segments_affected: list(set(
                     segment for f in revenue_flow_failures 
                     for segment in f[user_segments_affected]),"
@@ -281,7 +281,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                     failure_points.append({
                         step": step,"
                         failure: step_result[failure_reason],
-                        "impact: step_result.get(impact", Workflow step failed)
+                        "impact: step_result.get(impact, Workflow step failed)"
                     }
                     
             except Exception as e:
@@ -302,7 +302,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
             steps_attempted: len(workflow_steps),"
             steps_failed": len(failure_points),"
             failure_points: failure_points,
-            customer_impact": "Complete workflow success if success else Workflow completely blocked
+            customer_impact": Complete workflow success if success else Workflow completely blocked"
         }
 
     async def _simulate_workflow_step(self, step: str) -> Dict[str, Any]:
@@ -316,14 +316,14 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
             },
             WebSocket connection": {"
                 success: False,
-                failure_reason": "WebSocket connections fail with 1011 internal errors,
+                failure_reason": WebSocket connections fail with 1011 internal errors,"
                 impact: Primary communication channel broken
             },
             Message sending: {"
             Message sending: {"
                 "success: False,"
                 failure_reason: WebSocket message routing fails due to connection issues,
-                impact": "Users cannot send messages to AI agents
+                impact": Users cannot send messages to AI agents"
             },
             Agent execution: {
                 success: False,"
@@ -343,7 +343,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
             },
             WebSocket event delivery": {"
                 success: False,
-                failure_reason": "WebSocket event delivery blocked by 1011 errors,
+                failure_reason": WebSocket event delivery blocked by 1011 errors,"
                 impact: Real-time updates completely non-functional
             }
         }
@@ -362,7 +362,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_customer_experience_complete_degradation(self):
-    ""
+    """
         MISSION CRITICAL FAILURE: Validate complete customer experience failure.
         
         This test simulates customer usage patterns and validates that all
@@ -435,7 +435,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                 ]
             },
             Prospect in Trial: {
-                segment": "Prospect,
+                segment": Prospect,"
                 expectations: [
                     Seamless demo experience,"
                     Seamless demo experience,"
@@ -463,12 +463,12 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                 if not journey_result[journey_successful"]:"
                     customer_experience_failures.append({
                         persona: persona_name,
-                        segment": persona_config["segment],
+                        segment": persona_config[segment],"
                         expectations_met: 0,
                         total_expectations: len(persona_config[expectations"),"
                         "failed_interactions: journey_result.get(failure_points, [),"
                         customer_impact: fComplete experience failure for {persona_name},
-                        "business_consequences: self._calculate_persona_business_impact(persona_config[segment")
+                        "business_consequences: self._calculate_persona_business_impact(persona_config[segment)"
                     }
                     
                     # Update business metrics
@@ -496,7 +496,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                 expectations_failure_rate: "100%,  # All personas failed"
                 customer_retention_risk": CRITICAL,"
                 churn_probability: HIGH,
-                brand_damage_risk": "SEVERE
+                brand_damage_risk": SEVERE"
             }
             
             pytest.fail(
@@ -515,20 +515,20 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         "Calculate business impact of persona experience failure."
         segment_impacts = {
             Free: {
-                conversion_risk": "HIGH - Free users won't convert to paid,'
+                conversion_risk": HIGH - Free users won't convert to paid,'"
                 word_of_mouth: NEGATIVE - Bad reviews and recommendations, 
                 funnel_impact: "Top-of-funnel conversion completely blocked"
             },
             Early": {"
                 churn_risk: HIGH - Early customers likely to churn,
-                "expansion_risk: Expansion revenue completely blocked",
+                "expansion_risk: Expansion revenue completely blocked,"
                 reference_impact: Lose potential reference customers
             },
             Enterprise: {"
             Enterprise: {"
                 revenue_risk": CRITICAL - High-value customers at risk,"
                 contract_risk: Contract renewals in jeopardy,
-                reputation_risk": "Enterprise reputation damage
+                reputation_risk": Enterprise reputation damage"
             },
             Prospect: {
                 sales_risk: CRITICAL - Sales pipeline completely blocked","
@@ -537,7 +537,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
             }
         }
         
-        return segment_impacts.get(segment, {"impact: Unknown segment impact")
+        return segment_impacts.get(segment, {"impact: Unknown segment impact)"
 
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
@@ -568,27 +568,27 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
             Customer Support: {"
                 dependencies": [Platform functionality for support demonstration],"
                 impact_if_broken: Cannot help customers, support tickets escalate,
-                business_criticality": "HIGH
+                business_criticality": HIGH"
             },
             Sales Process: {
-                dependencies: [Demo capability", "Platform reliability, Value demonstration],
+                dependencies: [Demo capability", Platform reliability, Value demonstration],"
                 impact_if_broken: Cannot close deals, sales pipeline blocked,
                 "business_criticality: CRITICAL"
             },
             Customer Success: {
-                dependencies: ["Customer platform usage, Feature adoption", Value realization],
+                dependencies: ["Customer platform usage, Feature adoption, Value realization],"
                 impact_if_broken: Customer churn, failed renewals, negative NPS,
-                business_criticality": "CRITICAL
+                business_criticality": CRITICAL"
             },
             Product Development: {
-                dependencies: [Platform feedback", "User behavior data, Feature validation],
+                dependencies: [Platform feedback", User behavior data, Feature validation],"
                 impact_if_broken: Development efforts wasted, no user feedback loop,
                 "business_criticality: HIGH"
             },
             Revenue Recognition: {
-                dependencies: ["Platform usage metrics, Feature utilization", Customer engagement],
+                dependencies: ["Platform usage metrics, Feature utilization, Customer engagement],"
                 impact_if_broken: Cannot justify pricing, revenue recognition issues,
-                business_criticality": "CRITICAL
+                business_criticality": CRITICAL"
             }
         }
         
@@ -604,7 +604,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                         operation: operation_name,"
                         dependencies_broken": operation_result[broken_dependencies],"
                         business_impact: operation_config[impact_if_broken],
-                        criticality": operation_config["business_criticality],
+                        criticality": operation_config[business_criticality],"
                         continuity_status: HALTED
                     }
                     
@@ -614,7 +614,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                     operation: operation_name,"
                     "dependencies_broken: [Cannot test operation],"
                     business_impact: fOperation testing failed: {str(e)},
-                    "criticality: operation_config[business_criticality"],
+                    "criticality: operation_config[business_criticality],"
                     continuity_status: UNKNOWN
                 }
         
@@ -631,7 +631,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                     f for f in business_continuity_failures 
                     if f[criticality] == CRITICAL
                 ],
-                "business_functions_impacted: [f[operation"] for f in business_continuity_failures],
+                "business_functions_impacted: [f[operation] for f in business_continuity_failures],"
                 overall_continuity: FAILED,
                 business_emergency_level: CRITICAL"
                 business_emergency_level: CRITICAL"
@@ -702,34 +702,34 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                 customer_experience: "COMPLETELY_DEGRADED,"
                 user_satisfaction": CRITICAL_FAILURE,"
                 churn_risk: EXTREMELY_HIGH,
-                net_promoter_score_impact": "SEVERE_NEGATIVE,
+                net_promoter_score_impact": SEVERE_NEGATIVE,"
                 customer_support_load: CRITICAL_ESCALATION
             },
             business_continuity: {"
             business_continuity: {"
                 "operations_status: SEVERELY_COMPROMISED,"
                 sales_process: COMPLETELY_BLOCKED,
-                "customer_success: FAILED",
+                "customer_success: FAILED,"
                 product_development: IMPACTED,
                 business_emergency: True"
                 business_emergency: True"
             },
             competitive_impact": {"
                 competitive_position: SEVERELY_DAMAGED,
-                "market_perception: UNRELIABLE_PLATFORM",
+                "market_perception: UNRELIABLE_PLATFORM,"
                 customer_acquisition: BLOCKED,
                 brand_reputation: AT_RISK"
                 brand_reputation: AT_RISK"
             },
             "operational_impact: {"
                 engineering_productivity: FOCUSED_ON_CRISIS,
-                customer_support": "OVERWHELMED,
+                customer_support": OVERWHELMED,"
                 sales_team: CANNOT_DEMO,
                 executive_attention: "FULL_FOCUS_REQUIRED"
             },
             resolution_urgency": {"
                 business_priority: P0_CRITICAL,
-                "resolution_timeline: IMMEDIATE",
+                "resolution_timeline: IMMEDIATE,"
                 escalation_required: C_LEVEL,
                 all_hands_effort: REQUIRED"
                 all_hands_effort: REQUIRED"

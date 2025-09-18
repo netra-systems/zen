@@ -124,7 +124,7 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
         self.logger.info(✓ MessageRouter interface working correctly)
 
     def test_no_duplicate_message_router_imports(self):
-        ""Verify no imports try to use old/duplicate MessageRouter locations.
+        ""Verify no imports try to use old/duplicate MessageRouter locations."
         import re
         
         # Pattern for old/problematic imports

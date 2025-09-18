@@ -43,7 +43,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.config import get_config
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.dependencies import get_user_execution_context
@@ -62,7 +62,7 @@ class GoldenPathAgentExecutionTests(SSotAsyncTestCase):
     async def asyncSetUp(self):
         """Set up GCP staging environment for Golden Path testing."""
         super().setUp()
-        self.config = get_unified_config()
+        self.config = get_config()
         self.staging_project = self.config.get('GCP_PROJECT_ID', 'netra-staging')
         self.llm_manager = LLMManager()
         self.db_manager = DatabaseManager()
@@ -195,7 +195,7 @@ class MultiUserEnterpriseIsolationTests(SSotAsyncTestCase):
     async def asyncSetUp(self):
         """Set up multi-user enterprise testing environment."""
         super().setUp()
-        self.config = get_unified_config()
+        self.config = get_config()
         self.llm_manager = LLMManager()
         self.db_manager = DatabaseManager()
         try:
@@ -309,7 +309,7 @@ class ProductionToolExecutionTests(SSotAsyncTestCase):
     async def asyncSetUp(self):
         """Set up production tool execution testing."""
         super().setUp()
-        self.config = get_unified_config()
+        self.config = get_config()
         self.llm_manager = LLMManager()
         try:
             await self.llm_manager.initialize()
@@ -375,7 +375,7 @@ class ProductionPerformanceValidationTests(SSotAsyncTestCase):
     async def asyncSetUp(self):
         """Set up production performance testing."""
         super().setUp()
-        self.config = get_unified_config()
+        self.config = get_config()
         self.llm_manager = LLMManager()
         self.db_manager = DatabaseManager()
         try:

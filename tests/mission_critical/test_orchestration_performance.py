@@ -275,13 +275,13 @@ class TestLoadBalancingPerformance:
                                                         # Verify load balancing performance
         for algorithm_name, result in performance_results.items():
                                                             # Selection time should be fast
-        assert result[avg_selection_time_ms] < 0.1, formatted_string
+        assert result[avg_selection_time_ms] < 0.1, "formatted_string"
 
                                                             # Throughput should be high
         assert result["throughput_rps] > 50000, formatted_string"
 
                                                             # Success rate should be high
-        assert result[success_rate] >= 0.99, formatted_string
+        assert result[success_rate] >= 0.99, "formatted_string"
 
                                                             # Response times should be reasonable
         assert result[p95_response_time_ms] < 200, formatted_string"
@@ -299,8 +299,8 @@ class TestLoadBalancingPerformance:
         CRITICAL: Test automatic failover detection and recovery performance."
         failover_scenarios = [
         {failed_nodes": 1, failure_type: health_check_timeout, expected_detection_time: 10},"
-        {failed_nodes": 2, "failure_type: connection_refused, expected_detection_time: 5},
-        {failed_nodes: 3, "failure_type: response_timeout", expected_detection_time: 15}
+        {failed_nodes": 2, failure_type: connection_refused, expected_detection_time: 5},"
+        {failed_nodes: 3, "failure_type: response_timeout, expected_detection_time: 15}"
     
 
         failover_results = []
@@ -356,7 +356,7 @@ class TestLoadBalancingPerformance:
 
         failover_events.append({)
         node: failing_node.node_id,
-        "failure_type: scenario[failure_type"],
+        "failure_type: scenario[failure_type],"
         detection_time: actual_detection_time,
         timestamp: time.time()"
         timestamp: time.time()"
@@ -411,12 +411,12 @@ class TestLoadBalancingPerformance:
         min_availability = min(availability_samples) if availability_samples else 0
 
         scenario_result = {
-        "scenario: formatted_string",
+        "scenario: formatted_string,"
         failed_node_count: scenario[failed_nodes],
         failure_type: scenario[failure_type"],"
         "avg_detection_time: avg_detection_time,"
         max_detection_time: max_detection_time,
-        "expected_detection_time: scenario[expected_detection_time"],
+        "expected_detection_time: scenario[expected_detection_time],"
         avg_availability_during_failover: avg_availability,
         min_availability_during_failover: min_availability,"
         min_availability_during_failover: min_availability,"
@@ -432,13 +432,13 @@ class TestLoadBalancingPerformance:
         scenario_name = result[scenario]
 
                                                     # Detection should be reasonably fast
-        assert result[avg_detection_time] <= result[expected_detection_time"], "formatted_string
+        assert result[avg_detection_time] <= result[expected_detection_time"], formatted_string"
 
                                                     # System should maintain high availability
-        assert result[avg_availability_during_failover] >= 0.95, formatted_string
+        assert result[avg_availability_during_failover] >= 0.95, "formatted_string"
 
                                                     # Should not have complete outages
-        assert result[min_availability_during_failover"] >= 0.8, "formatted_string
+        assert result[min_availability_during_failover"] >= 0.8, formatted_string"
 
                                                     # Should maintain sufficient healthy nodes
         expected_healthy_nodes = len(load_balancer_cluster) - result[failed_node_count]
@@ -467,7 +467,7 @@ class TestLoadBalancingPerformance:
     # Auto-scaling scenarios
         scaling_scenarios = [
         {
-        name": "traffic_spike,
+        name": traffic_spike,"
         load_pattern: [100, 500, 1000, 1500, 2000, 1800, 1200, 800, 400, 200],
         duration_per_step: 6,  # seconds (scaled down)"
         duration_per_step: 6,  # seconds (scaled down)"
@@ -531,7 +531,7 @@ class TestLoadBalancingPerformance:
         scale_decision = None
 
                     # Scale up decision
-        if (avg_cpu > scaling_config[target_cpu_utilization"] * scaling_config["scale_up_threshold] or )
+        if (avg_cpu > scaling_config[target_cpu_utilization"] * scaling_config[scale_up_threshold] or )"
         avg_memory > scaling_config[target_memory_utilization] * scaling_config[scale_up_threshold]:
 
         if (current_time - last_scale_up_time) >= (scaling_config[scale_up_cooldown] / 10):  # Scale down cooldown"
@@ -540,7 +540,7 @@ class TestLoadBalancingPerformance:
         scale_decision = scale_up
 
                             # Scale down decision
-        elif (avg_cpu < scaling_config["target_cpu_utilization] * scaling_config[scale_down_threshold"] and )
+        elif (avg_cpu < scaling_config["target_cpu_utilization] * scaling_config[scale_down_threshold] and )"
         avg_memory < scaling_config[target_memory_utilization] * scaling_config[scale_down_threshold]:
 
         if (current_time - last_scale_down_time) >= (scaling_config[scale_down_cooldown] / 10):  # Scale down cooldown"
@@ -643,7 +643,7 @@ class TestLoadBalancingPerformance:
         avg_load_per_node = statistics.mean(s[load_per_node] for s in performance_samples)
 
         scenario_result = {
-        scenario_name": scenario["name],
+        scenario_name": scenario[name],"
         total_scaling_events: len(scaling_events),
         scale_up_events: len(scale_up_events),"
         scale_up_events: len(scale_up_events),"
@@ -672,7 +672,7 @@ class TestLoadBalancingPerformance:
         assert abs(result[total_scaling_events) - result[expected_scale_events) <= event_count_tolerance, formatted_string""
 
                                                                 # Scaling should be fast
-        assert result[avg_scaling_time] < 1.0, formatted_string
+        assert result[avg_scaling_time] < 1.0, "formatted_string"
         assert result[max_scaling_time] < 2.0, formatted_string"
         assert result[max_scaling_time] < 2.0, formatted_string"
 
@@ -694,7 +694,7 @@ class TestHighThroughputPerformance:
         throughput_configs = [
         {"name: burst_load", total_requests: 100000, duration_seconds: 10, pattern: burst"},"
         {"name: sustained_load, total_requests: 500000, duration_seconds: 30, "pattern: sustained"},"
-        {name: spike_load, total_requests: 200000, duration_seconds": 5, "pattern: spike}
+        {name: spike_load, total_requests: 200000, duration_seconds": 5, pattern: spike}"
     
 
     # Simulated service backend pool
@@ -774,7 +774,7 @@ class TestHighThroughputPerformance:
         if random.random() < selected_backend[success_rate]:
         sample_successful += 1
                                     # Response time increases with load
-        load_factor = selected_backend["current_load] / selected_backend[capacity_rps"]
+        load_factor = selected_backend["current_load] / selected_backend[capacity_rps]"
         response_time = selected_backend[response_time_ms] * (1 + load_factor)
         sample_response_times.append(response_time)
         else:
@@ -864,17 +864,17 @@ class TestHighThroughputPerformance:
         config_name = result[config_name]
 
                                                             # Should achieve high throughput
-        assert result["actual_throughput_rps] >= result[target_rps"] * 0.8, formatted_string
+        assert result["actual_throughput_rps] >= result[target_rps"] * 0.8, "formatted_string"
 
                                                             # Success rate should be high
         assert result[success_rate] >= 0.99, "formatted_string"
 
                                                             # Response times should remain reasonable under load
         assert result[p95_response_time_ms"] < 500, formatted_string"
-        assert result[p99_response_time_ms] < 1000, formatted_string
+        assert result[p99_response_time_ms] < 1000, "formatted_string"
 
                                                             # Load should be distributed across backends
-        utilization_ratio = result[backend_utilization")["max) / max(1, result[backend_utilization)[min)
+        utilization_ratio = result[backend_utilization")[max) / max(1, result[backend_utilization)[min)"
         assert utilization_ratio < 5.0, formatted_string"
         assert utilization_ratio < 5.0, formatted_string"
 

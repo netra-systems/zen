@@ -26,7 +26,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Core types and context
 from shared.types.core_types import UserID, ThreadID, RunID
-from netra_backend.app.agents.supervisor.execution_context import (
+from netra_backend.app.agents.supervisor.execution_context import ()
     AgentExecutionContext,
     AgentExecutionResult,
     AgentExecutionStrategy
@@ -326,7 +326,7 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
                     raise
     
     async def test_comprehensive_prerequisites_validation_function_missing(self):
-        ""FAILING TEST: Should have a comprehensive prerequisite validation function.
+        ""FAILING TEST: Should have a comprehensive prerequisite validation function."
         
         This test demonstrates that there's no single function to validate all prerequisites'
         before agent execution starts.
@@ -336,7 +336,7 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
         # THIS SHOULD FAIL: No comprehensive prerequisite validation function exists
         try:
             # Try to import the prerequisite validation function that should exist
-            from netra_backend.app.agents.supervisor.prerequisites_validator import (
+            from netra_backend.app.agents.supervisor.prerequisites_validator import ()
                 validate_agent_execution_prerequisites,
                 PrerequisitesValidationResult
             )
@@ -349,7 +349,7 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
             
             if not hasattr(validation_result, 'is_valid'):
                 raise AssertionError(
-                    "Prerequisites validation function exists but doesn't return proper result structure"'
+                    "Prerequisites validation function exists but doesn't return proper result structure'"
                 )
                 
         except ImportError:
@@ -385,7 +385,7 @@ class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
         with patch('netra_backend.app.agents.supervisor.prerequisites_validator.validate_agent_execution_prerequisites') as mock_validate:
             mock_result = Mock()
             mock_result.is_valid = False
-            mock_result.failed_prerequisites = [websocket, "database, registry"]
+            mock_result.failed_prerequisites = [websocket, "database, registry]"
             mock_result.error_message = Multiple prerequisites failed
             mock_validate.return_value = mock_result
             

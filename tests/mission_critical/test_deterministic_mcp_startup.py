@@ -66,15 +66,15 @@ class MockService:
         assert mcp_service.supply_catalog_service == supply_catalog_service
 
     # Verify MCP server is created
-        assert hasattr(mcp_service, 'mcp_server')
+        assert hasattr(mcp_service, "'mcp_server')"
         assert mcp_service.mcp_server is not None
 
     # Verify repositories are initialized
-        assert hasattr(mcp_service, 'client_repository')
-        assert hasattr(mcp_service, 'execution_repository')
+        assert hasattr(mcp_service, "'client_repository')"
+        assert hasattr(mcp_service, "'execution_repository')"
 
         print([PASS] MCP service created successfully with all dependencies)
-        print("[PASS] All services properly assigned")
+        print("[PASS] All services properly assigned)"
         print([PASS] MCP server initialized)"
         print([PASS] MCP server initialized)"
         print("[PASS] Repositories initialized)"
@@ -110,7 +110,7 @@ class MockAgentService:
         try:
         mcp_service = _create_mcp_service(agent_service=mock_agent)
         print([PASS] Factory creates MCP service with provided agent_service")"
-        assert isinstance(mcp_service, MCPService)
+        assert isinstance(mcp_service, "MCPService)"
         print([PASS] Created service is proper MCPService instance)
         return True
         except Exception as e:
@@ -136,7 +136,7 @@ class MockAgentService:
     # Test 2: Service factory validation
         print()
         Test 2: Service Factory Validation)
-        print(-" * 40")
+        print(-" * 40)"
         results.append(test_mcp_service_factory_validation())
 
     # Summary

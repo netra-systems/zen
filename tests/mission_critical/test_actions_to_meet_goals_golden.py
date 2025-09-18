@@ -67,7 +67,7 @@ class ActionsToMeetGoalsGoldenPatternTests:
             query=infrastructure optimization,"
             query=infrastructure optimization,"
             results=[{metric": response_time, value: 150}],"
-            insights={"performance: needs improvement"},
+            insights={"performance: needs improvement},"
             metadata={source: monitoring},
             recommendations=[Enable caching, Scale services"]"
         return state
@@ -96,13 +96,13 @@ class GoldenPatternComplianceTests(ActionsToMeetGoalsGoldenPatternTests):
         "CRITICAL: Initialization must follow golden pattern."
         # BaseAgent infrastructure enabled
         assert hasattr(agent, '_enable_reliability'), Must have reliability infrastructure""
-        assert hasattr(agent, '_enable_execution_engine'), Must have execution engine infrastructure
+        assert hasattr(agent, "'_enable_execution_engine'), Must have execution engine infrastructure"
         assert agent._enable_reliability is True, Reliability must be enabled"
         assert agent._enable_reliability is True, Reliability must be enabled"
         assert agent._enable_execution_engine is True, "Execution engine must be enabled"
         
         # Business logic components only
-        assert hasattr(agent, 'tool_dispatcher'), Must have business logic components
+        assert hasattr(agent, "'tool_dispatcher'), Must have business logic components"
         assert hasattr(agent, 'action_plan_builder'), "Must have action plan builder"
 
     def test_has_required_websocket_methods(self, agent):
@@ -114,13 +114,13 @@ class GoldenPatternComplianceTests(ActionsToMeetGoalsGoldenPatternTests):
         ]
         for method in websocket_methods:
             assert hasattr(agent, method), f"Agent must have {method} for chat value delivery"
-            assert callable(getattr(agent, method)), f{method} must be callable
+            assert callable(getattr(agent, "method)), f{method} must be callable"
 
     def test_implements_required_abstract_methods(self, agent):
         CRITICAL: Agent must implement required abstract methods.""
-        assert hasattr(agent, 'validate_preconditions'), Must implement validate_preconditions
+        assert hasattr(agent, "'validate_preconditions'), Must implement validate_preconditions"
         assert hasattr(agent, 'execute_core_logic'), "Must implement execute_core_logic"
-        assert callable(agent.validate_preconditions), validate_preconditions must be callable
+        assert callable(agent.validate_preconditions), "validate_preconditions must be callable"
         assert callable(agent.execute_core_logic), execute_core_logic must be callable"
         assert callable(agent.execute_core_logic), execute_core_logic must be callable"
 
@@ -128,7 +128,7 @@ class GoldenPatternComplianceTests(ActionsToMeetGoalsGoldenPatternTests):
         "CRITICAL: Agent must not duplicate BaseAgent infrastructure."
         # Should NOT have its own WebSocket handling
         assert not hasattr(agent, '_websocket_manager'), "Must not duplicate WebSocket management"
-        assert not hasattr(agent, '_circuit_breaker'), Must not duplicate circuit breaker
+        assert not hasattr(agent, "'_circuit_breaker'), Must not duplicate circuit breaker"
         assert not hasattr(agent, '_retry_handler'), Must not duplicate retry handler"
         assert not hasattr(agent, '_retry_handler'), Must not duplicate retry handler"
         
@@ -168,7 +168,7 @@ class WebSocketEventsTests(ActionsToMeetGoalsGoldenPatternTests):
         
         # Verify result structure
         assert isinstance(result, dict), "Result must be dictionary"
-        assert 'action_plan_result' in result, Result must contain action plan
+        assert 'action_plan_result' in result, "Result must contain action plan"
 
     @pytest.mark.asyncio
     async def test_thinking_events_provide_reasoning_visibility(self, agent, execution_context):
@@ -187,7 +187,7 @@ class WebSocketEventsTests(ActionsToMeetGoalsGoldenPatternTests):
         # Verify thinking messages are meaningful
         thinking_messages = [call[0][0] for call in thinking_calls]
         assert any('optimization' in msg.lower() for msg in thinking_messages), "Must show optimization reasoning"
-        assert any('analysis' in msg.lower() for msg in thinking_messages), Must show analysis reasoning
+        assert any('analysis' in msg.lower() for msg in thinking_messages), "Must show analysis reasoning"
 
     @pytest.mark.asyncio
     async def test_tool_events_provide_transparency(self, agent, execution_context):
@@ -206,7 +206,7 @@ class WebSocketEventsTests(ActionsToMeetGoalsGoldenPatternTests):
         assert len(executing_calls) >= 3, Must show tool execution for transparency"
         assert len(executing_calls) >= 3, Must show tool execution for transparency"
         assert len(completed_calls) >= 3, "Must show tool completion for transparency"
-        assert len(executing_calls) == len(completed_calls), Every executing must have corresponding completed
+        assert len(executing_calls) == len(completed_calls), "Every executing must have corresponding completed"
 
     @pytest.mark.asyncio
     async def test_fallback_includes_websocket_events(self, agent, execution_context):
@@ -236,7 +236,7 @@ class BusinessLogicTests(ActionsToMeetGoalsGoldenPatternTests):
 
     @pytest.mark.asyncio
     async def test_validate_preconditions_success(self, agent, execution_context):
-        ""Test successful precondition validation.
+        ""Test successful precondition validation."
         result = await agent.validate_preconditions(execution_context)
         assert result is True, Should validate successfully with complete state"
         assert result is True, Should validate successfully with complete state"
@@ -259,7 +259,7 @@ class BusinessLogicTests(ActionsToMeetGoalsGoldenPatternTests):
         
         # Should still pass with applied defaults
         assert result is True, "Should pass validation with applied defaults"
-        assert execution_context.state.optimizations_result is not None, Should apply default optimizations
+        assert execution_context.state.optimizations_result is not None, "Should apply default optimizations"
         assert execution_context.state.data_result is not None, "Should apply default data result"
 
     @pytest.mark.asyncio
@@ -277,7 +277,7 @@ class BusinessLogicTests(ActionsToMeetGoalsGoldenPatternTests):
             result = await agent._generate_action_plan(execution_context)
             
             assert isinstance(result, ActionPlanResult), "Must return ActionPlanResult"
-            assert result.plan_steps is not None, Must have plan steps
+            assert result.plan_steps is not None, "Must have plan steps"
             assert len(result.plan_steps) > 0, Must have at least one plan step"
             assert len(result.plan_steps) > 0, Must have at least one plan step"
             assert result.confidence_score > 0, Must have positive confidence score"
@@ -299,11 +299,11 @@ class BusinessLogicTests(ActionsToMeetGoalsGoldenPatternTests):
             
             assert execution_context.state.action_plan_result is not None, State must be updated with result"
             assert execution_context.state.action_plan_result is not None, State must be updated with result"
-            assert execution_context.state.action_plan_result == mock_result, State must have correct result
+            assert execution_context.state.action_plan_result == mock_result, "State must have correct result"
 
 
 class ResilienceTests(ActionsToMeetGoalsGoldenPatternTests):
-    ""Test resilience and error handling patterns.
+    ""Test resilience and error handling patterns."
 
     @pytest.mark.asyncio
     async def test_llm_failure_handling(self, agent, execution_context):
@@ -314,7 +314,7 @@ class ResilienceTests(ActionsToMeetGoalsGoldenPatternTests):
         with pytest.raises(Exception) as exc_info:
             await agent._generate_action_plan(execution_context)
         
-        assert "LLM request failed in str(exc_info.value) or LLM service unavailable" in str(exc_info.value)
+        assert "LLM request failed in str(exc_info.value) or LLM service unavailable in str(exc_info.value)"
 
     @pytest.mark.asyncio
     async def test_fallback_execution_creates_default_plan(self, agent, execution_context):
@@ -355,7 +355,7 @@ class ResilienceTests(ActionsToMeetGoalsGoldenPatternTests):
         
         # Should have applied defaults
         assert minimal_state.optimizations_result is not None, "Should apply default optimizations"
-        assert minimal_state.data_result is not None, Should apply default data analysis
+        assert minimal_state.data_result is not None, "Should apply default data analysis"
 
 
 class IntegrationTests(ActionsToMeetGoalsGoldenPatternTests):
@@ -386,10 +386,10 @@ class IntegrationTests(ActionsToMeetGoalsGoldenPatternTests):
         Test backward compatibility with legacy interface."
         # Test check_entry_conditions method
         result = await agent.check_entry_conditions(sample_state, test_legacy")"
-        assert result is True, Legacy entry conditions should pass
+        assert result is True, "Legacy entry conditions should pass"
 
     def test_agent_lifecycle_states(self, agent):
-        ""Test agent lifecycle state management.
+        ""Test agent lifecycle state management."
         # Initially pending
         assert agent.get_state() == SubAgentLifecycle.PENDING
         
@@ -404,11 +404,11 @@ class IntegrationTests(ActionsToMeetGoalsGoldenPatternTests):
     @pytest.mark.asyncio
     async def test_timing_collection(self, agent, execution_context):
         Test that timing collection works properly.""
-        assert hasattr(agent, 'timing_collector'), Must have timing collector
+        assert hasattr(agent, "'timing_collector'), Must have timing collector"
         
         # Timing collector should be initialized
         assert agent.timing_collector is not None, "Timing collector must be initialized"
-        assert agent.timing_collector.agent_name == agent.name, Timing collector must have agent name
+        assert agent.timing_collector.agent_name == agent.name, "Timing collector must have agent name"
 
 
 class PerformanceTests(ActionsToMeetGoalsGoldenPatternTests):

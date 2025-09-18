@@ -50,7 +50,7 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
         self.auth_service = get_unified_auth_service()
 
     def create_mock_websocket_with_state(self, state: str='CONNECTED', **kwargs) -> object:
-        ""Create a mock WebSocket with realistic state and attributes.
+        ""Create a mock WebSocket with realistic state and attributes."
         from unittest.mock import Mock
         from fastapi.websockets import WebSocketState
         websocket = Mock()
@@ -72,7 +72,7 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
         return websocket
 
     async def test_handshake_timing_validation_integration(self):
-    ""
+    """
         INTEGRATION TEST: WebSocket handshake timing validation.
         
         Issue #395: Tests that handshake timing validation works correctly in integration scenarios.
@@ -113,7 +113,7 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
             self.fail(f'Authentication service integration error: {e}')
 
     async def test_e2e_context_propagation_integration(self):
-    ""
+    """
         INTEGRATION TEST: E2E context propagation through authentication flow.
         
         Issue #395: Tests that E2E context is properly propagated through the entire authentication flow.

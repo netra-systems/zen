@@ -57,7 +57,7 @@ class SSotViolation:
 
 
 class TestSSotProductionCompliance(SSotAsyncTestCase):
-    ""
+    """
     Mission-critical test suite for SSOT production compliance validation.
 
     This test suite is designed to run in CI/CD and catch any SSOT violations
@@ -165,7 +165,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
         self.assertLog(✅ MISSION CRITICAL: Production violation limits PASSED")"
 
     def test_no_new_critical_violations(self):
-    "
+        """
     "
         TEST MISSION CRITICAL: Ensure no new critical violations introduced.
 
@@ -196,7 +196,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
         self.assertLog(✅ MISSION CRITICAL: No new critical violations PASSED)"
 
     def test_websocket_factory_elimination_compliance(self):
-    "
+        """
     "
         TEST MISSION CRITICAL: Validate WebSocket factory elimination.
 
@@ -233,7 +233,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
         self.assertLog(✅ MISSION CRITICAL: WebSocket factory elimination PASSED)"
 
     def test_golden_path_import_compliance(self):
-        "
+        """
         "
         TEST MISSION CRITICAL: Validate Golden Path import compliance.
 
@@ -270,7 +270,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
         self.assertLog(✅ MISSION CRITICAL: Golden Path import compliance PASSED)"
 
     async def test_business_continuity_protection(self):
-    "
+        """
     "
         TEST MISSION CRITICAL: Validate business continuity protection.
 
@@ -313,7 +313,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
         self.assertLog(✅ MISSION CRITICAL: Business continuity protection PASSED)
 
     def test_user_isolation_integrity(self):
-    ""
+    """
         TEST MISSION CRITICAL: Validate user isolation integrity.
 
         User isolation failures are security and business critical.
@@ -340,7 +340,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
     # Comprehensive scanning methods
 
     def _scan_all_production_code(self) -> List[SSotViolation]:
-        ""
+        """
         Scan all production code for SSOT violations.
 
         Returns:
@@ -356,7 +356,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
         return all_violations
 
     def _scan_directory_for_violations(self, directory: str) -> List[SSotViolation]:
-    ""
+    """
         Scan a directory for SSOT violations.
 
         Args:
@@ -406,7 +406,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
     def _scan_file_content_for_patterns(
         self, file_path: str, content: str, patterns: List[str], violation_type: str
     ) -> List[SSotViolation]:
-""
+"""
         Scan file content for specific violation patterns.
 
         Args:
@@ -439,7 +439,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
         return violations
 
     def _scan_for_critical_violations(self) -> List[SSotViolation]:
-    "
+        """
     "
         Scan specifically for critical violations that block deployment.
 
@@ -457,7 +457,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
         return critical_violations
 
     def _scan_for_websocket_factory_violations(self) -> List[SSotViolation]:
-        "
+        """
         "
         Scan specifically for WebSocket factory violations.
 
@@ -515,7 +515,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
         return violations
 
     def _scan_for_user_isolation_violations(self) -> List[SSotViolation]:
-        ""
+        """
         Scan for user isolation violations (security critical).
 
         Returns:
@@ -667,7 +667,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
     # Baseline and tracking methods
 
     def _load_baseline_violations(self) -> Dict:
-    ""
+    """
         Load baseline violations for comparison.
 
         Returns:
@@ -728,7 +728,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
         return new_violations
 
     def _log_mission_critical_violation_summary(self, violations: List[SSotViolation):
-    ""
+    """
         Log detailed violation summary for mission critical tracking.
 
         Args:

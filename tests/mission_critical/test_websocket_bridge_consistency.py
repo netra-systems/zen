@@ -6,7 +6,7 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
             raise RuntimeError(WebSocket is closed)"
@@ -68,7 +68,7 @@ class WebSocketPatternAnalyzer:
         self.mixed_usage = []
         self.duplicate_methods = {}
     def analyze_file(self, filepath: Path) -> Dict[str, Any]:
-        ""Analyze a Python file for WebSocket patterns.
+        ""Analyze a Python file for WebSocket patterns."
         try:
         with open(filepath, 'r', encoding='utf-8') as f:
         content = f.read()
@@ -131,7 +131,7 @@ class TestWebSocketBridgeConsistency:
     def _get_agent_files(self) -> List[Path]:
         "Get all agent Python files."
         pass
-        base_path = Path(__file__).parent.parent.parent / "netra_backend / app" / agents
+        base_path = Path(__file__).parent.parent.parent / "netra_backend / app / agents"
         agent_files = []
         for file in base_path.rglob(*.py):"
         for file in base_path.rglob(*.py):"
@@ -161,7 +161,7 @@ class TestWebSocketBridgeConsistency:
         'locations': locations,
         'count': len(locations)
                             
-        assert len(duplicates) == 0, ( )
+        assert len(duplicates) == 0, "( )"
         formatted_string +"
         formatted_string +"
         
@@ -191,7 +191,7 @@ class TestWebSocketBridgeConsistency:
         'bridge_refs': len(results.get('bridge_refs', []),
         'violations': results.get('violations', [)
             
-        assert len(mixed_files) == 0, ( )
+        assert len(mixed_files) == 0, "( )"
         "formatted_string +"
         
         .join([formatted_stringmanager_refs]} manager refs, {f[bridge_refs"]} bridge refs ))"
@@ -212,7 +212,7 @@ class TestWebSocketBridgeConsistency:
         'file': filepath.name,
         'lines': results['manager_refs']
                 
-        assert len(manager_usage) == 0, ( )
+        assert len(manager_usage) == 0, "( )"
         "formatted_string +"
         
         .join([formatted_stringlines]) for f in manager_usage]"
@@ -239,10 +239,10 @@ class TestWebSocketBridgeConsistency:
         'file': filepath.name,
         'non_standard_methods': list(non_standard)
                 
-        assert len(inconsistent_patterns) == 0, ( )
+        assert len(inconsistent_patterns) == 0, "( )"
         formatted_string" +"
 
-        .join([formatted_string"non_standard_methods"]} ))
+        .join([formatted_string"non_standard_methods]} ))"
         for f in inconsistent_patterns]
                     
 @pytest.mark.asyncio
@@ -305,7 +305,7 @@ for method_name in emit_methods:
     method = getattr(bridge_adapter, method_name)
 sig = inspect.signature(method)
         # All emit methods should be async
-assert inspect.iscoroutinefunction(method), formatted_string
+assert inspect.iscoroutinefunction(method), "formatted_string"
         # Check common parameters
 params = list(sig.parameters.keys())
 assert 'self' in params, formatted_string""
@@ -341,7 +341,7 @@ if violations:
 if len(violations) > 5:
     print("")
                             # Fail if compliance is below threshold
-assert compliance_score >= 80, ( )
+assert compliance_score >= 80, "( )"
 formatted_string""
 formatted_string
                             
@@ -413,7 +413,7 @@ class TestWebSocketMigrationPath:
     def test_identify_files_needing_migration(self):
         "Identify all files that need migration to bridge pattern."
         analyzer = WebSocketPatternAnalyzer()
-        base_path = Path(__file__).parent.parent.parent / netra_backend" / "app / agents
+        base_path = Path(__file__).parent.parent.parent / netra_backend" / app / agents"
         files_to_migrate = []
         for filepath in base_path.rglob(*.py):"
         for filepath in base_path.rglob(*.py):"
@@ -451,7 +451,7 @@ class TestWebSocketMigrationPath:
         'set_websocket_bridge'
     
         for method in required_methods:
-        assert hasattr(adapter, method), formatted_string
+        assert hasattr(adapter, "method), formatted_string"
         # Verify it's callable'
         method_obj = getattr(adapter, method)
         assert callable(method_obj), 

@@ -48,7 +48,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, WebSocketID, ensure
 
 # Backend components for isolation testing
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager_factory import (
+from netra_backend.app.websocket_core.websocket_manager_factory import ()
     create_websocket_manager,
     WebSocketManagerFactory,
     IsolatedWebSocketManager
@@ -93,7 +93,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_user_id_collision_violations_SHOULD_FAIL(self):
-    "
+        """
     "
         EXPECTED TO FAIL: User ID generation allows collisions between different users.
         
@@ -171,7 +171,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_cross_user_context_contamination_violations_SHOULD_FAIL(self):
-        ""
+        """
         EXPECTED TO FAIL: User contexts contaminate each other through shared ID generation.
         
         This test validates that user contexts maintain complete isolation
@@ -274,7 +274,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_multi_user_isolation_violations_SHOULD_FAIL(self):
-        ""
+        """
         EXPECTED TO FAIL: WebSocket isolation fails allowing cross-user message delivery.
         
         This test validates that WebSocket systems maintain complete user isolation
@@ -318,7 +318,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             for i, (ctx, mgr) in enumerate(user_websocket_pairs):
                 message = {
                     type: isolation_test,
-                    "data: {sender": i, private_data: fsecret_user_{i}},
+                    ""data": {"sender": i, private_data: fsecret_user_{i}},"
                     user_id: ctx.user_id,"
                     user_id: ctx.user_id,"
                     timestamp": datetime.utcnow().isoformat()"
@@ -367,7 +367,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                 try:
                     message = {
                         type: concurrent_test,
-                        "data: {operation_id": operation_id},
+                        ""data": {"operation_id": operation_id},"
                         user_id: ctx.user_id,
                         timestamp: datetime.utcnow().isoformat()"
                         timestamp: datetime.utcnow().isoformat()"
@@ -414,7 +414,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_thread_run_relationship_isolation_violations_SHOULD_FAIL(self):
-        "
+        """
         "
         EXPECTED TO FAIL: Thread/Run ID relationships allow cross-user data access.
         
@@ -606,7 +606,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                     try:
                         message = {
                             type: concurrent_message,
-                            "data: {user": user_idx, message_idx: i, private: fsecret_{user_idx}_{i}},
+                            ""data": {"user": user_idx, message_idx: i, private: fsecret_{user_idx}_{i}},"
                             user_id": ctx.user_id,"
                             timestamp: datetime.utcnow().isoformat()
                         }
@@ -723,7 +723,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_multi_user_isolation_compliance_SHOULD_PASS_AFTER_MIGRATION(self):
-    "
+        """
     "
         This test should PASS after migration validates proper multi-user isolation.
         "
@@ -745,11 +745,11 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             
             # All user IDs should be unique and SSOT-compliant
             user_ids = [ctx.user_id for ctx in user_contexts]
-            assert len(set(user_ids)) == len(user_ids), All user IDs should be unique
+            assert len(set(user_ids)) == len(user_ids), "All user IDs should be unique"
             
             for user_id in user_ids:
                 assert not self.id_patterns['uuid_v4'].match(user_id), fUser ID should not be raw UUID: {user_id}""
-                assert '_' in user_id, fUser ID should be structured: {user_id}
+                assert '_' in user_id, "fUser ID should be structured: {user_id}"
             
             # Test WebSocket isolation works properly
             for i, manager in enumerate(websocket_managers):
@@ -762,7 +762,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                         # Should return False or raise exception (both indicate proper isolation)
                         try:
                             is_active = manager.is_connection_active(other_user_id)
-                            assert not is_active, fManager {i} should not see user {j}'s connections'
+                            assert not is_active, "fManager {i} should not see user {j}'s connections'"
                         except Exception:
                             # Exception is acceptable and indicates proper isolation
                             pass
@@ -770,8 +770,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             # Test message sending works for each user independently
             for i, (ctx, manager) in enumerate(zip(user_contexts, websocket_managers)):
                 test_message = {
-                    "type: isolation_compliance_test",
-                    data: {user: i},
+                    "type: isolation_compliance_test,"
+                    "data": {"user: i},"
                     user_id: ctx.user_id,"
                     user_id: ctx.user_id,"
                     timestamp": datetime.utcnow().isoformat()"
@@ -793,7 +793,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_concurrent_multi_user_compliance_SHOULD_PASS_AFTER_MIGRATION(self):
-        "
+        """
         "
         This test should PASS after migration validates concurrent multi-user operations work properly.
 "
@@ -816,17 +816,17 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             
             # All operations should succeed
             assert len(user_contexts) == num_users, fShould create {num_users} user contexts""
-            assert len(websocket_managers) == num_users, fShould create {num_users} WebSocket managers
+            assert len(websocket_managers) == num_users, "fShould create {num_users} WebSocket managers"
             
             # All user IDs should be unique
             user_ids = [ctx.user_id for ctx in user_contexts]
-            assert len(set(user_ids)) == num_users, All user IDs should be unique
+            assert len(set(user_ids)) == num_users, "All user IDs should be unique"
             
             # Test concurrent messaging
             async def send_test_message(user_idx, ctx, manager):
                 message = {
-                    "type: concurrent_test",
-                    data: {user: user_idx},
+                    "type: concurrent_test,"
+                    "data": {"user: user_idx},"
                     user_id: ctx.user_id,"
                     user_id: ctx.user_id,"
                     timestamp": datetime.utcnow().isoformat()"
@@ -892,15 +892,15 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
         ids_per_second = len(all_ids) / duration
         
         # Should be fast enough for multi-user scenarios
-        assert ids_per_second > 1000, fMulti-user ID generation too slow: {ids_per_second:.2f} IDs/second
+        assert ids_per_second > 1000, "fMulti-user ID generation too slow: {ids_per_second:.2f} IDs/second"
         
         # All should be unique
-        assert len(set(all_ids)) == len(all_ids), fAll {len(all_ids)} generated IDs should be unique
+        assert len(set(all_ids)) == len(all_ids), "fAll {len(all_ids)} generated IDs should be unique"
         
         # All should be SSOT-compliant
         for test_id in all_ids[:20]:  # Sample check
             assert not self.id_patterns['uuid_v4'].match(test_id), fID should not be UUID: {test_id}""
-            assert '_' in test_id, fID should be structured: {test_id}
+            assert '_' in test_id, "fID should be structured: {test_id}"
 
     # =============================================================================
     # CLEANUP AND UTILITIES
@@ -918,7 +918,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_multi_user_system_health_check(self):
-        "
+        """
         "
         Health check to validate basic multi-user functionality works.
         This test should always pass to ensure basic multi-user capability.
@@ -931,7 +931,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             user2_ctx = await create_authenticated_user_context(user_email=health2@example.com")"
             
             # Users should have different IDs
-            assert user1_ctx.user_id != user2_ctx.user_id, Users should have different IDs
+            assert user1_ctx.user_id != user2_ctx.user_id, "Users should have different IDs"
             
             # Create WebSocket managers
             ws1 = await create_websocket_manager(user1_ctx)
@@ -944,7 +944,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             stats1 = ws1.get_manager_stats()
             stats2 = ws2.get_manager_stats()
             
-            assert stats1 != stats2, Manager stats should be different
+            assert stats1 != stats2, "Manager stats should be different"
             
             # Cleanup
             await ws1.cleanup_all_connections()
@@ -990,7 +990,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             ssot_count = sum(1 for uid in user_ids if self.id_patterns['ssot_structured'].match(uid))
             
             if uuid_count > 0:
-                violation_summary["user_id_collisions].append(fRaw UUID usage detected in {uuid_count} user IDs")
+                violation_summary["user_id_collisions].append(fRaw UUID usage detected in {uuid_count} user IDs)"
             
             if uuid_count > 0 and ssot_count > 0:
                 violation_summary[context_contamination].append(fMixed ID formats: {uuid_count} UUID, {ssot_count} SSOT)
@@ -1011,9 +1011,9 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             total_categories = len([cat for violations in violation_summary.values() if violations]
             total_violations = sum(len(violations) for violations in violation_summary.values())
             
-            print(f"\nMulti-User Isolation Violation Summary:)")
+            print(f"\nMulti-User Isolation Violation Summary:))"
             print(fCategories with violations: {total_categories}/{len(violation_summary)})
-            print(f"Total potential violations: {total_violations})")
+            print(f"Total potential violations: {total_violations}))"
             
             for category, violations in violation_summary.items():
                 if violations:

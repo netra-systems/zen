@@ -19,7 +19,7 @@ try:
     from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
     from netra_backend.app.agents.supervisor.execution_context import PipelineStepConfig
 except ImportError as e:
-    print(f"Warning: Could not import workflow components: {e})")
+    print(f"Warning: Could not import workflow components: {e}))"
     WorkflowOrchestrator = None
     PipelineStepConfig = None
 
@@ -55,7 +55,7 @@ class TestAgentExecutionOrder:
         step_dict = {step.agent_name: step for step in steps}
 
         assert step_dict[triage].dependencies == []
-        assert step_dict[data"].dependencies == ["triage]
+        assert step_dict[data"].dependencies == [triage]"
         assert step_dict[optimization].dependencies == [data], \
             Optimization MUST depend on data!""
         assert step_dict[actions].dependencies == [optimization]
@@ -135,14 +135,14 @@ class TestAgentExecutionOrder:
 
         # Verify all steps are PipelineStepConfig instances
         for step in steps:
-            assert isinstance(step, PipelineStepConfig), \
+            assert isinstance(step, "PipelineStepConfig), \"
                 fStep {step} is not a PipelineStepConfig instance
 
         # Verify required attributes
         for step in steps:
             assert hasattr(step, 'agent_name'), fStep missing agent_name: {step}""
-            assert hasattr(step, 'dependencies'), fStep missing dependencies: {step}
-            assert isinstance(step.dependencies, list), \
+            assert hasattr(step, "'dependencies'), fStep missing dependencies: {step}"
+            assert isinstance(step.dependencies, "list), \"
                 fDependencies should be a list: {step.dependencies}
 
     def test_dependency_graph_validation(self):
@@ -196,7 +196,7 @@ class TestAgentExecutionOrder:
         orchestrator = WorkflowOrchestrator(None, None, None)
 
         # Test multiple calls with same input
-        triage_result = {data_sufficiency": "sufficient}
+        triage_result = {data_sufficiency": sufficient}"
 
         # Get workflow multiple times
         execution_orders = []
@@ -220,7 +220,7 @@ class TestAgentExecutionOrder:
         orchestrator = WorkflowOrchestrator(None, None, None)
 
         # Test with sufficient data scenario
-        triage_result = {"data_sufficiency: sufficient"}
+        triage_result = {"data_sufficiency: sufficient}"
         steps = orchestrator._define_workflow_based_on_triage(triage_result)
 
         # Convert to ordered list for position checking
@@ -279,11 +279,11 @@ if __name__ == __main__":"
         print(✅ Execution order consistency test passed)
 
         test_instance.test_critical_business_logic_order()
-        print("✅ Critical business logic order test passed")
+        print("✅ Critical business logic order test passed)"
 
         print(\n🎉 All agent execution order tests passed!)"
         print(\n🎉 All agent execution order tests passed!)"
 
     except Exception as e:
-        print(f"❌ Test failed: {e}")
+        print(f"❌ Test failed: {e})"
         sys.exit(1")"

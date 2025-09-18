@@ -69,7 +69,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
     # Edge case: Complex circular chains longer than 2 hops
         complex_cycles = [item for item in []]
 
-        assert len(complex_cycles) == 0, ( )
+        assert len(complex_cycles) == 0, "( )"
         "" +
         "
         "
@@ -108,7 +108,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         if len(sources) > 1
     
 
-        assert len(multi_source_types) == 0, ( )
+        assert len(multi_source_types) == 0, "( )"
         "" +
         "
         "
@@ -130,7 +130,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         EDGE CASE: Check for duplicate enum definitions (MessageType, AgentStatus, etc.).
 
         This test identifies enum definitions that appear in multiple modules,
-        which can cause TypeScript "duplicate identifier" errors.
+        which can cause TypeScript "duplicate identifier errors."
 
         Similar Pattern: MessageType enum defined in both websocket.ts and api.ts
         '''
@@ -148,7 +148,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         if duplicate['enum_name'] in critical_enums
     
 
-        assert len(critical_duplicates) == 0, ( )
+        assert len(critical_duplicates) == 0, "( )"
         "" +
         "
         "
@@ -187,7 +187,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         if inc['issue_type'] == 'missing_export_target'
     
 
-        assert len(missing_type_exports) == 0, ( )
+        assert len(missing_type_exports) == 0, "( )"
         "" +
         "
         "
@@ -223,7 +223,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         if conflict['default_name'] == conflict['named_name']
     
 
-        assert len(name_conflicts) == 0, ( )
+        assert len(name_conflicts) == 0, "( )"
         "" +
         "
         "
@@ -265,7 +265,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         if chain.get('is_cyclic', False)
     
 
-        assert len(deep_chains) == 0, ( )
+        assert len(deep_chains) == 0, "( )"
         "" +
         "
         "
@@ -280,7 +280,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         Deep inheritance chains can cause performance and maintainability issues."
         
 
-        assert len(cyclic_inheritance) == 0, ( )
+        assert len(cyclic_inheritance) == 0, "( )"
         "" +
         "
         "
@@ -322,7 +322,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         if mismatch['severity'] == 'permissive'
     
 
-        assert len(overly_restrictive) == 0, ( )
+        assert len(overly_restrictive) == 0, "( )"
         "" +
         "
         "
@@ -337,7 +337,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         Type guards should not be more restrictive than TypeScript types."
         
 
-        assert len(overly_permissive) == 0, ( )
+        assert len(overly_permissive) == 0, "( )"
         "" +
         "
         "
@@ -380,7 +380,7 @@ issue for issue in async_type_issues
 if issue.get('has_circular_reference', False)
                 
 
-assert len(nested_promise_issues) == 0, ( )
+assert len(nested_promise_issues) == 0, "( )"
 "" +
 "
 "
@@ -395,7 +395,7 @@ Deeply nested Promise types can cause type inference issues."
 Deeply nested Promise types can cause type inference issues."
                     
 
-assert len(circular_async_types) == 0, ( )
+assert len(circular_async_types) == 0, "( )"
 "" +
 "
 "
@@ -416,7 +416,7 @@ def _scan_for_circular_type_dependencies(self) -> List[List[str]]:
 dependency_graph = {}
 
     # Build dependency graph
-for ts_file in self.types_path.rglob("*.ts"):
+for ts_file in self.types_path.rglob("*.ts):"
 try:
     pass
 content = ts_file.read_text(encoding='utf-8')
@@ -482,7 +482,7 @@ def _analyze_type_origin_conflicts(self) -> Dict[str, List[str]]:
 type_origins = {}
 
     # Scan for type definitions and their likely origins
-for ts_file in self.types_path.rglob("*.ts"):
+for ts_file in self.types_path.rglob("*.ts):"
 try:
     pass
 content = ts_file.read_text(encoding='utf-8')
@@ -526,7 +526,7 @@ def _scan_for_duplicate_enums(self) -> List[Dict[str, Any]]:
 """Scan for duplicate enum definitions across modules."""
 enum_definitions = {}
 
-for ts_file in self.types_path.rglob("*.ts"):
+for ts_file in self.types_path.rglob("*.ts):"
 try:
     pass
 content = ts_file.read_text(encoding='utf-8')
@@ -562,7 +562,7 @@ def _validate_type_registry_consistency(self) -> List[Dict[str, Any]]:
 inconsistencies = []
 
     # Find all index files (type registries)
-index_files = list(self.types_path.rglob("index.ts"))
+index_files = list(self.types_path.rglob("index.ts))"
 
 for index_file in index_files:
 try:
@@ -571,7 +571,7 @@ content = index_file.read_text(encoding='utf-8')
 
             # Extract exports
 import re
-exports = re.findall(r"export\s+(?:type\s+)?\{\s*([^}]+)\s*\}", content)
+exports = re.findall(r"export\s+(?:type\s+)?\{\s*([^}]+)\s*\}, content)"
 export_from = re.findall(r'export.*?from\s+['']([^'']+)['']', content)
 
 for export_match in exports:
@@ -583,15 +583,15 @@ if export_name:
 source_found = False
 registry_dir = index_file.parent
 
-for source_file in registry_dir.rglob("*.ts"):
-if source_file.name == "index.ts":
+for source_file in registry_dir.rglob("*.ts):"
+if source_file.name == "index.ts:"
     pass
 continue
 
 try:
     pass
 source_content = source_file.read_text(encoding='utf-8')
-if "" in source_content or "" in source_content:
+if "" in source_content or " in source_content:"
     pass
 source_found = True
 break
@@ -618,7 +618,7 @@ def _scan_for_mixed_export_conflicts(self) -> List[Dict[str, Any]]:
 """Scan for conflicting default and named exports."""
 conflicts = []
 
-for ts_file in self.types_path.rglob("*.ts"):
+for ts_file in self.types_path.rglob("*.ts):"
 try:
     pass
 content = ts_file.read_text(encoding='utf-8')
@@ -657,7 +657,7 @@ inheritance_map = {}
 issues = []
 
     # Build inheritance map
-for ts_file in self.types_path.rglob("*.ts"):
+for ts_file in self.types_path.rglob("*.ts):"
 try:
     pass
 content = ts_file.read_text(encoding='utf-8')
@@ -738,7 +738,7 @@ mismatches = []
     # parsing to compare Zod schemas, type guards, etc. with TypeScript interfaces
 
     # Look for type guard patterns and compare with interface definitions
-for ts_file in self.types_path.rglob("*.ts"):
+for ts_file in self.types_path.rglob("*.ts):"
 try:
     pass
 content = ts_file.read_text(encoding='utf-8')
@@ -783,7 +783,7 @@ issues = []
     # Simulate async analysis (in practice, this would use TypeScript compiler API)
 await asyncio.sleep(0.1)  # Simulate async work
 
-for ts_file in self.types_path.rglob("*.ts"):
+for ts_file in self.types_path.rglob("*.ts):"
 try:
     pass
 content = ts_file.read_text(encoding='utf-8')
@@ -849,7 +849,7 @@ for dup in self.enum_duplicates:
     print("")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
-pytest.main([__file__, "-v"])
+pytest.main([__file__, "-v])"
 pass

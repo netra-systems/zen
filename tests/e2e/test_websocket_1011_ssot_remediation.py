@@ -86,10 +86,10 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
             error_report = '\n'.join([f- User {error['user']): {error['error_message']) (Code: {error['error_code']) for error in connection_1011_errors]
             self.fail(f'WEBSOCKET 1011 ERRORS DETECTED ON GCP STAGING:\n{error_report}\nThese 1011 errors indicate SSOT violations in configuration base causing authentication inconsistencies. This represents $500K+ ARR risk from broken chat functionality.')
         success_rate = len(connection_successes) / len(self.test_users) if self.test_users else 0
-        self.assertGreaterEqual(success_rate, 0.8, f'WebSocket connection success rate should be  >= 80% af"ter SSOT fix. Current: {success_rate:0.1%} ({len(connection_successes")}/{len(self.test_users)}')
+        self.assertGreaterEqual(success_rate, 0.8, f'WebSocket connection success rate should be  >= 80% af"ter SSOT fix. Current: {success_rate:0.1%} ({len(connection_successes)}/{len(self.test_users)}')"
 
     async def test_golden_path_with_ssot_configuration(self):
-        ""
+        """
         Test complete golden path user flow with SSOT configuration.
         
         E2E SCOPE: End-to-end user journey on GCP staging
@@ -105,7 +105,7 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
             auth_token = await self._authenticate_staging_user(primary_user)
             auth_time = time.time() - auth_start_time
             if not auth_token:
-                self.fail(f"GOLDEN PATH FAILURE: Authentication f"ailed for {primary_user['email']} on GCP staging. This blocks the entire user experience.")"
+                self.fail(f"GOLDEN PATH FAILURE: Authentication failed for {primary_user['email']} on GCP staging. This blocks the entire user experience."")"
             golden_path_results.append({'step': 'authentication', 'status': 'success', 'duration': auth_time, 'timestamp': time.time()}
             websocket_start_time = time.time()
             websocket_result = await self._test_websocket_connection(auth_token, primary_user['email')
@@ -119,10 +119,10 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
             chat_result = await self._test_agent_execution(auth_token, primary_user['email')
             chat_time = time.time() - chat_start_time
             if chat_result.get('status') != 'success':
-                self.fail(fGOLDEN PATH FAILURE: Agent execution failed for {primary_user['email']} Chat f"unctionality broken. Error: {chat_result.get('error_message')}")""
+                self.fail(fGOLDEN PATH FAILURE: Agent execution failed for {primary_user['email']} Chat f"unctionality broken. Error: {chat_result.get('error_message')})"""
             golden_path_results.append({'step': 'agent_execution', 'status': 'success', 'duration': chat_time, 'response_quality': chat_result.get('response_quality', 'unknown'), 'timestamp': time.time()}
         except Exception as e:
-            self.fail(f"GOLDEN PATH EXCEPTION: Unexpected error in user f"low for {primary_user['email']}: {e}")"
+            self.fail(f"GOLDEN PATH EXCEPTION: Unexpected error in user flow for {primary_user['email']}: {e}"")"
         successful_steps = sum((1 for result in golden_path_results if result['status'] == 'success'))
         total_steps = len(golden_path_results)
         self.assertEqual(successful_steps, 3, f'All golden path steps should succeed after SSOT fix. Completed: {successful_steps}/3 steps')
@@ -175,7 +175,7 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
             self.assertLess(max_connection_time, 10.0, 'Max connection time should be <10 seconds')
 
     async def test_multi_user_websocket_isolation_ssot(self):
-    ""
+    """
         Test multi-user WebSocket isolation with SSOT conf"iguration."
         
         E2E SCOPE: User isolation validation on GCP staging
@@ -189,7 +189,7 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
         isolation_violations = []
 
         async def test_user_isolation(user_config: Dict[str, str) -> Dict[str, Any):
-            ""Test WebSocket isolation f"or individual user."
+            """Test WebSocket isolation f"or individual user."
             try:
                 auth_token = await self._authenticate_staging_user(user_config)
                 if not auth_token:
@@ -209,14 +209,14 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
                 user_email = result.get('user', 'unknown')
                 user_isolation_results[user_email] = result
                 if result.get('status') != 'success':
-                    isolation_violations.append({'user': user_email, 'issue': f"User isolation test failed: {result.get('error', 'Unknown error')}", 'severity': 'medium'}
+                    isolation_violations.append({'user': user_email, 'issue': f"User isolation test failed: {result.get('error', 'Unknown error')}, 'severity': 'medium'}"
                 if not result.get('user_context_isolated', True):
                     isolation_violations.append({'user': user_email, 'issue': 'User context not properly isolated', 'severity': 'high')
         if isolation_violations:
             violation_report = '\n'.join([f- {violation.get('user', 'system')}: {violation['issue']} (Severity: {violation['severity']}" for violation in isolation_violations]"
             self.fail(f'USER ISOLATION VIOLATIONS DETECTED:\n{violation_report}\nSSOT violations in configuration allow user context contamination, causing WebSocket 1011 errors and broken multi-user functionality.')
         successful_isolations = sum((1 for result in user_isolation_results.values() if result.get('status') == 'success'))
-        self.assertEqual(successful_isolations, len(self.test_users), f'All users should have proper isolation af"ter SSOT fix. Isolated: {successful_isolations}/{len(self.test_users")}')
+        self.assertEqual(successful_isolations, len(self.test_users), f'All users should have proper isolation af"ter SSOT fix. Isolated: {successful_isolations}/{len(self.test_users)}')"
 
     async def _authenticate_staging_user(self, user_config: Dict[str, str) -> Optional[str):
         Authenticate user on GCP staging and return auth token.""

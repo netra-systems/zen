@@ -17,7 +17,7 @@ class WebsocketUiTimingIntegrationHelpersTests:
 
     @pytest.mark.e2e
     def test_placeholder(self):
-        ""Placeholder test to ensure file is syntactically valid
+        ""Placeholder test to ensure file is syntactically valid"
         assert True
 
     @pytest.mark.e2e

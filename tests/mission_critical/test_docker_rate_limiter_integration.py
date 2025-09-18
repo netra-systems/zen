@@ -45,18 +45,18 @@ from shared.isolated_environment import IsolatedEnvironment
 # Add project root to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from test_framework.docker_rate_limiter import (
+from test_framework.docker_rate_limiter import ()
     get_docker_rate_limiter, 
     execute_docker_command,
     docker_health_check,
     DockerCommandResult
 )
 # Replace missing docker_circuit_breaker with unified circuit breaker
-from netra_backend.app.core.resilience.unified_circuit_breaker import (
+from netra_backend.app.core.resilience.unified_circuit_breaker import ()
     UnifiedCircuitBreaker as DockerCircuitBreaker,
     UnifiedCircuitBreakerState as CircuitBreakerState
 )
-from netra_backend.app.core.circuit_breaker import (
+from netra_backend.app.core.circuit_breaker import ()
     CircuitBreakerOpenError as DockerCircuitBreakerError,
     get_circuit_breaker as get_circuit_breaker_manager
 )
@@ -104,7 +104,7 @@ class DockerRateLimiterIntegrationTests:
         limiter1 = get_docker_rate_limiter()
         limiter2 = get_docker_rate_limiter()
         
-        assert limiter1 is limiter2, Rate limiter should be singleton
+        assert limiter1 is limiter2, "Rate limiter should be singleton"
         assert limiter1.min_interval > 0, Rate limiter should have minimum interval"
         assert limiter1.min_interval > 0, Rate limiter should have minimum interval"
         assert limiter1.max_concurrent > 0, Rate limiter should allow concurrent operations"
@@ -115,15 +115,15 @@ class DockerRateLimiterIntegrationTests:
         # Test a safe Docker command that should always work
         result = execute_docker_command([docker, version, --format, "{{.Server.Version))]"
         
-        assert isinstance(result, DockerCommandResult)
+        assert isinstance(result, "DockerCommandResult)"
         assert result.duration > 0, Command should have measurable duration"
         assert result.duration > 0, Command should have measurable duration"
-        assert result.retry_count >= 0, Retry count should be non-negative
+        assert result.retry_count >= 0, "Retry count should be non-negative"
         
         # Verify rate limiting statistics
         limiter = get_docker_rate_limiter()
         stats = limiter.get_statistics()
-        assert stats[total_operations"] > 0, "Operations should be tracked
+        assert stats[total_operations"] > 0, Operations should be tracked"
     
     def test_concurrent_docker_operations_are_rate_limited(self):
         Test that concurrent Docker operations respect rate limiting."
@@ -145,7 +145,7 @@ class DockerRateLimiterIntegrationTests:
         
         # Verify all operations completed
         assert len(results) == 10, "All operations should complete"
-        assert all(isinstance(r, DockerCommandResult) for r in results), All results should be DockerCommandResult
+        assert all(isinstance(r, "DockerCommandResult) for r in results), All results should be DockerCommandResult"
         
         # Verify rate limiting was applied (operations should take longer due to limiting)
         total_duration = end_time - start_time
@@ -174,14 +174,14 @@ class DockerRateLimiterIntegrationTests:
             Health check should go through rate limiter
     
     def test_error_handling_and_retries(self):
-        ""Test that rate limiter handles errors correctly with retries.
+        ""Test that rate limiter handles errors correctly with retries."
         # Try to execute a Docker command that will fail
-        result = execute_docker_command([docker, run", "--invalid-flag, nonexistent:image)
+        result = execute_docker_command([docker, run", --invalid-flag, nonexistent:image)"
         
-        assert isinstance(result, DockerCommandResult)
-        assert result.returncode != 0, Command should fail
+        assert isinstance(result, "DockerCommandResult)"
+        assert result.returncode != 0, "Command should fail"
         assert result.stderr, Error should be captured""
-        assert result.retry_count >= 0, Retry count should be tracked
+        assert result.retry_count >= 0, "Retry count should be tracked"
     
     def test_timeout_handling(self):
         "Test rate limiter timeout handling."
@@ -209,12 +209,12 @@ class DockerCircuitBreakerIntegrationTests:
         assert breaker.is_available is True
         
         # Execute a simple command
-        result = breaker.execute_docker_command([docker, version", "--format, {{.Client.Version))]
-        assert isinstance(result, DockerCommandResult)
+        result = breaker.execute_docker_command([docker, version", --format, {{.Client.Version))]"
+        assert isinstance(result, "DockerCommandResult)"
         
         stats = breaker.get_stats()
         assert stats[total_requests] > 0
-        assert stats[state"] == "closed
+        assert stats[state"] == closed"
     
     def test_circuit_breaker_failure_detection(self):
         Test circuit breaker opens after repeated failures."
@@ -226,7 +226,7 @@ class DockerCircuitBreakerIntegrationTests:
         for i in range(6):  # More than failure threshold
             try:
                 result = breaker.execute_docker_command([
-                    docker, run, --invalid-flag", "nonexistent:image
+                    docker, run, --invalid-flag", nonexistent:image"
                 ]
                 if result.returncode != 0:
                     failure_count += 1
@@ -235,7 +235,7 @@ class DockerCircuitBreakerIntegrationTests:
         
         # Circuit should open after repeated failures
         stats = breaker.get_stats()
-        assert stats[failed_requests] > 0, Failures should be tracked
+        assert stats[failed_requests] > 0, "Failures should be tracked"
         
         # If circuit opened, should fail fast
         if breaker.state == CircuitBreakerState.OPEN:
@@ -253,7 +253,7 @@ class DockerCircuitBreakerIntegrationTests:
         
         assert breaker1 is not breaker2, Different names should give different breakers"
         assert breaker1 is not breaker2, Different names should give different breakers"
-        assert breaker1 is breaker1_again, Same name should give same breaker
+        assert breaker1 is breaker1_again, "Same name should give same breaker"
         
         # Test getting all stats
         all_stats = manager.get_all_stats()
@@ -267,7 +267,7 @@ class DockerCircuitBreakerIntegrationTests:
             breaker_name="test-convenience"
         )
         
-        assert isinstance(result, DockerCommandResult)
+        assert isinstance(result, "DockerCommandResult)"
         
         # Verify the breaker was created and used
         manager = get_circuit_breaker_manager()
@@ -280,7 +280,7 @@ class DockerIntrospectionRateLimiterIntegrationTests:
     "Test that Docker introspection uses rate limiter."
     
     def test_docker_introspection_uses_rate_limiter(self):
-        ""Test that DockerIntrospector uses rate-limited Docker commands.
+        ""Test that DockerIntrospector uses rate-limited Docker commands."
         introspector = DockerIntrospector(docker-compose.test.yml, test-introspection")"
         
         # Get initial rate limiter stats
@@ -300,7 +300,7 @@ class DockerIntrospectionRateLimiterIntegrationTests:
         except Exception as e:
             # It's OK if the docker-compose file doesn't exist for this test
             # We're mainly testing that the rate limiter was attempted to be used'
-            if No such file" in str(e) or "not found in str(e):
+            if No such file" in str(e) or not found in str(e):"
                 final_stats = limiter.get_statistics() 
                 assert final_stats[total_operations] >= initial_stats[total_operations]
             else:
@@ -341,7 +341,7 @@ class PortConflictFixRateLimiterIntegrationTests:
         final_stats = limiter.get_statistics()
         assert final_stats[total_operations] > initial_stats[total_operations"], \
             "Container cleanup should use rate limiter"
-        assert isinstance(cleaned_count, int), Should return count of cleaned containers
+        assert isinstance(cleaned_count, "int), Should return count of cleaned containers"
 
 
 class RateLimiterStatisticsTests:
@@ -356,10 +356,10 @@ class RateLimiterStatisticsTests:
         
         # Execute some commands
         for i in range(3):
-            execute_docker_command([docker, version, "--format, ftest-{i)"]
+            execute_docker_command([docker, version, "--format, ftest-{i)]"
         
         stats = limiter.get_statistics()
-        assert stats[total_operations] == 3, Should track all operations
+        assert stats[total_operations] == 3, "Should track all operations"
         assert stats[success_rate] > 0, Should calculate success rate"
         assert stats[success_rate] > 0, Should calculate success rate"
         assert "rate_limit_percentage in stats, Should track rate limiting percentage"
@@ -380,7 +380,7 @@ class RateLimiterStatisticsTests:
         stats_after = limiter.get_statistics()
         
         assert stats_after["total_operations] == 0, Statistics should be reset"
-        assert stats_after[failed_operations] == 0, Failed operations should be reset
+        assert stats_after[failed_operations] == 0, "Failed operations should be reset"
 
 
 class IntegrationRobustnessTests:
@@ -394,7 +394,7 @@ class IntegrationRobustnessTests:
         # Run many concurrent operations
         def stress_operation(index: int):
             try:
-                return execute_docker_command([docker, version, "--format, json")
+                return execute_docker_command([docker, version, "--format, json)"
             except Exception as e:
                 return e
         
@@ -433,7 +433,7 @@ class IntegrationRobustnessTests:
 
 
 class DockerRateLimiterInfrastructureTests:
-    ""Infrastructure tests for Docker rate limiter performance and reliability.
+    ""Infrastructure tests for Docker rate limiter performance and reliability."
     
     def test_rate_limiter_throughput_benchmark(self):
         Benchmark rate limiter throughput under various loads.""
@@ -453,7 +453,7 @@ class DockerRateLimiterInfrastructureTests:
             def rate_limited_operation(thread_id: int) -> int:
                 successes = 0
                 for i in range(operations_per_thread):
-                    result = execute_docker_command(["docker, version", --format, f{{.Server.Version))-{thread_id)-{i)]
+                    result = execute_docker_command(["docker, version, --format, f{{.Server.Version))-{thread_id)-{i)]"
                     if result.returncode == 0:
                         successes += 1
                 return successes
@@ -471,11 +471,11 @@ class DockerRateLimiterInfrastructureTests:
         
         # Validate throughput meets minimum requirements
         assert throughput_results[1] > 1.0, fSingle-threaded throughput too low: {throughput_results[1]:.2f} ops/sec""
-        assert throughput_results[10] > 2.0, f10-thread throughput too low: {throughput_results[10]:.2f} ops/sec
+        assert throughput_results[10] > 2.0, "f10-thread throughput too low: {throughput_results[10]:.2f} ops/sec"
         
         # Verify rate limiting is working (higher concurrency shouldn't scale linearly)'
         scaling_efficiency = throughput_results[20] / throughput_results[1] if throughput_results[1] > 0 else 0
-        assert scaling_efficiency < 15, fRate limiting not working properly: {scaling_efficiency:.2f}x scaling
+        assert scaling_efficiency < 15, "fRate limiting not working properly: {scaling_efficiency:.2f}x scaling"
         
         final_stats = limiter.get_statistics()
         logger.info(f" PASS:  Rate limiter handled {final_stats['total_operations']} operations, {final_stats['rate_limited_operations']} rate-limited)"
@@ -526,14 +526,14 @@ class DockerRateLimiterInfrastructureTests:
         
         # Validate exponential backoff is working
         assert avg_backoff_time > 0.1, f"Insufficient backoff detected: {avg_backoff_time:.3f}s"
-        assert max_backoff_time < 10.0, fExcessive backoff detected: {max_backoff_time:.3f}s
+        assert max_backoff_time < 10.0, "fExcessive backoff detected: {max_backoff_time:.3f}s"
         
         final_stats = limiter.get_statistics()
         rate_limited_percentage = (final_stats['rate_limited_operations') / final_stats['total_operations') * 100
-        assert rate_limited_percentage > 10, fNot enough rate limiting: {rate_limited_percentage:.1f}%
+        assert rate_limited_percentage > 10, "fNot enough rate limiting: {rate_limited_percentage:.1f}%"
     
     def test_backpressure_handling_extreme_load(self):
-        ""Test backpressure handling under extreme load conditions.
+        ""Test backpressure handling under extreme load conditions."
         logger.info([U+1F4C8] Testing backpressure handling under extreme load)"
         logger.info([U+1F4C8] Testing backpressure handling under extreme load)"
         
@@ -615,11 +615,11 @@ class DockerRateLimiterInfrastructureTests:
         logger.info(f   Total test time: {total_time:.2f}s")"
         
         # Validate backpressure is working effectively
-        assert success_rate > 70, fSuccess rate too low under extreme load: {success_rate:.1f}%
+        assert success_rate > 70, "fSuccess rate too low under extreme load: {success_rate:.1f}%"
         assert avg_queue_time > 0.2, fQueue time too low (no backpressure): {avg_queue_time:.3f}s"
         assert avg_queue_time > 0.2, fQueue time too low (no backpressure): {avg_queue_time:.3f}s"
         assert max_queue_time < 15.0, f"Maximum queue time excessive: {max_queue_time:.3f}s"
-        assert abs(memory_delta) < 200, fMemory usage change too high: {memory_delta:.1f}MB
+        assert abs(memory_delta) < 200, "fMemory usage change too high: {memory_delta:.1f}MB"
         
         final_stats = limiter.get_statistics()
         assert final_stats['total_operations'] >= operations_completed
@@ -663,7 +663,7 @@ class DockerRateLimiterInfrastructureTests:
             batch_start = time.time()
             
             def batch_operation(operation_id: int) -> bool:
-                result = execute_docker_command([docker, "version, --format", fbatch-{batch)-op-{operation_id)]
+                result = execute_docker_command([docker, "version, --format, fbatch-{batch)-op-{operation_id)]"
                 return result.returncode == 0
             
             with ThreadPoolExecutor(max_workers=5) as executor:
@@ -711,8 +711,8 @@ class DockerRateLimiterInfrastructureTests:
         assert abs(cpu_delta) < 20, fCPU usage change too high: {cpu_delta:.1f}%"
         assert abs(cpu_delta) < 20, fCPU usage change too high: {cpu_delta:.1f}%"
         assert abs(memory_delta) < 100, f"Memory usage change too high: {memory_delta:.1f}MB"
-        assert abs(thread_delta) < 10, fThread count change too high: {thread_delta}
-        assert avg_cpu < 50, fAverage CPU too high during test: {avg_cpu:.1f}%
+        assert abs(thread_delta) < 10, "fThread count change too high: {thread_delta}"
+        assert avg_cpu < 50, "fAverage CPU too high during test: {avg_cpu:.1f}%"
         
         final_stats = limiter.get_statistics()
         total_operations = final_stats['total_operations']

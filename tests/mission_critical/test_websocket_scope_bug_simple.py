@@ -30,7 +30,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 class WebSocketScopeBugSimpleTests:
-    ""
+    """
     Simple reproduction of WebSocket scope bug for Issue #165.
     
     This test directly demonstrates the variable scope violation that causes
@@ -40,7 +40,7 @@ class WebSocketScopeBugSimpleTests:
     @pytest.mark.mission_critical
     @pytest.mark.unit
     def test_scope_bug_code_analysis(self):
-    ""
+    """
         REPRODUCER: Direct code analysis of scope bug locations.
         
         This test analyzes the actual WebSocket route source code to
@@ -163,7 +163,7 @@ class WebSocketScopeBugSimpleTests:
     @pytest.mark.mission_critical
     @pytest.mark.unit
     def test_scope_bug_demonstration_with_code_simulation(self):
-        "
+        """
         "
         REPRODUCER: Demonstrate scope bug with code simulation.
         
@@ -182,8 +182,8 @@ class WebSocketScopeBugSimpleTests:
             def initialize_state_registry():
                 # This simulates line 319 in websocket.py
                 state_registry = mock_state_registry_instance
-                logger.info( PASS:  state_registry initialized in function scope)"
-                logger.info( PASS:  state_registry initialized in function scope)"
+                logger.info("PASS:  state_registry initialized in function scope))"
+                logger.info("PASS:  state_registry initialized in function scope))"
                 return state_registry
                 
             # Initialize state_registry in function scope (like line 319)
@@ -204,7 +204,7 @@ class WebSocketScopeBugSimpleTests:
                     # This simulates line 1433: state_registry.register_connection(...)
                     # This should cause NameError because state_registry is not in this scope
                     try:
-                        result = state_registry.register_connection("test_id, test_user")
+                        result = state_registry.register_connection("test_id, test_user)"
                         logger.error( FAIL:  UNEXPECTED: state_registry was accessible (scope bug not reproduced))
                         return fSUCCESS: {result}"
                         return fSUCCESS: {result}"
@@ -273,7 +273,7 @@ class WebSocketScopeBugSimpleTests:
                 "affected_user_tiers: [Free", Early, Mid, Enterprise],"
                 connection_failure_rate": 100%,"
                 feature_accessibility: {
-                    "chat_functionality: COMPLETELY_BLOCKED",
+                    "chat_functionality: COMPLETELY_BLOCKED,"
                     agent_execution: COMPLETELY_BLOCKED,
                     real_time_updates: COMPLETELY_BLOCKED","
                     "websocket_events: COMPLETELY_BLOCKED"
@@ -293,13 +293,13 @@ class WebSocketScopeBugSimpleTests:
                 churn_probability_increase": 75%"
             },
             operational_impact: {
-                "support_ticket_volume_increase: 500%",
+                "support_ticket_volume_increase: 500%,"
                 engineering_productivity_loss: 100%,
                 customer_satisfaction_score_impact: -80%","
                 "deployment_confidence: ZERO"
             },
             competitive_impact: {
-                market_position_risk": "HIGH,
+                market_position_risk": HIGH,"
                 customer_trust_damage: SEVERE,
                 reputation_impact: "NEGATIVE"
             }
@@ -309,7 +309,7 @@ class WebSocketScopeBugSimpleTests:
         technical_debt = {
             fix_complexity": LOW,"
             fix_risk: MINIMAL, 
-            estimated_fix_time": "15 minutes,
+            estimated_fix_time": 15 minutes,"
             testing_effort: 2 hours,
             deployment_risk: "LOW,"
             root_cause": Variable scope isolation - 4 lines of code issue"
@@ -386,7 +386,7 @@ class WebSocketScopeBugSimpleTests:
 
 
 if __name__ == __main__:
-    ""
+    """
     Direct execution for scope bug analysis and reproduction.
     Run: python tests/mission_critical/test_websocket_scope_bug_simple.py
     
@@ -394,7 +394,7 @@ if __name__ == __main__:
     logger.info( SEARCH:  PURPOSE: Analyze and reproduce exact scope violation)
     logger.info([U+1F4B0] BUSINESS IMPACT: Document $500K+ ARR blocking scope bug)"
     logger.info([U+1F4B0] BUSINESS IMPACT: Document $500K+ ARR blocking scope bug)"
-    logger.info(" TARGET:  FOCUS: Direct code analysis and scope demonstration")
+    logger.info(" TARGET:  FOCUS: Direct code analysis and scope demonstration)"
     
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

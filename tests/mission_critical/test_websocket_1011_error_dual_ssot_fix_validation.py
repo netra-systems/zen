@@ -52,7 +52,7 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
         self.failed_cleanups = []
         
     def test_websocket_1011_error_fix_all_permutations(self):
-        "
+        """
         "
         CRITICAL: Test all permutations of dual SSOT ID creation and cleanup.
         
@@ -70,13 +70,13 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
         # Test all permutations of ID system combinations
         id_system_combinations = [
             # (connection_system, execution_system, cleanup_system)
-            (manager", "manager, manager),      # Pure UnifiedIDManager 
-            (generator, generator", "generator), # Pure UnifiedIdGenerator
+            (manager", manager, manager),      # Pure UnifiedIDManager "
+            (generator, generator", generator), # Pure UnifiedIdGenerator"
             (manager, generator, manager"),     # Mixed: Mgr  ->  Gen  ->  Mgr"
             (generator, manager, generator),   # Mixed: Gen  ->  Mgr  ->  Gen"
             (generator, manager, generator),   # Mixed: Gen  ->  Mgr  ->  Gen"
             (manager", generator, generator),   # Mixed: Mgr  ->  Gen  ->  Gen"
-            ("generator, manager", manager),     # Mixed: Gen  ->  Mgr  ->  Mgr
+            ("generator, manager, manager),     # Mixed: Gen  ->  Mgr  ->  Mgr"
         ]
         
         success_count = 0
@@ -140,7 +140,7 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
             self.active_connections.clear()
                 
     def test_websocket_1011_error_business_impact_validation(self):
-        ""
+        """
         Validate that the fix addresses the specific business impact scenarios.
         
         These are real user scenarios that were causing revenue loss.
@@ -187,7 +187,7 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
                           Protected revenue should exceed $2K for test scenarios)
         
     def test_dual_ssot_performance_impact_on_critical_path(self):
-        ""
+        """
         Ensure the compatibility fix doesn't impact critical path performance.'
         
         WebSocket operations are on the critical path for chat functionality.
@@ -445,7 +445,7 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
         return True
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

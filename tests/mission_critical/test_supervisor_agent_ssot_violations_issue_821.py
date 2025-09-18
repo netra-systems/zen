@@ -156,7 +156,7 @@ class SupervisorAgentSSOTViolationsTests(SSotBaseTestCase):
         # Log findings for debugging
         print(f\n=== IMPORT VIOLATION SCAN RESULTS ===)"
         print(f\n=== IMPORT VIOLATION SCAN RESULTS ===)"
-        print(f"Non-SSOT SupervisorAgent imports found: {len(import_violations)})")
+        print(f"Non-SSOT SupervisorAgent imports found: {len(import_violations)}))"
         for violation in import_violations:
             print(f  - {violation['file']}:{violation['line']} -> {violation['content']})"
             print(f  - {violation['file']}:{violation['line']} -> {violation['content']})"
@@ -200,7 +200,7 @@ class SupervisorAgentSSOTViolationsTests(SSotBaseTestCase):
             print(fSupervisorAgent registrations found: {len(supervisor_registrations)})"
             print(fSupervisorAgent registrations found: {len(supervisor_registrations)})"
             for reg in supervisor_registrations:
-                print(f"  - {reg['name']} -> {reg['class']} from {reg['module']})")
+                print(f"  - {reg['name']} -> {reg['class']} from {reg['module']}))"
             print(=*50)"
             print(=*50)"
 
@@ -273,10 +273,10 @@ class SupervisorAgentSSOTViolationsTests(SSotBaseTestCase):
 
         # Log findings for debugging
         print(f\n=== IMPORT PATH VIOLATION SCAN RESULTS ===)
-        print(f"Working violation paths found: {len(working_violation_paths)}")
+        print(f"Working violation paths found: {len(working_violation_paths)})"
         for violation in working_violation_paths:
             print(f  - {violation['path']} -> {violation['class']})
-        print("=*50")
+        print("=*50)"
 
         # ASSERTION: Should have zero working violation paths
         # This test FAILS if multiple import paths work

@@ -38,7 +38,7 @@ from netra_backend.app.core.configuration.base import get_unified_config
 import netra_backend.app.db.postgres_core as postgres_core
 
     # Check that the module imports get_unified_config
-        assert hasattr(postgres_core, 'get_unified_config') or 'get_unified_config' in dir(postgres_core)
+        assert hasattr(postgres_core, "'get_unified_config') or 'get_unified_config' in dir(postgres_core)"
 
     # Verify critical functions don't reference DatabaseConfig directly'
         source_file = postgres_core.__file__.replace('.pyc', '.py')
@@ -95,7 +95,7 @@ with patch('netra_backend.app.db.postgres_core.create_async_engine') as mock_cre
 mock_engine = AsyncNone  # TODO: Use real service instead of Mock
 mock_create_engine.return_value = mock_engine
 
-                    # This should not raise "DatabaseConfig is not defined" error
+                    # This should not raise "DatabaseConfig is not defined error"
 try:
     pass
 await initialize_postgres()
@@ -103,9 +103,9 @@ await initialize_postgres()
 assert True
 except NameError as e:
     pass
-if "DatabaseConfig" in str(e):
+if "DatabaseConfig in str(e):"
     pass
-pytest.fail("formatted_string")
+pytest.fail("formatted_string)"
 raise
 except Exception:
                                     # Other exceptions are acceptable for this test
@@ -114,7 +114,7 @@ pass
 @pytest.mark.e2e
 def test_no_direct_database_config_usage_in_core_files(self):
     pass
-"""Verify core database files don't use DatabaseConfig class attributes directly."""'
+"""Verify core database files don't use DatabaseConfig class attributes directly.""'"
 core_db_files = [ )
 'netra_backend/app/db/postgres_core.py',
 'netra_backend/app/db/postgres_events.py',
@@ -143,7 +143,7 @@ if problematic_lines:
 issues = "
 issues = "
 ".join(["formatted_string" for num, line in problematic_lines])"
-pytest.fail("formatted_string")
+pytest.fail("formatted_string)"
 
 except FileNotFoundError:
                             # File might not exist in test environment
@@ -181,7 +181,7 @@ with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
 config = get_unified_config()
 
             # Verify staging-specific settings
-assert config.environment in ['staging', 'testing']
+assert config.environment in ['staging', "'testing']"
 """
 """
 assert config.db_pool_size >= 5, "Pool size too small for staging"
@@ -193,8 +193,8 @@ def test_import_resolution_in_deployment(self):
     pass
 """Test that all critical imports resolve correctly as they would in deployment.""""""
 """Test that all critical imports resolve correctly as they would in deployment.""""""
-"from netra_backend.app.core.configuration.base import get_unified_config",
-"from netra_backend.app.db.database_manager import DatabaseManager",
+"from netra_backend.app.core.configuration.base import get_unified_config,"
+"from netra_backend.app.db.database_manager import DatabaseManager,"
 "from sqlalchemy.ext.asyncio import create_async_engine"
     
 
@@ -204,7 +204,7 @@ try:
 exec(import_stmt)
 except ImportError as e:
     pass
-pytest.fail("formatted_string")
+pytest.fail("formatted_string)"
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -246,9 +246,9 @@ assert True
 
 except NameError as e:
     pass
-if "DatabaseConfig" in str(e):
+if "DatabaseConfig in str(e):"
     pass
-pytest.fail("formatted_string")
+pytest.fail("formatted_string)"
 raise
 
 """

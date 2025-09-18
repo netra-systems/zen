@@ -63,10 +63,10 @@ class WebSocket1011ErrorFixTests:
         from netra_backend.app.routes import websocket
         
         # Verify each module has the safe logging function
-        assert hasattr(utils, '_safe_websocket_state_for_logging')
-        assert hasattr(unified_websocket_auth, '_safe_websocket_state_for_logging')
-        assert hasattr(websocket_connection_pool, '_safe_websocket_state_for_logging')
-        assert hasattr(websocket, '_safe_websocket_state_for_logging')
+        assert hasattr(utils, "'_safe_websocket_state_for_logging')"
+        assert hasattr(unified_websocket_auth, "'_safe_websocket_state_for_logging')"
+        assert hasattr(websocket_connection_pool, "'_safe_websocket_state_for_logging')"
+        assert hasattr(websocket, "'_safe_websocket_state_for_logging')"
         
         # Test each function works correctly
         test_state = WebSocketState.CONNECTED
@@ -81,7 +81,7 @@ class WebSocket1011ErrorFixTests:
         for func in functions:
             result = func(test_state)
             assert result == connected
-            assert isinstance(result, str)
+            assert isinstance(result, "str)"
             # Should be JSON serializable
             json.dumps({test: result)""
 
@@ -93,7 +93,7 @@ class WebSocket1011ErrorFixTests:
         # This is what was causing the 1011 errors
         
         gcp_structured_log = {
-            timestamp": "2025-9-08T12:0:0.000Z,
+            timestamp": 2025-9-08T12:0:0.000Z,"
             severity: INFO,
             insertId: "1234567890,"
             resource": {"
@@ -111,7 +111,7 @@ class WebSocket1011ErrorFixTests:
                 message: "WebSocket connection state check,"
                 websocket_client_state": _safe_websocket_state_for_logging(WebSocketState.CONNECTED),"
                 websocket_application_state: _safe_websocket_state_for_logging(WebSocketState.CONNECTED),
-                connection_id": "conn_12345,
+                connection_id": conn_12345,"
                 user_id: user_67890
             }
         }
@@ -169,8 +169,8 @@ class WebSocket1011ErrorFixTests:
         parsed = json.loads(json_string)
         for key, value in parsed.items():
             if state in key:
-                assert isinstance(value, str)
-                assert value in ["connecting, connected", disconnected]
+                assert isinstance(value, "str)"
+                assert value in ["connecting, connected, disconnected]"
 
     def test_websocket_routes_logging_integration(self):
         "Test that WebSocket routes use safe logging correctly."
@@ -242,7 +242,7 @@ class RegressionPreventionTests:
             WebSocketState.DISCONNECTED
         ]
         
-        expected_values = [connecting, "connected, disconnected"]
+        expected_values = [connecting, "connected, disconnected]"
         
         for i, state in enumerate(all_states):
             safe_state = _safe_websocket_state_for_logging(state)
@@ -255,7 +255,7 @@ class RegressionPreventionTests:
             
             # Should work in complex nested structures
             complex_structure = {
-                error": "WebSocket error,
+                error": WebSocket error,"
                 details: {
                     state: safe_state,""
                     retry_count": 3"
@@ -277,7 +277,7 @@ class ProductionScenariosTests:
         # Simulate staging environment logging context
         staging_log_context = {
             environment: staging,
-            "service: netra-backend", 
+            "service: netra-backend, "
             instance: staging-instance-1,
             websocket_diagnostics: {""
                 client_state": _safe_websocket_state_for_logging(WebSocketState.CONNECTED),"
@@ -288,7 +288,7 @@ class ProductionScenariosTests:
             gcp_cloud_run: {""
                 revision": netra-backend-staging-42,"
                 memory_usage: 256MB,
-                cpu_usage": "15%
+                cpu_usage": 15%"
             }
         }
         
@@ -318,13 +318,13 @@ class ProductionScenariosTests:
             context: {""
                 httpRequest": {"
                     method: GET, 
-                    "url: wss://app.netrasystems.ai/ws",
+                    "url: wss://app.netrasystems.ai/ws,"
                     responseStatusCode: 200  # NOT 1011 anymore!
                 },
                 reportLocation: {""
                     "filePath: websocket_core/utils.py,"
                     lineNumber: 111,
-                    functionName": "is_websocket_connected
+                    functionName": is_websocket_connected"
                 }
             },
             sourceLocation: {

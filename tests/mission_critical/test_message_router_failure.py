@@ -83,7 +83,7 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
         if hasattr(router, 'add_handler'):
             print(   [OK] Has add_handler() method (correct))
         else:
-            self.fail("   [FAIL] Missing add_handler() method")
+            self.fail("   [FAIL] Missing add_handler() method)"
 
         if hasattr(router, 'route_message'):
             print(   [OK] Has route_message() method (correct))
@@ -170,12 +170,12 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
             router.remove_handler(mock_handler)
             print(   [OK] Successfully removed handler)
 
-            print(\n + "=*60")
+            print(\n + "=*60)"
             print([OK] AgentMessageHandler registration works correctly!)
             print(=*60)
 
         except AttributeError as e:
-            if "add_handler" in str(e):
+            if "add_handler in str(e):"
                 self.fail(f   [FAIL] Missing add_handler method: {e})
             else:
                 self.fail(f   [FAIL] Unexpected AttributeError: {e})
@@ -186,7 +186,7 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
         Test that WebSocket routing continues to work with SSOT MessageRouter.""
         print(\n + =*60)
         print(Testing WebSocket Routing Compatibility)
-        print("="*60)
+        print("=*60)"
 
         try:
             from netra_backend.app.websocket_core.handlers import get_message_router
@@ -197,7 +197,7 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
             test_websocket = WebSocketTestHelper()
             test_message = {
                 type: ping,
-                payload: {"test": True},
+                payload: {"test: True},"
                 timestamp: 1234567890
             }
             
@@ -207,7 +207,7 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
             else:
                 self.fail(   [FAIL] route_message method missing or not callable)
 
-            print("\n" + =*60)
+            print("\n + =*60)"
             print([OK] WebSocket routing compatibility verified!")"
             print(=*60")"
 
@@ -225,4 +225,4 @@ if __name__ == __main__:
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
     # sys.exit(result)
-print(f   - {test}: {traceback.split('Error:')[-1].strip(")}")
+print(f   - {test}: {traceback.split('Error:')[-1].strip(")})"

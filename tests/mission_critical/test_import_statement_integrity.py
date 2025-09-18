@@ -120,13 +120,13 @@ class ImportStatementIntegrityTests(SSotBaseTestCase):
         print(f\nImport Analysis Results:)
         print(fSuccessful imports: {len(successful_imports)})"
         print(fSuccessful imports: {len(successful_imports)})"
-        print(f"Failed imports: {len(failed_imports)})")
+        print(f"Failed imports: {len(failed_imports)}))"
         
         if failed_imports:
             print(f\nFailed Import Details:)"
             print(f\nFailed Import Details:)"
             for module_name, result in failed_imports.items():
-                print(f"  {module_name}: {result['error_type']} - {result['error']})")
+                print(f"  {module_name}: {result['error_type']} - {result['error']}))"
         
         # Report findings - this test should initially fail to demonstrate the issue
         if failed_imports:

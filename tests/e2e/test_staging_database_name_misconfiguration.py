@@ -53,8 +53,8 @@ from shared.isolated_environment import IsolatedEnvironment
                 # CRITICAL CHECK: Staging should NOT use netra_dev database
         postgres_db = staging_vars.get('POSTGRES_DB', '')
         assert postgres_db != 'netra_dev', \
-        "formatted_string" \
-        f"in .env.staging. Staging should use 'netra_staging' or 'postgres' database, " \
+        "formatted_string \"
+        f"in .env.staging. Staging should use 'netra_staging' or 'postgres' database,  \"
         f"NOT 'netra_dev' which is for development environment only."
 
         @pytest.mark.e2e
@@ -73,8 +73,8 @@ staging_env = {'ENVIRONMENT': 'staging',, 'POSTGRES_HOST': '/cloudsql/netra-stag
 
         # This assertion should now pass - staging correctly configured"""
         # This assertion should now pass - staging correctly configured"""
-        f"Staging environment is configured to use 'netra_dev' database. " \
-        f"This is incorrect! Staging should use a staging-specific database " \
+        f"Staging environment is configured to use 'netra_dev' database.  \"
+        f"This is incorrect! Staging should use a staging-specific database  \"
         f"like 'netra_staging' or 'postgres', not the dev database."
 
         @pytest.mark.e2e
@@ -96,40 +96,40 @@ from netra_backend.app.core.environment_constants import get_current_environment
         # Staging/Production should use 'public' schema
 """
 """
-        if current_env == "development":
+        if current_env == "development:"
         expected_schema = "netra_dev"
-        elif current_env in ["testing", "test"]:
+        elif current_env in ["testing", "test]:"
         expected_schema = "netra_test"
         else:  # staging/production
         expected_schema = "public"
 
-        assert expected_schema == "public", \
+        assert expected_schema == "public, \"
         "formatted_string"
 
                     # But the POSTGRES_DB in .env.staging is still wrong!
                     # It's set to 'netra_dev' when it should be something else'
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
                         # Run the test to demonstrate the failure
         test = TestStagingDatabaseMisconfiguration()
 
-        print("Running test to demonstrate staging database misconfiguration...")
-        print("-" * 60)
+        print("Running test to demonstrate staging database misconfiguration...)"
+        print("- * 60)"
 
         try:
         test.test_staging_should_not_use_dev_database_name()
-        print(" FAIL:  Test unexpectedly passed - staging configuration may have been fixed")
+        print(" FAIL:  Test unexpectedly passed - staging configuration may have been fixed)"
         except AssertionError as e:
-        print("formatted_string")
+        print("formatted_string)"
 
-        print("-" * 60)
+        print("- * 60)"
 
         try:
         test.test_staging_database_url_should_not_contain_netra_dev()
-        print(" FAIL:  Test unexpectedly passed - staging configuration may have been fixed")
+        print(" FAIL:  Test unexpectedly passed - staging configuration may have been fixed)"
         except AssertionError as e:
-        print("formatted_string")
+        print("formatted_string)"
 
 """
 '''

@@ -116,7 +116,7 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_all_staging_domains_accessible_https(self):
-        "
+        """
         "
         HARD FAIL: All staging domains MUST be accessible via HTTPS.
         
@@ -196,7 +196,7 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_staging_domains_ssl_certificates_valid(self):
-    ""
+    """
         HARD FAIL: All staging domains MUST have valid SSL certificates.
         
         This test validates SSL certificate validity for all staging domains.
@@ -255,7 +255,7 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     def test_staging_domains_match_expected_patterns(self):
-    "
+        """
     "
         HARD FAIL: Staging domains MUST follow expected naming patterns.
         
@@ -423,7 +423,7 @@ if __name__ == __main__":"
         
         try:
             test_instance.test_staging_domains_match_expected_patterns()
-            print(" PASS:  All staging domains follow expected patterns")
+            print(" PASS:  All staging domains follow expected patterns)"
         except AssertionError as e:
             print(f FAIL:  Domain pattern violations:\n{e})"
             print(f FAIL:  Domain pattern violations:\n{e})"
@@ -432,7 +432,7 @@ if __name__ == __main__":"
         return True
     
     if asyncio.run(run_tests()):
-        print(" PASS:  All staging domain resolution tests passed!")
+        print(" PASS:  All staging domain resolution tests passed!)"
     else:
         exit(1")"
 

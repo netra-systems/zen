@@ -19,7 +19,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.environment_markers import env, env_requires, dev_and_staging
 from tests.e2e.config import TEST_USERS
-from tests.e2e.websocket_guarantees_helpers import (
+from tests.e2e.websocket_guarantees_helpers import ()
     MessageOrderingCore, AtLeastOnceDeliveryCore, DuplicateDetectionCore, ReconnectionRecoveryCore, ConcurrentMessageCore,
     MessageOrderingCore,
     AtLeastOnceDeliveryCore,
@@ -31,7 +31,7 @@ from tests.e2e.websocket_guarantees_helpers import (
 
 @env(dev, staging)
 @env_requires(
-    services=[websocket_manager, "message_queue, postgres", redis],
+    services=[websocket_manager, "message_queue, postgres, redis],"
     features=[message_ordering, delivery_guarantees, reconnection_recovery"],"
     data=[enterprise_test_users, message_sequences]
 @pytest.mark.asyncio
@@ -51,7 +51,7 @@ class MessageOrderingPreservationTests:
             send_result = await ordering_core.send_ordered_sequence(client, user_id, message_count)
             assert send_result[sent_count"] == message_count"
             
-            ordering_request = {type: validate_message_ordering, "user_id: user_id, expected_sequence_length": message_count}
+            ordering_request = {"type": validate_message_ordering, "user_id: user_id, expected_sequence_length: message_count}"
             await client.send(ordering_request)
             response = await client.receive(timeout=3.0)
             
@@ -79,7 +79,7 @@ class MessageOrderingPreservationTests:
             assert batch1_result[sent_count] == batch_size""
             assert batch2_result[sent_count"] == batch_size"
             
-            integrity_request = {type: validate_global_ordering_integrity, "user_id: user_id}"
+            integrity_request = {"type": validate_global_ordering_integrity, "user_id: user_id}"
             await client.send(integrity_request)
             response = await client.receive(timeout=3.0)
             assert response is not None
@@ -107,7 +107,7 @@ class AtLeastOnceDeliveryGuaranteeTests:
             delivery_result = await delivery_core.send_with_retry_guarantee(client, user_id, message_count)
             assert delivery_result[delivered_count"] == message_count"
             
-            validation_request = {type: validate_delivery_guarantee, user_id: user_id, expected_count": message_count}"
+            validation_request = {"type": validate_delivery_guarantee, user_id: user_id, expected_count": message_count}"
             await client.send(validation_request)
             response = await client.receive(timeout=5.0)
             
@@ -128,7 +128,7 @@ class AtLeastOnceDeliveryGuaranteeTests:
         
         try:
             client = await delivery_core.establish_connection(user_id)
-            instability_request = {type: simulate_network_instability, "user_id: user_id, failure_rate": 0.3}
+            instability_request = {"type": simulate_network_instability, "user_id: user_id, failure_rate: 0.3}"
             await client.send(instability_request)
             
             delivery_result = await delivery_core.send_with_retry_guarantee(client, user_id, message_count)
@@ -157,13 +157,13 @@ class DuplicateMessageDetectionTests:
             assert send_result["unique_sent] > 0"
             assert send_result[duplicates_sent] > 0
             
-            detection_request = {type: validate_duplicate_detection", "user_id: user_id}
+            detection_request = {"type": validate_duplicate_detection", user_id: user_id}"
             await client.send(detection_request)
             response = await client.receive(timeout=3.0)
             
             assert response is not None
             assert response.get(duplicates_detected) == send_result[duplicates_sent]
-            assert response.get(unique_messages_processed") == send_result["unique_sent]
+            assert response.get(unique_messages_processed") == send_result[unique_sent]"
             assert response.get(duplicate_detection_accuracy) >= 0.95
             await client.close()
         except Exception as e:
@@ -178,11 +178,11 @@ class DuplicateMessageDetectionTests:
         
         try:
             client = await duplicate_core.establish_connection(user_id)
-            retry_request = {type": "enable_retry_simulation, user_id: user_id, duplicate_prevention: True}
+            retry_request = {type": enable_retry_simulation, user_id: user_id, duplicate_prevention: True}"
             await client.send(retry_request)
             
             send_result = await duplicate_core.send_with_intentional_duplicates(client, user_id, message_count)
-            prevention_request = {type: "validate_duplicate_prevention, user_id": user_id}
+            prevention_request = {"type": "validate_duplicate_prevention, user_id: user_id}"
             await client.send(prevention_request)
             response = await client.receive(timeout=3.0)
             
@@ -215,7 +215,7 @@ class ReconnectionWithMessageRecoveryTests:
             recovery_result = await recovery_core.test_message_recovery_after_reconnection(client, user_id)
             assert recovery_result["recovered_count] == queued_count"
             
-            completeness_request = {type: validate_recovery_completeness, user_id: user_id, "expected_recovered: queued_count}"
+            completeness_request = {"type": validate_recovery_completeness, user_id: user_id, "expected_recovered: queued_count}"
             await client.send(completeness_request)
             response = await client.receive(timeout=5.0)
             
@@ -240,7 +240,7 @@ class ReconnectionWithMessageRecoveryTests:
             pre_queue_result = await recovery_core.simulate_disconnection_with_queued_messages(client, user_id, pre_disconnect_count)
             post_recovery_result = await recovery_core.test_message_recovery_after_reconnection(client, user_id)
             
-            continuity_request = {type: validate_conversation_continuity, user_id": user_id}"
+            continuity_request = {"type": validate_conversation_continuity, user_id": user_id}"
             await client.send(continuity_request)
             response = await client.receive(timeout=3.0)
             
@@ -275,14 +275,14 @@ class ConcurrentMessageHandlingTests:
             assert processing_time < 5.0
             assert concurrent_result[concurrent_sent] == concurrent_count
             
-            integrity_request = {type: validate_concurrent_processing_integrity", "user_id: user_id, expected_count: concurrent_count}
+            integrity_request = {"type": validate_concurrent_processing_integrity", user_id: user_id, expected_count: concurrent_count}"
             await client.send(integrity_request)
             response = await client.receive(timeout=5.0)
             
             assert response is not None
             assert response.get(concurrent_integrity_maintained) is True
             assert response.get(processing_order_preserved") is True"
-            assert response.get(message_loss_under_load, 0) == 0
+            assert response.get(message_loss_under_load, "0) == 0"
             await client.close()
         except Exception as e:
             if server not available in str(e).lower():""
@@ -312,13 +312,13 @@ class ConcurrentMessageHandlingTests:
             
             assert response is not None
             assert response.get(message_isolation_maintained") is True"
-            assert response.get(cross_user_contamination, 0) == 0
+            assert response.get(cross_user_contamination, "0) == 0"
             
             await client1.close()
             await client2.close()
         except Exception as e:
             if server not available in str(e).lower():""
-                pytest.skip("WebSocket server not available for isolation test")
+                pytest.skip("WebSocket server not available for isolation test)"
             raise
 
 """

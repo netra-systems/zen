@@ -88,7 +88,7 @@ class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
                 
                 # CRITICAL: Send initial message to trigger environment detection logic
                 test_message = {
-                    "type: agent_request",
+                    "type: agent_request,"
                     data: {
                         message: "Test coroutine regression,"
                         thread_id": integration-test-thread"
@@ -102,7 +102,7 @@ class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
                 response_data = json.loads(response)
                 
                 # CRITICAL: Validate we got a proper response (not coroutine error)
-                assert isinstance(response_data, dict), fResponse should be dict, got {type(response_data)}
+                assert isinstance(response_data, "dict), fResponse should be dict, got {type(response_data)}"
                 assert "type in response_data, Response should have 'type' field"
                 
                 # If we get here without coroutine errors, the fix is working
@@ -117,34 +117,34 @@ class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
                 self.fail(fWebSocket endpoint failed with coroutine regression: {e})
 
     def test_websocket_environment_detection_integration(self):
-    ""
+    """
         Test WebSocket environment detection logic with real environment.
         
         This tests the E2E detection logic that caused the coroutine issue
         in an integration context with real environment variables.
         
         # CRITICAL: Test environment detection without coroutines
-        environment = self.env.get(ENVIRONMENT", "development).lower()
+        environment = self.env.get(ENVIRONMENT", development).lower()"
         is_testing = self.env.get(TESTING, 0) == 1""
         
         # Test E2E detection logic from websocket.py lines 213-217
         is_e2e_via_env = (
             self.env.get("E2E_TESTING, 0) == 1 or "
-            self.env.get(PYTEST_RUNNING", "0) == 1 or
-            self.env.get(STAGING_E2E_TEST, 0") == "1 or
+            self.env.get(PYTEST_RUNNING", 0) == 1 or"
+            self.env.get(STAGING_E2E_TEST, 0") == 1 or"
             self.env.get(E2E_OAUTH_SIMULATION_KEY) is not None or
             self.env.get("E2E_TEST_ENV) == staging"
         )
         
         # CRITICAL: All values should be proper types, not coroutines
-        assert isinstance(environment, str), fEnvironment should be string, got {type(environment)}
-        assert isinstance(is_testing, bool), fis_testing should be bool, got {type(is_testing)}
+        assert isinstance(environment, "str), fEnvironment should be string, got {type(environment)}"
+        assert isinstance(is_testing, "bool), fis_testing should be bool, got {type(is_testing)}"
         assert isinstance(is_e2e_via_env, bool), f"is_e2e_via_env should be bool, got {type(is_e2e_via_env)}"
         
         # CRITICAL: Validate no coroutine objects in environment access
         for attr_name in [environment", is_testing, is_e2e_via_env]:"
-            attr_value = locals()[attr_name.replace("., _")]
-            assert not inspect.iscoroutine(attr_value), f{attr_name} should not be a coroutine: {attr_value}
+            attr_value = locals()[attr_name.replace("., _)]"
+            assert not inspect.iscoroutine(attr_value), "f{attr_name} should not be a coroutine: {attr_value}"
 
     async def test_websocket_startup_logic_integration(self):
         
@@ -160,18 +160,18 @@ class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
         startup_complete = True  # Simulate completed startup
         startup_in_progress = False
         
-        if not startup_complete and environment in ["staging, production"]:
+        if not startup_complete and environment in ["staging, production]:"
             # Test E2E detection logic that was failing
             is_e2e_testing = (
                 self.env.get(E2E_TESTING, 0) == 1 or ""
                 self.env.get(PYTEST_RUNNING", 0) == 1 or"
-                self.env.get("STAGING_E2E_TEST, 0") == 1 or
+                self.env.get("STAGING_E2E_TEST, 0) == 1 or"
                 self.env.get(E2E_OAUTH_SIMULATION_KEY) is not None or""
                 self.env.get("E2E_TEST_ENV) == staging"
             )
             
             # CRITICAL: This logic should work without coroutine errors
-            assert isinstance(is_e2e_testing, bool), fis_e2e_testing should be bool, got {type(is_e2e_testing)}
+            assert isinstance(is_e2e_testing, "bool), fis_e2e_testing should be bool, got {type(is_e2e_testing)}"
 
     def test_websocket_environment_conditional_logic(self):
         pass
@@ -212,7 +212,7 @@ class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
             self.assertIsInstance(is_e2e_testing, bool)
 
     async def test_websocket_auth_integration_with_environment_detection(self):
-    ""
+    """
         CRITICAL: Test WebSocket authentication integrated with environment detection.
         
         This test combines real authentication with environment detection to ensure

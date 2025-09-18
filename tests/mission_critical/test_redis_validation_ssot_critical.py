@@ -77,7 +77,7 @@ logger = logging.getLogger(__name__)
 
 
 class RedisValidationSsotCriticalTest(SSotBaseTestCase):
-    ""
+    """
     Mission Critical Redis Validation SSOT Compliance Test.
     
     This test MUST pass before any deployment. It validates that Redis
@@ -97,7 +97,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
             test_category=CategoryType.MISSION_CRITICAL,
             metadata={
                 deployment_blocker: True,
-                "ssot_category: redis_validation",
+                "ssot_category: redis_validation,"
                 expected_failures: 3,  # Number of SSOT violations
                 business_impact: "HIGH"
             }
@@ -107,14 +107,14 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         self.known_violations = {
             backend_redis_health": netra_backend/app/core/health_checkers.py,"
             auth_redis_health: auth_service/services/health_check_service.py, 
-            analytics_redis_health": "analytics_service/analytics_core/database/connection.py
+            analytics_redis_health": analytics_service/analytics_core/database/connection.py"
         }
         
         # Expected SSOT location (does not exist yet - should be created)
         self.expected_ssot_location = shared/redis_validation
         
     def test_redis_validation_ssot_violations_detected(self):
-    ""
+    """
         CRITICAL: Test that multiple Redis validation implementations exist.
         
         This test MUST FAIL to demonstrate current SSOT violations.
@@ -171,7 +171,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         )
     
     def test_redis_validation_behavior_consistency(self):
-    "
+        """
     "
         Test that Redis validation behaviors are consistent across services.
         
@@ -200,7 +200,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         )
     
     def test_redis_ssot_location_exists(self):
-        "
+        """
         "
         Test that a single Redis validation SSOT location exists.
         
@@ -276,7 +276,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         )
     
     def _scan_for_redis_validation_implementations(self) -> Dict[str, Dict[str, Any]]:
-        "
+        """
         "
         Scan codebase for Redis validation implementations.
         
@@ -335,7 +335,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
                         }
                         
                 except Exception as e:
-                    logger.warning(f"Failed to scan {py_file}: {e})")
+                    logger.warning(f"Failed to scan {py_file}: {e}))"
         
         return implementations
     
@@ -410,7 +410,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
-                if "redis in node.name.lower() and health" in node.name.lower():
+                if "redis in node.name.lower() and health in node.name.lower():"
                     method_info = {
                         name: node.name,
                         args: [arg.arg for arg in node.args.args],"
@@ -460,7 +460,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
                     
                     if m1["args] != m2[args] or m1[is_async] != m2[is_async]:"
                         mismatches.append({
-                            "type: method_signature_mismatch",
+                            "type: method_signature_mismatch,"
                             method: method_name,
                             file1: file1,"
                             file1: file1,"
@@ -519,7 +519,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
                     behaviors[file_path] = behavior_info
                     
             except Exception as e:
-                logger.warning(f"Failed to analyze behavior in {file_path}: {e})")
+                logger.warning(f"Failed to analyze behavior in {file_path}: {e}))"
         
         return behaviors
     
@@ -540,22 +540,22 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
             line_lower = line.lower().strip()
             
             # Find timeout values
-            if timeout" in line_lower and any(op in line_lower for op in ["=, :):
+            if timeout" in line_lower and any(op in line_lower for op in [=, :):"
                 behavior_info[timeout_values].append(line.strip())"
                 behavior_info[timeout_values].append(line.strip())"
             
             # Find error handling patterns
             if any(pattern in line_lower for pattern in [except", try:, raise, error):"
-                if redis" in line_lower or "connection in line_lower:
+                if redis" in line_lower or connection in line_lower:"
                     behavior_info[error_handling_patterns].append(line.strip())
             
             # Find return format patterns
-            if return in line_lower and any(pattern in line_lower for pattern in [{", "dict, result):
+            if return in line_lower and any(pattern in line_lower for pattern in [{", dict, result):"
                 behavior_info[return_formats].append(line.strip())
             
             # Find connection patterns
-            if any(pattern in line_lower for pattern in [redis", "connection, client, ping):
-                if any(op in line_lower for op in [=, "await, get_", connect):
+            if any(pattern in line_lower for pattern in [redis", connection, client, ping):"
+                if any(op in line_lower for op in [=, "await, get_, connect):"
                     behavior_info[connection_patterns].append(line.strip())
         
         return behavior_info
@@ -610,7 +610,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         # Find return format differences
         if len(set(len(returns) for returns in return_patterns.values())) > 1:
             differences.append({
-                type": "return_format_difference, 
+                type": return_format_difference, "
                 details: return_patterns
             }
         
@@ -687,13 +687,13 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
             logger.error(fSSOT VIOLATION: {violations) Redis validation implementations found. "
                         fThis is a DEPLOYMENT BLOCKER until consolidated.)
         else:
-            logger.info( PASS:  Redis validation appears to be SSOT compliant)"
-            logger.info( PASS:  Redis validation appears to be SSOT compliant)"
+            logger.info("PASS:  Redis validation appears to be SSOT compliant))"
+            logger.info("PASS:  Redis validation appears to be SSOT compliant))"
         
         super().tearDown()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # Run as standalone test
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

@@ -41,7 +41,7 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
     "Test suite to reproduce and validate config manager SSOT violations."
 
     def test_config_manager_import_conflicts_detected(self):
-    ""
+    """
         EXPECTED TO FAIL - Detect import conflicts between 3 config managers.
 
         This test demonstrates how having 3 different configuration managers
@@ -75,7 +75,7 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
                 import_errors.append(fClass not found in {manager_path}: {str(e)})
 
         # TEST ASSERTION: This should fail because all 3 managers exist and conflict
-        assert len(imported_managers) < 3, (
+        assert len(imported_managers) < 3, ()
             fSSOT VIOLATION: Found {len(imported_managers)} config managers, should be only 1. 
             fManagers found: {[m['path'] for m in imported_managers]}. ""
             fImport errors: {import_errors}. 
@@ -83,7 +83,7 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
         )
 
     def test_config_manager_method_signature_conflicts(self):
-    ""
+    """
         EXPECTED TO FAIL - Detect method signature conflicts between managers.
 
         Different config managers may have conflicting method signatures
@@ -144,7 +144,7 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
         )
 
     def test_environment_access_ssot_violations_detected(self):
-        "
+        """
         "
         EXPECTED TO FAIL - Detect direct os.environ access violations in config managers.
 
@@ -280,7 +280,7 @@ class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
         )
 
     def test_config_manager_singleton_vs_factory_pattern_conflicts(self):
-        "
+        """
         "
         EXPECTED TO FAIL - Detect singleton vs factory pattern conflicts.
 

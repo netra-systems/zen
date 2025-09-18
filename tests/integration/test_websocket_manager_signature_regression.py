@@ -30,7 +30,7 @@ class WebSocketManagerSignatureTests:
         try:
             manager = create_websocket_manager(context)
             assert manager is not None
-            assert hasattr(manager, 'user_context')
+            assert hasattr(manager, "'user_context')"
             assert manager.user_context.user_id == '105945141827451681156'
         except TypeError as e:
             pytest.fail(f'Failed with positional argument: {e}')
@@ -46,7 +46,7 @@ class WebSocketManagerSignatureTests:
         try:
             manager = create_websocket_manager(user_context=context)
             assert manager is not None
-            assert hasattr(manager, 'user_context')
+            assert hasattr(manager, "'user_context')"
             assert manager.user_context.user_id == 'github_user_98765432101'
         except TypeError as e:
             pytest.fail(f'Failed with keyword argument: {e}')
@@ -93,8 +93,8 @@ class WebSocketManagerSignatureTests:
         assert manager2 is not None
         manager3 = create_websocket_manager(user_context=context)
         assert manager3 is not None
-        assert all([manager1, manager2, manager3)
-        assert len({id(manager1), id(manager2), id(manager3)} == 3
+        assert all([manager1, "manager2, manager3)"
+        assert len({id(manager1), "id(manager2), id(manager3)} == 3"
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

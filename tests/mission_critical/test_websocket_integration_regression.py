@@ -54,7 +54,7 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
     @pytest.mark.no_skip  # NEVER skip this test
     @pytest.mark.real_services
     async def test_complete_websocket_integration_chain_regression(self, real_services_fixture):
-    "
+        """
     "
         Test the complete WebSocket integration chain to prevent regressions.
         
@@ -344,7 +344,7 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
     @pytest.mark.no_skip  # NEVER skip this test
     @pytest.mark.real_services
     async def test_websocket_events_business_continuity_regression(self, real_services_fixture):
-    "
+        """
     "
         Test WebSocket events business continuity to prevent revenue regressions.
         
@@ -420,7 +420,7 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
                         
                         captured_events.append({
                             event_type: event_type,
-                            user_id: kwargs.get(user_id", "unknown),
+                            user_id: kwargs.get(user_id", unknown),"
                             business_context: kwargs.get(business_context, {),
                             timestamp": timestamp"
                         }
@@ -643,7 +643,7 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
                 websocket_factory2 = WebSocketBridgeFactory()
                 
                 # All factories should be independent instances
-                assert execution_factory1 is not execution_factory2, ExecutionEngineFactory not creating independent instances
+                assert execution_factory1 is not execution_factory2, "ExecutionEngineFactory not creating independent instances"
                 assert websocket_factory1 is not websocket_factory2, WebSocketBridgeFactory not creating independent instances"
                 assert websocket_factory1 is not websocket_factory2, WebSocketBridgeFactory not creating independent instances"
                 
@@ -652,7 +652,7 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
                 
                 for factory in factories:
                     assert hasattr(factory, 'configure'), f"Factory {type(factory)} missing configure method"
-                    assert callable(factory.configure), fFactory {type(factory)} configure not callable
+                    assert callable(factory.configure), "fFactory {type(factory)} configure not callable"
                 
                 # Configuration should be successful for all instances
                 for factory in factories:
@@ -794,7 +794,7 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
                     websocket_client_id=str(user_context.websocket_client_id)
                 )
                 
-                assert execution_engine is not None, Execution engine creation failed in orchestration
+                assert execution_engine is not None, "Execution engine creation failed in orchestration"
                 assert user_emitter is not None, "User emitter creation failed in orchestration"
                 
                 architecture_validation[service_orchestration] = True
@@ -836,7 +836,7 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
                     
                     # Configs should be from same source (SSOT)
                     if config1 and config2:
-                        assert type(config1) == type(config2), Engines using different config types - SSOT violation
+                        assert type(config1) == type(config2), "Engines using different config types - SSOT violation"
                 
                 assert len(ssot_indicators) > 0, (
                     "No SSOT indicators found - factory not following SSOT principles"

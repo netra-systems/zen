@@ -28,12 +28,12 @@ from test_framework.ssot.mocks import get_mock_factory
 
 # Import UserExecutionEngine and dependencies
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-from netra_backend.app.agents.supervisor.execution_context import (
+from netra_backend.app.agents.supervisor.execution_context import ()
     AgentExecutionContext,
     AgentExecutionResult, 
     PipelineStep
 )
-from netra_backend.app.services.user_execution_context import (
+from netra_backend.app.services.user_execution_context import ()
     UserExecutionContext,
     create_user_execution_context
 )
@@ -231,9 +231,9 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
             fGolden Path failed steps: {failed_steps})
         
         # Log Golden Path success
-        print(f"✅ GOLDEN PATH PROTECTED: Complete user flow successful through UserExecutionEngine")
+        print(f"✅ GOLDEN PATH PROTECTED: Complete user flow successful through UserExecutionEngine)"
         print(f   Total duration: {total_duration:.2f}s)
-        print(f"   Steps completed: {len(golden_path_results)}")
+        print(f"   Steps completed: {len(golden_path_results)})"
         print(f   Business value: $500K+ ARR flow maintained)
 
     async def test_golden_path_websocket_events_all_five_critical_events(self):
@@ -340,7 +340,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                         agent_started must come before agent_completed)
                 
                 print(f✅ ALL 5 CRITICAL WEBSOCKET EVENTS VALIDATED:)
-                print(f   Events received: {len(events_received")}")
+                print(f   Events received: {len(events_received")})"
                 print(f   Event sequence: {' → '.join(event_order)})
                 print(f   Golden Path user experience: MAINTAINED"")
 
@@ -476,9 +476,9 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                     self.assertIn(event_name, ['agent_started', 'agent_thinking', 'agent_completed')
             
             print(f✅ MULTI-USER GOLDEN PATH PROTECTED:)
-            print(f"   Concurrent users: {concurrent_users}")
+            print(f"   Concurrent users: {concurrent_users})"
             print(f   Total duration: {total_duration:.2f}s)
-            print(f"   All users successful: {len(successful_users)}/{concurrent_users}")
+            print(f"   All users successful: {len(successful_users)}/{concurrent_users})"
             print(f   User isolation: MAINTAINED)
             
         finally:

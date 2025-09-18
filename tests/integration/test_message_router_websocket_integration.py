@@ -198,7 +198,7 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
             # Step 2: User sends message
             user_message = create_standard_message(
                 message_type=MessageType.USER_MESSAGE,
-                content={text: Help me optimize my AI workflow", "user_id: user_id},
+                content={text: Help me optimize my AI workflow", user_id: user_id},"
                 user_id=user_id
             )
             
@@ -254,7 +254,7 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
             final_response = create_standard_message(
                 message_type=MessageType.AGENT_RESPONSE,
                 content={
-                    response": "Here's your AI optimization plan...,'
+                    response": Here's your AI optimization plan...,'"
                     user_id: user_id
                 },
                 user_id=user_id
@@ -290,7 +290,7 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
             )
             
     async def test_concurrent_user_message_routing_isolation(self):
-    ""
+    """
         Test that concurrent users have isolated message routing.
         This should FAIL initially, revealing user isolation issues.
         

@@ -7,7 +7,7 @@ class WebSocketTestHelper:
         self._closed = False
         
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
             raise RuntimeError(WebSocket is closed)"
@@ -189,7 +189,7 @@ class AgentHandlerComprehensiveFixTests:
         
         message = WebSocketMessage(
             type=MessageType.START_AGENT,
-            payload={"agent_name: triage", user_request: test}
+            payload={"agent_name: triage, user_request: test}"
         
         websocket = WebSocketTestHelper()
         
@@ -223,14 +223,14 @@ class AgentHandlerComprehensiveFixTests:
                 assert handler.processing_stats[errors] > 0
 
     async def test_concurrent_message_handling(self):
-        ""Test that multiple concurrent messages can be handled.
+        ""Test that multiple concurrent messages can be handled."
         
         handler = AgentMessageHandler()
         
         async def handle_single_message(msg_id: int):
             message = WebSocketMessage(
                 type=MessageType.START_AGENT,
-                payload={agent_name: fagent_{msg_id}", "user_request: ftest_{msg_id}}
+                payload={agent_name: fagent_{msg_id}", user_request: ftest_{msg_id}}"
             
             websocket = WebSocketTestHelper()
             
@@ -245,7 +245,7 @@ class AgentHandlerComprehensiveFixTests:
                     websocket = WebSocketTestHelper()
                     mock_service.handle_start_agent = AsyncMock(return_value={
                         success: True,
-                        run_id": f"run_{msg_id},
+                        run_id": frun_{msg_id},"
                         agent: f"agent_{msg_id}"
                     }
                     mock_service_class.return_value = mock_service

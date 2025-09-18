@@ -54,7 +54,7 @@ class WebSocketImmediateDisconnectRegressionTests:
             async with websockets.connect(backend_url, subprotocols=['jwt-auth', f'jwt.{test_token)'], additional_headers={'Authorization': f'Bearer {test_token)') as websocket:
                 logger.info('WebSocket connected successfully')
                 connection_duration = time.time() - connection_start
-                assert connection_duration < 1.0, 'Connection took too long to establish'
+                assert connection_duration < 1.0, "'Connection took too long to establish'"
                 try:
                     welcome = await asyncio.wait_for(websocket.recv(), timeout=2.0)
                     messages_received.append(welcome)
@@ -70,18 +70,18 @@ class WebSocketImmediateDisconnectRegressionTests:
                     logger.info(f'Received response: {response[:100]}')
                 except asyncio.TimeoutError:
                     pass
-                assert websocket.open, 'WebSocket closed prematurely'
+                assert websocket.open, "'WebSocket closed prematurely'"
                 await asyncio.sleep(1.0)
                 connection_duration = time.time() - connection_start
-                assert connection_duration >= 1.0, f'Connection closed too quickly: {connection_duration}s'
+                assert connection_duration >= 1.0, "f'Connection closed too quickly: {connection_duration}s'"
         except ConnectionClosed as e:
             disconnect_code = e.code
             connection_duration = time.time() - connection_start
             logger.error(f'Connection closed with code {e.code}: {e.reason}')
-            assert e.code != 1006 or connection_duration > 0.5, f'REGRESSION: Immediate ABNORMAL_CLOSURE (1006) after {connection_duration}s - the exact bug!'
-            assert e.code != 1008, 'Connection closed with policy violation - subprotocol negotiation failed'
-        assert connection_duration >= 1.0, f'Connection only lasted {connection_duration}s - should stay open longer'
-        assert disconnect_code != 1006, f'Connection closed with ABNORMAL_CLOSURE - indicates state/subprotocol issue'
+            assert e.code != 1006 or connection_duration > 0.5, "f'REGRESSION: Immediate ABNORMAL_CLOSURE (1006) after {connection_duration}s - the exact bug!'"
+            assert e.code != 1008, "'Connection closed with policy violation - subprotocol negotiation failed'"
+        assert connection_duration >= 1.0, "f'Connection only lasted {connection_duration}s - should stay open longer'"
+        assert disconnect_code != 1006, "f'Connection closed with ABNORMAL_CLOSURE - indicates state/subprotocol issue'"
 
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
@@ -98,7 +98,7 @@ class WebSocketImmediateDisconnectRegressionTests:
             async with websockets.connect(backend_url, subprotocols=subprotocols, additional_headers={'Authorization': f'Bearer {test_token)', 'Origin': 'http://localhost:3000') as websocket:
                 selected_subprotocol = websocket.subprotocol
                 logger.info(f'Server selected subprotocol: {selected_subprotocol}')
-                assert selected_subprotocol in ['jwt-auth', None], f'Server selected unexpected subprotocol: {selected_subprotocol}'
+                assert selected_subprotocol in ['jwt-auth', "None], f'Server selected unexpected subprotocol: {selected_subprotocol}'"
                 if subprotocols:
                     assert selected_subprotocol == 'jwt-auth', Server didn't select jwt-auth subprotocol when client requested it""'
                 await asyncio.sleep(0.5)
@@ -106,8 +106,8 @@ class WebSocketImmediateDisconnectRegressionTests:
         except ConnectionClosed as e:
             if e.code == 1006 and time.time() - start_time < 0.1:
                 pytest.fail(f'REGRESSION: Immediate disconnect with 1006 - subprotocol issue')
-        assert connection_stable, 'Connection was not stable'
-        assert selected_subprotocol == 'jwt-auth', 'Subprotocol negotiation failed - would cause frontend disconnect'
+        assert connection_stable, "'Connection was not stable'"
+        assert selected_subprotocol == 'jwt-auth', "'Subprotocol negotiation failed - would cause frontend disconnect'"
 
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
@@ -132,11 +132,11 @@ class WebSocketImmediateDisconnectRegressionTests:
                     except asyncio.TimeoutError:
                         pass
                     await asyncio.sleep(0.1)
-                assert websocket.open, 'Connection closed during message exchange'
+                assert websocket.open, "'Connection closed during message exchange'"
         except ConnectionClosed as e:
             if e.code == 1006 and messages_sent == 0:
                 pytest.fail('REGRESSION: Connection closed before any messages could be sent')
-        assert messages_sent >= 3, f'Could only send {messages_sent} messages before disconnect'
+        assert messages_sent >= 3, "f'Could only send {messages_sent} messages before disconnect'"
         logger.info(f'Successfully exchanged messages: sent={messages_sent}, received={messages_received}')
 
     @pytest.mark.asyncio
@@ -148,10 +148,10 @@ class WebSocketImmediateDisconnectRegressionTests:
 ""
         try:
             async with websockets.connect(backend_url, additional_headers={'Authorization': f'Bearer {test_token)') as websocket:
-                assert websocket.open, 'Failed to connect without subprotocols'
+                assert websocket.open, "'Failed to connect without subprotocols'"
                 await asyncio.sleep(0.5)
-                assert websocket.open, 'Connection closed when no subprotocols sent'
-                assert websocket.subprotocol is None, f'Unexpected subprotocol selected: {websocket.subprotocol}'
+                assert websocket.open, "'Connection closed when no subprotocols sent'"
+                assert websocket.subprotocol is None, "f'Unexpected subprotocol selected: {websocket.subprotocol}'"
         except ConnectionClosed as e:
             if e.code == 1006:
                 pytest.fail('Connection rejected when no subprotocols sent')
@@ -186,14 +186,14 @@ class WebSocketImmediateDisconnectRegressionTests:
         logger.info(f'Connections: {len(successful)} successful, {len(failed)} failed')
         for failure in failed:
             logger.error(fConnection {failure['id']} failed: {failure.get('error')})
-        assert len(successful) >= num_connections * 0.8, f'Too many connections failed: {len(failed)}/{num_connections}'
+        assert len(successful) >= num_connections * 0.8, "f'Too many connections failed: {len(failed)}/{num_connections}'"
         immediate_1006 = [f for f in failed if 'Code 1006' in f.get('error', '')]
-        assert len(immediate_1006) == 0, f'REGRESSION: {len(immediate_1006)} connections had immediate ABNORMAL_CLOSURE'
+        assert len(immediate_1006) == 0, "f'REGRESSION: {len(immediate_1006)} connections had immediate ABNORMAL_CLOSURE'"
 
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_websocket_reconnection_after_disconnect(self, backend_url, test_token):
-    ""
+    """
         REGRESSION TEST: Reconnection should work after disconnect.
         Tests that the bug doesn't affect reconnection scenarios.'
         
@@ -215,12 +215,12 @@ class WebSocketImmediateDisconnectRegressionTests:
         except ConnectionClosed as e:
             if e.code == 1006:
                 pytest.fail('Reconnection failed with ABNORMAL_CLOSURE')
-        assert first_connection_ok, 'First connection failed'
-        assert second_connection_ok, 'Reconnection failed'
+        assert first_connection_ok, "'First connection failed'"
+        assert second_connection_ok, "'Reconnection failed'"
         logger.info('Both initial connection and reconnection successful')
 
 class WebSocketChatUIIntegrationTests:
-    ""Test that the fix resolves the actual Loading chat... issue.
+    ""Test that the fix resolves the actual Loading chat... issue."
 
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)

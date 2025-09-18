@@ -40,7 +40,7 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
         return Path(__file__).parent.parent.parent
 
     def test_auth_integration_wrapper_detection(self):
-        "
+        """
         "
         CRITICAL: Detect wrapper functions in auth integration that bypass SSOT.
 
@@ -48,7 +48,7 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
         REMEDIATION: Remove wrapper functions, use SSOT auth service directly
 "
 "
-        auth_integration_path = self.project_root / netra_backend / app" / "auth_integration
+        auth_integration_path = self.project_root / netra_backend / app" / auth_integration"
 
         if not auth_integration_path.exists():
             # Skip if path doesn't exist'
@@ -102,7 +102,7 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
             )
 
     def test_function_delegation_pattern_detection(self):
-    "
+        """
     "
         CRITICAL: Detect functions that delegate to legacy patterns instead of SSOT.
 
@@ -174,7 +174,7 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
             )
 
     def test_deprecated_import_pattern_detection(self):
-    "
+        """
     "
         CRITICAL: Detect deprecated import patterns that should be updated.
 
@@ -188,7 +188,7 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
         deprecated_patterns = [
             (from netra_backend.app.logging_config import", Use 'from shared.logging.unified_logging_ssot import get_logger'),"
             (import netra_backend.app.logging_config, Use 'from shared.logging.unified_logging_ssot import get_logger'),
-            (from auth_service.legacy", "Use current auth_service modules),
+            (from auth_service.legacy", Use current auth_service modules),"
             (from netra_backend.app.auth_integration import validate_jwt, Use auth_service directly)
         ]
 

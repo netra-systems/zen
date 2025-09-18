@@ -45,7 +45,7 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         super().setup_method(method)
 
         # Test environment setup
-        self.set_env_var(ENVIRONMENT", "test)
+        self.set_env_var(ENVIRONMENT", test)"
         self.set_env_var(TESTING, true)
         self.set_env_var(JWT_SECRET_KEY, "test-secret-for-golden-path-testing)"
 
@@ -53,7 +53,7 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         self.golden_path_user = {
             user_id": fgolden_path_user_{uuid.uuid4().hex[:8]},"
             email: golden.path@netrasystems.ai,
-            permissions: ["chat, agents", read, write]
+            permissions: ["chat, agents, read, write]"
         }
 
         # Test JWT token for Golden Path validation
@@ -77,13 +77,13 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         payload = {
             sub": user_data[user_id],"
             email: user_data[email],
-            permissions": user_data["permissions],
+            permissions": user_data[permissions],"
             iat: int(time.time()),
             exp: int(time.time()) + 3600,  # 1 hour"
             exp: int(time.time()) + 3600,  # 1 hour"
             token_type": access,"
             iss: netra-auth-service,
-            aud": "netra-platform
+            aud": netra-platform"
         }
 
         # For testing, create a mock JWT token format
@@ -101,7 +101,7 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         return f{header}.{payload_encoded}.{signature}
 
     def test_user_isolation_failures_due_to_jwt_violations(self):
-        "
+        """
         "
         CRITICAL TEST - DESIGNED TO FAIL
 
@@ -124,26 +124,26 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         # Test multiple users with same JWT token processed differently
         test_users = [
             {user_id": user_a, email: user.a@test.com},"
-            {user_id": "user_b, email: user.b@test.com}
+            {user_id": user_b, email: user.b@test.com}"
         ]
 
         validation_results = {}
         isolation_violations = []
 
         # Test multiple JWT validation paths with same token
-        for i, validation_path in enumerate([path_1, "path_2, path_3"):
+        for i, validation_path in enumerate([path_1, "path_2, path_3):"
             try:
                 # Simulate different validation implementations
                 if validation_path == path_1:
                     # Simulate auth_client_core.validate_token
-                    result = {user_id": "user_a, source: auth_client_core}
+                    result = {user_id": user_a, source: auth_client_core}"
                 elif validation_path == path_2:"
                 elif validation_path == path_2:"
                     # Simulate user_auth_service.validate_token
                     result = {"user_id: user_b, source: user_auth_service}"
                 else:
                     # Simulate validators.validate_token
-                    result = {"user_id: user_a", source: validators}
+                    result = {"user_id: user_a, source: validators}"
 
                 validation_results[validation_path] = result
 
@@ -187,7 +187,7 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         )
 
     def test_websocket_authentication_inconsistency_violations(self):
-        ""
+        """
         CRITICAL TEST - DESIGNED TO FAIL
 
         Test WebSocket auth bypassing auth service SSOT.
@@ -263,10 +263,10 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
             )
 
         # Test 3: Simulate auth consistency between WebSocket and API
-        websocket_auth_result = {valid: True, user_id: "user_ws, source": websocket}
-        api_auth_result = {valid: True, "user_id: user_api", source: api}
+        websocket_auth_result = {valid: True, user_id: "user_ws, source: websocket}"
+        api_auth_result = {valid: True, "user_id: user_api, source: api}"
 
-        if websocket_auth_result["user_id] != api_auth_result[user_id"]:
+        if websocket_auth_result["user_id] != api_auth_result[user_id]:"
             auth_consistency_violations.append(
                 fWebSocket and API auth return different user IDs for same token: 
                 fWebSocket={websocket_auth_result['user_id']}, API={api_auth_result['user_id']}. 
@@ -291,7 +291,7 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         )
 
     def test_jwt_secret_mismatch_authentication_failures(self):
-        "
+        """
         "
         CRITICAL TEST - DESIGNED TO FAIL
 
@@ -480,8 +480,8 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
                 # Multiple validation paths would return different results
                 auth_attempts = [
                     {method": websocket_direct, result: user_ws},"
-                    {method": "auth_service_delegate, result: user_auth},
-                    {method: "fallback_validation, result": user_fallback}
+                    {method": auth_service_delegate, result: user_auth},"
+                    {method: "fallback_validation, result: user_fallback}"
                 ]
 
                 unique_results = set(attempt[result] for attempt in auth_attempts)
@@ -500,7 +500,7 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         if websocket_auth_success:
             try:
                 # Simulate agent execution - would fail if auth context inconsistent
-                agent_auth_validation = {user_id: user_agent, "permissions: [chat"]}
+                agent_auth_validation = {user_id: user_agent, "permissions: [chat]}"
                 websocket_user_id = user_ws  # From Step 2
 
                 if agent_auth_validation[user_id] != websocket_user_id:"
@@ -520,11 +520,11 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         if agent_execution_success:
             try:
                 # Simulate WebSocket event delivery - requires consistent auth throughout
-                critical_events = [agent_started", "agent_thinking, agent_completed]
+                critical_events = [agent_started", agent_thinking, agent_completed]"
 
                 for event in critical_events:
                     # Each event delivery requires auth validation
-                    event_auth_check = {user_id: user_event", "event: event}
+                    event_auth_check = {user_id: user_event", event: event}"
 
                     # JWT violations would cause event auth to fail or return wrong user
                     if event_auth_check[user_id] != user_agent:

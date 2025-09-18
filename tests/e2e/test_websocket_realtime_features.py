@@ -81,7 +81,7 @@ connection_failures = []
         # Step 1: Get authentication token
 auth_token = None
 async with aiohttp.ClientSession() as session:
-    print("[Auth] Getting authentication token for WebSocket connection...")
+    print("[Auth] Getting authentication token for WebSocket connection...)"
 try:
                 # Try to get a test token using dev login endpoint
 async with session.post(formatted_string) as response:
@@ -198,7 +198,7 @@ try:
 agent_task = {
 type": agent_task,"
 task_id: str(uuid.uuid4()),
-"agent_type: supervisor_agent",
+"agent_type: supervisor_agent,"
 task_data: }
 prompt: "Hello, this is a test task,"
 priority": normal,"
@@ -216,7 +216,7 @@ try:
 
 ack_data = json.loads(ack_response)
 
-if ack_data.get(type") != "agent_task_ack:
+if ack_data.get(type") != agent_task_ack:"
     agent_communication_failures.append(formatted_string)
 
 elif ack_data.get(task_id) != agent_task[task_id"]:"
@@ -267,7 +267,7 @@ elif not any(chunk.get(type") == agent_response_complete for chunk in response_c
 
 
                                                                                                                                         # Test 3: Agent Status Updates
-    print("[Agent] Testing agent status updates...")
+    print("[Agent] Testing agent status updates...)"
 
 status_request = {
 type: agent_status_request,
@@ -309,7 +309,7 @@ pytest.skip(fAgent communication test failed (WebSocket infrastructure not imple
  + 
 .join(failure_report))
 
-print("[Success] Agent communication test passed")
+print("[Success] Agent communication test passed)"
 
 
 @pytest.mark.e2e
@@ -420,7 +420,7 @@ elif broadcast_received_count < len(clients) - 1:
 selective_message = {
 type": direct_message,"
 target_client: 1,
-"message: This is for client 1 only",
+"message: This is for client 1 only,"
 message_id: str(uuid.uuid4()),
 timestamp: time.time()""
                                                                                                                                                                                                                                     
@@ -442,7 +442,7 @@ client[websocket].recv(),
 timeout=0.5
                                                                                                                                                                                                                                                 
 msg_data = json.loads(message)
-if msg_data.get("message_id) == selective_message[message_id"]:
+if msg_data.get("message_id) == selective_message[message_id]:"
     if i == 1:
         pass
 target_received = True

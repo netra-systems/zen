@@ -7,7 +7,7 @@ class WebSocketTestHelper:
         self._closed = False
         
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
             raise RuntimeError(WebSocket is closed)"
@@ -67,7 +67,7 @@ from dataclasses import dataclass
 from collections import defaultdict
 from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.services.websocket_bridge_factory import (
+from netra_backend.app.services.websocket_bridge_factory import ()
     WebSocketBridgeFactory,
     UserWebSocketEmitter,
     WebSocketConnectionPool,
@@ -124,7 +124,7 @@ class PerformanceMetrics:
     
     @property
     def avg_connection_time(self) -> float:
-        ""Average connection establishment time.
+        ""Average connection establishment time."
         return statistics.mean(self.connection_times) if self.connection_times else 0
     
     @property
@@ -298,7 +298,7 @@ class WebSocketBridgePerformanceTests:
         return MockWebSocket(latency_ms=latency_ms)
     
     async def measure_latency(self, emitter: UserWebSocketEmitter, num_samples: int = 1000) -> List[float]:
-        ""Measure event delivery latency.
+        ""Measure event delivery latency."
         latencies = []
         
         for i in range(num_samples):
@@ -368,10 +368,10 @@ class WebSocketBridgePerformanceTests:
             logger.info(f  Avg: {avg:.2f}ms")"
             
             # CRITICAL: P99 latency must be < 50ms
-            assert p99 < 50.0, fP99 latency {p99:.2f}ms exceeds 50ms requirement
+            assert p99 < 50.0, "fP99 latency {p99:.2f}ms exceeds 50ms requirement"
             
             # Additional performance targets
-            assert p95 < 30.0, fP95 latency {p95:.2f}ms exceeds 30ms target
+            assert p95 < 30.0, "fP95 latency {p95:.2f}ms exceeds 30ms target"
             assert p50 < 10.0, f"P50 latency {p50:.2f}ms exceeds 10ms target"
             assert avg < 15.0, fAverage latency {avg:.2f}ms exceeds 15ms target"
             assert avg < 15.0, fAverage latency {avg:.2f}ms exceeds 15ms target"
@@ -383,7 +383,7 @@ class WebSocketBridgePerformanceTests:
     
     @pytest.mark.asyncio
     async def test_throughput_baseline_1000_mps(self, factory):
-        ""Test throughput meets >1000 messages/second requirement.
+        ""Test throughput meets >1000 messages/second requirement."
         await self.performance_monitor.start_monitoring()
         
         try:
@@ -436,10 +436,10 @@ class WebSocketBridgePerformanceTests:
             assert throughput > 1000.0, f"Throughput {throughput:.2f} msg/s below 1000 msg/s requirement"
             
             # Verify all events were sent
-            assert len(websocket.sent_messages) == num_events, fExpected {num_events} messages, got {len(websocket.sent_messages)}
+            assert len(websocket.sent_messages) == num_events, "fExpected {num_events} messages, got {len(websocket.sent_messages)}"
             
-            logger.info( PASS:  Throughput baseline test PASSED)"
-            logger.info( PASS:  Throughput baseline test PASSED)"
+            logger.info("PASS:  Throughput baseline test PASSED))"
+            logger.info("PASS:  Throughput baseline test PASSED))"
             
         finally:
             await self.performance_monitor.stop_monitoring()
@@ -489,7 +489,7 @@ class WebSocketBridgePerformanceTests:
             
             # CRITICAL: Connection time must be < 500ms
             assert p99_time < 500.0, fP99 connection time {p99_time:.2f}ms exceeds 500ms requirement""
-            assert avg_time < 100.0, fAverage connection time {avg_time:.2f}ms exceeds 100ms target
+            assert avg_time < 100.0, "fAverage connection time {avg_time:.2f}ms exceeds 100ms target"
             
             logger.info( PASS:  Connection establishment test PASSED)
             
@@ -569,7 +569,7 @@ class WebSocketBridgePerformanceTests:
     
     @pytest.mark.asyncio
     async def test_concurrent_users_25_plus(self, factory):
-        ""Test system handles 25+ concurrent users meeting performance requirements.
+        ""Test system handles 25+ concurrent users meeting performance requirements."
         await self.performance_monitor.start_monitoring()
         
         try:
@@ -667,8 +667,8 @@ class WebSocketBridgePerformanceTests:
             logger.info(f"  Latency Avg: {avg_latency:.2f}ms)"
             
             # CRITICAL: Performance requirements must be met under load
-            assert p99 < 50.0, fP99 latency {p99:.2f}ms exceeds 50ms requirement under concurrent load
-            assert overall_throughput > 200.0, fThroughput {overall_throughput:.2f} events/s too low for {num_users} users
+            assert p99 < 50.0, "fP99 latency {p99:.2f}ms exceeds 50ms requirement under concurrent load"
+            assert overall_throughput > 200.0, "fThroughput {overall_throughput:.2f} events/s too low for {num_users} users"
             
             # Verify all events were sent
             total_sent = sum(len(websocket.sent_messages) for _, _, websocket in emitters)
@@ -769,8 +769,8 @@ class WebSocketBridgePerformanceTests:
             logger.info(f  Max memory: {max_memory:.2f}MB")"
             
             # Resource usage should be reasonable
-            assert memory_increase < 200.0, fMemory increase {memory_increase:.2f}MB exceeds 200MB limit
-            assert max_cpu < 80.0, fMax CPU usage {max_cpu:.2f}% exceeds 80% limit
+            assert memory_increase < 200.0, "fMemory increase {memory_increase:.2f}MB exceeds 200MB limit"
+            assert max_cpu < 80.0, "fMax CPU usage {max_cpu:.2f}% exceeds 80% limit"
             
             # Performance should remain stable
             throughput = total_events / duration_seconds
@@ -1014,10 +1014,10 @@ class WebSocketBridgePerformanceTests:
                 assert p99_passed, fP99 latency {metrics.p99_latency:.2f}ms exceeds 50ms requirement"
                 assert p99_passed, fP99 latency {metrics.p99_latency:.2f}ms exceeds 50ms requirement"
                 assert throughput_passed, f"Throughput {metrics.throughput:.2f}/s below 1000/s requirement"
-                assert connection_passed, fConnection time {metrics.avg_connection_time:.2f}ms exceeds 500ms requirement
-                assert user_passed, fOnly {len(emitters)} users created, need  >=  25
+                assert connection_passed, "fConnection time {metrics.avg_connection_time:.2f}ms exceeds 500ms requirement"
+                assert user_passed, "fOnly {len(emitters)} users created, need  >=  25"
                 assert error_passed, fError rate {metrics.error_rate:.2f}% exceeds 1% limit""
-                assert memory_passed, fMemory usage {metrics.avg_memory_usage:.2f}MB exceeds 500MB limit
+                assert memory_passed, "fMemory usage {metrics.avg_memory_usage:.2f}MB exceeds 500MB limit"
                 
                 logger.info( PASS:  COMPREHENSIVE PERFORMANCE BASELINE TEST PASSED)
                 

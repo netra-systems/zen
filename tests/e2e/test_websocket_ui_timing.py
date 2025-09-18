@@ -33,7 +33,7 @@ class TestWebSocketUITiming:
 
     @pytest.fixture
     async def backend_client(self):
-        ""Get authenticated backend client.
+        ""Get authenticated backend client."
         client = BackendTestClient()
         await client.authenticate()
         try:
@@ -94,21 +94,21 @@ class TestWebSocketUITiming:
         continue
 
                                     # Validate Fast Layer timing (0-100ms)
-        assert len(fast_events_timing) > 0, No fast layer events received for timing validation
+        assert len(fast_events_timing) > 0, "No fast layer events received for timing validation"
 
         for event_timing in fast_events_timing:
         latency = event_timing[latency_ms"]"
         event_type = event_timing[event_type]
 
                                         # Fast Layer requirement:  <= 100ms
-        assert latency <= 100.0, ( )
+        assert latency <= 100.0, "( )"
         formatted_string""
         f"This impacts immediate user feedback perception."
                                         
 
                                         # Ultra-fast events should be near-instantaneous
         if event_type == agent_started:
-        assert latency <= 50.0, ( )
+        assert latency <= 50.0, "( )"
         formatted_string""
                                             
 
@@ -117,13 +117,13 @@ class TestWebSocketUITiming:
         "Test Medium Layer events arrive within 100ms-1s for progressive updates."""
         pass
                                                 # Medium layer events per spec
-        medium_layer_events = {"agent_thinking, partial_result"}
+        medium_layer_events = {"agent_thinking, partial_result}"
 
                                                 # Trigger action that generates medium layer events
         send_time = time.time()
                                                 # Removed problematic line: await websocket_client.send_message({)
         type: user_message,
-        payload: {content": "Generate progressive updates with thinking and partial results}
+        payload: {content": Generate progressive updates with thinking and partial results}"
                                                 
 
                                                 # Collect medium layer events with timing
@@ -145,7 +145,7 @@ class TestWebSocketUITiming:
         if isinstance(message, dict) and message.get(type) in medium_layer_events:
         latency_ms = (receive_time - send_time) * 1000
         medium_events_timing.append({)
-        "event_type: message[type"],
+        "event_type: message[type],"
         latency_ms: latency_ms,
         timestamp: receive_time""
                                                                 
@@ -160,7 +160,7 @@ class TestWebSocketUITiming:
         event_type = event_timing[event_type]
 
                                                                         # Medium Layer requirement: 100ms  <=  latency  <=  1000ms
-        assert 100.0 <= latency <= 1000.0, ( )
+        assert 100.0 <= latency <= 1000.0, "( )"
         "formatted_string"
         f(expected 100-1000ms). This impacts progressive update perception.
                                                                         
@@ -174,7 +174,7 @@ class TestWebSocketUITiming:
                                                                             # Trigger comprehensive action for slow layer events
         send_time = time.time()
                                                                             # Removed problematic line: await websocket_client.send_message({)
-        type": "user_message,
+        type": user_message,"
         payload: {content: Execute comprehensive analysis for final results timing test}""
                                                                             
 
@@ -213,7 +213,7 @@ class TestWebSocketUITiming:
         event_type = event_timing[event_type]
 
                                                                                                     # Slow Layer requirement:  >= 1000ms (indicates substantial work)
-        assert latency >= 1000.0, ( )
+        assert latency >= 1000.0, "( )"
         "formatted_string"
         f(expected  >= 1000ms). This may indicate insufficient processing depth.
                                                                                                     
@@ -225,7 +225,7 @@ class TestWebSocketUITiming:
                                                                                                         # Expected layer assignments per SPEC/websocket_communication.xml
         expected_layers = {
         agent_started: fast,      # 0-100ms
-        tool_executing": "fast,     # 0-100ms
+        tool_executing": fast,     # 0-100ms"
         agent_thinking: medium,   # 100ms-1s
         partial_result: "medium,   # 100ms-1s"
         agent_completed": slow,    # 1s+"
@@ -235,7 +235,7 @@ class TestWebSocketUITiming:
                                                                                                         # Trigger comprehensive workflow
         send_time = time.time()
                                                                                                         # Removed problematic line: await websocket_client.send_message({)
-        type": "user_message,
+        type": user_message,"
         payload: {content: Full workflow test for timing layer segregation validation}""
                                                                                                         
 
@@ -352,7 +352,7 @@ class TestWebSocketUITiming:
         last_fast_order = max(e[order] for e in fast_events)
         first_slow_order = min(e[order"] for e in slow_events)"
 
-        assert last_fast_order <= first_slow_order, ( )
+        assert last_fast_order <= first_slow_order, "( )"
         fProgressive timing violation: slow events started before fast events finished. 
         formatted_string
                                                                                                                                                                                 
@@ -404,7 +404,7 @@ class TestWebSocketUITiming:
         std_dev = variance ** 0.5
         coefficient_of_variation = (std_dev / avg_latency) * 100 if avg_latency > 0 else 0
 
-        assert coefficient_of_variation <= 50.0, ( )
+        assert coefficient_of_variation <= 50.0, "( )"
         formatted_string
         formatted_string""
                                                                                                                                                                                                                 

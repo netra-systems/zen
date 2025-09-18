@@ -42,7 +42,7 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
         return Path(__file__).parent.parent.parent
 
     def test_logging_function_behavioral_consistency(self):
-        "
+        """
         "
         CRITICAL: Ensure SSOT logging functions behave consistently.
 
@@ -146,7 +146,7 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
             )
 
     def test_auth_function_behavioral_consistency(self):
-        "
+        """
         "
         CRITICAL: Ensure auth functions behave consistently across SSOT and legacy systems.
 
@@ -185,7 +185,7 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
             files_using_legacy_auth = []
             search_paths = [
                 self.project_root / "netra_backend / app / routes,"
-                self.project_root / netra_backend" / "app / middleware
+                self.project_root / netra_backend" / app / middleware"
             ]
 
             for search_path in search_paths:
@@ -243,7 +243,7 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
             )
 
     def test_configuration_function_behavioral_consistency(self):
-    "
+        """
     "
         CRITICAL: Ensure configuration functions return consistent values.
 
@@ -436,7 +436,7 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
                     continue
 
                 for py_file in search_path.rglob(*.py):
-                    if py_file.name.startswith("__) or test" in py_file.name.lower():
+                    if py_file.name.startswith("__) or test in py_file.name.lower():"
                         continue
 
                     try:
@@ -485,7 +485,7 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
             )
 
     def test_database_function_behavioral_consistency(self):
-    ""
+    """
         CRITICAL: Ensure database functions behave consistently.
 
         EXPECTED: Should FAIL initially - detects database behavioral inconsistencies
@@ -497,7 +497,7 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
             # Check for multiple database connection patterns
             db_connection_files = []
             search_paths = [
-                self.project_root / netra_backend" / "app,
+                self.project_root / netra_backend" / app,"
                 self.project_root / auth_service
             ]
 

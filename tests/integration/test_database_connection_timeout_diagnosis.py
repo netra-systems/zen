@@ -107,7 +107,7 @@ class DatabaseConnectionTimeoutDiagnostic:
         start_time = time.time()
         try:
                                 # Clean URL for asyncpg
-        clean_url = url.replace("postgresql+asyncpg://", "postgresql://")
+        clean_url = url.replace("postgresql+asyncpg://", "postgresql://)"
 
                                 # Test connection with timeout
         conn = await asyncio.wait_for( )
@@ -117,7 +117,7 @@ class DatabaseConnectionTimeoutDiagnostic:
 
                                 # Test query
         await asyncio.wait_for( )
-        conn.fetchval("SELECT 1"),
+        conn.fetchval("SELECT 1),"
         timeout=timeout
                                 
 
@@ -216,7 +216,7 @@ class DatabaseConnectionTimeoutDiagnostic:
 
         try:
                                                             # Clean URL
-        clean_url = url.replace("postgresql+asyncpg://", "postgresql://")
+        clean_url = url.replace("postgresql+asyncpg://", "postgresql://)"
 
                                                             # Create concurrent connection tasks
     async def connect_and_query(conn_id: int):
@@ -224,7 +224,7 @@ class DatabaseConnectionTimeoutDiagnostic:
         conn_start = time.time()
         try:
         conn = await asyncio.wait_for(asyncpg.connect(clean_url), timeout=10.0)
-        await asyncio.wait_for(conn.fetchval("SELECT 1"), timeout=5.0)
+        await asyncio.wait_for(conn.fetchval("SELECT 1), timeout=5.0)"
         await conn.close()
         await asyncio.sleep(0)
         return { }
@@ -259,17 +259,17 @@ class DatabaseConnectionTimeoutDiagnostic:
 
     async def diagnose_timeout_patterns(self) -> Dict[str, Any]:
         """Comprehensive timeout pattern analysis."""
-        logger.info("Starting comprehensive database connection timeout diagnosis...")
+        logger.info("Starting comprehensive database connection timeout diagnosis...)"
 
         config = self.get_current_config()
 
     # Test different timeout values
         timeout_tests = [ ]
-        (1.0, "very_short"),
-        (5.0, "short"),
-        (10.0, "normal"),
-        (15.0, "long"),
-        (30.0, "very_long")
+        (1.0, "very_short),"
+        (5.0, "short),"
+        (10.0, "normal),"
+        (15.0, "long),"
+        (30.0, "very_long)"
     
 
         auth_url = config['auth_config'].get('database_url')
@@ -311,7 +311,7 @@ class DatabaseConnectionTimeoutDiagnostic:
         failed_timeouts = [item for item in []]]
 
         if not successful_timeouts:
-        analysis['root_causes'].append("All timeout tests failed - database unreachable or configuration issue")
+        analysis['root_causes'].append("All timeout tests failed - database unreachable or configuration issue)"
         analysis['severity'] = 'critical'
         elif len(failed_timeouts) > 0:
         min_success_timeout = min(r['timeout'] for r in successful_timeouts)
@@ -320,20 +320,20 @@ class DatabaseConnectionTimeoutDiagnostic:
 
             # Analyze initialization
         if not init_result['success']:
-        analysis['root_causes'].append("Auth database initialization failing")
+        analysis['root_causes'].append("Auth database initialization failing)"
         if init_result.get('error'):
         analysis['root_causes'].append("")
 
                     # Analyze concurrent connections
         if not concurrent_result['success']:
-        analysis['root_causes'].append("Concurrent connections failing - potential blocking issue")
+        analysis['root_causes'].append("Concurrent connections failing - potential blocking issue)"
 
                         # Generate recommendations
         if analysis['severity'] in ['critical', 'high']:
         analysis['recommendations'].extend([ ])
-        "Increase database connection timeouts to minimum working value",
-        "Implement connection pooling with proper timeout configuration",
-        "Add retry logic with exponential backoff",
+        "Increase database connection timeouts to minimum working value,"
+        "Implement connection pooling with proper timeout configuration,"
+        "Add retry logic with exponential backoff,"
         "Monitor database connection pool status"
                             
 
@@ -359,14 +359,14 @@ by analyzing connection timeouts, initialization failures, and blocking issues.
 '''
 '''
 pass
-logger.info("=== COMPREHENSIVE DATABASE TIMEOUT DIAGNOSIS ===")
+logger.info("=== COMPREHENSIVE DATABASE TIMEOUT DIAGNOSIS ===)"
 
         # Run comprehensive diagnosis
 diagnosis = await diagnostic.diagnose_timeout_patterns()
 
         # Print detailed results
     print("")
-print("DATABASE CONNECTION TIMEOUT DIAGNOSIS RESULTS")
+print("DATABASE CONNECTION TIMEOUT DIAGNOSIS RESULTS)"
 print("")
 
         # Configuration
@@ -432,19 +432,19 @@ not any(r['success'] for r in timeout_tests)
 if has_critical_issues:
                                     # This test should document the issue but not fail - we need to implement fixes
     print("")
-print(" FAIL:  CRITICAL BLOCKING ISSUE IDENTIFIED")
-print("This test documents the database connection timeout issue.")
-print("Fixes are being implemented in subsequent tests.")
+print(" FAIL:  CRITICAL BLOCKING ISSUE IDENTIFIED)"
+print("This test documents the database connection timeout issue.)"
+print("Fixes are being implemented in subsequent tests.)"
 print("")
 
                                     # Always assert - this test should pass after fixes are implemented
 working_timeouts = [item for item in []]]
-assert len(working_timeouts) > 0, ( )
+assert len(working_timeouts) > 0, "( )"
 ""
                                     
 
                                     # Verify auth database initialization works (should work after fixes)
-assert init_result.get('success'), ( )
+assert init_result.get('success'), "( )"
 ""
                                     
 
@@ -459,7 +459,7 @@ and implements fixes for timeout-related issues.
 '''
 '''
 pass
-logger.info("=== DATABASE CONNECTION TIMEOUT CONFIGURATION TEST ===")
+logger.info("=== DATABASE CONNECTION TIMEOUT CONFIGURATION TEST ===)"
 
                                         # Get environment configuration
 env = get_env()
@@ -477,7 +477,7 @@ for config in timeout_configs:
 try:
                                                 # Get database URL
 database_url = AuthConfig.get_database_url()
-clean_url = database_url.replace("postgresql+asyncpg://", "postgresql://")
+clean_url = database_url.replace("postgresql+asyncpg://", "postgresql://)"
 
                                                 # Test connection with specific timeouts
 start_time = time.time()
@@ -488,7 +488,7 @@ timeout=config['connect']
                                                 
 
 result = await asyncio.wait_for( )
-conn.fetchval("SELECT 1"),
+conn.fetchval("SELECT 1),"
 timeout=config['query']
                                                 
 
@@ -511,7 +511,7 @@ except Exception as e:
     print("")
 
                                                     # Verify at least one configuration works
-assert len(successful_configs) > 0, ( )
+assert len(successful_configs) > 0, "( )"
 "No timeout configuration successful. Database may be unreachable or credentials invalid."
                                                     
 
@@ -529,7 +529,7 @@ print(f" )"
 Recommended fixes:")"
 print("")
 print("")
-print(f"  3. Implement retry logic with exponential backoff")
+print(f"  3. Implement retry logic with exponential backoff)"
 
 def test_database_url_formation_diagnosis(self):
     pass
@@ -542,7 +542,7 @@ cause connection timeouts or failures.
 '''
 '''
 pass
-logger.info("=== DATABASE URL FORMATION DIAGNOSIS ===")
+logger.info("=== DATABASE URL FORMATION DIAGNOSIS ===)"
 
     # Get all URL variations
 env = get_env()
@@ -571,19 +571,19 @@ masked_url = DatabaseURLBuilder.mask_url_for_logging(url)
 print("")
 
             # Check for common issues
-if "postgresql+asyncpg://" in url and name.endswith('_sync'):
+if "postgresql+asyncpg:// in url and name.endswith('_sync'):"
     pass
 url_issues.append("")
 
-if "sslmode=" in url and "asyncpg" in url:
+if "sslmode=" in url and "asyncpg in url:"
     pass
 url_issues.append(""t support sslmode parameter")"
 
-if "ssl=" in url and "psycopg2" in url:
+if "ssl=" in url and "psycopg2 in url:"
     pass
 url_issues.append("")
 
-if ":5432/" in url and env_vars.get('POSTGRES_PORT') != '5432':
+if ":5432/ in url and env_vars.get('POSTGRES_PORT') != '5432':"
     pass
 url_issues.append("")
 
@@ -599,7 +599,7 @@ for issue in url_issues:
     print("")
 else:
     pass
-print(f"   PASS:  No URL formation issues detected")
+print(f"   PASS:  No URL formation issues detected)"
 
                                             # Verify no critical URL issues
 critical_issues = [item for item in []]
@@ -617,9 +617,9 @@ assert urls['builder_async'], "DatabaseURLBuilder async URL must be generated"
 
                                                     # Check for SSL parameter issues (critical for asyncpg)
 auth_url = urls['auth_config']
-if "asyncpg" in auth_url:
+if "asyncpg in auth_url:"
     pass
-assert "sslmode=" not in auth_url, ( )
+assert "sslmode=" not in auth_url, "( )"
 f"AsyncPG URL contains unsupported sslmode parameter. "
 ""
                                                         
@@ -635,7 +635,7 @@ class DatabaseConnectionTimeoutFixes:
         conn = None
         try:
         # Clean URL for asyncpg
-        clean_url = database_url.replace("postgresql+asyncpg://", "postgresql://")
+        clean_url = database_url.replace("postgresql+asyncpg://", "postgresql://)"
 
         # Connect with timeout
         conn = await asyncio.wait_for( )
@@ -663,7 +663,7 @@ class DatabaseConnectionTimeoutFixes:
         try:
         async with cls.enhanced_database_connection(database_url, timeout, timeout) as conn:
         result = await asyncio.wait_for( )
-        conn.fetchval("SELECT 1"),
+        conn.fetchval("SELECT 1),"
         timeout=timeout
                                             
         await asyncio.sleep(0)
@@ -706,10 +706,10 @@ database_url = AuthConfig.get_database_url()
 async with DatabaseConnectionTimeoutFixes.enhanced_database_connection( )
 database_url, connect_timeout=15.0, query_timeout=10.0
 ) as conn:
-result = await conn.fetchval("SELECT 1")
+result = await conn.fetchval("SELECT 1)"
 assert result == 1
 
-print(" PASS:  Enhanced database connection with timeouts working")
+print(" PASS:  Enhanced database connection with timeouts working)"
 
 @pytest.mark.asyncio
     async def test_database_readiness_with_timeout_fix(self):
@@ -723,7 +723,7 @@ database_url, timeout=15.0
                 
 
 assert is_ready, "Database readiness check with timeout should pass"
-print(" PASS:  Database readiness check with timeout working")
+print(" PASS:  Database readiness check with timeout working)"
 
 @pytest.mark.asyncio
     async def test_retry_database_operation_fix(self):
@@ -734,7 +734,7 @@ database_url = AuthConfig.get_database_url()
     async def test_operation():
 async with DatabaseConnectionTimeoutFixes.enhanced_database_connection(database_url) as conn:
 await asyncio.sleep(0)
-return await conn.fetchval("SELECT 1")
+return await conn.fetchval("SELECT 1)"
 
                             # Test with retry logic
 result = await DatabaseConnectionTimeoutFixes.retry_database_operation( )
@@ -742,13 +742,13 @@ test_operation, max_retries=3, initial_delay=0.1, max_delay=1.0
                             
 
 assert result == 1
-print(" PASS:  Database operation retry logic working")
+print(" PASS:  Database operation retry logic working)"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                 # Run diagnostic when executed directly
 async def main():
-    print("=== DATABASE CONNECTION TIMEOUT DIAGNOSIS ===")
+    print("=== DATABASE CONNECTION TIMEOUT DIAGNOSIS ===)"
 diagnostic = DatabaseConnectionTimeoutDiagnostic()
 results = await diagnostic.diagnose_timeout_patterns()
 

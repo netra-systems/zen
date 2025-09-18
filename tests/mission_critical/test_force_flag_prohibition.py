@@ -8,7 +8,7 @@ class WebSocketTestHelper:
         self._closed = False
 
         async def send_json(self, message: dict):
-            ""Send JSON message.
+            ""Send JSON message."
             if self._closed:
                 raise RuntimeError(WebSocket is closed)"
                 raise RuntimeError(WebSocket is closed)"
@@ -45,7 +45,7 @@ class WebSocketTestHelper:
                 import os
                 from shared.isolated_environment import IsolatedEnvironment
 
-                from test_framework.docker_force_flag_guardian import (
+                from test_framework.docker_force_flag_guardian import ()
                 DockerForceFlagGuardian,
                 DockerForceFlagViolation,
                 validate_docker_command,
@@ -134,7 +134,7 @@ class WebSocketTestHelper:
                                                                             guardian.validate_command(Docker Container rm --Force container123)
 
                                                                             def test_guardian_audit_logging(self):
-                                                                                ""Test guardian logs violations for audit trail.
+                                                                                ""Test guardian logs violations for audit trail."
                                                                                 pass
                                                                                 with tempfile.TemporaryDirectory() as temp_dir:
                                                                                     audit_path = os.path.join(temp_dir, test_violations.log)"
@@ -196,7 +196,7 @@ class WebSocketTestHelper:
         # Verify statistics updated
                                                                                                                         stats = rate_limiter.get_statistics()
                                                                                                                         assert stats[force_flag_violations] >= 1
-                                                                                                                        assert stats[force_flag_guardian_status"] == "ACTIVE - ZERO TOLERANCE ENFORCED
+                                                                                                                        assert stats[force_flag_guardian_status"] == ACTIVE - ZERO TOLERANCE ENFORCED"
 
                                                                                                                         def test_convenience_function_integration(self):
                                                                                                                             Test convenience function also blocks force flags."
@@ -292,7 +292,7 @@ class WebSocketTestHelper:
                                                                                                                                                                                         pytest.fail(fNon-Docker command incorrectly flagged: {cmd})
 
                                                                                                                                                                                         def test_audit_report_generation(self):
-                                                                                                                                                                                            ""Test comprehensive audit report generation.
+                                                                                                                                                                                            ""Test comprehensive audit report generation."
                                                                                                                                                                                             guardian = DockerForceFlagGuardian()
 
         # Trigger some violations
@@ -370,11 +370,11 @@ class WebSocketTestHelper:
                                                                                                                                                                                                                                             validate_docker_command(docker ps)
 
                                                                                                                                                                                                                                             def test_get_safe_alternative_function(self):
-                                                                                                                                                                                                                                                ""Test global get_safe_alternative function.
+                                                                                                                                                                                                                                                ""Test global get_safe_alternative function."
                                                                                                                                                                                                                                                 pass
                                                                                                                                                                                                                                                 alt = get_safe_alternative(docker rm -f container)"
                                                                                                                                                                                                                                                 alt = get_safe_alternative(docker rm -f container)"
-                                                                                                                                                                                                                                                assert isinstance(alt, str)
+                                                                                                                                                                                                                                                assert isinstance(alt, "str)"
                                                                                                                                                                                                                                                 assert len(alt) > 0
                                                                                                                                                                                                                                                 assert docker stop" in alt"
 

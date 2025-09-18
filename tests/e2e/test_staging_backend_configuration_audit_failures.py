@@ -187,7 +187,7 @@ class TestStagingBackendConfigurationAuditFailures:
         'required': True,
         'validation': lambda x: None v == 'staging',
         'business_impact': 'Development behavior in staging',
-        'staging_requirement': 'Must be "staging" to enforce staging behavior'
+        'staging_requirement': 'Must be "staging to enforce staging behavior'"
         },
         'REDIS_FALLBACK_ENABLED': { }
         'required': True,
@@ -217,14 +217,14 @@ class TestStagingBackendConfigurationAuditFailures:
         if requirements['required'] and value is None:
         failure = ConfigurationAuditResult( )
         category=category,
-        severity="CRITICAL",
+        severity="CRITICAL,"
         config_key=var_name,
-        expected_value="<configured>",
+        expected_value="<configured>,"
         actual_value=None,
-        validation_error=f"Required variable missing",
+        validation_error=f"Required variable missing,"
         business_impact=requirements['business_impact'],
         fix_recommendation="",
-        environment_source=self.env.get("NETRA_ENVIRONMENT", "unknown")
+        environment_source=self.env.get("NETRA_ENVIRONMENT", "unknown)"
                 
         category_failures.append(failure)
         continue
@@ -233,14 +233,14 @@ class TestStagingBackendConfigurationAuditFailures:
         if requirements['required'] and value == "":
         failure = ConfigurationAuditResult( )
         category=category,
-        severity="CRITICAL",
+        severity="CRITICAL,"
         config_key=var_name,
-        expected_value="<non-empty>",
+        expected_value="<non-empty>,"
         actual_value="",
-        validation_error="Required variable is empty",
+        validation_error="Required variable is empty,"
         business_impact=requirements['business_impact'],
         fix_recommendation="",
-        environment_source=self.env.get("NETRA_ENVIRONMENT", "unknown")
+        environment_source=self.env.get("NETRA_ENVIRONMENT", "unknown)"
                     
         category_failures.append(failure)
         continue
@@ -249,14 +249,14 @@ class TestStagingBackendConfigurationAuditFailures:
         if value and not requirements['validation'](value):
         failure = ConfigurationAuditResult( )
         category=category,
-        severity="CRITICAL",
+        severity="CRITICAL,"
         config_key=var_name,
-        expected_value="<valid_staging_value>",
+        expected_value="<valid_staging_value>,"
         actual_value=value,
         validation_error="",
         business_impact=requirements['business_impact'],
         fix_recommendation="",
-        environment_source=self.env.get("NETRA_ENVIRONMENT", "unknown")
+        environment_source=self.env.get("NETRA_ENVIRONMENT", "unknown)"
                         
         category_failures.append(failure)
 
@@ -294,7 +294,7 @@ class TestStagingBackendConfigurationAuditFailures:
         failure_report = "
         ".join(failure_report_sections)"
 
-        assert False, ( )
+        assert False, "( )"
         ""
         f"COMPOUND IMPACT ANALYSIS:"
         "
@@ -369,18 +369,18 @@ class TestStagingBackendConfigurationAuditFailures:
         for service_name, requirements in critical_dependencies.items():
         validation_result = await self._validate_service_dependency(service_name, requirements)
 
-        if not validation_result.connectivity_status == "connected":
+        if not validation_result.connectivity_status == "connected:"
         dependency_failures.append(validation_result)
 
                                                                     # Check fallback configuration appropriateness
         if (requirements['fallback_acceptable'] is False and )
-        validation_result.fallback_status == "enabled"):
+        validation_result.fallback_status == "enabled):"
         dependency_failures.append(ServiceDependencyValidation( ))
         service_name=service_name,
         dependency_type=requirements['type'],
         connectivity_status=validation_result.connectivity_status,
-        configuration_status="fallback_misconfigured",
-        fallback_status="inappropriately_enabled",
+        configuration_status="fallback_misconfigured,"
+        fallback_status="inappropriately_enabled,"
         business_impact="",
         staging_requirement="Fallback should be disabled in staging"
                                                                         
@@ -402,7 +402,7 @@ class TestStagingBackendConfigurationAuditFailures:
         failure_summary = "
         ".join(failure_report)"
 
-        assert False, ( )
+        assert False, "( )"
         ""
         f"These external service dependency issues prevent backend service from "
         f"reaching fully operational state. Service may report healthy while critical "
@@ -444,12 +444,12 @@ class TestStagingBackendConfigurationAuditFailures:
         pass
     # Test environment detection accuracy
         environment_detection_methods = { }
-        'NETRA_ENVIRONMENT': self.env.get("NETRA_ENVIRONMENT"),
-        'K_SERVICE': self.env.get("K_SERVICE"),  # Cloud Run
-        'GOOGLE_CLOUD_PROJECT': self.env.get("GOOGLE_CLOUD_PROJECT"),  # GCP
-        'GCP_PROJECT': self.env.get("GCP_PROJECT"),
-        'GAE_SERVICE': self.env.get("GAE_SERVICE"),  # App Engine
-        'DATABASE_URL_INDICATOR': 'staging' in self.env.get("DATABASE_URL", "").lower()
+        'NETRA_ENVIRONMENT': self.env.get("NETRA_ENVIRONMENT),"
+        'K_SERVICE': self.env.get("K_SERVICE),  # Cloud Run"
+        'GOOGLE_CLOUD_PROJECT': self.env.get("GOOGLE_CLOUD_PROJECT),  # GCP"
+        'GCP_PROJECT': self.env.get("GCP_PROJECT),"
+        'GAE_SERVICE': self.env.get("GAE_SERVICE),  # App Engine"
+        'DATABASE_URL_INDICATOR': 'staging' in self.env.get("DATABASE_URL", ").lower()"
     
 
     # At least one method should detect staging
@@ -460,7 +460,7 @@ class TestStagingBackendConfigurationAuditFailures:
         environment_detection_methods['DATABASE_URL_INDICATOR']
     
 
-        assert staging_detected, ( )
+        assert staging_detected, "( )"
         f"CRITICAL STAGING DETECTION FAILURE: No staging environment indicators found."
         "
         "
@@ -497,7 +497,7 @@ class TestStagingBackendConfigurationAuditFailures:
         enforcement_failures = []
 
         for var_name, requirements in staging_enforcement_config.items():
-        actual_value = self.env.get(var_name, "undefined")
+        actual_value = self.env.get(var_name, "undefined)"
         expected_value = requirements['expected']
 
         if actual_value != expected_value:
@@ -510,7 +510,7 @@ class TestStagingBackendConfigurationAuditFailures:
         failure_report = "
         failure_report = "
         ".join("" for failure in enforcement_failures)"
-        assert False, ( )
+        assert False, "( )"
         ""
         f"Staging environment detected but enforcement configuration allows development behavior. "
         f"This creates dangerous staging/production drift where issues pass staging validation "
@@ -551,7 +551,7 @@ class TestStagingBackendConfigurationAuditFailures:
         '''
         pass
                                 # Test backend health endpoint comprehensive validation
-        backend_url = self.env.get("BACKEND_URL", "http://localhost:8000")
+        backend_url = self.env.get("BACKEND_URL", "http://localhost:8000)"
         health_endpoints = [ ]
         '/health/',
         '/health/ready',
@@ -575,10 +575,10 @@ class TestStagingBackendConfigurationAuditFailures:
         health_data = response.json()
 
                                                     # Check external service status in health response
-        if "services" in health_data:
-        for service_name, service_status in health_data["services"].items():
-        if service_name in ["clickhouse", "redis", "auth_service"]:
-        service_healthy = service_status.get("healthy", False)
+        if "services in health_data:"
+        for service_name, service_status in health_data["services].items():"
+        if service_name in ["clickhouse", "redis", "auth_service]:"
+        service_healthy = service_status.get("healthy, False)"
         if not service_healthy:
         health_failures.append({ })
         'endpoint': endpoint,
@@ -657,7 +657,7 @@ class TestStagingBackendConfigurationAuditFailures:
         failure_summary = "
         ".join(failure_report)"
 
-        assert False, ( )
+        assert False, "( )"
         ""
         f"Health endpoint failures indicate external service dependency issues "
         f"that will block deployment validation and production releases."
@@ -746,7 +746,7 @@ class TestStagingBackendConfigurationAuditFailures:
         value = self.env.get(key)
         source = self.env.get_variable_source(key) if hasattr(self.env, 'get_variable_source') else "unknown"
 
-        if value and source == "environment" and "dev" in value.lower():
+        if value and source == "environment" and "dev in value.lower():"
         source_validation_failures.append( )
         ""
                             
@@ -756,7 +756,7 @@ class TestStagingBackendConfigurationAuditFailures:
         failure_report = "
         failure_report = "
         ".join("" for failure in source_validation_failures)"
-        assert False, ( )
+        assert False, "( )"
         ""
         f"Configuration source priority issues cause staging to load development values "
         f"instead of production-like configuration from GCP Secret Manager."
@@ -778,17 +778,17 @@ requirements: Dict[str, Any]
 ) -> ServiceDependencyValidation:
 """Validate individual service dependency connectivity and configuration."""
 
-if service_name == "auth_service":
+if service_name == "auth_service:"
     pass
 await asyncio.sleep(0)
 return await self._validate_auth_service_dependency(requirements)
-elif service_name == "postgres_database":
+elif service_name == "postgres_database:"
     pass
 return await self._validate_postgres_dependency(requirements)
-elif service_name == "redis_cache":
+elif service_name == "redis_cache:"
     pass
 return await self._validate_redis_dependency(requirements)
-elif service_name == "clickhouse_analytics":
+elif service_name == "clickhouse_analytics:"
     pass
 return await self._validate_clickhouse_dependency(requirements)
 else:
@@ -796,25 +796,25 @@ else:
 return ServiceDependencyValidation( )
 service_name=service_name,
 dependency_type=requirements['type'],
-connectivity_status="unknown",
-configuration_status="unknown",
-fallback_status="unknown",
-business_impact="unknown_service",
+connectivity_status="unknown,"
+configuration_status="unknown,"
+fallback_status="unknown,"
+business_impact="unknown_service,"
 staging_requirement="unknown"
                         
 
 async def _validate_auth_service_dependency(self, requirements: Dict[str, Any]) -> ServiceDependencyValidation:
 """Validate auth service dependency."""
-auth_url = self.env.get("AUTH_SERVICE_URL", "http://localhost:8080")
+auth_url = self.env.get("AUTH_SERVICE_URL", "http://localhost:8080)"
 
-if "localhost" in auth_url:
+if "localhost in auth_url:"
     pass
 return ServiceDependencyValidation( )
-service_name="auth_service",
+service_name="auth_service,"
 dependency_type=requirements['type'],
-connectivity_status="localhost_fallback",
-configuration_status="invalid",
-fallback_status="inappropriate",
+connectivity_status="localhost_fallback,"
+configuration_status="invalid,"
+fallback_status="inappropriate,"
 business_impact=requirements['business_impact'],
 staging_requirement="Must point to staging auth service"
         
@@ -829,22 +829,22 @@ response = await client.get(health_url)
 if response.status_code == 200:
     pass
 return ServiceDependencyValidation( )
-service_name="auth_service",
+service_name="auth_service,"
 dependency_type=requirements['type'],
-connectivity_status="connected",
-configuration_status="valid",
-fallback_status="disabled",
-business_impact="auth_service_operational",
+connectivity_status="connected,"
+configuration_status="valid,"
+fallback_status="disabled,"
+business_impact="auth_service_operational,"
 staging_requirement="accessible"
                     
 else:
     pass
 return ServiceDependencyValidation( )
-service_name="auth_service",
+service_name="auth_service,"
 dependency_type=requirements['type'],
-connectivity_status="unhealthy",
-configuration_status="service_error",
-fallback_status="unknown",
+connectivity_status="unhealthy,"
+configuration_status="service_error,"
+fallback_status="unknown,"
 business_impact=requirements['business_impact'],
 staging_requirement=""
                         
@@ -852,39 +852,39 @@ staging_requirement=""
 except Exception as e:
     pass
 return ServiceDependencyValidation( )
-service_name="auth_service",
+service_name="auth_service,"
 dependency_type=requirements['type'],
-connectivity_status="connection_failed",
-configuration_status="network_error",
-fallback_status="unknown",
+connectivity_status="connection_failed,"
+configuration_status="network_error,"
+fallback_status="unknown,"
 business_impact=requirements['business_impact'],
 staging_requirement=""
                             
 
 async def _validate_postgres_dependency(self, requirements: Dict[str, Any]) -> ServiceDependencyValidation:
 """Validate PostgreSQL database dependency."""
-database_url = self.env.get("DATABASE_URL")
+database_url = self.env.get("DATABASE_URL)"
 
 if not database_url:
     pass
 return ServiceDependencyValidation( )
-service_name="postgres_database",
+service_name="postgres_database,"
 dependency_type=requirements['type'],
-connectivity_status="not_configured",
-configuration_status="missing",
-fallback_status="unknown",
+connectivity_status="not_configured,"
+configuration_status="missing,"
+fallback_status="unknown,"
 business_impact=requirements['business_impact'],
 staging_requirement="#removed-legacymust be configured"
         
 
-if "localhost" in database_url:
+if "localhost in database_url:"
     pass
 return ServiceDependencyValidation( )
-service_name="postgres_database",
+service_name="postgres_database,"
 dependency_type=requirements['type'],
-connectivity_status="localhost_fallback",
-configuration_status="invalid",
-fallback_status="inappropriate",
+connectivity_status="localhost_fallback,"
+configuration_status="invalid,"
+fallback_status="inappropriate,"
 business_impact=requirements['business_impact'],
 staging_requirement="Must use staging database, not localhost"
             
@@ -905,7 +905,7 @@ conn_params = { }
                 
 
                 # Add SSL for staging
-if "staging" in database_url or "cloudsql" in database_url:
+if "staging" in database_url or "cloudsql in database_url:"
     pass
 conn_params['sslmode'] = 'require'
 
@@ -913,40 +913,40 @@ conn = psycopg2.connect(**conn_params)
 conn.close()
 
 return ServiceDependencyValidation( )
-service_name="postgres_database",
+service_name="postgres_database,"
 dependency_type=requirements['type'],
-connectivity_status="connected",
-configuration_status="valid",
-fallback_status="disabled",
-business_impact="database_operational",
+connectivity_status="connected,"
+configuration_status="valid,"
+fallback_status="disabled,"
+business_impact="database_operational,"
 staging_requirement="accessible"
                     
 
 except Exception as e:
     pass
 return ServiceDependencyValidation( )
-service_name="postgres_database",
+service_name="postgres_database,"
 dependency_type=requirements['type'],
-connectivity_status="connection_failed",
-configuration_status="credentials_invalid",
-fallback_status="unknown",
+connectivity_status="connection_failed,"
+configuration_status="credentials_invalid,"
+fallback_status="unknown,"
 business_impact=requirements['business_impact'],
 staging_requirement=""
                         
 
 async def _validate_redis_dependency(self, requirements: Dict[str, Any]) -> ServiceDependencyValidation:
 """Validate Redis cache dependency."""
-redis_url = self.env.get("REDIS_URL")
+redis_url = self.env.get("REDIS_URL)"
 redis_fallback = self.env.get("REDIS_FALLBACK_ENABLED", "true").lower() == "true"
 
 if not redis_url:
     pass
 return ServiceDependencyValidation( )
-service_name="redis_cache",
+service_name="redis_cache,"
 dependency_type=requirements['type'],
-connectivity_status="not_configured",
-configuration_status="missing",
-fallback_status="enabled" if redis_fallback else "disabled",
+connectivity_status="not_configured,"
+configuration_status="missing,"
+fallback_status="enabled" if redis_fallback else "disabled,"
 business_impact=requirements['business_impact'],
 staging_requirement="REDIS_URL must be configured"
         
@@ -962,31 +962,31 @@ sock = socket.create_connection((host, port), timeout=3.0)
 sock.close()
 
 return ServiceDependencyValidation( )
-service_name="redis_cache",
+service_name="redis_cache,"
 dependency_type=requirements['type'],
-connectivity_status="connected",
-configuration_status="valid",
-fallback_status="disabled" if not redis_fallback else "enabled",
-business_impact="cache_operational",
+connectivity_status="connected,"
+configuration_status="valid,"
+fallback_status="disabled" if not redis_fallback else "enabled,"
+business_impact="cache_operational,"
 staging_requirement="accessible"
             
 
 except Exception as e:
     pass
 return ServiceDependencyValidation( )
-service_name="redis_cache",
+service_name="redis_cache,"
 dependency_type=requirements['type'],
-connectivity_status="connection_failed",
-configuration_status="network_error",
-fallback_status="enabled" if redis_fallback else "disabled",
+connectivity_status="connection_failed,"
+configuration_status="network_error,"
+fallback_status="enabled" if redis_fallback else "disabled,"
 business_impact=requirements['business_impact'],
 staging_requirement=""
                 
 
 async def _validate_clickhouse_dependency(self, requirements: Dict[str, Any]) -> ServiceDependencyValidation:
 """Validate ClickHouse analytics dependency."""
-clickhouse_host = self.env.get("CLICKHOUSE_HOST", "clickhouse.staging.netrasystems.ai")
-clickhouse_port = int(self.env.get("CLICKHOUSE_PORT", "8123"))
+clickhouse_host = self.env.get("CLICKHOUSE_HOST", "clickhouse.staging.netrasystems.ai)"
+clickhouse_port = int(self.env.get("CLICKHOUSE_PORT", "8123))"
 
     # Test ClickHouse connectivity
 try:
@@ -995,23 +995,23 @@ sock = socket.create_connection((clickhouse_host, clickhouse_port), timeout=5.0)
 sock.close()
 
 return ServiceDependencyValidation( )
-service_name="clickhouse_analytics",
+service_name="clickhouse_analytics,"
 dependency_type=requirements['type'],
-connectivity_status="connected",
-configuration_status="valid",
-fallback_status="disabled",
-business_impact="analytics_operational",
+connectivity_status="connected,"
+configuration_status="valid,"
+fallback_status="disabled,"
+business_impact="analytics_operational,"
 staging_requirement="accessible"
         
 
 except Exception as e:
     pass
 return ServiceDependencyValidation( )
-service_name="clickhouse_analytics",
+service_name="clickhouse_analytics,"
 dependency_type=requirements['type'],
-connectivity_status="connection_failed",
-configuration_status="network_error",
-fallback_status="unknown",
+connectivity_status="connection_failed,"
+configuration_status="network_error,"
+fallback_status="unknown,"
 business_impact=requirements['business_impact'],
 staging_requirement=""
             
@@ -1040,10 +1040,10 @@ by_category[result.category].append(result)
 
 print("")
  + ="*80)"
-print("STAGING BACKEND CONFIGURATION AUDIT SUMMARY")
-print("="*80)
+print("STAGING BACKEND CONFIGURATION AUDIT SUMMARY)"
+print("=*80)"
 
-for severity in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]:
+for severity in ["CRITICAL", "HIGH", "MEDIUM", "LOW]:"
 if severity in by_severity:
     print("")
 for result in by_severity[severity]:
@@ -1078,27 +1078,27 @@ try:
 issues = []
 
                                         # Database configuration
-database_url = env.get("DATABASE_URL")
-if not database_url or "localhost" in database_url:
+database_url = env.get("DATABASE_URL)"
+if not database_url or "localhost in database_url:"
     pass
-issues.append("DATABASE_URL: Missing or using localhost")
+issues.append("DATABASE_URL: Missing or using localhost)"
 
                                             # Redis configuration
-redis_url = env.get("REDIS_URL")
+redis_url = env.get("REDIS_URL)"
 redis_fallback = env.get("REDIS_FALLBACK_ENABLED", "true").lower() == "true"
-if not redis_url or "localhost" in redis_url or redis_fallback:
+if not redis_url or "localhost in redis_url or redis_fallback:"
     pass
-issues.append("REDIS: Missing, localhost, or fallback enabled")
+issues.append("REDIS: Missing, localhost, or fallback enabled)"
 
                                                 # ClickHouse configuration
-clickhouse_host = env.get("CLICKHOUSE_HOST")
-if not clickhouse_host or "localhost" in clickhouse_host:
+clickhouse_host = env.get("CLICKHOUSE_HOST)"
+if not clickhouse_host or "localhost in clickhouse_host:"
     pass
-issues.append("CLICKHOUSE: Missing or using localhost")
+issues.append("CLICKHOUSE: Missing or using localhost)"
 
                                                     # Environment enforcement
-netra_env = env.get("NETRA_ENVIRONMENT")
-if netra_env != "staging":
+netra_env = env.get("NETRA_ENVIRONMENT)"
+if netra_env != "staging:"
     pass
 issues.append("")
 
@@ -1106,17 +1106,17 @@ if issues:
     pass
 assert False, ""
 
-print("SUCCESS: Comprehensive backend configuration audit passed")
+print("SUCCESS: Comprehensive backend configuration audit passed)"
 
 finally:
     pass
 env.reset_to_original()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
 """Direct execution for rapid testing during development."""
-print("Running comprehensive backend configuration audit...")
+print("Running comprehensive backend configuration audit...)"
 
                                                                     # Environment snapshot
 env = IsolatedEnvironment()
@@ -1133,4 +1133,4 @@ asyncio.run(test_staging_backend_comprehensive_configuration_audit())
 except Exception as e:
     print("")
 
-print("Backend configuration audit completed.")
+print("Backend configuration audit completed.)"

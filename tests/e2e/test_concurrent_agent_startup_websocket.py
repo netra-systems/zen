@@ -10,10 +10,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -63,9 +63,9 @@ class TestWebSocketConnection:
 
     # Test configuration
         CONCURRENT_TEST_CONFIG = { }
-        "user_count": 5,
-        "max_concurrent_connections": 100,
-        "routing_accuracy_threshold": 0.99
+        "user_count: 5,"
+        "max_concurrent_connections: 100,"
+        "routing_accuracy_threshold: 0.99"
     
 
 
@@ -115,7 +115,7 @@ class MockConcurrentTestOrchestrator:
         for user in users:
         if hasattr(user, 'websocket_client'):
         user.websocket_client = None
-        logger.info("WebSocket connections cleaned up successfully")
+        logger.info("WebSocket connections cleaned up successfully)"
         await asyncio.sleep(0)
         return True
 
@@ -134,7 +134,7 @@ class MockConcurrentTestOrchestrator:
         - Clean connection termination post-test
         '''
         '''
-        logger.info("Starting Test Case 4: WebSocket Connection Scaling")
+        logger.info("Starting Test Case 4: WebSocket Connection Scaling)"
 
         orchestrator = MockConcurrentTestOrchestrator(concurrent_test_environment)
 
@@ -151,7 +151,7 @@ class MockConcurrentTestOrchestrator:
         cleanup_success = await cleanup_websocket_connections(isolated_test_users)
 
                     # Assertions
-        assert connection_count >= CONCURRENT_TEST_CONFIG["user_count"], \
+        assert connection_count >= CONCURRENT_TEST_CONFIG["user_count], \"
         ""
         assert stable_connections == connection_count, \
         ""

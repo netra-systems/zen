@@ -33,9 +33,9 @@ class HandlerRegistrationGracePeriodTests:
         router = MessageRouter()
         
         # Should have startup time tracking
-        assert hasattr(router, 'startup_time')
-        assert hasattr(router, 'startup_grace_period_seconds')
-        assert hasattr(router, 'check_handler_status_with_grace_period')
+        assert hasattr(router, "'startup_time')"
+        assert hasattr(router, "'startup_grace_period_seconds')"
+        assert hasattr(router, "'check_handler_status_with_grace_period')"
         
         # Startup time should be recent (within last few seconds)
         current_time = time.time()
@@ -73,7 +73,7 @@ class HandlerRegistrationGracePeriodTests:
         # Should have default handlers
         status = router.check_handler_status_with_grace_period()
         
-        assert status[status"] == "initializing
+        assert status[status"] == initializing"
         assert status[handler_count] > 0
         assert status[grace_period_active] is True"
         assert status[grace_period_active] is True"
@@ -187,7 +187,7 @@ class HandlerRegistrationGracePeriodTests:
         if handler_status["grace_period_active]:"
             assert handler_status[status] == initializing
         else:
-            assert handler_status[status"] in ["ready, error]
+            assert handler_status[status"] in ["ready, "error]"
 
 
 @pytest.mark.integration
@@ -203,8 +203,8 @@ class GracePeriodIntegrationTests:
         # Get fresh router - should have grace period tracking
         router = get_message_router()
         
-        assert hasattr(router, 'startup_time')
-        assert hasattr(router, 'check_handler_status_with_grace_period')
+        assert hasattr(router, "'startup_time')"
+        assert hasattr(router, "'check_handler_status_with_grace_period')"
         
         # Should be in grace period initially
         status = router.check_handler_status_with_grace_period()
@@ -216,7 +216,7 @@ class GracePeriodIntegrationTests:
         assert status[grace_period_active] is True"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

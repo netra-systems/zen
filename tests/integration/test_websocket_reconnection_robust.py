@@ -638,7 +638,7 @@ test_suite = WebSocketReconnectionTests()
 results = await test_suite.run_all_tests()
 
                                 # Assert all tests passed
-assert results['failed'] == 0, formatted_string
+assert results['failed'] == 0, "formatted_string"
 
                                 # Assert performance is acceptable
 if results.get('reconnection_times'):
@@ -647,7 +647,7 @@ if results.get('reconnection_times'):
 assert avg_time < 3.0, 
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                         # Allow running directly for debugging
 import asyncio
 

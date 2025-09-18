@@ -10,10 +10,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -74,22 +74,22 @@ class TestDeterministicStartup:
     async def test_phase1_environment_validation_failure(self, orchestrator):
         """Test that environment validation failure causes startup failure."""
 with patch.object(orchestrator, '_validate_environment') as mock_validate:
-    mock_validate.side_effect = Exception("Invalid environment")
+    mock_validate.side_effect = Exception("Invalid environment)"
 
 with pytest.raises(DeterministicStartupError) as exc_info:
     await orchestrator.initialize_system()
 
-assert "Invalid environment" in str(exc_info.value)
+assert "Invalid environment in str(exc_info.value)"
 assert orchestrator.app.state.startup_failed == True
 assert orchestrator.app.state.startup_complete == False
 
 @pytest.mark.asyncio
     async def test_phase1_migrations_optional(self, orchestrator):
-        """Test that migration failures don't stop startup."""'
+        """Test that migration failures don't stop startup.""'"
 pass
 with patch.object(orchestrator, '_validate_environment'):
     with patch.object(orchestrator, '_run_migrations') as mock_migrations:
-        mock_migrations.side_effect = Exception("Migration failed")
+        mock_migrations.side_effect = Exception("Migration failed)"
 
                             # Mock other phases to succeed
 with patch.object(orchestrator, '_phase2_core_services'):
@@ -107,12 +107,12 @@ assert orchestrator.app.state.startup_complete == True
         """Test that database initialization failure causes startup failure."""
 with patch.object(orchestrator, '_phase1_foundation'):
     with patch.object(orchestrator, '_initialize_database') as mock_db:
-        mock_db.side_effect = Exception("Database connection failed")
+        mock_db.side_effect = Exception("Database connection failed)"
 
 with pytest.raises(DeterministicStartupError) as exc_info:
     await orchestrator.initialize_system()
 
-assert "Database connection failed" in str(exc_info.value)
+assert "Database connection failed in str(exc_info.value)"
 assert orchestrator.app.state.startup_failed == True
 
 @pytest.mark.asyncio
@@ -127,7 +127,7 @@ orchestrator.app.state.db_session_factory = None
 with pytest.raises(DeterministicStartupError) as exc_info:
     await orchestrator.initialize_system()
 
-assert "db_session_factory is None" in str(exc_info.value)
+assert "db_session_factory is None in str(exc_info.value)"
 
 @pytest.mark.asyncio
     async def test_phase2_redis_failure_is_critical(self, orchestrator):
@@ -137,12 +137,12 @@ with patch.object(orchestrator, '_phase1_foundation'):
         orchestrator.app.state.websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
 with patch.object(orchestrator, '_initialize_redis') as mock_redis:
-    mock_redis.side_effect = Exception("Redis connection failed")
+    mock_redis.side_effect = Exception("Redis connection failed)"
 
 with pytest.raises(DeterministicStartupError) as exc_info:
     await orchestrator.initialize_system()
 
-assert "Redis connection failed" in str(exc_info.value)
+assert "Redis connection failed in str(exc_info.value)"
 
 @pytest.mark.asyncio
     async def test_phase2_llm_manager_failure_is_critical(self, orchestrator):
@@ -155,12 +155,12 @@ with patch.object(orchestrator, '_phase1_foundation'):
                 orchestrator.app.state.websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
 with patch.object(orchestrator, '_initialize_llm_manager') as mock_llm:
-    mock_llm.side_effect = Exception("LLM Manager failed")
+    mock_llm.side_effect = Exception("LLM Manager failed)"
 
 with pytest.raises(DeterministicStartupError) as exc_info:
     await orchestrator.initialize_system()
 
-assert "LLM Manager failed" in str(exc_info.value)
+assert "LLM Manager failed in str(exc_info.value)"
 
                                                                                                                             # ========== PHASE 3: Chat Pipeline Tests ==========
 
@@ -175,12 +175,12 @@ with patch.object(orchestrator, '_phase1_foundation'):
                 orchestrator.app.state.websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
 with patch.object(orchestrator, '_initialize_agent_supervisor') as mock_agent:
-    mock_agent.side_effect = Exception("Agent supervisor failed")
+    mock_agent.side_effect = Exception("Agent supervisor failed)"
 
 with pytest.raises(DeterministicStartupError) as exc_info:
     await orchestrator.initialize_system()
 
-assert "Agent supervisor failed" in str(exc_info.value)
+assert "Agent supervisor failed in str(exc_info.value)"
 
 @pytest.mark.asyncio
     async def test_phase3_agent_supervisor_none_is_critical(self, orchestrator):
@@ -199,7 +199,7 @@ orchestrator.app.state.agent_supervisor = None
 with pytest.raises(DeterministicStartupError) as exc_info:
     await orchestrator.initialize_system()
 
-assert "Agent supervisor is None" in str(exc_info.value)
+assert "Agent supervisor is None in str(exc_info.value)"
 
 @pytest.mark.asyncio
     async def test_phase3_websocket_enhancement_required(self, orchestrator):
@@ -221,13 +221,13 @@ orchestrator.app.state.websocket = TestWebSocketConnection()  # Real WebSocket i
 with pytest.raises(DeterministicStartupError) as exc_info:
     await orchestrator.initialize_system()
 
-assert "Tool dispatcher not enhanced with WebSocket" in str(exc_info.value)
+assert "Tool dispatcher not enhanced with WebSocket in str(exc_info.value)"
 
                                                                                                                                                                                                                 # ========== PHASE 4: Optional Services Tests ==========
 
 @pytest.mark.asyncio
     async def test_phase4_clickhouse_failure_is_optional(self, orchestrator):
-        """Test that ClickHouse failure doesn't stop startup."""'
+        """Test that ClickHouse failure doesn't stop startup.""'"
 pass
                                                                                                                                                                                                                     # Mock successful critical phases
 with patch.object(orchestrator, '_phase1_foundation'):
@@ -235,7 +235,7 @@ with patch.object(orchestrator, '_phase1_foundation'):
         with patch.object(orchestrator, '_phase3_chat_pipeline'):
             with patch.object(orchestrator, '_phase5_validation'):
                 with patch.object(orchestrator, '_initialize_clickhouse') as mock_ch:
-                    mock_ch.side_effect = Exception("ClickHouse failed")
+                    mock_ch.side_effect = Exception("ClickHouse failed)"
 
                                                                                                                                                                                                                                         # Should not raise - ClickHouse is optional
 await orchestrator.initialize_system()
@@ -243,7 +243,7 @@ assert orchestrator.app.state.startup_complete == True
 
 @pytest.mark.asyncio
     async def test_phase4_monitoring_failure_is_optional(self, orchestrator):
-        """Test that monitoring failure doesn't stop startup."""'
+        """Test that monitoring failure doesn't stop startup.""'"
                                                                                                                                                                                                                                             # Mock successful critical phases
 with patch.object(orchestrator, '_phase1_foundation'):
     with patch.object(orchestrator, '_phase2_core_services'):
@@ -251,7 +251,7 @@ with patch.object(orchestrator, '_phase1_foundation'):
             with patch.object(orchestrator, '_phase5_validation'):
                 with patch.object(orchestrator, '_initialize_clickhouse'):
                     with patch.object(orchestrator, '_initialize_monitoring') as mock_mon:
-                        mock_mon.side_effect = Exception("Monitoring failed")
+                        mock_mon.side_effect = Exception("Monitoring failed)"
 
                                                                                                                                                                                                                                                                     # Should not raise - monitoring is optional
 await orchestrator.initialize_system()
@@ -276,9 +276,9 @@ with pytest.raises(DeterministicStartupError) as exc_info:
     await orchestrator.initialize_system()
 
 error_msg = str(exc_info.value)
-assert "Agent Supervisor" in error_msg
-assert "Thread Service" in error_msg
-assert "Tool Dispatcher" in error_msg
+assert "Agent Supervisor in error_msg"
+assert "Thread Service in error_msg"
+assert "Tool Dispatcher in error_msg"
 
                                                                                                                                                                                                                                                                                             # ========== Integration Tests ==========
 
@@ -312,7 +312,7 @@ assert orchestrator.app.state.startup_error is None
 
 @pytest.mark.asyncio
     async def test_no_graceful_degradation_for_critical_services(self, app):
-        """Test that there's no graceful degradation for critical services."""'
+        """Test that there's no graceful degradation for critical services.""'"
 pass
                                                                                                                                                                                                                                                                                                                                                         # This test verifies the principle that critical services must work or fail
 orchestrator = StartupOrchestrator(app)
@@ -367,11 +367,11 @@ with patch.object(orchestrator, '_phase5_validation') as p5:
 await orchestrator.initialize_system()
 
                         # Verify strict order
-assert call_order == ['phase1', 'phase2', 'phase3', 'phase4', 'phase5']
+assert call_order == ['phase1', "'phase2', 'phase3', 'phase4', 'phase5']"
 
 @pytest.mark.asyncio
     async def test_no_environment_conditional_paths(self, orchestrator):
-        """Test that critical services don't have environment-conditional behavior."""'
+        """Test that critical services don't have environment-conditional behavior.""'"
 pass
                             # The deterministic startup should behave the same regardless of environment
 environments = ['development', 'staging', 'production']
@@ -383,14 +383,14 @@ for env in environments:
                                     # Database failure should always be critical
 with patch.object(orchestrator, '_phase1_foundation'):
     with patch.object(orchestrator, '_initialize_database') as mock_db:
-        mock_db.side_effect = Exception("Database failed")
+        mock_db.side_effect = Exception("Database failed)"
 
 with pytest.raises(DeterministicStartupError) as exc_info:
     await orchestrator.initialize_system()
 
                                                 # Should fail the same way in all environments
-assert "Database failed" in str(exc_info.value)
+assert "Database failed in str(exc_info.value)"
 
 
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+if __name__ == "__main__:"
+    pytest.main([__file__, "-v])"
