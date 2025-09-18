@@ -2333,14 +2333,15 @@ class AgentWebSocketBridge(MonitorableComponent):
                 event_id = parameters.get('event_id')
             
             # Build standardized notification message with user_id for proper routing
+            # CRITICAL BUSINESS FIX: tool_name must be at top level for tool transparency
             notification = {
                 "type": "tool_executing",
                 "run_id": run_id,
                 "user_id": effective_user_context.user_id,  # PHASE 1 FIX: Include user_id for routing
                 "agent_name": effective_agent_name,
+                "tool_name": tool_name,  # BUSINESS CRITICAL: Tool transparency - moved to top level
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "data": {
-                    "tool_name": tool_name,
                     "parameters": self._sanitize_parameters(parameters) if parameters else {},
                     "status": "executing",
                     "message": f"{effective_agent_name} is using {tool_name}"
