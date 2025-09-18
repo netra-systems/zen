@@ -41,11 +41,44 @@ def get_database_url() -> str:
     
     return database_url
 
+def _fix_sqlite_url(database_url: str) -> str:
+    """Fix SQLite URL format if needed.
+
+    SQLAlchemy expects sqlite:/// (three slashes) but we might get sqlite:/ (two slashes)
+    """
+    if database_url.startswith('sqlite:/') and not database_url.startswith('sqlite:///'):
+        # Convert sqlite:/path to sqlite:///path
+        if database_url.startswith('sqlite://'):
+            # Already properly formatted with double slash for host (which is empty)
+            return database_url
+        else:
+            # Fix sqlite:/path to sqlite:///path
+            return database_url.replace('sqlite:/', 'sqlite:///', 1)
+    return database_url
+
+def _get_isolation_level_for_database(database_url: str) -> str:
+    """Get appropriate isolation level based on database engine type.
+
+    SQLite only supports: READ UNCOMMITTED, SERIALIZABLE, AUTOCOMMIT
+    PostgreSQL supports: READ UNCOMMITTED, READ COMMITTED, REPEATABLE READ, SERIALIZABLE
+    """
+    if database_url.startswith('sqlite'):
+        return "SERIALIZABLE"  # Use SERIALIZABLE for SQLite (equivalent to READ COMMITTED)
+    else:
+        return "READ_COMMITTED"  # Default for PostgreSQL and other databases
+
 def get_engine():
     """Get or create database engine."""
     global _engine
     if _engine is None:
         database_url = get_database_url()
+
+        # Fix SQLite URL format if needed
+        database_url = _fix_sqlite_url(database_url)
+
+        # Determine appropriate isolation level based on database engine
+        isolation_level = _get_isolation_level_for_database(database_url)
+
         # RACE CONDITION FIX: Increased pool size and improved connection isolation
         # Note: QueuePool cannot be used with async engines - use AsyncAdaptedQueuePool (default)
         _engine = create_async_engine(
@@ -61,12 +94,12 @@ def get_engine():
             # RACE CONDITION FIX: Enable connection pooling optimizations
             pool_reset_on_return='commit',  # Clean up connections properly
             execution_options={
-                "isolation_level": "READ_COMMITTED"  # Explicit isolation level
+                "isolation_level": isolation_level  # Database-specific isolation level
             }
         )
         logger.info(
             f" CHART:  DATABASE ENGINE: Created with pool_size=20, max_overflow=30, "
-            f"pool_timeout=10s for race condition prevention"
+            f"pool_timeout=10s, isolation_level={isolation_level} for race condition prevention"
         )
     return _engine
 
