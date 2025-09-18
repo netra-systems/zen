@@ -1,20 +1,20 @@
-"Mission Critical Data Layer Isolation Security Tests - REAL SERVICES ONLY"
+"""Mission Critical Data Layer Isolation Security Tests - REAL SERVICES ONLY
 
 These tests use REAL services to detect critical security vulnerabilities:
     1. Redis key collision between users
-2. Database session isolation failures
-3. Cache contamination between users  
-4. User context propagation failure
-5. Concurrent user data isolation
-6. WebSocket message isolation
-7. Agent state contamination
-8. Thread safety violations
+    2. Database session isolation failures
+    3. Cache contamination between users
+    4. User context propagation failure
+    5. Concurrent user data isolation
+    6. WebSocket message isolation
+    7. Agent state contamination
+    8. Thread safety violations
 
 COMPLIANCE:
     @claude.md - NO MOCKS ALLOWED, REAL services for spacecraft reliability
-@spec/type_safety.xml - Full type safety with real service responses
-@spec/core.xml - SSOT pattern enforcement with real data flows
-""
+    @spec/type_safety.xml - Full type safety with real service responses
+    @spec/core.xml - SSOT pattern enforcement with real data flows
+"""
 
 import asyncio
 import json
@@ -38,7 +38,7 @@ from test_framework.test_context import TestContext, create_isolated_test_contex
 
 @pytest.fixture(scope=module)
 def isolated_env():
-    Isolated environment for testing.""
+    """Isolated environment for testing."""
     return IsolatedEnvironment()
 
 
