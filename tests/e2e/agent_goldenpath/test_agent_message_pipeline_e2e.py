@@ -41,7 +41,7 @@ from collections import defaultdict
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from tests.e2e.staging_config import get_staging_config, is_staging_available
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
-from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
+from test_framework.websocket_helpers import WebSocketTestHelpers
 
 @pytest.mark.e2e
 @pytest.mark.gcp_staging
