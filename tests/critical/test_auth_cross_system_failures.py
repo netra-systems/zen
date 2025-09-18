@@ -306,7 +306,7 @@ f"This indicates session state is not synchronized between services."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available)"
     async def test_jwt_secret_rotation_during_request(self):
-'''Test 4: JWT Secret Rotation During Request'
+'''Test 4: JWT Secret Rotation During Request
 
 This test WILL FAIL because the system doesn"t handle JWT secret"
 rotation gracefully. Active requests fail when secrets rotate,
@@ -373,7 +373,7 @@ f"System should handle secret rotation gracefully."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available)"
     async def test_cross_service_permission_escalation(self):
-'''Test 5: Cross-Service Permission Escalation'
+'''Test 5: Cross-Service Permission Escalation
 
 This test WILL FAIL because permissions granted in auth_service
 may not be properly validated in netra_backend, allowing
@@ -441,7 +441,7 @@ f"Backend should validate token integrity and reject tampering."
 @pytest.mark.critical
 # @pytest.fixture
     async def test_oauth_state_replay_attack(self):
-'''Test 6: OAuth State Replay Attack'
+'''Test 6: OAuth State Replay Attack
 
 This test WILL FAIL because OAuth state parameters aren"t properly"
 validated against replay attacks, allowing attackers to reuse
