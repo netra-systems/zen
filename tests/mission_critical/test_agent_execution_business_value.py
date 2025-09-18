@@ -1,21 +1,20 @@
-""""
-
+"""
 P0 Mission Critical Agent Execution Business Value Test
 
-MISSION CRITICAL: This test validates the CORE of Netra's value proposition - successful'
+MISSION CRITICAL: This test validates the CORE of Netra's value proposition - successful
 agent execution that delivers actionable business insights to users.
 
 Business Value Justification (BVJ):
-    - Segment: All (Free, Early, Mid, Enterprise) 
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Core Platform Value Delivery - Agent execution MUST work
 - Value Impact: Validates agents execute successfully and deliver actionable business insights
 - Strategic Impact: "500K" ARR depends on agents executing and delivering value through chat
 
 CRITICAL: If this test fails, the entire platform is worthless because:
-    1. Agents don't execute successfully'
-2. Users don't receive actionable insights'
-3. WebSocket events don't deliver real-time value'
-""""
+    1. Agents don't execute successfully
+2. Users don't receive actionable insights
+3. WebSocket events don't deliver real-time value
+"""
 
 4. No business value is generated from AI interactions
 
@@ -32,8 +31,7 @@ ARCHITECTURE COMPLIANCE:
 - Follows TEST_CREATION_GUIDE.md standards exactly
 - Uses SSOT patterns from test_framework/
 - Validates business value delivery, not just technical functionality
-"
-""
+"""
 
 
 import asyncio
@@ -93,7 +91,7 @@ class AgentExecutionBusinessValueTests(BaseIntegrationTest):
     value that generates revenue through actionable insights and recommendations.
     
     CRITICAL: These tests MUST pass or deployment is blocked.
-"
+"""
 ""
 
     
@@ -411,8 +409,7 @@ class AgentExecutionBusinessValueTests(BaseIntegrationTest):
     @pytest.mark.mission_critical
     @pytest.mark.real_services
     async def test_agent_execution_websocket_event_delivery(self, real_services_fixture):
-    """"
-
+"""
         MISSION CRITICAL: Validate all 5 WebSocket events are delivered during agent execution.
         
         This test focuses specifically on the WebSocket event delivery that enables
@@ -510,7 +507,7 @@ class AgentExecutionBusinessValueTests(BaseIntegrationTest):
         # Validate performance requirements
         assert execution_time < 30.0, f"Execution time {execution_time:."2f"}s exceeds "30s" business requirement"
         assert execution_time < 5.0, fExecution time {execution_time:.2f}s should be under 5s for good UX"
-        assert execution_time < 5.0, fExecution time {execution_time:.2f}s should be under 5s for good UX""
+        assert execution_time < 5.0, fExecution time {execution_time:."2f"}s should be under "5s" for good UX""
 
         
         # Validate result contains performance metrics
@@ -584,8 +581,7 @@ class AgentExecutionBusinessValueTests(BaseIntegrationTest):
     @pytest.mark.mission_critical  
     @pytest.mark.real_services
     async def test_agent_execution_actionable_insights_validation(self, real_services_fixture):
-    """"
-
+"""
         MISSION CRITICAL: Validate agent execution generates actionable business insights.
         
         This is the core of business value - agents must provide:
