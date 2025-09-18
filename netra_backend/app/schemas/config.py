@@ -413,7 +413,7 @@ class AppConfig(BaseModel):
     testing: Optional[str] = Field(default=None, description="Testing flag for environment detection")
     
     # Auth service configuration
-    auth_service_url: str = Field(default="http://127.0.0.1:8081", description="Auth service URL")
+    auth_service_url: str = Field(default="http://localhost:8081", description="Auth service URL (internal service port)")
     auth_service_enabled: str = Field(default="true", description="Auth service enabled flag")
     auth_fast_test_mode: str = Field(default="false", description="Auth fast test mode flag")
     auth_cache_ttl_seconds: str = Field(default="300", description="Auth cache TTL in seconds")
@@ -810,19 +810,29 @@ class DevelopmentConfig(AppConfig):
         client_id="",  # Populated by SecretReference: google-client-id
         client_secret="",  # Populated by SecretReference: google-client-secret
         authorized_redirect_uris=[
+            # Backend service ports (internal: 8000, external: varies)
             "http://localhost:8000/auth/callback",
-            "http://localhost:8081/auth/callback",
-            "http://localhost:8002/auth/callback",
-            "http://localhost:8003/auth/callback",
-            "http://localhost:8080/auth/callback",
             "http://127.0.0.1:8000/auth/callback",
-            "http://127.0.0.1:8001/auth/callback",
+            # Auth service ports (internal: 8081, external: varies)
+            "http://localhost:8081/auth/callback",
+            "http://127.0.0.1:8081/auth/callback",
+            # External development ports (docker-compose mappings)
+            "http://localhost:8002/auth/callback",  # Backend external (alpine-test)
+            "http://localhost:8003/auth/callback",  # Auth external (alpine-dev)
+            "http://localhost:8083/auth/callback",  # Auth external (alpine-test)
             "http://127.0.0.1:8002/auth/callback",
             "http://127.0.0.1:8003/auth/callback",
-            "http://127.0.0.1:8080/auth/callback",
+            "http://127.0.0.1:8083/auth/callback",
+            # Frontend ports (internal: 3000, external: varies)
             "http://localhost:3000/auth/callback",
             "http://localhost:3001/auth/callback",
-            "http://localhost:3002/auth/callback"
+            "http://localhost:3002/auth/callback",  # Frontend external (alpine-test)
+            "http://127.0.0.1:3000/auth/callback",
+            "http://127.0.0.1:3001/auth/callback",
+            "http://127.0.0.1:3002/auth/callback",
+            # Legacy ports for backward compatibility
+            "http://localhost:8080/auth/callback",
+            "http://127.0.0.1:8080/auth/callback"
         ]
     )
     
