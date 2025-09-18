@@ -212,6 +212,19 @@ class RealWebSocketTestConfig:
     })
 
 
+@dataclass
+class EventValidationResult:
+    """Results from WebSocket event validation."""
+    success: bool
+    events_captured: List[Dict[str, Any]]
+    required_events_found: Set[str]
+    missing_events: Set[str]
+    extra_events: Set[str]
+    total_events: int
+    validation_duration: float
+    error_message: Optional[str] = None
+
+
 class RealWebSocketTestBase:
     """
     Universal base class for ALL WebSocket tests - uses ONLY real connections.

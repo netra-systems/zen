@@ -41,10 +41,10 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env, IsolatedEnvironment
 import pytest
 from loguru import logger
-from netra_backend.app.auth_integration.auth import AuthenticationService
-from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.core.session_manager import SessionManager
-from auth_service.auth_core.core.token_validator import TokenValidator
+from netra_backend.app.auth_integration.auth import BackendAuthIntegration
+from netra_backend.app.core.unified.jwt_validator import UnifiedJWTValidator, TokenValidationResult
+from netra_backend.app.database.session_manager import SessionManager
+from netra_backend.app.auth_integration.auth import auth_client
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
@@ -59,11 +59,11 @@ class RealAuthTestClient:
         self.session_token = None
         self.jwt_token = None
         self.user_info = None
-        self.auth_service = AuthenticationService()
+        self.auth_service = BackendAuthIntegration()
 
     async def initialize(self):
         """Initialize real authentication service connection."""
-        await self.auth_service.initialize()
+        # BackendAuthIntegration doesn't need explicit initialization
 
     async def create_test_user(self, user_id: str, email: str=None) -> Dict[str, Any]:
         """Create a real test user account."""
@@ -159,13 +159,12 @@ class AuthenticationIntegrationAgentWorkflowsTests(SSotAsyncTestCase):
     async def setup_real_auth_infrastructure(self):
         """Initialize real authentication infrastructure components."""
         self.auth_client = RealAuthTestClient()
-        await self.auth_client.initialize()
-        self.jwt_handler = JWTHandler(secret_key=self.jwt_secret)
+        # auth_client doesn't need explicit initialization
+        self.jwt_validator = UnifiedJWTValidator()
         self.session_manager = SessionManager()
-        await self.session_manager.initialize()
-        self.token_validator = TokenValidator(jwt_handler=self.jwt_handler, session_manager=self.session_manager)
-        self.auth_service = AuthenticationService()
-        await self.auth_service.initialize()
+        # Note: Using auth_client for JWT operations instead of direct JWT handler
+        self.auth_service = BackendAuthIntegration()
+        # BackendAuthIntegration doesn't need explicit initialization
         await self.auth_client.create_test_user(self.test_user_id)
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=f'conv_{self.test_user_id}', run_id=f'run_{uuid.uuid4()}', request_id=f'req_{uuid.uuid4()}')
         self.websocket_manager = get_websocket_manager(user_context=user_context)
@@ -280,8 +279,8 @@ class AuthenticationIntegrationAgentWorkflowsTests(SSotAsyncTestCase):
         assert continued_result is not None, 'Continued execution should succeed'
         if continued_result.get('user_context'):
             assert continued_result['user_context'].get('user_id') == self.test_user_id, 'User context should be preserved'
-        initial_validation = await self.token_validator.validate_token(initial_token)
-        refreshed_validation = await self.token_validator.validate_token(refreshed_token)
+        initial_validation = await self.jwt_validator.validate_token(initial_token)
+        refreshed_validation = await self.jwt_validator.validate_token(refreshed_token)
         if initial_validation.get('valid'):
             logger.info('Initial token still valid during test')
         assert refreshed_validation.get('valid') is True, 'Refreshed token should be valid'
@@ -300,7 +299,7 @@ class AuthenticationIntegrationAgentWorkflowsTests(SSotAsyncTestCase):
         result = await execution_engine.execute_authenticated_request('Perform analysis with OAuth-authenticated access', auth_token=oauth_token)
         assert result is not None, 'OAuth-authenticated execution should succeed'
         assert result.get('status') != 'auth_failed', 'Should not fail OAuth authentication'
-        oauth_validation = await self.token_validator.validate_oauth_token(oauth_token)
+        oauth_validation = await self.jwt_validator.validate_token(oauth_token)
         assert oauth_validation.get('valid') is True, 'OAuth token should be valid'
         assert oauth_validation.get('provider') == 'google', 'Should identify correct OAuth provider'
         logger.info('Verified OAuth flow completion and agent execution integration')
@@ -421,7 +420,7 @@ class AuthenticationIntegrationAgentWorkflowsTests(SSotAsyncTestCase):
             if successful_operations >= 2:
                 successful_users += 1
             token = tokens[user_index]
-            token_validation = await self.token_validator.validate_token(token)
+            token_validation = await self.jwt_validator.validate_token(token)
             assert token_validation.get('user_id') == user_id, f'Token should identify correct user {user_id}'
         assert successful_users >= num_users - 1, f'Most users should succeed: {successful_users}/{num_users}'
         for auth_client in auth_clients:
