@@ -490,7 +490,7 @@ f"OAuth implementation should prevent state parameter replay attacks."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available)"
     async def test_refresh_token_cross_service_leak(self):
-'''Test 7: Refresh Token Cross-Service Leak'
+'''Test 7: Refresh Token Cross-Service Leak
 
 This test WILL FAIL because refresh tokens may leak between
 services or be accessible from unintended endpoints,
@@ -559,7 +559,7 @@ f"Only auth service should handle refresh tokens."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available)"
     async def test_multi_tab_session_collision(self):
-'''Test 8: Multi-Tab Session Collision'
+'''Test 8: Multi-Tab Session Collision
 
 This test WILL FAIL because the system doesn"t properly handle"
 multiple browser tabs with different sessions for the same user,
@@ -630,7 +630,7 @@ f"Multi-tab sessions are interfering with each other."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available)"
     async def test_service_restart_auth_persistence(self):
-'''Test 9: Service Restart Auth Persistence'
+'''Test 9: Service Restart Auth Persistence
 
 This test WILL FAIL because authentication state doesn"t persist"
 properly across service restarts, causing all users to be logged out
@@ -689,7 +689,7 @@ f"Authentication should persist across service restarts."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available)"
     async def test_cross_origin_token_injection(self):
-'''Test 10: Cross-Origin Token Injection'
+'''Test 10: Cross-Origin Token Injection
 
 This test WILL FAIL because the system doesn"t properly validate"
 token origins, allowing tokens from unauthorized domains to be

@@ -16,14 +16,14 @@ settings = get_config()
 from netra_backend.app.schemas.config import AppConfig
 from netra_backend.app.services.permission_service import PermissionService
 from netra_backend.app.services.audit_service import AuditService
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.monitoring.authentication_monitor_service import (
     get_authentication_monitor_service,
     get_auth_health_status,
     AuthenticationHealthStatus
 )
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 audit_service = AuditService()
 
 router = APIRouter()
