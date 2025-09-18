@@ -177,28 +177,50 @@ class UnifiedWebSocketManager(_UnifiedWebSocketManagerImplementation):
 
 class WebSocketManagerFactory:
     """
-    CANONICAL PATTERN 2a: Factory Class Pattern
-    
-    Factory class for creating WebSocket manager instances.
-    Provides backwards compatibility with factory-based patterns.
-    
+    DEPRECATED: Unnecessary factory wrapper - Issue #1194 Factory Over-Engineering Cleanup
+
+    This factory class adds no value over calling get_websocket_manager() directly.
+    It's an example of the factory pattern over-engineering that Issue #1194 addresses.
+
+    MIGRATION PATH:
+    - Replace WebSocketManagerFactory.create_manager() with get_websocket_manager()
+    - Replace WebSocketManagerFactory.get_manager() with get_websocket_manager()
+
     Example:
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerFactory
-        
+        # OLD (over-engineered)
         factory = WebSocketManagerFactory()
         manager = factory.create_manager(user_context=ctx)
+
+        # NEW (direct function call)
+        manager = get_websocket_manager(user_context=ctx)
     """
-    
+
     @staticmethod
     def create_manager(user_context: Optional[Any] = None, **kwargs) -> _UnifiedWebSocketManagerImplementation:
-        """Create a WebSocket manager instance with user context."""
-        _log_import_usage("Factory Class", "canonical_import_patterns.WebSocketManagerFactory.create_manager")
+        """
+        DEPRECATED: Use get_websocket_manager() directly.
+
+        This method adds unnecessary indirection. Use the function directly.
+        """
+        _log_import_usage("Factory Class (DEPRECATED)", "canonical_import_patterns.WebSocketManagerFactory.create_manager")
+        logger.warning(
+            "WebSocketManagerFactory.create_manager() is deprecated. "
+            "Use get_websocket_manager() directly for Issue #1194 compliance."
+        )
         return get_websocket_manager(user_context=user_context, **kwargs)
-    
+
     @staticmethod
     def get_manager(user_context: Optional[Any] = None, **kwargs) -> _UnifiedWebSocketManagerImplementation:
-        """Alias for create_manager for backwards compatibility."""
-        _log_import_usage("Factory Class", "canonical_import_patterns.WebSocketManagerFactory.get_manager")
+        """
+        DEPRECATED: Use get_websocket_manager() directly.
+
+        This method adds unnecessary indirection. Use the function directly.
+        """
+        _log_import_usage("Factory Class (DEPRECATED)", "canonical_import_patterns.WebSocketManagerFactory.get_manager")
+        logger.warning(
+            "WebSocketManagerFactory.get_manager() is deprecated. "
+            "Use get_websocket_manager() directly for Issue #1194 compliance."
+        )
         return get_websocket_manager(user_context=user_context, **kwargs)
 
 

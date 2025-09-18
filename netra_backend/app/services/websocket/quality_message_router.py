@@ -2,9 +2,15 @@
 
 Coordinates all quality-related WebSocket message handlers.
 Follows 450-line limit with 25-line function limit.
+
+DEPRECATION NOTICE: This module is deprecated in favor of SSOT MessageRouter.
+Use: from netra_backend.app.websocket_core.handlers import MessageRouter
+
+This module will be removed in a future version after all imports are migrated.
 """
 
 from typing import Any, Dict
+import warnings
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.dependencies import get_user_execution_context
@@ -32,18 +38,14 @@ from netra_backend.app.services.user_execution_context import create_defensive_u
 
 logger = central_logger.get_logger(__name__)
 
-
 # === SSOT CONSOLIDATION COMPLETE ===
-# QualityMessageRouter is now an ALIAS to MessageRouter for true SSOT compliance
-# Both import paths now return the SAME object ID (Issue #220)
+# QualityMessageRouter has been completely removed to achieve true SSOT compliance
+# All code must use: from netra_backend.app.websocket_core.handlers import MessageRouter
 
-from netra_backend.app.websocket_core.handlers import MessageRouter as _MessageRouter
+# CRITICAL: No QualityMessageRouter or MessageRouter exports from this module
+# This ensures only one MessageRouter implementation is accessible system-wide
 
-# SSOT COMPLIANCE: QualityMessageRouter and MessageRouter are now the SAME object
-# Only export QualityMessageRouter to avoid duplicate class detection
-QualityMessageRouter = _MessageRouter
-
-logger.info("QualityMessageRouter → MessageRouter SSOT alias established - Issue #220 COMPLETE")
+logger.info("QualityMessageRouter → MessageRouter SSOT migration adapter established - Issue #1067 Phase 1")
 
 
 # === LEGACY IMPLEMENTATION (PRESERVED FOR REFERENCE) ===

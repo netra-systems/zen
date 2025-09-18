@@ -155,6 +155,7 @@ class AgentOrchestrationTestRunner(SSotBaseTestCase):
 
         print(f"Running performance tests with concurrent load: {concurrent_load}")
         print(f"Detailed reports: {detailed_reports}")
+        print(f"Executing command: {' '.join(cmd)}")
         print()
 
         # Set environment variable for concurrent load through IsolatedEnvironment
@@ -162,7 +163,11 @@ class AgentOrchestrationTestRunner(SSotBaseTestCase):
         env_vars["AGENT_PERFORMANCE_CONCURRENT_LOAD"] = str(concurrent_load)
 
         try:
-            result = subprocess.run(cmd, env=env_vars, capture_output=False, cwd=str(self.project_root))
+            # On Windows, when paths have spaces, use shell=True for better compatibility
+            if sys.platform.startswith('win'):
+                result = subprocess.run(cmd, env=env_vars, capture_output=False, cwd=str(self.project_root), shell=True)
+            else:
+                result = subprocess.run(cmd, env=env_vars, capture_output=False, cwd=str(self.project_root))
 
             if result.returncode == 0:
                 print("[SUCCESS] Performance tests completed successfully")
@@ -199,7 +204,11 @@ class AgentOrchestrationTestRunner(SSotBaseTestCase):
         print()
 
         try:
-            result = subprocess.run(cmd, capture_output=False, cwd=str(self.project_root))
+            # On Windows, when paths have spaces, use shell=True for better compatibility
+            if sys.platform.startswith('win'):
+                result = subprocess.run(cmd, capture_output=False, cwd=str(self.project_root), shell=True)
+            else:
+                result = subprocess.run(cmd, capture_output=False, cwd=str(self.project_root))
 
             if result.returncode == 0:
                 print("[SUCCESS] Error recovery tests completed successfully")
@@ -247,8 +256,8 @@ class AgentOrchestrationTestRunner(SSotBaseTestCase):
 
         results = []
 
-        # Quick performance validation
-        perf_test = "test_single_agent_execution_time_benchmarks"
+        # Quick performance validation - use actual test name from the file
+        perf_test = "AgentPerformanceMetricsTests::test_basic_agent_performance_tracking"
         cmd_perf = self._build_pytest_command(
             self.test_files['performance'],
             specific_test=perf_test
@@ -257,7 +266,11 @@ class AgentOrchestrationTestRunner(SSotBaseTestCase):
 
         print("Running quick performance validation...")
         try:
-            perf_result = subprocess.run(cmd_perf, capture_output=False, cwd=str(self.project_root))
+            # On Windows, when paths have spaces, use shell=True for better compatibility
+            if sys.platform.startswith('win'):
+                perf_result = subprocess.run(cmd_perf, capture_output=False, cwd=str(self.project_root), shell=True)
+            else:
+                perf_result = subprocess.run(cmd_perf, capture_output=False, cwd=str(self.project_root))
             results.append(('performance', perf_result.returncode))
         except Exception as e:
             print(f"[ERROR] Performance validation failed: {e}")
@@ -273,7 +286,11 @@ class AgentOrchestrationTestRunner(SSotBaseTestCase):
 
         print("Running quick error recovery validation...")
         try:
-            recovery_result = subprocess.run(cmd_recovery, capture_output=False, cwd=str(self.project_root))
+            # On Windows, when paths have spaces, use shell=True for better compatibility
+            if sys.platform.startswith('win'):
+                recovery_result = subprocess.run(cmd_recovery, capture_output=False, cwd=str(self.project_root), shell=True)
+            else:
+                recovery_result = subprocess.run(cmd_recovery, capture_output=False, cwd=str(self.project_root))
             results.append(('error_recovery', recovery_result.returncode))
         except Exception as e:
             print(f"[ERROR] Error recovery validation failed: {e}")
