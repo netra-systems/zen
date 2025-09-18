@@ -73,6 +73,7 @@ TypeError: object Row can't be used in 'await' expression
 ### For Cluster 1 (AgentWebSocketBridge):
 - **Search for existing issue:** Look for WebSocket configuration or factory issues
 - **Action:** Create new P0 issue if none exists, or update existing
+- **COMPLETED:** Created GitHub issue #1339 - "GCP-regression | P0 | AgentWebSocketBridge missing 'configure' attribute causes service crash"
 
 ### For Cluster 2 (Database Async):
 - **Search for existing issue:** Database async/await or Row object issues
@@ -89,3 +90,6 @@ TypeError: object Row can't be used in 'await' expression
 2. Create/update issues for each cluster
 3. Link related issues together
 4. Update this worklog with issue numbers created/updated
+
+## Issue Tracking
+- **Issue #1339:** AgentWebSocketBridge missing 'configure' attribute (P0) - CREATED
