@@ -907,6 +907,40 @@ class DevelopmentConfig(AppConfig):
         """Deprecated: Mock mode is not supported in development."""
         # Mock mode is only for specific testing cases, not for development
         pass
+
+    def _load_secrets_from_environment(self, data: dict) -> None:
+        """Load critical secrets from environment variables for development.
+
+        This ensures SECRET_KEY, SERVICE_SECRET, JWT_SECRET_KEY, and other critical
+        secrets are loaded from environment variables for development.
+        """
+        from shared.isolated_environment import get_env
+        import logging
+
+        logger = logging.getLogger(__name__)
+        env = get_env()
+
+        # Load critical secrets that may come from environment or config files
+        critical_secrets = [
+            ('SERVICE_SECRET', 'service_secret'),
+            ('SERVICE_ID', 'service_id'),
+            ('JWT_SECRET_KEY', 'jwt_secret_key'),
+            ('SECRET_KEY', 'secret_key'),
+            ('FERNET_KEY', 'fernet_key'),
+        ]
+
+        for env_name, config_name in critical_secrets:
+            # Use get() method which IsolatedEnvironment supports
+            env_value = env.get(env_name)
+            # CRITICAL FIX: Always override with env value if present, even if data has None
+            if env_value:
+                data[config_name] = env_value
+                logger.info(f"Development: Loaded {env_name} from environment")
+
+        # Log what's loaded for debugging
+        logger.info(f"Development: SECRET_KEY configured: {bool(data.get('secret_key'))}")
+        logger.info(f"Development: SERVICE_SECRET configured: {bool(data.get('service_secret'))}")
+        logger.info(f"Development: JWT_SECRET_KEY configured: {bool(data.get('jwt_secret_key'))}")
     
     def _load_api_keys_from_environment(self, env, data: dict) -> None:
         """Load API keys and service URLs from environment variables for development."""

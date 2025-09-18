@@ -14,9 +14,9 @@ a baseline performance report without requiring the full application stack.
 **Critical Requirements:**
 - P99 latency < ""50ms"" (real-time user experience)
 - Throughput > 1000 events/second (scalability)
-- Connection time < ""500ms"" (quick user engagement)
+- Connection time < "500ms" (quick user engagement)
 - Support 25+ concurrent users (business growth)
-""""
+"""
 
 
 
