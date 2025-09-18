@@ -30,7 +30,7 @@ class AuthEnvironment:
         """Validate auth-specific configuration on initialization."""
         # Core auth requirements
         required_vars = [
-            "JWT_SECRET_KEY"
+            "JWT_SECRET_KEY",
             # Database URL is now built from components, not required directly
         ]
         

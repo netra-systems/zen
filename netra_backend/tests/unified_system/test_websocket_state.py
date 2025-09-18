@@ -27,12 +27,12 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 import pytest
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.websocket_core.connection_info import ConnectionInfo, ConnectionState
 from netra_backend.app.websocket_core import WebSocketManager as ConnectionManager, get_connection_monitor
 from netra_backend.app.websocket_core.reconnection_handler import ReconnectionContext, get_reconnection_handler
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 @dataclass
 class WebSocketTestSession:

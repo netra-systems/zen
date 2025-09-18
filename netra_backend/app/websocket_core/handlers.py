@@ -2432,8 +2432,13 @@ class MessageRouter(ExternalCanonicalMessageRouter):
     @property
     def handlers(self):
         """Compatibility property to access event handlers."""
-        # Return the _event_handlers from CanonicalMessageRouter for backward compatibility
-        return getattr(self, '_event_handlers', {})
+        # Return a list of all handlers for backward compatibility
+        _event_handlers = getattr(self, '_event_handlers', {})
+        # Flatten the handlers from all message types into a single list
+        all_handlers = []
+        for handler_list in _event_handlers.values():
+            all_handlers.extend(handler_list)
+        return all_handlers
 
     async def handle_message(self, user_id: str, message: Union[WebSocketMessage, Dict[str, Any]]) -> None:
         """

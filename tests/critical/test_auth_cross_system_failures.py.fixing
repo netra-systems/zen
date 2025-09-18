@@ -2,8 +2,7 @@ from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 
 env = get_env()
-'''
-'''
+"""
 Authentication Cross-System Critical Failure Tests
 
 These tests are designed to FAIL initially to expose real authentication integration
@@ -21,8 +20,7 @@ Test Philosophy: Expose Real Failure Modes
 - Each test designed to expose specific integration gaps
 - Focus on race conditions, state sync, and cross-service consistency
 - Target real-world attack vectors and edge cases
-'''
-'''
+"""
 
 import asyncio
 import os
@@ -41,15 +39,15 @@ import jwt as pyjwt
 from fastapi.testclient import TestClient
 
     # Set test environment before any imports
-env.set("TESTING", "true", "test)"
-env.set("ENVIRONMENT", "test", "test)"
-env.set("SKIP_STARTUP_CHECKS", "true", "test)"
-env.set("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only", "test)"
+env.set("TESTING", "true", "test")
+env.set("ENVIRONMENT", "test", "test")
+env.set("SKIP_STARTUP_CHECKS", "true", "test")
+env.set("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only", "test")
 
     # Force enable auth service for cross-system testing
-env.set("AUTH_SERVICE_ENABLED", "true", "test)"
-env.set("AUTH_FAST_TEST_MODE", "false", "test)"
-env.set("AUTH_SERVICE_URL", "http://127.0.0.1:8001", "test)"
+env.set("AUTH_SERVICE_ENABLED", "true", "test")
+env.set("AUTH_FAST_TEST_MODE", "false", "test")
+env.set("AUTH_SERVICE_URL", "http://127.0.0.1:8001", "test")
 
     # Add project root to path for imports
 import sys
@@ -60,22 +58,20 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
     # Import modules but defer app creation until test execution
 try:
-    pass
-import netra_backend.app.main
-from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.clients.auth_client import auth_client
-from netra_backend.app.db.models_postgres import User
-backend_available = True
+    import netra_backend.app.main
+    from netra_backend.app.auth_integration.auth import get_current_user
+    from netra_backend.app.clients.auth_client import auth_client
+    from netra_backend.app.db.models_postgres import User
+    backend_available = True
 except ImportError as e:
     print("")
 backend_available = False
 
 try:
-    pass
-import auth_service.main
-from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.services.auth_service import AuthService
-auth_service_available = True
+    import auth_service.main
+    from auth_service.auth_core.core.jwt_handler import JWTHandler
+    from auth_service.auth_core.services.auth_service import AuthService
+    auth_service_available = True
 except ImportError as e:
     print("")
 auth_app = None
@@ -83,21 +79,18 @@ auth_service_available = False
 
 
 class TestAuthCrossSystemFailures:
-    '''
-    '''
+    """
     Authentication Cross-System Critical Failure Test Suite
 
     These tests are designed to FAIL to expose real integration issues
     between the auth service and main backend service.
-    '''
-    '''
-    pass
+    """
 
-@pytest.mark.asyncio
-@pytest.mark.critical
-# @pytest.fixture
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    # @pytest.fixture
     async def test_concurrent_login_race_condition(self):
-'''Test 1: Concurrent Login Race Condition'
+        '''Test 1: Concurrent Login Race Condition
 
 This test WILL FAIL because the auth service and main backend
 don"t properly handle concurrent login attempts for the same user."
@@ -228,7 +221,7 @@ f"This indicates token blacklisting isnt synchronized across services.""
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available)"
     async def test_session_state_desync(self):
-'''Test 3: Session State Desync'
+'''Test 3: Session State Desync
 
 This test WILL FAIL because session state between auth_service
 and netra_backend can become desynchronized, leading to
@@ -306,7 +299,7 @@ f"This indicates session state is not synchronized between services."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available)"
     async def test_jwt_secret_rotation_during_request(self):
-'''Test 4: JWT Secret Rotation During Request'
+'''Test 4: JWT Secret Rotation During Request
 
 This test WILL FAIL because the system doesn"t handle JWT secret"
 rotation gracefully. Active requests fail when secrets rotate,
@@ -373,7 +366,7 @@ f"System should handle secret rotation gracefully."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available)"
     async def test_cross_service_permission_escalation(self):
-'''Test 5: Cross-Service Permission Escalation'
+'''Test 5: Cross-Service Permission Escalation
 
 This test WILL FAIL because permissions granted in auth_service
 may not be properly validated in netra_backend, allowing
@@ -441,7 +434,7 @@ f"Backend should validate token integrity and reject tampering."
 @pytest.mark.critical
 # @pytest.fixture
     async def test_oauth_state_replay_attack(self):
-'''Test 6: OAuth State Replay Attack'
+'''Test 6: OAuth State Replay Attack
 
 This test WILL FAIL because OAuth state parameters aren"t properly"
 validated against replay attacks, allowing attackers to reuse
@@ -490,7 +483,7 @@ f"OAuth implementation should prevent state parameter replay attacks."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available)"
     async def test_refresh_token_cross_service_leak(self):
-'''Test 7: Refresh Token Cross-Service Leak'
+'''Test 7: Refresh Token Cross-Service Leak
 
 This test WILL FAIL because refresh tokens may leak between
 services or be accessible from unintended endpoints,
@@ -559,7 +552,7 @@ f"Only auth service should handle refresh tokens."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available)"
     async def test_multi_tab_session_collision(self):
-'''Test 8: Multi-Tab Session Collision'
+'''Test 8: Multi-Tab Session Collision
 
 This test WILL FAIL because the system doesn"t properly handle"
 multiple browser tabs with different sessions for the same user,
@@ -630,7 +623,7 @@ f"Multi-tab sessions are interfering with each other."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available)"
     async def test_service_restart_auth_persistence(self):
-'''Test 9: Service Restart Auth Persistence'
+'''Test 9: Service Restart Auth Persistence
 
 This test WILL FAIL because authentication state doesn"t persist"
 properly across service restarts, causing all users to be logged out
@@ -689,7 +682,7 @@ f"Authentication should persist across service restarts."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available)"
     async def test_cross_origin_token_injection(self):
-'''Test 10: Cross-Origin Token Injection'
+'''Test 10: Cross-Origin Token Injection
 
 This test WILL FAIL because the system doesn"t properly validate"
 token origins, allowing tokens from unauthorized domains to be
@@ -782,7 +775,7 @@ return TestClient(netra_backend.app.main.app)
 
 # @pytest.fixture
     async def test_user_credentials(self, auth_service_client):
-            # Removed problematic line: '''Fixture to create test user and await asyncio.sleep(0)'
+            # Removed problematic line: Fixture to create test user and await asyncio.sleep(0)
 return credentials'''
 return credentials'''
 user_email = ""

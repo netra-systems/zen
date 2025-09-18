@@ -12,9 +12,9 @@ from fastapi import Request, WebSocket
 from starlette.middleware.cors import CORSMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 # WebSocket CORS now uses unified configuration from shared/cors_config_builder.py
 # No need for separate WebSocket origin management

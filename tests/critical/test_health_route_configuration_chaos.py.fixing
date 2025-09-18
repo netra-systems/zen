@@ -54,10 +54,11 @@ class HealthConfigurationChaosDetector:
 
     def add_config_conflict(self, conflict_type: str, details: Dict[str, Any]):
         """Add a detected configuration conflict."""
-        self.config_conflicts.append({ })
-        'type': conflict_type,
-        'details': details,
-        'timestamp': datetime.now(timezone.utc).isoformat()
+        self.config_conflicts.append({
+            'type': conflict_type,
+            'details': details,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        })
     
 
     def add_env_inconsistency(self, environment: str, inconsistency: Dict[str, Any]):

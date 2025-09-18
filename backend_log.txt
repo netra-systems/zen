@@ -1,0 +1,447 @@
+C:\GitHub\netra-apex\netra_backend\app\main.py:38: DeprecationWarning: netra_backend.app.core.logging_config is deprecated. Cloud Run logging is now handled by shared.logging.unified_logging_ssot.
+  from netra_backend.app.core.logging_config import configure_cloud_run_logging, setup_exception_handler
+WARNING:netra_backend.app.core.sentry_integration:Sentry SDK not available - install sentry-sdk[fastapi] to enable error tracking
+C:\GitHub\netra-apex\netra_backend\app\routes\websocket_ssot.py:138: DeprecationWarning: Importing WebSocketManager from 'netra_backend.app.websocket' is deprecated. Use 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager' instead.
+  from netra_backend.app.websocket.connection_handler import connection_scope
+INFO:     Will watch for changes in these directories: ['C:\\GitHub\\netra-apex\\app']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+WARNING:  --reload-include and --reload-exclude have no effect unless watchfiles is installed.
+INFO:     Started reloader process [33528] using StatReload
+WARNING:netra_backend.app.core.sentry_integration:Sentry SDK not available - install sentry-sdk[fastapi] to enable error tracking
+C:\GitHub\netra-apex\netra_backend\app\routes\websocket_ssot.py:138: DeprecationWarning: Importing WebSocketManager from 'netra_backend.app.websocket' is deprecated. Use 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager' instead.
+  from netra_backend.app.websocket.connection_handler import connection_scope
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\legacy\__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+  warnings.warn(  # deprecated in 14.0 - 2024-11-09
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\uvicorn\protocols\websockets\websockets_impl.py:17: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated
+  from websockets.server import WebSocketServerProtocol
+INFO:     Started server process [43536]
+INFO:     Waiting for application startup.
+ERROR:netra_backend.app.redis_manager:Redis reconnection failed (attempt 1): 
+WARNING:netra_backend.app.redis_manager:Redis recovery failed - returning None
+ERROR:netra_backend.app.db.database_manager:\u274c Database connection error after 4.062s (attempt 1/3): Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432)
+ERROR:netra_backend.app.db.database_manager:\u274c Database connection error after 4.057s (attempt 2/3): Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432)
+ERROR:netra_backend.app.db.database_manager:\u274c Database connection error after 4.061s (attempt 3/3): Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432)
+ERROR:netra_backend.app.db.database_manager:Database connection failed after 3 attempts
+CRITICAL:netra_backend.app.db.database_manager:[\U0001f4a5] CRITICAL: Database connection failed during initialization after 15.198s
+ERROR:netra_backend.app.db.database_manager:Database connection error: ConnectionError: Connection error: Failed to establish database connection after all retry attempts
+ERROR:netra_backend.app.db.database_manager:Check database server availability, network connectivity, and credentials
+ERROR:netra_backend.app.db.database_manager:This will prevent all database operations including user data persistence
+WARNING:netra_backend.app.smd:Circuit breaker: Database failures reached threshold (3), opening circuit for 60s
+CRITICAL:netra_backend.app.core.lifespan_manager:DETERMINISTIC STARTUP FAILURE: Phase 3 database setup failed - deterministic startup requires functional database: Capacity-aware database initialization failed in test environment: Database initialization failed after 3 attempts in test environment. Last error: Failed to verify database tables exist: Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432) (Original: RuntimeError: Failed to verify database tables exist: Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432)) (Original: DeterministicStartupError: Capacity-aware database initialization failed in test environment: Database initialization failed after 3 attempts in test environment. Last error: Failed to verify database tables exist: Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432) (Original: RuntimeError: Failed to verify database tables exist: Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432)))
+CRITICAL:netra_backend.app.core.lifespan_manager:Application cannot start without critical services
+CRITICAL:netra_backend.app.core.lifespan_manager:Exiting with code 3 to signal startup failure
+INFO:netra_backend.app.core.lifespan_manager:Application shutdown initiated...
+INFO:netra_backend.app.core.lifespan_manager:Shutting down global background task manager...
+INFO:netra_backend.app.core.lifespan_manager:Global background task manager shutdown complete
+INFO:netra_backend.app.core.lifespan_manager:Shutting down infrastructure resilience components...
+INFO:netra_backend.app.core.lifespan_manager:Infrastructure resilience monitoring stopped
+INFO:netra_backend.app.core.lifespan_manager:Circuit breakers reset for clean shutdown
+INFO:netra_backend.app.core.lifespan_manager:Circuit breaker manager reset
+INFO:netra_backend.app.core.lifespan_manager:Infrastructure resilience shutdown complete
+INFO:netra_backend.app.core.lifespan_manager:Application shutdown complete.
+C:\GitHub\netra-apex\netra_backend\app\services\infrastructure_resilience.py:406: DeprecationWarning: ISSUE #1182: Importing from 'netra_backend.app.websocket_core.manager' is deprecated. Use 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager' instead. This import path will be removed in Phase 2 of SSOT consolidation.
+  from netra_backend.app.websocket_core.manager import get_websocket_manager
+ERROR:    Traceback (most recent call last):
+  File "C:\GitHub\netra-apex\netra_backend\app\startup_module.py", line 133, in _verify_required_database_tables_exist
+    async with engine.connect() as conn:
+               ~~~~~~~~~~~~~~^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\ext\asyncio\base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\ext\asyncio\engine.py", line 274, in start
+    await greenlet_spawn(self.sync_engine.connect)
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py", line 3277, in connect
+    return self._connection_cls(self)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py", line 3301, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\pool\base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\pool\base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\pool\base.py", line 711, in checkout
+    rec = pool._do_get()
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\pool\impl.py", line 177, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\pool\impl.py", line 175, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\pool\base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\pool\base.py", line 673, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\pool\base.py", line 899, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\pool\base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py", line 629, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 964, in connect
+    await_only(creator_fn(*arg, **kw)),
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\asyncpg\connection.py", line 2421, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<20 lines>...
+    )
+    ^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\asyncpg\connect_utils.py", line 1075, in _connect
+    raise last_error or exceptions.TargetServerAttributeNotMatched(
+    ...<2 lines>...
+    )
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\asyncpg\connect_utils.py", line 1049, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\asyncpg\connect_utils.py", line 886, in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\asyncpg\connect_utils.py", line 931, in __connect_addr
+    tr, pr = await connector
+             ^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\asyncpg\connect_utils.py", line 802, in _create_ssl_connection
+    tr, pr = await loop.create_connection(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        host, port)
+        ^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\asyncio\base_events.py", line 1179, in create_connection
+    raise OSError('Multiple exceptions: {}'.format(
+        ', '.join(str(exc) for exc in exceptions)))
+OSError: Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\GitHub\netra-apex\netra_backend\app\smd.py", line 1281, in _initialize_database_with_progressive_retry
+    await self._initialize_database_single_attempt(current_timeout)
+  File "C:\GitHub\netra-apex\netra_backend\app\smd.py", line 1359, in _initialize_database_single_attempt
+    await asyncio.wait_for(
+    ...<2 lines>...
+    )
+  File "C:\Program Files\Python313\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\GitHub\netra-apex\netra_backend\app\startup_module.py", line 100, in _ensure_database_tables_exist
+    await _verify_required_database_tables_exist(logger, graceful_startup)
+  File "C:\GitHub\netra-apex\netra_backend\app\startup_module.py", line 202, in _verify_required_database_tables_exist
+    raise RuntimeError(error_msg) from e
+RuntimeError: Failed to verify database tables exist: Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\GitHub\netra-apex\netra_backend\app\smd.py", line 1488, in _initialize_database_with_capacity_awareness
+    await self._initialize_database_with_progressive_retry(initialization_timeout)
+  File "C:\GitHub\netra-apex\netra_backend\app\smd.py", line 1331, in _initialize_database_with_progressive_retry
+    raise DeterministicStartupError(error_msg, original_error=last_error, phase=StartupPhase.DATABASE) from last_error
+netra_backend.app.smd.DeterministicStartupError: Database initialization failed after 3 attempts in test environment. Last error: Failed to verify database tables exist: Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432) (Original: RuntimeError: Failed to verify database tables exist: Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\GitHub\netra-apex\netra_backend\app\smd.py", line 462, in _phase3_database_setup
+    await self._initialize_database_with_capacity_awareness()
+  File "C:\GitHub\netra-apex\netra_backend\app\smd.py", line 1516, in _initialize_database_with_capacity_awareness
+    raise DeterministicStartupError(error_msg) from e
+netra_backend.app.smd.DeterministicStartupError: Capacity-aware database initialization failed in test environment: Database initialization failed after 3 attempts in test environment. Last error: Failed to verify database tables exist: Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432) (Original: RuntimeError: Failed to verify database tables exist: Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\GitHub\netra-apex\netra_backend\app\core\lifespan_manager.py", line 51, in lifespan
+    start_time, logger = await run_complete_startup(app)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\GitHub\netra-apex\netra_backend\app\smd.py", line 2491, in run_deterministic_startup
+    await orchestrator.initialize_system()
+  File "C:\GitHub\netra-apex\netra_backend\app\smd.py", line 400, in initialize_system
+    raise e
+  File "C:\GitHub\netra-apex\netra_backend\app\smd.py", line 372, in initialize_system
+    await self._phase3_database_setup()
+  File "C:\GitHub\netra-apex\netra_backend\app\smd.py", line 511, in _phase3_database_setup
+    raise DeterministicStartupError(enhanced_error_msg, original_error=e, phase=StartupPhase.DATABASE) from e
+netra_backend.app.smd.DeterministicStartupError: Phase 3 database setup failed - deterministic startup requires functional database: Capacity-aware database initialization failed in test environment: Database initialization failed after 3 attempts in test environment. Last error: Failed to verify database tables exist: Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432) (Original: RuntimeError: Failed to verify database tables exist: Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432)) (Original: DeterministicStartupError: Capacity-aware database initialization failed in test environment: Database initialization failed after 3 attempts in test environment. Last error: Failed to verify database tables exist: Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432) (Original: RuntimeError: Failed to verify database tables exist: Multiple exceptions: [Errno 10061] Connect call failed ('::1', 5432, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 5432)))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\starlette\routing.py", line 694, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py", line 134, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\GitHub\netra-apex\netra_backend\app\core\lifespan_manager.py", line 94, in lifespan
+    sys.exit(3)
+    ~~~~~~~~^^^
+SystemExit: 3
+
+ERROR:    Application startup failed. Exiting.
+Backend Service: Critical environment variables already set - skipping .env loading: Critical vars already set (3/3)

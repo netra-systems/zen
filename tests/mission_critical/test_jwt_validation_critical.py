@@ -1,5 +1,4 @@
 """
-
 Mission Critical JWT Validation Tests
 
 Tests critical JWT validation functionality that directly impacts business value.
@@ -9,13 +8,9 @@ ULTRA CRITICAL: JWT validation failures = 100% user lockout = $0 revenue
 
 Business Value Justification (BVJ):
     - Segment: ALL (Free  ->  Enterprise) - Authentication affects every user
-- Business Goal: Prevent complete system lockout due to JWT validation failures  
-- Value Impact: Protects ALL business value that depends on user authentication
-- Strategic Impact: $120K+ MRR protection through functional authentication
-"
-""
-
-
+    - Business Goal: Prevent complete system lockout due to JWT validation failures
+    - Value Impact: Protects ALL business value that depends on user authentication
+    - Strategic Impact: $120K+ MRR protection through functional authentication
 """
 
 import pytest
@@ -25,45 +20,40 @@ import time
 from typing import Dict, Any, Optional, List
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from netra_backend.app.core.unified.jwt_validator import ()
+from netra_backend.app.core.unified.jwt_validator import (
     UnifiedJWTValidator,
-    TokenValidationResult, 
+    TokenValidationResult,
     TokenType
 )
-from netra_backend.app.core.service_dependencies.golden_path_validator import ()
+from netra_backend.app.core.service_dependencies.golden_path_validator import (
     GoldenPathValidator,
     GoldenPathValidationResult
 )
-from netra_backend.app.core.service_dependencies.models import ()
+from netra_backend.app.core.service_dependencies.models import (
     ServiceType,
     EnvironmentType
 )
 
 
 class JWTValidationMissionCriticalTests:
-    "
-    ""
-
+    """
     Mission Critical JWT validation tests.
-    
+
     FAILURE TOLERANCE: ZERO
     These tests protect the authentication infrastructure that enables all business value.
-"
-""
+    """
 
 
-    @pytest.fixture(scope="class)"
+    @pytest.fixture(scope="class")
     def critical_test_logger(self):
-        Logger for mission critical test output.""
-        logger = logging.getLogger(mission_critical_jwt)
+        """Logger for mission critical test output."""
+        logger = logging.getLogger("mission_critical_jwt")
         logger.setLevel(logging.INFO)
         
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                 ALERT:  CRITICAL JWT: %(asctime)s - %(levelname)s - %(message)s"
-                 ALERT:  CRITICAL JWT: %(asctime)s - %(levelname)s - %(message)s""
-
+                "🚨 ALERT: 🔐 CRITICAL JWT: %(asctime)s - %(levelname)s - %(message)s"
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)

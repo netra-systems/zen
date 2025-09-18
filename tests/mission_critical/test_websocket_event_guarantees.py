@@ -41,8 +41,7 @@ from shared.isolated_environment import get_env
 
 @dataclass
 class WebSocketEventCapture:
-    Captures WebSocket events for testing."
-    Captures WebSocket events for testing.""
+    """Captures WebSocket events for testing."""
 
     event_type: str
     timestamp: float

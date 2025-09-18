@@ -79,7 +79,7 @@ async def backend_client(isolated_env):
     # Ensure backend is healthy
     health_ok = await client.health_check()
     if not health_ok:
-        pytest.skip(Backend service not available")"
+        pytest.skip("Backend service not available")
     
     yield client
     
@@ -88,25 +88,22 @@ async def backend_client(isolated_env):
 
 @pytest.mark.mission_critical
 class RealDataLayerIsolationTests:
-    "
-    ""
-
+    """
     Mission Critical test suite for data layer isolation using REAL services.
-    
+
     Tests 15+ comprehensive isolation scenarios with real Redis, PostgreSQL, and WebSocket connections.
     Each test verifies zero data leakage between users in spacecraft-critical scenarios.
-    "
-    ""
+    """
 
 
     @pytest.mark.asyncio
     async def test_real_redis_user_isolation(self, redis_client):
-        
+        """
         CRITICAL: Redis key isolation between users using REAL Redis service.
-        
+
         Tests that user sessions, cache keys, and data are completely isolated
         in production Redis instance. Any key collision is a security breach.
-""
+        """
         # Create isolated user contexts
         users = [
             {'id': f'user-redis-{uuid.uuid4().hex[:8]}', 'email': f'user{i}@isolation.test'}
@@ -116,11 +113,10 @@ class RealDataLayerIsolationTests:
         # Test session key isolation
         session_data = {}
         for user in users:
-            session_id = fsession_{uuid.uuid4().hex}
+            session_id = f"session_{uuid.uuid4().hex}"
             
             # Store sensitive user data in Redis
-            session_key = fsession:{user['id']}:{session_id}"
-            session_key = fsession:{user['id']}:{session_id}""
+            session_key = f"session:{user['id']}:{session_id}"
 
             sensitive_data = {
                 'user_id': user['id'],
@@ -155,8 +151,8 @@ class RealDataLayerIsolationTests:
                     # Try various key guess patterns that could expose data
                     guess_patterns = [
                         other_key,  # Direct key
-                        fsession:{user['id']}:*,  # Wildcard attempt
-                        other_key.replace(other_user['id'), user['id'),  # ID substitution
+                        f"session:{user['id']}:*",  # Wildcard attempt
+                        other_key.replace(other_user['id'], user['id']),  # ID substitution
                     ]
                     
                     for pattern in guess_patterns:
@@ -167,11 +163,10 @@ class RealDataLayerIsolationTests:
                             assert not other_user_keys, f"SECURITY BREACH: User {user['id']} can discover other user keys: {other_user_keys}"
                         else:
                             # Direct key access attempt (should fail)
-                            if pattern != user_key:  # Don't test own key'
+                            if pattern != user_key:  # Don't test own key
                                 unauthorized_data = await redis_client.hgetall(pattern)
                                 if unauthorized_data and unauthorized_data.get('user_id') != user['id']:
-                                    assert False, fSECURITY BREACH: User {user['id']} accessed data belonging to {unauthorized_data['user_id']}"
-                                    assert False, fSECURITY BREACH: User {user['id']} accessed data belonging to {unauthorized_data['user_id']}""
+                                    assert False, f"SECURITY BREACH: User {user['id']} accessed data belonging to {unauthorized_data['user_id']}"
 
 
     @pytest.mark.asyncio

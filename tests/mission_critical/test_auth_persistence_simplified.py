@@ -14,16 +14,16 @@ Tests core auth persistence patterns without importing modules with singleton is
 import asyncio
 import uuid
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from netra_backend.app.websocket_core.context import WebSocketContext
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class AuthPersistenceCoreTests:
@@ -35,8 +35,8 @@ class AuthPersistenceCoreTests:
         payload = {
             sub: "test-user-123,"
             email": test@example.com,"
-            exp: datetime.utcnow() + timedelta(hours=1),
-            "iat: datetime.utcnow()"
+            exp: datetime.now(timezone.utc) + timedelta(hours=1),
+            "iat: datetime.now(timezone.utc)"
         }
         return jwt.encode(payload, test-secret, algorithm=HS256)
     

@@ -1,5 +1,4 @@
-'''
-'''
+"""
 Database Port Configuration Mismatch Test
 
 This test exposes and validates the critical port configuration issue where:
@@ -15,8 +14,7 @@ Business Value Justification (BVJ):
 
 This test is designed to FAIL initially, exposing the port mismatch issue,
 and PASS once the DatabaseURLBuilder is fixed to use consistent ports.
-'''
-'''
+"""
 
 import os
 import sys
@@ -46,20 +44,21 @@ class DatabasePortConfigurationTester:
 
     def create_test_environment(self, port: str) -> Dict[str, str]:
         """Create a test environment with specific port configuration."""
-        return { }
-        'ENVIRONMENT': 'development',
-        'POSTGRES_HOST': 'localhost',
-        'POSTGRES_PORT': port,
-        'POSTGRES_USER': 'postgres',
-        'POSTGRES_PASSWORD': 'DTprdt5KoQXlEG4Gh9lF',
-        'POSTGRES_DB': 'netra_dev',
-        'DATABASE_URL': 'formatted_string'
+        return {
+            'ENVIRONMENT': 'development',
+            'POSTGRES_HOST': 'localhost',
+            'POSTGRES_PORT': port,
+            'POSTGRES_USER': 'postgres',
+            'POSTGRES_PASSWORD': 'DTprdt5KoQXlEG4Gh9lF',
+            'POSTGRES_DB': 'netra_dev',
+            'DATABASE_URL': 'formatted_string'
+        }
     
 
     def extract_port_from_url(self, url: str) -> str:
         """Extract port number from database URL."""
         if not url:
-        return "NO_URL"
+                    return "NO_URL"
 
         try:
             # Handle standard URL format

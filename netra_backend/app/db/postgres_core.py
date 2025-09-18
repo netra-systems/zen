@@ -24,7 +24,7 @@ from netra_backend.app.db.postgres_events import (
     setup_async_engine_events,
     setup_sync_engine_events,
 )
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.config import get_config
 
 
@@ -33,7 +33,7 @@ def get_settings():
     """Get settings lazily to avoid circular import."""
     return get_config()
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class Database:
