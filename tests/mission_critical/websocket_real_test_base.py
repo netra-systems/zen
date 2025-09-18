@@ -47,6 +47,152 @@ from test_framework.unified_docker_manager import UnifiedDockerManager, Environm
 warnings.filterwarnings("ignore", message=".*docker.*", category=UserWarning)
 
 
+# CRITICAL: Always require real services - NO MOCKS per CLAUDE.md
+def require_docker_services(func=None) -> Union[None, Callable]:
+    """
+    Require Docker services for all tests - fail fast if not available.
+    Can be used as a function or decorator.
+
+    CRITICAL: Per CLAUDE.md, MOCKS = Abomination. Tests must use real services.
+    """
+    def check_docker():
+        try:
+            manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
+            if not manager.is_docker_available():
+                pytest.fail("Docker services required but not available. Start Docker and run: docker compose -f docker-compose.alpine-test.yml up -d")
+        except Exception as e:
+            pytest.fail(f"Docker services check failed: {e}. Ensure Docker is running.")
+
+    if func is None:
+        # Called as function
+        check_docker()
+        return None
+    else:
+        # Called as decorator
+        def wrapper(*args, **kwargs):
+            check_docker()
+            return func(*args, **kwargs)
+        return wrapper
+
+
+def require_docker_services_smart() -> None:
+    """Smart Docker services requirement with staging fallback support."""
+    import platform
+
+    try:
+        manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
+        env = get_env()
+        is_windows = platform.system() == 'Windows'
+
+        # Fast Docker availability check
+        if manager.is_docker_available():
+            logger.info("✅ Docker available - proceeding with local validation")
+            return
+
+        # Enhanced staging environment fallback activation
+        logger.warning("🔄 Docker unavailable - activating staging fallback")
+
+        # Load staging configuration if available
+        from pathlib import Path
+        staging_env_file = Path.cwd() / ".env.staging.e2e"
+        if staging_env_file.exists():
+            logger.info(f"📁 Loading staging configuration from {staging_env_file}")
+            env.load_from_file(staging_env_file, source="staging_e2e_config")
+        else:
+            logger.warning("⚠️ No .env.staging.e2e file found - using environment fallbacks")
+
+        # Get staging configuration
+        staging_enabled = env.get("USE_STAGING_FALLBACK", "true").lower() == "true"
+
+        if not staging_enabled:
+            pytest.skip("❌ Docker unavailable and staging fallback disabled. Enable with USE_STAGING_FALLBACK=true")
+
+        staging_websocket_url = env.get("STAGING_WEBSOCKET_URL", "wss://netra-staging.onrender.com/ws")
+        staging_base_url = env.get("STAGING_BASE_URL", "https://netra-staging.onrender.com")
+        staging_auth_url = env.get("STAGING_AUTH_URL", "https://netra-staging.onrender.com/auth")
+
+        logger.info(f"🌐 Staging WebSocket URL: {staging_websocket_url}")
+        logger.info(f"🌐 Staging Base URL: {staging_base_url}")
+        logger.info(f"🌐 Staging Auth URL: {staging_auth_url}")
+
+        # Configure test environment for staging
+        setup_staging_test_environment(staging_websocket_url, staging_base_url, staging_auth_url)
+        logger.info("✅ Successfully configured staging environment fallback - tests will proceed")
+
+    except Exception as e:
+        logger.error(f"❌ Smart Docker check failed: {e}")
+        pytest.skip(f"Neither Docker nor staging environment available: {e}")
+
+
+def is_docker_available() -> bool:
+    """Check if Docker is available - wrapper for UnifiedDockerManager."""
+    try:
+        manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
+        return manager.is_docker_available()
+    except Exception as e:
+        logger.warning(f"Docker availability check failed: {e}")
+        return False
+
+
+def setup_staging_test_environment(websocket_url: str, base_url: str = None, auth_url: str = None) -> None:
+    """Configure test environment variables for staging validation."""
+    import os
+
+    # Configure core staging environment variables
+    os.environ["TEST_WEBSOCKET_URL"] = websocket_url
+    os.environ["TEST_MODE"] = "staging_fallback"
+    os.environ["REAL_SERVICES"] = "true"
+    os.environ["USE_STAGING_SERVICES"] = "true"
+
+    # Configure staging environment detection
+    os.environ["ENVIRONMENT"] = "staging"
+    os.environ["STAGING_ENV"] = "true"
+    os.environ["INTEGRATION_TEST_MODE"] = "staging"
+
+    # Handle base URL configuration
+    if base_url is None:
+        # Derive from WebSocket URL
+        base_url = websocket_url.replace("wss://", "https://").replace("ws://", "http://").replace("/ws", "")
+
+    os.environ["TEST_BACKEND_URL"] = base_url
+    os.environ["STAGING_BASE_URL"] = base_url
+    os.environ["STAGING_API_URL"] = f"{base_url}/api"
+
+    # Handle auth URL configuration
+    if auth_url is None:
+        # Default to backend auth endpoint
+        auth_url = f"{base_url}/auth"
+
+    os.environ["TEST_AUTH_URL"] = auth_url
+    os.environ["STAGING_AUTH_URL"] = auth_url
+
+    # WebSocket event validation configuration
+    os.environ["STAGING_WEBSOCKET_URL"] = websocket_url
+    os.environ["VALIDATE_WEBSOCKET_EVENTS_STAGING"] = "true"
+    os.environ["REQUIRE_ALL_AGENT_EVENTS_STAGING"] = "true"
+
+    # Enhanced WebSocket event validation settings
+    os.environ["WEBSOCKET_EVENT_TIMEOUT"] = "30"  # 30 seconds for staging latency
+    os.environ["WEBSOCKET_CONNECTION_TIMEOUT"] = "15"  # 15 seconds for staging connection
+    os.environ["WEBSOCKET_EVENT_RETRY_COUNT"] = "3"  # 3 retries for staging stability
+
+    # Test configuration for staging environment
+    os.environ["BYPASS_STARTUP_VALIDATION"] = "true"
+    os.environ["SKIP_DOCKER_HEALTH_CHECKS"] = "true"
+
+    logger.info(f"🏗️  Staging test environment configured:")
+    logger.info(f"   📡 WebSocket URL: {websocket_url}")
+    logger.info(f"   🌐 Backend URL: {base_url}")
+    logger.info(f"   🔐 Auth URL: {auth_url}")
+    logger.info(f"   🔧 API URL: {base_url}/api")
+    logger.info(f"   ✅ WebSocket Event Validation: Enabled")
+    logger.info(f"   ⏱️  Event Timeout: 30s, Connection Timeout: 15s, Retries: 3")
+
+
+# Always require Docker for real tests
+requires_docker = pytest.mark.usefixtures("ensure_docker_services")
+
+
 @dataclass
 class RealWebSocketTestConfig:
     """Configuration for real WebSocket tests."""

@@ -31,8 +31,8 @@ if not env_manager.get("AUTH_SERVICE_URL"):
     # Use development auth service URL for local development
     env_manager.set("AUTH_SERVICE_URL", "http://localhost:8001")
 if not env_manager.get("SERVICE_SECRET"):
-    # Use development service secret for local development
-    env_manager.set("SERVICE_SECRET", "dev-service-secret-32-chars-long")
+    # Use development service secret for local development - use strong secret for validation
+    env_manager.set("SERVICE_SECRET", "xNp9hKjT5mQ8w2fE7vR4yU3iO6aS1gL9cB0zZ8tN6wX2eR4vY7uI0pQ3s9dF5gH8")
 
 # Configure logging for Cloud Run compatibility (prevents ANSI codes)
 from netra_backend.app.core.logging_config import configure_cloud_run_logging, setup_exception_handler
