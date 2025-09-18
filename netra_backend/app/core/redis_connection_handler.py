@@ -38,16 +38,20 @@ class RedisConnectionHandler:
         """Initialize Redis connection handler with environment configuration."""
         self.env = get_env().get("ENVIRONMENT", "development").lower()
         self._config = get_config()
+        self._secrets_manager = get_secrets_manager()
         self._connection_pool = None
         self._connection_info = self._build_connection_info()
         
     def _build_connection_info(self) -> Dict[str, Any]:
         """Build Redis connection information based on environment."""
-        # Get base configuration
-        host = get_env().get("REDIS_HOST", "localhost")
-        port = int(get_env().get("REDIS_PORT", "6379"))
-        db = int(get_env().get("REDIS_DB", "0"))
-        password = get_env().get("REDIS_PASSWORD")
+        # Get configuration using unified secrets manager (supports GCP Secret Manager)
+        host = self._secrets_manager.get_secret("REDIS_HOST", "localhost")
+        port = int(self._secrets_manager.get_secret("REDIS_PORT", "6379"))
+        db = int(self._secrets_manager.get_secret("REDIS_DB", "0"))
+        password = self._secrets_manager.get_secret("REDIS_PASSWORD")
+
+        # Log which source was used for debugging
+        logger.info(f"Redis configuration loaded - Host: {host}, Port: {port}, DB: {db}, Password: {'***' if password else 'None'}")
         
         # Environment-specific host resolution
         if self.env == "staging":

@@ -28,17 +28,17 @@ def test_message_router_handlers():
 
         # Test basic requirements
         if handler_count > 0:
-            print("✅ SUCCESS: MessageRouter initializes with built-in handlers")
+            print("SUCCESS: MessageRouter initializes with built-in handlers")
             return True
         else:
-            print("❌ FAIL: MessageRouter has no handlers")
+            print("FAIL: MessageRouter has no handlers")
             return False
 
     except ImportError as e:
-        print(f"❌ IMPORT ERROR: {e}")
+        print(f"IMPORT ERROR: {e}")
         return False
     except Exception as e:
-        print(f"❌ ERROR: {e}")
+        print(f"ERROR: {e}")
         import traceback
         traceback.print_exc()
         return False
