@@ -26,9 +26,7 @@ from typing import Dict, Any, List
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 import pytest
 
-from netra_backend.app.services.websocket.quality_message_router import (
-    QualityMessageRouter
-)
+from netra_backend.app.websocket_core.handlers import MessageRouter as QualityMessageRouter
 from netra_backend.app.services.quality_gate_service import QualityGateService
 from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
 

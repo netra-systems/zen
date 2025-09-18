@@ -64,15 +64,16 @@ class TestWebSocketConnection:
         pass
         print("")
         if close_status_code:
-        self.error_logs.append({)
-        type: "websocket_close,"
-        code": close_status_code,"
-        message: close_msg,
-        timestamp": time.time()"
+            self.error_logs.append({
+                "type": "websocket_close",
+                "code": close_status_code,
+                "message": close_msg,
+                "timestamp": time.time()
+            })
         
 
     def on_open(self, ws):
-        Handle WebSocket open.""
+        """Handle WebSocket open."""
         print(WebSocket connection opened")"
 
         @pytest.mark.websocket
@@ -114,10 +115,11 @@ class TestWebSocketConnection:
         error_msg = "formatted_string"
         print(formatted_string)""
         self.connection_errors.append(error_msg)
-        self.error_logs.append({)
-        "type: connection_exception,"""
-        message: error_msg,
-        timestamp": time.time()"
+        self.error_logs.append({
+            "type": "connection_exception",
+            "message": error_msg,
+            "timestamp": time.time()
+        })
             
 
         return }

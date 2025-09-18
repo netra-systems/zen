@@ -38,7 +38,7 @@ from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWe
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.websocket_core.protocols import WebSocketProtocol
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.services.websocket.quality_message_router import QualityMessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter as QualityMessageRouter
 
 # Agent and execution components
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
