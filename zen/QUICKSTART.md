@@ -1,4 +1,4 @@
-# Zen Orchestrator - Quick Start Guide
+# Quick Start Guide
 
 ## Installation Methods
 
@@ -214,4 +214,3 @@ See the included example files:
 
 - GitHub Issues: https://github.com/netra-systems/zen/issues
 - Documentation: https://github.com/netra-systems/zen/wiki
-- Email: anthony.chaudhary@netrasystems.ai
