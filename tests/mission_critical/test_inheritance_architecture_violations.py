@@ -22,8 +22,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 
 class InheritanceArchitectureViolationsTests:
-    Test suite exposing critical inheritance architecture violations."
-    Test suite exposing critical inheritance architecture violations.""
+    """Test suite exposing critical inheritance architecture violations."""
 
     
     @pytest.fixture
