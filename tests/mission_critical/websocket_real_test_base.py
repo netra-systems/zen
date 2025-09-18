@@ -131,8 +131,8 @@ def require_docker_services_smart() -> None:
         # Get staging configuration with enhanced defaults
         staging_enabled = env.get("USE_STAGING_FALLBACK", "true").lower() == "true"  # Default true
         staging_websocket_url = env.get("STAGING_WEBSOCKET_URL", "wss://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws")
-        staging_base_url = env.get("STAGING_BASE_URL", "https://netra-backend-staging-pnovr5vsba-uc.a.run.app")"
-        staging_auth_url = env.get("STAGING_AUTH_URL", "https://auth-service-701982941522.us-central1.run.app")"
+        staging_base_url = env.get("STAGING_BASE_URL", "https://netra-backend-staging-pnovr5vsba-uc.a.run.app")
+        staging_auth_url = env.get("STAGING_AUTH_URL", "https://auth-service-701982941522.us-central1.run.app")
 
         # Phase 2.5: Windows mock server fallback (Issue #860)
         if not staging_enabled and is_windows:
