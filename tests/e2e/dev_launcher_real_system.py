@@ -63,10 +63,10 @@ class DevLauncherRealSystem:
         try:
         # Check if we need to start new services or use existing ones
         # Removed problematic line: if await self._check_existing_services():
-        logger.info("Using existing healthy services...")
+        logger.info("Using existing healthy services...)"
         self._startup_success = True
         else:
-        logger.info("Starting new dev_launcher services...")
+        logger.info("Starting new dev_launcher services...)"
                 # Start launcher in background task
         self._launcher_task = asyncio.create_task(self._run_launcher())
 
@@ -78,9 +78,9 @@ class DevLauncherRealSystem:
 
                 # Set service URLs
         self.service_urls = { }
-        "auth_service": "http://localhost:8081",  # Correct auth port
-        "backend": "http://localhost:8000",
-        "frontend": "http://localhost:3000" if not self.skip_frontend else None
+        "auth_service": "http://localhost:8081,  # Correct auth port"
+        "backend": "http://localhost:8000,"
+        "frontend": "http://localhost:3000 if not self.skip_frontend else None"
                 
 
         elapsed = time.time() - self.start_time
@@ -101,7 +101,7 @@ class DevLauncherRealSystem:
         config.no_browser = True  # Don"t open browser"
         config.verbose = False  # Less output for tests
         config.non_interactive = True  # No prompts
-        config.startup_mode = "minimal"  # Fast startup
+        config.startup_mode = "minimal  # Fast startup"
         config.no_secrets = True  # Don"t load secrets for tests"
         config.parallel_startup = True  # Parallel startup for speed
         config.project_root = self._detect_project_root()
@@ -112,27 +112,27 @@ class DevLauncherRealSystem:
         current = Path(__file__).parent
         while current.parent != current:
         # Check for project root markers - netra_backend and auth_service directories
-        if (current / "netra_backend").exists() and (current / "auth_service").exists():
+        if (current / "netra_backend").exists() and (current / "auth_service).exists():"
         return current
         current = current.parent
-        raise RuntimeError("Could not detect project root directory")
+        raise RuntimeError("Could not detect project root directory)"
 
     async def _check_existing_services(self) -> bool:
         """Check if services are already running and healthy."""
         try:
         # Check backend
-        backend_response = requests.get("http://localhost:8000/health", timeout=2)
+        backend_response = requests.get("http://localhost:8000/health, timeout=2)"
         if backend_response.status_code != 200:
         return False
 
             # Check auth
-        auth_response = requests.get("http://localhost:8081/health", timeout=2)
+        auth_response = requests.get("http://localhost:8081/health, timeout=2)"
         if auth_response.status_code != 200:
         return False
 
                 # Check frontend if needed
         if not self.skip_frontend:
-        frontend_response = requests.get("http://localhost:3000", timeout=2)
+        frontend_response = requests.get("http://localhost:3000, timeout=2)"
         if frontend_response.status_code not in [200, 404]:
         return False
 
@@ -186,7 +186,7 @@ class DevLauncherRealSystem:
     async def _check_port_responding(self, port: int) -> bool:
         """Check if a port is responding."""
         try:
-        response = requests.get("formatted_string", timeout=1)
+        response = requests.get("formatted_string, timeout=1)"
         return response.status_code == 200
         except Exception:
         return False
@@ -198,24 +198,24 @@ class DevLauncherRealSystem:
         while time.time() - start < timeout:
         try:
             # Check backend health
-        backend_response = requests.get("http://localhost:8000/health", timeout=2)
+        backend_response = requests.get("http://localhost:8000/health, timeout=2)"
         backend_healthy = backend_response.status_code == 200
 
             # Check auth health
-        auth_response = requests.get("http://localhost:8081/health", timeout=2)
+        auth_response = requests.get("http://localhost:8081/health, timeout=2)"
         auth_healthy = auth_response.status_code == 200
 
             # Check frontend health if needed
         frontend_healthy = True
         if not self.skip_frontend:
         try:
-        frontend_response = requests.get("http://localhost:3000", timeout=2)
+        frontend_response = requests.get("http://localhost:3000, timeout=2)"
         frontend_healthy = frontend_response.status_code in [200, 404]
         except Exception:
         frontend_healthy = False
 
         if backend_healthy and auth_healthy and frontend_healthy:
-        logger.info("All required services are healthy")
+        logger.info("All required services are healthy)"
         return
 
         except Exception as e:
@@ -227,7 +227,7 @@ class DevLauncherRealSystem:
 
     async def stop_all_services(self) -> None:
         """Stop all services and cleanup."""
-        logger.info("Stopping all services...")
+        logger.info("Stopping all services...)"
 
     # Set shutdown event
         self._shutdown_event.set()
@@ -263,7 +263,7 @@ class DevLauncherRealSystem:
 
     def _force_free_port(self, port: int):
         """Force free a specific port."""
-        if sys.platform == "win32":
+        if sys.platform == "win32:"
         try:
         result = subprocess.run( )
         "",
@@ -281,7 +281,7 @@ class DevLauncherRealSystem:
         logger.debug("")
         except Exception as e:
         logger.debug("")
-        elif sys.platform == "darwin":
+        elif sys.platform == "darwin:"
         try:
         result = subprocess.run( )
         "",
@@ -305,13 +305,13 @@ class DevLauncherRealSystem:
         """Check if all services are healthy."""
         try:
         # Check each service
-        backend_ok = requests.get("http://localhost:8000/health", timeout=2).status_code == 200
-        auth_ok = requests.get("http://localhost:8081/health", timeout=2).status_code == 200
+        backend_ok = requests.get("http://localhost:8000/health, timeout=2).status_code == 200"
+        auth_ok = requests.get("http://localhost:8081/health, timeout=2).status_code == 200"
 
         if self.skip_frontend:
         return backend_ok and auth_ok
         else:
-        frontend_ok = requests.get("http://localhost:3000", timeout=2).status_code in [200, 404]
+        frontend_ok = requests.get("http://localhost:3000, timeout=2).status_code in [200, 404]"
         return backend_ok and auth_ok and frontend_ok
 
         except Exception:
@@ -355,7 +355,7 @@ class DevLauncherRealSystem:
 
         while (time.time() - start_time) < timeout:
         try:
-        response = requests.get("formatted_string", timeout=2)
+        response = requests.get("formatted_string, timeout=2)"
         if response.status_code == 200:
         return True
         except Exception:
@@ -381,14 +381,14 @@ class DevLauncherRealSystem:
         results = {}
 
     # Check if auth starts first (should be available)
-        results['auth_first'] = await wait_for_service_health("http://localhost:8081", 10)
+        results['auth_first'] = await wait_for_service_health("http://localhost:8081, 10)"
 
     # Check if backend starts next
-        results['backend_second'] = await wait_for_service_health("http://localhost:8000", 15)
+        results['backend_second'] = await wait_for_service_health("http://localhost:8000, 15)"
 
     # Check if frontend starts last (if enabled)
         try:
-        frontend_response = requests.get("http://localhost:3000", timeout=2)
+        frontend_response = requests.get("http://localhost:3000, timeout=2)"
         results['frontend_last'] = frontend_response.status_code in [200, 404]
         except Exception:
         results['frontend_last'] = False
@@ -412,7 +412,7 @@ class DevLauncherTestContext:
 
         try:
         await self.services.start_all_services()
-        logger.info("Test environment setup complete")
+        logger.info("Test environment setup complete)"
         except Exception as e:
         logger.error("")
         await self.cleanup_test_environment()

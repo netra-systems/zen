@@ -104,7 +104,7 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
         self.test_connections.clear()
     
     def test_websocket_factory_user_state_isolation_violation(self):
-    "
+        """
     "
         CRITICAL: Test detecting user state isolation violations in factory pattern.
         
@@ -164,7 +164,7 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
         )
     
     def test_websocket_factory_concurrent_session_contamination_detection(self):
-        "
+        """
         "
         CRITICAL: Test detecting session contamination in concurrent access.
         
@@ -179,11 +179,11 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
         # Test concurrent session isolation
         session_contamination = self._test_concurrent_session_isolation()
         
-        print(f"\nDETECTED SESSION CONTAMINATION VIOLATIONS: {len(session_contamination)})")
+        print(f"\nDETECTED SESSION CONTAMINATION VIOLATIONS: {len(session_contamination)}))"
         for contamination in session_contamination:
             print(f  - Session {contamination['source_session']} contaminated {contamination['target_session']})"
             print(f  - Session {contamination['source_session']} contaminated {contamination['target_session']})"
-            print(f"    Contamination type: {contamination['contamination_type']})")
+            print(f"    Contamination type: {contamination['contamination_type']}))"
             print(f    Data affected: {contamination['affected_data']})"
             print(f    Data affected: {contamination['affected_data']})"
         
@@ -197,7 +197,7 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
         )
     
     def test_websocket_factory_security_clearance_isolation_violation(self):
-        ""
+        """
         CRITICAL: Test detecting security clearance isolation violations.
         
         This test MUST FAIL because:
@@ -210,10 +210,10 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
         # Test security clearance isolation
         clearance_violations = self._test_security_clearance_isolation()
         
-        print(f"\nDETECTED SECURITY CLEARANCE VIOLATIONS: {len(clearance_violations)}")
+        print(f"\nDETECTED SECURITY CLEARANCE VIOLATIONS: {len(clearance_violations)})"
         for violation in clearance_violations:
             print(f  - User {violation['user_id']} (clearance: {violation['user_clearance']})
-            print(f"    Accessed data requiring: {violation['required_clearance']}")
+            print(f"    Accessed data requiring: {violation['required_clearance']})"
             print(f    Violation severity: {violation['severity']})
         
         # This assertion SHOULD FAIL with current clearance violations
@@ -227,7 +227,7 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
         )
     
     def test_websocket_factory_memory_isolation_violation(self):
-        "
+        """
         "
         CRITICAL: Test detecting memory isolation violations in factory pattern.
         
@@ -583,7 +583,7 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
         return target_key in connection.state_data
     
     def _inject_user_memory_data(self, connection: WebSocketTestConnection, user_data: str):
-        ""Inject user-specific data into memory.
+        ""Inject user-specific data into memory."
         connection.state_data['user_memory_data'] = user_data
     
     def _capture_memory_snapshot(self, connection: WebSocketTestConnection) -> Dict:

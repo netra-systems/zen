@@ -93,7 +93,7 @@ class WebSocketScalingPerformanceTests(BaseIntegrationTest):
                 
                 # Send initial ping to complete handshake measurement
                 ping_message = {
-                    "type: ping",
+                    "type: ping,"
                     connection_id: connection_id,
                     timestamp: time.time()""
                 }
@@ -192,7 +192,7 @@ class WebSocketScalingPerformanceTests(BaseIntegrationTest):
                 message_p95 = statistics.quantiles(all_message_latencies, n=20)[18]  # 95th percentile
                 avg_message_latency = statistics.mean(all_message_latencies)
                 
-                assert message_p95 < 0.1, fMessage latency p95 {message_p95:.3f}s exceeds 100ms SLA
+                assert message_p95 < 0.1, "fMessage latency p95 {message_p95:.3f}s exceeds 100ms SLA"
             
             # Total messages sent/received
             total_messages_sent = sum(m.messages_sent for m in successful_metrics)
@@ -255,7 +255,7 @@ class WebSocketScalingPerformanceTests(BaseIntegrationTest):
                         type: throughput_test","
                         "message_index: i,"
                         timestamp: message_start,
-                        "data: fthroughput_test_message_{i}_{'x' * 50}"  # Add some payload
+                        "data: fthroughput_test_message_{i}_{'x' * 50}  # Add some payload"
                     }
                     
                     await websocket.send(json.dumps(message))
@@ -287,9 +287,9 @@ class WebSocketScalingPerformanceTests(BaseIntegrationTest):
         metrics = await measure_message_throughput()
         
         # Performance assertions
-        assert metrics[messages_sent] == message_count, fExpected {message_count} messages, sent {metrics['messages_sent']}
+        assert metrics[messages_sent] == message_count, "fExpected {message_count} messages, sent {metrics['messages_sent']}"
         assert len(metrics["errors] == 0, fMessage sending errors: {metrics['errors'])"
-        assert metrics[messages_per_second] >= 100, fThroughput {metrics['messages_per_second']:.1f} msg/s below 100 msg/s SLA
+        assert metrics[messages_per_second] >= 100, "fThroughput {metrics['messages_per_second']:.1f} msg/s below 100 msg/s SLA"
         assert metrics[average_message_time] < 0.1, fAverage message time {metrics['average_message_time']:.3f}s exceeds 10ms SLA""
         
         print(f" PASS:  WebSocket Message Throughput Results:)"
@@ -350,7 +350,7 @@ class WebSocketScalingPerformanceTests(BaseIntegrationTest):
                     
                     # Send periodic ping to maintain connection
                     ping_message = {
-                        type": "stability_ping,
+                        type": stability_ping,"
                         connection_id: connection_id,
                         timestamp: time.time()""
                     }
@@ -416,7 +416,7 @@ class WebSocketScalingPerformanceTests(BaseIntegrationTest):
         
         # Performance assertions
         assert stability_metrics["uptime_percentage] >= 99.5, fUptime {stability_metrics['uptime_percentage']:.1f}% below 99.5% SLA"
-        assert stability_metrics[connection_failures] <= 1, fToo many connection failures: {stability_metrics['connection_failures']}
+        assert stability_metrics[connection_failures] <= 1, "fToo many connection failures: {stability_metrics['connection_failures']}"
         
         print(f PASS:  WebSocket Connection Stability Results:")"
         print(f   Test duration: {actual_test_duration:.1f}s")"

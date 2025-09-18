@@ -126,7 +126,7 @@ class WebSocketRealConnectionTester:
         return self.jwt_helper.create_access_token(
             user_id=user_id,
             email=f{user_id}@test.com,
-            permissions=["read, write"]
+            permissions=["read, write]"
     
     @pytest.mark.websocket
     async def test_bidirectional_message_flow(self, client: RealWebSocketClient) -> Dict[str, Any]:
@@ -135,7 +135,7 @@ class WebSocketRealConnectionTester:
             {
                 type": user_message,"
                 payload: {
-                    "content: Test agent pipeline connectivity",
+                    "content": "Test agent pipeline connectivity","
                     thread_id: None,
                     user_id: "test-user"
                 }
@@ -143,7 +143,7 @@ class WebSocketRealConnectionTester:
             {
                 type": start_agent,"
                 payload: {
-                    "query: Validate agent pipeline response",
+                    "query: Validate agent pipeline response,"
                     user_id: test-user
                 }
             },
@@ -172,7 +172,7 @@ class WebSocketRealConnectionTester:
         return {
             "message_flows: message_flow_results,"
             total_messages_sent: len(test_messages),
-            "total_responses_received: sum(len(flow[responses"] for flow in message_flow_results)
+            "total_responses_received: sum(len(flow[responses] for flow in message_flow_results)"
         }
     
     async def _collect_responses(self, client: RealWebSocketClient, timeout: float) -> List[Dict[str, Any]]:
@@ -207,7 +207,7 @@ class WebSocketRealConnectionTester:
         client = connection_result["client]"
         
         # Send initial message
-        initial_message = {type: ping, payload": {"test: before_disconnect}}
+        initial_message = {"type": ping, payload": {test: before_disconnect}}"
         await client.send(initial_message)
         
         # Force disconnect
@@ -220,7 +220,7 @@ class WebSocketRealConnectionTester:
         if reconnection_result[connected]:""
             # Test message after reconnection
             reconnect_client = reconnection_result[client"]"
-            reconnect_message = {type: ping, "payload: {test": after_reconnect}}
+            reconnect_message = {"type": ping, "payload: {test: after_reconnect}}"
             send_success = await reconnect_client.send(reconnect_message)
             
             await reconnect_client.close()
@@ -245,7 +245,7 @@ class WebSocketRealConnectionTester:
                 }
             
             client = RealWebSocketClient(self.websocket_url)
-            headers = {"Authorization: fBearer {invalid_token}"}
+            headers = {"Authorization: fBearer {invalid_token}}"
             
             # Use timeout for connection attempt
             connection_success = await asyncio.wait_for(
@@ -327,7 +327,7 @@ class AgentPipelineValidator:
         
         return {
             message_routing_tests: routing_results,
-            "overall_routing_success: all(result[routing_successful"] for result in routing_results)
+            "overall_routing_success: all(result[routing_successful] for result in routing_results)"
         }
     
     async def _wait_for_agent_responses(self, timeout: float) -> List[Dict[str, Any]]:
@@ -384,18 +384,18 @@ class WebSocketRealConnectionTests:
             
             if not connection_result["connected]:"
                 error_msg = str(connection_result[error].lower()
-                if any(keyword in error_msg for keyword in ["connection, timeout", not available, refused):
+                if any(keyword in error_msg for keyword in ["connection, timeout, not available, refused):"
                     pytest.skip(fWebSocket service not available: {connection_result['error']})
                 
-            assert connection_result[connected"], f"Authentication failed: {connection_result['error']}
-            assert connection_result[token] is not None, No JWT token generated
-            assert connection_result[client] is not None, No WebSocket client created
+            assert connection_result[connected"], fAuthentication failed: {connection_result['error']}"
+            assert connection_result[token] is not None, "No JWT token generated"
+            assert connection_result[client] is not None, "No WebSocket client created"
             
             # Test connection is functional
             client = connection_result[client"]"
-            test_message = {type: ping, payload: {test": "authentication_success}}
+            test_message = {"type": ping, payload: {test": authentication_success}}"
             send_success = await client.send(test_message)
-            assert send_success, Failed to send message through authenticated connection
+            assert send_success, "Failed to send message through authenticated connection"
             
             await client.close()
             
@@ -428,7 +428,7 @@ class WebSocketRealConnectionTests:
             
             # Validate message flow results
             for flow in flow_result[message_flows"]:"
-                assert flow[send_success], fFailed to send message: {flow['sent_message']}
+                assert flow[send_success], "fFailed to send message: {flow['sent_message']}"
                 
                 # Note: Response count may be 0 if agent pipeline is not fully running
                 # This is acceptable as we're testing WebSocket connectivity primarily'
@@ -462,7 +462,7 @@ class WebSocketRealConnectionTests:
             # Test that messages were sent successfully (routing validation)
             for routing_test in routing_result[message_routing_tests]:
                 test_message = routing_test["test_message]"
-                assert test_message is not None, Test message missing
+                assert test_message is not None, "Test message missing"
                 assert type in test_message, Test message missing 'type' field""
                 assert "payload in test_message, Test message missing 'payload' field"
                 
@@ -537,7 +537,7 @@ class WebSocketRealConnectionTests:
                     pytest.skip(WebSocket service not available for invalid auth test")"
                 rejection_results.append({
                     token: invalid_token[:20] + ...,
-                    "result: {properly_rejected": True, rejection_reason: str(e)}
+                    "result: {properly_rejected: True, rejection_reason: str(e)}"
                 }
         
         # Validate all invalid tokens were properly rejected
@@ -560,11 +560,11 @@ class WebSocketRealConnectionTests:
             
             # Test connection persistence with multiple messages
             persistence_messages = [
-                {type: ping, payload: {"sequence: 1}},"
+                {"type": ping, payload: {"sequence: 1}},"
                 {type": user_message, payload: {content: Persistence test 1", "thread_id: None}},"
-                {type: ping, payload: {"sequence: 2}},"
+                {"type": ping, payload: {"sequence: 2}},"
                 {type": user_message, payload: {content: Persistence test 2", "thread_id: None}},"
-                {type: ping, payload: {"sequence: 3}}"
+                {"type": ping, payload: {"sequence: 3}}"
             ]
             
             message_results = []
@@ -579,9 +579,9 @@ class WebSocketRealConnectionTests:
             assert all(message_results), Connection lost persistence during message sequence""
             
             # Test connection is still active
-            final_ping = {type: ping, "payload: {final": True}}
+            final_ping = {"type": ping, "payload: {final: True}}"
             final_success = await client.send(final_ping)
-            assert final_success, Connection not persistent - final message failed
+            assert final_success, "Connection not persistent - final message failed"
             
             await client.close()
             
@@ -604,15 +604,15 @@ class WebSocketRealConnectionTests:
             
             # Test various message structures
             test_messages = [
-                {type: user_message", "payload: {content: Structure test, thread_id: None}},
-                {"type: ping", payload: {timestamp: time.time()}},
-                {type: create_thread", "payload: {name: Test thread}}
+                {"type": user_message", payload: {content: Structure test, thread_id: None}},"
+                {"type: ping, payload: {timestamp: time.time()}},"
+                {"type": create_thread", payload: {name: Test thread}}"
             ]
             
             for test_message in test_messages:
                 # Validate structure before sending
-                assert type" in test_message, "Message missing 'type' field
-                assert payload in test_message, Message missing 'payload' field
+                assert type" in test_message, Message missing 'type' field"
+                assert payload in test_message, "Message missing 'payload' field"
                 
                 # Send message
                 send_success = await client.send(test_message)
@@ -659,7 +659,7 @@ class WebSocketRealConnectionTests:
                 if isinstance(result, dict):
                     if result.get(connected, False):
                         successful_connections.append(result)
-                    elif not available in str(result.get("error, ")).lower():
+                    elif not available in str(result.get("error, )).lower():"
                         service_unavailable_count += 1
                 elif server not available in str(result).lower():
                     service_unavailable_count += 1
@@ -669,7 +669,7 @@ class WebSocketRealConnectionTests:
                 pytest.skip(WebSocket service not available for concurrent test")"
             
             # Should have at least one successful connection
-            assert len(successful_connections) > 0, No concurrent connections established
+            assert len(successful_connections) > 0, "No concurrent connections established"
             
             # Test messaging on each connection
             for connection in successful_connections:
@@ -685,7 +685,7 @@ class WebSocketRealConnectionTests:
                 
         except Exception as e:
             error_msg = str(e).lower()
-            if any(keyword in error_msg for keyword in [server not available, connection", "timeout):
+            if any(keyword in error_msg for keyword in [server not available, connection", timeout):"
                 pytest.skip(WebSocket service not available for concurrent test)
             raise
 

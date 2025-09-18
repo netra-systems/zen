@@ -7,7 +7,7 @@ class WebSocketTestHelper:
         self._closed = False
         
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
             raise RuntimeError(WebSocket is closed)"
@@ -78,7 +78,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Import current SSOT components for testing
 try:
-    from netra_backend.app.services.websocket_bridge_factory import (
+    from netra_backend.app.services.websocket_bridge_factory import ()
         WebSocketBridgeFactory,
         UserWebSocketEmitter,
         UserWebSocketContext,
@@ -86,7 +86,7 @@ try:
         ConnectionStatus,
         get_websocket_bridge_factory
     )
-    from test_framework.test_context import (
+    from test_framework.test_context import ()
         TestContext,
         TestUserContext,
         create_test_context,
@@ -164,7 +164,7 @@ class ComprehensiveEventValidator:
         all_user_ids = set(self.user_events.keys())
         for user_id, events in self.user_events.items():
             for event in events:
-                event_thread_id = event.get(thread_id", ")
+                event_thread_id = event.get(thread_id", )"
                 if any(other_user in event_thread_id for other_user in all_user_ids if other_user != user_id):
                     self.warnings.append(fPossible cross-user reference in thread_id for user {user_id})
         
@@ -234,7 +234,7 @@ class ComprehensiveEventValidator:
             total_users: len(self.user_events),"
             "event_counts: self.event_counts.copy(),"
             users_with_complete_flows: sum(1 for events in self.user_events.values() 
-                                           if any(e.get("event_type) == agent_completed" for e in events)),
+                                           if any(e.get("event_type) == agent_completed for e in events)),"
             isolation_valid: isolation_valid,
             events_valid: events_valid,"
             events_valid: events_valid,"
@@ -298,7 +298,7 @@ class WebSocketFactoryTestHarness:
                 await emitter.notify_tool_completed(agent_name, run_id, tool_name, {result": success)"
                 self._record_emitter_event(user_id, emitter, tool_completed, {tool_name: tool_name)
             
-            await emitter.notify_agent_completed(agent_name, run_id, {status": "completed)
+            await emitter.notify_agent_completed(agent_name, run_id, {status": completed)"
             self._record_emitter_event(user_id, emitter, agent_completed)
             
             return True
@@ -394,7 +394,7 @@ class UltraComprehensiveWebSocketValidationTests:
     @pytest.mark.critical
     @pytest.mark.timeout(60)
     async def test_comprehensive_single_user_flow(self):
-        ""Test comprehensive single user flow with factory pattern.
+        ""Test comprehensive single user flow with factory pattern."
         print( TARGET:  Testing comprehensive single user flow")"
         
         user_id = single_user_test
@@ -421,7 +421,7 @@ class UltraComprehensiveWebSocketValidationTests:
     @pytest.mark.timeout(120)
     async def test_comprehensive_user_isolation(self):
         "Test comprehensive user isolation with factory pattern."
-        print("[U+1F512] Testing comprehensive user isolation")
+        print("[U+1F512] Testing comprehensive user isolation)"
         
         # Create multiple isolated users
         user_count = 15
@@ -482,7 +482,7 @@ class UltraComprehensiveWebSocketValidationTests:
         # Validate events were delivered
         test_results = self.test_harness.get_comprehensive_results()
         analysis = test_results["analysis]"
-        assert analysis[total_events] >= 30, Should have delivered many events despite network issues
+        assert analysis[total_events] >= 30, "Should have delivered many events despite network issues"
         
         print( PASS:  Comprehensive event delivery reliability test passed"")
     
@@ -506,11 +506,11 @@ class UltraComprehensiveWebSocketValidationTests:
         
         # Validate comprehensive results
         results = self.test_harness.get_comprehensive_results()
-        assert results[validation_passed], fHigh load validation failed: {results['validation_failures']}
+        assert results[validation_passed], "fHigh load validation failed: {results['validation_failures']}"
         
         # Factory should handle load efficiently
         factory_metrics = results["factory_metrics]"
-        assert factory_metrics[emitters_created] == 25, Factory should create all requested emitters
+        assert factory_metrics[emitters_created] == 25, "Factory should create all requested emitters"
         
         analysis = results[analysis]"
         analysis = results[analysis]"
@@ -524,7 +524,7 @@ class UltraComprehensiveWebSocketValidationTests:
     @pytest.mark.timeout(60)
     async def test_comprehensive_event_ordering_validation(self):
         "Test comprehensive event ordering validation."
-        print("[U+1F4CB] Testing comprehensive event ordering validation")
+        print("[U+1F4CB] Testing comprehensive event ordering validation)"
         
         # Create users with specific ordering requirements
         ordering_test_users = []
@@ -548,7 +548,7 @@ class UltraComprehensiveWebSocketValidationTests:
         assert analysis["users_with_complete_flows] == len(ordering_test_users), \
             Not all users completed their flows
         
-        print(" PASS:  Comprehensive event ordering validation test passed")
+        print(" PASS:  Comprehensive event ordering validation test passed)"
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -569,7 +569,7 @@ class UltraComprehensiveWebSocketValidationTests:
             await self.test_harness.simulate_complete_agent_flow(user_id)
         
         mid_metrics = self.test_harness.factory.get_factory_metrics()
-        assert mid_metrics[emitters_active] >= initial_active + 10, Factory should track active emitters
+        assert mid_metrics[emitters_active] >= initial_active + 10, "Factory should track active emitters"
         
         # Cleanup emitters
         for user_id in cleanup_users:
@@ -581,7 +581,7 @@ class UltraComprehensiveWebSocketValidationTests:
         
         final_metrics = self.test_harness.factory.get_factory_metrics()
         # Some emitters may still be cleaning up, so allow for that
-        assert final_metrics[emitters_cleaned"] >= 5, "Factory should track cleaned emitters
+        assert final_metrics[emitters_cleaned"] >= 5, Factory should track cleaned emitters"
         
         print( PASS:  Comprehensive factory resource management test passed)
     
@@ -615,9 +615,9 @@ class UltraComprehensiveWebSocketValidationTests:
         assert analysis[total_users"] == final_user_count, \"
             fFinal validation insufficient user coverage: {analysis['total_users']}
         
-        assert analysis[isolation_valid], Final validation: User isolation failed
-        assert analysis[events_valid"], "Final validation: Critical events validation failed
-        assert analysis[ordering_valid], Final validation: Event ordering failed
+        assert analysis[isolation_valid], "Final validation: User isolation failed"
+        assert analysis[events_valid"], Final validation: Critical events validation failed"
+        assert analysis[ordering_valid], "Final validation: Event ordering failed"
         
         # Factory should be in good state
         factory_metrics = results[factory_metrics]"
@@ -625,7 +625,7 @@ class UltraComprehensiveWebSocketValidationTests:
         assert factory_metrics["emitters_created] == final_user_count, \
             Factory should have created correct number of emitters
         
-        print(" TROPHY:  FINAL COMPREHENSIVE VALIDATION PASSED!")
+        print(" TROPHY:  FINAL COMPREHENSIVE VALIDATION PASSED!)"
         print( TARGET:  All WebSocket notification requirements validated successfully)"
         print( TARGET:  All WebSocket notification requirements validated successfully)"
         print("[U+1F4BC] Business value preservation: Chat functionality fully operational with factory pattern)"
@@ -665,7 +665,7 @@ class FactoryPatternRegressionPreventionTests:
         factory2 = get_websocket_bridge_factory()
         
         assert factory1 is factory2, "Factory singleton not working correctly"
-        assert isinstance(factory1, WebSocketBridgeFactory), Factory should be WebSocketBridgeFactory instance
+        assert isinstance(factory1, "WebSocketBridgeFactory), Factory should be WebSocketBridgeFactory instance"
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -690,11 +690,11 @@ class FactoryPatternRegressionPreventionTests:
         # Contexts should be completely isolated
         assert context1.user_id != context2.user_id, User contexts should have different user IDs"
         assert context1.user_id != context2.user_id, User contexts should have different user IDs"
-        assert context1.thread_id != context2.thread_id, User contexts should have different thread IDs
+        assert context1.thread_id != context2.thread_id, "User contexts should have different thread IDs"
         assert context1.connection_id != context2.connection_id, User contexts should have different connection IDs""
         
         # Event queues should be separate
-        assert context1.event_queue is not context2.event_queue, User contexts should have separate event queues
+        assert context1.event_queue is not context2.event_queue, "User contexts should have separate event queues"
         
         # Event history should be separate
         assert context1.sent_events is not context2.sent_events, User contexts should have separate sent events"
@@ -718,13 +718,13 @@ class FactoryPatternRegressionPreventionTests:
         
         # Event should have proper isolation fields
         assert event.user_id == user_id, Event should have correct user_id""
-        assert event.thread_id == thread_id, Event should have correct thread_id
+        assert event.thread_id == thread_id, "Event should have correct thread_id"
         assert event.event_id is not None, Event should have unique event_id"
         assert event.event_id is not None, Event should have unique event_id"
         assert event.timestamp is not None, "Event should have timestamp"
         
         # Event should have proper retry mechanism
-        assert event.retry_count == 0, Event should start with 0 retries
+        assert event.retry_count == 0, "Event should start with 0 retries"
         assert event.max_retries > 0, "Event should have max_retries configured"
 
 

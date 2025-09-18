@@ -59,7 +59,7 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_accepts_invalid_jwt_signature_violation(self):
-    "
+        """
     "
         VIOLATION REPRODUCTION: WebSocket accepts tokens with invalid signatures.
         
@@ -76,7 +76,7 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
         fake_payload = {
             sub": test_user_123,"
             iss: netra-auth-service,
-            aud": "netra-backend,
+            aud": netra-backend,"
             exp: int((datetime.now() + timedelta(hours=1)).timestamp()),
             iat: int(datetime.now().timestamp()),"
             iat: int(datetime.now().timestamp()),"
@@ -139,12 +139,12 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
         
         # Create an EXPIRED JWT token
         expired_payload = {
-            sub": "expired_user_456, 
+            sub": expired_user_456, "
             iss: netra-auth-service,
             aud: "netra-backend,"
             exp": int((datetime.now() - timedelta(hours=1)).timestamp()),  # EXPIRED 1 hour ago"
             iat: int((datetime.now() - timedelta(hours=2)).timestamp()),
-            email": "expired@example.com
+            email": expired@example.com"
         }
         
         # Create expired token (even with correct secret, should be rejected due to expiry)
@@ -167,7 +167,7 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
                 logger.error(f ALERT:  Extracted user context from expired token: {user_context})
                 
                 # Assertion that proves violation exists
-                assert user_context.get(sub") == "expired_user_456, \
+                assert user_context.get(sub") == expired_user_456, \"
                     SSOT VIOLATION: WebSocket accepted expired JWT token
                     
                 logger.critical( ALERT:  SECURITY VIOLATION: WebSocket accepted expired JWT token)"
@@ -184,7 +184,7 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit  
     async def test_websocket_accepts_malformed_jwt_token_violation(self):
-    "
+        """
     "
         VIOLATION REPRODUCTION: WebSocket accepts completely malformed JWT tokens.
         
@@ -227,7 +227,7 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
             logger.critical( ALERT:  SSOT VIOLATION CONFIRMED: Malformed tokens were accepted)"
             logger.critical( ALERT:  SSOT VIOLATION CONFIRMED: Malformed tokens were accepted)"
             logger.critical(" ALERT:  THIS TEST PASSES = VIOLATION EXISTS)"
-            assert True, SSOT VIOLATION: WebSocket accepted malformed JWT tokens
+            assert True, "SSOT VIOLATION: WebSocket accepted malformed JWT tokens"
         else:
             pytest.fail("VIOLATION NOT REPRODUCED: All malformed tokens were rejected)"
 
@@ -250,12 +250,12 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
         fake_admin_payload = {
             "sub: fake_admin_999,"
             iss: netra-auth-service, 
-            "aud: netra-backend",
+            "aud: netra-backend,"
             exp: int((datetime.now() + timedelta(hours=1)).timestamp()),
             iat: int(datetime.now().timestamp()),"
             iat: int(datetime.now().timestamp()),"
             "email: fake_admin@malicious.com,"
-            permissions: [admin, "chat, premium"]  # Elevated permissions
+            permissions: [admin, "chat, premium]  # Elevated permissions"
         }
         
         # Create token with wrong secret but proper structure
@@ -281,7 +281,7 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
                     logger.critical( ALERT:  FAKE ADMIN PERMISSIONS ACCEPTED - MASSIVE SECURITY BREACH")"
                 
                 # Business impact assertion
-                assert True, CRITICAL VIOLATION: JWT bypass enables unauthorized access to $500K+ ARR platform
+                assert True, "CRITICAL VIOLATION: JWT bypass enables unauthorized access to $500K+ ARR platform"
                 return True
                 
         except Exception as e:

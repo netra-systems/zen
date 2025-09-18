@@ -58,7 +58,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         base_websocket_definitions = []
 
         # Check all TypeScript files in the types directory
-        for ts_file in self.types_path.rglob("*.ts"):
+        for ts_file in self.types_path.rglob("*.ts):"
         try:
         content = ts_file.read_text(encoding='utf-8')
         lines = content.split(" )"
@@ -101,7 +101,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         self.conflicting_types = base_websocket_definitions
 
                                     # This assertion SHOULD FAIL - we expect multiple definitions
-        assert len(base_websocket_definitions) <= 1, ( )
+        assert len(base_websocket_definitions) <= 1, "( )"
         ""
         f"of BaseWebSocketPayload. Expected exactly 1 canonical definition."
         "
@@ -129,8 +129,8 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         FAILING TEST: TypeScript compilation should pass without type conflicts.
 
         This test SHOULD FAIL because duplicate type definitions cause
-        TypeScript compiler errors like "Duplicate identifier" or
-        "Type 'BaseWebSocketPayload' is not assignable to type 'BaseWebSocketPayload'".
+        TypeScript compiler errors like "Duplicate identifier or"
+        "Type 'BaseWebSocketPayload' is not assignable to type 'BaseWebSocketPayload'."
         '''
         '''
         pass
@@ -153,7 +153,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         
 
         # This assertion SHOULD FAIL due to type conflicts
-        assert result.returncode == 0 and not has_duplicate_errors, ( )
+        assert result.returncode == 0 and not has_duplicate_errors, "( )"
         f"TypeScript compilation failed with duplicate type errors."
         "
         "
@@ -163,9 +163,9 @@ class TestTypeExportConflicts(BaseIntegrationTest):
             
 
         except subprocess.TimeoutExpired:
-        pytest.fail("TypeScript compilation timed out - likely due to type conflicts")
+        pytest.fail("TypeScript compilation timed out - likely due to type conflicts)"
         except FileNotFoundError:
-        pytest.skip("TypeScript compiler (tsc) not found in PATH")
+        pytest.skip("TypeScript compiler (tsc) not found in PATH)"
 
         @pytest.mark.e2e
     def test_scan_all_duplicate_type_definitions_FAILING(self):
@@ -181,7 +181,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         duplicate_types = self._scan_for_duplicate_types()
 
     # This assertion SHOULD FAIL - we expect many duplicates
-        assert len(duplicate_types) == 0, ( )
+        assert len(duplicate_types) == 0, "( )"
         "" +
         "
         "
@@ -212,7 +212,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         mixed_exports = self._detect_mixed_export_styles()
 
         # This assertion SHOULD FAIL due to inconsistent export patterns
-        assert len(mixed_exports) == 0, ( )
+        assert len(mixed_exports) == 0, "( )"
         "" +
         "
         "
@@ -244,7 +244,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         similar_interfaces = self._find_similar_interface_names()
 
     # This assertion SHOULD FAIL due to naming conflicts
-        assert len(similar_interfaces) == 0, ( )
+        assert len(similar_interfaces) == 0, "( )"
         ""
         f"that could cause confusion:"
         " +"
@@ -265,7 +265,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         """Scan TypeScript files for duplicate type definitions."""
         type_definitions = {}
 
-        for ts_file in self.types_path.rglob("*.ts"):
+        for ts_file in self.types_path.rglob("*.ts):"
         try:
         content = ts_file.read_text(encoding='utf-8')
 
@@ -289,7 +289,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         """Detect types exported with different styles across files."""
         export_styles = {}
 
-        for ts_file in self.types_path.rglob("*.ts"):
+        for ts_file in self.types_path.rglob("*.ts):"
         try:
         content = ts_file.read_text(encoding='utf-8')
 
@@ -321,7 +321,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         """Find groups of interfaces with similar names that could cause confusion."""
         interface_names = []
 
-        for ts_file in self.types_path.rglob("*.ts"):
+        for ts_file in self.types_path.rglob("*.ts):"
         try:
         content = ts_file.read_text(encoding='utf-8')
 
@@ -366,6 +366,6 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         print("")
 
 
-        if __name__ == "__main__":
-        pytest.main([__file__, "-v"])
+        if __name__ == "__main__:"
+        pytest.main([__file__, "-v])"
         pass

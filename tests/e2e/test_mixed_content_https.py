@@ -33,9 +33,9 @@ import asyncio
 
 @pytest.fixture
 @pytest.fixture
-services=["frontend", "backend", "auth_service"],
-features=["https_configured", "cors_configured", "ssl_enabled"],
-data=["staging_domain_config", "ssl_certificates"]
+services=["frontend", "backend", "auth_service],"
+features=["https_configured", "cors_configured", "ssl_enabled],"
+data=["staging_domain_config", "ssl_certificates]"
     
 @pytest.mark.e2e
 class TestMixedContentHTTPS(BaseIntegrationTest):
@@ -81,13 +81,13 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
 
         # Both should detect secure environment
         # This assertion SHOULD FAIL if detection is broken
-        assert server_side_secure, ( )
+        assert server_side_secure, "( )"
         f"Server-side environment detection failed for staging. "
         ""
         f"secure-api-config.ts isSecureEnvironment() should return true for staging."
         
 
-        assert client_side_secure, ( )
+        assert client_side_secure, "( )"
         f"Client-side environment detection failed for staging with HTTPS. "
         f"secure-api-config.ts should detect HTTPS protocol as secure environment."
         
@@ -128,7 +128,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         self.mixed_content_violations.extend(http_violations)
 
                     # This assertion SHOULD FAIL due to HTTP URLs in staging
-        assert len(http_violations) == 0, ( )
+        assert len(http_violations) == 0, "( )"
         """"Real WebSocket connection for testing instead of mocks."""
         """"Real WebSocket connection for testing instead of mocks."""
 
@@ -141,10 +141,10 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -217,7 +217,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
                 
 
                 # This assertion SHOULD FAIL due to WS instead of WSS
-        assert len(websocket_violations) == 0, ( )
+        assert len(websocket_violations) == 0, "( )"
         "" +
         "
         "
@@ -275,7 +275,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         self.protocol_inconsistencies.extend(consistency_issues)
 
                     # This assertion SHOULD FAIL due to SSR/client inconsistencies
-        assert len(consistency_issues) == 0, ( )
+        assert len(consistency_issues) == 0, "( )"
         "" +
         "
         "
@@ -346,7 +346,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
                 
 
                 # This assertion SHOULD FAIL due to edge case handling issues
-        assert len(detection_failures) == 0, ( )
+        assert len(detection_failures) == 0, "( )"
         "" +
         "
         "
@@ -398,7 +398,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
                 
 
                 # This assertion SHOULD FAIL due to protocol mismatches
-        assert len(protocol_mismatches) == 0, ( )
+        assert len(protocol_mismatches) == 0, "( )"
         "" +
         "
         "
@@ -489,6 +489,6 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         print("")
 
 
-        if __name__ == "__main__":
-        pytest.main([__file__, "-v"])
+        if __name__ == "__main__:"
+        pytest.main([__file__, "-v])"
         pass

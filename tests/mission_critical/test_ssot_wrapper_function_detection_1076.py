@@ -43,7 +43,7 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
         self.backward_compatibility_violations = []
 
     def test_auth_integration_wrapper_detection(self):
-        "
+        """
         "
         CRITICAL: Detect wrapper functions in auth integration that bypass SSOT.
 
@@ -51,7 +51,7 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
         REMEDIATION: Remove wrapper functions, use SSOT auth service directly
 "
 "
-        auth_integration_path = self.project_root / netra_backend / app" / "auth_integration
+        auth_integration_path = self.project_root / netra_backend / app" / auth_integration"
 
         if not auth_integration_path.exists():
             self.fail(fAuth integration path not found: {auth_integration_path})
@@ -129,8 +129,8 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
         # Search in key SSOT directories
         search_paths = [
             self.project_root / netra_backend" / app / auth_integration,"
-            self.project_root / "netra_backend / app" / core,
-            self.project_root / netra_backend / "app / websocket_core",
+            self.project_root / "netra_backend / app / core,"
+            self.project_root / netra_backend / "app / websocket_core,"
             self.project_root / shared
         ]
 
@@ -183,7 +183,7 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
             )
 
     def test_function_delegation_pattern_detection(self):
-        "
+        """
         "
         CRITICAL: Detect functions that delegate to legacy patterns instead of SSOT.
 
@@ -268,7 +268,7 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
         # Search in all Python files
         for py_file in self.project_root.rglob(*.py):
             if any(skip in str(py_file) for skip in [
-                __pycache__, .git", "venv, node_modules,
+                __pycache__, .git", venv, node_modules,"
                 tests/, test_, "_test"
             ]:
                 continue

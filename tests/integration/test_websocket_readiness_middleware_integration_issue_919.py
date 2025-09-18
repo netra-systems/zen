@@ -71,7 +71,7 @@ class WebSocketReadinessMiddlewareIntegrationTests:
                         assert data == 'connection_established'
 
     def test_issue_919_gcp_staging_graceful_degradation(self, mock_app_with_middleware):
-    ""
+    """
         ISSUE #919 FIX: Test graceful degradation in staging when services aren't ready.'
         
         SCENARIO: GCP staging environment without bypass but graceful degradation
@@ -116,7 +116,7 @@ class WebSocketReadinessMiddlewareIntegrationTests:
                                 pass
 
     def test_issue_919_non_gcp_environment_allows_connections(self, mock_app_with_middleware):
-    ""
+    """
         Test non-GCP environments allow WebSocket connections without validation.
         
         SCENARIO: Development/local environment

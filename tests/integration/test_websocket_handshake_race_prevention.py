@@ -31,7 +31,7 @@ from starlette.websockets import WebSocketDisconnect
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 
-from netra_backend.app.websocket_core.utils import (
+from netra_backend.app.websocket_core.utils import ()
     validate_websocket_handshake_completion,
     is_websocket_connected_and_ready,
     safe_websocket_send,
@@ -39,7 +39,7 @@ from netra_backend.app.websocket_core.utils import (
     _safe_websocket_state_for_logging
 )
 from netra_backend.app.websocket_core.types import create_server_message
-from netra_backend.app.core.timeout_configuration import (
+from netra_backend.app.core.timeout_configuration import ()
     get_websocket_recv_timeout,
     get_agent_execution_timeout,
     reset_timeout_manager
@@ -65,13 +65,13 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
         reset_timeout_manager()
     
     def teardown_method(self, method):
-        ""Clean up after each test.
+        ""Clean up after each test."
         reset_timeout_manager()
         super().teardown_method(method)
     
     @pytest.mark.asyncio
     async def test_accept_then_validate_sequence_proper_order(self):
-    ""
+    """
         Test that WebSocket accept() -> validation -> message handling sequence is enforced.
         
         EXPECTED TO FAIL INITIALLY: Current implementation may start message handling
@@ -92,7 +92,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
             
         mock_websocket.accept = mock_accept
         mock_websocket.send_json = AsyncMock(side_effect=lambda data: sequence_log.append("send_json_called))"
-        mock_websocket.receive_text = AsyncMock(return_value='{type: test}')
+        mock_websocket.receive_text = AsyncMock(return_value='{"type: test}')"
         
         # Mock the state checking functions to simulate proper validation
         def mock_is_connected(ws):
@@ -113,7 +113,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
             # Step 3: Only allow message handling after validation
             if handshake_valid:
                 sequence_log.append(message_handling_started)
-                await mock_websocket.send_json({type: "connection_established)"
+                await mock_websocket.send_json({"type": "connection_established)"
         
         # CRITICAL: Verify proper sequence was followed
         expected_sequence = [
@@ -132,7 +132,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
     
     @pytest.mark.asyncio
     async def test_handshake_completion_validation_bidirectional_test(self):
-    ""
+    """
         Test handshake completion validation performs bidirectional communication test.
         
         EXPECTED TO FAIL INITIALLY: Validation may be incomplete or skip bidirectional test.
@@ -159,7 +159,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
             # CRITICAL: Should perform actual send test
             assert send_called, (
                 Handshake validation failed to perform bidirectional communication test. ""
-                "This can cause race conditions where transport appears ready but isn't."'
+                "This can cause race conditions where transport appears ready but isn't.'"
             )
             
             # Should send a validation message
@@ -225,7 +225,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
 ""
         mock_websocket = AsyncMock(spec=WebSocket)
         mock_websocket.client_state = WebSocketState.CONNECTED
-        mock_websocket.receive_text = AsyncMock(return_value='{type: user_message, "content: hello"}')
+        mock_websocket.receive_text = AsyncMock(return_value='{"type": user_message, "content": "hello"}')"
         
         message_processing_started = False
         
@@ -249,7 +249,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
         async def mock_message_handler(message):
             nonlocal message_processing_started
             message_processing_started = True
-            return {type: response", "status: processed}
+            return {"type": response", status: processed}"
         
         with patch('netra_backend.app.websocket_core.utils.is_websocket_connected', return_value=True):
             with patch('netra_backend.app.websocket_core.connection_state_machine.get_connection_state_machine',
@@ -262,7 +262,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
                 while True:
                     is_ready = is_websocket_connected_and_ready(mock_websocket, connection_id)
                     if is_ready:
-                        await mock_message_handler({type": "user_message)
+                        await mock_message_handler({type": user_message)"
                         break
                     
                     # Prevent infinite loop in test
@@ -280,7 +280,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
                     Race condition: messages processed before application ready.""
                 )
                 
-                assert message_processing_started, Message processing should have started after readiness
+                assert message_processing_started, "Message processing should have started after readiness"
     
     @pytest.mark.asyncio  
     async def test_gcp_service_readiness_prevents_connection_acceptance(self):
@@ -354,7 +354,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
             )
             
             assert close_code == 1011, f"Wrong close code: {close_code}, expected 1011"
-            assert supervisor_service in close_reason, fClose reason should mention failed service: {close_reason}
+            assert supervisor_service in close_reason, "fClose reason should mention failed service: {close_reason}"
     
     @pytest.mark.asyncio
     async def test_timeout_coordination_prevents_premature_failures(self):
@@ -377,7 +377,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
             # Mock agent execution that takes significant time
             async def mock_agent_execution():
                 await asyncio.sleep(simulated_agent_duration)
-                return {type: agent_completed, "result: success"}
+                return {"type": agent_completed, "result: success}"
             
             # Mock WebSocket receive that should wait longer than agent execution
             receive_calls = 0
@@ -386,7 +386,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
                 receive_calls += 1
                 if receive_calls == 1:
                     # First call simulates user message
-                    return '{type: start_agent, agent: test_agent"}'"
+                    return '{"type": start_agent, agent: test_agent"}'"
                 else:
                     # Subsequent calls simulate waiting for agent completion
                     await asyncio.sleep(0.1)

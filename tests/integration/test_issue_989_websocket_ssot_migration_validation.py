@@ -69,7 +69,7 @@ class ImportPatternAnalysis:
 
 @pytest.mark.integration
 class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
-    ""Mission Critical: Issue #989 WebSocket SSOT Migration Validation
+    ""Mission Critical: Issue #989 WebSocket SSOT Migration Validation"
 
     This test suite validates that WebSocket factory SSOT migration has been
     completed successfully without breaking the $500K+ ARR Golden Path.
@@ -138,7 +138,7 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
             validation_result.remaining_issues.append('canonical_imports.py missing')
             validation_result.migration_success = False
         self.migration_results.append(validation_result)
-        assert validation_result.migration_success, f'SSOT MIGRATION INCOMPLETE: Found {validation_result.post_migration_violations} deprecated exports still present in canonical_imports.py. Remaining issues: {validation_result.remaining_issues}. Migration success requires removal of ALL deprecated exports.'
+        assert validation_result.migration_success, "f'SSOT MIGRATION INCOMPLETE: Found {validation_result.post_migration_violations} deprecated exports still present in canonical_imports.py. Remaining issues: {validation_result.remaining_issues}. Migration success requires removal of ALL deprecated exports.'"
 
     def test_validate_codebase_import_pattern_consolidation(self):
         CRITICAL: Validate all codebase imports use SSOT patterns post-migration""
@@ -206,7 +206,7 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
         for file_info in mixed_pattern_files[:5]:
             validation_result.remaining_issues.append(fMixed patterns in {file_info['file']})
         self.migration_results.append(validation_result)
-        assert validation_result.migration_success, f'SSOT MIGRATION INCOMPLETE: Found {validation_result.post_migration_violations} files with deprecated import patterns. Deprecated pattern files: {import_analysis.deprecated_pattern_files}, Mixed pattern files: {import_analysis.mixed_pattern_files}. SSOT compliance: {validation_result.compliance_percentage:.1f}%. Migration requires 100% SSOT compliance.'
+        assert validation_result.migration_success, "f'SSOT MIGRATION INCOMPLETE: Found {validation_result.post_migration_violations} files with deprecated import patterns. Deprecated pattern files: {import_analysis.deprecated_pattern_files}, Mixed pattern files: {import_analysis.mixed_pattern_files}. SSOT compliance: {validation_result.compliance_percentage:.1f}%. Migration requires 100% SSOT compliance.'"
 
     def test_validate_single_websocket_initialization_pattern_enforcement(self):
         CRITICAL: Validate single WebSocket initialization pattern enforcement
@@ -264,7 +264,7 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
         if deprecated_patterns_in_use:
             validation_result.remaining_issues.append(f'Deprecated patterns still used in {len(deprecated_patterns_in_use)} files')
         self.migration_results.append(validation_result)
-        assert validation_result.migration_success, f'SINGLE PATTERN ENFORCEMENT FAILED: Found {validation_result.post_migration_violations} pattern violations. Multiple pattern files: {len(pattern_violations)}, Deprecated pattern files: {len(deprecated_patterns_in_use)}. SSOT requires single initialization pattern only.'
+        assert validation_result.migration_success, "f'SINGLE PATTERN ENFORCEMENT FAILED: Found {validation_result.post_migration_violations} pattern violations. Multiple pattern files: {len(pattern_violations)}, Deprecated pattern files: {len(deprecated_patterns_in_use)}. SSOT requires single initialization pattern only.'"
 
     def test_validate_websocket_import_path_consistency_post_migration(self):
         "CRITICAL: Validate WebSocket import path consistency after migration"""
@@ -319,10 +319,10 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
         for file_info in inconsistent_files[:5]:
             validation_result.remaining_issues.append(fInconsistent imports in {file_info['file']}: {file_info['import_paths']})
         self.migration_results.append(validation_result)
-        assert validation_result.migration_success, f'IMPORT PATH CONSISTENCY FAILED: Found {validation_result.post_migration_violations} import path violations. Inconsistent files: {len(inconsistent_files)}. Import path compliance: {validation_result.compliance_percentage:.1f}%. SSOT migration requires consistent import paths.'
+        assert validation_result.migration_success, "f'IMPORT PATH CONSISTENCY FAILED: Found {validation_result.post_migration_violations} import path violations. Inconsistent files: {len(inconsistent_files)}. Import path compliance: {validation_result.compliance_percentage:.1f}%. SSOT migration requires consistent import paths.'"
 
     def teardown_method(self, method):
-        ""Clean up and log Issue #989 SSOT migration validation results.""
+        """Clean up and log Issue #989 SSOT migration validation results.""
         if self.migration_results:
             logger.info('📋 Issue #989 SSOT Migration Validation Summary:')
             total_validations = len(self.migration_results)

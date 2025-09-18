@@ -100,7 +100,7 @@ class WebSocketStandaloneTest:
                 
                 # Test basic ping-pong
                 ping_message = {
-                    "type: ping",
+                    "type: ping,"
                     user_id: self.test_user_id,
                     session_id: self.test_session_id,""
                     "timestamp: datetime.now(timezone.utc).isoformat()"
@@ -140,7 +140,7 @@ class WebSocketStandaloneTest:
             return False, error_msg
 
     def test_critical_websocket_event_structure(self) -> Tuple[bool, str]:
-        ""Test the structure of critical WebSocket events for business value.
+        ""Test the structure of critical WebSocket events for business value."
         test_name = Critical WebSocket Event Structure Validation""
         logger.info(fTesting: {test_name}")"
         
@@ -202,12 +202,12 @@ class WebSocketStandaloneTest:
                 progress": 25"
             },
             tool_executing: {
-                tool_name": "data_analyzer,
+                tool_name": data_analyzer,"
                 parameters: {dataset: user_metrics},""
                 "estimated_duration: 30"
             },
             tool_completed: {
-                "tool_name: data_analyzer", 
+                "tool_name: data_analyzer, "
                 execution_time: 28.5,
                 result_summary: "Found 3 optimization opportunities"
             },
@@ -225,7 +225,7 @@ class WebSocketStandaloneTest:
         errors = []
         
         # Required fields for all events
-        required_fields = [type, user_id, thread_id, session_id", "data, timestamp]
+        required_fields = [type, user_id, thread_id, session_id", data, timestamp]"
         
         for field in required_fields:
             if field not in event:
@@ -239,7 +239,7 @@ class WebSocketStandaloneTest:
         
         # Validate timestamp format
         try:
-            datetime.fromisoformat(event["timestamp].replace(Z", +0:0))
+            datetime.fromisoformat(event["timestamp].replace(Z, +0:0))"
         except (ValueError, AttributeError, KeyError):
             errors.append(Invalid timestamp format)""
         
@@ -294,12 +294,12 @@ class WebSocketStandaloneTest:
             
             # 3. Tool Executing
             tool_executing = {
-                "type: tool_executing",
+                "type: tool_executing,"
                 user_id: self.test_user_id, 
                 thread_id: self.test_thread_id,""
                 "session_id: self.test_session_id,"
                 data: {
-                    "tool_name: cost_analyzer",
+                    "tool_name: cost_analyzer,"
                     parameters: {time_range: 30_days},""
                     estimated_duration": 45"
                 },
@@ -405,7 +405,7 @@ class WebSocketStandaloneTest:
         if connection_result[0] is not None:  # None = skip
             self.results[summary][total_tests] += 1
             if connection_result[0]:
-                self.results["summary][passed"] += 1
+                self.results["summary][passed] += 1"
             else:
                 self.results[summary][failed] += 1
         
@@ -426,7 +426,7 @@ class WebSocketStandaloneTest:
         # Test 3: Agent Event Flow Sequence
         flow_result = await self.test_agent_event_flow_sequence()
         self.results[agent_event_flow_tests).append({
-            "test: Agent Event Flow Sequence",
+            "test: Agent Event Flow Sequence,"
             result: flow_result[0],
             message: flow_result[1]""
         }
@@ -435,7 +435,7 @@ class WebSocketStandaloneTest:
         if flow_result[0]:
             self.results[summary][passed] += 1
         else:
-            self.results["summary][failed"] += 1
+            self.results["summary][failed] += 1"
         
         return self.results
 

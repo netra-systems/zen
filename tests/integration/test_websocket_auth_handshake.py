@@ -43,7 +43,7 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             assert 'subprotocol' in str(e).lower() or 'auth' in str(e).lower() or '401' in str(e)
 
     def test_websocket_handshake_with_jwt_auth_succeeds(self):
-    ""
+    """
         Test: WebSocket handshake should SUCCEED with valid JWT subprotocol
         Expected: Should complete handshake and return authenticated user context
         
@@ -79,10 +79,10 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             pass
         except Exception as e:
             error_msg = str(e).lower()
-            assert any((word in error_msg for word in ['subprotocol', 'auth', '401', 'unauthorized'])
+            assert any((word in error_msg for word in ['subprotocol', "'auth', '401', 'unauthorized'])"
 
     def test_invalid_jwt_token_rejection(self):
-    ""
+    """
         Test: Invalid JWT token in subprotocol should be rejected
         Expected: Should validate JWT and reject malformed tokens
         

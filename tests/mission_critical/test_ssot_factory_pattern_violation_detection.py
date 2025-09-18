@@ -70,7 +70,7 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
     
     @pytest.mark.mission_critical
     def test_validate_factory_pattern_enforcement_in_tests(self):
-    ""
+    """
         Test that validates proper factory pattern usage in test files.
         
         CRITICAL: Ensures ALL test files use StateManagerFactory for user isolation.
@@ -94,14 +94,14 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
     
     @pytest.mark.mission_critical
     def test_ssot_compliance_user_isolation_validation(self):
-    ""
+    """
         Test that validates SSOT compliance for user isolation via factory pattern.
         
         CRITICAL: Ensures factory pattern creates isolated instances per user.
         
         # Import required classes
         try:
-            from netra_backend.app.core.managers.unified_state_manager import (
+            from netra_backend.app.core.managers.unified_state_manager import ()
                 StateManagerFactory, UnifiedStateManager
             )
         except ImportError:
@@ -148,7 +148,7 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
     
     @pytest.mark.mission_critical
     async def test_factory_pattern_with_real_services_integration(self, real_services_fixture):
-    ""
+    """
         Test factory pattern compliance with real services integration.
         
         CRITICAL: Validates factory pattern works correctly with real database and cache.
@@ -170,8 +170,8 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
         user2_manager = StateManagerFactory.get_user_manager("real_test_user_2)"
         
         # Set values that will be stored in real Redis
-        await user1_manager.set_async(real_test_key, {user: user1, "data: sensitive_data_1")
-        await user2_manager.set_async(real_test_key, {user: "user2, data": sensitive_data_2)
+        await user1_manager.set_async(real_test_key, {user: user1, "data: sensitive_data_1)"
+        await user2_manager.set_async(real_test_key, {user: "user2, data: sensitive_data_2)"
         
         # Validate isolation with real services
         user1_data = await user1_manager.get_async(real_test_key)"
@@ -188,7 +188,7 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
         await user2_manager.delete_async(real_test_key)
     
     def _scan_for_direct_instantiation_violations(self) -> Dict[str, List[int]]:
-    ""
+    """
         Scan codebase for direct UnifiedStateManager() instantiation violations.
         
         Returns:
@@ -253,7 +253,7 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
         return violations
     
     def _is_direct_instantiation_line(self, line: str) -> bool:
-    "
+        """
     "
         Check if line contains direct UnifiedStateManager instantiation.
         
@@ -285,7 +285,7 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
         return False
     
     def _get_test_files_using_unified_state_manager(self) -> List[Path]:
-        ""Get test files that import or use UnifiedStateManager.
+        ""Get test files that import or use UnifiedStateManager."
         test_files = []
         
         test_dirs = [
@@ -324,7 +324,7 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
             return False
     
     def _file_has_direct_instantiation(self, file_path: Path) -> bool:
-        ""Check if file has direct UnifiedStateManager instantiation.
+        ""Check if file has direct UnifiedStateManager instantiation."
         line_numbers = self._find_direct_instantiation_lines(file_path)
         return len(line_numbers) > 0
 
@@ -340,7 +340,7 @@ class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
     
     @pytest.mark.mission_critical
     def test_prevent_direct_instantiation_in_new_code(self):
-        ""
+        """
         Test that prevents new direct instantiation violations from being introduced.
         
         CRITICAL: This is a regression prevention test that should always PASS
@@ -348,7 +348,7 @@ class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
         
         # Import check - this should work without direct instantiation
         try:
-            from netra_backend.app.core.managers.unified_state_manager import (
+            from netra_backend.app.core.managers.unified_state_manager import ()
                 StateManagerFactory,
                 get_state_manager  # Convenience function that uses factory
             )
@@ -360,14 +360,14 @@ class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
         user_manager = get_state_manager(test_user")  # Should use factory"
         
         # Validate they are proper instances
-        assert hasattr(global_manager, 'user_id'), Manager must have user_id attribute
+        assert hasattr(global_manager, "'user_id'), Manager must have user_id attribute"
         assert hasattr(user_manager, 'user_id'), "Manager must have user_id attribute"
-        assert global_manager.user_id is None, Global manager should have no user_id
-        assert user_manager.user_id == test_user, User manager should have correct user_id
+        assert global_manager.user_id is None, "Global manager should have no user_id"
+        assert user_manager.user_id == test_user, "User manager should have correct user_id"
     
     @pytest.mark.mission_critical
     def test_factory_pattern_documentation_compliance(self):
-        ""
+        """
         Test that validates factory pattern is properly documented and enforced.
         
         CRITICAL: Ensures factory pattern requirements are clear for developers.
@@ -387,24 +387,24 @@ class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
         ]
         
         for method_name in required_methods:
-            assert hasattr(StateManagerFactory, method_name), (
+            assert hasattr(StateManagerFactory, "method_name), ("
                 fStateManagerFactory must have {method_name} method for SSOT compliance
             )
-            assert callable(getattr(StateManagerFactory, method_name)), (
+            assert callable(getattr(StateManagerFactory, "method_name)), ("
                 fStateManagerFactory.{method_name} must be callable
             )
         
         # Test factory methods work correctly
         global_manager = StateManagerFactory.get_global_manager()
-        user_manager = StateManagerFactory.get_user_manager("compliance_test_user")
+        user_manager = StateManagerFactory.get_user_manager("compliance_test_user)"
         
-        assert global_manager is not None, Factory must create global manager
-        assert user_manager is not None, Factory must create user manager
-        assert global_manager is not user_manager, Factory must create different instances
+        assert global_manager is not None, "Factory must create global manager"
+        assert user_manager is not None, "Factory must create user manager"
+        assert global_manager is not user_manager, "Factory must create different instances"
     
     @pytest.mark.mission_critical
     def test_known_violation_specific_detection(self):
-        "
+        """
         "
         Test that specifically detects the known violation in GitHub issue #207.
         
@@ -431,7 +431,7 @@ class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
             has_violation = self._is_direct_instantiation_line(target_line)
             
             # Log the line for debugging
-            print(fChecking line {violation_line}: {target_line.strip(")}")
+            print(fChecking line {violation_line}: {target_line.strip(")})"
             print(fContains violation: {has_violation})
             
             # This should FAIL before fix (violation exists), PASS after fix (violation removed)
@@ -445,7 +445,7 @@ class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
             pytest.fail(fCould not read violation file: {e})
     
     def _is_direct_instantiation_line(self, line: str) -> bool:
-        ""
+        """
         Check if line contains direct UnifiedStateManager instantiation.
         
         Args:
@@ -459,7 +459,7 @@ class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
         line = re.sub(r'.*?"', '', line, flags=re.DOTALL)  # Remove docstrings"
         line = re.sub(r"'''.*?''', '', line, flags=re.DOTALL)  # Remove docstrings"
         line = re.sub(r'[^]*', '', line)  # Remove double-quoted strings
-        line = re.sub(r"'[^']*'", '', line)  # Remove single-quoted strings'
+        line = re.sub(r"'[^']*', '', line)  # Remove single-quoted strings'"
         
         # Look for direct instantiation patterns
         patterns = [

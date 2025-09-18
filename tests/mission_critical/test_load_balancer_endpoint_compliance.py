@@ -372,7 +372,7 @@ class LoadBalancerEndpointComplianceTests:
         critical_services = ['backend', 'auth']
         for service in critical_services:
             service_result = results['results'].get(service, {)
-            assert service_result.get('accessible', False), (
+            assert service_result.get('accessible', "False), ("
                 fCRITICAL: {service} service not accessible at {service_result.get('url', 'unknown')}\n"
                 fCRITICAL: {service} service not accessible at {service_result.get('url', 'unknown')}\n"
                 fError: {service_result.get('error', 'Unknown error')}
@@ -442,7 +442,7 @@ if __name__ == "__main__:"
             print(\n WARNING: [U+FE0F]  Some connectivity issues detected (may be expected in CI))"
             print(\n WARNING: [U+FE0F]  Some connectivity issues detected (may be expected in CI))"
         
-        print("\nLoad Balancer Migration: SUCCESSFUL")
+        print("\nLoad Balancer Migration: SUCCESSFUL)"
     
     asyncio.run(run_compliance_check()")"
 

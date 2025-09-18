@@ -14,7 +14,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Critical - Service independence is required for production deployment patterns
 
 CRITICAL ISSUE FROM ITERATION 7:
-"Services not independent after launcher completion" - This test validates that all
+"Services not independent after launcher completion - This test validates that all"
 services (auth, backend, frontend) continue running normally after the launcher
 process terminates, which is required for production-like behavior.
 
@@ -85,7 +85,7 @@ class ServiceIndependenceValidator:
 
     async def run_independence_test(self, timeout_seconds: int = 60) -> TestLauncherResult:
         """Run complete service independence test."""
-        logger.info("Starting service independence validation test")
+        logger.info("Starting service independence validation test)"
 
         try:
         # Phase 1: Start dev launcher and wait for services
@@ -104,7 +104,7 @@ class ServiceIndependenceValidator:
         await self._validate_service_responsiveness()
 
         self.test_results.independence_validated = True
-        logger.info(" PASS:  Service independence validation PASSED")
+        logger.info(" PASS:  Service independence validation PASSED)"
 
         except Exception as e:
         logger.error("")
@@ -114,11 +114,11 @@ class ServiceIndependenceValidator:
 
     async def _start_launcher_and_wait(self):
         """Start dev launcher and wait for services to be ready."""
-        logger.info("Phase 1: Starting dev launcher and waiting for services")
+        logger.info("Phase 1: Starting dev launcher and waiting for services)"
 
     # Start dev launcher subprocess
         launcher_cmd = [ ]
-        "python", "-m", "dev_launcher",
+        "python", "-m", "dev_launcher,"
         "--dynamic", "--no-browser", "--non-interactive", "--minimal"
     
 
@@ -151,8 +151,8 @@ class ServiceIndependenceValidator:
 
             # Check if core services are responding
         try:
-        auth_healthy = await self._check_service_health("auth", 8081)
-        backend_healthy = await self._check_service_health("backend", 8001)
+        auth_healthy = await self._check_service_health("auth, 8081)"
+        backend_healthy = await self._check_service_health("backend, 8001)"
 
         if auth_healthy or backend_healthy:  # At least one core service ready
         services_ready = True
@@ -164,20 +164,20 @@ class ServiceIndependenceValidator:
         await asyncio.sleep(2)
 
         if not services_ready:
-        raise TimeoutError("Services did not become ready within timeout")
+        raise TimeoutError("Services did not become ready within timeout)"
 
-        logger.info(" PASS:  Services are ready")
+        logger.info(" PASS:  Services are ready)"
 
     async def _discover_running_services(self):
         """Discover and catalog all running services."""
         pass
-        logger.info("Phase 2: Discovering running services")
+        logger.info("Phase 2: Discovering running services)"
 
     # Expected services and their default ports
         expected_services = { }
-        "auth": 8081,
-        "backend": 8001,  # Updated to match dev launcher
-        "frontend": 3000
+        "auth: 8081,"
+        "backend: 8001,  # Updated to match dev launcher"
+        "frontend: 3000"
     
 
         for service_name, default_port in expected_services.items():
@@ -194,7 +194,7 @@ class ServiceIndependenceValidator:
         name=service_name,
         pid=pid,
         port=port,
-        status="running" if pid and responsive else "not_running",
+        status="running" if pid and responsive else "not_running,"
         health_check_url=health_url,
         responsive=responsive
             
@@ -213,14 +213,14 @@ class ServiceIndependenceValidator:
                         # Require at least one service to be running
         running_services = [item for item in []]
         if not running_services:
-        raise RuntimeError("No services discovered as running before launcher termination")
+        raise RuntimeError("No services discovered as running before launcher termination)"
 
     async def _terminate_launcher(self):
         """Terminate the launcher process gracefully."""
-        logger.info("Phase 3: Terminating launcher process")
+        logger.info("Phase 3: Terminating launcher process)"
 
         if not self.launcher_process or self.launcher_process.poll() is not None:
-        raise RuntimeError("Launcher process not running or already terminated")
+        raise RuntimeError("Launcher process not running or already terminated)"
 
         original_pid = self.launcher_process.pid
 
@@ -239,7 +239,7 @@ class ServiceIndependenceValidator:
         logger.info("")
         except subprocess.TimeoutExpired:
                             # Force termination if needed
-        logger.warning("Launcher did not terminate gracefully, forcing termination")
+        logger.warning("Launcher did not terminate gracefully, forcing termination)"
         self.launcher_process.kill()
         exit_code = self.launcher_process.wait()
         logger.info("")
@@ -261,13 +261,13 @@ class ServiceIndependenceValidator:
     async def _validate_service_independence(self):
         """Validate that services remain running after launcher termination."""
         pass
-        logger.info("Phase 4: Validating service independence")
+        logger.info("Phase 4: Validating service independence)"
 
     # Wait a moment for any cascade termination to occur
         await asyncio.sleep(5)
 
         for service_name, service_before in self.test_results.services_before_termination.items():
-        if service_before.status != "running":
+        if service_before.status != "running:"
         continue  # Skip services that weren"t running before"
 
         try:
@@ -282,20 +282,20 @@ class ServiceIndependenceValidator:
                 # or different but still responsive (process restarted independently)
         if service_before.pid and current_pid:
         if service_before.pid == current_pid:
-        independence_type = "same_process"  # Best case
+        independence_type = "same_process  # Best case"
         else:
-        independence_type = "restarted_independently"  # Still good
+        independence_type = "restarted_independently  # Still good"
         elif current_pid and responsive:
         independence_type = "new_independent_process"
         else:
-        independence_type = "terminated_with_launcher"  # BAD
+        independence_type = "terminated_with_launcher  # BAD"
         independent = False
 
         service_after = ServiceStatus( )
         name=service_name,
         pid=current_pid,
         port=service_before.port,
-        status="running" if current_pid and responsive else "terminated",
+        status="running" if current_pid and responsive else "terminated,"
         health_check_url=service_before.health_check_url,
         responsive=responsive,
         independent=independent
@@ -315,7 +315,7 @@ class ServiceIndependenceValidator:
 
     async def _validate_service_responsiveness(self):
         """Validate that independent services are still responsive."""
-        logger.info("Phase 5: Validating service responsiveness")
+        logger.info("Phase 5: Validating service responsiveness)"
 
         for service_name, service_after in self.test_results.services_after_termination.items():
         if not service_after.independent:
@@ -349,17 +349,17 @@ class ServiceIndependenceValidator:
         """Discover actual service port from service discovery."""
         pass
         try:
-        if service_name == "auth":
+        if service_name == "auth:"
         info = self.discovery.read_auth_info()
-        elif service_name == "backend":
+        elif service_name == "backend:"
         info = self.discovery.read_backend_info()
-        elif service_name == "frontend":
+        elif service_name == "frontend:"
         info = self.discovery.read_frontend_info()
         else:
         await asyncio.sleep(0)
         return default_port
 
-        return info.get("port", default_port) if info else default_port
+        return info.get("port, default_port) if info else default_port"
 
         except Exception:
         return default_port
@@ -391,7 +391,7 @@ class ServiceIndependenceValidator:
 
     async def cleanup(self):
         """Clean up test resources."""
-        logger.info("Cleaning up service independence test")
+        logger.info("Cleaning up service independence test)"
 
     # Terminate launcher if still running
         if hasattr(self, 'launcher_process') and self.launcher_process.poll() is None:
@@ -468,7 +468,7 @@ class TestServiceIndependenceValidation(BaseE2ETest):
         print("")
 
                             # CRITICAL ASSERTION: At least 80% of services must be independent
-        assert independence_rate >= 0.8, ( )
+        assert independence_rate >= 0.8, "( )"
         ""
         f"Services must remain operational after launcher termination. "
         ""
@@ -476,11 +476,11 @@ class TestServiceIndependenceValidation(BaseE2ETest):
 
                             # CRITICAL ASSERTION: No cascade termination errors
         cascade_errors = [item for item in []]
-        assert not cascade_errors, ( )
+        assert not cascade_errors, "( )"
         ""
                             
 
-        print(" PASS:  SERVICE INDEPENDENCE VALIDATION PASSED")
+        print(" PASS:  SERVICE INDEPENDENCE VALIDATION PASSED)"
         await asyncio.sleep(0)
         return result
 
@@ -507,7 +507,7 @@ class TestServiceIndependenceValidation(BaseE2ETest):
         try:
         zombie_count = len([item for item in []])
         assert zombie_count == 0, ""
-        print(" PASS:  No zombie processes detected")
+        print(" PASS:  No zombie processes detected)"
         except Exception as e:
         logger.warning("")
 
@@ -519,10 +519,10 @@ class TestServiceIndependenceValidation(BaseE2ETest):
         except psutil.NoSuchProcess:
         print("")
 
-        print(" PASS:  FINAL SYSTEM STATE VALIDATION PASSED")
+        print(" PASS:  FINAL SYSTEM STATE VALIDATION PASSED)"
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
                             # Run service independence test
-        pytest.main([__file__, "-v", "--tb=short"])
+        pytest.main([__file__, "-v", "--tb=short])"
         pass

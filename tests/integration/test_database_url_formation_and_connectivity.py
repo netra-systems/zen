@@ -123,8 +123,8 @@ class DatabaseURLFormationDiagnostic:
         issues = []
 
     # SSL parameter issues
-        if "postgresql+asyncpg://" in url or "+asyncpg" in url:
-        if "sslmode=" in url:
+        if "postgresql+asyncpg://" in url or "+asyncpg in url:"
+        if "sslmode= in url:"
         issues.append({ })
         'source': source,
         'severity': 'critical',
@@ -133,8 +133,8 @@ class DatabaseURLFormationDiagnostic:
         'url_masked': DatabaseURLBuilder.mask_url_for_logging(url)
             
 
-        if "postgresql+psycopg2://" in url or "+psycopg2" in url:
-        if "ssl=" in url and "sslmode=" not in url:
+        if "postgresql+psycopg2://" in url or "+psycopg2 in url:"
+        if "ssl=" in url and "sslmode= not in url:"
         issues.append({ })
         'source': source,
         'severity': 'warning',
@@ -144,7 +144,7 @@ class DatabaseURLFormationDiagnostic:
                     
 
                     # Driver specification issues
-        if url.startswith("postgres://"):
+        if url.startswith("postgres://):"
         issues.append({ })
         'source': source,
         'severity': 'medium',
@@ -186,7 +186,7 @@ class DatabaseURLFormationDiagnostic:
 
         try:
                                             # Clean URL for asyncpg test
-        clean_url = url.replace("postgresql+asyncpg://", "postgresql://").replace("postgresql+psycopg2://", "postgresql://")
+        clean_url = url.replace("postgresql+asyncpg://", "postgresql://").replace("postgresql+psycopg2://", "postgresql://)"
 
                                             # Test with asyncpg
         conn = await asyncio.wait_for( )
@@ -195,7 +195,7 @@ class DatabaseURLFormationDiagnostic:
                                             
 
         await asyncio.wait_for( )
-        conn.fetchval("SELECT 1"),
+        conn.fetchval("SELECT 1),"
         timeout=5.0
                                             
 
@@ -245,7 +245,7 @@ class TestDatabaseURLFormationAndConnectivity:
         '''
         '''
         pass
-        logger.info("=== DATABASE URL FORMATION ANALYSIS ===")
+        logger.info("=== DATABASE URL FORMATION ANALYSIS ===)"
 
     # Get all URLs
         url_data = diagnostic.get_all_database_urls()
@@ -303,10 +303,10 @@ class TestDatabaseURLFormationAndConnectivity:
         other_issues.append(issue)
 
         if not issues:
-        print("   PASS:  No URL formation issues detected")
+        print("   PASS:  No URL formation issues detected)"
 
                                                             # Assert no critical issues that would cause connection failures
-        assert len(critical_issues) == 0, ( )
+        assert len(critical_issues) == 0, "( )"
         f"Critical URL formation issues found that will cause connection failures:"
         " +"
         "
@@ -340,7 +340,7 @@ and identifies which URLs work vs. which fail.
 '''
 '''
 pass
-logger.info("=== DATABASE URL CONNECTIVITY VERIFICATION ===")
+logger.info("=== DATABASE URL CONNECTIVITY VERIFICATION ===)"
 
                                                                             # Get all URLs
 url_data = diagnostic.get_all_database_urls()
@@ -400,7 +400,7 @@ print("")
 print("")
 
                                                                                                         # Assert that at least one URL works for basic connectivity
-assert len(successful_connections) > 0, ( )
+assert len(successful_connections) > 0, "( )"
 f"No database URLs successfully connected. This indicates a fundamental "
 f"connectivity or configuration issue. Failure details:"
 " +"
@@ -415,7 +415,7 @@ if auth_config_results and not auth_config_results[0]['success']:
     pass
 print(f" )"
 WARNING: [U+FE0F]  WARNING: Primary auth_config URL failed but other URLs work.")"
-print(f"This indicates the auth service may not be using the optimal URL.")
+print(f"This indicates the auth service may not be using the optimal URL.)"
 
 print(f" )"
 PASS:  Database URL connectivity verification completed")"
@@ -431,7 +431,7 @@ asyncpg vs. psycopg2 drivers to prevent connection failures.
 '''
 '''
 pass
-logger.info("=== SSL PARAMETER COMPATIBILITY CHECK ===")
+logger.info("=== SSL PARAMETER COMPATIBILITY CHECK ===)"
 
     # Test URL transformations for SSL parameters
 test_cases = [ ]
@@ -516,7 +516,7 @@ else:
     pass
 env.set('DATABASE_URL', 'sqlite+aiosqlite:///test.db')
 
-print(f"   PASS:  SSL parameter transformation working")
+print(f"   PASS:  SSL parameter transformation working)"
 
 except Exception as e:
     pass
@@ -531,12 +531,12 @@ for issue in compatibility_issues:
     print("")
 
 if not compatibility_issues:
-    print("   PASS:  All SSL parameter transformations working correctly")
+    print("   PASS:  All SSL parameter transformations working correctly)"
 
                                                                     # Assert no critical SSL compatibility issues
 critical_ssl_issues = [item for item in []]
 
-assert len(critical_ssl_issues) == 0, ( )
+assert len(critical_ssl_issues) == 0, "( )"
 f"Critical SSL parameter compatibility issues found:"
 " +"
 "
@@ -553,16 +553,16 @@ print(f" )"
 PASS:  SSL parameter compatibility check completed")"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                                                             # Run diagnostic when executed directly
 async def main():
 pass
-print("=== DATABASE URL FORMATION AND CONNECTIVITY DIAGNOSIS ===")
+print("=== DATABASE URL FORMATION AND CONNECTIVITY DIAGNOSIS ===)"
 
 diagnostic = DatabaseURLFormationDiagnostic()
 
     # Analyze URL formation
-    print("1. Analyzing URL formation...")
+    print("1. Analyzing URL formation...)"
 url_data = diagnostic.get_all_database_urls()
 issues = diagnostic.analyze_url_issues(url_data)
 
@@ -594,8 +594,8 @@ successful = [item for item in []]]
 print("")
 
 if successful:
-    print(" PASS:  Database URL formation and connectivity working")
+    print(" PASS:  Database URL formation and connectivity working)"
 else:
-    print(" FAIL:  Database URL formation or connectivity issues found")
+    print(" FAIL:  Database URL formation or connectivity issues found)"
 
 asyncio.run(main())

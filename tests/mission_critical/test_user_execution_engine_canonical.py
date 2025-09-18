@@ -250,7 +250,7 @@ class UserExecutionEngineCanonicalTests(SSotBaseTestCase):
                 )
                 
                 self.assertEqual(
-                    engine2.get_agent_state("test_agent), user2_state",
+                    engine2.get_agent_state("test_agent), user2_state,"
                     Engine2 should maintain user2 agent state
                 )
                 

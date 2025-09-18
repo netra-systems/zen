@@ -73,7 +73,7 @@ class ServiceSecretConfigurationTests:
         assert validate_service_secret(valid_service_secret_12345)
     
     def test_configuration_dependency_mapping(self):
-        ""Test configuration dependency mapping for SERVICE_SECRET
+        ""Test configuration dependency mapping for SERVICE_SECRET"
         
         CRITICAL_DEPENDENCIES = {
             SERVICE_SECRET: {"
@@ -198,7 +198,7 @@ class ServiceSecretConfigurationTests:
         
         result = validate_gcp_service_config(
             config_invalid,
-            ["SERVICE_SECRET, DATABASE_URL", JWT_SECRET_KEY]
+            ["SERVICE_SECRET, DATABASE_URL, JWT_SECRET_KEY]"
         
         assert not result[valid]"
         assert not result[valid]"
@@ -207,13 +207,13 @@ class ServiceSecretConfigurationTests:
         # Test valid configuration
         config_valid = {
             SERVICE_SECRET: valid_service_secret_12345,
-            "DATABASE_URL: postgresql://test",
+            "DATABASE_URL: postgresql://test,"
             JWT_SECRET_KEY: jwt_secret
         }
         
         result = validate_gcp_service_config(
             config_valid,
-            [SERVICE_SECRET, DATABASE_URL", "JWT_SECRET_KEY]
+            [SERVICE_SECRET, DATABASE_URL", JWT_SECRET_KEY]"
         
         assert result[valid]
         assert len(result["missing) == 0"
@@ -238,7 +238,7 @@ class ServiceSecretConfigurationTests:
             return True, Deployment validation passed
         
         # Test blocked deployment
-        invalid_config = {DATABASE_URL: "test, JWT_SECRET_KEY": test}
+        invalid_config = {DATABASE_URL: "test, JWT_SECRET_KEY: test}"
         can_deploy, message = can_deploy_to_gcp(invalid_config)
         
         assert not can_deploy
@@ -246,7 +246,7 @@ class ServiceSecretConfigurationTests:
         
         # Test successful deployment
         valid_config = {
-            "SERVICE_SECRET: valid_deployment_secret_12345",
+            "SERVICE_SECRET: valid_deployment_secret_12345,"
             DATABASE_URL: postgresql://test,
             JWT_SECRET_KEY: jwt_secret_key"
             JWT_SECRET_KEY: jwt_secret_key"
@@ -275,7 +275,7 @@ class ServiceSecretConfigurationTests:
                     return False
                 
                 if len(service_secret) < 16:
-                    self.trigger_alert("WARNING, SERVICE_SECRET too short - security risk")
+                    self.trigger_alert("WARNING, SERVICE_SECRET too short - security risk)"
                     return False
                 
                 return True
@@ -286,7 +286,7 @@ class ServiceSecretConfigurationTests:
                 alert = {
                     severity": severity,"
                     message: message,
-                    timestamp": "2025-9-05T16:43:25Z,
+                    timestamp": 2025-9-05T16:43:25Z,"
                     component: SERVICE_SECRET_MONITOR
                 }
                 self.alerts.append(alert)
@@ -306,7 +306,7 @@ class ServiceSecretConfigurationTests:
         
         # Test valid SERVICE_SECRET (no alerts)
         monitor.alerts.clear()
-        valid_config = {SERVICE_SECRET": "valid_secret_for_monitoring_12345}
+        valid_config = {SERVICE_SECRET": valid_secret_for_monitoring_12345}"
         result = monitor.check_service_secret(valid_config)
         
         assert result is True
@@ -386,7 +386,7 @@ class ServiceSecretConfigurationTests:
         # Validate response
         timeline = simulator.get_response_timeline()
         assert timeline[incident_resolved]
-        assert outage_detected" in timeline["steps_completed]
+        assert outage_detected" in timeline[steps_completed]"
         assert deploy_service_secret in timeline[steps_completed]
         assert validate_circuit_breaker_reset in timeline["steps_completed]"
     
@@ -396,7 +396,7 @@ class ServiceSecretConfigurationTests:
         class ConfigRegressionValidator:
             def __init__(self):
                 self.baseline_config = {
-                    "SERVICE_SECRET: baseline_secret_12345",
+                    "SERVICE_SECRET: baseline_secret_12345,"
                     DATABASE_URL: postgresql://baseline,
                     JWT_SECRET_KEY: baseline_jwt"
                     JWT_SECRET_KEY: baseline_jwt"
@@ -410,13 +410,13 @@ class ServiceSecretConfigurationTests:
                     
                     if baseline_value and not new_value:
                         self.regressions.append({
-                            type": "CRITICAL_DELETION,
+                            type": CRITICAL_DELETION,"
                             key: key,
-                            impact: System failure" if key == "SERVICE_SECRET else Service degradation
+                            impact: System failure" if key == SERVICE_SECRET else Service degradation"
                         }
                     elif key == SERVICE_SECRET and new_value and len(new_value) < len(baseline_value):
                         self.regressions.append({
-                            type": "SECURITY_DOWNGRADE, 
+                            type": SECURITY_DOWNGRADE, "
                             key: key,
                             impact: Reduced security strength"
                             impact: Reduced security strength"
@@ -450,19 +450,19 @@ class ServiceSecretDocumentationTests:
     "Test SERVICE_SECRET documentation and knowledge capture"
     
     def test_mission_critical_index_structure(self):
-        ""Test mission critical index structure for SERVICE_SECRET
+        ""Test mission critical index structure for SERVICE_SECRET"
         
         MISSION_CRITICAL_ENTRY = {
             name: SERVICE_SECRET","
             "type: env_var,"
             severity: ULTRA_CRITICAL,
-            "cascade_impact: Complete authentication failure, circuit breaker permanently open, 100% user lockout",
+            "cascade_impact: Complete authentication failure, circuit breaker permanently open, 100% user lockout,"
             required_by: [netra-backend-staging, netra-backend-production],"
             required_by: [netra-backend-staging, netra-backend-production],"
             incident_history": ["
                 {
                     date: 2025-9-5,
-                    "severity: CRITICAL",
+                    "severity: CRITICAL,"
                     description: Missing SERVICE_SECRET caused complete staging outage,
                     impact: 100% user authentication failure","
                     "logs_pattern: INTER-SERVICE AUTHENTICATION CRITICAL ERROR"
@@ -472,7 +472,7 @@ class ServiceSecretDocumentationTests:
         
         # Validate structure
         assert MISSION_CRITICAL_ENTRY[severity] == ULTRA_CRITICAL
-        assert "authentication failure in MISSION_CRITICAL_ENTRY[cascade_impact"]
+        assert "authentication failure in MISSION_CRITICAL_ENTRY[cascade_impact]"
         assert len(MISSION_CRITICAL_ENTRY[incident_history) > 0
         
         # Validate incident history
@@ -480,7 +480,7 @@ class ServiceSecretDocumentationTests:
         incident = MISSION_CRITICAL_ENTRY[incident_history][0]"
         assert incident["date] == 2025-9-5"
         assert staging outage in incident[description]
-        assert "INTER-SERVICE AUTHENTICATION in incident[logs_pattern"]
+        assert "INTER-SERVICE AUTHENTICATION in incident[logs_pattern]"
     
     def test_config_dependency_map_structure(self):
         Test configuration dependency map structure"
@@ -513,7 +513,7 @@ class ServiceSecretDocumentationTests:
         # Validate dependency chain
         deps = CONFIG_DEPENDENCY_MAP["SERVICE_SECRET]"
         assert SERVICE_SECRET Environment Variable in deps[dependency_chain]
-        assert Chat System Access" in deps["dependency_chain]
+        assert Chat System Access" in deps[dependency_chain]"
         
         # Validate failure chain
         assert Missing SERVICE_SECRET in deps[failure_chain]

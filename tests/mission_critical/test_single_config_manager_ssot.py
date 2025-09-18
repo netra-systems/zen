@@ -41,7 +41,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
     "Test suite to validate single configuration manager SSOT compliance."
 
     def test_only_one_config_manager_can_be_imported(self):
-    ""
+    """
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate single config manager import.
 
         After SSOT consolidation, only one configuration manager should be importable.
@@ -93,10 +93,10 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
 
         # Verify SSOT manager is functional
         assert ssot_manager is not None, SSOT config manager must be instantiable""
-        assert hasattr(ssot_manager, 'get_config'), SSOT config manager must have get_config method
+        assert hasattr(ssot_manager, "'get_config'), SSOT config manager must have get_config method"
 
     def test_config_manager_import_paths_redirect_to_ssot(self):
-        "
+        """
         "
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate import path redirection to SSOT.
 
@@ -167,7 +167,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
         )
 
     def test_ssot_config_manager_has_complete_api(self):
-    "
+        """
     "
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate SSOT manager API completeness.
 
@@ -228,7 +228,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
                 assert callable(method), fMethod {method_name} must be callable"
 
     def test_ssot_config_manager_uses_isolated_environment(self):
-    "
+        """
     "
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate SSOT manager uses IsolatedEnvironment.
 
@@ -249,7 +249,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
             pytest.skip(fCannot get source code for manager: {str(e)})
 
         # Validate IsolatedEnvironment import and usage
-        has_isolated_env_import = (
+        has_isolated_env_import = ()
             'from shared.isolated_environment import' in source_code or
             'import shared.isolated_environment' in source_code or
             'from dev_launcher.isolated_environment import' in source_code
@@ -268,7 +268,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
         )
 
         # TEST ASSERTION: Should pass when SSOT manager uses IsolatedEnvironment
-        assert has_isolated_env_import, (
+        assert has_isolated_env_import, ()
             fSSOT VIOLATION: SSOT config manager does not import IsolatedEnvironment. "
             fSSOT VIOLATION: SSOT config manager does not import IsolatedEnvironment. "
             f"Must use SSOT environment access pattern."
@@ -321,7 +321,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
             )
 
     def test_ssot_config_manager_golden_path_integration(self):
-        ""
+        """
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate Golden Path integration readiness.
 
         The SSOT config manager should provide configuration needed for Golden Path functionality.
@@ -374,7 +374,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
         try:
             # Basic configuration access should work without errors
             environment = manager.get_config('ENVIRONMENT', 'test')
-            assert environment is not None, Environment configuration must be accessible
+            assert environment is not None, "Environment configuration must be accessible"
 
         except Exception as e:
             pytest.fail(fSSOT config manager basic functionality failed: {str(e)})

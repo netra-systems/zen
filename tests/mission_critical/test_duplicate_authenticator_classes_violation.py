@@ -49,7 +49,7 @@ class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
         return {}
     
     def test_only_one_unified_websocket_authenticator_class_exists(self):
-    "
+        """
     "
         CRITICAL TEST: Should FAIL currently - detects duplicate UnifiedWebSocketAuthenticator classes.
         
@@ -83,7 +83,7 @@ class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
                         fThis indicates authentication SSOT violation blocking Golden Path.)"
     
     def test_class_definitions_line_ranges_non_overlapping(self):
-    "
+        """
     "
         SUPPORTING TEST: Verify that if multiple classes exist, they don't overlap.'
         
@@ -149,7 +149,7 @@ class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
         self.assertTrue(True, SSOT metadata validation completed)
     
     def _count_class_definitions(self, file_content: str, class_name: str) -> List[Dict[str, Any]]:
-        ""
+        """
         Count class definitions using AST parsing for accuracy.
         
         Args:
@@ -180,13 +180,13 @@ class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
         
         except SyntaxError as e:
             # Fallback to simple text parsing if AST fails
-            self.logger.warning(f"AST parsing failed ({e}, using text-based parsing)")
+            self.logger.warning(f"AST parsing failed ({e}, using text-based parsing))"
             return self._count_class_definitions_text_based(file_content, class_name)
         
         return class_definitions
     
     def _count_class_definitions_text_based(self, file_content: str, class_name: str) -> List[Dict[str, Any]]:
-        "
+        """
         "
         Fallback method to count class definitions using text parsing.
         
@@ -280,7 +280,7 @@ class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
             
             # Look for migration indicators
             if any(keyword in line_lower for keyword in ['migration', 'backward compatibility', 'legacy'):
-                indicators['migration_indicators'].append(f"Line {line_num}: {line.strip()}")
+                indicators['migration_indicators'].append(f"Line {line_num}: {line.strip()})"
         
         return indicators
 

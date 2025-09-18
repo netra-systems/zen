@@ -134,7 +134,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                 should_succeed: True  # Should work if JWT is valid
             },
             AuthMode.RELAXED: {
-                "user_id: frelaxed_user_{int(time.time())}",
+                "user_id: frelaxed_user_{int(time.time())},"
                 email: frelaxed-user-{int(time.time())}@test.com, 
                 jwt_token: None,  # Intentionally missing for relaxed auth"
                 jwt_token: None,  # Intentionally missing for relaxed auth"
@@ -142,7 +142,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
             },
             AuthMode.DEMO: {
                 user_id: fdemo-user-{int(time.time())},
-                "email: fdemo-user-{int(time.time())}@test.com",
+                "email: fdemo-user-{int(time.time())}@test.com,"
                 jwt_token: None,  # Demo mode bypasses JWT
                 should_succeed: False  # Not implemented yet"
                 should_succeed: False  # Not implemented yet"
@@ -197,7 +197,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
         self.auth_context_per_event = {}
     
     async def test_all_critical_events_strict_auth_with_jwt(self):
-    "
+        """
     "
         Test all 5 critical WebSocket events with STRICT auth and valid JWT.
         
@@ -213,7 +213,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
         
         # Set environment to STRICT mode
         env = IsolatedEnvironment()
-        env.set(AUTH_VALIDATION_LEVEL", "STRICT)
+        env.set(AUTH_VALIDATION_LEVEL", STRICT)"
         
         # Create WebSocket client with JWT
         client = WebSocketClient()
@@ -321,7 +321,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
         self.logger.info(f✅ Confirmed auth blocking prevents all WebSocket events: {cm.exception}")"
     
     async def test_critical_events_relaxed_auth_not_implemented(self):
-    "
+        """
     "
         Test critical events with RELAXED auth mode - MUST FAIL (not implemented).
         
@@ -339,7 +339,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
         # Create WebSocket client with degraded auth headers
         client = WebSocketClient()
         headers = {
-            X-User-Hint": user["user_id],
+            X-User-Hint": user[user_id],"
             X-Auth-Degraded: true,
             X-Fallback-Reason: "load-balancer-stripped-jwt"
         }
@@ -439,7 +439,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                 if len(events_received) == 5:
                     # Validate events have demo user context
                     for event in events_received:
-                        user_id = event.get("user_id, ")
+                        user_id = event.get("user_id, )"
                         self.assertTrue(user_id.startswith(demo-user-),
                                       fExpected demo user ID, got: {user_id})"
                                       fExpected demo user ID, got: {user_id})"
@@ -461,7 +461,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
             self.logger.info(f✅ Demo auth events correctly failed: {e})
     
     async def test_critical_events_emergency_auth_not_implemented(self):
-        ""
+        """
         Test critical events with EMERGENCY auth mode - MUST FAIL (not implemented).
         
         EMERGENCY mode should deliver all events with emergency user context.
@@ -472,7 +472,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
         
         # Set environment to EMERGENCY mode
         env = IsolatedEnvironment()
-        env.set("AUTH_VALIDATION_LEVEL, EMERGENCY")
+        env.set("AUTH_VALIDATION_LEVEL, EMERGENCY)"
         
         # Create WebSocket client with emergency access headers
         client = WebSocketClient()
@@ -510,7 +510,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                     # Validate events have emergency auth context
                     for event in events_received:
                         auth_context = event.get(auth_context, {)
-                        self.assertIn(emergency, auth_context.get("level, ").lower(),
+                        self.assertIn(emergency, auth_context.get("level, ).lower(),"
                                     Events should indicate emergency auth context)
                     
                     self.fail(Emergency auth events appear to be working - test needs update")"
@@ -530,7 +530,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
             self.logger.info(f✅ Emergency auth events correctly failed: {e}")"
     
     async def test_critical_events_comprehensive_all_auth_modes(self):
-    "
+        """
     "
         Comprehensive test of critical events with all authentication modes.
         
@@ -575,7 +575,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
         strict_should_work = self.test_users[AuthMode.STRICT][jwt_token] is not None
         
         if strict_should_work:
-            self.assertTrue(results[strict")["success),
+            self.assertTrue(results[strict")[success),"
                           fSTRICT auth events should work with JWT: {results['strict']})
         else:
             self.assertFalse(results[strict)[success"),"
@@ -605,7 +605,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
         self.logger.info(f✅ Business value at risk: {at_risk_modes}/{total_modes} auth modes not working)"
     
     async def test_event_delivery_timing_all_auth_modes(self):
-    "
+        """
     "
         Test timing of event delivery across all authentication modes.
         
@@ -663,7 +663,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
         for auth_mode in AuthMode:
             if not self.test_users[auth_mode][should_succeed]:
                 # Skip content test for modes that shouldn't work'
-                content_results[auth_mode.value] = {skipped": "not_implemented}
+                content_results[auth_mode.value] = {skipped": not_implemented}"
                 continue
             
             user = self.test_users[auth_mode]
@@ -725,7 +725,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
             return events_collected
             
         except Exception as e:
-            self.logger.warning(f"Event collection stopped after {len(events_collected)} events: {e})")
+            self.logger.warning(f"Event collection stopped after {len(events_collected)} events: {e}))"
             return events_collected
     
     def _validate_event_ordering(self, events: List[Dict[str, Any)) -> None:
@@ -751,7 +751,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
         for event in events:
             # Required fields for all events
             self.assertIn(type, event, Event missing type field)
-            self.assertIn(timestamp", event, "Event missing timestamp field)
+            self.assertIn(timestamp", event, Event missing timestamp field)"
             
             # User context validation
             if user_id in event:
@@ -761,7 +761,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
             
             # Thread/run context validation
             if thread_id in event:
-                self.assertIsInstance(event[thread_id"], str, "thread_id should be string)
+                self.assertIsInstance(event[thread_id"], str, thread_id should be string)"
                 self.assertNotEqual(event[thread_id], , thread_id should not be empty)"
                 self.assertNotEqual(event[thread_id], , thread_id should not be empty)"
             
@@ -789,7 +789,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                         timestamp = datetime.fromtimestamp(float(ts_str))
                     timestamps.append(timestamp)
                 except Exception as e:
-                    self.logger.warning(f"Could not parse timestamp {ts_str}: {e})")
+                    self.logger.warning(f"Could not parse timestamp {ts_str}: {e}))"
         
         if len(timestamps) >= 2:
             # Validate events are in chronological order
@@ -808,7 +808,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
         env = IsolatedEnvironment()
         env.set(AUTH_VALIDATION_LEVEL, auth_mode.value.upper())
         if auth_mode == AuthMode.DEMO:
-            env.set(DEMO_MODE", "1)
+            env.set(DEMO_MODE", 1)"
         
         # Set up headers based on auth mode
         headers = {}
@@ -822,7 +822,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
             }
         elif auth_mode == AuthMode.EMERGENCY:
             headers.update({
-                "X-Emergency-Access: true",
+                "X-Emergency-Access: true,"
                 X-Emergency-Key: test_key
             }
         # Demo mode uses no headers
@@ -903,7 +903,7 @@ class WebSocketEventResilienceTests(SSotBaseTestCase):
         
         with self.assertRaises((NotImplementedError, AttributeError)) as cm:
             # Try to import auth degradation handler (doesn't exist)'
-            from netra_backend.app.websocket_core.auth_permissiveness import (
+            from netra_backend.app.websocket_core.auth_permissiveness import ()
                 AuthDegradationHandler  # Does not exist yet
             )
             
@@ -911,10 +911,10 @@ class WebSocketEventResilienceTests(SSotBaseTestCase):
             await handler.maintain_events_during_auth_degradation()
         
         # Failure proves we need to implement this feature
-        self.assertIn((auth", "degradation, not found), str(cm.exception).lower())
+        self.assertIn((auth", degradation, not found), str(cm.exception).lower())"
     
     async def test_event_delivery_fallback_mechanisms(self):
-    ""
+    """
         Test event delivery fallback mechanisms when primary auth fails.
         
         Events are critical for user experience and should have fallback
@@ -926,7 +926,7 @@ class WebSocketEventResilienceTests(SSotBaseTestCase):
         
         with self.assertRaises((NotImplementedError, AttributeError)) as cm:
             # Try to import event fallback system (doesn't exist)'
-            from netra_backend.app.websocket_core.event_resilience import (
+            from netra_backend.app.websocket_core.event_resilience import ()
                 EventDeliveryFallback  # Does not exist yet
             )
             
@@ -934,7 +934,7 @@ class WebSocketEventResilienceTests(SSotBaseTestCase):
             await fallback.deliver_events_with_fallback_auth()
         
         # Failure proves we need to implement this feature
-        self.assertIn(("event, fallback", "not found"), str(cm.exception).lower())
+        self.assertIn(("event, fallback", "not found), str(cm.exception).lower())"
 
 
 if __name__ == '__main__':

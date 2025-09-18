@@ -83,7 +83,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
     # ================================================================================
 
     def test_auth_database_models_raw_uuid_violations_SHOULD_FAIL(self):
-        ""
+        """
         EXPECTED TO FAIL: Detect exact raw UUID violations in auth database models.
         
         Violations at auth_service/auth_core/database/models.py:
@@ -151,7 +151,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         )
 
     def test_auth_service_session_creation_violations_SHOULD_FAIL(self):
-        "
+        """
         "
         EXPECTED TO FAIL: Detect exact raw UUID violations in auth service session creation.
         
@@ -281,7 +281,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         )
 
     def test_unified_auth_interface_violations_SHOULD_FAIL(self):
-    "
+        """
     "
         EXPECTED TO FAIL: Detect exact raw UUID violations in unified auth interface.
         
@@ -351,7 +351,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
     # ================================================================================
 
     def test_auth_models_generate_non_structured_ids_SHOULD_FAIL(self):
-    "
+        """
     "
         EXPECTED TO FAIL: Test that auth models currently generate raw UUIDs instead of structured IDs.
         
@@ -394,7 +394,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
                     violations.append(fAuthAuditLog ID '{audit_id}' uses raw UUID format instead of structured format)
                     
                 # Test PasswordResetToken ID generation
-                reset_token = PasswordResetToken(user_id=test_user, token_hash=test_hash", email="test@example.com)
+                reset_token = PasswordResetToken(user_id=test_user, token_hash=test_hash", email=test@example.com)"
                 reset_id = reset_token.id
                 
                 if uuid_pattern.match(reset_id):
@@ -435,7 +435,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
             
             # Test session creation behavior
             test_user_id = test_user_123
-            test_user_data = {email: "test@example.com, name": Test User}
+            test_user_data = {email: "test@example.com, name: Test User}"
             
             session_id = auth_service.create_session(test_user_id, test_user_data)
             
@@ -475,7 +475,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
     # ================================================================================
 
     def test_unified_id_generator_produces_structured_auth_ids_SHOULD_PASS_AFTER_MIGRATION(self):
-    ""
+    """
         This test should PASS after migration to validate UnifiedIdGenerator compliance.
         
         Validates that UnifiedIdGenerator produces properly structured IDs for auth components.
@@ -496,23 +496,23 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
             (auth_user_id, auth_user_, Auth user ID"),"
             (session_id, "session_, Session ID),"
             (jti_id, jti_, JWT ID (JTI)),
-            (audit_id, "audit_, Audit log ID"),
+            (audit_id, "audit_, Audit log ID),"
             (reset_token_id, reset_token_, Password reset token ID),
         ]
         
         for id_value, expected_prefix, description in test_cases:
             # Should start with expected prefix
-            assert id_value.startswith(expected_prefix), f{description} should start with {expected_prefix}: {id_value}
+            assert id_value.startswith(expected_prefix), "f{description} should start with {expected_prefix}: {id_value}"
             
             # Should NOT be raw UUID format
             assert not uuid_pattern.match(id_value), f{description} should not be raw UUID format: {id_value}""
             
             # Should match structured format
-            assert structured_pattern.match(id_value), f{description} should match structured format: {id_value}
+            assert structured_pattern.match(id_value), "f{description} should match structured format: {id_value}"
             
             # Should have exactly 4 parts
             parts = id_value.split('_')
-            assert len(parts) >= 4, f{description} should have at least 4 parts: {id_value}
+            assert len(parts) >= 4, "f{description} should have at least 4 parts: {id_value}"
             
             # Timestamp should be numeric
             timestamp_part = parts[-3]
@@ -525,12 +525,12 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
             
             # Random part should be 8-character hex
             random_part = parts[-1]
-            assert len(random_part) == 8, fRandom part should be 8 characters in {description}: {random_part}
+            assert len(random_part) == 8, "fRandom part should be 8 characters in {description}: {random_part}"
             assert all(c in '0123456789abcdef' for c in random_part.lower()), fRandom part should be hex in {description}: {random_part}"
             assert all(c in '0123456789abcdef' for c in random_part.lower()), fRandom part should be hex in {description}: {random_part}"
 
     def test_unified_id_manager_auth_integration_SHOULD_PASS_AFTER_MIGRATION(self):
-    "
+        """
     "
         This test should PASS after migration to validate UnifiedIDManager integration.
         
@@ -556,14 +556,14 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         # Validate parse components
         parsed = UnifiedIDManager.parse_run_id(auth_run_id)
         assert parsed['valid'] is True, f"Run ID should parse successfully: {auth_run_id}"
-        assert parsed['thread_id'] == auth_thread_id, fParsed thread ID should match original: {parsed}
+        assert parsed['thread_id'] == auth_thread_id, "fParsed thread ID should match original: {parsed}"
 
     # ================================================================================
     # INTEGRATION TESTS - Cross-component validation
     # ================================================================================
 
     def test_auth_service_integration_after_migration_SHOULD_PASS_AFTER_MIGRATION(self):
-    ""
+    """
         Integration test to validate that auth service works properly after migration.
         
         This tests the end-to-end flow with migrated ID generation.
@@ -577,7 +577,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         
         assert structured_pattern.match(thread_id), fThread ID should match structured pattern: {thread_id}"
         assert structured_pattern.match(thread_id), fThread ID should match structured pattern: {thread_id}"
-        assert structured_pattern.match(run_id), fRun ID should match structured pattern: {run_id}
+        assert structured_pattern.match(run_id), "fRun ID should match structured pattern: {run_id}"
         assert structured_pattern.match(request_id), fRequest ID should match structured pattern: {request_id}"
         assert structured_pattern.match(request_id), fRequest ID should match structured pattern: {request_id}"
         
@@ -595,7 +595,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         }
         
         # This should work without any UUID-related errors
-        assert all(key in session_data for key in ['thread_id', 'run_id', 'request_id'), Session data should contain all required IDs
+        assert all(key in session_data for key in ['thread_id', "'run_id', 'request_id'), Session data should contain all required IDs"
 
     # ================================================================================
     # CLEANUP AND UTILITIES
@@ -606,7 +606,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         if hasattr(self, 'violations_detected') and self.violations_detected:
             print(f\n=== Phase 1 Auth Service Violations Detected: {len(self.violations_detected)} ===)
             for violation in self.violations_detected:
-                print(f"  Line {violation['line']}: {violation['content']})")
+                print(f"  Line {violation['line']}: {violation['content']}))"
             print(f=== Total violations requiring migration: {len(self.violations_detected")} ===)"
 
     def get_violation_summary(self) -> Dict[str, Any]:
@@ -638,7 +638,7 @@ class AuthServiceIDViolationPatternsTests(SSotBaseTestCase):
 ""
 
     def test_detect_sqlalchemy_default_uuid_patterns_SHOULD_FAIL(self):
-    "
+        """
     "
         EXPECTED TO FAIL: Detect SQLAlchemy default=lambda: str(uuid.uuid4()) patterns.
         
@@ -693,7 +693,7 @@ class AuthServiceIDViolationPatternsTests(SSotBaseTestCase):
         )
 
     def test_detect_session_creation_uuid_patterns_SHOULD_FAIL(self):
-    ""
+    """
         EXPECTED TO FAIL: Detect session creation UUID patterns in auth service.
         
         Pattern: session_id = str(uuid.uuid4())
@@ -745,7 +745,7 @@ class AuthServiceIDViolationPatternsTests(SSotBaseTestCase):
         )
 
     def test_detect_user_id_creation_uuid_patterns_SHOULD_FAIL(self):
-        "
+        """
         "
         EXPECTED TO FAIL: Detect user ID creation UUID patterns in auth service.
         
@@ -797,7 +797,7 @@ class AuthServiceIDViolationPatternsTests(SSotBaseTestCase):
         )
 
     def test_detect_jwt_jti_uuid_patterns_SHOULD_FAIL(self):
-        "
+        """
         "
         EXPECTED TO FAIL: Detect JWT JTI UUID patterns.
         

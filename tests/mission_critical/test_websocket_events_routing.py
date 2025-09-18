@@ -146,7 +146,7 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                     }
                     
                     await emitter.notify_agent_completed(fagent_{i), {
-                        "final_result: fcompleted_for_user_{i}",
+                        "final_result: fcompleted_for_user_{i},"
                         user_id: user_id
                     }
                 
@@ -397,14 +397,14 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                 # Test data integrity with complex data structures
                 test_data_sets = [
                     # Simple data
-                    {"simple: value", number: 42},
+                    {"simple: value, number: 42},"
                     
                     # Complex nested data
                     {
                         nested: {"
                         nested: {"
                             "level1: {"
-                                level2: [item1, item2", {"level3: True}]
+                                level2: [item1, item2", {level3: True}]"
                             }
                         },
                         array: [1, 2, 3, {nested_in_array: value}]"
@@ -415,7 +415,7 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                     {
                         "special_chars: !@#$%^&*(),"
                         unicode: 🚀 测试 データ,
-                        "quotes: 'Single double" quotes'
+                        "quotes: 'Single double quotes'"
                     },
                     
                     # Large data
@@ -442,7 +442,7 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                     }
                     await websocket_emitter.notify_agent_completed(fintegrity_agent_{i)", {"
                         result: test_data,
-                        integrity_check": f"test_{i}_complete
+                        integrity_check": ftest_{i}_complete"
                     }
                 
                 # Validate data integrity

@@ -47,10 +47,10 @@ from loguru import logger
 
 @dataclass
 class ResultTests:
-    ""Test execution result data structure.
+    ""Test execution result data structure."
     test_file: str
     test_name: str
-    status: str  # passed, failed", "skipped, error
+    status: str  # passed, failed", skipped, error"
     duration: float
     error_message: Optional[str] = None
     migration_phase: Optional[str] = None
@@ -71,7 +71,7 @@ class SsotWebSocketValidationSuite:
         self.results: List[ResultTests] = []
         
     def detect_migration_phase(self) -> str:
-        ""Detect current migration phase based on codebase state.
+        ""Detect current migration phase based on codebase state."
         logger.info([MIGRATION PHASE] Detecting current migration phase...)"
         logger.info([MIGRATION PHASE] Detecting current migration phase...)"
         
@@ -142,7 +142,7 @@ class SsotWebSocketValidationSuite:
                 if result.stdout:
                     logger.info(f[TEST STDOUT] {result.stdout})
                 if result.stderr:
-                    logger.warning(f"[TEST STDERR] {result.stderr})")
+                    logger.warning(f"[TEST STDERR] {result.stderr}))"
                     
                 # Determine if failures are migration-related or system issues
                 output_text = result.stdout + result.stderr
@@ -284,7 +284,7 @@ class SsotWebSocketValidationSuite:
         }
 
     def assess_migration_readiness(self) -> Dict[str, Any]:
-        ""Assess readiness for SSOT migration based on test results.
+        ""Assess readiness for SSOT migration based on test results."
         system_errors = [r for r in self.results if r.status in [failed, error"]]"
         
         if len(system_errors) == 0:
@@ -310,7 +310,7 @@ class SsotWebSocketValidationSuite:
     def get_migration_recommendation(self, readiness: str) -> str:
         "Get specific migration recommendation based on readiness."
         recommendations = {
-            READY": "Proceed with SSOT migration. All validation tests confirm system stability.,
+            READY": Proceed with SSOT migration. All validation tests confirm system stability.,"
             READY_WITH_CAUTION: Proceed with migration but monitor closely. Address minor issues post-migration.,
             NOT_READY: "Do not proceed with migration. Resolve system issues first to protect $500K+ ARR."
         }
@@ -351,13 +351,13 @@ class SsotWebSocketValidationSuite:
         
         print(f\nDETAILED RESULTS:)
         for result in summary['detailed_results']:
-            status_icon = {passed": "✅, failed: ❌, expected_failure: "⚠️, error": 🚨}
+            status_icon = {passed": "✅, failed: ❌, expected_failure: "⚠️, error: 🚨}"
             icon = status_icon.get(result['status'], ❓)
-            print(f"  {icon} {result['test_file']}: {result['status']} ({result['duration']:.2f}s)")
+            print(f"  {icon} {result['test_file']}: {result['status']} ({result['duration']:.2f}s))"
             if result['error_message']:
                 print(f      Error: {result['error_message'][:100]}...)
         
-        print("=*80")
+        print("=*80)"
 
 
 async def main():

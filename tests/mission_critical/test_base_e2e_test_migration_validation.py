@@ -45,7 +45,7 @@ class TestBaseE2ETestMigrationValidation(SSotAsyncTestCase):
         ]
         
     def test_scan_for_base_e2e_test_imports(self):
-        ""
+        """
         Scan codebase for remaining BaseE2ETest imports.
         
         This test will FAIL initially (expected) and pass as migration progresses.
@@ -53,7 +53,7 @@ class TestBaseE2ETestMigrationValidation(SSotAsyncTestCase):
         base_e2e_imports = self._scan_for_base_e2e_imports()
         
         if base_e2e_imports:
-            files_list = "\n.join([f  - {file}: {imports}" for file, imports in base_e2e_imports.items()]
+            files_list = "\n.join([f  - {file}: {imports} for file, imports in base_e2e_imports.items()]"
             self.fail(
                 fMIGRATION REQUIRED: Found {len(base_e2e_imports)} files still importing BaseE2ETest.\n
                 fFiles requiring migration:\n{files_list}\n\n
@@ -139,7 +139,7 @@ class TestBaseE2ETestMigrationValidation(SSotAsyncTestCase):
         )
 
     def test_validate_ssot_import_patterns(self):
-    "
+        """
     "
         Validate that migrated files use proper SSOT import patterns.
         "
@@ -271,7 +271,7 @@ NEXT ACTIONS:
         return base_e2e_imports
 
     def _find_e2e_test_files(self) -> Set[str]:
-        ""Find all E2E test files in the codebase.
+        ""Find all E2E test files in the codebase."
         e2e_files = set()
         
         for test_dir in self.test_directories:
@@ -302,7 +302,7 @@ NEXT ACTIONS:
         return e2e_files
 
     def _scan_for_ssot_compliance(self, e2e_files: Set[str) -> Set[str):
-        ""Check which files are using SSotAsyncTestCase.
+        ""Check which files are using SSotAsyncTestCase."
         compliant_files = set()
         
         for file_path in e2e_files:

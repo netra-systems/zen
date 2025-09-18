@@ -56,7 +56,7 @@ class E2ESsotValidationEnhancer:
         self.validation_warnings = []
         
     def enhanced_validate_test_class(self, test_class: Type) -> Dict[str, Any]:
-        "
+        """
         "
         Enhanced test class validation for E2E tests.
         
@@ -135,7 +135,7 @@ class E2ESsotValidationEnhancer:
         return validation_result
     
     def enhanced_get_test_base_for_category(self, category: str) -> Type:
-    "
+        """
     "
         Enhanced category-to-base-class mapping for E2E tests.
         
@@ -166,7 +166,7 @@ class E2ESsotValidationEnhancer:
                 return SSotBaseTestCase
     
     def validate_e2e_ssot_patterns(self, test_class: Type) -> Dict[str, Any]:
-        "
+        """
         "
         Validate E2E-specific SSOT patterns and conventions.
         
@@ -218,7 +218,7 @@ class E2ESsotValidationEnhancer:
         return patterns_result
     
     def scan_e2e_directory_for_compliance(self, e2e_dir: Path) -> Dict[str, Any]:
-    ""
+    """
         Scan an entire E2E directory for SSOT compliance.
         
         Provides comprehensive compliance report for E2E test directories.
@@ -406,7 +406,7 @@ class E2ESsotComplianceTests(SSotBaseTestCase):
                 logger.debug(f PASS:  Category '{category}' correctly maps to {expected_class.__name__})"
                 logger.debug(f PASS:  Category '{category}' correctly maps to {expected_class.__name__})"
             else:
-                logger.warning(f" FAIL:  Category '{category}' maps to {result_class.__name__}, expected {expected_class.__name__})")
+                logger.warning(f" FAIL:  Category '{category}' maps to {result_class.__name__}, expected {expected_class.__name__}))"
         
         # Test async E2E mappings
         for category, expected_class in async_e2e_categories:
@@ -477,7 +477,7 @@ class E2ESsotComplianceTests(SSotBaseTestCase):
         compliant_result = self.validation_enhancer.enhanced_validate_test_class(MockCompliantE2ETest)
         
         assert compliant_result['is_valid'], Compliant E2E test should be valid""
-        assert compliant_result['ssot_compliance'], Compliant test should have SSOT compliance
+        assert compliant_result['ssot_compliance'], "Compliant test should have SSOT compliance"
         assert compliant_result['e2e_specific_compliance'], Compliant test should have E2E compliance"
         assert compliant_result['e2e_specific_compliance'], Compliant test should have E2E compliance"
         assert len(compliant_result['issues') == 0, "Compliant test should have no issues"
@@ -485,9 +485,9 @@ class E2ESsotComplianceTests(SSotBaseTestCase):
         # Test async compliant E2E test
         async_result = self.validation_enhancer.enhanced_validate_test_class(MockAsyncE2ETest)
         
-        assert async_result['is_valid'], Async compliant E2E test should be valid
+        assert async_result['is_valid'], "Async compliant E2E test should be valid"
         assert async_result['ssot_compliance'], "Async compliant test should have SSOT compliance"
-        assert 'SSotAsyncTestCase' in async_result['base_classes'], Should inherit from SSotAsyncTestCase
+        assert 'SSotAsyncTestCase' in async_result['base_classes'], "Should inherit from SSotAsyncTestCase"
         
         # Test non-compliant test
         non_compliant_result = self.validation_enhancer.enhanced_validate_test_class(MockNonCompliantTest)
@@ -496,7 +496,7 @@ class E2ESsotComplianceTests(SSotBaseTestCase):
         assert not non_compliant_result['is_valid'], Non-compliant test should be invalid"
         assert not non_compliant_result['ssot_compliance'], Non-compliant test should fail SSOT compliance"
         assert not non_compliant_result['ssot_compliance'], Non-compliant test should fail SSOT compliance"
-        assert len(non_compliant_result['issues') > 0, Non-compliant test should have issues
+        assert len(non_compliant_result['issues') > 0, "Non-compliant test should have issues"
         
         # Record metrics
         self.record_metric(compliant_test_validation_passed", compliant_result['is_valid')"
@@ -508,7 +508,7 @@ class E2ESsotComplianceTests(SSotBaseTestCase):
         logger.info( PASS:  Enhanced test class validation working correctly for E2E tests)
     
     def test_e2e_tests_follow_ssot_patterns(self):
-    ""
+    """
         Validate E2E tests follow all SSOT patterns and conventions.
         
         Comprehensive SSOT pattern compliance check for E2E tests.
@@ -541,19 +541,19 @@ class E2ESsotComplianceTests(SSotBaseTestCase):
         # Validate fully compliant test
         assert fully_compliant_patterns['patterns_score'] == 100.0, Fully compliant test should score 100%"
         assert fully_compliant_patterns['patterns_score'] == 100.0, Fully compliant test should score 100%"
-        assert fully_compliant_patterns['environment_usage'] == 'ssot_compliant', Should have compliant environment usage
+        assert fully_compliant_patterns['environment_usage'] == 'ssot_compliant', "Should have compliant environment usage"
         assert fully_compliant_patterns['metrics_usage'] == 'ssot_compliant', Should have compliant metrics usage""
-        assert fully_compliant_patterns['cleanup_usage'] == 'ssot_compliant', Should have compliant cleanup usage
+        assert fully_compliant_patterns['cleanup_usage'] == 'ssot_compliant', "Should have compliant cleanup usage"
         assert fully_compliant_patterns['isolation_compliance'] == 'ssot_compliant', Should have isolation compliance"
         assert fully_compliant_patterns['isolation_compliance'] == 'ssot_compliant', Should have isolation compliance"
         assert len(fully_compliant_patterns['recommendations') == 0, "Fully compliant should have no recommendations"
         
         # Validate partially compliant test
-        assert 0 < partially_compliant_patterns['patterns_score'] < 100.0, Partially compliant should have partial score
+        assert 0 < partially_compliant_patterns['patterns_score'] < 100.0, "Partially compliant should have partial score"
         assert len(partially_compliant_patterns['recommendations') > 0, "Should have improvement recommendations"
         
         # Validate non-compliant test
-        assert non_compliant_patterns['patterns_score'] == 0.0, Non-compliant should score 0%
+        assert non_compliant_patterns['patterns_score'] == 0.0, "Non-compliant should score 0%"
         assert non_compliant_patterns['isolation_compliance'] == 'non_compliant', Should be non-compliant"
         assert non_compliant_patterns['isolation_compliance'] == 'non_compliant', Should be non-compliant"
         assert len(non_compliant_patterns['recommendations') >= 4, Should have multiple recommendations"
@@ -651,8 +651,8 @@ class E2ESsotComplianceTests(SSotBaseTestCase):
             self.record_metric(f"enhancement_{feature}, status)"
         
         # Log comprehensive report
-        logger.info(f"
-        logger.info(f"
+        logger.info(f"")
+        logger.info(f"")
 E2E SSOT ENHANCEMENT VALIDATION REPORT
 ====================================
 Category Mapping: {' PASS:  FUNCTIONAL' if enhancement_report['category_mapping_functional'] else ' FAIL:  BROKEN'}
@@ -674,7 +674,7 @@ Overall Enhancement Coverage: {enhancement_report['enhancement_coverage_percenta
         logger.info(f PASS:  COMPREHENSIVE ENHANCEMENT VALIDATION PASSED: {enhancement_report['enhancement_coverage_percentage']:.1f}% coverage)
     
     def test_integration_with_existing_ssot_infrastructure(self):
-        "
+        """
         "
         Test integration with existing SSOT compliance infrastructure.
         

@@ -59,7 +59,7 @@ class AuthServiceCoordinationValidator:
             jwt_secrets_match: False,"
             "service_versions_compatible: False,"
             health_status_synchronized: False,
-            "business_impact: ",
+            "business_impact: ,"
             details: {}
         }
         
@@ -150,7 +150,7 @@ class AuthServiceCoordinationValidator:
                     else:
                         validation[business_impact] = CRITICAL: OAuth flow broken - users cannot login
                 else:
-                    validation[business_impact"] = f"CRITICAL: OAuth config unavailable - {oauth_config.status_code}
+                    validation[business_impact"] = fCRITICAL: OAuth config unavailable - {oauth_config.status_code}"
                     
         except Exception as e:
             validation[business_impact] = fCRITICAL: OAuth coordination test failed - {str(e)}
@@ -179,7 +179,7 @@ class AuthServiceCoordinationTests(BaseIntegrationTest):
         self.backend_url = self.services[backend_url]
         
     async def test_jwt_secret_synchronization_revenue_critical(self):
-    ""
+    """
         MISSION CRITICAL: JWT secrets must be synchronized between services.
         
         BUSINESS IMPACT: Secret mismatch = ALL authentication fails = $0 revenue
@@ -212,7 +212,7 @@ class AuthServiceCoordinationTests(BaseIntegrationTest):
             
             # Decode with unified secret (simulates backend validation)
             decoded = jwt.decode(token, unified_secret, algorithms=["HS256)"
-            assert decoded[sub] == user_id, CRITICAL: User ID mismatch in cross-service validation
+            assert decoded[sub] == user_id, "CRITICAL: User ID mismatch in cross-service validation"
             assert decoded[email] == email, "CRITICAL: Email mismatch in cross-service validation"
             
         except jwt.InvalidTokenError as e:
@@ -221,7 +221,7 @@ class AuthServiceCoordinationTests(BaseIntegrationTest):
         logger.info( PASS:  MISSION CRITICAL: JWT secret synchronization validated)
     
     async def test_auth_token_lifecycle_coordination(self):
-        ""
+        """
         MISSION CRITICAL: Token lifecycle coordinated between services.
         
         BUSINESS IMPACT: Poor token lifecycle = User session drops = Bad UX = Churn
@@ -245,7 +245,7 @@ class AuthServiceCoordinationTests(BaseIntegrationTest):
             secret = get_unified_jwt_secret()
             decoded = jwt.decode(original_token, secret, algorithms=[HS256")"
             
-            assert decoded[sub] == user_id, CRITICAL: Token corruption during service handoff
+            assert decoded[sub] == user_id, "CRITICAL: Token corruption during service handoff"
             
         except Exception as e:
             pytest.fail(fMISSION CRITICAL: Token usage phase failed - {str(e)})
@@ -262,7 +262,7 @@ class AuthServiceCoordinationTests(BaseIntegrationTest):
             refreshed_decoded = jwt.decode(refreshed_token, secret, algorithms=[HS256")"
             
             # User identity must remain consistent
-            assert refreshed_decoded[sub] == user_id, CRITICAL: User identity lost during token refresh
+            assert refreshed_decoded[sub] == user_id, "CRITICAL: User identity lost during token refresh"
             assert refreshed_decoded[email] == email, CRITICAL: Email lost during token refresh"
             assert refreshed_decoded[email] == email, CRITICAL: Email lost during token refresh"
             
@@ -275,7 +275,7 @@ class AuthServiceCoordinationTests(BaseIntegrationTest):
         logger.info( PASS:  MISSION CRITICAL: Token lifecycle coordination validated)
     
     async def test_concurrent_auth_requests_coordination(self):
-        "
+        """
         "
         MISSION CRITICAL: Multiple concurrent auth requests handled properly.
         
@@ -351,18 +351,18 @@ class AuthServiceCoordinationTests(BaseIntegrationTest):
         avg_duration = sum(r[duration] for r in successful_auths) / len(successful_auths)"
         max_duration = max(r[duration"] for r in successful_auths)"
         
-        assert avg_duration < 0.2, fBUSINESS CRITICAL: Average auth time {avg_duration:.3f}s too slow
+        assert avg_duration < 0.2, "fBUSINESS CRITICAL: Average auth time {avg_duration:.3f}s too slow"
         assert max_duration < 1.0, fBUSINESS CRITICAL: Max auth time {max_duration:.3f}s unacceptable"
         assert max_duration < 1.0, fBUSINESS CRITICAL: Max auth time {max_duration:.3f}s unacceptable"
         
         # Verify unique user isolation
         user_ids = {r["user_id] for r in successful_auths}"
-        assert len(user_ids) == concurrent_users, CRITICAL: User ID collision in concurrent auth
+        assert len(user_ids) == concurrent_users, "CRITICAL: User ID collision in concurrent auth"
         
         logger.info(f" PASS:  MISSION CRITICAL: {concurrent_users} concurrent auths successful, avg {avg_duration:.3f}s)"
     
     async def test_oauth_flow_coordination_business_critical(self):
-        "
+        """
         "
         MISSION CRITICAL: OAuth flow coordination between auth and backend.
         
@@ -378,7 +378,7 @@ class AuthServiceCoordinationTests(BaseIntegrationTest):
         
         if not validation.get(oauth_config_synchronized, False):
             # OAuth may not be fully configured in test environment - warn but don't fail'
-            logger.warning(f"OAUTH WARNING: {validation.get('business_impact', 'OAuth not configured')})")
+            logger.warning(f"OAUTH WARNING: {validation.get('business_impact', 'OAuth not configured')}))"
             pytest.skip(OAuth not configured in test environment - skipping OAuth coordination test")"
         
         # Test OAuth redirect handling
@@ -388,7 +388,7 @@ class AuthServiceCoordinationTests(BaseIntegrationTest):
         logger.info( PASS:  MISSION CRITICAL: OAuth flow coordination validated)
     
     async def test_service_restart_auth_continuity(self):
-        "
+        """
         "
         MISSION CRITICAL: Authentication continues during service restarts.
         
@@ -415,7 +415,7 @@ class AuthServiceCoordinationTests(BaseIntegrationTest):
             secret = get_unified_jwt_secret()
             pre_decoded = jwt.decode(pre_restart_token, secret, algorithms=["HS256)"
             
-            assert pre_decoded[sub] == user_id, SETUP FAILURE: Pre-restart token invalid
+            assert pre_decoded[sub] == user_id, "SETUP FAILURE: Pre-restart token invalid"
             
         except Exception as e:
             pytest.fail(fSETUP FAILURE: Pre-restart validation failed - {str(e)})"
@@ -429,8 +429,8 @@ class AuthServiceCoordinationTests(BaseIntegrationTest):
             post_restart_secret = get_unified_jwt_secret()
             post_decoded = jwt.decode(pre_restart_token, post_restart_secret, algorithms=["HS256)"
             
-            assert post_decoded[sub] == user_id, MISSION CRITICAL: User session lost after restart
-            assert post_decoded[email"] == email, "MISSION CRITICAL: User data lost after restart
+            assert post_decoded[sub] == user_id, "MISSION CRITICAL: User session lost after restart"
+            assert post_decoded[email"] == email, MISSION CRITICAL: User data lost after restart"
             
         except Exception as e:
             pytest.fail(fMISSION CRITICAL: Post-restart token validation failed - {str(e)})
@@ -460,7 +460,7 @@ class AuthServiceFailureRecoveryTests(BaseIntegrationTest):
     Mission Critical: Auth service failure recovery scenarios."
     
     async def test_auth_service_timeout_recovery(self):
-    "
+        """
     "
         MISSION CRITICAL: System recovers from auth service timeouts.
         
@@ -486,7 +486,7 @@ class AuthServiceFailureRecoveryTests(BaseIntegrationTest):
             
             # This should work without calling auth service
             decoded = jwt.decode(token, secret, algorithms=["HS256)"
-            assert decoded[sub] == user_id, MISSION CRITICAL: JWT validation requires auth service (should be stateless)
+            assert decoded[sub] == user_id, "MISSION CRITICAL: JWT validation requires auth service (should be stateless)"
             
         except Exception as e:
             pytest.fail(fMISSION CRITICAL: JWT validation not resilient to auth service issues - {str(e)}")"
@@ -494,7 +494,7 @@ class AuthServiceFailureRecoveryTests(BaseIntegrationTest):
         logger.info( PASS:  MISSION CRITICAL: Auth service timeout recovery validated)
     
     async def test_partial_service_failure_handling(self):
-        "
+        """
         "
         MISSION CRITICAL: Handle partial service failures gracefully.
         
@@ -541,7 +541,7 @@ class AuthServiceFailureRecoveryTests(BaseIntegrationTest):
 
 
 if __name__ == __main__:
-    ""Run mission critical auth service coordination tests.""
+    """Run mission critical auth service coordination tests.""
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

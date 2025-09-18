@@ -88,7 +88,7 @@ class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
                      UserExecutionEngine (SSOT target) not found in codebase)
     
     def test_execution_engine_import_ssot_compliance(self):
-    ""
+    """
         CRITICAL: All execution engine imports must use SSOT patterns.
         
         This test FAILS if files import non-SSOT execution engines,
@@ -139,7 +139,7 @@ class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
             pytest.fail(\n.join(violation_report))
     
     def test_websocket_event_routing_ssot_compliance(self):
-    ""
+    """
         CRITICAL: WebSocket events must route through UserExecutionEngine only.
         
         This test FAILS if WebSocket events are delivered through multiple
@@ -164,7 +164,7 @@ class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
             pytest.fail(\n".join(violation_report))"
     
     def test_golden_path_execution_engine_uniqueness(self):
-    "
+        """
     "
         CRITICAL: Golden Path must use single execution engine.
         

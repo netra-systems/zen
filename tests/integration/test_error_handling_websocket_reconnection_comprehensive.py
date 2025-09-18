@@ -102,7 +102,7 @@ class ReconnectingWebSocketClient:
         self.on_reconnect_attempt = None
 
     async def connect(self) -> bool:
-        ""Establish WebSocket connection with authentication.
+        ""Establish WebSocket connection with authentication."
         self.connection_attempts += 1
         connect_start = time.time()
         try:
@@ -276,7 +276,7 @@ class ReconnectingWebSocketClient:
         return {'current_state': self.state.value, 'connection_attempts': self.connection_attempts, 'successful_connections': self.successful_connections, 'connection_failures': self.connection_failures, 'reconnect_attempts': self.reconnect_attempts, 'messages_sent': self.messages_sent, 'messages_received': self.messages_received, 'queued_messages': len(self.message_queue), 'pending_messages': len(self.pending_messages), 'connection_success_rate': self.successful_connections / max(self.connection_attempts, 1), 'reconnection_events_count': len(self.reconnection_events), 'connection_id': self.connection_id}
 
 class WebSocketErrorHandlingTests(BaseIntegrationTest):
-    ""Integration tests for WebSocket error handling and reconnection patterns.
+    ""Integration tests for WebSocket error handling and reconnection patterns."
 
     def setup_method(self):
         Set up test environment.""
@@ -328,7 +328,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_automatic_reconnection_after_network_failure(self, real_services_fixture, authenticated_websocket_client):
-        ""Test automatic reconnection after simulated network failure.
+        ""Test automatic reconnection after simulated network failure."
         client, user_context = authenticated_websocket_client
         redis = real_services_fixture['redis']
         reconnection_events = []
@@ -350,7 +350,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
             assert message_sent is True
             pre_disconnect_messages.append(f'pre_disconnect_message_{i}')
         await client.force_disconnect()
-        assert client.state in [WebSocketState.DISCONNECTED, WebSocketState.RECONNECTING]
+        assert client.state in [WebSocketState.DISCONNECTED, "WebSocketState.RECONNECTING]"
         disconnected_messages = []
         for i in range(2):
             message_queued = await client.send_message('disconnected_message', {'message_index': i, 'content': f'Message while disconnected {i)')

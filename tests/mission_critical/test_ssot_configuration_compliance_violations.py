@@ -221,7 +221,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
             return 'Configuration consistency - affects development and deployment reliability'
 
     def scan_project_for_violations(self) -> SsotComplianceResults:
-        ""Scan entire project for SSOT configuration violations.
+        ""Scan entire project for SSOT configuration violations."
         all_violations = []
         files_scanned = 0
         compliant_files = 0
@@ -282,7 +282,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         )
 
     def test_detect_auth_trace_logger_ssot_violation(self):
-    ""
+    """
         MUST FAIL CURRENTLY - Detect SSOT violation in auth trace logger.
 
         This test specifically targets the known violation:
@@ -323,7 +323,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         target_file = self.project_root / 'netra_backend/app/middleware/error_recovery_middleware.py'
 
         # Verify file exists
-        assert target_file.exists(), fTarget file not found: {target_file}
+        assert target_file.exists(), "fTarget file not found: {target_file}"
 
         # Scan for violations
         violations = self.scan_file_for_violations(target_file)
@@ -346,7 +346,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         )
 
     def test_detect_corpus_admin_ssot_violation(self):
-    ""
+    """
         MUST FAIL CURRENTLY - Detect SSOT violation in unified corpus admin.
 
         This test specifically targets the known violation:
@@ -379,7 +379,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         )
 
     def test_comprehensive_ssot_configuration_compliance(self):
-        "
+        """
         "
         MUST FAIL CURRENTLY - Comprehensive scan for all SSOT configuration violations.
 
@@ -454,7 +454,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
             )
 
     def test_validate_isolated_environment_usage_patterns(self):
-    "
+        """
     "
         Test for proper IsolatedEnvironment usage patterns in SSOT-compliant files.
 
@@ -507,7 +507,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         )
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # Run the test to detect SSOT violations
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

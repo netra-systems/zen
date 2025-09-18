@@ -23,7 +23,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 import websockets
 
-from tests.e2e.harness_utils import (
+from tests.e2e.harness_utils import ()
     UnifiedTestHarnessComplete as TestHarness,
 )
 from tests.e2e.jwt_token_helpers import JWTTestHelper
@@ -46,7 +46,7 @@ class WebSocketMessagingerTests:
         return self
     
     async def cleanup(self):
-        ""Clean up connections and test environment.
+        ""Clean up connections and test environment."
         await self._close_all_connections()
         await self.harness.teardown()
     
@@ -70,7 +70,7 @@ class WebSocketMessagingerTests:
     async def send_message(self, connection_id: str, message_type: str, payload: Dict):
         "Send typed message through WebSocket connection."""
         ws = self.connections[connection_id]
-        message = {type: message_type, payload": payload}"
+        message = {"type": message_type, payload": payload}"
         await ws.send(json.dumps(message))
         self.message_log[connection_id].append({"sent: message)"
         return message
@@ -107,7 +107,7 @@ async def test_websocket_basic_message_sending(messaging_tester):
     ws, token = await messaging_tester.create_authenticated_connection(client1)
     
     # Act
-    test_payload = {content: Hello WebSocket", "timestamp: datetime.now().isoformat()}
+    test_payload = {content: Hello WebSocket", timestamp: datetime.now().isoformat()}"
     await messaging_tester.send_message(client1, chat_message, test_payload)
     
     # Assert
@@ -125,7 +125,7 @@ async def test_websocket_message_routing(messaging_tester):
     ws2, token2 = await messaging_tester.create_authenticated_connection(client2)
     
     # Act - Client1 sends message
-    message_payload = {content: Hello from client1", "target: broadcast}
+    message_payload = {content: Hello from client1", target: broadcast}"
     await messaging_tester.send_message(client1, broadcast_message, message_payload)
     
     # Assert - Both clients receive message
@@ -143,7 +143,7 @@ async def test_websocket_state_synchronization(messaging_tester):
     Test state synchronization across WebSocket connections.""
     # Arrange
     ws, token = await messaging_tester.create_authenticated_connection(client1)
-    initial_state = {user_status: "active, current_thread": thread_123}
+    initial_state = {user_status: "active, current_thread: thread_123}"
     
     # Act - Update state
     await messaging_tester.send_message(client1, state_update, initial_state)
@@ -171,7 +171,7 @@ async def test_websocket_reconnection_message_recovery(messaging_tester):
     
     # Act - Send message and close connection
     message_id = str(uuid.uuid4())
-    await messaging_tester.send_message(client1", "important_message, {
+    await messaging_tester.send_message(client1", important_message, {"
         id: message_id, content: Critical data""
     }
     await ws1.close()
@@ -212,7 +212,7 @@ async def test_websocket_error_handling(messaging_tester):
     # Assert - Connection still functional
     response = await messaging_tester.receive_message("client1)"
     payload = await messaging_tester.verify_message_structure(response, message_received)
-    assert payload["content] == valid_payload[content"]
+    assert payload["content] == valid_payload[content]"
 
 
 @pytest.mark.asyncio
@@ -238,7 +238,7 @@ async def test_websocket_concurrent_messaging(messaging_tester):
         responses.append(response)
     
     assert len(responses) == 10
-    sequences = [resp["payload][sequence"] for resp in responses]
+    sequences = [resp["payload][sequence] for resp in responses]"
     assert set(sequences) == set(range(10))
 
 
@@ -251,7 +251,7 @@ async def test_websocket_message_validation(messaging_tester):
     
     # Act - Send message with missing required fields
     invalid_payload = {incomplete: data}
-    await messaging_tester.send_message("client1, validated_message", invalid_payload)
+    await messaging_tester.send_message("client1, validated_message, invalid_payload)"
     
     # Assert - Validation error received
     validation_response = await messaging_tester.receive_message(client1)
@@ -259,7 +259,7 @@ async def test_websocket_message_validation(messaging_tester):
     
     # Act - Send valid message
     valid_payload = {"required_field: value, optional_field: optional}"
-    await messaging_tester.send_message("client1, validated_message", valid_payload)
+    await messaging_tester.send_message("client1, validated_message, valid_payload)"
     
     # Assert - Message accepted
     success_response = await messaging_tester.receive_message(client1)
@@ -280,7 +280,7 @@ async def test_websocket_heartbeat_mechanism(messaging_tester):
     # Assert - Pong received
     pong_response = await messaging_tester.receive_message(client1")"
     pong_payload = await messaging_tester.verify_message_structure(pong_response, pong)
-    assert pong_payload[timestamp"] == ping_payload["timestamp]
+    assert pong_payload[timestamp"] == ping_payload[timestamp]"
 
 
 @pytest.mark.asyncio
@@ -293,7 +293,7 @@ async def test_websocket_agent_communication(messaging_tester):
     # Act - Send agent request
     agent_request = {
         agent_type: test_agent,
-        query": "Analyze this data,
+        query": Analyze this data,"
         request_id: str(uuid.uuid4())
     }
     await messaging_tester.send_message(client1, agent_request", agent_request)"
@@ -301,8 +301,8 @@ async def test_websocket_agent_communication(messaging_tester):
     # Assert - Agent response received
     agent_response = await messaging_tester.receive_message("client1)"
     payload = await messaging_tester.verify_message_structure(agent_response, agent_response)
-    assert payload["request_id] == agent_request[request_id"]
-    assert "result in payload or status" in payload
+    assert payload["request_id] == agent_request[request_id]"
+    assert "result in payload or status in payload"
 
 """
 )))))))

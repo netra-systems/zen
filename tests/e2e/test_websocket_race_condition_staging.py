@@ -80,7 +80,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
         )
     
     async def test_staging_cloud_run_cold_start_race_condition(self):
-        ""
+        """
         Test Cloud Run cold start race conditions in staging environment.
         
         EXPECTED BEHAVIOR: This test should FAIL initially, proving staging cold start race conditions.
@@ -362,7 +362,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                 
                 # Attempt connection with authentication headers
                 auth_headers = {
-                    "Origin: https://staging.netrasystems.ai",
+                    "Origin: https://staging.netrasystems.ai,"
                     Authorization: Bearer test-token-for-race-condition-testing,
                     X-Test-Scenario: fauth-race-{attempt}""
                 }
@@ -471,7 +471,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
             )
     
     async def test_staging_service_dependency_race_condition(self):
-    ""
+    """
         Test service dependency initialization race conditions in staging.
         
         EXPECTED BEHAVIOR: This test should FAIL initially, proving staging dependency race conditions.
@@ -675,5 +675,5 @@ class StagingRaceConditionReporter:
             report_lines.append(f   Details: {finding['details']})
             report_lines.append(")"
         
-        return "\n".join(report_lines)
+        return "\n.join(report_lines)"
 )))))))))))))))))))))))

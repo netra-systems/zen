@@ -155,7 +155,7 @@ class MultiAgentMockConnectionPool:
         self.user_event_counters[user_id] = self.user_event_counters.get(user_id, 0) + 1
 
     def get_user_events(self, user_id: str) -> List[FactoryEventCapture]:
-        ""Get all events for specific user.
+        ""Get all events for specific user."
         pass
         return [item for item in []]
 
@@ -200,7 +200,7 @@ class MultiAgentMockWebSocket:
         self.messages_sent.append(event_data)
 
     async def close(self) -> None:
-        ""Close connection.
+        ""Close connection."
         self.is_closed = True
 
 
@@ -323,7 +323,7 @@ class MultiAgentFactoryTestHarness:
         record.success = True
         record.events_emitted = self.mock_pool.get_agent_events(user_id, agent_name)
 
-        return {success: True, result": result, "events: len(record.events_emitted)}
+        return {success: True, result": result, events: len(record.events_emitted)}"
 
         except Exception as e:
         record.end_time = time.time()
@@ -333,7 +333,7 @@ class MultiAgentFactoryTestHarness:
 
         async def _execute_standard_agent(self, emitter: UserWebSocketEmitter,
         agent_name: str, user_id: str) -> Dict[str, Any]:
-        ""Standard agent execution pattern.
+        ""Standard agent execution pattern."
         run_id = formatted_string"
         run_id = formatted_string"
 
@@ -415,13 +415,13 @@ class MultiAgentFactoryTestHarness:
         completion_tasks = []
         for i in range(5):
         completion_tasks.append( )
-        emitter.notify_tool_completed(agent_name, run_id, formatted_string", {"completed: i)
+        emitter.notify_tool_completed(agent_name, run_id, formatted_string", {completed: i)"
             
         await asyncio.gather(*completion_tasks)
 
         await emitter.notify_agent_completed(agent_name, run_id, {pattern: burst)
 
-        return {pattern: "burst, tools": 5, user: user_id}
+        return {pattern: "burst, tools: 5, user: user_id}"
 
         async def _execute_hierarchical_agent(self, emitter: UserWebSocketEmitter,
         agent_name: str, user_id: str) -> Dict[str, Any]:
@@ -446,7 +446,7 @@ class MultiAgentFactoryTestHarness:
         user_id: user_id
         
 
-        return {hierarchy: "coordinator, subtasks": len(sub_results), user: user_id}
+        return {hierarchy: "coordinator, subtasks: len(sub_results), user: user_id}"
 
         async def _execute_subtask(self, emitter: UserWebSocketEmitter,
         agent_name: str, parent_run_id: str,
@@ -472,7 +472,7 @@ class MultiAgentFactoryTestHarness:
         raise Exception(Simulated agent error)
 
     async def cleanup_all_emitters(self):
-        ""Cleanup all user emitters.
+        ""Cleanup all user emitters."
         for user_emitters in self.user_emitters.values():
         for emitter in user_emitters.values():
         try:
@@ -584,21 +584,21 @@ user_id": user_multi_1,"
 agents: [
 {"name: data_agent", type: data, pattern: standard"},"
 {"name: analysis_agent, type: analysis, "pattern: fast"},"
-{name: report_agent, type: reporting", "pattern: slow}
+{name: report_agent, type: reporting", pattern: slow}"
                 
 },
 {
 user_id: user_multi_2,
 "agents: ["
-{name: optimizer, type: "optimization, pattern": burst},
-{name: validator, type": "validation, pattern: standard}
+{name: optimizer, type: "optimization, pattern: burst},"
+{name: validator, type": validation, pattern: standard}"
                 
 },
 {
 user_id: "user_multi_3,"
 agents": ["
-{name: coordinator, "type: coordination", pattern: hierarchical},
-{name: executor_1", "type: execution, pattern: fast},
+{name: coordinator, "type: coordination, pattern: hierarchical},"
+{name: executor_1", type: execution, pattern: fast},"
 {"name: executor_2", type: execution, pattern: fast"}"
                 
                 
@@ -616,8 +616,8 @@ results = await asyncio.gather(*user_tasks)
 
                     # Validate all user sessions completed successfully
 for result in results:
-    assert result[success], formatted_string
-assert result["agents_completed] == result[agents_created"], \
+    assert result[success], "formatted_string"
+assert result["agents_completed] == result[agents_created], \"
 formatted_string
 
                         # Validate comprehensive results
@@ -652,8 +652,8 @@ hierarchical_users = []
 for i in range(4):
     user_id = ""
 agents = [
-{name: supervisor, type: "supervisor, pattern": hierarchical},
-{name: coordinator, type": "coordinator, pattern: hierarchical}
+{name: supervisor, type: "supervisor, pattern: hierarchical},"
+{name: coordinator, type": coordinator, pattern: hierarchical}"
                                 
 hierarchical_users.append({user_id: user_id, "agents: agents)"
 
@@ -669,7 +669,7 @@ hierarchy_results = await asyncio.gather(*hierarchy_tasks)
 
                                     # Validate hierarchical execution
 for result in hierarchy_results:
-    assert result[success], formatted_string
+    assert result[success], "formatted_string"
 assert result[total_events"] >= 10, \"
 formatted_string
 
@@ -704,18 +704,18 @@ print([U+1F9EA] TEST 3: Event ordering across concurrent agents per user)
                                                 # Create users with different agent timing patterns
 timing_scenarios = [
 {
-user_id": "timing_user_1,
+user_id": timing_user_1,"
 agents: [
-{name: fast_agent", "pattern: fast},
-{name: slow_agent, "pattern: slow"},
+{name: fast_agent", pattern: fast},"
+{name: slow_agent, "pattern: slow},"
 {name: burst_agent, pattern: burst"}"
                                                 
 },
 {
 "user_id: timing_user_2,"
 agents: [
-{name": "stream_agent, pattern: standard},
-{name: "batch_agent, pattern": burst}
+{name": stream_agent, pattern: standard},"
+{name: "batch_agent, pattern: burst}"
                                                 
 },
 {
@@ -723,7 +723,7 @@ user_id: timing_user_3,
 agents": ["
 {name: quick_1, pattern: fast"},"
 {"name: quick_2, pattern: fast},"
-{"name: quick_3", pattern: fast}
+{"name: quick_3, pattern: fast}"
                                                 
                                                 
                                                 
@@ -865,7 +865,7 @@ print()"
     async def test_cleanup_with_mixed_success_failure_per_user(self):
         "Test 5: Cleanup when agents complete or fail per user."
 pass
-print("[U+1F9EA] TEST 5: Cleanup with mixed success/failure per user")
+print("[U+1F9EA] TEST 5: Cleanup with mixed success/failure per user)"
 
                                             # Create scenarios with mixed success/failure patterns
 mixed_scenarios = [
@@ -874,13 +874,13 @@ user_id: mixed_user_1,
 agents": ["
 {name: success_1, pattern: standard"},"
 {"name: success_2, pattern: fast},"
-{"name: failure_1", pattern: error}
+{"name: failure_1, pattern: error}"
                                             
 },
 {
 user_id: mixed_user_2","
 "agents: ["
-{name: success_3, pattern": "burst},
+{name: success_3, pattern": burst},"
 {name: failure_2, pattern: "error},"
 {name": success_4, pattern: slow}"
                                             
@@ -891,7 +891,7 @@ user_id: mixed_user_2","
 mixed_tasks = []
 for scenario in mixed_scenarios:
     task = self.test_harness.simulate_multi_agent_user_session( )
-scenario[user_id"], scenario["agents], include_errors=True
+scenario[user_id"], scenario[agents], include_errors=True"
                                                 
 mixed_tasks.append(task)
 
@@ -929,7 +929,7 @@ if failure_agents:
     assert len(error_events) >= len(failure_agents) * 0.5, \
 formatted_string
 
-print(" PASS:  TEST 5 PASSED: Mixed success/failure scenarios handled with proper user isolation")
+print(" PASS:  TEST 5 PASSED: Mixed success/failure scenarios handled with proper user isolation)"
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -946,7 +946,7 @@ for i in range(3):
 agents = [
 {name: burst_1, pattern: burst"},"
 {"name: burst_2, pattern: burst},"
-{"name: burst_3", pattern: burst}
+{"name: burst_3, pattern: burst}"
                                                                         
 collision_users.append({user_id: user_id, agents": agents)"
 
@@ -962,7 +962,7 @@ collision_results = await asyncio.gather(*collision_tasks)
 
                                                                             # Validate collision handling
 for result in collision_results:
-    assert result[success], formatted_string
+    assert result[success], "formatted_string"
 
                                                                                 # Burst patterns should generate many events
 assert result["total_events] >= 15, \"
@@ -1015,7 +1015,7 @@ for i in range(stress_users):
 agents = []
 for j in range(stress_agents_per_user):
     pattern = random.choice(["fast, burst, standard, hierarchical)"
-agents.append({"name: formatted_string", pattern: pattern)
+agents.append({"name: formatted_string, pattern: pattern)"
 stress_scenarios.append({user_id: user_id, "agents: agents)"
 
                                                                                                     # Monitor performance
@@ -1091,33 +1091,33 @@ ultimate_scenarios = [
 {
 user_id": ultimate_user_1,"
 "agents: ["
-{name: coordinator, pattern: "hierarchical"},
+{name: coordinator, pattern: "hierarchical},"
 {name: fast_executor, pattern: fast"},"
 {name: "data_processor, pattern: standard}"
                                                                                                                     
 },
                                                                                                                     # Burst and timing users
 {
-user_id: "ultimate_user_2",
+user_id: "ultimate_user_2,"
 agents: [
 {name: burst_1, pattern": burst},"
 {"name: burst_2, pattern: burst},"
-{"name": slow_analyzer, pattern: slow}
+{"name: slow_analyzer, pattern: slow}"
                                                                                                                     
 },
                                                                                                                     # High-throughput user
 {
 user_id": ultimate_user_3,"
 "agents: ["
-{name: , pattern: "fast"} for i in range(5)
+{name: , pattern: "fast} for i in range(5)"
 ][0]  # Flatten first agent for testing
 },
                                                                                                                     # Mixed success/failure user
 {
 user_id: ultimate_user_4,
 agents: [
-{name": reliable, "pattern: standard},
-{name: unreliable, "pattern": error},
+{name": reliable, pattern: standard},"
+{name: unreliable, "pattern: error},"
 {name: backup, pattern": standard}"
                                                                                                                     
                                                                                                                     
@@ -1188,7 +1188,7 @@ print(=" * 100)"
 print( TROPHY:  COMPREHENSIVE MULTI-AGENT FACTORY INTEGRATION PASSED!")"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                                                                                                             # Run comprehensive multi-agent integration tests
 pass
 

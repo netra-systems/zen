@@ -6,7 +6,7 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
             raise RuntimeError(WebSocket is closed)"
@@ -43,12 +43,12 @@ class TestWebSocketConnection:
 class TestServiceSecretDependency:
         "Test complete SERVICE_SECRET dependency chain"
     def test_service_secret_missing_initialization_failure(self):
-        ""Test that missing SERVICE_SECRET causes initialization failure
+        ""Test that missing SERVICE_SECRET causes initialization failure"
         with patch.dict(os.environ, {}, clear=True):
         # AuthServiceClient should fail gracefully when SERVICE_SECRET is missing
         client = AuthServiceClient()
         # Test that service secret related operations fail
-        assert hasattr(client, 'validate_token')
+        assert hasattr(client, "'validate_token')"
     def test_service_secret_present_initialization_success(self):
         Test that present SERVICE_SECRET allows successful initialization""
         pass
@@ -79,7 +79,7 @@ class TestServiceSecretDependency:
         client = AuthClientCore()
         assert client.service_secret == adequate_length_secret_123456
     def test_service_secret_in_auth_headers(self, mock_requests):
-        ""Test that SERVICE_SECRET is properly used in authentication headers
+        ""Test that SERVICE_SECRET is properly used in authentication headers"
         pass
         test_secret = test_secret_for_headers_12345"
         test_secret = test_secret_for_headers_12345"
@@ -102,10 +102,10 @@ class TestServiceSecretDependency:
         with patch.dict(os.environ, {SERVICE_SECRET: circuit_breaker_test_secret):
         client = AuthClientCore()
         # Circuit breaker should be properly initialized
-        assert hasattr(client, '_validate_token_remote_breaker')
+        assert hasattr(client, "'_validate_token_remote_breaker')"
         assert client._validate_token_remote_breaker is not None
     def test_circuit_breaker_opens_on_auth_failures(self, mock_requests):
-        ""Test circuit breaker opens on consistent authentication failures
+        ""Test circuit breaker opens on consistent authentication failures"
         pass
         test_secret = circuit_breaker_failure_test"
         test_secret = circuit_breaker_failure_test"
@@ -164,7 +164,7 @@ class TestServiceSecretDependency:
         AuthClientCore()
     def test_service_secret_environment_specific_loading(self):
         "Test SERVICE_SECRET loading for different environments"
-        environments = ["development, staging", production]
+        environments = ["development, staging, production]"
         for env in environments:
         env_specific_secret = formatted_string"
         env_specific_secret = formatted_string"
@@ -185,7 +185,7 @@ class TestServiceSecretDependency:
             # Check that SERVICE_SECRET value is not in any log calls
         for call in mock_logger.info.call_args_list + mock_logger.debug.call_args_list:
         log_message = str(call)
-        assert test_secret not in log_message, SERVICE_SECRET leaked in logs
+        assert test_secret not in log_message, "SERVICE_SECRET leaked in logs"
 @pytest.mark.asyncio
     async def test_service_secret_async_context_compatibility(self):
     "Test SERVICE_SECRET works with async contexts"
@@ -243,7 +243,7 @@ class TestServiceSecretIntegration:
         mock_response = MagicMock(); mock_response.status_code = 200
         mock_response.json.return_value = {
         valid: True,
-        user_id": "test_user_123,
+        user_id": test_user_123,"
         permissions: [read, write]"
         permissions: [read, write]"
     
@@ -266,7 +266,7 @@ class TestServiceSecretIntegration:
         with pytest.raises(ValueError, match=SERVICE_SECRET):
         AuthClientCore()
     def test_service_secret_configuration_validation_comprehensive(self):
-        ""Comprehensive configuration validation test
+        ""Comprehensive configuration validation test"
     # Test all required environment variables together
         required_vars = {
         SERVICE_SECRET: comprehensive_test_secret_12345","
@@ -318,7 +318,7 @@ class TestServiceSecretMonitoring:
                 # Test various scenarios
         test_cases = [
         ({}, (False, SERVICE_SECRET missing)),
-        ({SERVICE_SECRET: "}, (False, SERVICE_SECRET missing")),
+        ({SERVICE_SECRET: "}, (False, SERVICE_SECRET missing)),"
         ({SERVICE_SECRET: short}, (False, "SERVICE_SECRET too short)),"
         ({SERVICE_SECRET:    }, (False, SERVICE_SECRET is whitespace)),"
         ({SERVICE_SECRET:    }, (False, SERVICE_SECRET is whitespace)),"
@@ -370,7 +370,7 @@ class TestServiceSecretPerformance:
             # All should have correct secret
         for client in clients:
         assert client.service_secret == test_secret
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
                     # Allow running tests directly
         pass
 )))))))))))))))))

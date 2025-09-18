@@ -80,7 +80,7 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
     @pytest.mark.asyncio
     @pytest.mark.real_services
     async def test_complete_chat_flow_e2e_staging_user(self, auth_config):
-        ""
+        """
         TEST 1: CRITICAL - Complete end-to-end chat flow with failing user pattern.
         
         This test MUST FAIL initially, proving the bug blocks complete user workflows.
@@ -128,7 +128,7 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
                 required_events = ['agent_started', 'agent_completed']
                 for required_event in required_events:
                     assert required_event in event_types, fRequired WebSocket event '{required_event}' not received. Events received: {event_types}""
-                assert len(events_received) > 0, 'No WebSocket events received during agent execution'
+                assert len(events_received) > 0, "'No WebSocket events received during agent execution'"
         except websockets.InvalidStatusCode as e:
             if e.status_code == 403:
                 pytest.fail(fWebSocket authentication failed for user '{failing_user_data['user_id']}' due to user ID validation bug. This blocks deployment user workflows.)
@@ -174,9 +174,9 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
                                 break
                         except asyncio.TimeoutError:
                             timeout_count += 1
-                    assert len(events) > 0, f'No events received for deployment user {user_id}'
+                    assert len(events) > 0, "f'No events received for deployment user {user_id}'"
                     event_types = [e.get('type') for e in events]
-                    assert 'agent_started' in event_types, f'Missing agent_started event for {user_id}'
+                    assert 'agent_started' in event_types, "f'Missing agent_started event for {user_id}'"
             except Exception as e:
                 if 'Invalid user_id format' in str(e):
                     pytest.fail(fDeployment user '{user_id}' should work after fix but still fails with ID validation error: {e}")"
@@ -260,7 +260,7 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
                 event_types = [e.get('type') for e in task_events]
                 for expected_event in task['expected_events']:
                     assert expected_event in event_types, f"Pipeline task '{task['message']}' missing expected WebSocket event '{expected_event}'. Events: {event_types}"
-        assert True, 'Complete pipeline deployment test succeeded'
+        assert True, "'Complete pipeline deployment test succeeded'"
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

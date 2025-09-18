@@ -87,7 +87,7 @@ class JWTSecretHardRequirementsTests:
             if secret:
                 # This test expects hard failure, but the implementation might have fallbacks
                 # For now, let's verify it's at least a secure length
-                assert len(secret) >= 32, fJWT secret too short for staging: {len(secret)} chars
+                assert len(secret) >= 32, "fJWT secret too short for staging: {len(secret)} chars"
         except (ValueError, KeyError):
             # This is what we expect - hard failure
             pass

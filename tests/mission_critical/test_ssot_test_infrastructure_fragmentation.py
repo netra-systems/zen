@@ -38,17 +38,17 @@ class TestInfrastructureFragmentationAnalyzer:
     def __init__(self, project_root: Path):
         self.project_root = project_root
         self.test_base_patterns = [
-            "BaseTestCase, AsyncTestCase", TestCase, BaseTest,
-            IntegrationTestCase, UnitTestCase", "E2ETestCase
+            "BaseTestCase, AsyncTestCase, TestCase, BaseTest,"
+            IntegrationTestCase, UnitTestCase", E2ETestCase"
         ]
         self.mock_patterns = [
-            MockFactory, MockAgent, MockManager", "MockService,
+            MockFactory, MockAgent, MockManager", MockService,"
             TestMock, FakeMock, StubMock"
             TestMock, FakeMock, StubMock"
         ]
         self.test_utility_patterns = [
             "TestUtility, TestHelper, TestConfiguration, TestMetrics,"
-            "TestContext, TestValidator", TestRunner
+            "TestContext, TestValidator, TestRunner"
         ]
 
     def scan_test_files(self) -> Dict[str, List[Path]]:
@@ -69,7 +69,7 @@ class TestInfrastructureFragmentationAnalyzer:
         return test_files
 
     def _is_test_file(self, file_path: Path) -> bool:
-        ""Determine if a file is a test file
+        ""Determine if a file is a test file"
         # Skip obvious non-test directories
         skip_dirs = {'.git', '__pycache__', '.pytest_cache', 'node_modules'}
         if any(skip_dir in file_path.parts for skip_dir in skip_dirs):
@@ -314,7 +314,7 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
         cls.test_files = cls.analyzer.scan_test_files()
 
     def test_detect_test_base_class_fragmentation(self):
-    "
+        """
     "
         Integration Test: Detect test base class fragmentation
 
@@ -336,10 +336,10 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
         # Log fragmentation details
         duplicates = base_class_analysis['duplicate_base_classes']
         if duplicates:
-            print(f"\n=== TEST BASE CLASS FRAGMENTATION ({len(duplicates)} duplicate types) ===)")
+            print(f"\n=== TEST BASE CLASS FRAGMENTATION ({len(duplicates)} duplicate types) ===))"
             print(fTotal duplicate instances: {base_class_analysis['total_duplicate_count']})"
             print(fTotal duplicate instances: {base_class_analysis['total_duplicate_count']})"
-            print(f"Fragmentation score: {base_class_analysis['fragmentation_score']:.2f})")
+            print(f"Fragmentation score: {base_class_analysis['fragmentation_score']:.2f}))"
             print()
 
             # Show most fragmented base classes
@@ -347,7 +347,7 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
             for class_name, implementations in sorted_duplicates[:5]:
                 print(f{class_name} ({len(implementations)} implementations):)
                 for impl in implementations[:3]:  # Show first 3
-                    print(f"  - {impl['relative_path']}:{impl['line']} ({impl['category']})")
+                    print(f"  - {impl['relative_path']}:{impl['line']} ({impl['category']}))"
                 if len(implementations) > 3:
                     print(f  ... and {len(implementations") - 3} more)"
                 print()
@@ -378,7 +378,7 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
             )
 
     def test_detect_mock_implementation_fragmentation(self):
-    "
+        """
     "
         Integration Test: Detect mock implementation fragmentation
 
@@ -406,7 +406,7 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
             # Show most duplicated mocks
             sorted_mocks = sorted(mock_duplicates.items(), key=lambda x: len(x[1], reverse=True)
             for mock_name, implementations in sorted_mocks[:5]:
-                print(f{mock_name} ({len(implementations)} implementations"):")
+                print(f{mock_name} ({len(implementations)} implementations"):)"
                 for impl in implementations[:3]:  # Show first 3
                     print(f  - {impl['relative_path']}:{impl['line']})
                 if len(implementations) > 3:
@@ -438,7 +438,7 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
             )
 
     def test_detect_test_execution_pattern_fragmentation(self):
-    ""
+    """
         Integration Test: Detect test execution pattern fragmentation
 
         This identifies bypassing of SSOT unified test runner leading to
@@ -484,7 +484,7 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
             )
 
     def test_detect_test_configuration_fragmentation(self):
-        "
+        """
         "
         Integration Test: Detect test configuration fragmentation
 
@@ -525,7 +525,7 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
         )
 
     def test_calculate_comprehensive_fragmentation_metrics(self):
-    ""
+    """
         Integration Test: Calculate comprehensive fragmentation metrics
 
         This generates the overall fragmentation assessment that should
@@ -604,7 +604,7 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
         )
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     import unittest
     unittest.main(verbosity=2)
 ))))))))))))))))))))))))))

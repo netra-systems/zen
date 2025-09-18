@@ -73,7 +73,7 @@ class WebSocketAgentEventsMissingTests(BaseE2ETest):
         
         # Track all WebSocket events received
         received_events = []
-        expected_events = [agent_started, agent_thinking, tool_executing", "tool_completed, agent_completed]
+        expected_events = [agent_started, agent_thinking, tool_executing", tool_completed, agent_completed]"
         
         # Get authentication headers for WebSocket connection
         websocket_headers = auth_helper.get_websocket_headers(authenticated_user.jwt_token)
@@ -96,7 +96,7 @@ class WebSocketAgentEventsMissingTests(BaseE2ETest):
                 agent_request = {
                     type": agent_request,"
                     agent: triage_agent,
-                    message": "Test message to trigger all 5 WebSocket events,
+                    message": Test message to trigger all 5 WebSocket events,"
                     user_id: authenticated_user.user_id,
                     request_id: ftest_events_{int(datetime.now(timezone.utc).timestamp())}","
                     "timestamp: datetime.now(timezone.utc).isoformat()"""
@@ -116,7 +116,7 @@ class WebSocketAgentEventsMissingTests(BaseE2ETest):
                         
                         try:
                             event_data = json.loads(message)
-                            event_type = event_data.get("type, unknown")
+                            event_type = event_data.get("type, unknown)"
                             
                             # Log all received events
                             logger.info(fReceived WebSocket event: {event_type})
@@ -189,7 +189,7 @@ class WebSocketAgentEventsMissingTests(BaseE2ETest):
                         fWEBSOCKET EVENTS ORDER WRONG (E2E): Last event was '{received_events[-1]['type']}', ""
                         fexpected 'agent_completed'. 
                         fEvent sequence: {[e['type'] for e in received_events]}. ""
-                        f"Users won't know when agent finished processing."'
+                        f"Users won't know when agent finished processing.'"
                     )
                 
         except websockets.ConnectionClosed as e:
@@ -290,7 +290,7 @@ class WebSocketAgentEventsMissingTests(BaseE2ETest):
                         agent: triage_agent","
                         "message: User 2 agent request for isolation testing,"""
                         user_id: user2.user_id,
-                        request_id": f"user2_isolation_{int(datetime.now(timezone.utc).timestamp())}
+                        request_id": fuser2_isolation_{int(datetime.now(timezone.utc).timestamp())}"
                     }
                     
                     # Send requests simultaneously to test isolation
@@ -432,12 +432,12 @@ class WebSocketAgentEventsMissingTests(BaseE2ETest):
                 # Send business-critical agent request
                 business_request = {
                     type: agent_request,
-                    "agent: optimization_agent",  # Business-critical agent
+                    "agent: optimization_agent,  # Business-critical agent"
                     message: Analyze cost optimization opportunities for Q4 planning,
                     user_id: business_user.user_id,""
                     priority": high,"
                     business_context: {
-                        "user_tier: premium",
+                        "user_tier: premium,"
                         use_case: business_planning,
                         expected_savings: $50000""
                     }
@@ -464,7 +464,7 @@ class WebSocketAgentEventsMissingTests(BaseE2ETest):
                             business_metrics[user_experience_score"] += 20"
                             
                         elif event_type == agent_thinking:
-                            business_metrics[transparency_indicators"].append("reasoning_visible)
+                            business_metrics[transparency_indicators"].append(reasoning_visible)"
                             business_metrics[user_experience_score] += 15
                             
                         elif event_type == tool_executing:""

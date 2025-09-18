@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
-    ""
+    """
     Test suite to detect and validate DatabaseManager SSOT consolidation.
     
     These tests scan the codebase for duplicate DatabaseManager implementations
@@ -63,7 +63,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
         self._project_root = Path(project_root)
         self._scan_paths = [
             self._project_root / netra_backend" / app / db,"
-            self._project_root / "netra_backend / app" / factories,
+            self._project_root / "netra_backend / app / factories,"
             self._project_root / auth_service,"
             self._project_root / auth_service,"
             self._project_root / "shared,"
@@ -71,13 +71,13 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
         ]
         
     def test_multiple_database_manager_classes_detected(self):
-    ""
+    """
         DESIGNED TO FAIL: Detect duplicate DatabaseManager implementations
         
         This test scans the codebase for multiple DatabaseManager class definitions
         which violate SSOT principles and cause WebSocket factory failures.
         
-        self.record_metric(violation_type", "multiple_database_manager_classes)
+        self.record_metric(violation_type", multiple_database_manager_classes)"
         
         database_manager_locations = self._find_database_manager_classes()
         
@@ -168,7 +168,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
             self.record_metric(no_imports_found, True)
     
     def test_consolidated_database_manager_single_source(self):
-    ""
+    """
         DESIGNED TO PASS: Post-SSOT should have single DatabaseManager
         
         This test validates that after SSOT consolidation:
@@ -244,7 +244,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
         
         Returns:
             List of dictionaries with class location details
-        ""
+        """
         database_manager_classes = []
         
         for scan_path in self._scan_paths:
@@ -273,14 +273,14 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
                             logger.debug(fFound DatabaseManager class: {class_info})"
                             
                 except (SyntaxError, UnicodeDecodeError) as e:
-                    logger.warning(f"Could not parse {py_file}: {e})")
+                    logger.warning(f"Could not parse {py_file}: {e}))"
                 except Exception as e:
                     logger.warning(fError scanning {py_file}: {e})
         
         return database_manager_classes
     
     def _find_database_manager_imports(self) -> List[Dict[str, Any]]:
-    ""
+    """
         Find all DatabaseManager import statements in the codebase.
         
         Returns:
@@ -311,7 +311,7 @@ class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
                                     if alias.name == "DatabaseManager:"
                                         import_info = {
                                             file_path: str(py_file),
-                                            "import_type: from_import",
+                                            "import_type: from_import,"
                                             source_module: node.module,
                                             imported_name: alias.name,"
                                             imported_name: alias.name,"

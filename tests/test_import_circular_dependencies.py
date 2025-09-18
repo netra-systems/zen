@@ -53,7 +53,7 @@ class TestCircularImports:
 
         except ImportError as e:
         error_msg = str(e)
-        if "circular import" in error_msg.lower() or "partially initialized module" in error_msg:
+        if "circular import" in error_msg.lower() or "partially initialized module in error_msg:"
         circular_import_errors.append("")
         else:
         failed_imports.append("")
@@ -92,11 +92,11 @@ class TestCircularImports:
         import netra_backend.app.startup_module
 
             # Verify that shared.isolated_environment is accessible
-        assert hasattr(netra_backend.app.startup_module, 'get_env'), \
+        assert hasattr(netra_backend.app.startup_module, "'get_env'), \"
         "startup_module should have get_env accessible after import"
 
         except ImportError as e:
-        if "circular import" in str(e).lower():
+        if "circular import in str(e).lower():"
         pytest.fail("")
         raise
 
@@ -111,13 +111,13 @@ class TestCircularImports:
         import netra_backend.app.dependencies as deps_module
 
             Verify lazy import functions exist
-        assert hasattr(deps_module, '_get_session_scope_validator'), \
+        assert hasattr(deps_module, "'_get_session_scope_validator'), \"
         "dependencies module should have lazy import function _get_session_scope_validator"
 
-        assert hasattr(deps_module, '_get_session_isolation_error'), \
+        assert hasattr(deps_module, "'_get_session_isolation_error'), \"
         "dependencies module should have lazy import function _get_session_isolation_error"
 
-        assert hasattr(deps_module, '_get_managed_session'), \
+        assert hasattr(deps_module, "'_get_managed_session'), \"
         "dependencies module should have lazy import function _get_managed_session"
 
             # Test that lazy imports work
@@ -125,7 +125,7 @@ class TestCircularImports:
         assert validator_class is not None, "Lazy import should return valid class"
 
         except ImportError as e:
-        if "circular import" in str(e).lower():
+        if "circular import in str(e).lower():"
         pytest.fail("")
         raise
 
@@ -141,7 +141,7 @@ class TestCircularImports:
         import netra_backend.app.database.session_manager as sm_module
 
             Verify lazy import function exists
-        assert hasattr(sm_module, '_get_user_execution_context_type'), \
+        assert hasattr(sm_module, "'_get_user_execution_context_type'), \"
         "session_manager should have lazy import function _get_user_execution_context_type"
 
             Test that lazy import works
@@ -149,7 +149,7 @@ class TestCircularImports:
         assert context_class is not None, "Lazy import should return valid class"
 
         except ImportError as e:
-        if "circular import" in str(e).lower():
+        if "circular import in str(e).lower():"
         pytest.fail("")
         raise
 
@@ -179,7 +179,7 @@ class TestCircularImports:
         importlib.import_module(module)
 
         except ImportError as e:
-        if "circular import" in str(e).lower():
+        if "circular import in str(e).lower():"
         pytest.fail("")
         raise
 
@@ -203,7 +203,7 @@ class TestCircularImports:
         try:
         importlib.import_module(module)
         except ImportError as e:
-        if "circular import" in str(e).lower():
+        if "circular import in str(e).lower():"
         pytest.fail("")
         raise
         finally:
@@ -223,7 +223,7 @@ class TestCircularImports:
         assert get_db_dependency is not None
 
         except ImportError as e:
-        if "circular import" in str(e).lower():
+        if "circular import in str(e).lower():"
         pytest.fail("")
         raise
 
@@ -238,7 +238,7 @@ class TestCircularImports:
         try:
         importlib.import_module(module_name)
         except ImportError as e:
-        if "circular import" in str(e).lower():
+        if "circular import in str(e).lower():"
         pytest.fail("")
         raise
 
@@ -256,7 +256,7 @@ class TestCircularImports:
         assert session_manager is not None
 
         except ImportError as e:
-        if "circular import" in str(e).lower():
+        if "circular import in str(e).lower():"
         pytest.fail("")
         raise
 
@@ -268,7 +268,7 @@ class TestImportHierarchy:
         """Test that shared.isolated_environment can be imported first."""
     # This should always work as it's the foundation'
         import shared.isolated_environment
-        assert hasattr(shared.isolated_environment, 'get_env')
+        assert hasattr(shared.isolated_environment, "'get_env')"
 
     def test_startup_module_path_setup(self):
         """Test that startup_module sets up paths correctly."""
@@ -276,7 +276,7 @@ class TestImportHierarchy:
         import netra_backend.app.startup_module as startup
 
     # Verify the _setup_paths function exists
-        assert hasattr(startup, '_setup_paths'), \
+        assert hasattr(startup, "'_setup_paths'), \"
         "startup_module should have _setup_paths function"
 
     def test_lazy_import_functions_work(self):
@@ -297,7 +297,7 @@ class TestImportHierarchy:
         assert managed_fn is not None
 
     def test_type_checking_imports_isolation(self):
-        """Test that TYPE_CHECKING imports don't cause runtime issues."""'
+        """Test that TYPE_CHECKING imports don't cause runtime issues.""'"
         pass
     # Import modules that use TYPE_CHECKING
         import netra_backend.app.database.session_manager
@@ -308,27 +308,27 @@ class TestImportHierarchy:
         assert netra_backend.app.dependencies is not None
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         # Run tests directly for verification
-        print("Testing circular imports...")
+        print("Testing circular imports...)"
 
         test_instance = TestCircularImports()
 
         try:
         test_instance.test_all_critical_modules_import_successfully()
-        print("PASS: All critical modules import successfully")
+        print("PASS: All critical modules import successfully)"
         except Exception as e:
         print("")
 
         try:
         test_instance.test_import_order_isolation()
-        print("PASS: Import order isolation test passed")
+        print("PASS: Import order isolation test passed)"
         except Exception as e:
         print("")
 
         try:
         test_instance.test_import_guards_effectiveness()
-        print("PASS: Import guards effectiveness test passed")
+        print("PASS: Import guards effectiveness test passed)"
         except Exception as e:
         print("")
 
@@ -339,13 +339,13 @@ class TestImportHierarchy:
 
         try:
         hierarchy_test.test_shared_isolated_environment_is_foundation()
-        print("PASS: shared.isolated_environment foundation test passed")
+        print("PASS: shared.isolated_environment foundation test passed)"
         except Exception as e:
         print("")
 
         try:
         hierarchy_test.test_startup_module_path_setup()
-        print("PASS: startup_module path setup test passed")
+        print("PASS: startup_module path setup test passed)"
         except Exception as e:
         print("")
 

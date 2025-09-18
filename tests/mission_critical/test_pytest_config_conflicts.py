@@ -93,7 +93,7 @@ class PytestConfigConflictsTests:
         
         # Verify it's specifically an option conflict'
         assert any(keyword in result.stderr.lower() for keyword in [
-            "already added, conflict", duplicate, option
+            "already added, conflict, duplicate, option"
         ), (
             fExpected option conflict error in stderr, but got:\n
             fSTDERR: {result.stderr}""
@@ -135,7 +135,7 @@ class PytestConfigConflictsTests:
         
         # This confirms the root cause: wildcard import brings pytest_addoption
         # into conftest.py namespace, while pytest also auto-discovers the plugin
-        assert True, Wildcard import issue confirmed
+        assert True, "Wildcard import issue confirmed"
         
     def test_phase1_validate_plugin_auto_discovery(self):
         PHASE 1: Validate that pytest auto-discovers the conflicting plugin.""
@@ -145,7 +145,7 @@ class PytestConfigConflictsTests:
         
         # Run pytest with plugin discovery info
         cmd = [
-            sys.executable, -m", "pytest, 
+            sys.executable, -m", pytest, "
             --trace-config,
             --collect-only,"
             --collect-only,"
@@ -173,7 +173,7 @@ class PytestConfigConflictsTests:
         if result.returncode == 0 and not plugin_discovered:
             pytest.skip("Plugin auto-discovery not captured in trace output)"
             
-        assert True, fPlugin discovery behavior documented. Output: {output[:500]}...
+        assert True, "fPlugin discovery behavior documented. Output: {output[:500]}..."
 
 
 class PytestConfigDeprecationTests:
@@ -261,7 +261,7 @@ class EnvironmentConflictsTests:
                 fThis can cause plugin loading conflicts.
             )
         
-        assert True, fSingle pytest installation confirmed: {pytest_locations}
+        assert True, "fSingle pytest installation confirmed: {pytest_locations}"
         
     def test_phase1_check_venv_plugin_isolation(self):
         "PHASE 1: Check virtual environment plugin isolation."

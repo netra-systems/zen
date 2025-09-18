@@ -59,7 +59,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_implements_local_fallback_patterns_violation(self):
-    "
+        """
     "
         VIOLATION REPRODUCTION: WebSocket implements local fallback auth patterns.
         
@@ -124,7 +124,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
             logger.critical( ALERT:  WebSocket should delegate ALL fallback to UnifiedAuthInterface)
             logger.critical( ALERT:  THIS TEST PASSES = VIOLATION EXISTS")"
             
-            assert len(violations_found) > 0, fFALLBACK SSOT VIOLATION: WebSocket implements local fallback: {violations_found}
+            assert len(violations_found) > 0, "fFALLBACK SSOT VIOLATION: WebSocket implements local fallback: {violations_found}"
             return True
         else:
             pytest.fail(VIOLATION NOT REPRODUCED: No local fallback patterns detected)
@@ -132,7 +132,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_fallback_logic_complexity_violation(self):
-    ""
+    """
         VIOLATION REPRODUCTION: WebSocket fallback logic is complex and duplicates SSOT.
         
         This test demonstrates that WebSocket implements complex multi-step
@@ -159,7 +159,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
                     success: True,"
                     "valid: True,"
                     user_id: fallback_user,
-                    email": "test@fallback.com,
+                    email": test@fallback.com,"
                     permissions: [chat]
                 }
                 
@@ -207,7 +207,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_fallback_auth_client_core_duplication_violation(self):
-        ""
+        """
         VIOLATION REPRODUCTION: WebSocket duplicates auth_client_core fallback logic.
         
         CURRENT VIOLATION: WebSocket imports and uses auth_client_core directly
@@ -245,7 +245,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
             auth_client_duplication_detected = False
             
             with patch('netra_backend.app.clients.auth_client_core.validate_token_with_resilience') as mock_auth_client:
-                mock_auth_client.return_value = {success": True, "valid: True, user_id: duplicate_test}
+                mock_auth_client.return_value = {success": True, valid: True, user_id: duplicate_test}"
                 
                 from netra_backend.app.websocket_core.user_context_extractor import WebSocketUserContextExtractor
                 extractor = WebSocketUserContextExtractor()
@@ -297,7 +297,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio 
     @pytest.mark.integration
     async def test_websocket_fallback_resilience_pattern_duplication_violation(self):
-    "
+        """
     "
         INTEGRATION VIOLATION TEST: WebSocket duplicates resilience patterns from auth_client_core.
         
@@ -317,11 +317,11 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
         resilience_patterns_detected = []
         
         def track_auth_calls(*args, **kwargs):
-            retry_attempts.append({args": args, "kwargs: kwargs)
+            retry_attempts.append({args": args, kwargs: kwargs)"
             # Simulate auth service failure to test resilience 
             if len(retry_attempts) == 1:
                 raise Exception(Auth service temporarily unavailable)
-            return {success: True, valid": True, "user_id: resilient_user}
+            return {success: True, valid": True, user_id: resilient_user}"
         
         with patch('netra_backend.app.clients.auth_client_core.validate_token_with_resilience', 
                    side_effect=track_auth_calls):
@@ -330,7 +330,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
             env_accesses = []
             def track_env_access():
                 env_accesses.append(env_access)
-                return {ENVIRONMENT": "test, JWT_SECRET_KEY: test}
+                return {ENVIRONMENT": test, JWT_SECRET_KEY: test}"
             
             with patch('shared.isolated_environment.get_env', side_effect=track_env_access):
                 
@@ -388,7 +388,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_fallback_creates_auth_state_violation(self):
-        ""
+        """
         VIOLATION REPRODUCTION: WebSocket fallback creates auth state independently.
         
         This test shows that WebSocket fallback logic constructs user authentication
@@ -409,7 +409,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
                 valid: True,"
                 user_id": state_test_user,"
                 email: state@test.com, 
-                permissions": ["chat, read]
+                permissions": [chat, read]"
             }
             
             extractor = WebSocketUserContextExtractor()
@@ -426,7 +426,7 @@ class WebSocketAuthFallbackSsotViolationTests(SSotAsyncTestCase):
                     
                     if user_context:
                         # Check if WebSocket constructed JWT-style payload (VIOLATION)
-                        jwt_fields = [sub, iss, "aud, exp", iat, email]
+                        jwt_fields = [sub, iss, "aud, exp, iat, email]"
                         constructed_fields = [field for field in jwt_fields if field in user_context]
                         
                         if len(constructed_fields) > 0:

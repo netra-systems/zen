@@ -49,21 +49,21 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
             },
             {
                 type: tool_executing,
-                tool_name": "search_data,
+                tool_name": search_data,"
                 parameters: {query: test},"
                 parameters: {query: test},"
                 "timestamp: self.test_timestamp"
             },
             {
                 type: tool_completed,
-                tool_name": "search_data, 
+                tool_name": search_data, "
                 results: {data: results},"
                 results: {data: results},"
                 "duration: 1.5,"
                 timestamp: self.test_timestamp
             },
             {
-                "type: agent_completed",
+                "type: agent_completed,"
                 status: success,
                 final_response: Task completed","
                 "timestamp: self.test_timestamp"
@@ -80,7 +80,7 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
                     "timestamp: self.test_timestamp,"
                     agent_name: supervisor
                 },
-                sender": "system,
+                sender": system,"
                 timestamp: self.test_timestamp
             },
             {
@@ -97,7 +97,7 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
                 type: tool_executing,
                 payload": {"
                     tool_name: search_data,
-                    parameters: {query": "test},
+                    parameters: {query": test},"
                     timestamp: self.test_timestamp,
                     "sub_agent_name: data_helper"
                 },
@@ -108,12 +108,12 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
             {
                 type": tool_completed,"
                 payload: {
-                    "tool_name: search_data", 
+                    "tool_name: search_data, "
                     results: {data: results},"
                     results: {data: results},"
                     duration": 1.5,"
                     timestamp: self.test_timestamp,
-                    sub_agent_name": "data_helper
+                    sub_agent_name": data_helper"
                 },
                 sender: system,
                 timestamp: self.test_timestamp"
@@ -122,7 +122,7 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
             {
                 "type: agent_completed,"
                 payload: {
-                    status": "success,
+                    status": success,"
                     final_response: Task completed,
                     timestamp: self.test_timestamp,"
                     timestamp: self.test_timestamp,"
@@ -187,7 +187,7 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
             },
             # ServerMessage format
             {
-                "type: agent_thinking",
+                "type: agent_thinking,"
                 payload: {
                     reasoning: "Analyzing request,"
                     timestamp": self.test_timestamp"
@@ -196,7 +196,7 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
             },
             # Flat format
             {
-                "type: tool_executing",
+                "type: tool_executing,"
                 tool_name: search,
                 parameters: {},"
                 parameters: {},"
@@ -226,7 +226,7 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
                 all_passed = False
                 failed_events.append({
                     event_type: event_type,
-                    format: ServerMessage" if "payload in message else flat,
+                    format: ServerMessage" if payload in message else flat,"
                     errors: self.validator.errors.copy()
                 }
         
@@ -241,7 +241,7 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
             {
                 type": agent_started,"
                 payload: {
-                    "user_id: integration-test-user",
+                    "user_id: integration-test-user,"
                     thread_id: integration-test-thread,
                     timestamp: self.test_timestamp,"
                     timestamp: self.test_timestamp,"
@@ -250,7 +250,7 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
                 sender: system
             },
             {
-                type": "agent_thinking, 
+                type": agent_thinking, "
                 payload: {
                     reasoning: Starting analysis of user query","
                     "timestamp: self.test_timestamp"
@@ -258,7 +258,7 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
                 sender: system
             },
             {
-                type": "tool_executing,
+                type": tool_executing,"
                 payload: {
                     tool_name: data_search","
                     "parameters: {query: integration test},"
@@ -270,7 +270,7 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
                 type: tool_completed","
                 "payload: {"
                     tool_name: data_search,
-                    results": {"found: True, count: 5},
+                    results": {found: True, count: 5},"
                     duration: 2.1,"
                     duration: 2.1,"
                     timestamp": self.test_timestamp"
@@ -278,7 +278,7 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
                 sender: system
             },
             {
-                "type: agent_completed",
+                "type: agent_completed,"
                 payload: {
                     status: "success,"
                     final_response": Integration test completed successfully,"
@@ -304,7 +304,7 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
         
         # Verify all critical events are present
         event_types = [msg["type] for msg in execution_messages]"
-        required_events = [agent_started, agent_thinking, tool_executing", "tool_completed, agent_completed]
+        required_events = [agent_started, agent_thinking, tool_executing", tool_completed, agent_completed]"
         
         for required in required_events:
             self.assertIn(required, event_types, fMissing required event: {required})

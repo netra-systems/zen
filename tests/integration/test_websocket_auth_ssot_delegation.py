@@ -36,7 +36,7 @@ class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
         self.expired_jwt_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0X3VzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjE2MDAwMDAwMDAsImlhdCI6MTYwMDAwMDAwMH0.expired_signature'
 
     def test_integration_ssot_websocket_connection_delegates_to_jwt_handler(self):
-        ""
+        """
         TEST DESIGNED TO FAIL: Integration test for WebSocket connection SSOT delegation.
         
         This test should FAIL initially because:
@@ -90,7 +90,7 @@ class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
                     self.assertEqual(len(integration_violations), 0, f'INTEGRATION SSOT VIOLATIONS: {integration_violations}. WebSocket integration must delegate ONLY to JWTHandler.validate_token()')
 
     def test_integration_ssot_websocket_auth_error_handling_consistency(self):
-    ""
+    """
         TEST DESIGNED TO FAIL: Integration test for consistent SSOT error handling.
         
         This test should FAIL initially because:
@@ -144,7 +144,7 @@ class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
                 self.assertEqual(len(error_handling_violations), 0, f'ERROR HANDLING SSOT VIOLATIONS: {error_handling_violations}. Error handling must use consistent SSOT JWT validation')
 
     def test_integration_ssot_websocket_auth_flow_end_to_end_delegation(self):
-        ""
+        """
         TEST DESIGNED TO FAIL: End-to-end integration test for SSOT delegation.
         
         This test should FAIL initially because:
@@ -208,7 +208,7 @@ class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
                 self.assertEqual(len(e2e_violations), 0, f'END-TO-END SSOT VIOLATIONS: {e2e_violations}. Complete E2E flow must use ONLY JWTHandler.validate_token()')
 
     def test_integration_ssot_websocket_context_creation_uses_ssot_validation(self):
-    ""
+    """
         TEST DESIGNED TO FAIL: Integration test for SSOT validation in context creation.
         
         This test should FAIL initially because:
@@ -266,7 +266,7 @@ class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
                     self.assertEqual(len(context_violations), 0, f'CONTEXT CREATION SSOT VIOLATIONS: {context_violations}. UserExecutionContext creation must rely only on SSOT validation results')
 
     def tearDown(self):
-        ""Clean up integration test environment.""
+        """Clean up integration test environment.""
         super().tearDown()
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

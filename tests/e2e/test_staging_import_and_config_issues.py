@@ -10,10 +10,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -121,11 +121,11 @@ class TestEnvironmentSpecificConfiguration:
         assert config.environment == environment
 
         # Verify environment-specific settings
-        if environment == "staging":
+        if environment == "staging:"
             # Staging should have production-like settings
         assert config.db_pool_size >= 5
         assert config.db_pool_pre_ping is True
-        elif environment == "production":
+        elif environment == "production:"
                 # Production should have optimal settings
         assert config.db_pool_size >= 10
         assert config.db_pool_pre_ping is True
@@ -141,8 +141,8 @@ class TestEnvironmentSpecificConfiguration:
         test_url = "postgresql://user:pass@/dbname?host=/cloudsql/instance&sslmode=require"
 
         # The conversion should happen: sslmode -> ssl for asyncpg
-        if "asyncpg" in test_url or "+asyncpg" in test_url:
-        assert "ssl" in test_url.replace("sslmode", "ssl")
+        if "asyncpg" in test_url or "+asyncpg in test_url:"
+        assert "ssl" in test_url.replace("sslmode", "ssl)"
 
 
         @pytest.mark.e2e
@@ -157,11 +157,11 @@ class TestServiceDependencyImports:
         from auth_service.auth_core.database.connection import get_async_session
 
         # Verify the connection class has required methods
-        assert hasattr(DatabaseConnection, 'get_session')
+        assert hasattr(DatabaseConnection, "'get_session')"
         assert callable(get_async_session)
 
         except ImportError as e:
-        if "auth_service" not in str(e):
+        if "auth_service not in str(e):"
                 # Only fail if it's not a missing auth_service module'
         pytest.fail("")
 
@@ -170,10 +170,10 @@ class TestServiceDependencyImports:
         """Test backend service has all core imports."""
         pass
         required_imports = [ ]
-        ("netra_backend.app.core.configuration.base", "get_unified_config"),
-        ("netra_backend.app.db.database_manager", "DatabaseManager"),
-        ("netra_backend.app.db.postgres_core", "initialize_postgres"),
-        ("netra_backend.app.db.postgres_core", "get_async_session")
+        ("netra_backend.app.core.configuration.base", "get_unified_config),"
+        ("netra_backend.app.db.database_manager", "DatabaseManager),"
+        ("netra_backend.app.db.postgres_core", "initialize_postgres),"
+        ("netra_backend.app.db.postgres_core", "get_async_session)"
     
 
         for module_path, attr_name in required_imports:
@@ -191,7 +191,7 @@ class TestDeploymentScriptConfiguration:
         @pytest.mark.e2e
     def test_deploy_script_exists(self):
         """Verify deployment script exists and is executable."""
-        deploy_script = Path("scripts/deploy_to_gcp.py")
+        deploy_script = Path("scripts/deploy_to_gcp.py)"
         assert deploy_script.exists(), "Deployment script not found"
 
     # Check script has required functions
@@ -211,7 +211,7 @@ class TestDeploymentScriptConfiguration:
     def test_deployment_uses_correct_project(self):
         """Test deployment targets correct GCP project."""
         pass
-        deploy_script = Path("scripts/deploy_to_gcp.py")
+        deploy_script = Path("scripts/deploy_to_gcp.py)"
         if deploy_script.exists():
         with open(deploy_script, 'r') as f:
         content = f.read()
@@ -221,7 +221,7 @@ class TestDeploymentScriptConfiguration:
 
             # Ensure not using production by default
         if '--project' not in content:
-        pytest.fail("Deployment script should require explicit project specification")
+        pytest.fail("Deployment script should require explicit project specification)"
 
 
         @pytest.mark.e2e
@@ -257,7 +257,7 @@ from netra_backend.app.db.postgres_core import async_engine
 
 if async_engine is not None:
                             # Verify engine has dispose method for cleanup
-assert hasattr(async_engine, 'dispose')
+assert hasattr(async_engine, "'dispose')"
 
                             # Test that dispose can be called without errors
 try:
@@ -280,8 +280,8 @@ with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
 app = app_instance  # Initialize appropriate service instead of Mock
 
             # Simulate health check
-health_check_response = {"status": "healthy", "environment": "staging"}
-assert health_check_response["environment"] in ["staging", "testing"]
+health_check_response = {"status": "healthy", "environment": "staging}"
+assert health_check_response["environment"] in ["staging", "testing]"
 
 @pytest.mark.e2e
 def test_staging_cors_configuration(self):
@@ -296,7 +296,7 @@ from netra_backend.app.core.configuration.base import get_unified_config
 config = get_unified_config()
 
         # Check if the config would generate correct CORS settings
-assert config.environment in ['staging', 'testing']
+assert config.environment in ['staging', "'testing']"
 
 @pytest.mark.e2e
 def test_staging_database_url_format(self):

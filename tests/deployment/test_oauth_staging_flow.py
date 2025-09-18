@@ -25,23 +25,23 @@ class OAuthStagingTester:
         self.frontend_url = get_env().get( )
         "FRONTEND_URL", "https://app.staging.netrasystems.ai"
     
-        self.api_url = get_env().get("API_URL", "https://api.staging.netrasystems.ai")
+        self.api_url = get_env().get("API_URL", "https://api.staging.netrasystems.ai)"
 
     async def test_auth_service_health(self) -> bool:
         """Test that auth service is healthy"""
         async with httpx.AsyncClient() as client:
         try:
-        response = await client.get("formatted_string")
+        response = await client.get("formatted_string)"
         if response.status_code != 200:
         print("")
         return False
 
         data = response.json()
-        if data.get("status") != "healthy":
+        if data.get("status") != "healthy:"
         print("")
         return False
 
-        print("[PASS] Auth service is healthy")
+        print("[PASS] Auth service is healthy)"
         return True
         except Exception as e:
         print("")
@@ -51,7 +51,7 @@ class OAuthStagingTester:
         """Test that auth config endpoint returns OAuth configuration"""
         async with httpx.AsyncClient() as client:
         try:
-        response = await client.get("formatted_string")
+        response = await client.get("formatted_string)"
         if response.status_code != 200:
         print( )
         ""
@@ -62,9 +62,9 @@ class OAuthStagingTester:
 
                                             # Verify required fields
         required_fields = [ ]
-        "google_client_id",
-        "endpoints",
-        "authorized_redirect_uris",
+        "google_client_id,"
+        "endpoints,"
+        "authorized_redirect_uris,"
                                             
         for field in required_fields:
         if field not in data:
@@ -72,20 +72,20 @@ class OAuthStagingTester:
         return False
 
                                                     # Verify Google client ID is set
-        if not data.get("google_client_id"):
-        print("[FAIL] Google client ID not configured")
+        if not data.get("google_client_id):"
+        print("[FAIL] Google client ID not configured)"
         return False
 
                                                         # Verify redirect URI is correct
         expected_callback = ""
-        if expected_callback not in data.get("authorized_redirect_uris", []):
+        if expected_callback not in data.get("authorized_redirect_uris, []):"
         print( )
         ""
                                                             
         print("")
         return False
 
-        print("[PASS] Auth config is properly configured")
+        print("[PASS] Auth config is properly configured)"
         print("")
         print("")
         return True
@@ -99,7 +99,7 @@ class OAuthStagingTester:
         async with httpx.AsyncClient(follow_redirects=False) as client:
         try:
         response = await client.get( )
-        "", params={"provider": "google"}
+        "", params={"provider": "google}"
                                                                             
 
         if response.status_code != 302:
@@ -110,26 +110,26 @@ class OAuthStagingTester:
                                                                                 
         return False
 
-        location = response.headers.get("location", "")
-        if not location.startswith("https://accounts.google.com/o/oauth2/"):
+        location = response.headers.get("location", ")"
+        if not location.startswith("https://accounts.google.com/o/oauth2/):"
         print("")
         return False
 
                                                                                     # Check for required OAuth parameters
-        if "client_id=" not in location:
-        print("[FAIL] Missing client_id in OAuth URL")
+        if "client_id= not in location:"
+        print("[FAIL] Missing client_id in OAuth URL)"
         return False
 
-        if "redirect_uri=" not in location:
-        print("[FAIL] Missing redirect_uri in OAuth URL")
+        if "redirect_uri= not in location:"
+        print("[FAIL] Missing redirect_uri in OAuth URL)"
         return False
 
         if "" not in location:
-        print("[FAIL] Incorrect redirect_uri in OAuth URL")
+        print("[FAIL] Incorrect redirect_uri in OAuth URL)"
         return False
 
-        print("[PASS] OAuth initiation works correctly")
-        print("   Redirects to Google OAuth")
+        print("[PASS] OAuth initiation works correctly)"
+        print("   Redirects to Google OAuth)"
         print( )
         ""
                                                                                                 
@@ -144,7 +144,7 @@ class OAuthStagingTester:
         async with httpx.AsyncClient() as client:
         try:
                                                                                                                 # Test chat page loads
-        response = await client.get("formatted_string")
+        response = await client.get("formatted_string)"
         if response.status_code != 200:
         print( )
         ""
@@ -153,11 +153,11 @@ class OAuthStagingTester:
 
                                                                                                                     # Check if page contains necessary OAuth handling code
         content = response.text
-        if "localStorage" not in content and "jwt_token" not in content:
-        print("[WARN] Chat page may not have token handling code")
+        if "localStorage" not in content and "jwt_token not in content:"
+        print("[WARN] Chat page may not have token handling code)"
                                                                                                                         # This is a warning, not a failure
 
-        print("[PASS] Frontend chat page is accessible")
+        print("[PASS] Frontend chat page is accessible)"
         return True
 
         except Exception as e:
@@ -171,7 +171,7 @@ class OAuthStagingTester:
                                                                                                                                         # Test with invalid token (should fail gracefully)
         response = await client.post( )
         "",
-        json={"token": "invalid-test-token"})
+        json={"token": "invalid-test-token})"
 
                                                                                                                                         # Should return 401 for invalid token
         if response.status_code == 401:
@@ -181,8 +181,8 @@ class OAuthStagingTester:
         return True
         elif response.status_code == 200:
         data = response.json()
-        if not data.get("valid"):
-        print("[PASS] Token validation endpoint works (returns invalid)")
+        if not data.get("valid):"
+        print("[PASS] Token validation endpoint works (returns invalid))"
         return True
 
         print( )
@@ -199,18 +199,18 @@ class OAuthStagingTester:
         async with httpx.AsyncClient() as client:
         try:
                                                                                                                                                                     # Test API health endpoint (should work without auth)
-        response = await client.get("formatted_string")
+        response = await client.get("formatted_string)"
         if response.status_code != 200:
         print("")
         return False
 
                                                                                                                                                                         # Test protected endpoint without token (should fail)
-        response = await client.get("formatted_string")
+        response = await client.get("formatted_string)"
         if response.status_code == 401:
-        print("[PASS] API correctly requires authentication")
+        print("[PASS] API correctly requires authentication)"
         return True
         elif response.status_code == 200:
-        print("[WARN] API endpoint accessible without authentication")
+        print("[WARN] API endpoint accessible without authentication)"
         return True  # Not a failure, might be intentional
 
         print("")
@@ -224,8 +224,8 @@ class OAuthStagingTester:
         """Run all OAuth staging tests"""
         print("")
          + =" * 60)"
-        print("OAuth Staging Environment Tests")
-        print("=" * 60)
+        print("OAuth Staging Environment Tests)"
+        print("= * 60)"
         print("")
         print("")
         print("")
@@ -233,18 +233,18 @@ class OAuthStagingTester:
         ")"
 
         tests = [ ]
-        ("Auth Service Health", self.test_auth_service_health),
-        ("Auth Config Endpoint", self.test_auth_config_endpoint),
-        ("OAuth Initiation", self.test_oauth_initiation),
-        ("Frontend Chat Page", self.test_frontend_chat_page),
-        ("Token Validation", self.test_token_validation_endpoint),
-        ("API Auth Integration", self.test_api_auth_integration),
+        ("Auth Service Health, self.test_auth_service_health),"
+        ("Auth Config Endpoint, self.test_auth_config_endpoint),"
+        ("OAuth Initiation, self.test_oauth_initiation),"
+        ("Frontend Chat Page, self.test_frontend_chat_page),"
+        ("Token Validation, self.test_token_validation_endpoint),"
+        ("API Auth Integration, self.test_api_auth_integration),"
     
 
         results = []
         for test_name, test_func in tests:
         print("")
-        print("-" * 40)
+        print("- * 40)"
         result = await test_func()
         results.append((test_name, result))
         print()
@@ -252,8 +252,8 @@ class OAuthStagingTester:
         # Summary
         print("")
          + =" * 60)"
-        print("Test Summary")
-        print("=" * 60)
+        print("Test Summary)"
+        print("= * 60)"
 
         passed = sum(1 for _, result in results if result)
         total = len(results)
@@ -283,5 +283,5 @@ class OAuthStagingTester:
         return 0 if success else 1
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         exit_code = asyncio.run(main())

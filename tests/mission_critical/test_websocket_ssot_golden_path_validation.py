@@ -72,7 +72,7 @@ class WebSocketSSOTGoldenPathValidationTests(SSotBaseTestCase, unittest.TestCase
         }
     
     def test_golden_path_websocket_import_dependency(self):
-        ""Test Golden Path dependency on WebSocket Manager imports.
+        ""Test Golden Path dependency on WebSocket Manager imports."
         
         EXPECTED TO FAIL: Import fragmentation should block Golden Path.
         This proves business impact of Issue #1104.

@@ -39,7 +39,7 @@ class InsufficientDataHandlingTests:
     def insufficient_vague_request(self):
         "Extremely vague request with almost no data."
         return {
-            user_request": "optimize,
+            user_request": optimize,"
             available_data: {},
             missing_data: ["
             missing_data: ["
@@ -117,7 +117,7 @@ class InsufficientDataHandlingTests:
     def insufficient_goal_only_request(self):
         "User has goal but no current state data."
         return {
-            user_request": "Want to reduce costs by 50%,
+            user_request": Want to reduce costs by 50%,"
             available_data: {
                 goal: 50% cost reduction"
                 goal: 50% cost reduction"
@@ -138,7 +138,7 @@ class InsufficientDataHandlingTests:
     
     @pytest.mark.asyncio
     async def test_insufficient_data_workflow_selection(self, insufficient_vague_request):
-        ""Test that insufficient data triggers data collection workflow.
+        ""Test that insufficient data triggers data collection workflow."
         from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
         
         orchestrator = WorkflowOrchestrator(None, None, None)
@@ -152,13 +152,13 @@ class InsufficientDataHandlingTests:
             
             workflow = await orchestrator.select_workflow(insufficient_vague_request)
             
-            assert workflow[type"] == "data_collection_focus
+            assert workflow[type"] == data_collection_focus"
             assert workflow[confidence] < 0.20
             assert phases in workflow"
             assert phases in workflow"
             assert educate" in workflow[phases]"
             assert collect in workflow[phases]
-            assert demonstrate_value" in workflow["phases]
+            assert demonstrate_value" in workflow[phases]"
     
     @pytest.mark.asyncio
     async def test_clarification_request_generation(self, insufficient_vague_request):
@@ -179,7 +179,7 @@ class InsufficientDataHandlingTests:
                         {
                             category": AI/LLM Cost Optimization,"
                             description: Reduce AI spending by 30-70%,
-                            next_question": "What's your current monthly AI spend?'
+                            next_question": What's your current monthly AI spend?'"
                         },
                         {
                             category: Performance Optimization,
@@ -188,7 +188,7 @@ class InsufficientDataHandlingTests:
                         },
                         {
                             category: Scale Optimization,
-                            description": "Handle 10x more requests efficiently,
+                            description": Handle 10x more requests efficiently,"
                             next_question: What's your current request volume?'
                         },
                         {
@@ -197,7 +197,7 @@ class InsufficientDataHandlingTests:
                             next_question: What are your quality requirements?
                         }
                     ],
-                    quick_start": "Or describe your specific challenge in a few sentences
+                    quick_start": Or describe your specific challenge in a few sentences"
                 },
                 interpretation_attempts: [
                     General optimization request,"
@@ -240,7 +240,7 @@ class InsufficientDataHandlingTests:
                         examples": ["
                             {
                                 scenario: High-volume, low-complexity requests,
-                                "optimization: Switch to lighter models",
+                                "optimization: Switch to lighter models,"
                                 potential_savings: 60-70%
                             },
                             {
@@ -249,7 +249,7 @@ class InsufficientDataHandlingTests:
                                 potential_savings: 40-50%
                             },
                             {
-                                "scenario: Repetitive queries",
+                                "scenario: Repetitive queries,"
                                 optimization: Add caching layer,
                                 potential_savings: 30-40%"
                                 potential_savings: 30-40%"
@@ -266,7 +266,7 @@ class InsufficientDataHandlingTests:
                         ]
                     },
                     getting_started: {
-                        "title: Quick Start Guide",
+                        "title: Quick Start Guide,"
                         steps: [
                             1. Check your current AI/LLM invoice,"
                             1. Check your current AI/LLM invoice,"
@@ -323,7 +323,7 @@ class InsufficientDataHandlingTests:
                     industry_benchmarks: {"
                         average_savings": 45-55%,"
                         top_quartile_savings: 65-75%,
-                        implementation_time": "2-4 weeks
+                        implementation_time": 2-4 weeks"
                     },
                     optimization_categories: [
                         {
@@ -339,14 +339,14 @@ class InsufficientDataHandlingTests:
                             example: Optimized prompts use fewer tokens
                         },
                         {
-                            "category: Caching & Batching",
+                            "category: Caching & Batching,"
                             impact: 25-40% request reduction,
                             effort: Medium","
                             "example: Cache common queries, batch similar requests"
                         },
                         {
                             category: Infrastructure Optimization,
-                            "impact: 20-35% efficiency gain",
+                            "impact: 20-35% efficiency gain,"
                             effort: Medium,
                             example: Better routing, load balancing"
                             example: Better routing, load balancing"
@@ -354,7 +354,7 @@ class InsufficientDataHandlingTests:
                     ],
                     "roi_projection: {"
                         typical_payback_period: 1-2 months,
-                        year_1_roi": "300-500%,
+                        year_1_roi": 300-500%,"
                         risk: Minimal with phased approach
                     }
                 },
@@ -408,7 +408,7 @@ class InsufficientDataHandlingTests:
                             {
                                 q": Estimated monthly AI spend?,"
                                 format: Range is fine (e.g., $5K-10K),
-                                why": "Baseline for savings calculation
+                                why": Baseline for savings calculation"
                             },
                             {
                                 q: Current response times?,
@@ -417,7 +417,7 @@ class InsufficientDataHandlingTests:
                             },
                             {
                                 q: Main use case?,
-                                format": "One sentence description,
+                                format": One sentence description,"
                                 why: Tailor optimization approach
                             }
                         ],
@@ -425,7 +425,7 @@ class InsufficientDataHandlingTests:
                         value_unlocked": Basic optimization roadmap"
                     },
                     stage_2_detailed: {
-                        "description: After initial analysis",
+                        "description: After initial analysis,"
                         when: If you like the initial recommendations,
                         additional_questions: 5,"
                         additional_questions: 5,"
@@ -447,7 +447,7 @@ class InsufficientDataHandlingTests:
             
             state = DeepAgentState(
                 user_request=insufficient_problem_only_request[user_request],
-                identified_problems=["expensive, slow"]
+                identified_problems=["expensive, slow]"
             
             context = ExecutionContext(
                 run_id=test-insufficient-4,
@@ -511,7 +511,7 @@ Quick Win Opportunities (check if interested):
                     processing_time": Analysis within 1 hour"
                 },
                 alternative_options: {
-                    "guided_chat: Answer questions interactively",
+                    "guided_chat: Answer questions interactively,"
                     upload_invoice: Share recent AI service invoice,
                     connect_api: Grant read-only API access for automatic analysis"
                     connect_api: Grant read-only API access for automatic analysis"
@@ -536,7 +536,7 @@ Quick Win Opportunities (check if interested):
             assert quick_template in result.result"
             template = result.result[quick_template"]"
             assert template in template
-            assert 50%" in template["template]  # Incorporates user's goal'
+            assert 50%" in template[template]  # Incorporates user's goal'"
             assert template[processing_time] == Analysis within 1 hour
     
     # === Edge Case Tests ===
@@ -559,7 +559,7 @@ Quick Win Opportunities (check if interested):
                 data_sufficiency: insufficient","
                 "confidence: 0.0,"
                 fallback_response: {
-                    "greeting: Hello! I'm here to help optimize your AI operations.",'
+                    "greeting: Hello! I'm here to help optimize your AI operations.,'"
                     capabilities: [
                         Reduce AI/LLM costs by 30-70%,"
                         Reduce AI/LLM costs by 30-70%,"
@@ -572,7 +572,7 @@ Quick Win Opportunities (check if interested):
                     quick_options: ["
                         "Tell me about cost optimization,"
                         Help with performance issues,
-                        "Show me what's possible,"'
+                        "Show me what's possible,'"
                         I have a specific question
                     ]
                 }
@@ -597,7 +597,7 @@ Quick Win Opportunities (check if interested):
     async def test_data_phobia_handling(self):
         "Test handling users reluctant to share data."
         reluctant_request = {
-            user_request": "Can you help without seeing our data?,
+            user_request": Can you help without seeing our data?,"
             available_data: {
                 concern: data_privacy"
                 concern: data_privacy"
@@ -619,7 +619,7 @@ Quick Win Opportunities (check if interested):
                         {
                             "level: Fully Anonymous,"
                             description: Share only patterns, no actual values,
-                            "example: High/Medium/Low instead of dollar amounts",
+                            "example: High/Medium/Low instead of dollar amounts,"
                             value: General optimization strategies
                         },
                         {
@@ -643,7 +643,7 @@ Quick Win Opportunities (check if interested):
                         Audit trail of all data usage"
                     ],
                     alternative: {
-                        self_service": "Here's a guide to optimize on your own,'
+                        self_service": Here's a guide to optimize on your own,'"
                         tools: [Cost calculator, Optimization checklist, "Best practices guide]"
                     }
                 }
@@ -689,14 +689,14 @@ Quick Win Opportunities (check if interested):
                     },
                     risk_reversal": {"
                         guarantee: See value in 24 hours or no commitment,
-                        "trial: Start with free assessment",
+                        "trial: Start with free assessment,"
                         flexibility: Cancel anytime, no lock-in
                     },
                     clear_cta: {"
                     clear_cta: {"
                         primary": Get Your Free AI Cost Assessment,"
                         secondary: See 5-Minute Demo,
-                        tertiary": "Read Success Stories
+                        tertiary": Read Success Stories"
                     },
                     friction_reduction: [
                         No credit card required,"
@@ -728,7 +728,7 @@ Quick Win Opportunities (check if interested):
             assert urgency_creation in response"
             assert risk_reversal" in response"
             assert clear_cta in response
-            assert No credit card required" in response["friction_reduction]
+            assert No credit card required" in response[friction_reduction]"
     
     # === Integration Tests ===
     
@@ -749,7 +749,7 @@ Quick Win Opportunities (check if interested):
                     success=True,
                     result={
                         data_sufficiency: insufficient,
-                        workflow_recommendation": "data_collection_only
+                        workflow_recommendation": data_collection_only"
                     }
             elif agent_name == data_helper:
                 return ExecutionResult(
@@ -766,7 +766,7 @@ Quick Win Opportunities (check if interested):
             await orchestrator.execute_minimal_workflow(insufficient_vague_request)
             
             # Only triage and data_helper should execute
-            assert execution_sequence == ["triage, data_helper"]
+            assert execution_sequence == ["triage, data_helper]"
             # No optimization, analysis, or action agents
             assert optimization not in execution_sequence
             assert data not in execution_sequence  # data analysis"
@@ -812,7 +812,7 @@ Quick Win Opportunities (check if interested):
         events_sent = []
         
         async def mock_send_event(event_type, data):
-            events_sent.append({type: event_type, "data: data)"
+            events_sent.append({"type": event_type, "data: data)"
         
         websocket_manager.send_event = mock_send_event
         
@@ -864,25 +864,25 @@ Quick Win Opportunities (check if interested):
                 ux_optimized: {"
                     "immediate_value: {"
                         message: I can already tell you 3 quick wins,
-                        items": ["Use GPT-3.5 for simple tasks, Implement caching, Optimize prompts],
+                        items": [Use GPT-3.5 for simple tasks, Implement caching, Optimize prompts],"
                         time_to_implement: "Start today"
                     },
                     minimal_ask": {"
                         message: Just answer 3 questions to unlock personalized recommendations,
-                        "questions: [Monthly spend?", Main use case?, Biggest pain point?],
+                        "questions: [Monthly spend?, Main use case?, Biggest pain point?],"
                         time_required: < 2 minutes"
                         time_required: < 2 minutes"
                     },
                     "motivation: {"
                         peer_comparison: Companies like yours save $5-15K monthly,
-                        quick_win": "Most users see first savings within 48 hours,
+                        quick_win": Most users see first savings within 48 hours,"
                         support: We guide you through every step
                     },
                     next_steps: {"
                     next_steps: {"
                         "1: Answer 3 questions (2 min),"
                         2: Review recommendations (5 min),
-                        "3: Implement first optimization (1 day)",
+                        "3: Implement first optimization (1 day),"
                         4: See measurable savings (1 week)
                     }
                 }
@@ -900,7 +900,7 @@ Quick Win Opportunities (check if interested):
             
             assert result.success
             ux = result.result[ux_optimized]
-            assert ux[minimal_ask"]["time_required] == < 2 minutes
+            assert ux[minimal_ask"][time_required] == < 2 minutes"
             assert len(ux[minimal_ask)[questions") == 3"
             assert "next_steps in ux"
             assert motivation in ux
@@ -908,7 +908,7 @@ Quick Win Opportunities (check if interested):
 
 # === Test Runner ===
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

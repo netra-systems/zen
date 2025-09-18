@@ -85,7 +85,7 @@ class SSotMessageRepositoryComplianceTests:
             # Clean messages
             await session.execute(
                 text(DELETE FROM message WHERE thread_id LIKE :pattern),
-                {pattern": f"{self.test_thread_id}%}
+                {pattern": f{self.test_thread_id}%}"
             # Clean threads  
             await session.execute(
                 text(DELETE FROM thread WHERE id LIKE :pattern),
@@ -94,7 +94,7 @@ class SSotMessageRepositoryComplianceTests:
             
     @pytest.mark.asyncio
     async def test_ssot_message_creation_structure_compliance(self):
-    ""
+    """
         CRITICAL TEST: Validate SSOT message creation produces proper structure.
         
         This test EXPOSES the violation by comparing:
@@ -131,12 +131,12 @@ class SSotMessageRepositoryComplianceTests:
             
             # Validate SSOT message structure (proper format)
             self.assertIsNotNone(ssot_message, SSOT repository should create message)
-            self.assertEqual(ssot_message.object, thread.message", "SSOT message should have proper object type)
+            self.assertEqual(ssot_message.object, thread.message", SSOT message should have proper object type)"
             self.assertIsInstance(ssot_message.content, list, SSOT message content should be list)
             self.assertEqual(len(ssot_message.content), 1, SSOT message should have one content item)"
             self.assertEqual(len(ssot_message.content), 1, SSOT message should have one content item)"
             self.assertEqual(ssot_message.content[0][type"], text, SSOT content should be text type)"
-            self.assertIn("value, ssot_message.content[0][text"], SSOT text should have value field)
+            self.assertIn("value, ssot_message.content[0][text], SSOT text should have value field)"
             
             # Validate violation message structure (will be different due to violation)
             # This part will expose the violation by showing structural differences
@@ -181,7 +181,7 @@ class SSotMessageRepositoryComplianceTests:
         
     @pytest.mark.asyncio  
     async def test_ssot_message_metadata_consistency(self):
-    "
+        """
     "
         CRITICAL TEST: Validate metadata handling consistency.
         
@@ -192,9 +192,9 @@ class SSotMessageRepositoryComplianceTests:
         logger.info(=== SSOT MESSAGE METADATA CONSISTENCY TEST ===)
         
         test_metadata = {
-            "source: compliance_test",
+            "source: compliance_test,"
             priority: high,
-            tags: [ssot", "validation]
+            tags: [ssot", validation]"
         }
         
         async with self.db_helper.get_async_session() as session:
@@ -252,7 +252,7 @@ class SSotMessageRepositoryComplianceTests:
         
     @pytest.mark.asyncio
     async def test_ssot_message_field_completeness(self):
-    ""
+    """
         CRITICAL TEST: Validate all required fields are set properly.
         
         This test ensures the SSOT repository creates complete message records
@@ -261,8 +261,8 @@ class SSotMessageRepositoryComplianceTests:
         logger.info(=== SSOT MESSAGE FIELD COMPLETENESS TEST ===")"
         
         required_fields = [
-            id, object, created_at, thread_id", "role, 
-            content, assistant_id, run_id", "file_ids, metadata_
+            id, object, created_at, thread_id", role, "
+            content, assistant_id, run_id", file_ids, metadata_"
         ]
         
         async with self.db_helper.get_async_session() as session:
@@ -345,7 +345,7 @@ class SSotMessageRepositoryComplianceTests:
         
     @pytest.mark.asyncio
     async def test_ssot_message_creation_audit_trail(self):
-    ""
+    """
         CRITICAL TEST: Validate audit trail and business logic consistency.
         
         This test ensures the SSOT repository maintains proper audit trails
@@ -431,7 +431,7 @@ class SSotMessageRepositoryIntegrationTests:
     
     @pytest.mark.asyncio
     async def test_ssot_message_repository_transaction_consistency(self):
-    "
+        """
     "
         CRITICAL TEST: Validate transaction consistency between SSOT and test framework.
         
@@ -480,7 +480,7 @@ class SSotMessageRepositoryIntegrationTests:
                 )
                 final_messages = final_result.scalars().all()
                 
-                assert len(final_messages) == 2, Both messages should be committed
+                assert len(final_messages) == 2, "Both messages should be committed"
                 
             finally:
                 # Cleanup
@@ -497,7 +497,7 @@ if __name__ == __main__:"
     import os
     
     # Add project root to path for imports
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ..", "..))
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ..", ..))"
     sys.path.insert(0, project_root)
     
     # Configure logging for test execution

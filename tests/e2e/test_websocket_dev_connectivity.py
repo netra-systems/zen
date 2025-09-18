@@ -26,7 +26,7 @@ class WebSocketDevConnectivityTests:
 
     @pytest.mark.websocket
     async def test_dev_websocket_basic_connectivity(self):
-    ""
+    """
         Test basic WebSocket connectivity to the test endpoint.
         
         Critical Assertions:
@@ -63,7 +63,7 @@ class WebSocketDevConnectivityTests:
                     "No server time in welcome message"""
                 
                 connection_id = welcome_data[connection_id]
-                print(f"WebSocket connected with ID: {connection_id}")
+                print(f"WebSocket connected with ID: {connection_id})"
                 
         except asyncio.TimeoutError:
             raise AssertionError(WebSocket connection timeout - server not responding)
@@ -100,7 +100,7 @@ class WebSocketDevConnectivityTests:
             }
             
             echo_request = {
-                "type: echo",
+                "type: echo,"
                 payload: test_payload
             }
             
@@ -130,7 +130,7 @@ class WebSocketDevConnectivityTests:
 
     @pytest.mark.websocket
     async def test_dev_websocket_ping_pong(self):
-    ""
+    """
         Test WebSocket ping/pong heartbeat functionality.
         
         Critical Assertions:
@@ -248,7 +248,7 @@ class WebSocketDevConnectivityTests:
             
             for i in range(message_count):
                 message = {
-                    "type: echo",
+                    "type: echo,"
                     payload: fMessage {i},
                     sequence: i""
                 }
@@ -303,7 +303,7 @@ class WebSocketDevConnectivityTests:
                 welcome_data = json.loads(welcome_response)
                 
                 connection_id = welcome_data.get("connection_id)"
-                assert connection_id, fNo connection ID for connection {connection_num}
+                assert connection_id, "fNo connection ID for connection {connection_num}"
                 assert connection_id not in connection_ids, \
                     fDuplicate connection ID: {connection_id}
                 
@@ -311,7 +311,7 @@ class WebSocketDevConnectivityTests:
                 
                 # Verify server time format
                 server_time = welcome_data.get(server_time")"
-                assert server_time, No server time provided
+                assert server_time, "No server time provided"
                 
                 # Try to parse ISO format timestamp
                 try:
@@ -326,7 +326,7 @@ class WebSocketDevConnectivityTests:
 
     @pytest.mark.asyncio
     async def test_websocket_availability_check(self):
-        ""
+        """
         Quick availability check for WebSocket service.
         This test ensures the WebSocket service is running and responding.
         

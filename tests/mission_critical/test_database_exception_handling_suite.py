@@ -31,7 +31,7 @@ from clickhouse_connect.driver import exceptions as clickhouse_errors
 from netra_backend.app.db import database_manager, clickhouse, database_initializer, clickhouse_schema
 
 # Import specific exception classes that SHOULD be used throughout database layer
-from netra_backend.app.db.transaction_errors import (
+from netra_backend.app.db.transaction_errors import ()
     ConnectionError as DatabaseConnectionError,
     DeadlockError,
     TimeoutError as DatabaseTimeoutError,
@@ -48,7 +48,7 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
     
     @pytest.mark.mission_critical
     def test_database_modules_missing_transaction_error_integration(self):
-        "FAILING TEST: Core database modules don't integrate with transaction_errors.py infrastructure."'
+        "FAILING TEST: Core database modules don't integrate with transaction_errors.py infrastructure.'"
         
         # Test all 4 priority modules identified in Issue #374
         modules_to_test = [
@@ -265,7 +265,7 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
     @pytest.mark.mission_critical
     @pytest.mark.asyncio
     async def test_end_to_end_database_error_handling_workflow(self):
-        ""FAILING TEST: End-to-end test of database error handling from detection to resolution.
+        ""FAILING TEST: End-to-end test of database error handling from detection to resolution."
         
         # Simulate complete workflow: Error occurs -> Classification -> Recovery -> Resolution
         

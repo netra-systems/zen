@@ -128,7 +128,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
                 monthly_value=100.0,
                 request_complexity=low,
                 expected_response_time=30.0,
-                critical_events_required=["agent_started, agent_completed"],
+                critical_events_required=["agent_started, agent_completed],"
                 business_impact_if_failed=LOW - Early adopter experience degradation
             ),
             RevenueScenario(
@@ -220,7 +220,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
             # Service should be available and prioritize enterprise requests
             try:
                 handler = self.message_router._find_handler(user_message")"
-                assert handler is not None, REVENUE CRITICAL: No handler available for enterprise customer
+                assert handler is not None, "REVENUE CRITICAL: No handler available for enterprise customer"
                 revenue_protection_results[service_availability"] = True"
             except Exception as e:
                 self.record_metric(enterprise_service_unavailable, str(e))
@@ -279,7 +279,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
             # Enterprise requests must receive substantive, actionable responses
             mock_triage_result = {
                 category: Cost Optimization,
-                "priority: critical",
+                "priority: critical,"
                 confidence_score: 0.95,
                 savings_potential: "$11,0/month,"
                 implementation_plan": detailed_migration_strategy,"
@@ -318,7 +318,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
             protection_score = sum(1 for result in revenue_protection_results.values() if result)
             total_criteria = len(revenue_protection_results)
             
-            assert protection_score >= total_criteria * 0.8, fEnterprise revenue protection insufficient: {protection_score}/{total_criteria}
+            assert protection_score >= total_criteria * 0.8, "fEnterprise revenue protection insufficient: {protection_score}/{total_criteria}"
             
             self.record_metric(enterprise_revenue_protection_score, protection_score / total_criteria)"
             self.record_metric(enterprise_revenue_protection_score, protection_score / total_criteria)"
@@ -336,7 +336,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
     
     @pytest.mark.asyncio
     async def test_multi_tier_customer_impact_analysis(self):
-    ""
+    """
         Test revenue protection across all customer tiers simultaneously.
         
         Business Impact: Validates system protects revenue across entire
@@ -353,7 +353,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
                 type: "user_message,"
                 content": self._generate_tier_appropriate_request(scenario),"
                 user_id: f{scenario.customer_tier}_user_{uuid.uuid4().hex[:8]},
-                "thread_id: f{scenario.customer_tier}_thread_{uuid.uuid4().hex[:8]}",
+                "thread_id: f{scenario.customer_tier}_thread_{uuid.uuid4().hex[:8]},"
                 metadata: {
                     customer_tier: scenario.customer_tier,"
                     customer_tier: scenario.customer_tier,"
@@ -476,7 +476,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
     
     @pytest.mark.asyncio
     async def test_business_continuity_under_triage_failures(self):
-        "
+        """
         "
         Test business continuity when triage processing fails.
         
@@ -498,14 +498,14 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
                 business_impact: HIGH - Limited functionality
             },
             {
-                "name: WebSocket Event Delivery Failure",
+                "name: WebSocket Event Delivery Failure,"
                 failure_type: event_delivery_error,
                 expected_fallback: direct_response_delivery","
                 "business_impact: LOW - Response delivered via alternative channel"
             },
             {
                 name: Complete Agent Pipeline Failure,
-                "failure_type: pipeline_failure",
+                "failure_type: pipeline_failure,"
                 expected_fallback: emergency_response_mode,
                 business_impact: CRITICAL - Minimal functionality preserved"
                 business_impact: CRITICAL - Minimal functionality preserved"
@@ -520,12 +520,12 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
             try:
                 # Inject specific failure type
                 failure_injected = await self._inject_failure(scenario["failure_type)"
-                assert failure_injected, fFailed to inject {scenario['failure_type']}
+                assert failure_injected, "fFailed to inject {scenario['failure_type']}"
                 
                 # Test business continuity under failure
                 mock_websocket = AsyncMock()
                 user_request = {
-                    "type: user_message",
+                    "type: user_message,"
                     content: Test request under failure conditions,
                     user_id: fcontinuity_user_{uuid.uuid4().hex[:8]}","
                     "thread_id: fcontinuity_thread_{uuid.uuid4().hex[:8]}"
@@ -609,8 +609,8 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
         total_revenue_at_risk = sum(r.revenue_at_risk for r in continuity_results)
         
         # Business continuity requirements
-        assert continuity_rate >= 0.5, fBusiness continuity rate too low: {continuity_rate:.2f}
-        assert total_revenue_at_risk <= 2000.0, fToo much revenue at risk from failures: ${total_revenue_at_risk}
+        assert continuity_rate >= 0.5, "fBusiness continuity rate too low: {continuity_rate:.2f}"
+        assert total_revenue_at_risk <= 2000.0, "fToo much revenue at risk from failures: ${total_revenue_at_risk}"
         
         self.record_metric("business_continuity_rate, continuity_rate)"
         self.record_metric(continuity_revenue_at_risk, total_revenue_at_risk)
@@ -629,7 +629,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
             type: "emergency_response,"
             message": We're experiencing technical difficulties. Our team has been notified and will respond within 2 hours.,"
             support_contact: support@netrasystems.ai,
-            escalation_ticket": f"EMRG_{uuid.uuid4().hex[:8]}
+            escalation_ticket": fEMRG_{uuid.uuid4().hex[:8]}"
         }
         return True
     
@@ -712,7 +712,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
         p95_response_time = response_times[int(len(response_times) * 0.95)] if response_times else 60.0
         
         success_rate = (sla_results[successful_requests] / sla_test_requests) * 100
-        event_delivery_rate = (sla_results["events_delivered) / sla_results[events_attempted") * 100 if sla_results[events_attempted) > 0 else 0
+        event_delivery_rate = (sla_results["events_delivered) / sla_results[events_attempted) * 100 if sla_results[events_attempted) > 0 else 0"
         
         # Validate SLA compliance
         sla_compliance = {
@@ -760,7 +760,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
                 revenue_impact_if_failed: HIGH - Mass customer dissatisfaction
             },
             {
-                name": "Partial Service Degradation,
+                name": Partial Service Degradation,"
                 condition: reduced_functionality,
                 satisfaction_threshold: 0.7,"
                 satisfaction_threshold: 0.7,"
@@ -768,7 +768,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
             },
             {
                 name: Emergency Maintenance Mode,
-                "condition: maintenance_mode",
+                "condition: maintenance_mode,"
                 satisfaction_threshold: 0.6,
                 revenue_impact_if_failed: "LOW - Expected degradation communicated"
             }
@@ -784,7 +784,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
                 satisfaction_result = {
                     scenario": scenario[name],"
                     satisfaction_score: satisfaction_score,
-                    "threshold_met: satisfaction_score >= scenario[satisfaction_threshold"],
+                    "threshold_met: satisfaction_score >= scenario[satisfaction_threshold],"
                     revenue_protected: satisfaction_score >= scenario[satisfaction_threshold],
                     condition: scenario[condition"]"
                 }
@@ -799,7 +799,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
                 
             except Exception as e:
                 satisfaction_results.append({
-                    "scenario: scenario[name"],
+                    "scenario: scenario[name],"
                     satisfaction_score: 0.0,
                     threshold_met: False,"
                     threshold_met: False,"
@@ -817,7 +817,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
         
         # Customer satisfaction requirements for revenue protection
         assert satisfaction_protection_rate >= 0.7, fCustomer satisfaction protection too low: {satisfaction_protection_rate:.2f}""
-        assert avg_satisfaction_score >= 0.6, fAverage satisfaction score too low: {avg_satisfaction_score:.2f}
+        assert avg_satisfaction_score >= 0.6, "fAverage satisfaction score too low: {avg_satisfaction_score:.2f}"
         
         self.record_metric(customer_satisfaction_protection_rate, satisfaction_protection_rate)
         self.record_metric("avg_customer_satisfaction_score, avg_satisfaction_score)"
@@ -846,7 +846,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
     
     @pytest.mark.asyncio
     async def test_comprehensive_revenue_protection_validation(self):
-        "
+        """
         "
         Test comprehensive revenue protection across all business dimensions.
         
@@ -871,7 +871,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
             test_request = {
                 type": user_message,"
                 content: Comprehensive revenue protection test request,
-                user_id": f"final_validation_user_{uuid.uuid4().hex[:8]},
+                user_id": ffinal_validation_user_{uuid.uuid4().hex[:8]},"
                 thread_id: ffinal_validation_thread_{uuid.uuid4().hex[:8]}
             }
             
@@ -914,7 +914,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
             overall_protection_rate = protection_score / total_dimensions
             
             # MISSION CRITICAL: Must protect majority of revenue dimensions
-            assert overall_protection_rate >= 0.8, fRevenue protection insufficient: {overall_protection_rate:.2f}
+            assert overall_protection_rate >= 0.8, "fRevenue protection insufficient: {overall_protection_rate:.2f}"
             assert self.total_revenue_at_risk <= 1000.0, fToo much revenue at risk: ${self.total_revenue_at_risk}"
             assert self.total_revenue_at_risk <= 1000.0, fToo much revenue at risk: ${self.total_revenue_at_risk}"
             
@@ -946,16 +946,16 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
         final_business_continuity_score = max(0.0, self.business_continuity_score)
         
         # Generate business impact report
-        print(f"\n=== MISSION CRITICAL REVENUE PROTECTION REPORT - Issue #135 ===")
+        print(f"\n=== MISSION CRITICAL REVENUE PROTECTION REPORT - Issue #135 ===)"
         print(fTest Duration: {total_test_time:.3f}s)
-        print(f"Total Potential Annual Revenue: ${total_potential_annual_revenue:,.2f}")
+        print(f"Total Potential Annual Revenue: ${total_potential_annual_revenue:,.2f})"
         print(fRevenue at Risk: ${self.total_revenue_at_risk * 12:,.2f})
-        print(f"Customers Affected: {self.customers_affected}")
+        print(f"Customers Affected: {self.customers_affected})"
         print(fBusiness Continuity Score: {final_business_continuity_score:.1f}%)
         
         # Calculate revenue protection rate
         revenue_protection_rate = 1.0 - ((self.total_revenue_at_risk * 12) / total_potential_annual_revenue)
-        print(f"Revenue Protection Rate: {revenue_protection_rate:.1%}")
+        print(f"Revenue Protection Rate: {revenue_protection_rate:.1%})"
         
         # Business impact assessment
         if revenue_protection_rate >= 0.9:
@@ -977,7 +977,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
         successes = [k for k, v in metrics.items() if k.endswith(_success) and v is True]
         
         print(fRevenue Protection Tests Passed: {len(successes)})
-        print(fRevenue Protection Tests Failed: {len(failures")}")
+        print(fRevenue Protection Tests Failed: {len(failures")})"
         
         if failures:
             print( ALERT:  CRITICAL FAILURES AFFECTING REVENUE:)"

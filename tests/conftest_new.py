@@ -34,7 +34,7 @@ import pytest
 from tests.conftest_base import *
 
     # Memory profiling decorator - available to all test modules
-def memory_profile(description: str = "", impact: str = "LOW"):
+def memory_profile(description: str = "", impact: str = "LOW):"
     pass
 '''Decorator to track memory usage of fixtures.'
 
@@ -113,11 +113,11 @@ def _should_load_real_services(request) -> bool:
 from shared.isolated_environment import get_env
 env = get_env()
 
-if env.get("USE_REAL_SERVICES", "false").lower() == "true":
+if env.get("USE_REAL_SERVICES", "false").lower() == "true:"
     pass
 return True
 
-if env.get("ENVIRONMENT", "").lower() == "staging":
+if env.get("ENVIRONMENT", "").lower() == "staging:"
     pass
 return True
 
@@ -151,11 +151,11 @@ def _should_load_e2e(request) -> bool:
 from shared.isolated_environment import get_env
 env = get_env()
 
-if env.get("RUN_E2E_TESTS", "false").lower() == "true":
+if env.get("RUN_E2E_TESTS", "false").lower() == "true:"
     pass
 return True
 
-if env.get("ENVIRONMENT", "").lower() == "staging":
+if env.get("ENVIRONMENT", "").lower() == "staging:"
     pass
 return True
 
@@ -323,18 +323,18 @@ class MockMemoryReporter:
     def pytest_collection_modifyitems(config, items):
         """Modify test items after collection to optimize for memory usage."""
     # Skip auto-use fixtures during collection if running unit tests only
-        if config.getoption("--collect-only"):
+        if config.getoption("--collect-only):"
         # During collection, don't trigger expensive auto-use fixtures'
         return
 
         # Add markers based on test names/paths for better fixture loading
         for item in items:
             # Auto-mark tests based on their path
-        if "e2e" in str(item.fspath):
+        if "e2e in str(item.fspath):"
         item.add_marker(pytest.mark.e2e)
-        elif "integration" in str(item.fspath):
+        elif "integration in str(item.fspath):"
         item.add_marker(pytest.mark.integration)
-        elif "unit" in str(item.fspath):
+        elif "unit in str(item.fspath):"
         item.add_marker(pytest.mark.unit)
 
                         # Hook to provide memory usage report at end of session
@@ -350,8 +350,8 @@ class MockMemoryReporter:
         memory_mb = process.memory_info().rss / 1024 / 1024
         print("")
         except ImportError:
-        print("Memory tracking not available (psutil required)")
+        print("Memory tracking not available (psutil required))"
 
             # Report on any potential memory issues detected
         if len(_loaded_modules) > 3:
-        print("NOTE: Multiple fixture modules loaded - consider using more specific test markers")
+        print("NOTE: Multiple fixture modules loaded - consider using more specific test markers)"

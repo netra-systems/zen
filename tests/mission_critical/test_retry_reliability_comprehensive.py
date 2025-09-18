@@ -49,7 +49,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Import retry components
-from netra_backend.app.core.reliability_retry import (
+from netra_backend.app.core.reliability_retry import ()
     RetryConfig,
     RetryHandler,
     RetryPolicy,
@@ -146,7 +146,7 @@ class TransientFailureSimulator:
         
         if should_fail:
             failure_type = random.choice(pattern[failure_types)
-            call_record[result"] = "failed
+            call_record[result"] = failed"
             call_record[error] = failure_type
             self.call_history[operation_id].append(call_record)
             
@@ -306,7 +306,7 @@ class RetryStormDetector:
                 event_count: len(recent_events),"
                 time_window": self.time_window,"
                 storm_threshold: self.storm_threshold,
-                operations_involved": list(set(event["operation_id] for event in recent_events))
+                operations_involved": list(set(event[operation_id] for event in recent_events))"
             }
             
             self.storm_alerts.append(storm_alert)
@@ -319,7 +319,7 @@ class RetryStormDetector:
         
         # Calculate retry rate over time
         if len(self.retry_events) > 1:
-            duration = self.retry_events[-1][timestamp"] - self.retry_events[0]["timestamp]
+            duration = self.retry_events[-1][timestamp"] - self.retry_events[0][timestamp]"
             retry_rate = len(self.retry_events) / duration if duration > 0 else 0
         else:
             retry_rate = 0
@@ -355,7 +355,7 @@ class RetryStormDetector:
                 op_id: {
                     "retry_count: len(events),"
                     max_attempt: max(e[attempt] for e in events),
-                    backoff_progression": [e["backoff_delay] for e in events]
+                    backoff_progression": [e[backoff_delay] for e in events]"
                 }
                 for op_id, events in operations.items()
             }
@@ -449,7 +449,7 @@ class RetryReliabilityTester:
                 backoff_multiplier": backoff_multiplier"
             },
             operations_tested: len(operation_results),
-            successful_operations: sum(1 for r in operation_results if r["result] == success"),
+            successful_operations: sum(1 for r in operation_results if r["result] == success),"
             failed_operations: sum(1 for r in operation_results if r[result] == "failed),"
             storm_analysis: storm_analysis,
             backoff_verification: backoff_verification,"
@@ -801,7 +801,7 @@ class RetryReliabilityTester:
         avg_retries_per_operation = total_retry_attempts / completed_operations if completed_operations > 0 else 0
         
         test_result = {
-            "test_name: concurrent_retry_performance",
+            "test_name: concurrent_retry_performance,"
             concurrent_operations_target: concurrent_operations,
             completed_operations: completed_operations,"
             completed_operations: completed_operations,"
@@ -890,7 +890,7 @@ async def test_exponential_backoff_prevents_retry_storms(retry_reliability_teste
             fBackoff not sufficiently exponential: max={backoff_stats['max_backoff']}, min={backoff_stats['min_backoff']}"
             fBackoff not sufficiently exponential: max={backoff_stats['max_backoff']}, min={backoff_stats['min_backoff']}"
     
-    logger.info(f"Exponential backoff test: {storm_analysis['storms_detected']) storms,"
+    logger.info(f"Exponential backoff test: {storm_analysis['storms_detected'])"
                 f{success_rate:.2f} success rate, backoff correct: {backoff_verification['backoff_correct']})
 
 
@@ -933,7 +933,7 @@ async def test_retry_exhaustion_graceful_failure(retry_reliability_tester):
 @pytest.mark.critical  
 @pytest.mark.timeout(90)
 async def test_memory_stability_extended_retries(retry_reliability_tester):
-    ""CRITICAL: Test memory stability during extended retry scenarios.
+    ""CRITICAL: Test memory stability during extended retry scenarios."
     tester = retry_reliability_tester
     
     # Test memory usage during extended retry operations
@@ -995,7 +995,7 @@ async def test_concurrent_retry_performance_scalability(retry_reliability_tester
         fRetry storms detected under load: {result['storm_analysis']['storms_detected']}
     
     # Should complete reasonable percentage of operations
-    completion_rate = result[completed_operations"] / result["concurrent_operations_target]
+    completion_rate = result[completed_operations"] / result[concurrent_operations_target]"
     assert completion_rate > 0.8, \
         fToo many operations timed out: {completion_rate:.2f} completion rate
     
@@ -1077,7 +1077,7 @@ async def test_retry_backoff_timing_accuracy(failure_simulator):
             expected_delays = []
             for attempt in range(len(actual_delays)):
                 if config[strategy] == BackoffStrategy.EXPONENTIAL:
-                    expected = config[initial_delay"] * (config["multiplier] ** attempt)
+                    expected = config[initial_delay"] * (config[multiplier] ** attempt)"
                 elif config[strategy] == BackoffStrategy.LINEAR:
                     expected = config[initial_delay] + (config.get(increment", 0.5) * attempt)"
                 else:
@@ -1095,7 +1095,7 @@ async def test_retry_backoff_timing_accuracy(failure_simulator):
                     f{config['name']} backoff timing error too high: {error_percent:.1f}% on attempt {i+1}
             
             timing_results.append({
-                "strategy: config[name"],
+                "strategy: config[name],"
                 attempts: len(attempt_times),
                 actual_delays: actual_delays,"
                 actual_delays: actual_delays,"
@@ -1221,7 +1221,7 @@ async def test_retry_state_isolation_concurrent_operations(retry_reliability_tes
                 fall properly isolated")"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # Run retry reliability stress tests
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

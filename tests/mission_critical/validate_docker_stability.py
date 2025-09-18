@@ -5,7 +5,7 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
             raise RuntimeError(WebSocket is closed)"
@@ -80,7 +80,7 @@ class ValidationResult:
         warnings: List[str]
         @dataclass
 class StressTestResult:
-        ""Result of a stress test scenario.
+        ""Result of a stress test scenario."
         scenario: str
         total_operations: int
         successful_operations: int
@@ -157,9 +157,9 @@ class DockerStabilityValidator:
         logger.error(
         return False
     def run_comprehensive_validation(self) -> Dict[str, Any]:
-        ""Run all validation scenarios and return comprehensive report.
+        ""Run all validation scenarios and return comprehensive report."
         if not self.setup_validation():
-        return {success: False, error": "Failed to setup validation environment}
+        return {success: False, error": Failed to setup validation environment}"
         try:
             # Run all validation scenarios
         scenarios = [
@@ -641,7 +641,7 @@ class DockerStabilityValidator:
         return ValidationResult(Safe Container Removal, False,
         time.time() - start_time, metrics, errors, warnings)
     def _validate_resource_leak_prevention(self) -> ValidationResult:
-        ""Validate that operations don't leave resource leaks.'
+        ""Validate that operations don't leave resource leaks.'"
         start_time = time.time()
         errors = []
         warnings = []
@@ -1065,7 +1065,7 @@ class DockerStabilityValidator:
         errors=errors[:5]
                                     
     def _stress_high_concurrency(self) -> StressTestResult:
-        ""Stress test high concurrency operations.
+        ""Stress test high concurrency operations."
         total_operations = 20
         successful_operations = 0
         operation_times = []
@@ -1183,12 +1183,12 @@ class DockerStabilityValidator:
         },
         validation_areas": {"
         docker_lifecycle_management: self._get_test_status(Docker Lifecycle Management),
-        "concurrent_operations_stability: self._get_test_status(Concurrent Operations Stability"),
+        "concurrent_operations_stability: self._get_test_status(Concurrent Operations Stability),"
         memory_limits_enforcement: self._get_test_status(Memory Limits Enforcement),
         rate_limiter_functionality: self._get_test_status(Rate Limiter Functionality"),"
         "safe_container_removal: self._get_test_status(Safe Container Removal),"
         resource_leak_prevention: self._get_test_status(Resource Leak Prevention),
-        "docker_daemon_resilience: self._get_test_status(Docker Daemon Resilience"),
+        "docker_daemon_resilience: self._get_test_status(Docker Daemon Resilience),"
         stress_test_suite: self._get_test_status(Stress Test Suite)
         },
         issues_summary: {"
@@ -1268,7 +1268,7 @@ class DockerStabilityValidator:
         pass
         return set()
     def _get_docker_networks(self) -> Set[str]:
-        ""Get current Docker networks.
+        ""Get current Docker networks."
         try:
         result = subprocess.run(['docker', 'network', 'ls', '--format', '{{.Name))'],
         capture_output=True, text=True, timeout=10)

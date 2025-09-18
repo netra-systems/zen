@@ -66,7 +66,7 @@ class ComprehensiveDatabaseConnectivityValidator:
 
     async def validate_auth_service_503_fix(self) -> Dict[str, Any]:
         """Validate that auth service 503 errors are fixed."""
-        logger.info("Validating auth service 503 error fixes...")
+        logger.info("Validating auth service 503 error fixes...)"
 
         result = { }
         'test': 'auth_service_503_fix',
@@ -106,17 +106,17 @@ class ComprehensiveDatabaseConnectivityValidator:
         This simulates the exact logic from auth_service/main.py around line 406
         if is_ready:
         health_response = { }
-        "status": "healthy",
-        "service": "auth-service",
-        "version": "1.0.0",
+        "status": "healthy,"
+        "service": "auth-service,"
+        "version": "1.0.0,"
         "database_status": "connected"
             
         http_status = 200
         else:
         health_response = { }
-        "status": "unhealthy",
-        "service": "auth-service",
-        "version": "1.0.0",
+        "status": "unhealthy,"
+        "service": "auth-service,"
+        "version": "1.0.0,"
         "reason": "Database connectivity failed"
                 
         http_status = 503
@@ -140,7 +140,7 @@ class ComprehensiveDatabaseConnectivityValidator:
 
     async def validate_timeout_handling_fixes(self) -> Dict[str, Any]:
         """Validate that timeout handling fixes work correctly."""
-        logger.info("Validating timeout handling fixes...")
+        logger.info("Validating timeout handling fixes...)"
 
         result = { }
         'test': 'timeout_handling_fixes',
@@ -207,7 +207,7 @@ class ComprehensiveDatabaseConnectivityValidator:
 
     def validate_url_formation_fixes(self) -> Dict[str, Any]:
         """Validate that URL formation fixes work correctly."""
-        logger.info("Validating URL formation fixes...")
+        logger.info("Validating URL formation fixes...)"
 
         result = { }
         'test': 'url_formation_fixes',
@@ -296,8 +296,8 @@ class ComprehensiveDatabaseConnectivityValidator:
         return result
 
     async def validate_concurrent_readiness_checks(self) -> Dict[str, Any]:
-        """Validate that concurrent readiness checks don't block each other."""'
-        logger.info("Validating concurrent readiness check handling...")
+        """Validate that concurrent readiness checks don't block each other.""'"
+        logger.info("Validating concurrent readiness check handling...)"
 
         result = { }
         'test': 'concurrent_readiness_checks',
@@ -351,7 +351,7 @@ class ComprehensiveDatabaseConnectivityValidator:
 
     async def validate_docker_services_health(self) -> Dict[str, Any]:
         """Validate that all docker-compose database services are running and healthy."""
-        logger.info("Validating docker-compose database services health...")
+        logger.info("Validating docker-compose database services health...)"
 
         result = { }
         'test': 'docker_services_health',
@@ -362,18 +362,18 @@ class ComprehensiveDatabaseConnectivityValidator:
 
         try:
         Get docker-compose service connection details from environment
-        postgres_host = self.env.get("POSTGRES_HOST", "localhost")
-        postgres_port = int(self.env.get("DEV_POSTGRES_PORT", "5433"))
-        redis_host = self.env.get("REDIS_HOST", "localhost")
-        redis_port = int(self.env.get("DEV_REDIS_PORT", "6380"))
-        clickhouse_host = self.env.get("CLICKHOUSE_HOST", "localhost")
-        clickhouse_port = int(self.env.get("DEV_CLICKHOUSE_HTTP_PORT", "8124"))
+        postgres_host = self.env.get("POSTGRES_HOST", "localhost)"
+        postgres_port = int(self.env.get("DEV_POSTGRES_PORT", "5433))"
+        redis_host = self.env.get("REDIS_HOST", "localhost)"
+        redis_port = int(self.env.get("DEV_REDIS_PORT", "6380))"
+        clickhouse_host = self.env.get("CLICKHOUSE_HOST", "localhost)"
+        clickhouse_port = int(self.env.get("DEV_CLICKHOUSE_HTTP_PORT", "8124))"
 
         # Test PostgreSQL service health
         try:
         pg_url = ""
         conn = await asyncpg.connect(pg_url, timeout=10.0)
-        await conn.fetchval("SELECT 1")
+        await conn.fetchval("SELECT 1)"
         await conn.close()
         result['services']['postgresql'] = {'healthy': True, 'url': ""}
         except Exception as e:
@@ -395,7 +395,7 @@ class ComprehensiveDatabaseConnectivityValidator:
         port=clickhouse_port,
         connect_timeout=10
                             
-        ch_client.command("SELECT 1")
+        ch_client.command("SELECT 1)"
         ch_client.close()
         result['services']['clickhouse'] = {'healthy': True, 'url': ""}
         except Exception as e:
@@ -414,7 +414,7 @@ class ComprehensiveDatabaseConnectivityValidator:
 
     async def validate_postgresql_connectivity(self) -> Dict[str, Any]:
         """Validate real PostgreSQL database connectivity using docker-compose services."""
-        logger.info("Validating PostgreSQL connectivity with real database...")
+        logger.info("Validating PostgreSQL connectivity with real database...)"
 
         result = { }
         'test': 'postgresql_connectivity',
@@ -427,11 +427,11 @@ class ComprehensiveDatabaseConnectivityValidator:
 
         try:
         Get PostgreSQL connection details from environment
-        postgres_user = self.env.get("POSTGRES_USER", "netra")
-        postgres_password = self.env.get("POSTGRES_PASSWORD", "netra123")
-        postgres_db = self.env.get("POSTGRES_DB", "netra_dev")
-        postgres_host = self.env.get("POSTGRES_HOST", "localhost")
-        postgres_port = int(self.env.get("DEV_POSTGRES_PORT", "5433"))
+        postgres_user = self.env.get("POSTGRES_USER", "netra)"
+        postgres_password = self.env.get("POSTGRES_PASSWORD", "netra123)"
+        postgres_db = self.env.get("POSTGRES_DB", "netra_dev)"
+        postgres_host = self.env.get("POSTGRES_HOST", "localhost)"
+        postgres_port = int(self.env.get("DEV_POSTGRES_PORT", "5433))"
 
         pg_url = ""
 
@@ -439,7 +439,7 @@ class ComprehensiveDatabaseConnectivityValidator:
         try:
         start_time = time.time()
         conn = await asyncpg.connect(pg_url, timeout=15.0)
-        test_result = await conn.fetchval("SELECT version()")
+        test_result = await conn.fetchval("SELECT version())"
         await conn.close()
         result['connection_tests'].append({ })
         'name': 'basic_connection',
@@ -459,9 +459,9 @@ class ComprehensiveDatabaseConnectivityValidator:
         start_time = time.time()
         conn = await asyncpg.connect(pg_url, timeout=15.0)
         async with conn.transaction():
-        await conn.execute("CREATE TEMP TABLE test_table (id SERIAL PRIMARY KEY, data TEXT)")
-        await conn.execute("INSERT INTO test_table (data) VALUES ('test')")
-        count = await conn.fetchval("SELECT COUNT(*) FROM test_table")
+        await conn.execute("CREATE TEMP TABLE test_table (id SERIAL PRIMARY KEY, data TEXT))"
+        await conn.execute("INSERT INTO test_table (data) VALUES ('test'))"
+        count = await conn.fetchval("SELECT COUNT(*) FROM test_table)"
         await conn.close()
         result['transaction_tests'].append({ })
         'name': 'transaction_handling',
@@ -481,7 +481,7 @@ class ComprehensiveDatabaseConnectivityValidator:
         start_time = time.time()
         pool = await asyncpg.create_pool(pg_url, min_size=2, max_size=5, timeout=15.0)
         async with pool.acquire() as conn:
-        result_val = await conn.fetchval("SELECT 42")
+        result_val = await conn.fetchval("SELECT 42)"
         await pool.close()
         result['pool_tests'].append({ })
         'name': 'connection_pool',
@@ -508,7 +508,7 @@ class ComprehensiveDatabaseConnectivityValidator:
 
     async def validate_redis_connectivity(self) -> Dict[str, Any]:
         """Validate real Redis connectivity using docker-compose services."""
-        logger.info("Validating Redis connectivity with real service...")
+        logger.info("Validating Redis connectivity with real service...)"
 
         result = { }
         'test': 'redis_connectivity',
@@ -520,8 +520,8 @@ class ComprehensiveDatabaseConnectivityValidator:
 
         try:
         Get Redis connection details from environment
-        redis_host = self.env.get("REDIS_HOST", "localhost")
-        redis_port = int(self.env.get("DEV_REDIS_PORT", "6380"))
+        redis_host = self.env.get("REDIS_HOST", "localhost)"
+        redis_port = int(self.env.get("DEV_REDIS_PORT", "6380))"
 
         # Test 1: Basic connection and ping
         try:
@@ -579,7 +579,7 @@ class ComprehensiveDatabaseConnectivityValidator:
 
     async def validate_clickhouse_connectivity(self) -> Dict[str, Any]:
         """Validate real ClickHouse connectivity using docker-compose services."""
-        logger.info("Validating ClickHouse connectivity with real service...")
+        logger.info("Validating ClickHouse connectivity with real service...)"
 
         result = { }
         'test': 'clickhouse_connectivity',
@@ -591,10 +591,10 @@ class ComprehensiveDatabaseConnectivityValidator:
 
         try:
         Get ClickHouse connection details from environment
-        clickhouse_host = self.env.get("CLICKHOUSE_HOST", "localhost")
-        clickhouse_port = int(self.env.get("DEV_CLICKHOUSE_HTTP_PORT", "8124"))
-        clickhouse_user = self.env.get("CLICKHOUSE_USER", "netra")
-        clickhouse_password = self.env.get("CLICKHOUSE_PASSWORD", "netra123")
+        clickhouse_host = self.env.get("CLICKHOUSE_HOST", "localhost)"
+        clickhouse_port = int(self.env.get("DEV_CLICKHOUSE_HTTP_PORT", "8124))"
+        clickhouse_user = self.env.get("CLICKHOUSE_USER", "netra)"
+        clickhouse_password = self.env.get("CLICKHOUSE_PASSWORD", "netra123)"
 
         # Test 1: Basic connection
         try:
@@ -606,7 +606,7 @@ class ComprehensiveDatabaseConnectivityValidator:
         password=clickhouse_password,
         connect_timeout=15
             
-        version_result = client.command("SELECT version()")
+        version_result = client.command("SELECT version())"
         client.close()
         result['connection_tests'].append({ })
         'name': 'basic_connection',
@@ -633,7 +633,7 @@ class ComprehensiveDatabaseConnectivityValidator:
                     
 
                     # Test query with data
-        query_result = client.query("SELECT 42 as test_value, 'connectivity_test' as test_string")
+        query_result = client.query("SELECT 42 as test_value, 'connectivity_test' as test_string)"
         rows = query_result.result_rows
 
         client.close()
@@ -668,7 +668,7 @@ class ComprehensiveDatabaseConnectivityValidator:
 
     async def run_comprehensive_validation(self) -> Dict[str, Any]:
         """Run all validation tests and return comprehensive results."""
-        logger.info("Starting comprehensive database connectivity validation...")
+        logger.info("Starting comprehensive database connectivity validation...)"
 
     # Run all validation tests - including new real database connectivity tests
         self.results['docker_services_health'] = await self.validate_docker_services_health()
@@ -716,14 +716,14 @@ Unavailable errors due to database connection timeouts) are working correctly.
 '''
 '''
 pass
-logger.info("=== COMPREHENSIVE DATABASE CONNECTIVITY VALIDATION ===")
+logger.info("=== COMPREHENSIVE DATABASE CONNECTIVITY VALIDATION ===)"
 
         # Run comprehensive validation
 results = await validator.run_comprehensive_validation()
 
         # Display results
     print("")
-print("COMPREHENSIVE DATABASE CONNECTIVITY VALIDATION RESULTS")
+print("COMPREHENSIVE DATABASE CONNECTIVITY VALIDATION RESULTS)"
 print("")
 
 overall_status = results['overall_status']
@@ -752,7 +752,7 @@ http_status = health_check['http_status']
 would_503 = health_check['would_return_503']
 
 print("")
-                    # Removed problematic line: print(f"Error executing agent: {e}")
+                    # Removed problematic line: print(f"Error executing agent: {e})"
 
 if auth_results.get('error'):
     print("")
@@ -772,7 +772,7 @@ print("")
 
 if test.get('timed_out'):
     pass
-print(f"     [U+23F0] Operation timed out")
+print(f"     [U+23F0] Operation timed out)"
 if test.get('error') and not test.get('timed_out'):
     print("")
 
@@ -816,7 +816,7 @@ print("")
 
                                                                             # Summary and assertions
     print("")
-print("VALIDATION SUMMARY")
+print("VALIDATION SUMMARY)"
 print("")
 
 critical_issues = []
@@ -824,46 +824,46 @@ critical_issues = []
                                                                             # Assert auth service 503 fix works
 if not auth_results['success']:
     pass
-critical_issues.append("Auth service 503 error fix failed")
+critical_issues.append("Auth service 503 error fix failed)"
 
                                                                                 # Assert timeout handling works
 if not timeout_results['success']:
     pass
-critical_issues.append("Timeout handling fixes failed")
+critical_issues.append("Timeout handling fixes failed)"
 
                                                                                     # Check for 503 errors specifically
 if auth_results.get('simulated_health_check', {}).get('would_return_503'):
     pass
-critical_issues.append("Auth service would still return 503 Service Unavailable")
+critical_issues.append("Auth service would still return 503 Service Unavailable)"
 
 if critical_issues:
-    print(" FAIL:  CRITICAL ISSUES FOUND:")
+    print(" FAIL:  CRITICAL ISSUES FOUND:)"
 for issue in critical_issues:
     print("")
 
 print(f" )"
 These are PRIMARY BLOCKERS that prevent full system operation.")"
 else:
-    print(" PASS:  ALL CRITICAL FIXES WORKING:")
-print("  - Auth service 503 errors fixed")
-print("  - Database connection timeouts handled")
-print("  - System can start and respond to health checks")
+    print(" PASS:  ALL CRITICAL FIXES WORKING:)"
+print("  - Auth service 503 errors fixed)"
+print("  - Database connection timeouts handled)"
+print("  - System can start and respond to health checks)"
 
                                                                                                     # Assert overall success
-assert results['overall_status'] != 'failure', ( )
+assert results['overall_status'] != 'failure', "( )"
 f"Comprehensive database connectivity validation failed. "
 ""
 f"This indicates the PRIMARY BLOCKER (503 Service Unavailable) is not fully resolved."
                                                                                                     
 
                                                                                                     # Specific assertion for 503 errors
-assert not auth_results.get('simulated_health_check', {}).get('would_return_503'), ( )
+assert not auth_results.get('simulated_health_check', "{}).get('would_return_503'), ( )"
 "Auth service health check simulation would still return 503 Service Unavailable. "
 "This is the PRIMARY BLOCKER that must be fixed for system operation."
                                                                                                     
 
                                                                                                     # Assert auth service readiness works
-assert auth_results['success'], ( )
+assert auth_results['success'], "( )"
 f"Auth service database readiness check failed. "
 ""
 f"This will cause 503 errors in production."
@@ -873,13 +873,13 @@ if results['overall_status'] == 'success':
     pass
 print(f" )"
 CELEBRATION:  COMPREHENSIVE VALIDATION SUCCESSFUL!")"
-print(f"The PRIMARY BLOCKER (503 Service Unavailable errors) has been resolved.")
-print(f"All services should now start successfully and respond to health checks.")
+print(f"The PRIMARY BLOCKER (503 Service Unavailable errors) has been resolved.)"
+print(f"All services should now start successfully and respond to health checks.)"
 else:
     pass
 print(f" )"
 WARNING: [U+FE0F]  PARTIAL SUCCESS - Some non-critical issues remain")"
-print(f"The PRIMARY BLOCKER is resolved but some optimizations could be made.")
+print(f"The PRIMARY BLOCKER is resolved but some optimizations could be made.)"
 
 @pytest.mark.asyncio
     async def test_auth_service_health_endpoint_simulation(self):
@@ -892,7 +892,7 @@ logic to ensure it no longer returns 503 Service Unavailable.
 '''
 '''
 pass
-logger.info("=== AUTH SERVICE HEALTH ENDPOINT SIMULATION ===")
+logger.info("=== AUTH SERVICE HEALTH ENDPOINT SIMULATION ===)"
 
                                                                                                                 Simulate the exact logic from auth_service/main.py health endpoint
 auth_conn = AuthDatabaseConnection()
@@ -901,7 +901,7 @@ try:
                                                                                                                     # This is the logic around line 406 in auth_service/main.py
 environment = AuthConfig.get_environment()
 
-if environment in ["staging", "production"]:
+if environment in ["staging", "production]:"
                                                                                                                         # Check database connectivity (this was timing out)
 start_time = time.time()
 
@@ -919,11 +919,11 @@ print("")
 if not db_ready:
                                                                                                                             # This would cause 503 Service Unavailable
 health_response = { }
-"status": "unhealthy",
-"service": "auth-service",
-"version": "1.0.0",
-"reason": "Database connectivity failed",
-"environment": environment
+"status": "unhealthy,"
+"service": "auth-service,"
+"version": "1.0.0,"
+"reason": "Database connectivity failed,"
+"environment: environment"
                                                                                                                             
 http_status = 503
 
@@ -933,38 +933,38 @@ print("")
 else:
                                                                                                                                 # This would return healthy status
 health_response = { }
-"status": "healthy",
-"service": "auth-service",
-"version": "1.0.0",
-"database_status": "connected",
-"environment": environment
+"status": "healthy,"
+"service": "auth-service,"
+"version": "1.0.0,"
+"database_status": "connected,"
+"environment: environment"
                                                                                                                                 
 http_status = 200
 
-print(f" PASS:  Would return 200 OK")
+print(f" PASS:  Would return 200 OK)"
 print("")
 
 else:
                                                                                                                                     # Development environment - basic health check
 health_response = { }
-"status": "healthy",
-"service": "auth-service",
+"status": "healthy,"
+"service": "auth-service,"
 "version": "1.0.0"
                                                                                                                                     
 http_status = 200
 db_ready = True
 
-print(f" PASS:  Development environment - would return 200 OK")
+print(f" PASS:  Development environment - would return 200 OK)"
 
                                                                                                                                     # Clean up
 await auth_conn.close(timeout=5.0)
 
                                                                                                                                     # Assertions
-assert db_ready, ( )
+assert db_ready, "( )"
 "Database readiness check failed - this would cause 503 Service Unavailable errors"
                                                                                                                                     
 
-assert http_status == 200, ( )
+assert http_status == 200, "( )"
 ""
 f"This indicates the 503 error fix is not working."
                                                                                                                                     
@@ -978,11 +978,11 @@ await auth_conn.close(timeout=5.0)  # Ensure cleanup
 pytest.fail("")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                                                                                                                             # Run comprehensive validation when executed directly
 async def main():
 pass
-print("=== COMPREHENSIVE DATABASE CONNECTIVITY VALIDATION ===")
+print("=== COMPREHENSIVE DATABASE CONNECTIVITY VALIDATION ===)"
 
 validator = ComprehensiveDatabaseConnectivityValidator()
 results = await validator.run_comprehensive_validation()
@@ -1001,7 +1001,7 @@ if overall_status == 'success':
     pass
 print(f" )"
 CELEBRATION:  All database connectivity fixes working!")"
-print(f"The PRIMARY BLOCKER (503 errors) has been resolved.")
+print(f"The PRIMARY BLOCKER (503 errors) has been resolved.)"
 else:
     pass
 print(f" )"

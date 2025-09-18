@@ -52,7 +52,7 @@ class MockDuplicationViolation:
 
 
 class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
-    ""
+    """
     Mission Critical test suite to detect and validate SSOT mock compliance.
     
     This test is designed to FAIL initially to expose current violations,
@@ -60,7 +60,7 @@ class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
     
     
     def setup_method(self, method):
-        ""Set up test environment.
+        ""Set up test environment."
         super().setup_method(method)
         self.project_root = Path(/Users/anthony/Desktop/netra-apex)"
         self.project_root = Path(/Users/anthony/Desktop/netra-apex)"
@@ -97,7 +97,7 @@ class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
         }
         
     def test_detect_agent_mock_duplications(self):
-        "
+        """
         "
         CRITICAL: Detect duplicate agent mock implementations.
         
@@ -122,7 +122,7 @@ class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
             )
             
     def test_detect_websocket_mock_duplications(self):
-    ""
+    """
         HIGH: Detect duplicate WebSocket mock implementations.
         
         Expected violations: 120+ duplicate WebSocket mocks
@@ -145,7 +145,7 @@ class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
             )
             
     def test_detect_database_mock_duplications(self):
-        "
+        """
         "
         HIGH: Detect duplicate database mock implementations.
         
@@ -170,7 +170,7 @@ class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
             )
             
     def test_detect_generic_mock_duplications(self):
-    "
+        """
     "
         MEDIUM: Detect generic mock patterns that should use SSOT factory.
         
@@ -206,7 +206,7 @@ class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
             )
             
     def test_comprehensive_mock_violation_report(self):
-    "
+        """
     "
         Generate comprehensive SSOT mock violation report.
         
@@ -326,7 +326,7 @@ BUSINESS IMPACT:
         return unknown_mock
         
     def _determine_severity(self, mock_type: str) -> str:
-        ""Determine violation severity based on mock type.
+        ""Determine violation severity based on mock type."
         severity_map = {
             'agent_mock': 'CRITICAL',
             'websocket_mock': 'HIGH', 
@@ -359,5 +359,5 @@ BUSINESS IMPACT:
         formatted = []
         for mock_type, count in sorted(violation_counts.items(), key=lambda x: x[1], reverse=True):
             formatted.append(f- {mock_type}: {count} violations")"
-        return "\n".join(formatted)
+        return "\n.join(formatted)"
 ))))))))

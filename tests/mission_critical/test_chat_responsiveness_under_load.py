@@ -67,7 +67,7 @@ logger = get_logger(__name__)
 
 
 class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
-    ""
+    """
     Comprehensive tests for chat responsiveness under concurrent load conditions.
 
     Validates that the chat system maintains proper responsiveness and isolation
@@ -110,7 +110,7 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
                        fsuccess_rate={self.test_metrics['successful_messages']/(self.test_metrics['successful_messages'] + self.test_metrics['failed_messages']:.2%})
 
     async def _create_user_execution_context(self, user_id: str) -> UserExecutionContext:
-        ""Create isolated user execution context for testing.
+        ""Create isolated user execution context for testing."
         try:
             context = UserExecutionContext.create_from_request(
                 user_id=user_id,
@@ -270,7 +270,7 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_user_context_isolation_under_load(self):
-        ""
+        """
         Test that user contexts remain properly isolated during concurrent operations.
 
         Validates that concurrent user sessions don't interfere with each other'
@@ -293,9 +293,9 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
 
         for context in created_contexts:
             # Check uniqueness
-            assert context.user_id not in seen_user_ids, fDuplicate user_id: {context.user_id}
+            assert context.user_id not in seen_user_ids, "fDuplicate user_id: {context.user_id}"
             assert context.thread_id not in seen_thread_ids, fDuplicate thread_id: {context.thread_id}""
-            assert context.session_id not in seen_session_ids, fDuplicate session_id: {context.session_id}
+            assert context.session_id not in seen_session_ids, "fDuplicate session_id: {context.session_id}"
 
             # Add to seen sets
             seen_user_ids.add(context.user_id)
@@ -303,14 +303,14 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
             seen_session_ids.add(context.session_id)
 
             # Validate context integrity
-            assert context.is_authenticated, User context should be authenticated
+            assert context.is_authenticated, "User context should be authenticated"
             assert context.user_id in user_ids, f"Unexpected user_id: {context.user_id}"
 
         logger.info(fSuccessfully validated isolation for {len(created_contexts)} concurrent user contexts")"
 
     @pytest.mark.asyncio
     async def test_response_time_consistency_under_load(self):
-    "
+        """
     "
         Test that response times remain consistent under load conditions.
 
@@ -366,5 +366,5 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
 if __name__ == __main__:"
 if __name__ == __main__:"
     # Support direct execution for debugging
-    pytest.main([__file__, "-v, -s")
+    pytest.main([__file__, "-v, -s)"
 )))))))))

@@ -57,7 +57,7 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
             TESTING: "true,"
             ENVIRONMENT": test,"
             TEST_DISABLE_REDIS: false,
-            REDIS_URL": "redis://localhost:6381/0  # Test Redis port
+            REDIS_URL": redis://localhost:6381/0  # Test Redis port"
         }
         
         # Apply test environment
@@ -138,7 +138,7 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         self.assertFalse(exists_after_delete, Key should not exist after deletion)
     
     async def test_ssot_redis_circuit_breaker_functionality(self):
-        ""Test circuit breaker prevents cascading failures.
+        ""Test circuit breaker prevents cascading failures."
         # Get circuit breaker status
         status = self.redis_manager._circuit_breaker.get_status()
         self.assertIn(state, status)"
@@ -208,7 +208,7 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         session_id = test_session_123"
         session_data = {
             user_id: test_user,
-            "permissions: [read", write],
+            "permissions: [read, write],"
             created_at: "2025-9-16T10:0:00Z"
         }
         
@@ -469,7 +469,7 @@ class TestRedisMultiUserIsolation(SSotAsyncTestCase):
         user1_run_id = run_user1_12345""
         user2_run_id = run_user2_67890
         
-        user1_state = {agent: "processing, step": 1, tools: [search]}
+        user1_state = {agent: "processing, step: 1, tools: [search]}"
         user2_state = {"agent: waiting", step: 3, tools: [calculator]}"
         user2_state = {"agent: waiting", step: 3, tools: [calculator]}"
         
@@ -489,5 +489,5 @@ class TestRedisMultiUserIsolation(SSotAsyncTestCase):
 
 
 if __name__ == __main__":"
-    pytest.main([__file__, "-v, --tb=short")
+    pytest.main([__file__, "-v, --tb=short)"
 )

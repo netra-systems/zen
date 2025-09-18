@@ -46,10 +46,10 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
         ]
 
     def test_single_execution_engine_factory_exists(self):
-        ""Validate only one ExecutionEngine factory is available as SSOT.
+        ""Validate only one ExecutionEngine factory is available as SSOT."
         try:
             # Test canonical factory import
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 ExecutionEngineFactory
             )
             
@@ -73,7 +73,7 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
     def test_factory_creates_only_user_execution_engine_instances(self):
         Validate factory only creates UserExecutionEngine instances, not legacy types.""
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 ExecutionEngineFactory
             )
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -148,9 +148,9 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
         )
 
     def test_factory_thread_safety_concurrent_creation(self):
-        ""Validate factory creates isolated engines safely during concurrent access.
+        ""Validate factory creates isolated engines safely during concurrent access."
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 ExecutionEngineFactory
             )
             
@@ -229,7 +229,7 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
     def test_factory_parameter_validation(self):
         "Validate factory properly validates parameters and handles edge cases."
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 ExecutionEngineFactory
             )
             
@@ -252,9 +252,9 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
             self.skipTest(ExecutionEngine factory not available during consolidation)
 
     def test_factory_memory_management(self):
-        "Validate factory doesn't create memory leaks or retain references."'
+        "Validate factory doesn't create memory leaks or retain references.'"
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 ExecutionEngineFactory
             )
             
@@ -296,7 +296,7 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
         Validate factory creates engines properly integrated with WebSocket bridges."
         Validate factory creates engines properly integrated with WebSocket bridges."
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 ExecutionEngineFactory
             )
             
@@ -329,7 +329,7 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
         Validate factory creates engines with proper cleanup capabilities."
         Validate factory creates engines with proper cleanup capabilities."
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 ExecutionEngineFactory
             )
             
@@ -361,7 +361,7 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
             self.skipTest(ExecutionEngine factory not available during consolidation)
 
     def test_no_legacy_factory_patterns_in_codebase(self):
-        ""Validate no legacy factory patterns exist in production code.
+        ""Validate no legacy factory patterns exist in production code."
         from pathlib import Path
         
         netra_backend_root = Path(__file__).parent.parent.parent / netra_backend"
@@ -404,7 +404,7 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
     def test_factory_performance_benchmarks(self):
         "Validate factory creation performance meets requirements."
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 ExecutionEngineFactory
             )
             

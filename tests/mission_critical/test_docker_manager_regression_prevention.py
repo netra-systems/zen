@@ -185,7 +185,7 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
         )
 
     def test_prevent_mock_implementation_leakage(self):
-        ""
+        """
         REGRESSION PREVENTION: Prevents mock implementations from leaking into production.
 
         PROTECTION GOAL:
@@ -246,7 +246,7 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
         )
 
     def test_prevent_configuration_inconsistencies(self):
-        "
+        """
         "
         REGRESSION PREVENTION: Prevents Docker configuration inconsistencies.
 
@@ -305,7 +305,7 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
             )
 
     def test_enforce_docker_manager_naming_conventions(self):
-    "
+        """
     "
         REGRESSION PREVENTION: Enforces Docker Manager naming conventions.
 
@@ -381,7 +381,7 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
             )
 
     def _should_skip_file(self, file_path: Path) -> bool:
-        "
+        """
         "
         Determine if a file should be skipped during analysis.
 

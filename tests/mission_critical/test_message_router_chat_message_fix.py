@@ -35,7 +35,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 
 
 class ChatMessageBusinessValueTests:
-    ""
+    """
     Test suite focused on business value of 'chat_message' type handling.
     
     CRITICAL: These tests validate the core chat functionality that drives 90% of our business value.
@@ -44,7 +44,7 @@ class ChatMessageBusinessValueTests:
     
     @pytest.mark.asyncio
     async def test_chat_message_business_value_blocked_mission_critical(self):
-        "
+        """
         "
         MISSION CRITICAL: Test that 'chat_message' type routing success enables business value.
         
@@ -65,7 +65,7 @@ class ChatMessageBusinessValueTests:
         chat_message = {
             type": chat_message,  # THIS IS THE FIXED TYPE - NOW IN LEGACY_MESSAGE_TYPE_MAP"
             payload: {
-                "content: Help me optimize my marketing campaign with AI agents",
+                "content": "Help me optimize my marketing campaign with AI agents","
                 requires_ai: True,
                 business_priority: "high,"
                 user_context": enterprise_customer"
@@ -108,7 +108,7 @@ class ChatMessageBusinessValueTests:
     
     @pytest.mark.asyncio 
     async def test_chat_message_not_in_legacy_mapping_fails_critical(self):
-    "
+        """
     "
         CRITICAL: Test that 'chat_message' is properly included in LEGACY_MESSAGE_TYPE_MAP.
         
@@ -150,13 +150,13 @@ class ChatMessageBusinessValueTests:
             after the fix is applied to LEGACY_MESSAGE_TYPE_MAP"
         )
         
-        print(f" PASS:  CONFIRMED: 'chat_message' is recognized as valid message type)")
+        print(f" PASS:  CONFIRMED: 'chat_message' is recognized as valid message type))"
         print(f PASS:  CONFIRMED: Presence in LEGACY_MESSAGE_TYPE_MAP resolves the issue)"
         print(f PASS:  CONFIRMED: Presence in LEGACY_MESSAGE_TYPE_MAP resolves the issue)"
     
     @pytest.mark.asyncio
     async def test_chat_message_frontend_compatibility_broken(self):
-    "
+        """
     "
         Test that proper 'chat_message' mapping enables frontend compatibility.
         
@@ -187,7 +187,7 @@ class ChatMessageBusinessValueTests:
             payload: {"
                 content": Can you help me analyze this data with AI?,"
                 frontend_metadata: {
-                    "component: ChatInputBox",
+                    "component: ChatInputBox,"
                     user_session: str(auth_context.websocket_client_id),
                     chat_ui_version: "2.1.0"
                 },
@@ -230,7 +230,7 @@ class ChatMessageBusinessValueTests:
     
     @pytest.mark.asyncio
     async def test_chat_message_agent_workflow_blocked(self):
-        ""
+        """
         Test that 'chat_message' unknown type prevents agent workflow initiation.
         
         This validates that the missing mapping blocks the core AI agent workflows
@@ -248,7 +248,7 @@ class ChatMessageBusinessValueTests:
             type: chat_message,  # Should map to a type that triggers agent handling
             payload: {"
             payload: {"
-                "content: Run a comprehensive analysis of my business metrics,"
+                "content": "Run a comprehensive analysis of my business metrics,""
                 agent_requirements: {
                     require_multi_agent": True,"
                     agents_needed: [data_analysis, business_optimization],"
@@ -257,7 +257,7 @@ class ChatMessageBusinessValueTests:
                 },
                 expected_output: detailed_report_with_insights
             },
-            message_id": f"agent_req_{int(time.time())},
+            message_id": fagent_req_{int(time.time())},"
             user_id: user_id
         }
         
@@ -284,10 +284,10 @@ class ChatMessageBusinessValueTests:
         
         print(f[U+1F916] AGENT IMPACT: 'chat_message' prevents agent workflow initiation)"
         print(f[U+1F916] AGENT IMPACT: 'chat_message' prevents agent workflow initiation)"
-        print(f"[U+1F916] AGENT IMPACT: Multi-agent collaboration requests are not processed)")
+        print(f"[U+1F916] AGENT IMPACT: Multi-agent collaboration requests are not processed))"
         print(f[U+1F916] AGENT IMPACT: Users request AI help but get acknowledgment only)"
         print(f[U+1F916] AGENT IMPACT: Users request AI help but get acknowledgment only)"
-        print(f"[U+1F916] BUSINESS VALUE LOST: Core AI functionality is inaccessible via chat)")
+        print(f"[U+1F916] BUSINESS VALUE LOST: Core AI functionality is inaccessible via chat))"
 
 
 class ChatMessageTechnicalValidationTests:
@@ -300,7 +300,7 @@ class ChatMessageTechnicalValidationTests:
     
     @pytest.mark.asyncio
     async def test_chat_message_detected_as_unknown_type(self):
-    "
+        """
     "
         Direct test of MessageRouter._is_unknown_message_type() method.
         
@@ -360,7 +360,7 @@ class ChatMessageTechnicalValidationTests:
         test_message = {
             type: chat_message",  # Unknown type"
             "payload: {content: Test message},"
-            message_id": "norm_test_1
+            message_id": norm_test_1"
         }
         
         # The router should detect unknown type and send acknowledgment
@@ -387,14 +387,14 @@ class ChatMessageTechnicalValidationTests:
         
         print(f[U+1F4CB] NORMALIZATION BYPASS CONFIRMED:)"
         print(f[U+1F4CB] NORMALIZATION BYPASS CONFIRMED:)"
-        print(f"   - Unknown check happens first: {is_unknown})")
+        print(f"   - Unknown check happens first: {is_unknown}))"
         print(f   - Normalization result (if it ran): {normalized})
-        print(f"   - But normalization is bypassed for unknown types")
+        print(f"   - But normalization is bypassed for unknown types)"
         print(f   - Router sends acknowledgment instead of processing message)
     
     @pytest.mark.asyncio
     async def test_websocket_unknown_message_acknowledgment_format(self):
-    ""
+    """
         Test the exact format of acknowledgments sent for unknown message types.
         
         This validates the WebSocket response format when 'chat_message' is unknown.
@@ -412,7 +412,7 @@ class ChatMessageTechnicalValidationTests:
             payload: {"
             payload: {"
                 content": Test acknowledgment format,"
-                metadata: {test: acknowledgment_format"}"
+                meta"data": {"test: acknowledgment_format""}"
             },
             message_id: ack_test_msg_123,
             user_id: user_id,"
@@ -424,26 +424,26 @@ class ChatMessageTechnicalValidationTests:
         result = await router.route_message(user_id, mock_websocket, unknown_message)
         
         # Verify acknowledgment was sent
-        assert mock_websocket.send_json.called, Should send JSON response for unknown type
+        assert mock_websocket.send_json.called, "Should send JSON response for unknown type"
         
         # Examine the acknowledgment format
         ack_response = mock_websocket.send_json.call_args[0][0]
         
         # Validate acknowledgment structure
-        assert ack_response.get(type") == "ack, Response type should be 'ack'
-        assert ack_response.get(received_type) == chat_message", "Should echo received type
+        assert ack_response.get(type") == "ack, "Response type should be 'ack'"
+        assert ack_response.get(received_type) == chat_message", Should echo received type"
         assert ack_response.get(status) == acknowledged, Should indicate acknowledgment""
-        assert ack_response.get(user_id) == user_id, Should include user ID
+        assert ack_response.get(user_id) == user_id, "Should include user ID"
         assert timestamp in ack_response, Should include timestamp"
         assert timestamp in ack_response, Should include timestamp"
         
         # Verify the acknowledgment indicates unknown type handling
-        print(f"[U+1F4E8] ACKNOWLEDGMENT FORMAT VALIDATION:)")
+        print(f"[U+1F4E8] ACKNOWLEDGMENT FORMAT VALIDATION:))"
         print(f   - Type: {ack_response.get('type')})
-        print(f"   - Received Type: {ack_response.get('received_type')})")
+        print(f"   - Received Type: {ack_response.get('received_type')}))"
         print(f   - Status: {ack_response.get('status'")})"
         print(f   - Contains timestamp: {'timestamp' in ack_response})
-        print(f   - Full response: {json.dumps(ack_response, indent=2")}")
+        print(f   - Full response: {json.dumps(ack_response, indent=2")})"
         
         # CRITICAL ASSERTION: This is what users/frontend receive for unknown types
         assert ack_response.get(received_type) == chat_message, (
@@ -453,7 +453,7 @@ class ChatMessageTechnicalValidationTests:
 
 
 class ChatMessageRouterIntegrationTests:
-    ""
+    """
     Integration tests for MessageRouter with 'chat_message' type.
     
     These tests validate the complete message routing pipeline and
@@ -462,7 +462,7 @@ class ChatMessageRouterIntegrationTests:
     
     @pytest.mark.asyncio
     async def test_message_router_rejects_chat_message_integration(self):
-        "
+        """
         "
         Integration test: Full message routing pipeline with 'chat_message'.
         
@@ -495,13 +495,13 @@ class ChatMessageRouterIntegrationTests:
                 metadata: {"
                     "thread_id: str(auth_context.thread_id),"
                     session_id: str(auth_context.websocket_client_id),
-                    "client_version: 2.1.0",
+                    "client_version: 2.1.0,"
                     request_priority: normal
                 },
                 context: {"
                 context: {"
                     user_preferences": {ai_complexity: detailed},"
-                    "business_domain: e-commerce", 
+                    "business_domain: e-commerce, "
                     data_sources: [sales_db, analytics_api]"
                     data_sources: [sales_db, analytics_api]"
                 }
@@ -522,7 +522,7 @@ class ChatMessageRouterIntegrationTests:
         
         # Check routing statistics
         stats = router.get_stats()
-        assert stats[messages_routed] > 0, Message should be counted as routed
+        assert stats[messages_routed] > 0, "Message should be counted as routed"
         assert stats[unhandled_messages] > 0, Message should be counted as unhandled"
         assert stats[unhandled_messages] > 0, Message should be counted as unhandled"
         
@@ -551,7 +551,7 @@ class ChatMessageRouterIntegrationTests:
     
     @pytest.mark.asyncio
     async def test_router_handler_bypass_for_chat_message(self):
-        "
+        """
         "
         Test that 'chat_message' bypasses all message handlers due to unknown type detection.
         
@@ -589,7 +589,7 @@ class ChatMessageRouterIntegrationTests:
         
         # Verify handlers were bypassed
         user_handler_initial = initial_handler_stats.get(UserMessageHandler, {}.get(processed, 0)
-        user_handler_final = final_handler_stats.get("UserMessageHandler, {}.get(processed", 0)
+        user_handler_final = final_handler_stats.get("UserMessageHandler, {}.get(processed, 0)"
         
         # CRITICAL ASSERTION: UserMessageHandler should not have processed this message
         assert user_handler_final == user_handler_initial, (
@@ -603,7 +603,7 @@ class ChatMessageRouterIntegrationTests:
         assert response.get("received_type) == chat_message, Should acknowledge unknown type"
         
         # Check routing counters
-        assert final_stats[unhandled_messages") > initial_stats["unhandled_messages), (
+        assert final_stats[unhandled_messages") > initial_stats[unhandled_messages), ("
             Unhandled message count should increase
         )
         

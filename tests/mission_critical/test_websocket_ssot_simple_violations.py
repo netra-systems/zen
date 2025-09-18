@@ -24,7 +24,7 @@ class TestWebSocketSSotSimpleViolations(SSotBaseTestCase):
         self.violations_found = []
 
     def test_multiple_websocket_implementations_exist(self):
-        "
+        """
         "
         EXPECTED TO FAIL: This test should detect multiple WebSocket implementations.
 
@@ -38,7 +38,7 @@ class TestWebSocketSSotSimpleViolations(SSotBaseTestCase):
             (netra_backend.app.websocket_core.manager, WebSocketManager"),"
             ("netra_backend.app.websocket_core.unified_manager, _UnifiedWebSocketManagerImplementation),"
             (netra_backend.app.websocket_core.canonical_import_patterns, UnifiedWebSocketManager),
-            ("netra_backend.app.websocket_core.websocket_manager_factory, WebSocketManagerFactory")
+            ("netra_backend.app.websocket_core.websocket_manager_factory, WebSocketManagerFactory)"
         ]
 
         for module_path, class_name in test_imports:
@@ -53,7 +53,7 @@ class TestWebSocketSSotSimpleViolations(SSotBaseTestCase):
                 pass
 
         # Log found implementations
-        print(f"\nFound {len(implementations)} WebSocket implementations:")
+        print(f"\nFound {len(implementations)} WebSocket implementations:)"
         for impl in implementations:
             print(f  - {impl})
 
@@ -70,7 +70,7 @@ class TestWebSocketSSotSimpleViolations(SSotBaseTestCase):
         print(fSSOT VIOLATION CONFIRMED: {len(implementations)} implementations detected)"
 
     def test_factory_patterns_exist(self):
-    "
+        """
     "
         EXPECTED TO FAIL: This test should detect multiple factory patterns.
         "
@@ -101,7 +101,7 @@ class TestWebSocketSSotSimpleViolations(SSotBaseTestCase):
             fShould be exactly 1. Factories: {factories}
         )
 
-        print(f"FACTORY VIOLATION CONFIRMED: {len(factories)} factories detected)")
+        print(f"FACTORY VIOLATION CONFIRMED: {len(factories)} factories detected))"
 
     def tearDown(self"):"
         Report violations found."
@@ -111,9 +111,9 @@ class TestWebSocketSSotSimpleViolations(SSotBaseTestCase):
             print(WEBSOCKET SSOT VIOLATIONS DETECTED")"
             print(=*60)
             for i, violation in enumerate(self.violations_found, 1):
-                print(f"{i:2d}. {violation}")
+                print(f"{i:2d}. {violation})"
             print(=*60)
-            print(f"TOTAL VIOLATIONS: {len(self.violations_found)}")
+            print(f"TOTAL VIOLATIONS: {len(self.violations_found)})"
             print(=*60)
 
 

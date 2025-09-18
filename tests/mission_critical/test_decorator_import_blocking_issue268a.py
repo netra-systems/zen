@@ -34,7 +34,7 @@ class DecoratorImportBlockingIssue268ATests(SSotBaseTestCase):
 "
     
     def test_experimental_test_decorator_import_fails_before_fix(self):
-    "
+        """
     "
         REPRODUCTION TEST: Demonstrates the exact import failure blocking unit test discovery.
         
@@ -68,7 +68,7 @@ class DecoratorImportBlockingIssue268ATests(SSotBaseTestCase):
             self.fail(fEXPECTED FAILURE BEFORE FIX: Cannot import experimental_test: {e})"
     
     def test_all_required_decorators_available_for_unit_tests(self):
-    "
+        """
     "
         COMPREHENSIVE TEST: Validates all decorators needed by unit tests are importable.
         
@@ -99,7 +99,7 @@ class DecoratorImportBlockingIssue268ATests(SSotBaseTestCase):
             self.fail(fMissing decorators blocking unit test discovery: {missing_decorators})
     
     def test_unit_test_discovery_count_validation(self):
-        "
+        """
         "
         VALIDATION TEST: Verifies that fixing imports enables discovery of expected test count.
         
@@ -150,7 +150,7 @@ class DecoratorImportBlockingIssue268ATests(SSotBaseTestCase):
             self.fail(fTest discovery failed: {e})"
     
     def test_specific_failing_unit_test_files_now_discoverable(self):
-    "
+        """
     "
         TARGETED TEST: Validates specific files that were failing are now discoverable.
         
@@ -215,7 +215,7 @@ class PostFixValidationTests(SSotBaseTestCase):
     
     @pytest.mark.integration  
     def test_full_unit_test_suite_runs_successfully(self):
-    ""
+    """
         INTEGRATION TEST: Validates that the full unit test suite can run after fix.
         
         BVJ: Platform | System Validation | Ensures fix enables full testing capability
@@ -248,7 +248,7 @@ class PostFixValidationTests(SSotBaseTestCase):
                     self.fail(fImport errors still present: {result.stderr})"
                 else:
                     # Test failures are acceptable, import errors are not
-                    print(f"Tests collected successfully, some may have failed: {result.stdout})")
+                    print(f"Tests collected successfully, some may have failed: {result.stdout}))"
             
             # Verify substantial test discovery
             output = result.stdout + result.stderr

@@ -98,7 +98,7 @@ class IntegrationTestResult:
 
     @dataclass
 class ServiceConfiguration:
-    ""Configuration for a service in integration testing.
+    ""Configuration for a service in integration testing."
     name: str
     image: str
     ports: Dict[str, int]
@@ -545,7 +545,7 @@ class DockerIntegrationFramework:
 
         @pytest.fixture
     def integration_framework():
-        ""Pytest fixture providing Docker integration framework.
+        ""Pytest fixture providing Docker integration framework."
         framework = DockerIntegrationFramework()
         yield framework
         framework.cleanup_scenario_resources()
@@ -663,9 +663,9 @@ class TestDockerMultiServiceIntegration:
                                                                             
 
                                                                             # Assertions
-        assert result.success, formatted_string
+        assert result.success, "formatted_string"
         assert result.services_deployed >= 3, formatted_string""
-        assert result.operations_failed <= 1, formatted_string
+        assert result.operations_failed <= 1, "formatted_string"
 
         logger.info(formatted_string)"
         logger.info(formatted_string)"
@@ -763,11 +763,11 @@ class TestDockerMultiServiceIntegration:
                                                     
 
                                                     # Assertions
-        assert result.success, formatted_string
+        assert result.success, "formatted_string"
         assert result.services_deployed >= 2, ""
 
         dependency_success_rate = result.performance_metrics.get('dependency_success_rate', 0)
-        assert dependency_success_rate >= 80, formatted_string
+        assert dependency_success_rate >= 80, "formatted_string"
 
         logger.info(""
 
@@ -897,7 +897,7 @@ class TestDockerCIPipelineSimulation:
                                                                         
 
                                                                         # Assertions
-        assert result.success, formatted_string
+        assert result.success, "formatted_string"
 
         build_success_rate = result.performance_metrics.get('build_success_rate', 0)
         assert build_success_rate >= 75, formatted_string"
@@ -1033,7 +1033,7 @@ class TestDockerCIPipelineSimulation:
 
                                                                                     # Assertions
         assert result.success, "formatted_string"
-        assert result.services_deployed >= 2, formatted_string
+        assert result.services_deployed >= 2, "formatted_string"
 
         deployment_success_rate = result.performance_metrics.get('deployment_success_rate', 0)
         assert deployment_success_rate >= 80, ""
@@ -1117,7 +1117,7 @@ class TestDockerInfrastructureServiceStartup:
                                 
 
         assert result.success, "formatted_string"
-        assert result.services_deployed >= 3, formatted_string
+        assert result.services_deployed >= 3, "formatted_string"
 
         avg_startup = result.performance_metrics.get('average_startup_time', 999)
         assert avg_startup < 30, ""
@@ -1228,7 +1228,7 @@ class TestDockerInfrastructureServiceStartup:
         alpine_startup_scenario
                                         
 
-        assert result.success, formatted_string
+        assert result.success, "formatted_string"
 
         avg_alpine = result.performance_metrics.get('average_alpine_startup', 999)
         assert avg_alpine < 15, formatted_string"
@@ -1370,7 +1370,7 @@ class TestDockerInfrastructureServiceStartup:
         assert success_rate >= 80, "formatted_string"
 
         avg_time = result.performance_metrics.get('average_concurrent_deploy_time', 999)
-        assert avg_time < 30, formatted_string
+        assert avg_time < 30, "formatted_string"
 
         logger.info(""
 
@@ -1494,7 +1494,7 @@ class TestDockerInfrastructureServiceStartup:
         assert result.success, "formatted_string"
 
         memory_used = result.performance_metrics.get('total_memory_allocated_mb', 999)
-        assert memory_used <= 500, formatted_string
+        assert memory_used <= 500, "formatted_string"
 
         efficiency = result.performance_metrics.get('memory_efficiency_services_per_100mb', 0)
         assert efficiency >= 0.5, ""
@@ -1537,7 +1537,7 @@ class TestDockerInfrastructureServiceStartup:
             # Create initial container that will cause conflict
         first_result = execute_docker_command([)
         'docker', 'run', '-d', '--name', test_case['first_container'],
-        '-p', "formatted_string if 'nginx' in test_case['image'] else formatted_string",
+        '-p', "formatted_string if 'nginx' in test_case['image'] else formatted_string,"
         test_case['image'], 'sleep', '30'
             
 
@@ -1629,7 +1629,7 @@ class TestDockerInfrastructureServiceStartup:
         startup_recovery_scenario
                                     
 
-        assert result.success, formatted_string
+        assert result.success, "formatted_string"
 
         recovery_rate = result.performance_metrics.get('recovery_success_rate', 0)
         assert recovery_rate >= 80, formatted_string"
@@ -1793,7 +1793,7 @@ class TestDockerInfrastructureHealthMonitoring:
         assert result.success, ""
 
         health_rate = result.performance_metrics.get('health_success_rate', 0)
-        assert health_rate >= 80, formatted_string
+        assert health_rate >= 80, "formatted_string"
 
         avg_time = result.performance_metrics.get('average_health_check_time', 999)
         assert avg_time < 20, formatted_string"
@@ -1933,7 +1933,7 @@ class TestDockerInfrastructureHealthMonitoring:
         assert result.success, formatted_string""
 
         avg_uptime = result.performance_metrics.get('average_uptime_percentage', 0)
-        assert avg_uptime >= 99.99, formatted_string
+        assert avg_uptime >= 99.99, "formatted_string"
 
         downtime = result.performance_metrics.get('total_downtime_seconds', 999)
         assert downtime == 0, formatted_string"
@@ -2066,7 +2066,7 @@ class TestDockerInfrastructureHealthMonitoring:
         assert result.success, "formatted_string"
 
         zero_conflicts = result.performance_metrics.get('zero_port_conflicts', False)
-        assert zero_conflicts, Port conflicts detected - should be zero
+        assert zero_conflicts, "Port conflicts detected - should be zero"
 
         efficiency = result.performance_metrics.get('port_allocation_efficiency', 999)
         assert efficiency < 10, ""
@@ -2239,7 +2239,7 @@ class TestDockerInfrastructureHealthMonitoring:
         assert samples >= 10, formatted_string"
 
         cpu_avg = result.performance_metrics.get('average_cpu_percent', 999)
-        assert cpu_avg < 50, formatted_string
+        assert cpu_avg < 50, "formatted_string"
 
         memory_avg = result.performance_metrics.get('average_memory_mb', 999)
         assert memory_avg < 150, formatted_string""
@@ -2247,7 +2247,7 @@ class TestDockerInfrastructureHealthMonitoring:
         logger.info(
 
     def test_health_monitoring_under_load(self, integration_framework):
-        ""Test health monitoring system under load conditions.
+        ""Test health monitoring system under load conditions."
         logger.info([U+1F3CB][U+FE0F] Testing health monitoring under load conditions)"
         logger.info([U+1F3CB][U+FE0F] Testing health monitoring under load conditions)"
 
@@ -2406,7 +2406,7 @@ class TestDockerInfrastructureHealthMonitoring:
         assert health_rate >= 90, "formatted_string"
 
         total_checks = result.performance_metrics.get('total_health_checks_under_load', 0)
-        assert total_checks >= 20, formatted_string
+        assert total_checks >= 20, "formatted_string"
 
         logger.info(""
 

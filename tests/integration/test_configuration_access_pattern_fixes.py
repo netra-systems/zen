@@ -72,7 +72,7 @@ class RealConfigurationPatternValidator:
         capture_output=True, text=True, timeout=60)
 
         if result.returncode == 0:
-        print(" PASS:  Docker services started successfully")
+        print(" PASS:  Docker services started successfully)"
         services_status['postgres'] = True
         services_status['redis'] = True
         else:
@@ -81,7 +81,7 @@ class RealConfigurationPatternValidator:
         services_status = self._check_service_connectivity()
 
         except subprocess.TimeoutExpired:
-        print(" WARNING: [U+FE0F]  Docker startup timed out, checking existing services...")
+        print(" WARNING: [U+FE0F]  Docker startup timed out, checking existing services...)"
         services_status = self._check_service_connectivity()
         except Exception as e:
         print("")
@@ -89,7 +89,7 @@ class RealConfigurationPatternValidator:
 
                         # Wait for services to be ready
         if services_status['postgres'] or services_status['redis']:
-        print("Waiting for services to be ready...")
+        print("Waiting for services to be ready...)"
         time.sleep(5)
 
         return services_status
@@ -103,16 +103,16 @@ class RealConfigurationPatternValidator:
         # Use a simple connection test
         import psycopg2
         conn = psycopg2.connect( )
-        host="localhost",
-        port="5433",  # From docker-compose.minimal.yml
-        user="netra",
-        password="netra123",
-        database="netra_dev",
+        host="localhost,"
+        port="5433,  # From docker-compose.minimal.yml"
+        user="netra,"
+        password="netra123,"
+        database="netra_dev,"
         connect_timeout=5
         
         conn.close()
         services['postgres'] = True
-        print(" PASS:  PostgreSQL is accessible")
+        print(" PASS:  PostgreSQL is accessible)"
         except Exception as e:
         print("")
 
@@ -122,7 +122,7 @@ class RealConfigurationPatternValidator:
         r = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6380, decode_responses=True)
         r.ping()
         services['redis'] = True
-        print(" PASS:  Redis is accessible")
+        print(" PASS:  Redis is accessible)"
         except Exception as e:
         print("")
 
@@ -210,13 +210,13 @@ class RealConfigurationPatternValidator:
 
         test_result['tests']['singleton'] = env1 is env2
         if not test_result['tests']['singleton']:
-        test_result['issues'].append("IsolatedEnvironment not singleton")
+        test_result['issues'].append("IsolatedEnvironment not singleton)"
         test_result['success'] = False
 
             # Test isolation mode
         test_result['tests']['isolation_enabled'] = env1.is_isolated()
         if not test_result['tests']['isolation_enabled']:
-        test_result['issues'].append("Isolation mode not enabled")
+        test_result['issues'].append("Isolation mode not enabled)"
 
                 # Test get/set operations
         test_key = "TEST_ISOLATION_KEY"
@@ -273,7 +273,7 @@ class RealConfigurationPatternValidator:
         test_result['tests']['config_loaded'] = config is not None
         if not config:
         test_result['success'] = False
-        test_result['issues'].append("Backend configuration not loaded")
+        test_result['issues'].append("Backend configuration not loaded)"
         return test_result
 
             # Test database URL
@@ -281,7 +281,7 @@ class RealConfigurationPatternValidator:
         test_result['tests']['database_url_configured'] = bool(db_url)
 
         if not db_url:
-        test_result['issues'].append("Database URL not configured in backend")
+        test_result['issues'].append("Database URL not configured in backend)"
         test_result['success'] = False
         else:
                     # Validate it's using our test database'
@@ -340,7 +340,7 @@ class RealConfigurationPatternValidator:
         test_result['tests']['database_url_configured'] = bool(db_url)
 
         if not db_url:
-        test_result['issues'].append("Database URL not configured in auth service")
+        test_result['issues'].append("Database URL not configured in auth service)"
         test_result['success'] = False
         else:
                     # Validate it's using our test database'
@@ -353,7 +353,7 @@ class RealConfigurationPatternValidator:
         test_result['tests']['jwt_secret_configured'] = bool(jwt_secret)
 
         if not jwt_secret:
-        test_result['issues'].append("JWT secret not configured in auth service")
+        test_result['issues'].append("JWT secret not configured in auth service)"
         test_result['success'] = False
 
                             # Test service independence - auth should have its own config
@@ -361,7 +361,7 @@ class RealConfigurationPatternValidator:
         test_result['tests']['service_secret_configured'] = bool(service_secret)
 
         if not service_secret:
-        test_result['issues'].append("Service secret not configured in auth service")
+        test_result['issues'].append("Service secret not configured in auth service)"
         test_result['success'] = False
 
                                 # Test Redis URL
@@ -472,10 +472,10 @@ class RealConfigurationPatternValidator:
         if backend_jwt and auth_jwt:
         test_result['tests']['consistent_jwt_secrets'] = backend_jwt == auth_jwt
         if backend_jwt != auth_jwt:
-        test_result['issues'].append("JWT secrets not consistent between services")
+        test_result['issues'].append("JWT secrets not consistent between services)"
         test_result['success'] = False
         else:
-        test_result['issues'].append("Could not retrieve JWT secrets from both services")
+        test_result['issues'].append("Could not retrieve JWT secrets from both services)"
         test_result['success'] = False
 
         except Exception as e:
@@ -526,7 +526,7 @@ class RealConfigurationPatternValidator:
         db_url = getattr(config, 'database_url', None)
 
         if not db_url:
-        test_result['issues'].append("No database URL configured")
+        test_result['issues'].append("No database URL configured)"
         return test_result
 
         test_result['connection_details']['url'] = db_url
@@ -548,7 +548,7 @@ class RealConfigurationPatternValidator:
 
             # Test basic query
         cursor = conn.cursor()
-        cursor.execute("SELECT 1 as test")
+        cursor.execute("SELECT 1 as test)"
         result = cursor.fetchone()
 
         test_result['success'] = result[0] == 1
@@ -582,7 +582,7 @@ class RealConfigurationPatternValidator:
         db_url = auth_config.get_database_url()
 
         if not db_url:
-        test_result['issues'].append("No database URL configured")
+        test_result['issues'].append("No database URL configured)"
         return test_result
 
         test_result['connection_details']['url'] = db_url
@@ -604,7 +604,7 @@ class RealConfigurationPatternValidator:
 
             # Test basic query
         cursor = conn.cursor()
-        cursor.execute("SELECT 1 as test")
+        cursor.execute("SELECT 1 as test)"
         result = cursor.fetchone()
 
         test_result['success'] = result[0] == 1
@@ -638,7 +638,7 @@ class RealConfigurationPatternValidator:
         redis_url = env.get('REDIS_URL')
 
         if not redis_url:
-        test_result['issues'].append("No Redis URL configured")
+        test_result['issues'].append("No Redis URL configured)"
         return test_result
 
         test_result['connection_details']['url'] = redis_url
@@ -711,9 +711,9 @@ class RealConfigurationPatternValidator:
                             # Add recommendations
         if not report['overall_success']:
         report['recommendations'] = [ ]
-        "Fix configuration access patterns to use IsolatedEnvironment",
-        "Ensure all services maintain independence while using shared utilities",
-        "Verify database connections use real services during testing",
+        "Fix configuration access patterns to use IsolatedEnvironment,"
+        "Ensure all services maintain independence while using shared utilities,"
+        "Verify database connections use real services during testing,"
         "Check SSOT compliance across all configuration components"
                                 
 
@@ -748,9 +748,9 @@ class TestConfigurationAccessPatternFixes:
 
         print("")
          + ="*80)"
-        print("TESTING REAL CONFIGURATION ACCESS PATTERNS")
-        print("Business Goal: Prevent $12K MRR loss from config incidents")
-        print("="*80)
+        print("TESTING REAL CONFIGURATION ACCESS PATTERNS)"
+        print("Business Goal: Prevent $12K MRR loss from config incidents)"
+        print("=*80)"
 
         validator = RealConfigurationPatternValidator()
 
@@ -759,7 +759,7 @@ class TestConfigurationAccessPatternFixes:
 
     # Require at least PostgreSQL for the test to proceed
         if not services_status.get('postgres', False):
-        pytest.skip("PostgreSQL service not available - cannot test real configuration patterns")
+        pytest.skip("PostgreSQL service not available - cannot test real configuration patterns)"
 
         # Step 2: Setup test environment through IsolatedEnvironment
         validator.setup_test_environment()
@@ -810,10 +810,10 @@ class TestConfigurationAccessPatternFixes:
         assert services_status.get('postgres', False), "PostgreSQL service must be available for configuration testing"
 
                                 # Validate core configuration patterns
-        assert config_results.get('shared_isolated_environment', {}).get('success', False), \
+        assert config_results.get('shared_isolated_environment', "{}).get('success', False), \"
         "Shared IsolatedEnvironment must work correctly"
 
-        assert config_results.get('environment_isolation', {}).get('success', False), \
+        assert config_results.get('environment_isolation', "{}).get('success', False), \"
         "Environment isolation must prevent os.environ pollution"
 
                                 # Validate service configurations load correctly
@@ -833,9 +833,9 @@ class TestConfigurationAccessPatternFixes:
                                 # Overall system health check
         assert report['overall_success'], ""
 
-        print(" CELEBRATION:  ALL CONFIGURATION ACCESS PATTERNS VALIDATED SUCCESSFULLY!")
+        print(" CELEBRATION:  ALL CONFIGURATION ACCESS PATTERNS VALIDATED SUCCESSFULLY!)"
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
                                     # Run the test directly for debugging
-        pytest.main([__file__, "-v", "-s", "--tb=short"])
+        pytest.main([__file__, "-v", "-s", "--tb=short])"

@@ -90,7 +90,7 @@ class TestWebSocketAuthStartuper:
         # Create a minimal test token payload
         payload = {
             user_id: test_websocket_user,
-            "email: test@websocket.com",
+            "email: test@websocket.com,"
             exp: datetime.datetime.now(timezone.utc) + datetime.timedelta(minutes=30),
             iat: datetime.datetime.now(timezone.utc)""
         }
@@ -103,7 +103,7 @@ class TestWebSocketAuthStartuper:
         return token
 
         except ImportError:
-        print("JWT library not available - using mock token for test")
+        print("JWT library not available - using mock token for test)"
         return mock.jwt.token.for.testing
         except Exception as e:
         print("")
@@ -219,7 +219,7 @@ assert auth_ready, Auth service not ready - cannot test WebSocket authentication
 
                                                                                                 # Test backend service readiness
 backend_ready = await tester.wait_for_backend_service_ready()
-assert backend_ready, Backend service not ready - cannot test WebSocket connectivity
+assert backend_ready, "Backend service not ready - cannot test WebSocket connectivity"
 
 print( PASS:  Both auth and backend services are ready for WebSocket testing"")
 
@@ -426,7 +426,7 @@ else:
     print( FAIL:  Could not create test token)
 
 else:
-    print(" FAIL:  Services not ready for WebSocket testing")
+    print(" FAIL:  Services not ready for WebSocket testing)"
 
 
 asyncio.run(main()")"

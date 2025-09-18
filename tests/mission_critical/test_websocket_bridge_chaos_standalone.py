@@ -59,7 +59,7 @@ class MockWebSocketClient:
         self.closed = True
 
     async def send(self, message: str):
-        ""Send message with simulated network conditions.
+        ""Send message with simulated network conditions."
         if self.closed:
         raise ConnectionError(WebSocket is closed)"
         raise ConnectionError(WebSocket is closed)"
@@ -71,7 +71,7 @@ class MockWebSocketClient:
         
 
     async def recv(self):
-        ""Receive message with simulated network conditions.
+        ""Receive message with simulated network conditions."
         pass
         if self.closed:
         raise ConnectionError(WebSocket is closed)"
@@ -82,11 +82,11 @@ class MockWebSocketClient:
         # Simulate different message types
         message_types = [
         {type": connection_established, connection_id: test_conn},"
-        {type": "agent_started, agent_name: test_agent},
-        {type: "agent_thinking, thought": Processing request},
-        {type: tool_executing, tool_name": "test_tool},
-        {type: tool_completed, result: {"status: success"}},
-        {type: agent_completed, "result: {success": True}}
+        {type": agent_started, agent_name: test_agent},"
+        {"type": "agent_thinking, thought: Processing request},"
+        {"type": tool_executing, tool_name": test_tool},"
+        {"type": tool_completed, result: {"status: success}},"
+        {"type": agent_completed, "result: {success: True}}"
         
 
         message = random.choice(message_types)
@@ -190,13 +190,13 @@ class ChaosWebSocketClient:
         try:
             # Apply chaos conditions
         if random.random() < self.conditions.drop_rate:
-        self._record_chaos_event(message_dropped", {"message_type: message.get(type)}
+        self._record_chaos_event(message_dropped", {message_type: message.get(type)}"
         return False
 
                 # Simulate corruption
         if random.random() < self.conditions.corruption_rate:
         message = self._corrupt_message(message)
-        self._record_chaos_event(message_corrupted, {original_type": message.get("type)}
+        self._record_chaos_event(message_corrupted, {original_type": message.get(type)}"
 
                     # Add latency
         if self.conditions.latency_max_ms > 0:
@@ -215,11 +215,11 @@ class ChaosWebSocketClient:
         return True
 
         except Exception as e:
-        self._record_chaos_event(send_error, {error": str(e), "message_type: message.get(type)}, severity=medium)
+        self._record_chaos_event(send_error, {error": str(e), message_type: message.get(type)}, severity=medium)"
         return False
 
     async def receive_message(self, timeout: float = 1.0) -> Optional[Dict]:
-        ""Receive message with chaos simulation.
+        ""Receive message with chaos simulation."
         if not self.is_connected or not self.websocket:
         return None
 
@@ -235,7 +235,7 @@ class ChaosWebSocketClient:
                 # Simulate corruption on receive
         if random.random() < self.conditions.corruption_rate:
         message = self._corrupt_message(message)
-        self._record_chaos_event(received_message_corrupted, {message_type": message.get("type)}
+        self._record_chaos_event(received_message_corrupted, {message_type": message.get(type)}"
 
         self.received_messages.append({)
         timestamp: time.time(),
@@ -244,7 +244,7 @@ class ChaosWebSocketClient:
                     
 
                     # Update heartbeat
-        if message.get(type) in [heartbeat", "connection_established]:
+        if message.get(type) in [heartbeat", connection_established]:"
         self.last_heartbeat = time.time()
 
         return message
@@ -277,7 +277,7 @@ class ChaosWebSocketClient:
         "Corrupt message to simulate network issues."
         corrupted = message.copy()
 
-        corruption_type = random.choice(["field_removal, field_corruption", type_change)
+        corruption_type = random.choice(["field_removal, field_corruption, type_change)"
 
         if corruption_type == field_removal and "payload in corrupted:"
         payload = corrupted[payload"]"
@@ -341,7 +341,7 @@ class TestWebSocketBridgeChaosStandalone:
 @pytest.mark.asyncio
     async def test_random_connection_drops_medium_chaos(self):
     "Test resilience with 20-30% random connection drops."
-    print("Starting medium chaos test: 20-30% connection drops")
+    print("Starting medium chaos test: 20-30% connection drops)"
 
         # Medium chaos conditions
 conditions = NetworkConditions( )
@@ -360,7 +360,7 @@ success = await client.connect("ws://mock-server/ws)"
 if success:
     clients.append(client)
 
-assert len(clients) >= 3, Should successfully connect at least 3 clients under medium chaos
+assert len(clients) >= 3, "Should successfully connect at least 3 clients under medium chaos"
 
                 # Simulate chat workflows with chaos
 total_messages_sent = 0
@@ -371,7 +371,7 @@ for client in clients:
 for i in range(10):
     message = {
 type: user_message","
-"content: formatted_string,"
+"content": "formatted_string,""
 timestamp: time.time()
                         
 
@@ -393,14 +393,14 @@ for client in clients:
 
                                     # Validate resilience
 assert successful_clients >= 3, At least 3 clients should function under medium chaos""
-assert total_messages_sent > 20, Should send substantial messages despite 25% drop rate
+assert total_messages_sent > 20, "Should send substantial messages despite 25% drop rate"
 
 print(formatted_string ")"
 
 
 @pytest.mark.asyncio
     async def test_high_chaos_extreme_conditions(self):
-    ""Test resilience under extreme chaos conditions (40-50% drops).
+    ""Test resilience under extreme chaos conditions (40-50% drops)."
 pass
 print(Starting high chaos test: 40-50% connection drops")"
 
@@ -435,7 +435,7 @@ for client in clients:
 for i in range(5):
     message = {
 type: user_message,
-"content: formatted_string",
+"content": "formatted_string","
 timestamp: time.time()
                                                         
 
@@ -458,9 +458,9 @@ for client in clients:
 
                                                                     # Validate extreme resilience
 assert functioning_clients >= 1, "At least 1 client should function under extreme chaos"
-assert total_chaos_events > 5, Should generate chaos events under extreme conditions
+assert total_chaos_events > 5, "Should generate chaos events under extreme conditions"
 
-print("formatted_string ")
+print("formatted_string )"
 formatted_string)
 
 @pytest.mark.asyncio
@@ -495,7 +495,7 @@ for client in clients:
 
 message = {
 type: latency_test,
-content": "formatted_string,
+content": formatted_string,"
 send_time: msg_start
                                                                                         
 
@@ -564,7 +564,7 @@ if duration <= 3.0:
 
                                                                                                                             # Send test message
 test_msg = {
-"type: ping",
+"type: ping,"
 cycle: cycle + 1,
 timestamp: time.time()"
 timestamp: time.time()"
@@ -583,9 +583,9 @@ formatted_string)"
 
                                                                                                                             # Validate requirements
 assert success_rate >= 0.6, "Should achieve >= 60% reconnection success rate"
-assert fast_rate >= 0.4, Should achieve >= 40% fast reconnections (<=3s)
+assert fast_rate >= 0.4, "Should achieve >= 40% fast reconnections (<=3s)"
 
-print("Rapid connect/disconnect cycle test completed successfully")
+print("Rapid connect/disconnect cycle test completed successfully)"
 
 @pytest.mark.asyncio
     async def test_comprehensive_chaos_resilience(self):
@@ -655,7 +655,7 @@ formatted_string"
 formatted_string
 formatted_string")"
 
-assert client_function_rate >= 0.5, Should maintain >= 50% functioning clients under comprehensive chaos
+assert client_function_rate >= 0.5, "Should maintain >= 50% functioning clients under comprehensive chaos"
 assert total_messages > 10, Should send substantial messages despite comprehensive chaos"
 assert total_messages > 10, Should send substantial messages despite comprehensive chaos"
 assert total_chaos_events > 5, "Should generate chaos events"
@@ -667,7 +667,7 @@ print(Comprehensive chaos resilience test completed successfully)"
 async def run_standalone_chaos_tests():
     "Run the standalone chaos engineering tests."
 pass
-print(=" * 80")
+print(=" * 80)"
 print(WEBSOCKET BRIDGE CHAOS ENGINEERING - STANDALONE DEMONSTRATION)"
 print(WEBSOCKET BRIDGE CHAOS ENGINEERING - STANDALONE DEMONSTRATION)"
 print(=" * 80)"
@@ -727,7 +727,7 @@ await asyncio.sleep(0)
 return passed_tests == total_tests
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                 # Run standalone chaos tests
 result = asyncio.run(run_standalone_chaos_tests())
 exit(0 if result else 1)

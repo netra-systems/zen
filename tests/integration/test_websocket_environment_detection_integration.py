@@ -53,14 +53,14 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
         self.original_env = dict(os.environ)
         
     def teardown_method(self):
-        ""Clean up environment after each test.
+        ""Clean up environment after each test."
         # Restore original environment
         os.environ.clear()
         os.environ.update(self.original_env)
         super().teardown_method()
 
     def test_e2e_environment_variable_detection_local(self):
-    ""
+    """
         Test E2E environment variable detection in local test environment.
         
         This validates that the environment variable detection logic works correctly
@@ -74,7 +74,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
         test_env_vars = {
             "E2E_TESTING: 1,"
             PYTEST_RUNNING: 1, 
-            "TEST_ENV: test",
+            "TEST_ENV: test,"
             ENVIRONMENT: test
         }
         
@@ -93,8 +93,8 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             
             # Validate E2E detection succeeded
             assert e2e_context is not None, E2E context should be detected in local test environment""
-            assert e2e_context.get(bypass_enabled) is True, E2E bypass should be enabled
-            assert e2e_context.get(environment) == test", "Environment should be detected as 'test'
+            assert e2e_context.get(bypass_enabled) is True, "E2E bypass should be enabled"
+            assert e2e_context.get(environment) == test", Environment should be detected as 'test'"
             
             logger.info( PASS:  E2E environment detection working correctly in local environment)
             
@@ -105,8 +105,8 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             
             is_e2e_detected = (
                 env.get(E2E_TESTING", 0) == 1 or"
-                env.get("PYTEST_RUNNING, 0") == 1 or
-                env.get(STAGING_E2E_TEST, "0) == 1" or
+                env.get("PYTEST_RUNNING, 0) == 1 or"
+                env.get(STAGING_E2E_TEST, "0) == 1 or"
                 env.get(E2E_TEST_ENV) == staging
             )
             
@@ -114,7 +114,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             logger.info( PASS:  Manual E2E detection logic working correctly)
 
     def test_staging_environment_detection_simulation(self):
-    ""
+    """
         Test environment detection with staging environment simulation.
         
         This simulates the GCP staging environment configuration and validates
@@ -129,7 +129,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
         staging_env_vars = {
             "ENVIRONMENT: staging,"
             GOOGLE_CLOUD_PROJECT: netra-staging-123,
-            "K_SERVICE: netra-backend-staging",
+            "K_SERVICE: netra-backend-staging,"
             K_REVISION: netra-backend-staging-1,
             # CRITICAL: E2E variables NOT set (simulating the bug)
             # E2E_TESTING: 1",      # Missing - this causes the bug"
@@ -170,7 +170,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             env = get_env()
             
             is_e2e_detected = (
-                env.get(E2E_TESTING, 0") == "1 or
+                env.get(E2E_TESTING, 0") == 1 or"
                 env.get(PYTEST_RUNNING, 0) == 1" or"
                 env.get(STAGING_E2E_TEST, 0) == 1""
             )
@@ -182,7 +182,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
                 pytest.fail(Manual E2E detection succeeded when it should fail)
 
     def test_factory_ssot_validation_path_selection(self):
-        ""
+        """
         Test factory SSOT validation path selection based on E2E context.
         
         This tests the critical decision point that determines whether WebSocket
@@ -209,7 +209,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             # Create mock user context without E2E indicators
             mock_user_context = {
                 user_id: test-user-123,
-                "email: test@example.com",
+                "email: test@example.com,"
                 permissions: [read, write]""
             }
             
@@ -234,8 +234,8 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             is_staging = current_env == staging
             
             is_e2e_testing = (
-                env.get(E2E_TESTING", "0) == 1 or
-                env.get(PYTEST_RUNNING, 0") == "1 or
+                env.get(E2E_TESTING", 0) == 1 or"
+                env.get(PYTEST_RUNNING, 0") == 1 or"
                 env.get(STAGING_E2E_TEST, 0) == 1""
             )
             
@@ -248,7 +248,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             logger.info(f CHART:  Use strict validation: {use_strict_validation}")"
             
             # This should be True (reproducing the bug condition)
-            assert use_strict_validation, Should use strict validation without E2E context
+            assert use_strict_validation, "Should use strict validation without E2E context"
             logger.info( PASS:  Validation path selection logic working correctly")"
             
         except Exception as e:
@@ -273,7 +273,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
         # Set up staging simulation environment
         os.environ.clear()
         os.environ.update({
-            ENVIRONMENT": "staging,
+            ENVIRONMENT": staging,"
             GOOGLE_CLOUD_PROJECT: netra-staging-123,
             K_SERVICE: "netra-backend-staging"
             # E2E variables missing (reproducing bug)
@@ -331,17 +331,17 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             
             # 4. Validate the integration reproduces the bug
             assert not e2e_detected, "E2E should not be detected (reproducing bug)"
-            assert auth_mode == strict, Should use strict authentication
-            assert validation_mode == strict", "Should use strict factory validation
-            assert connection_result == 1011_error, Should result in 1011 error
+            assert auth_mode == strict, "Should use strict authentication"
+            assert validation_mode == strict", Should use strict factory validation"
+            assert connection_result == 1011_error, "Should result in 1011 error"
             
-            logger.info( PASS:  Integration test confirms 1011 error reproduction path)""
+            logger.info("PASS:  Integration test confirms 1011 error reproduction path))"
             
             # Document the complete failure sequence
             failure_sequence = {
                 "step_1_e2e_detection: FAILED - environment variables missing,"
                 step_2_authentication: STRICT - no bypass enabled,
-                "step_3_factory_validation: STRICT - causes validation failure",
+                "step_3_factory_validation: STRICT - causes validation failure,"
                 step_4_connection_result: 1011_INTERNAL_ERROR,
                 root_cause: E2E environment variables not propagated to staging Cloud Run""
             }
@@ -353,7 +353,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             raise
 
     def test_e2e_context_extraction_from_websocket_headers(self):
-    ""
+    """
         Test E2E context extraction from WebSocket headers.
         
         This tests the specific function that extracts E2E context from WebSocket connections.
@@ -368,7 +368,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             test_headers = {
                 "Authorization: Bearer test-token,"
                 X-E2E-Test: true,
-                "X-Test-Type: E2E",
+                "X-Test-Type: E2E,"
                 X-Test-Environment: staging,
                 X-Staging-E2E: true""
             }
@@ -437,7 +437,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
                 logger.info(f CHART:  E2E context valid: {e2e_context_valid})""
                 
                 assert has_e2e_headers, "Client sent proper E2E headers"
-                assert not has_e2e_env, Environment missing E2E variables
+                assert not has_e2e_env, "Environment missing E2E variables"
                 assert not e2e_context_valid, "Combined E2E detection should fail"
                 
                 logger.info( PASS:  Manual context extraction logic confirms bug reproduction)
@@ -447,7 +447,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             raise
 
     def test_staging_cloud_run_environment_simulation(self):
-        ""
+        """
         Test complete simulation of GCP Cloud Run staging environment.
         
         This simulates the exact environment configuration that exists in GCP staging
@@ -464,7 +464,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             GOOGLE_CLOUD_PROJECT: "netra-staging-123456,"
             K_SERVICE": netra-backend-staging,"
             K_REVISION: netra-backend-staging-1-abc,
-            K_CONFIGURATION": "netra-backend-staging,
+            K_CONFIGURATION": netra-backend-staging,"
             PORT: 8080,
             
             # Application-specific variables
@@ -474,7 +474,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             
             # CRITICAL MISSING: E2E testing variables
             # These would be needed for E2E detection but are not set in staging:
-            # E2E_TESTING": "1,
+            # E2E_TESTING": 1,"
             # STAGING_E2E_TEST: 1, 
             # E2E_TEST_ENV: "staging,"
             # E2E_OAUTH_SIMULATION_KEY": ...,"
@@ -496,8 +496,8 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
         # Staging detection (should work)
         is_staging = (
             env.get("ENVIRONMENT, ).lower() == staging or"
-            bool(env.get(GOOGLE_CLOUD_PROJECT") and "staging in env.get(GOOGLE_CLOUD_PROJECT, ).lower()) or
-            bool(env.get(K_SERVICE, ").endswith(-staging"))
+            bool(env.get(GOOGLE_CLOUD_PROJECT") and staging in env.get(GOOGLE_CLOUD_PROJECT, ).lower()) or"
+            bool(env.get(K_SERVICE, ").endswith(-staging))"
         )
         
         # E2E detection (should fail - this is the bug)
@@ -505,7 +505,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             env.get(E2E_TESTING, 0) == "1 or"
             env.get(PYTEST_RUNNING, 0) == 1 or""
             env.get("STAGING_E2E_TEST, 0) == 1 or"
-            env.get(E2E_TEST_ENV") == "staging or
+            env.get(E2E_TEST_ENV") == staging or"
             env.get(E2E_OAUTH_SIMULATION_KEY) is not None
         )
         
@@ -517,16 +517,16 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
         logger.info(f   Use Strict Validation: {use_strict_validation})
         
         # Test results validation
-        assert is_staging, Staging detection should work
+        assert is_staging, "Staging detection should work"
         assert not is_e2e_testing, "E2E detection should fail (reproducing bug)"
-        assert use_strict_validation, Should select strict validation (causing 1011)
+        assert use_strict_validation, "Should select strict validation (causing 1011)"
         
         # Simulate the complete authentication flow
         auth_flow_result = {
             environment_detected: staging","
             "e2e_bypass_enabled: False,  # Bug: should be True during tests"
             authentication_mode: strict_jwt,
-            factory_validation_mode": "strict, 
+            factory_validation_mode": strict, "
             expected_connection_result: 1011_internal_error,
             bug_confirmed: True""
         }
@@ -534,8 +534,8 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
         logger.info(f" SEARCH:  Complete auth flow simulation: {auth_flow_result})"
         
         # This simulation confirms the complete bug reproduction
-        assert auth_flow_result[bug_confirmed], Complete environment simulation should confirm bug
-        logger.info( PASS:  Complete GCP Cloud Run staging simulation confirms 1011 error root cause)""
+        assert auth_flow_result[bug_confirmed], "Complete environment simulation should confirm bug"
+        logger.info("PASS:  Complete GCP Cloud Run staging simulation confirms 1011 error root cause))"
 
 
 if __name__ == "__main__:"
@@ -552,7 +552,7 @@ if __name__ == "__main__:"
     
     try:
         test_instance.test_staging_environment_detection_simulation()
-        print(" PASS:  Staging environment detection simulation passed")
+        print(" PASS:  Staging environment detection simulation passed)"
         
         test_instance.test_factory_ssot_validation_path_selection() 
         print( PASS:  Factory validation path selection test passed)""

@@ -8,7 +8,7 @@ class WebSocketConnectionTests:
         self._closed = False
         
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)""
         self.messages_sent.append(message)
@@ -87,7 +87,7 @@ class WebSocketAuthHandshakeTester:
         return {
             access_token: ftest_jwt_token_{username},
             refresh_token: ftest_refresh_token_{username},
-            token_type": "Bearer,
+            token_type": Bearer,"
             expires_in: 3600,
             user_id: fuser_{username}","
             "email: f{username}@example.com"
@@ -199,7 +199,7 @@ class WebSocketAuthHandshakeTester:
         auth_token: str,
         num_connections: int = 5
     ) -> List[WebSocketAuthResult]:
-        ""Test multiple concurrent WebSocket connections.
+        ""Test multiple concurrent WebSocket connections."
         tasks = [
             self.establish_websocket_connection(auth_token)
             for _ in range(num_connections)
@@ -219,7 +219,7 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
 # COMMENTED OUT: Mock-dependent test -         async def test_websocket_auth_handshake_complete_flow(self):
 # COMMENTED OUT: Mock-dependent test -         Test complete WebSocket authentication handshake flow.
         # 1. OAuth authentication flow
-# COMMENTED OUT: Mock-dependent test -         oauth_result = await self.auth_tester.perform_oauth_flow(testuser", "password123)
+# COMMENTED OUT: Mock-dependent test -         oauth_result = await self.auth_tester.perform_oauth_flow(testuser", password123)"
 # COMMENTED OUT: Mock-dependent test -         assert oauth_result[access_token]
 # COMMENTED OUT: Mock-dependent test -         assert oauth_result[user_id]
 # COMMENTED OUT: Mock-dependent test -         
@@ -235,7 +235,7 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
 # COMMENTED OUT: Mock-dependent test -             mock_ws.recv.return_value = json.dumps({
 # COMMENTED OUT: Mock-dependent test -                 type": auth_success,"
 # COMMENTED OUT: Mock-dependent test -                 session_id: session_123,
-# COMMENTED OUT: Mock-dependent test -                 user_id": "user_testuser
+# COMMENTED OUT: Mock-dependent test -                 user_id": user_testuser"
 # COMMENTED OUT: Mock-dependent test -             }
 # COMMENTED OUT: Mock-dependent test -             mock_connect.return_value.__aenter__.return_value = mock_ws
 # COMMENTED OUT: Mock-dependent test -             
@@ -244,7 +244,7 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
 # COMMENTED OUT: Mock-dependent test -             )
 # COMMENTED OUT: Mock-dependent test -         
         # Validate results
-# COMMENTED OUT: Mock-dependent test -         assert result.success, fConnection failed: {result.error_message}
+# COMMENTED OUT: Mock-dependent test -         assert result.success, "fConnection failed: {result.error_message}"
 # COMMENTED OUT: Mock-dependent test -         assert result.session_id == session_123
 # COMMENTED OUT: Mock-dependent test -         assert result.user_id == user_testuser
 # COMMENTED OUT: Mock-dependent test -         assert result.token_valid
@@ -256,8 +256,8 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
 # COMMENTED OUT: Mock-dependent test -         assert session_bound, "Session should be bound in backend"
 # COMMENTED OUT: Mock-dependent test -         
         # Performance assertions
-# COMMENTED OUT: Mock-dependent test -         assert result.connection_time < 5.0, Connection should establish within 5 seconds
-# COMMENTED OUT: Mock-dependent test -         assert result.auth_time < 2.0, Auth handshake should complete within 2 seconds
+# COMMENTED OUT: Mock-dependent test -         assert result.connection_time < 5.0, "Connection should establish within 5 seconds"
+# COMMENTED OUT: Mock-dependent test -         assert result.auth_time < 2.0, "Auth handshake should complete within 2 seconds"
 # COMMENTED OUT: Mock-dependent test -     
     async def test_invalid_token_rejection(self):
         "Test that invalid tokens are properly rejected."
@@ -281,7 +281,7 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
             # Mock: Generic component isolation for controlled unit testing
 # COMMENTED OUT: Mock-dependent test -             websocket = WebSocketConnectionTests()
 # COMMENTED OUT: Mock-dependent test -             mock_ws.recv.return_value = json.dumps({
-# COMMENTED OUT: Mock-dependent test -                 type": "auth_error,
+# COMMENTED OUT: Mock-dependent test -                 type": auth_error,"
 # COMMENTED OUT: Mock-dependent test -                 error: Token expired
 # COMMENTED OUT: Mock-dependent test -             }
 # COMMENTED OUT: Mock-dependent test -             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -303,7 +303,7 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
     
 # COMMENTED OUT: Mock-dependent test -         async def test_concurrent_websocket_connections(self):
 # COMMENTED OUT: Mock-dependent test -         Test multiple concurrent WebSocket connections with same auth.
-# COMMENTED OUT: Mock-dependent test -         oauth_result = await self.auth_tester.perform_oauth_flow(testuser", "password123)
+# COMMENTED OUT: Mock-dependent test -         oauth_result = await self.auth_tester.perform_oauth_flow(testuser", password123)"
 # COMMENTED OUT: Mock-dependent test -         
         # Mock: Component isolation for testing without external dependencies
 # COMMENTED OUT: Mock-dependent test -         with patch('websockets.connect') as mock_connect:
@@ -322,7 +322,7 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
 # COMMENTED OUT: Mock-dependent test -             )
 # COMMENTED OUT: Mock-dependent test -         
         # All connections should succeed
-# COMMENTED OUT: Mock-dependent test -         assert all(r.success for r in results), All concurrent connections should succeed
+# COMMENTED OUT: Mock-dependent test -         assert all(r.success for r in results), "All concurrent connections should succeed"
 # COMMENTED OUT: Mock-dependent test -         assert len(results) == 5
 # COMMENTED OUT: Mock-dependent test -         
         # Performance check - concurrent connections should be fast
@@ -332,7 +332,7 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
 # COMMENTED OUT: Mock-dependent test -     
     async def test_cross_service_session_validation(self):
         "Test session validation across auth service and main backend."""
-        oauth_result = await self.auth_tester.perform_oauth_flow(testuser", "password123)
+        oauth_result = await self.auth_tester.perform_oauth_flow(testuser", password123)"
         
         # Verify token is valid in auth service
         token_valid = await self.auth_tester.validate_jwt_token(oauth_result[access_token)
@@ -373,7 +373,7 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
 # COMMENTED OUT: Mock-dependent test -             websocket = WebSocketConnectionTests()
 # COMMENTED OUT: Mock-dependent test -             mock_ws.recv.return_value = json.dumps({
 # COMMENTED OUT: Mock-dependent test -                 type: auth_success,
-# COMMENTED OUT: Mock-dependent test -                 session_id": "session_2,
+# COMMENTED OUT: Mock-dependent test -                 session_id": session_2,"
 # COMMENTED OUT: Mock-dependent test -                 user_id: user_testuser
 # COMMENTED OUT: Mock-dependent test -             }
 # COMMENTED OUT: Mock-dependent test -             mock_connect.return_value.__aenter__.return_value = mock_ws

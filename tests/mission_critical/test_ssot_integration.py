@@ -70,7 +70,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
 # Import SSOT framework components for integration testing
-from test_framework.ssot import (
+from test_framework.ssot import ()
     BaseTestCase,
     AsyncBaseTestCase, 
     DatabaseTestCase,
@@ -140,7 +140,7 @@ class SSotIntegrationTestResult:
     memory_usage_mb: float = 0.0
     
     def has_violations(self) -> bool:
-        ""Check if any integration isolation violations were detected.
+        ""Check if any integration isolation violations were detected."
         return bool(self.integration_violations or self.cross_component_leaks)
 
 
@@ -291,7 +291,7 @@ class SSotIntegrationUserSimulator:
 
 @pytest.mark.usefixtures(isolated_test_env)
 class SSotIntegrationWithIsolationTests(IntegrationTestCase):
-    ""
+    """
     CRITICAL: SSOT Integration testing with comprehensive isolation.
     
     Tests that SSOT components integrate properly while maintaining complete isolation
@@ -299,7 +299,7 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
     
     
     def setUp(self):
-        ""Set up integration test environment with strict isolation validation.
+        ""Set up integration test environment with strict isolation validation."
         super().setUp()
         self.start_time = time.time()
         logger.info(fStarting SSOT integration isolation test: {self._testMethodName})
@@ -317,7 +317,7 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
         self.test_env_manager = get_test_env_manager()
         
     def tearDown(self):
-        ""Tear down with metrics collection and mock detection.
+        ""Tear down with metrics collection and mock detection."
         duration = time.time() - self.start_time
         logger.info(fSSOT integration isolation test {self._testMethodName} took {duration:.2f}s)
         
@@ -464,7 +464,7 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
                    f{execution_time:.2f}s, {memory_increase:.1f}MB increase)
     
     def test_database_session_isolation_during_integration(self):
-    ""
+    """
         CRITICAL: Test database session isolation during cross-component integration.
         
         Validates that database sessions remain isolated even when integrated
@@ -475,7 +475,7 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
         isolation_violations = []
         
         def test_user_integration_database_isolation(user_id):
-            ""Test database isolation during integration for a single user.
+            ""Test database isolation during integration for a single user."
             try:
                 user_simulator = SSotIntegrationUserSimulator(fdbinteguser_{user_id}, self.test_env_manager)
                 
@@ -569,7 +569,7 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
                         fDatabase integration isolation violations: {isolation_violations})
         
         # Validate all users completed
-        successful_results = [r for r in results if "success in r[0] or simulated" in r[0]]
+        successful_results = [r for r in results if "success in r[0] or simulated in r[0]]"
         self.assertEqual(len(successful_results), num_users,
                         fNot all users completed integration database tests: {[r[0] for r in results]})
         
@@ -1074,7 +1074,7 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
         logger.info(f[U+2713] Integration security boundary enforcement: {len(user_integration_resources)} isolated users)"
     
     def test_performance_monitoring_integration_concurrent_load(self):
-    "
+        """
     "
         CRITICAL: Test SSOT integration performance under concurrent load.
         

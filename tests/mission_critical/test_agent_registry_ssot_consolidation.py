@@ -72,7 +72,7 @@ class AgentRegistrySSoTConsolidationTests(SSotAsyncTestCase):
                           Advanced registry must support get_agent method)
 
     async def test_advanced_registry_features_retained(self):
-        "
+        """
         "
         CRITICAL: Ensure advanced features not broken by consolidation
         
@@ -105,7 +105,7 @@ class AgentRegistrySSoTConsolidationTests(SSotAsyncTestCase):
                            User sessions must be isolated)
 
     def test_import_path_compatibility(self):
-        "
+        """
         "
         CRITICAL: Validate import paths resolve correctly after consolidation
 
@@ -140,7 +140,7 @@ class AgentRegistrySSoTConsolidationTests(SSotAsyncTestCase):
                      SSOT consolidation complete: both import paths resolve to identical class objects)"
 
     async def test_interface_consistency_validation(self):
-    "
+        """
     "
         CRITICAL: Check interface consistency between implementations
         
@@ -175,7 +175,7 @@ class AgentRegistrySSoTConsolidationTests(SSotAsyncTestCase):
                                fAdvanced registry {method_name} must be callable)"
 
     async def test_no_functionality_regression(self):
-    "
+        """
     "
         CRITICAL: Comprehensive regression test suite
         
@@ -221,7 +221,7 @@ if __name__ == __main__:"
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print("MIGRATION NOTICE: This file previously used direct pytest execution.)"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")"
-    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md)"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

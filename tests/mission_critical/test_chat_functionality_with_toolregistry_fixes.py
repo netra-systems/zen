@@ -154,7 +154,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
         logger.info(f ALERT:  MISSION CRITICAL RESULTS for {method.__name__}: {analysis}")"
         
     async def test_complete_chat_flow_after_toolregistry_fix(self):
-    "
+        """
     "
         Test complete user chat flow after ToolRegistry fixes.
         This is the ultimate business value validation.
@@ -186,12 +186,12 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
             
             # Step 2: Send substantive chat message (business requirement: AI interaction)
             chat_message = {
-                type": "agent_request,
+                type": agent_request,"
                 agent: general_assistant,  # Use a general agent that should work
                 message: "Help me analyze my current situation and provide actionable recommendations,"
                 user_id": user_id,"
                 context: {
-                    request_type": "analysis_and_recommendations,
+                    request_type": analysis_and_recommendations,"
                     expected_response: substantive_ai_insights
                 }
             }
@@ -339,7 +339,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
         comprehensive_message = {
             "type: agent_request,"
             agent: comprehensive_test_agent,
-            "message: Please perform a comprehensive analysis that requires multiple tools and thinking steps",
+            "message: Please perform a comprehensive analysis that requires multiple tools and thinking steps,"
             user_id: user_id,
             request_configuration: {"
             request_configuration: {"
@@ -438,7 +438,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
         await websocket.close()
         
     async def test_concurrent_users_chat_without_registry_conflicts(self):
-    ""
+    """
         Test that multiple users can chat simultaneously without registry conflicts.
         
         CRITICAL: This validates multi-user business value delivery.
@@ -475,7 +475,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
                 chat_message = {
                     "type: agent_request,"
                     agent: concurrent_test_agent,
-                    "message: fConcurrent chat test from user {session_id}",
+                    "message: fConcurrent chat test from user {session_id},"
                     user_id: session['user_id']
                 }
                 
@@ -659,7 +659,7 @@ class ToolRegistryBusinessValueValidationTests(SSotBaseTestCase):
         logger.info([U+1F4BC] BUSINESS VALUE CONFIRMED: System stability maintained across multiple usage cycles")"
         
     async def test_no_performance_regression_after_registry_fixes(self):
-    "
+        """
     "
         Test that registry fixes don't cause performance regression.'
         

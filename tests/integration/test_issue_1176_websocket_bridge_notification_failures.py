@@ -26,7 +26,7 @@ from typing import Dict, Any, Optional
 
 # Test framework imports
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.real_services_test_fixtures import (
+from test_framework.real_services_test_fixtures import ()
     real_services_fixture,
     real_db_fixture,
     real_redis_fixture
@@ -56,7 +56,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
         redis = real_services_fixture["redis]"
 
         try:
-            from netra_backend.app.factories.websocket_bridge_factory import (
+            from netra_backend.app.factories.websocket_bridge_factory import ()
                 create_standard_websocket_bridge
             )
             from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -121,8 +121,8 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
             auth_config_scenarios = [
                 {JWT_SECRET_KEY: None, description: Missing JWT secret},""
                 {"JWT_SECRET_KEY: , description: Empty JWT secret},"
-                {"OAUTH_CLIENT_ID: None, description": Missing OAuth client ID},
-                {AUTH_SERVICE_URL: "http://invalid-url, description": Invalid auth service URL}
+                {"OAUTH_CLIENT_ID: None, description: Missing OAuth client ID},"
+                {AUTH_SERVICE_URL: "http://invalid-url, description: Invalid auth service URL}"
             ]
 
             for scenario in auth_config_scenarios:
@@ -199,8 +199,8 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
             # Test dependency failure scenarios
             dependency_scenarios = [
                 {"service: database, action: disconnect},"
-                {"service: redis", action: timeout},
-                {service: auth", "action: unavailable}
+                {"service: redis, action: timeout},"
+                {service: auth", action: unavailable}"
             ]
 
             for scenario in dependency_scenarios:
@@ -225,7 +225,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
                                 self.fail(WebSocket bridge should handle database disconnection gracefully)
 
                             except Exception as e:
-                                if database" in str(e).lower() or "connection in str(e).lower():
+                                if database" in str(e).lower() or connection in str(e).lower():"
                                     # Expected - database failure should be handled gracefully
                                     continue
                                 else:
@@ -249,7 +249,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
                                 # Expected - Redis timeout should be handled
                                 continue
                             except Exception as e:
-                                if "redis in str(e).lower() or timeout" in str(e).lower():
+                                if "redis in str(e).lower() or timeout in str(e).lower():"
                                     continue
                                 else:
                                     raise
@@ -258,7 +258,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
             pytest.skip(WebSocket bridge dependencies not available)
 
     async def test_message_routing_failures_with_interface_mismatches(self, real_services_fixture):
-        "Test message routing failures when bridge interfaces don't match."""'
+        "Test message routing failures when bridge interfaces don't match.""'"
 
         This test reproduces message routing failures identified in Issue #1176
         where interface mismatches cause routing breakdowns.
@@ -285,7 +285,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
                     bridge_provides: StandardWebSocketBridge
                 },
                 {
-                    "message_type: user_message",
+                    "message_type: user_message,"
                     handler_expects: WebSocketEventEmitter,
                     bridge_provides: WebSocketManager""
                 }
@@ -326,12 +326,12 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
                         call_args = mock_websocket.send_json.call_args
                         if call_args:
                             response = call_args[0][0]
-                            if error in response and "interface in str(response.get(error", )).lower():
+                            if error in response and "interface in str(response.get(error, )).lower():"
                                 self.fail(fInterface mismatch detected in message routing: {response['error']})
 
                     except Exception as e:
                         # Interface mismatch should cause routing failures
-                        if "interface in str(e).lower() or bridge" in str(e).lower():
+                        if "interface in str(e).lower() or bridge in str(e).lower():"
                             self.fail(fMessage routing failed due to interface mismatch: {e})
                         else:
                             raise
@@ -384,7 +384,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
             # Test all 5 critical event deliveries
             critical_events = [
                 (agent_started, notify_agent_started),
-                ("agent_thinking, notify_agent_thinking"),
+                ("agent_thinking, notify_agent_thinking),"
                 (tool_executing, notify_tool_executing),
                 (tool_completed, notify_tool_completed"),"
                 ("agent_completed, notify_agent_completed)"

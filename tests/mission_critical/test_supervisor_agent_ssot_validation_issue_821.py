@@ -36,7 +36,7 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
         self.ssot_class_name = SupervisorAgent
 
     def test_supervisor_agent_ssot_module_exists_and_importable(self):
-        ""Validate that the SSOT SupervisorAgent module exists and is importable.
+        ""Validate that the SSOT SupervisorAgent module exists and is importable."
         ssot_module_path = netra_backend.app.agents.supervisor_ssot"
         ssot_module_path = netra_backend.app.agents.supervisor_ssot"
         ssot_class_name = SupervisorAgent"
@@ -44,7 +44,7 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
 
         try:
             module = importlib.import_module(ssot_module_path)
-            assert module is not None, fSSOT module {ssot_module_path} should be importable
+            assert module is not None, "fSSOT module {ssot_module_path} should be importable"
 
             # Verify SupervisorAgent class exists in the module
             supervisor_class = getattr(module, ssot_class_name, None)
@@ -56,9 +56,9 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
 
             # Log success for debugging
             print(f\n=== SSOT VALIDATION SUCCESS ===)
-            print(f"✓ SSOT module importable: {ssot_module_path}")
+            print(f"✓ SSOT module importable: {ssot_module_path})"
             print(f✓ SSOT class available: {ssot_class_name})
-            print(f"✓ Class type valid: {type(supervisor_class)}")
+            print(f"✓ Class type valid: {type(supervisor_class)})"
             print(=*40)
 
         except ImportError as e:
@@ -117,7 +117,7 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
             print(f✓ Present methods: {present_methods}"")
             if missing_methods:
                 print(f✗ Missing methods: {missing_methods})
-            print(="*35")
+            print(="*35)"
 
             self.assertEqual(
                 len(missing_methods),
@@ -185,7 +185,7 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
                             content = f.read()
                             if self.ssot_module_path in content:
                                 ssot_usage_found = True
-                                print(f"\n=== FACTORY SSOT VALIDATION ===)")
+                                print(f"\n=== FACTORY SSOT VALIDATION ===))"
                                 print(f✓ Factory uses SSOT: {factory_module_path})"
                                 print(f✓ Factory uses SSOT: {factory_module_path})"
                                 print("=*35)"
@@ -230,10 +230,10 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
                 except ImportError:
                     continue
 
-            print(f"\n=== WEBSOCKET SSOT VALIDATION ===)")
+            print(f"\n=== WEBSOCKET SSOT VALIDATION ===))"
             print(fWebSocket modules using SSOT: {len(ssot_websocket_usage)})
             for module in ssot_websocket_usage:
-                print(f"✓ {module}")
+                print(f"✓ {module})"
             print(=*40)
 
             # This is informational - WebSocket integration should use SSOT

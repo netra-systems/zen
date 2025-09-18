@@ -40,7 +40,7 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
         self.original_env = self.env.get_all()
 
     def teardown_method(self, method):
-        ""Clean up test environment.
+        ""Clean up test environment."
         # Restore original environment
         current_env = self.env.get_all()
         for key in list(current_env.keys()):
@@ -51,7 +51,7 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
         super().teardown_method(method)
 
     def test_secret_reference_to_actual_value_bridge_failure(self):
-    ""
+    """
         REPRODUCER: Test bridge failure between SecretReference definition and actual secret values.
 
         This reproduces the issue where SECRET_CONFIG defines secret references correctly,
@@ -141,10 +141,10 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
 
         except Exception as e:
             # This is expected - the bridge failure should cause an exception
-            assert any(keyword in str(e).lower() for keyword in ['secret', 'missing', 'injection', 'bridge']
+            assert any(keyword in str(e).lower() for keyword in ['secret', "'missing', 'injection', 'bridge']"
 
     def test_unified_config_manager_secret_bridge_gap(self):
-        ""
+        """
         REPRODUCER: Test UnifiedConfigManager secret bridge gap.
 
         This reproduces the gap where UnifiedConfigManager creates configuration
@@ -185,10 +185,10 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
         except Exception as e:
             # Expected failure due to bridge gap
             error_message = str(e).lower()
-            assert any(keyword in error_message for keyword in ['secret', 'validation', 'missing', 'configuration')
+            assert any(keyword in error_message for keyword in ['secret', "'validation', 'missing', 'configuration')"
 
     def test_app_config_schema_secret_bridge_validation(self):
-    "
+        """
     "
         REPRODUCER: Test AppConfig schema secret bridge validation failure.
 
@@ -223,7 +223,7 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
             pass
 
     def test_secret_manager_factory_bridge_initialization(self):
-    "
+        """
     "
         REPRODUCER: Test secret manager factory bridge initialization failure.
 
@@ -258,10 +258,10 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
         except Exception as e:
             # Expected failure due to bridge initialization issues
             error_message = str(e).lower()
-            assert any(keyword in error_message for keyword in ['secret', 'bridge', 'initialization', 'factory')
+            assert any(keyword in error_message for keyword in ['secret', "'bridge', 'initialization', 'factory')"
 
     def test_gcp_secret_manager_bridge_connection(self):
-    "
+        """
     "
         REPRODUCER: Test GCP Secret Manager bridge connection failure.
 
@@ -301,7 +301,7 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
 
             # Verify the error indicates bridge connection failure
             error_message = str(exc_info.value)
-            assert any(keyword in error_message for keyword in ['gcp', 'connection', 'failed', 'bridge')
+            assert any(keyword in error_message for keyword in ['gcp', "'connection', 'failed', 'bridge')"
 
     def test_secret_injection_timing_bridge_failure(self):
         pass
@@ -353,7 +353,7 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
         except Exception as e:
             # Expected failure due to timing bridge issues
             error_message = str(e).lower()
-            assert any(keyword in error_message for keyword in ['timing', 'injection', 'bridge', 'reload')
+            assert any(keyword in error_message for keyword in ['timing', "'injection', 'bridge', 'reload')"
 
 
 if __name__ == __main__":"

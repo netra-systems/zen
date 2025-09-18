@@ -211,10 +211,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -1033,8 +1033,8 @@ class TestHealthRouteConfigurationConsistency:
         import re
         logging_patterns = [ ]
         r'logger\.(\w+)\(',
-        r'log_level[^=]*=\s*["\'](\w+)["\']',
-        r'LOG_LEVEL[^=]*=\s*["\'](\w+)["\']',
+        r'log_level[^=]*=\s*["\'](\w+)[\']',"
+        r'LOG_LEVEL[^=]*=\s*["\'](\w+)[\']',"
         r'logging\.getLogger\(['\']([^'\']+)['\']',
         r'central_logger\.get_logger\(['\']([^'\']+)['\']' )
                                                                                                     
@@ -1049,7 +1049,7 @@ class TestHealthRouteConfigurationConsistency:
         logging_configs[str(health_file)] = file_logging
 
                                                                                                                 # Check for inconsistent logging levels in health endpoints
-        log_level_pattern = r'log_level[^=]*=\s*["\'](\w+)["\']'
+        log_level_pattern = r'log_level[^=]*=\s*["\'](\w+)[\']'"
         files_with_levels = {}
 
         for file_path, config in logging_configs.items():
@@ -1111,7 +1111,7 @@ class TestHealthRouteConfigurationConsistency:
         assert len(logging_inconsistencies) == 0, ""
 
 
-        if __name__ == "__main__":
-        pytest.main([__file__, "-v", "--tb=short"])
+        if __name__ == "__main__:"
+        pytest.main([__file__, "-v", "--tb=short])"
 
 )))

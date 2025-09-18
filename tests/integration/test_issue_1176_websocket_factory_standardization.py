@@ -16,7 +16,7 @@ from unittest.mock import Mock, patch
 from datetime import datetime, timezone
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.standardized_factory_interface import (
+from netra_backend.app.websocket_core.standardized_factory_interface import ()
     StandardizedWebSocketManagerFactory,
     WebSocketManagerFactoryValidator,
     FactoryValidationResult,
@@ -57,7 +57,7 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
 
     async def test_factory_protocol_compliance(self):
         "Test that standardized factory implements WebSocketManagerFactoryProtocol."""
-        from netra_backend.app.websocket_core.standardized_factory_interface import (
+        from netra_backend.app.websocket_core.standardized_factory_interface import ()
             WebSocketManagerFactoryProtocol
         )
 
@@ -139,7 +139,7 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
             self.assertIsNotNone(manager)
 
     async def test_factory_validator_compliance_checking(self):
-        ""Test that WebSocketManagerFactoryValidator properly validates factories.
+        ""Test that WebSocketManagerFactoryValidator properly validates factories."
         # Test compliant factory
         validation_result = WebSocketManagerFactoryValidator.validate_factory_compliance(self.factory)
 
@@ -212,7 +212,7 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
         with self.assertRaises(RuntimeError) as cm:
             self.factory.create_manager(user_context=self.mock_user_context)
 
-        self.assertIn(WebSocket manager creation failed", str(cm.exception))"
+        self.assertIn("WebSocket manager creation failed"", str(cm.exception))"
 
     async def test_validation_result_production_readiness(self):
         Test FactoryValidationResult production readiness assessment.""
@@ -292,7 +292,7 @@ class TestIssue1176IntegrationPointValidation(SSotAsyncTestCase):
             self.assertTrue(validation_result.get('compliant', False))
 
     async def test_websocket_manager_setter_validation(self):
-        ""Test that WebSocket manager setter includes standardized validation.
+        ""Test that WebSocket manager setter includes standardized validation."
         from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
         bridge = AgentWebSocketBridge()

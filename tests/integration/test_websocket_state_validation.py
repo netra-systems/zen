@@ -41,7 +41,7 @@ class MockWebSocket:
     "Mock WebSocket for testing various state scenarios."
 
     def __init__(self, has_client_state: bool=True, client_state_value: Any='CONNECTED', has_receive: bool=True, is_closed: bool=False, state_value: Any='CONNECTED'):
-    ""
+    """
         Initialize mock WebSocket with configurable state attributes.
         
         Args:
@@ -54,7 +54,7 @@ class MockWebSocket:
         self._setup_attributes(has_client_state, client_state_value, has_receive, is_closed, state_value)
 
     def _setup_attributes(self, has_client_state, client_state_value, has_receive, is_closed, state_value):
-        ""Set up mock attributes based on configuration.
+        ""Set up mock attributes based on configuration."
         if has_client_state:
             self.client_state = client_state_value
         if has_receive:
@@ -89,7 +89,7 @@ class MockWebSocket:
         return mock_ws
 
 class WebSocketStateValidationTests(SSotBaseTestCase):
-    ""
+    """
     Integration tests for WebSocket state validation across environments.
     
     These tests focus on the is_websocket_connected() function and its
@@ -97,7 +97,7 @@ class WebSocketStateValidationTests(SSotBaseTestCase):
     
 
     def setup_method(self):
-        ""Set up each test with proper mocking infrastructure.
+        ""Set up each test with proper mocking infrastructure."
         super().setup_method()
         self.env = get_env()
         try:
@@ -139,14 +139,14 @@ class WebSocketStateValidationTests(SSotBaseTestCase):
                     test_result = {'environment': scenario['environment'], 'expected': scenario['expected_result'], 'actual': result, 'description': scenario['description'], 'websocket_type': type(scenario['websocket'].__name__)
                     self.test_results.append(test_result)
                     if scenario['environment'] in ['staging', 'production'] and scenario['expected_result']:
-                        assert result == scenario['expected_result'], fCRITICAL BUG: is_websocket_connected() returns {result} but expected {scenario['expected_result']} for {scenario['description']}. This causes ConnectionHandler to skip responses in {scenario['environment']} environment. WebSocket state detection must work properly in cloud environments.
+                        assert result == scenario['expected_result'], "fCRITICAL BUG: is_websocket_connected() returns {result} but expected {scenario['expected_result']} for {scenario['description']}. This causes ConnectionHandler to skip responses in {scenario['environment']} environment. WebSocket state detection must work properly in cloud environments."
                     else:
-                        assert result == scenario['expected_result'], fWebSocket state detection mismatch for {scenario['description']}: expected {scenario['expected_result']}, got {result}
+                        assert result == scenario['expected_result'], "fWebSocket state detection mismatch for {scenario['description']}: expected {scenario['expected_result']}, got {result}"
         logger.info(' PASS:  Environment-specific connection validation tests passed')
 
     @pytest.mark.integration
     def test_websocket_state_attributes_edge_cases(self):
-        ""
+        """
         Tests WebSocket state detection with various attribute scenarios.
         
         This test covers edge cases that may occur in different proxy environments
@@ -174,7 +174,7 @@ class WebSocketStateValidationTests(SSotBaseTestCase):
 
     @pytest.mark.integration
     def test_websocket_manager_lifecycle_coordination(self):
-        ""
+        """
         Tests proper coordination between WebSocket connections and manager cleanup.
         
         This test validates that WebSocket managers are properly cleaned up
@@ -200,7 +200,7 @@ class WebSocketStateValidationTests(SSotBaseTestCase):
         logger.info('Testing initial connection detection')
         for i, ws in enumerate(mock_connections):
             result = self.is_websocket_connected(ws)
-            assert result is True, f'Connection {i} should be detected as connected'
+            assert result is True, "f'Connection {i} should be detected as connected'"
             logger.info(f'   PASS:  Connection {i} detected as connected')
         logger.info('Testing connection closure detection')
         for i in range(0, num_connections, 2):
@@ -208,7 +208,7 @@ class WebSocketStateValidationTests(SSotBaseTestCase):
             mock_connections[i].state = 'CLOSED'
             mock_connections[i].client_state = 'DISCONNECTED'
             result = self.is_websocket_connected(mock_connections[i)
-            assert result is False, f'Closed connection {i} should be detected as disconnected'
+            assert result is False, "f'Closed connection {i} should be detected as disconnected'"
             logger.info(f'   PASS:  Closed connection {i} detected as disconnected')
         logger.info('Testing manager cleanup coordination')
         closed_connection_ids = [f'conn-{i}' for i in range(0, num_connections, 2)]
@@ -222,7 +222,7 @@ class WebSocketStateValidationTests(SSotBaseTestCase):
         active_managers = [m for m in mock_managers if m.is_active]
         expected_active = len(active_connection_ids)
         actual_active = len(active_managers)
-        assert actual_active == expected_active, f'Resource management mismatch: expected {expected_active} active managers, got {actual_active}. This indicates cleanup coordination issues.'
+        assert actual_active == expected_active, "f'Resource management mismatch: expected {expected_active} active managers, got {actual_active}. This indicates cleanup coordination issues.'"
         logger.info(f' PASS:  Resource management validated: {actual_active} active managers')
         logger.info('Testing resource accumulation prevention')
         temp_connections = []
@@ -239,7 +239,7 @@ class WebSocketStateValidationTests(SSotBaseTestCase):
 
     @pytest.mark.integration
     def test_cloud_environment_detection_fallbacks(self):
-    ""
+    """
         Tests fallback detection methods for cloud environments.
         
         This specifically tests the fixes needed for GCP Cloud Run

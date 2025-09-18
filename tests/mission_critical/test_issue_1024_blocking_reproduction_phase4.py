@@ -61,7 +61,7 @@ class DeploymentBlockingReproductionTests(BaseTestCase):
         self.deployment_blockers = []
 
     def test_reproduce_inconsistent_test_results(self):
-        "
+        """
         "
         Reproduce the core issue: same tests producing different results
         Expected to FAIL - demonstrates deployment blocking chaos
@@ -289,7 +289,7 @@ class BusinessImpactQuantificationTests(AsyncBaseTestCase):
         )
 
     async def test_customer_experience_degradation(self):
-    ""
+    """
         Test customer experience degradation from unreliable deployments
         Expected to FAIL - demonstrates customer impact
         
@@ -379,7 +379,7 @@ class UnauthorizedRunnerImpactReproductionTests(BaseTestCase):
     "Reproduce specific impacts of unauthorized test runners"
 
     def test_reproduce_pytest_main_environment_contamination(self):
-        "
+        """
         "
         Expected to FAIL - demonstrates technical root cause
 "
@@ -411,7 +411,7 @@ class UnauthorizedRunnerImpactReproductionTests(BaseTestCase):
         )
 
     def test_reproduce_subprocess_pytest_isolation_failures(self):
-        "
+        """
         "
         Reproduce subprocess pytest isolation failures
         Expected to FAIL - demonstrates subprocess execution problems
@@ -446,7 +446,7 @@ class UnauthorizedRunnerImpactReproductionTests(BaseTestCase):
         )
 
     def test_reproduce_standalone_script_dependency_chaos(self):
-    ""
+    """
         Reproduce standalone script dependency and import chaos
         Expected to FAIL - demonstrates import system problems
         
@@ -483,7 +483,7 @@ if __name__ == __main__:
     # CRITICAL: This standalone execution is THE EXACT PROBLEM we're testing!'
     # that demonstrates Issue #1024 in action!
 
-    print(=" * 80")
+    print(=" * 80)"
     print(🚨 CRITICAL DEMONSTRATION: THIS IS THE EXACT PROBLEM! 🚨)"
     print(🚨 CRITICAL DEMONSTRATION: THIS IS THE EXACT PROBLEM! 🚨)"
     print(Unauthorized test runner bypassing unified_test_runner.py SSOT")"

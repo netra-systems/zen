@@ -48,7 +48,7 @@ class AuthPersistenceMultiAgentTests:
         "Generate a valid JWT token for testing."
         payload = {
             sub: test-user-123,
-            "email: test@example.com",
+            "email: test@example.com,"
             exp: datetime.utcnow() + timedelta(hours=1),
             iat: datetime.utcnow()"
             iat: datetime.utcnow()"
@@ -224,7 +224,7 @@ class AuthPersistenceMultiAgentTests:
             payload={
                 "thread_id: thread_id,"
                 agent_name: long_running_agent,
-                content": "Process large dataset
+                content": Process large dataset"
             },
             thread_id=thread_id
         )

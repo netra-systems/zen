@@ -16,15 +16,15 @@ class TestSimpleHealthCheck:
 async with aiohttp.ClientSession() as session:
 assert session is not None
 
-print("[SUCCESS] Basic connectivity test passed")
+print("[SUCCESS] Basic connectivity test passed)"
 
 @pytest.mark.asyncio
     async def test_service_attempt(self):
 """Attempt to connect to services (passes regardless of result)."""
 pass
 services = [ ]
-("backend", "http://localhost:8000/health"),
-("auth", "http://localhost:8080/health")
+("backend", "http://localhost:8000/health),"
+("auth", "http://localhost:8080/health)"
                 
 
 results = {}
@@ -36,23 +36,23 @@ timeout = aiohttp.ClientTimeout(total=2.0)
 async with aiohttp.ClientSession(timeout=timeout) as session:
 async with session.get(url) as response:
 results[service_name] = { }
-"accessible": True,
-"status": response.status,
-"healthy": response.status == 200
+"accessible: True,"
+"status: response.status,"
+"healthy: response.status == 200"
                                 
 except Exception as e:
     pass
 results[service_name] = { }
-"accessible": False,
-"error": str(e),
-"healthy": False
+"accessible: False,"
+"error: str(e),"
+"healthy: False"
                                     
 
                                     # Print results
 print(f" )"
 [INFO] Service connectivity check:")"
 for service_name, result in results.items():
-if result["accessible"]:
+if result["accessible]:"
     print("")
 else:
     print("")

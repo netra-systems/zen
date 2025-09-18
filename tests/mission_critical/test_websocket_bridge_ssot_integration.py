@@ -74,7 +74,7 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         self.mock_websocket_manager = self.mock_factory.create_websocket_manager()
         
     async def test_websocket_events_delivery_consistency(self):
-    "
+        """
     "
         CRITICAL: Validate all 5 critical events still deliver properly
         
@@ -121,7 +121,7 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
             # Trigger tool_executing
             await self.registry._emit_websocket_event(
                 self.test_user_id, tool_executing,
-                {tool_name: "test_tool, session_id": self.test_session_id}
+                {tool_name: "test_tool, session_id: self.test_session_id}"
             
             # Trigger tool_completed
             await self.registry._emit_websocket_event(
@@ -196,7 +196,7 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         self.assertTrue(True, WebSocket bridge integration completed without critical errors)
 
     async def test_multi_user_websocket_isolation_preserved(self):
-        "
+        """
         "
         CRITICAL: Ensure user isolation maintained in WebSocket events
         
@@ -266,7 +266,7 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
                                User 2 should only see their own events)
 
     async def test_real_time_event_delivery_validation(self):
-        "
+        """
         "
         CRITICAL: Validate real-time event delivery performance
         
@@ -300,12 +300,12 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         
         if hasattr(self.registry, '_emit_websocket_event'):
             events_to_send = [
-                (agent_started, {agent": "performance_test),
+                (agent_started, {agent": performance_test),"
                 (agent_thinking, {thought: Processing quickly"), "
                 (tool_executing, {tool: fast_tool),"
                 (tool_executing, {tool: fast_tool),"
                 (tool_completed", {result: completed),"
-                ("agent_completed, {response": Done)
+                ("agent_completed, {response: Done)"
             ]
             
             for event_type, event_data in events_to_send:
@@ -344,7 +344,7 @@ if __name__ == __main__:"
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print("MIGRATION NOTICE: This file previously used direct pytest execution.)"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")"
-    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md)"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

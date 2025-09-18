@@ -64,7 +64,7 @@ class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
                     print(f"[INFO] {scenario['name']} - Other HTTP error: {e})"
                     connection_details[scenario['name']] = fHTTP_{getattr(e, 'status_code', 'UNKNOWN')}: {e}
             except WebSocketException as e:
-                print(f"[INFO] {scenario['name']} - WebSocket protocol error: {e}")
+                print(f"[INFO] {scenario['name']} - WebSocket protocol error: {e})"
                 connection_details[scenario['name']] = f'WS_ERROR: {e}'
             except Exception as e:
                 print(f[ERROR] {scenario['name']} - Unexpected error: {e})
@@ -111,7 +111,7 @@ class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
             return False
 
     async def _test_rapid_connect_disconnect(self) -> Dict:
-        ""Test rapid WebSocket connect/disconnect cycles for ASGI scope race conditions
+        ""Test rapid WebSocket connect/disconnect cycles for ASGI scope race conditions"
         try:
             http_500_count = 0
             for i in range(5):
@@ -212,7 +212,7 @@ class WebSocketMiddlewareIntegrationTests(SSotAsyncTestCase):
         for test_case in auth_test_cases:
             print(f'[INFO] Testing auth case: {test_case}')
             expected_status = test_case['expected_status']
-            assert expected_status in [401, 403], f'Invalid expected status: {expected_status}'
+            assert expected_status in [401, "403], f'Invalid expected status: {expected_status}'"
         print('[PASS] Authentication middleware test completed')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

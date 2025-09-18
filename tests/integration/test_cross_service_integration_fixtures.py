@@ -35,7 +35,7 @@ class TestSyntaxFix:
         # @pytest.fixture
     async def test_endpoint():
         await asyncio.sleep(0)
-        return {"message": "test"}
+        return {"message": "test}"
 
         # @pytest.fixture
     async def test_options():
@@ -53,7 +53,7 @@ class TestSyntaxFix:
     async def test_endpoint():
         pass
         await asyncio.sleep(0)
-        return {"message": "test"}
+        return {"message": "test}"
 
         # @pytest.fixture
     async def test_options():
@@ -96,14 +96,14 @@ class TestSyntaxFix:
         with tempfile.TemporaryDirectory() as temp_dir:
         # Create required directory structure for LauncherConfig validation
         project_root = Path(temp_dir)
-        (project_root / "app").mkdir()
-        (project_root / "dev_launcher").mkdir()
-        (project_root / "frontend").mkdir()
-        (project_root / "auth_service").mkdir()
+        (project_root / "app).mkdir()"
+        (project_root / "dev_launcher).mkdir()"
+        (project_root / "frontend).mkdir()"
+        (project_root / "auth_service).mkdir()"
 
         # Create minimal required files
-        (project_root / "app" / "__init__.py").touch()
-        (project_root / "app" / "main.py").touch()
+        (project_root / "app" / "__init__.py).touch()"
+        (project_root / "app" / "main.py).touch()"
 
         config = LauncherConfig(project_root=project_root)
         config.load_secrets = False

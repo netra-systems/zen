@@ -384,15 +384,15 @@ class RealConcurrentUserIsolationTests:
         
         # Assert no violations occurred
         assert len(violations) == 0, fCONCURRENT REDIS ISOLATION VIOLATIONS: {violations}""
-        assert success_rate >= 95.0, fSuccess rate too low: {success_rate}% (expected >= 95%)
-        assert avg_operation_time < 5.0, fAverage operation time too high: {avg_operation_time}s (expected < 5s)
+        assert success_rate >= 95.0, "fSuccess rate too low: {success_rate}% (expected >= 95%)"
+        assert avg_operation_time < 5.0, "fAverage operation time too high: {avg_operation_time}s (expected < 5s)"
         
         # Log performance metrics for monitoring
         logging.info(f"Concurrent Redis Test Metrics: {final_metrics})"
 
     @pytest.mark.asyncio
     async def test_database_concurrent_session_isolation(self, database_engine):
-        "
+        """
         "
         CRITICAL: Database session isolation with 15+ concurrent database transactions.
         
@@ -652,13 +652,13 @@ class RealConcurrentUserIsolationTests:
         
         assert len(violations) == 0, fDATABASE CONCURRENT ISOLATION VIOLATIONS: {violations}"
         assert len(violations) == 0, fDATABASE CONCURRENT ISOLATION VIOLATIONS: {violations}"
-        assert success_rate >= 95.0, fDatabase success rate too low: {success_rate}% (expected >= 95%)
+        assert success_rate >= 95.0, "fDatabase success rate too low: {success_rate}% (expected >= 95%)"
         assert avg_operation_time < 10.0, fDatabase operation time too high: {avg_operation_time}s (expected < 10s)"
         assert avg_operation_time < 10.0, fDatabase operation time too high: {avg_operation_time}s (expected < 10s)"
 
     @pytest.mark.asyncio
     async def test_websocket_concurrent_message_isolation(self, backend_client):
-    "
+        """
     "
         CRITICAL: WebSocket message isolation with 12+ concurrent connections.
         
@@ -805,7 +805,7 @@ class RealConcurrentUserIsolationTests:
             success_rate = (successful_operations / len(connected_contexts)) * 100 if connected_contexts else 100
             avg_operation_time = total_duration / len(connected_contexts) if connected_contexts else 0
             
-            assert len(violations) == 0, fWEBSOCKET CONCURRENT ISOLATION VIOLATIONS: {violations}
+            assert len(violations) == 0, "fWEBSOCKET CONCURRENT ISOLATION VIOLATIONS: {violations}"
             assert success_rate >= 90.0, fWebSocket success rate too low: {success_rate}% (expected >= 90%)"
             assert success_rate >= 90.0, fWebSocket success rate too low: {success_rate}% (expected >= 90%)"
             
@@ -816,7 +816,7 @@ class RealConcurrentUserIsolationTests:
 
     @pytest.mark.asyncio
     async def test_memory_stress_concurrent_isolation(self, redis_client, backend_client):
-    "
+        """
     "
         CRITICAL: Memory stress testing with 20+ concurrent users.
         
@@ -1005,9 +1005,9 @@ class RealConcurrentUserIsolationTests:
         success_rate = (successful_operations / len(users)) * 100
         avg_operation_time = total_duration / len(users)
         
-        assert len(violations) == 0, fMEMORY STRESS ISOLATION VIOLATIONS: {violations}
+        assert len(violations) == 0, "fMEMORY STRESS ISOLATION VIOLATIONS: {violations}"
         assert success_rate >= 90.0, fMemory stress success rate too low: {success_rate}% (expected >= 90%)""
-        assert avg_operation_time < 15.0, fMemory stress operation time too high: {avg_operation_time}s (expected < 15s)
+        assert avg_operation_time < 15.0, "fMemory stress operation time too high: {avg_operation_time}s (expected < 15s)"
 
     @pytest.mark.asyncio
     async def test_thread_safety_concurrent_operations(self, redis_client):
@@ -1106,8 +1106,8 @@ class RealConcurrentUserIsolationTests:
         success_rate = (successful_operations / len(users)) * 100
         avg_operation_time = total_duration / len(users)
         
-        assert len(violations) == 0, fTHREAD SAFETY VIOLATIONS: {violations}
-        assert success_rate >= 95.0, fThread safety success rate too low: {success_rate}% (expected >= 95%)
+        assert len(violations) == 0, "fTHREAD SAFETY VIOLATIONS: {violations}"
+        assert success_rate >= 95.0, "fThread safety success rate too low: {success_rate}% (expected >= 95%)"
         assert avg_operation_time < 20.0, fThread operation time too high: {avg_operation_time}s (expected < 20s)""
 
     async def _thread_safe_async_operations(self, redis_client, user: ConcurrentUserContext, 
@@ -1181,7 +1181,7 @@ class RealConcurrentUserIsolationTests:
 
     @pytest.mark.asyncio
     async def test_comprehensive_concurrent_integration(self, redis_client, database_engine, backend_client):
-    "
+        """
     "
         CRITICAL: Comprehensive integration test of ALL concurrent isolation mechanisms.
         
@@ -1397,7 +1397,7 @@ class RealConcurrentUserIsolationTests:
         avg_operation_time = total_duration / len(users)
         final_metrics = metrics.get_metrics()
         
-        assert len(violations) == 0, fCOMPREHENSIVE INTEGRATION VIOLATIONS: {violations}
+        assert len(violations) == 0, "fCOMPREHENSIVE INTEGRATION VIOLATIONS: {violations}"
         assert success_rate >= 90.0, f"Integration success rate too low: {success_rate}% (expected >= 90%)"
         assert avg_operation_time < 30.0, fIntegration operation time too high: {avg_operation_time}s (expected < 30s)"
         assert avg_operation_time < 30.0, fIntegration operation time too high: {avg_operation_time}s (expected < 30s)"

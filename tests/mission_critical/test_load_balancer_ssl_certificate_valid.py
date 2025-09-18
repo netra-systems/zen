@@ -54,7 +54,7 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
     
     # Required SSL configurations
     REQUIRED_SSL_PROTOCOLS = [TLSv1.2, TLSv1.3]
-    FORBIDDEN_SSL_PROTOCOLS = [SSLv2, "SSLv3, TLSv1.0", TLSv1.1]
+    FORBIDDEN_SSL_PROTOCOLS = [SSLv2, "SSLv3, TLSv1.0, TLSv1.1]"
     
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
@@ -138,7 +138,7 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_load_balancer_ssl_security_configuration(self):
-        ""
+        """
         HARD FAIL: Load balancer SSL configuration MUST meet security standards.
         
         This test validates that SSL configuration follows security best practices
@@ -203,7 +203,7 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     async def test_ssl_certificate_trust_chain_complete(self):
-    ""
+    """
         HARD FAIL: SSL certificate trust chain MUST be complete and valid.
         
         This test validates that the complete certificate trust chain is properly
@@ -422,7 +422,7 @@ class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
         return \n.join(report_parts)
     
     def _build_ssl_security_failure_report(self, security_results: Dict, failures: List[str) -> str:
-        ""Build SSL security failure report.
+        ""Build SSL security failure report."
         report_parts = []
         
         for domain, result in security_results.items():

@@ -35,12 +35,12 @@ import time
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
 
-from netra_backend.app.auth_integration.auth_permissiveness import (
+from netra_backend.app.auth_integration.auth_permissiveness import ()
     AuthPermissivenessLevel,
     AuthPermissivenessResult,
     authenticate_with_permissiveness
 )
-from netra_backend.app.auth_integration.auth_circuit_breaker import (
+from netra_backend.app.auth_integration.auth_circuit_breaker import ()
     CircuitBreakerState,
     CircuitBreakerConfig,
     authenticate_with_circuit_breaker
@@ -65,7 +65,7 @@ class MockWebSocketWith1011Conditions:
                 x-cloud-trace-context: "12345/67890;o=1,"
                 x-forwarded-for": 203.0.113.1,"
                 origin: https://app-staging.netrasystems.ai,
-                user-agent": "Chrome/118.0.0.0
+                user-agent": Chrome/118.0.0.0"
             }
             # Headers may be stripped by load balancer
             if simulate_header_stripping:
@@ -84,7 +84,7 @@ class MockWebSocketWith1011Conditions:
         
         # Mock client connection
         self.client = MagicMock()
-        self.client.host = 203.0.113.1" if simulate_gcp_load_balancer else "127.0.0.1
+        self.client.host = 203.0.113.1" if simulate_gcp_load_balancer else 127.0.0.1"
         self.client.port = 443 if simulate_gcp_load_balancer else 8080
         
         # WebSocket state
@@ -98,7 +98,7 @@ class MockWebSocketWith1011Conditions:
         Return conditions that would cause 1011 errors.""
         return {
             gcp_load_balancer: x-forwarded-proto in self.headers,
-            headers_stripped": "authorization not in self.headers,
+            headers_stripped": authorization not in self.headers,"
             auth_service_down: self._simulate_auth_service_down,
             staging_environment: self._environment == staging","
             "client_ip: self.client.host,"
@@ -172,7 +172,7 @@ class WebSocket1011RemediationTests:
             assert user_context.user_id.startswith(relaxed_")"
             assert user_context.websocket_client_id is not None
             assert user_context.agent_context[auth_level] == relaxed
-            assert "execute_agents in user_context.agent_context[permissions"]
+            assert "execute_agents in user_context.agent_context[permissions]"
             
             print(f✅ GCP Load Balancer scenario resolved: {result.auth_method})
     
@@ -315,7 +315,7 @@ class WebSocket1011RemediationTests:
                 # But should not allow demo mode
                 if result.success:
                     # If it succeeds, it should be with strict or relaxed, never demo
-                    assert result.level in [AuthPermissivenessLevel.STRICT, AuthPermissivenessLevel.RELAXED]
+                    assert result.level in [AuthPermissivenessLevel.STRICT, "AuthPermissivenessLevel.RELAXED]"
                     assert result.level != AuthPermissivenessLevel.DEMO
                 
                 print(f✅ Production security maintained: level={result.level.value if result.success else 'failed'})
@@ -343,9 +343,9 @@ class WebSocket1011RemediationTests:
             result = await mock_circuit_auth(mock_ws)
             
             assert result.success is True
-            assert hasattr(result, 'level')
-            assert hasattr(result, 'user_context')
-            assert hasattr(result, 'audit_info')
+            assert hasattr(result, "'level')"
+            assert hasattr(result, "'user_context')"
+            assert hasattr(result, "'audit_info')"
             
             print(f✅ WebSocket SSOT integration: {result.auth_method}")"
     
@@ -365,7 +365,7 @@ class WebSocket1011RemediationTests:
             },
             {
                 name: Development Demo Mode,
-                "websocket: MockWebSocketWith1011Conditions(environment=development"),
+                "websocket: MockWebSocketWith1011Conditions(environment=development),"
                 environment: development,  
                 demo_mode: True,""
                 expected_level": AuthPermissivenessLevel.DEMO"
@@ -407,7 +407,7 @@ class WebSocket1011RemediationTests:
                         assert result.level == scenario['expected_level']
                         print(f  ✅ Success: {result.auth_method})
                     else:
-                        print(f"  ❌ Failed: {'; '.join(result.security_warnings)}")
+                        print(f"  ❌ Failed: {'; '.join(result.security_warnings)})"
                         
                 except Exception as e:
                     print(f  ❌ Exception: {e})
@@ -431,7 +431,7 @@ class MonitoringAndAlertingTests:
         # Test all auth health endpoints
         try:
             circuit_status = await ssot_router.auth_circuit_breaker_status()
-            assert circuit_status[service"] == "auth_circuit_breaker
+            assert circuit_status[service"] == auth_circuit_breaker"
             assert status in circuit_status
             print(✅ Circuit breaker health endpoint operational")"
             
@@ -444,7 +444,7 @@ class MonitoringAndAlertingTests:
             assert health_status[service] == "auth_health"
             assert remediation" in health_status"
             assert health_status[remediation][websocket_1011_prevention] is True
-            print("✅ Overall health endpoint operational")
+            print("✅ Overall health endpoint operational)"
             
         except Exception as e:
             pytest.fail(fHealth endpoints failed during 1011 conditions: {e})
@@ -464,7 +464,7 @@ class MonitoringAndAlertingTests:
             security_warnings=["Using relaxed authentication],"
             audit_info={
                 fallback_used: True,
-                "environment: staging",
+                "environment: staging,"
                 gcp_load_balancer: True
             }
         
@@ -481,7 +481,7 @@ if __name__ == "__main__:"
     async def run_comprehensive_test():
         Run comprehensive 1011 remediation test.""
         print(🚀 Starting WebSocket 1011 Error Remediation Test Suite)
-        print(=" * 60")
+        print(=" * 60)"
         
         test_instance = WebSocket1011RemediationTests()
         
@@ -500,9 +500,9 @@ if __name__ == "__main__:"
             
             print(\n📋 BUSINESS IMPACT ASSESSMENT:")"
             print(f  • Chat Availability: {success_rate:.2%} of scenarios resolved)
-            print(f"  • Revenue Protection: ${500_000 * success_rate:.0f} ARR protected")
+            print(f"  • Revenue Protection: ${500_000 * success_rate:.0f} ARR protected)"
             print(  • Customer Experience: Graceful degradation active)
-            print("  • Security Boundaries: Maintained with audit logging")
+            print("  • Security Boundaries: Maintained with audit logging)"
             
         except Exception as e:
             print(f❌ Test suite failed: {e})""

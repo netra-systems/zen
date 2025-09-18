@@ -39,22 +39,22 @@ class TestServiceLauncher:
     # Set test environment variables
         test_env = get_env().as_dict().copy()
         test_env.update({ })
-        "TESTING": "1",
-        "ENVIRONMENT": "test",
-        "AUTH_FAST_TEST_MODE": "true",
-        "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
-        "SKIP_DATABASE_INIT": "true",
-        "SKIP_MIGRATIONS": "true",
-        "MINIMAL_STARTUP": "true",
+        "TESTING": "1,"
+        "ENVIRONMENT": "test,"
+        "AUTH_FAST_TEST_MODE": "true,"
+        "DATABASE_URL": "sqlite+aiosqlite:///:memory:,"
+        "SKIP_DATABASE_INIT": "true,"
+        "SKIP_MIGRATIONS": "true,"
+        "MINIMAL_STARTUP": "true,"
         "LOG_LEVEL": "WARNING"
     
 
     # Start backend with minimal configuration
         cmd = [ ]
-        sys.executable, "-m", "uvicorn",
-        "netra_backend.app.main:app",
-        "--host", "0.0.0.0",
-        "--port", str(port),
+        sys.executable, "-m", "uvicorn,"
+        "netra_backend.app.main:app,"
+        "--host", "0.0.0.0,"
+        "--port, str(port),"
         "--log-level", "warning"
     
 
@@ -68,16 +68,16 @@ class TestServiceLauncher:
         text=True
     
 
-        self.processes["backend"] = process
+        self.processes["backend] = process"
 
     # Wait for service to be ready
-        return await self._wait_for_service_ready("backend", port, "/health")
+        return await self._wait_for_service_ready("backend", port, "/health)"
 
     async def start_auth_test_mode(self, port: int = 8001) -> bool:
         """Start auth service in test mode (should already be running)."""
     # Check if already running
         try:
-        response = await self.http_client.get("formatted_string")
+        response = await self.http_client.get("formatted_string)"
         if response.status_code == 200:
         logger.info("")
         return True
@@ -89,11 +89,11 @@ class TestServiceLauncher:
 
         test_env = get_env().as_dict().copy()
         test_env.update({ })
-        "PORT": str(port),
-        "ENVIRONMENT": "test",
-        "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
-        "JWT_SECRET_KEY": "test-jwt-secret-key-unified-testing-32chars",
-        "FERNET_KEY": "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao=",
+        "PORT: str(port),"
+        "ENVIRONMENT": "test,"
+        "DATABASE_URL": "sqlite+aiosqlite:///:memory:,"
+        "JWT_SECRET_KEY": "test-jwt-secret-key-unified-testing-32chars,"
+        "FERNET_KEY": "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao=,"
         "AUTH_FAST_TEST_MODE": "true"
                 
 
@@ -106,36 +106,36 @@ class TestServiceLauncher:
         stderr=subprocess.PIPE
                 
 
-        self.processes["auth"] = process
-        return await self._wait_for_service_ready("auth", port, "/health")
+        self.processes["auth] = process"
+        return await self._wait_for_service_ready("auth", port, "/health)"
 
     async def _kill_port_process(self, port: int):
         """Kill any process using the specified port."""
         try:
-        if sys.platform == "win32":
+        if sys.platform == "win32:"
             # Windows
         result = subprocess.run( )
-        ["netstat", "-ano"],
+        ["netstat", "-ano],"
         capture_output=True, text=True
             
         for line in result.stdout.split(" )"
         "):"
-        if "" in line and "LISTENING" in line:
+        if "" in line and "LISTENING in line:"
         parts = line.split()
         if len(parts) > 4:
         pid = parts[-1]
-        subprocess.run(["taskkill", "/F", "/PID", pid),
+        subprocess.run(["taskkill", "/F", "/PID, pid),"
         capture_output=True)
         logger.info("")
         else:
                             # Unix/Linux
         result = subprocess.run( )
-        ["lsof", "-ti", ""],
+        ["lsof", -ti"", "],"
         capture_output=True, text=True
                             
         if result.stdout:
         pid = result.stdout.strip()
-        subprocess.run(["kill", "-9", pid])
+        subprocess.run(["kill", "-9, pid])"
         logger.info("")
         except Exception as e:
         logger.debug("")
@@ -167,14 +167,14 @@ class TestServiceLauncher:
         url = ""
         response = await self.http_client.get(url)
         return { }
-        "healthy": response.status_code == 200,
-        "status_code": response.status_code,
-        "response": response.json() if response.status_code == 200 else None
+        "healthy: response.status_code == 200,"
+        "status_code: response.status_code,"
+        "response: response.json() if response.status_code == 200 else None"
         
         except Exception as e:
         return { }
-        "healthy": False,
-        "error": str(e)
+        "healthy: False,"
+        "error: str(e)"
             
 
     async def stop_all_services(self):
@@ -204,22 +204,22 @@ class TestServiceLauncher:
         return their status.'''
         pass
         results = { }
-    # Removed problematic line: "auth": await test_launcher.start_auth_test_mode(),
-    # Removed problematic line: "backend": await test_launcher.start_backend_test_mode()
+    # Removed problematic line: "auth: await test_launcher.start_auth_test_mode(),"
+    # Removed problematic line: "backend: await test_launcher.start_backend_test_mode()"
     
 
     # Check health
-        if results["auth"]:
-        auth_health = await test_launcher.check_service_health("auth", 8001)
-        results["auth_healthy"] = auth_health["healthy"]
+        if results["auth]:"
+        auth_health = await test_launcher.check_service_health("auth, 8001)"
+        results["auth_healthy"] = auth_health["healthy]"
         else:
-        results["auth_healthy"] = False
+        results["auth_healthy] = False"
 
-        if results["backend"]:
-        backend_health = await test_launcher.check_service_health("backend", 8000)
-        results["backend_healthy"] = backend_health["healthy"]
+        if results["backend]:"
+        backend_health = await test_launcher.check_service_health("backend, 8000)"
+        results["backend_healthy"] = backend_health["healthy]"
         else:
-        results["backend_healthy"] = False
+        results["backend_healthy] = False"
 
         return results
 

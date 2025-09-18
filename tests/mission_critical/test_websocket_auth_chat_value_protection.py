@@ -85,7 +85,7 @@ class WebSocketAuthChatValueProtectionTests:
         cls.env = get_env()
         
         # Configure for production-like testing
-        test_env = cls.env.get(TEST_ENV", "test)
+        test_env = cls.env.get(TEST_ENV", test)"
         
         if test_env == staging:
             cls.auth_config = E2EAuthConfig.for_staging()
@@ -114,7 +114,7 @@ class WebSocketAuthChatValueProtectionTests:
         
         mission_critical_services = [
             ([U+1F510] Authentication Service, f{cls.auth_config.auth_service_url}/health),
-            ("[U+1F4AC] Chat Backend Service, f{cls.auth_config.backend_url}/health"), 
+            ("[U+1F4AC] Chat Backend Service, f{cls.auth_config.backend_url}/health), "
             ([U+1F310] WebSocket Service, f{cls.auth_config.backend_url}/api/websocket/health)
         ]
         
@@ -126,7 +126,7 @@ class WebSocketAuthChatValueProtectionTests:
             except RequestException as e:
                 # Try base service URL as fallback
                 try:
-                    base_url = /".join(service_url.split("/)[:-1]
+                    base_url = /".join(service_url.split(/)[:-1]"
                     requests.get(base_url, timeout=5)
                 except RequestException:
                     pytest.fail(f FAIL:  MISSION CRITICAL FAILURE: {service_name} unavailable - Chat functionality at risk: {e})
@@ -249,7 +249,7 @@ class WebSocketAuthChatValueProtectionTests:
         # Performance requirements for chat access
         for result in successful_access:
             access_time = result.get('chat_access_time_ms', 0)
-            assert access_time < 5000, f FAIL:  CHAT UX FAILURE: User {result['user_index']} took {access_time}ms to access chat (limit: 5000ms)
+            assert access_time < 5000, "f FAIL:  CHAT UX FAILURE: User {result['user_index']} took {access_time}ms to access chat (limit: 5000ms)"
         
         # Business impact validation
         business_success = [r for r in successful_access if r.get('business_impact') == 'SUCCESS - Revenue protected']
@@ -329,7 +329,7 @@ class WebSocketAuthChatValueProtectionTests:
                     refresh_result = json.loads(refresh_response)
                     
                     # CRITICAL: Token refresh must succeed without dropping chat
-                    assert refresh_result.get('type') == 'token_refreshed', fToken refresh failed: {refresh_result}
+                    assert refresh_result.get('type') == 'token_refreshed', "fToken refresh failed: {refresh_result}"
                     
                     new_token = refresh_result.get('new_token')
                     assert new_token is not None, New token must be provided"
@@ -384,9 +384,9 @@ class WebSocketAuthChatValueProtectionTests:
         assert refresh_result['token_refresh_successful'] is True, Token refresh must succeed"
         assert refresh_result['token_refresh_successful'] is True, Token refresh must succeed"
         assert refresh_result['chat_continuity_maintained'] is True, "Chat continuity must be maintained"
-        assert refresh_result['new_token_received'] is True, New token must be received
+        assert refresh_result['new_token_received'] is True, "New token must be received"
         assert refresh_result['chat_messages_sent'] >= 6, "All chat messages must be sent"
-        assert refresh_result['chat_responses_received'] >= 6, All chat responses must be received
+        assert refresh_result['chat_responses_received'] >= 6, "All chat responses must be received"
         assert refresh_result['chat_history_accessible'] is True, Chat history must remain accessible"
         assert refresh_result['chat_history_accessible'] is True, Chat history must remain accessible"
     
@@ -540,7 +540,7 @@ class WebSocketAuthChatValueProtectionTests:
         normal_scenario = next((s for s in scenarios if s['scenario'] == 'normal_business_chat'), None)
         assert normal_scenario is not None, Normal business chat scenario must be tested"
         assert normal_scenario is not None, Normal business chat scenario must be tested"
-        assert normal_scenario['success'] is True, Normal business chat must succeed
+        assert normal_scenario['success'] is True, "Normal business chat must succeed"
         assert normal_scenario['response_time_ms'] < 25000, Normal business chat must be responsive""
         
         # At least one degradation scenario should provide some level of service
@@ -548,7 +548,7 @@ class WebSocketAuthChatValueProtectionTests:
         successful_degradation = [s for s in degradation_scenarios if s['success']]
         
         # Business continuity requires at least some level of service during degradation
-        assert len(successful_degradation) >= 1, At least one degradation scenario must succeed for business continuity
+        assert len(successful_degradation) >= 1, "At least one degradation scenario must succeed for business continuity"
     
     def test_enterprise_customer_priority_authentication_processing(self):
         "[U+1F451] MISSION CRITICAL: Enterprise customers receive priority authentication."
@@ -570,7 +570,7 @@ class WebSocketAuthChatValueProtectionTests:
             "Test enterprise users get priority authentication processing."
             
             async def authenticate_user_with_timing(user_data, user_type):
-                ""Authenticate user and measure timing.
+                ""Authenticate user and measure timing."
                 start_time = time.time()
                 
                 websocket_headers = {
@@ -666,7 +666,7 @@ class WebSocketAuthChatValueProtectionTests:
         regular_time = regular_result['auth_time_ms']
         
         # Enterprise authentication should be fast (absolute requirement)
-        assert enterprise_time < 3000, fEnterprise auth too slow: {enterprise_time}ms (limit: 3000ms)
+        assert enterprise_time < 3000, "fEnterprise auth too slow: {enterprise_time}ms (limit: 3000ms)"
         
         # Enterprise should receive priority processing indicators
         enterprise_priority = enterprise_result.get('priority_processing', False)
@@ -824,7 +824,7 @@ class WebSocketAuthChatValueProtectionTests:
         assert revenue_result['critical_tier_failures'] == 0, "No critical tier authentication failures allowed"
         
         # Validate overall revenue protection
-        assert revenue_result['revenue_protection_successful'] is True, Revenue protection must be successful across all tiers
+        assert revenue_result['revenue_protection_successful'] is True, "Revenue protection must be successful across all tiers"
         
         # Performance requirements for revenue-generating activities
         for assessment in revenue_assessments:
@@ -834,20 +834,20 @@ class WebSocketAuthChatValueProtectionTests:
                 
                 # Higher tiers should have faster authentication
                 if tier == 'enterprise':
-                    assert auth_time < 2000, fEnterprise tier auth too slow: {auth_time}ms
+                    assert auth_time < 2000, "fEnterprise tier auth too slow: {auth_time}ms"
                 elif tier == 'premium':
                     assert auth_time < 4000, fPremium tier auth too slow: {auth_time}ms""
                 else:  # free tier
-                    assert auth_time < 8000, fFree tier auth too slow: {auth_time}ms
+                    assert auth_time < 8000, "fFree tier auth too slow: {auth_time}ms"
 
 
 if __name__ == __main__:
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.)"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
-    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md)"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

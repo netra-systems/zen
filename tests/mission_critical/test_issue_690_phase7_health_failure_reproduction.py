@@ -34,7 +34,7 @@ import pytest
 import aiohttp
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from netra_backend.app.startup_health_checks import (
+from netra_backend.app.startup_health_checks import ()
     StartupHealthChecker,
     ServiceStatus,
     HealthCheckResult,
@@ -67,7 +67,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
     @pytest.mark.mission_critical
     async def test_phase7_health_validation_returns_1_critical_service_unhealthy(self):
-        "
+        """
         "
         EXPECTED TO FAIL - CRITICAL ISSUE REPRODUCTION
 
@@ -119,7 +119,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
     @pytest.mark.mission_critical
     async def test_llm_manager_health_check_staging_failure(self):
-        "
+        """
         "
         EXPECTED TO FAIL - LLM MANAGER ISSUE
 
@@ -144,7 +144,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
         # Test expects healthy LLM manager but gets unhealthy
         with pytest.raises(AssertionError):
-            assert result.status == ServiceStatus.HEALTHY, fLLM manager should be healthy: {result.message}
+            assert result.status == ServiceStatus.HEALTHY, "fLLM manager should be healthy: {result.message}"
 
         # Verify we get the exact failure pattern from staging
         assert result.status == ServiceStatus.UNHEALTHY
@@ -175,7 +175,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
             # Test expects optional Redis dependency but gets critical failure
             with pytest.raises(AssertionError):
-                assert result.status in [ServiceStatus.HEALTHY, ServiceStatus.DEGRADED], \
+                assert result.status in [ServiceStatus.HEALTHY, "ServiceStatus.DEGRADED], \"
                     fRedis should be optional in staging: {result.message}
 
             # Verify Redis is treated as critical (causing unnecessary failures)
@@ -210,7 +210,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
                     # Test expects 200 OK but staging returns 503
                     with pytest.raises(AssertionError):
-                        assert resp.status == 200, fStaging health endpoint should return 200, got {resp.status}
+                        assert resp.status == 200, "fStaging health endpoint should return 200, got {resp.status}"
 
                     # Verify we get the exact 503 error from staging
                     assert resp.status == 503, fExpected 503 Service Unavailable, got {resp.status}""
@@ -232,7 +232,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
     @pytest.mark.mission_critical
     async def test_validate_startup_health_with_critical_failures(self):
-    "
+        """
     "
         EXPECTED TO FAIL - STARTUP VALIDATION FAILURE
 
@@ -266,7 +266,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
     @pytest.mark.mission_critical
     async def test_health_check_timeout_configuration_staging_specific(self):
-    ""
+    """
         EXPECTED TO FAIL - TIMEOUT CONFIGURATION ISSUE
 
         Test reproduces: Health checks timing out due to inappropriate timeouts for staging
@@ -321,7 +321,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
 @pytest.mark.asyncio
 class Issue690RemedationStrategyValidationTests:
-    ""
+    """
     Tests to validate remediation strategies for Issue #690.
 
     These tests should PASS after remediation is implemented.
@@ -329,7 +329,7 @@ class Issue690RemedationStrategyValidationTests:
 
     @pytest.mark.mission_critical
     async def test_environment_aware_health_checks_proposed_fix(self):
-        "
+        """
         "
         SHOULD PASS AFTER REMEDIATION
 
@@ -360,7 +360,7 @@ class Issue690RemedationStrategyValidationTests:
 
     @pytest.mark.mission_critical
     async def test_graceful_degradation_proposed_fix(self):
-        "
+        """
         "
         SHOULD PASS AFTER REMEDIATION
 
@@ -378,7 +378,7 @@ class Issue690RemedationStrategyValidationTests:
             database: {status: "healthy},"
             redis: {status: degraded, "required: False},  # Optional"
             clickhouse": {status: degraded, required: False},  # Optional"
-            llm_manager": {"status: degraded, required: False},  # Optional in staging
+            llm_manager": {status: degraded, required: False},  # Optional in staging"
             overall_status: "degraded,  # Not unhealthy"
             traffic_routing": allow  # Still serve traffic"
         }
@@ -400,7 +400,7 @@ if __name__ == __main__:
     async def main():
         print(=== ISSUE #690 PHASE 7 HEALTH FAILURE REPRODUCTION ===")"
         print(CRITICAL: These tests reproduce the staging deployment failures)
-        print("Expected: Tests should FAIL, demonstrating the issues\n")
+        print("Expected: Tests should FAIL, demonstrating the issues\n)"
 
         # Run a simple reproduction test
         test_instance = Issue690Phase7HealthFailureReproductionTests()
@@ -412,7 +412,7 @@ if __name__ == __main__:
             print( UNEXPECTED: Test passed - issue may be resolved)"
             return 0
         except AssertionError as e:
-            print(f" REPRODUCED ISSUE #690: {e})")
+            print(f" REPRODUCED ISSUE #690: {e}))"
             return 1
         except Exception as e:
             print(f ERROR: Unexpected failure: {e})"

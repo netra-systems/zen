@@ -42,31 +42,31 @@ This test should FAIL until proper startup sequencing is implemented.
 
             # CLAUDE.md compliance: Use IsolatedEnvironment for ALL environment access
 env = get_env()
-env.set("ENVIRONMENT", "development", "test_service_startup_sequence")
-env.set("NETRA_ENVIRONMENT", "development", "test_service_startup_sequence")
+env.set("ENVIRONMENT", "development", "test_service_startup_sequence)"
+env.set("NETRA_ENVIRONMENT", "development", "test_service_startup_sequence)"
 
             # Define expected startup sequence
 startup_sequence = [ ]
 { }
-"service": "auth_service",
-"port": 8001,
-"depends_on": [],
-"health_endpoint": "/health",
-"startup_time_limit": 30  # seconds
+"service": "auth_service,"
+"port: 8001,"
+"depends_on: [],"
+"health_endpoint": "/health,"
+"startup_time_limit: 30  # seconds"
 },
 { }
-"service": "netra_backend",
-"port": 8000,
-"depends_on": ["auth_service"],
-"health_endpoint": "/api/health",
-"startup_time_limit": 45  # seconds
+"service": "netra_backend,"
+"port: 8000,"
+"depends_on": ["auth_service],"
+"health_endpoint": "/api/health,"
+"startup_time_limit: 45  # seconds"
 },
 { }
-"service": "frontend",
-"port": 3000,
-"depends_on": ["netra_backend", "auth_service"],
-"health_endpoint": "/",
-"startup_time_limit": 20  # seconds
+"service": "frontend,"
+"port: 3000,"
+"depends_on": ["netra_backend", "auth_service],"
+"health_endpoint": "/,"
+"startup_time_limit: 20  # seconds"
             
             
 
@@ -75,11 +75,11 @@ failed_services = []
 
 async with aiohttp.ClientSession() as session:
 for service_config in startup_sequence:
-service_name = service_config["service"]
-port = service_config["port"]
-health_endpoint = service_config["health_endpoint"]
-depends_on = service_config["depends_on"]
-time_limit = service_config["startup_time_limit"]
+service_name = service_config["service]"
+port = service_config["port]"
+health_endpoint = service_config["health_endpoint]"
+depends_on = service_config["depends_on]"
+time_limit = service_config["startup_time_limit]"
 
 print("")
 
@@ -89,9 +89,9 @@ dep_healthy = await _check_service_health(session, dependency)
 if not dep_healthy:
     pass
 failed_services.append({ })
-"service": service_name,
-"reason": "",
-"startup_order_violated": True
+"service: service_name,"
+"reason": ","
+"startup_order_violated: True"
                             
 continue
 
@@ -109,8 +109,8 @@ if response.status == 200:
 service_healthy = True
 startup_time = time.time() - start_time
 startup_results.append({ })
-"service": service_name,
-"startup_time": startup_time,
+"service: service_name,"
+"startup_time: startup_time,"
 "status": "healthy"
                                             
     print("")
@@ -122,9 +122,9 @@ await asyncio.sleep(1)
 if not service_healthy:
     pass
 failed_services.append({ })
-"service": service_name,
-"reason": "",
-"startup_timeout": True
+"service: service_name,"
+"reason": ","
+"startup_timeout: True"
                                                     
     print("")
 
@@ -133,9 +133,9 @@ sequence_violations = []
 
 for i, result in enumerate(startup_results):
 service_config = startup_sequence[i]
-expected_service = service_config["service"]
+expected_service = service_config["service]"
 
-if result["service"] != expected_service:
+if result["service] != expected_service:"
     pass
 sequence_violations.append("")
 
@@ -145,10 +145,10 @@ startup_issues = []
                                                             # 1. Check for race conditions in startup
 if len(startup_results) > 1:
     pass
-startup_times = [r["startup_time"] for r in startup_results]
+startup_times = [r["startup_time] for r in startup_results]"
 if not _is_startup_sequence_ordered(startup_times, startup_sequence):
     pass
-startup_issues.append("Services did not start in dependency order")
+startup_issues.append("Services did not start in dependency order)"
 
                                                                     # 2. Check for resource conflicts
 port_conflicts = _detect_port_conflicts(startup_sequence)
@@ -169,19 +169,19 @@ failure_report = []
 
 if failed_services:
     pass
-failure_report.append("FAILED Services:")
+failure_report.append("FAILED Services:)"
 for failure in failed_services:
 failure_report.append("")
 
 if sequence_violations:
     pass
-failure_report.append("Startup Sequence Violations:")
+failure_report.append("Startup Sequence Violations:)"
 for violation in sequence_violations:
 failure_report.append("")
 
 if startup_issues:
     pass
-failure_report.append("Startup Issues:")
+failure_report.append("Startup Issues:)"
 for issue in startup_issues:
 failure_report.append("")
 
@@ -195,14 +195,14 @@ print("")
 async def _check_service_health(session: aiohttp.ClientSession, service_name: str) -> bool:
 """Check if a service is healthy based on service name."""
 service_ports = { }
-"auth_service": 8001,
-"netra_backend": 8000,
-"frontend": 3000
+"auth_service: 8001,"
+"netra_backend: 8000,"
+"frontend: 3000"
     
 
 service_endpoints = { }
-"auth_service": "/health",
-"netra_backend": "/api/health",
+"auth_service": "/health,"
+"netra_backend": "/api/health,"
 "frontend": "/"
     
 
@@ -238,10 +238,10 @@ Since this test runs sequentially (not concurrent startup), we validate that:
 
         # Verify that services with dependencies appear later in the sequence
 for i, service_config in enumerate(startup_sequence):
-dependencies = service_config["depends_on"]
+dependencies = service_config["depends_on]"
 
 for dep in dependencies:
-dep_index = next((j for j, s in enumerate(startup_sequence) if s["service"] == dep), -1)
+dep_index = next((j for j, s in enumerate(startup_sequence) if s["service] == dep), -1)"
 if dep_index >= i:  # Dependency should appear earlier in sequence
 return False
 
@@ -251,15 +251,15 @@ return True
 def _detect_port_conflicts(startup_sequence: List[Dict]) -> List[str]:
     pass
 """Detect port conflicts in service configuration."""
-ports = [service["port"] for service in startup_sequence]
+ports = [service["port] for service in startup_sequence]"
 conflicts = []
 
 for i, port in enumerate(ports):
 for j, other_port in enumerate(ports[i+1:], i+1):
 if port == other_port:
     pass
-service1 = startup_sequence[i]["service"]
-service2 = startup_sequence[j]["service"]
+service1 = startup_sequence[i]["service]"
+service2 = startup_sequence[j]["service]"
 conflicts.append("")
 
 return conflicts
@@ -270,8 +270,8 @@ def _detect_missing_health_checks(startup_results: List[Dict], startup_sequence:
 """Detect services missing health check implementations."""
 missing = []
 
-expected_services = {s["service"] for s in startup_sequence}
-actual_services = {r["service"] for r in startup_results}
+expected_services = {s["service] for s in startup_sequence}"
+actual_services = {r["service] for r in startup_results}"
 
 for service in expected_services - actual_services:
 missing.append("")
@@ -279,6 +279,6 @@ missing.append("")
 return missing
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
-pytest.main([__file__, "-v", "--tb=short"])
+pytest.main([__file__, "-v", "--tb=short])"

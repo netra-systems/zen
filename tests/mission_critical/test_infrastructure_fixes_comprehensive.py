@@ -8,7 +8,7 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
         raise RuntimeError(WebSocket is closed)"
         raise RuntimeError(WebSocket is closed)"
@@ -110,8 +110,8 @@ class TestInfrastructureFixesComprehensive:
     "Test that session and function scoped fixtures work together without ScopeMismatch."
         # This test validates the fixture scope fix (commit 69c5da95f)
 assert real_services_function is not None
-assert hasattr(real_services_function, 'postgres')
-assert hasattr(real_services_function, 'redis')
+assert hasattr(real_services_function, "'postgres')"
+assert hasattr(real_services_function, "'redis')"
 
         # Test database connectivity
 await real_services_function.ensure_all_services_available()
@@ -152,14 +152,14 @@ assert cached_result.decode() == 'function_scope_test'
     Test TestContext module imports and core functionality."
                 # Test TestContext creation
 context = create_test_context()
-assert isinstance(context, TestContext)
+assert isinstance(context, "TestContext)"
 assert context.user_context is not None
 assert context.user_context.user_id is not None
 assert context.event_capture is not None
 
                 # Test user context isolation
 user_context = context.create_isolated_user_context()
-assert isinstance(user_context, TestUserContext)
+assert isinstance(user_context, "TestUserContext)"
 assert user_context.user_id != context.user_context.user_id
 assert user_context.thread_id != context.user_context.thread_id
 
@@ -179,7 +179,7 @@ assert context.event_capture.event_counts[test_event] == 1"
                 # Test event validation
 validation = context.validate_agent_events(required_events={"test_event)"
 assert validation[valid] == True
-assert "test_event in validation[captured_events"]
+assert "test_event in validation[captured_events]"
 
 await context.cleanup()
 
@@ -231,12 +231,12 @@ context.websocket_connection = mock_websocket
 
                             # Test event capture with required agent events
 agent_events = [
-{type: agent_started, "agent_name: test_agent", timestamp: time.time()},
-{type: "agent_thinking, thought": Processing request, timestamp: time.time()},
+{"type": agent_started, "agent_name: test_agent, timestamp: time.time()},"
+{"type": "agent_thinking, thought: Processing request, timestamp: time.time()},"
 {"type: tool_executing", tool: test_tool, timestamp: time.time()},"
 {"type: tool_executing", tool: test_tool, timestamp: time.time()},"
 {type": tool_completed, tool: test_tool, result": "success, timestamp: time.time()},"
-{type: agent_completed", "result: Task completed, timestamp: time.time()}
+{"type": agent_completed", result: Task completed, timestamp: time.time()}"
                             
 
                             # Capture all events
@@ -260,7 +260,7 @@ await context.cleanup()
 @pytest.mark.asyncio
 @pytest.mark.integration
     async def test_user_context_isolation_comprehensive(self, real_services):
-    ""Test comprehensive user context isolation across multiple scenarios.
+    ""Test comprehensive user context isolation across multiple scenarios."
 pass
                                     # Create multiple isolated contexts
 primary_context = create_test_context(user_id=primary_user)"
@@ -302,7 +302,7 @@ assert primary_retrieved != secondary_retrieved
 
                                     # Test event isolation
 primary_context.event_capture.capture_event({)
-"type: primary_event",
+"type: primary_event,"
 user_id: primary_context.user_context.user_id,
 data: "primary_data"
                                     
@@ -397,7 +397,7 @@ timestamp: time.time()"
 {
 type": tool_completed,"
 tool_name: test_analyzer,
-result": {"analysis: test completed},
+result": {analysis: test completed},"
 user_id: context.user_context.user_id,"
 user_id: context.user_context.user_id,"
 thread_id": context.user_context.thread_id,"
@@ -424,7 +424,7 @@ assert executing_event[tool_name] == "test_analyzer"
 assert executing_event[user_id"] == context.user_context.user_id"
 assert executing_event[thread_id] == context.user_context.thread_id
 
-assert completed_event[tool_name"] == "test_analyzer
+assert completed_event[tool_name"] == test_analyzer"
 assert result in completed_event
 assert completed_event[user_id] == context.user_context.user_id"
 assert completed_event[user_id] == context.user_context.user_id"
@@ -465,7 +465,7 @@ timestamp: time.time()
 type: "tool_completed,"
 request_id": request_id,"
 tool_name: formatted_string,
-"result: formatted_string",
+"result: formatted_string,"
 user_id: context.user_context.user_id,
 thread_id: context.user_context.thread_id,"
 thread_id: context.user_context.thread_id,"
@@ -517,7 +517,7 @@ with isolated_test_session():
                                                         # Within isolation, should have test environment
 isolated_env = get_env()
 test_value = isolated_env.get(TESTING, 0)
-assert test_value in [0", "1]  # Should be set
+assert test_value in [0", 1]  # Should be set"
 
                                                         # Test setting and getting values in isolation
 isolated_env.set(TEST_ISOLATION_KEY, isolated_value, source=test)"
@@ -527,7 +527,7 @@ assert retrieved_value == isolated_value
 
                                                         # After isolation, changes should not persist in main environment
 main_env = get_env()
-main_value = main_env.get("TEST_ISOLATION_KEY, not_found")
+main_value = main_env.get("TEST_ISOLATION_KEY, not_found)"
                                                         # Value might or might not persist depending on implementation, just test it doesn't crash'
 assert main_value is not None
 
@@ -571,7 +571,7 @@ assert metrics[total_events_captured] == 2"
 assert metrics[total_events_captured] == 2"
 assert metrics[unique_event_types"] == 2"
 assert performance_start in metrics[event_counts]
-assert "performance_end in metrics[event_counts"]
+assert "performance_end in metrics[event_counts]"
 
 await context.cleanup()
 

@@ -52,7 +52,7 @@ class WebSocketLifecycleTracker:
         self.connection_start = time.time()
     
     def record_connection_established(self) -> None:
-        ""Record successful connection.
+        ""Record successful connection."
         self.connection_established = time.time()
     
     def record_message_sent(self) -> None:
@@ -188,7 +188,7 @@ class StreamingResponseValidator:
 
 @pytest.fixture
 async def lifecycle_harness():
-    ""Create WebSocket lifecycle testing harness.
+    ""Create WebSocket lifecycle testing harness."
     harness = UnifiedE2ETestHarness()
     yield harness
     # Cleanup handled by harness
@@ -269,14 +269,14 @@ class WebSocketAgentMessageLifecycleTests:
                 initial_msg = await asyncio.wait_for(client.websocket.recv(), timeout=2.0)
                 parsed_msg = json.loads(initial_msg)
                 logger.info(fConsumed initial message: {parsed_msg}")"
-                assert parsed_msg.get('type') == 'connection_established', fExpected connection_established, got {parsed_msg.get('type')}
+                assert parsed_msg.get('type') == 'connection_established', "fExpected connection_established, got {parsed_msg.get('type')}"
             except asyncio.TimeoutError:
                 logger.warning(No initial connection message received)""
         
         tracker.record_connection_established()
         
         assert success is True, "WebSocket connection failed"
-        assert client.websocket is not None, WebSocket not established
+        assert client.websocket is not None, "WebSocket not established"
     
     async def _send_message_with_routing(self, client: WebSocketAgentClient,
                                        tracker: WebSocketLifecycleTracker) -> SupervisorAgentMessageHandler:
@@ -310,11 +310,11 @@ class WebSocketAgentMessageLifecycleTests:
         Assert all performance timing requirements.""
         # Connection established < 500ms
         connection_time = tracker.connection_established - tracker.connection_start
-        assert connection_time < 0.5, fConnection too slow: {connection_time:.3f}s > 0.5s
+        assert connection_time < 0.5, "fConnection too slow: {connection_time:.3f}s > 0.5s"
         
         # Message acknowledged immediately (within 100ms)
         ack_time = tracker.message_acknowledged - tracker.message_sent
-        assert ack_time < 0.1, fMessage acknowledgment too slow: {ack_time:.3f}s > 0.1s
+        assert ack_time < 0.1, "fMessage acknowledgment too slow: {ack_time:.3f}s > 0.1s"
         
         # Streaming starts < 1 second
         if validator.streaming_started:
@@ -324,7 +324,7 @@ class WebSocketAgentMessageLifecycleTests:
         # Full roundtrip < 3 seconds
         if validator.last_chunk_time:
             roundtrip_time = validator.last_chunk_time - tracker.message_sent
-            assert roundtrip_time < 3.0, fFull roundtrip too slow: {roundtrip_time:.3f}s > 3.0s
+            assert roundtrip_time < 3.0, "fFull roundtrip too slow: {roundtrip_time:.3f}s > 3.0s"
 
 
 @pytest.mark.e2e
@@ -367,7 +367,7 @@ class AgentStateManagementTests:
         
         # Should have at least: started -> processing -> completed
         state_types = [s.get('type', '') for s in states]
-        assert 'agent_started' in state_types, Missing agent_started state
+        assert 'agent_started' in state_types, "Missing agent_started state"
 
 
 @pytest.mark.e2e
@@ -382,7 +382,7 @@ class WebSocketReliabilityTests:
         
         # Initial connection
         success = await client.establish_connection()
-        assert success is True, Initial connection failed
+        assert success is True, "Initial connection failed"
         
         # Simulate connection interruption
         await client.websocket.close()
@@ -405,7 +405,7 @@ class WebSocketReliabilityTests:
                 messages_sent += 1
             await asyncio.sleep(0.1)
         
-        assert messages_sent == 5, fMessage delivery failed: {messages_sent}/5
+        assert messages_sent == 5, "fMessage delivery failed: {messages_sent}/5"
 
     def _is_complete_response(self, parsed: Dict[str, Any) -> bool:
         "Check if response indicates completion."

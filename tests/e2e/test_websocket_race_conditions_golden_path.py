@@ -94,7 +94,7 @@ from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
 # CONSOLIDATED: from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
 # CONSOLIDATED: # CONSOLIDATED: from test_framework.base_e2e_test import BaseE2ETest
 # CONSOLIDATED: # CONSOLIDATED: from test_framework.real_services_test_fixtures import real_services_fixture
-# CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import (
+# CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import ()
 #     E2EWebSocketAuthHelper,
 #     E2EAuthConfig,
 #     AuthenticatedUser,
@@ -117,7 +117,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDisp
 @pytest.mark.mission_critical
 @pytest.mark.golden_path
 class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
-    ""
+    """
     E2E tests for WebSocket race conditions in complete golden path scenarios.
     
     Tests complete user chat experience with REAL services, REAL LLM,
@@ -138,7 +138,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
     
     @pytest.fixture(autouse=True)
     async def setup_e2e_environment(self, real_services_fixture):
-        ""Set up full E2E environment for golden path race condition testing.
+        ""Set up full E2E environment for golden path race condition testing."
         self.services = real_services_fixture
         
         # Initialize authentication with Docker-compatible config
@@ -273,7 +273,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                         event_tracking[connection_id].append(event_data)
                         
                         # Validate event structure
-                        assert type in event_data, fEvent missing type field: {event_data}
+                        assert type in event_data, "fEvent missing type field: {event_data}"
                         
                     except asyncio.TimeoutError:
                         pytest.fail(fConnection {i} timeout waiting for response)
@@ -285,15 +285,15 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                     pytest.fail(fFailed to establish connection {i}: {e}")"
             
             # Validate all connections established successfully
-            assert len(connections) == connection_count, fExpected {connection_count} connections, got {len(connections)}
+            assert len(connections) == connection_count, "fExpected {connection_count} connections, got {len(connections)}"
             
             # Validate no race condition errors in tracking
             for conn_id, events in event_tracking.items():
-                assert len(events) > 0, fNo events received on {conn_id}
+                assert len(events) > 0, "fNo events received on {conn_id}"
                 
                 # Check for error events
-                error_events = [e for e in events if e.get("type) == error"]
-                assert len(error_events) == 0, fError events found on {conn_id}: {error_events}
+                error_events = [e for e in events if e.get("type) == error]"
+                assert len(error_events) == 0, "fError events found on {conn_id}: {error_events}"
             
             print(f PASS:  Successfully established {connection_count} rapid connections without race conditions)""
             
@@ -328,7 +328,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             
             # Validate connection is authenticated
             assert websocket is not None, WebSocket connection failed""
-            assert websocket.open, WebSocket not in open state
+            assert websocket.open, "WebSocket not in open state"
             
             # Send authentication test message
             auth_test_message = {
@@ -344,7 +344,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             response_data = json.loads(response)
             
             # Validate authentication success
-            assert type" in response_data, "Response missing type field
+            assert type" in response_data, Response missing type field"
             assert response_data.get(type) != error, fAuthentication error: {response_data}""
             
             print(" PASS:  WebSocket authentication successful with real services)"
@@ -428,7 +428,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                     pass
 
     async def _send_and_capture_events(self, session: Dict, message: Dict) -> None:
-        ""Send message and capture resulting events.
+        ""Send message and capture resulting events."
         websocket = session[websocket]""
         
         # Send message
@@ -503,7 +503,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                         break
                         
                 except asyncio.TimeoutError:
-                    print("[U+23F1][U+FE0F] Timeout waiting for events, continuing...")
+                    print("[U+23F1][U+FE0F] Timeout waiting for events, continuing...)"
                     continue
                 except Exception as e:
                     print(f FAIL:  Error receiving events: {e})""
@@ -603,7 +603,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 
             except Exception as e:
                 print(f FAIL:  Race condition detected in cycle {cycle}: {e})
-                if 1011" in str(e) or "timeout in str(e).lower():
+                if 1011" in str(e) or timeout in str(e).lower():"
                     pytest.fail(fStaging race condition reproduced in cycle {cycle}: {e})
             finally:
                 if websocket:
@@ -661,7 +661,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                     
                     # Log business-relevant events
                     event_type = event_data.get(type)
-                    if event_type in [tool_executing, "tool_completed, agent_thinking", agent_completed]:
+                    if event_type in [tool_executing, "tool_completed, agent_thinking, agent_completed]:"
                         print(f[U+1F4BC] Business value event: {event_type})""
                     
                     # Stop when business value delivered
@@ -678,7 +678,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             event_types = set(event.get(type") for event in business_value_events)"
             
             # Must have agent execution events
-            assert agent_started in event_types, No agent_started event for business value
+            assert agent_started in event_types, "No agent_started event for business value"
             assert agent_thinking in event_types, No agent_thinking event for business reasoning""
             assert "agent_completed in event_types, No agent_completed event for business results"
             
@@ -694,13 +694,13 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             response_content = final_event.get("content, ).lower()"
             
             # Check for business-relevant content
-            business_keywords = [cost, optimize, "cloud, recommend", save, efficient]
+            business_keywords = [cost, optimize, "cloud, recommend, save, efficient]"
             has_business_content = any(keyword in response_content for keyword in business_keywords)
             
             if not has_business_content:
                 print(f WARNING: [U+FE0F] Warning: Response may lack business relevance: {response_content[:100]}...)
             
-            print(f PASS:  Business value delivery validated: {len(business_value_events")} events captured")
+            print(f PASS:  Business value delivery validated: {len(business_value_events")} events captured)"
             print(f PASS:  Complete user value chain: Request  ->  AI Analysis  ->  Recommendations)
             
         finally:
@@ -708,7 +708,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 await websocket.close()
 
     async def test_007_websocket_error_recovery_flow(self):
-        ""
+        """
         Test WebSocket error recovery and graceful degradation.
         
         Validates that WebSocket connections can recover from errors
@@ -743,7 +743,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             # Get initial response to confirm working
             initial_response = await asyncio.wait_for(primary_websocket.recv(), timeout=5.0)
             initial_data = json.loads(initial_response)
-            assert initial_data.get(type) != error, fInitial connection error: {initial_data}
+            assert initial_data.get(type) != error, "fInitial connection error: {initial_data}"
             
             # Simulate connection loss by closing
             await primary_websocket.close()
@@ -758,7 +758,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             # Send recovery test message
             recovery_message = {
                 type: chat_message,
-                "message: Test recovery connection functionality",
+                "message: Test recovery connection functionality,"
                 thread_id: str(user_context.thread_id),
                 user_id: str(user_context.user_id)""
             }
@@ -781,7 +781,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 await recovery_websocket.close()
 
     async def test_008_performance_under_load(self):
-        ""
+        """
         Test WebSocket performance under concurrent load.
         
         Validates that the system maintains performance and event delivery
@@ -845,11 +845,11 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                     f"User {i} connection too slow: {metrics['connection_time']:.2f}s"
                 
                 # Validate event delivery
-                assert metrics[events_received] > 0, fUser {i} received no events
+                assert metrics[events_received] > 0, "fUser {i} received no events"
                 
                 # Validate response times
                 if metrics[response_times]:
-                    avg_response_time = sum(metrics["response_times) / len(metrics[response_times")
+                    avg_response_time = sum(metrics["response_times) / len(metrics[response_times)"
                     assert avg_response_time < 5.0, \
                         fUser {i} average response time too slow: {avg_response_time:.2f}s
             
@@ -858,7 +858,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             avg_connection_time = sum(m["connection_time] for m in performance_metrics) / len(performance_metrics)"
             
             print(f PASS:  Performance test completed successfully)
-            print(f" PASS:  {concurrent_users} concurrent users, {total_events} total events")
+            print(f" PASS:  {concurrent_users} concurrent users, {total_events} total events)"
             print(f PASS:  Average connection time: {avg_connection_time:.2f}s)
             
         finally:
@@ -876,7 +876,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
         # Send test message
         test_message = {
             type: chat_message,
-            message": f"Performance test for user {session['user_id']},
+            message": fPerformance test for user {session['user_id']},"
             thread_id: session[thread_id],
             user_id: session[user_id]
         }

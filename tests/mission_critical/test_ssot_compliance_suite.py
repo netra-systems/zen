@@ -203,7 +203,7 @@ class SSotComplianceWithIsolationTests:
         self.ssot_suite = SSotComplianceSuite()
         
         # Configure for real services testing
-        self.env.set(USE_REAL_SERVICES", "true)
+        self.env.set(USE_REAL_SERVICES", true)"
         self.env.set(TEST_CONCURRENT_USERS, 15)
         self.env.set(SSOT_COMPLIANCE_MODE, "true)"
         
@@ -225,7 +225,7 @@ class SSotComplianceWithIsolationTests:
             try:
                 # Create user-specific SSOT validation data
                 validation_data = {
-                    "type: websocket_manager_validation",
+                    "type: websocket_manager_validation,"
                     key: fssot_key_{user.user_id},
                     compliance_check: True,"
                     compliance_check: True,"
@@ -259,13 +259,13 @@ class SSotComplianceWithIsolationTests:
         session_ids = {result[session_id] for result in results}
         validation_types = {result["validation_type] for result in results}"
         
-        assert len(user_ids) == user_count, fSSOT user data leakage: {len(user_ids)} vs {user_count}
-        assert len(session_ids) == user_count, fSSOT session leakage: {len(session_ids)} vs {user_count}
+        assert len(user_ids) == user_count, "fSSOT user data leakage: {len(user_ids)} vs {user_count}"
+        assert len(session_ids) == user_count, "fSSOT session leakage: {len(session_ids)} vs {user_count}"
         assert len(validation_types) == 1, fSSOT validation type inconsistency: {validation_types}""
-        assert len(errors) == 0, fSSOT compliance errors: {errors}
+        assert len(errors) == 0, "fSSOT compliance errors: {errors}"
         
         # Performance validation
-        assert execution_time < 10.0, fSSOT validation performance: {execution_time}s > 10s
+        assert execution_time < 10.0, "fSSOT validation performance: {execution_time}s > 10s"
         
     def test_websocket_manager_isolation_compliance(self, isolated_test_env):
         "CRITICAL: Test WebSocket manager SSOT compliance under concurrent load."
@@ -312,12 +312,12 @@ class SSotComplianceWithIsolationTests:
         assert len(websocket_compliance_data) == user_count, fWebSocket SSOT data isolation failed"
         
         for user_id, compliance_data in websocket_compliance_data.items():
-            assert compliance_data[user_id] == user_id, fWebSocket SSOT data contamination
+            assert compliance_data[user_id] == user_id, "fWebSocket SSOT data contamination"
             assert "manager_instance_id in compliance_data, fMissing WebSocket manager instance ID"
         
         # CRITICAL: No WebSocket manager SSOT violations allowed
-        assert len(websocket_violations) == 0, fCRITICAL WebSocket SSOT violations: {[v.description for v in websocket_violations]}
-        assert len(compliance_errors) == 0, fWebSocket SSOT compliance errors: {compliance_errors}
+        assert len(websocket_violations) == 0, "fCRITICAL WebSocket SSOT violations: {[v.description for v in websocket_violations]}"
+        assert len(compliance_errors) == 0, "fWebSocket SSOT compliance errors: {compliance_errors}"
         
     def test_jwt_validation_ssot_isolation(self, isolated_test_env):
         "CRITICAL: Test JWT validation SSOT compliance with user isolation."
@@ -370,12 +370,12 @@ class SSotComplianceWithIsolationTests:
         assert len(jwt_compliance_data) == user_count, fJWT SSOT data isolation failed"
         
         for user_id, compliance_data in jwt_compliance_data.items():
-            assert compliance_data[user_id] == user_id, fJWT SSOT data contamination
+            assert compliance_data[user_id] == user_id, "fJWT SSOT data contamination"
             assert "auth_token_id in compliance_data, fMissing JWT auth token ID"
-            assert compliance_data[security_compliance], fJWT security compliance failed for {user_id}
+            assert compliance_data[security_compliance], "fJWT security compliance failed for {user_id}"
         
         # CRITICAL: No JWT validation SSOT violations allowed
-        assert len(jwt_violations) == 0, fCRITICAL JWT SSOT violations: {[v.description for v in jwt_violations]}
+        assert len(jwt_violations) == 0, "fCRITICAL JWT SSOT violations: {[v.description for v in jwt_violations]}"
         assert len(security_violations) == 0, fJWT security violations: {security_violations}""
         
     def test_user_session_ssot_isolation_under_load(self, isolated_test_env):
@@ -396,9 +396,9 @@ class SSotComplianceWithIsolationTests:
             try:
                 for op_id in range(operations_per_user):
                     ssot_validation_data = {
-                        "type: high_load_ssot_test",
+                        "type: high_load_ssot_test,"
                         operation_id: op_id,
-                        ssot_component: random.choice(["websocket_manager, jwt_validator", agent_registry),
+                        ssot_component: random.choice(["websocket_manager, jwt_validator, agent_registry),"
                         load_test_data: fssot_load_{random.randint(1000, 9999)}
                     }
                     
@@ -428,7 +428,7 @@ class SSotComplianceWithIsolationTests:
         
         # Verify SSOT session isolation
         for user_id, sessions in ssot_session_data.items():
-            assert len(sessions) == 1, fSSOT session isolation failed for {user_id}: {len(sessions)} sessions
+            assert len(sessions) == 1, "fSSOT session isolation failed for {user_id}: {len(sessions)} sessions"
         
         # Verify SSOT operation isolation
         for user_id, results in user_ssot_results.items():
@@ -438,9 +438,9 @@ class SSotComplianceWithIsolationTests:
             
             # Verify all results maintain SSOT compliance
             ssot_compliance = all(result['ssot_compliance'] for result in results)
-            assert ssot_compliance, fSSOT compliance lost under load for {user_id}
+            assert ssot_compliance, "fSSOT compliance lost under load for {user_id}"
         
-        assert len(ssot_errors) == 0, fSSOT errors under load: {ssot_errors}
+        assert len(ssot_errors) == 0, "fSSOT errors under load: {ssot_errors}"
         assert execution_time < (load_duration + 3), f"SSOT performance under load: {execution_time}s"
         
     def test_websocket_channel_ssot_separation(self, isolated_test_env):
@@ -483,7 +483,7 @@ class SSotComplianceWithIsolationTests:
             
             # All messages in channel should be from the same user and SSOT-compliant
             message_user_ids = {msg['user_id'] for msg in channel_messages}
-            assert len(message_user_ids) == 1, fSSOT channel isolation failed for {user_id}: {message_user_ids}
+            assert len(message_user_ids) == 1, "fSSOT channel isolation failed for {user_id}: {message_user_ids}"
             assert list(message_user_ids)[0] == user_id
             
             # Verify SSOT compliance in all messages
@@ -500,7 +500,7 @@ class SSotComplianceWithIsolationTests:
         
         # Verify no cross-channel SSOT leakage
         all_channels = set(websocket_ssot_channels.values())
-        assert len(all_channels) == user_count, fSSOT channel creation failed: {len(all_channels)} vs {user_count}
+        assert len(all_channels) == user_count, "fSSOT channel creation failed: {len(all_channels)} vs {user_count}"
         
     def test_user_specific_ssot_cache_isolation(self, isolated_test_env):
         "CRITICAL: Test user-specific SSOT compliance cache isolation."
@@ -519,7 +519,7 @@ class SSotComplianceWithIsolationTests:
                     user_id: user_id,"
                     value": fuser_{user_id}_ssot_value_{i}_{random.randint(100, 999)},"
                     ssot_compliance: True,
-                    component_type: random.choice([websocket_manager", "jwt_validator, agent_registry),
+                    component_type: random.choice([websocket_manager", jwt_validator, agent_registry),"
                     timestamp: time.time()
                 }
                 
@@ -533,8 +533,8 @@ class SSotComplianceWithIsolationTests:
                 # Simulate SSOT cache access patterns
                 if i % 3 == 0:
                     retrieved_value = user_cache.get(cache_key)
-                    assert retrieved_value == cache_value, fSSOT cache corruption for {user_id}
-                    assert retrieved_value[ssot_compliance] is True, fSSOT compliance lost in cache for {user_id}
+                    assert retrieved_value == cache_value, "fSSOT cache corruption for {user_id}"
+                    assert retrieved_value[ssot_compliance] is True, "fSSOT compliance lost in cache for {user_id}"
         
         # Execute concurrent SSOT cache operations
         with concurrent.futures.ThreadPoolExecutor(max_workers=user_count) as executor:
@@ -549,7 +549,7 @@ class SSotComplianceWithIsolationTests:
         assert len(ssot_cache_data) == user_count, f"SSOT cache isolation failed: {len(ssot_cache_data)} vs {user_count}"
         
         for user_id, user_cache in ssot_cache_data.items():
-            assert len(user_cache) == ssot_operations, fSSOT cache operations failed for {user_id}: {len(user_cache)}
+            assert len(user_cache) == ssot_operations, "fSSOT cache operations failed for {user_id}: {len(user_cache)}"
             
             # Verify all cached values belong to correct user and are SSOT-compliant
             for key, value in user_cache.items():
@@ -580,7 +580,7 @@ class SSotComplianceWithIsolationTests:
                     user_id: user_id,"
                     "query: fSELECT * FROM user_data WHERE id = '{user_id}',"
                     ssot_compliance: True,
-                    isolation_environment": "shared_isolated_environment
+                    isolation_environment": shared_isolated_environment"
                 },
                 {
                     session_id: session_id,
@@ -594,7 +594,7 @@ class SSotComplianceWithIsolationTests:
                 {
                     "session_id: session_id,"
                     user_id: user_id,
-                    "query: fUPDATE user_settings SET last_login = NOW() WHERE user_id = '{user_id}'",
+                    "query: fUPDATE user_settings SET last_login = NOW() WHERE user_id = '{user_id}',"
                     ssot_compliance: True,
                     isolation_environment: "shared_isolated_environment"
                 }
@@ -615,7 +615,7 @@ class SSotComplianceWithIsolationTests:
             
             # Verify SSOT compliance for all operations in session
             session_compliance = ssot_compliance_check[session_id]
-            assert all(session_compliance), fSSOT compliance failed in session {session_id}
+            assert all(session_compliance), "fSSOT compliance failed in session {session_id}"
         
         assert len(db_ssot_sessions) == user_count, fDatabase SSOT session creation failed: {len(db_ssot_sessions)}"
         assert len(db_ssot_sessions) == user_count, fDatabase SSOT session creation failed: {len(db_ssot_sessions)}"
@@ -628,7 +628,7 @@ class SSotComplianceWithIsolationTests:
         ssot_violations = []
         
         def simulate_ssot_request(request_id: int):
-            ""Simulate individual request with SSOT-compliant database session.
+            ""Simulate individual request with SSOT-compliant database session."
             session_id = fssot_request_session_{request_id}_{uuid.uuid4()}
             user_id = fssot_request_user_{request_id % 5}"  # 5 users, multiple requests per user"
             
@@ -657,11 +657,11 @@ class SSotComplianceWithIsolationTests:
             session_ids = [future.result() for future in concurrent.futures.as_completed(futures)]
         
         # Verify no SSOT session sharing
-        assert len(shared_ssot_sessions) == 0, fSSOT session sharing detected: {shared_ssot_sessions}
+        assert len(shared_ssot_sessions) == 0, "fSSOT session sharing detected: {shared_ssot_sessions}"
         assert len(session_ids) == request_count, f"SSOT session creation failed: {len(session_ids)}"
         assert len(set(session_ids)) == request_count, fNon-unique SSOT sessions: {len(set(session_ids))}"
         assert len(set(session_ids)) == request_count, fNon-unique SSOT sessions: {len(set(session_ids))}"
-        assert len(ssot_violations) == 0, fSSOT compliance violations: {ssot_violations}
+        assert len(ssot_violations) == 0, "fSSOT compliance violations: {ssot_violations}"
         
         # Verify SSOT compliance in all sessions
         for session_id in session_ids:
@@ -682,7 +682,7 @@ class SSotComplianceWithIsolationTests:
             "Generate SSOT-compliant WebSocket events for specific user."
             events = [
                 {
-                    type": "agent_started,
+                    type": agent_started,"
                     user_id: user_id,
                     agent_id: fssot_agent_{user_id}_{i}","
                     "timestamp: time.time(),"
@@ -734,15 +734,15 @@ class SSotComplianceWithIsolationTests:
         assert len(event_routing_errors) == 0, fSSOT event routing errors: {event_routing_errors}"
         assert len(event_routing_errors) == 0, fSSOT event routing errors: {event_routing_errors}"
         assert len(ssot_compliance_errors) == 0, f"SSOT compliance errors: {ssot_compliance_errors}"
-        assert len(websocket_ssot_events) == user_count, fSSOT event user isolation failed: {len(websocket_ssot_events)}
+        assert len(websocket_ssot_events) == user_count, "fSSOT event user isolation failed: {len(websocket_ssot_events)}"
         
         for user_id, events in websocket_ssot_events.items():
-            assert len(events) == 10, fSSOT event count mismatch for {user_id}: {len(events)}
+            assert len(events) == 10, "fSSOT event count mismatch for {user_id}: {len(events)}"
             
             for event in events:
                 assert event['user_id'] == user_id, fSSOT event user contamination: {event}""
-                assert event['ssot_compliance'] is True, fSSOT compliance lost: {event}
-                assert event['websocket_manager'] == 'canonical_manager', fNon-canonical manager: {event}
+                assert event['ssot_compliance'] is True, "fSSOT compliance lost: {event}"
+                assert event['websocket_manager'] == 'canonical_manager', "fNon-canonical manager: {event}"
     
     # ========== RACE CONDITION TESTS ==========
     
@@ -803,10 +803,10 @@ class SSotComplianceWithIsolationTests:
         
         # Verify no SSOT collisions
         expected_operations = writer_count * operations_per_writer
-        assert len(collision_detected) == 0, fSSOT write collisions detected: {collision_detected}
+        assert len(collision_detected) == 0, "fSSOT write collisions detected: {collision_detected}"
         assert len(ssot_compliance_violations) == 0, fSSOT compliance violations: {ssot_compliance_violations}""
-        assert ssot_shared_resource['counter'] == expected_operations, fSSOT counter mismatch: {ssot_shared_resource['counter']} != {expected_operations}
-        assert len(ssot_shared_resource['data'] == expected_operations, fSSOT data count mismatch: {len(ssot_shared_resource['data'])
+        assert ssot_shared_resource['counter'] == expected_operations, "fSSOT counter mismatch: {ssot_shared_resource['counter']} != {expected_operations}"
+        assert len(ssot_shared_resource['data'] == expected_operations, "fSSOT data count mismatch: {len(ssot_shared_resource['data'])"
         assert len(ssot_write_operations) == expected_operations, f"SSOT operation tracking failed: {len(ssot_write_operations)}"
         
         # Verify SSOT compliance in all written data
@@ -886,8 +886,8 @@ class SSotComplianceWithIsolationTests:
         unauthorized_attempts = [result for result in attempt_results if not result['authorized']]
         
         assert len(authorized_attempts) == 0, fSSOT privilege escalation succeeded: {authorized_attempts}""
-        assert len(unauthorized_attempts) == len(ssot_escalation_attempts), fSSOT escalation attempts not detected: {len(unauthorized_attempts)} vs {len(ssot_escalation_attempts)}
-        assert len(ssot_privilege_violations) == len(ssot_escalation_attempts), fSSOT privilege violations not detected: {len(ssot_privilege_violations)}
+        assert len(unauthorized_attempts) == len(ssot_escalation_attempts), "fSSOT escalation attempts not detected: {len(unauthorized_attempts)} vs {len(ssot_escalation_attempts)}"
+        assert len(ssot_privilege_violations) == len(ssot_escalation_attempts), "fSSOT privilege violations not detected: {len(ssot_privilege_violations)}"
         
         # Verify SSOT compliance in all results
         for result in attempt_results:
@@ -936,17 +936,17 @@ class SSotComplianceWithIsolationTests:
         
         # SSOT compliance performance assertions
         expected_results = workload_count * 5 * 10  # workloads * users * operations
-        assert len(ssot_workload_results) == expected_results, fSSOT workload execution incomplete: {len(ssot_workload_results)}
+        assert len(ssot_workload_results) == expected_results, "fSSOT workload execution incomplete: {len(ssot_workload_results)}"
         
         # SSOT compliance performance thresholds
         assert execution_time < 15.0, fSSOT compliance performance degradation: {execution_time}s > 15s""
-        assert memory_usage < 100.0, fSSOT compliance memory overhead: {memory_usage}MB > 100MB
+        assert memory_usage < 100.0, "fSSOT compliance memory overhead: {memory_usage}MB > 100MB"
         
         # Verify SSOT compliance in all results
         ssot_compliance_rate = sum(1 for result in ssot_workload_results if result.get('ssot_compliance', False)) / len(ssot_workload_results)
-        assert ssot_compliance_rate == 1.0, fSSOT compliance rate below 100%: {ssot_compliance_rate:.2%}
+        assert ssot_compliance_rate == 1.0, "fSSOT compliance rate below 100%: {ssot_compliance_rate:.2%}"
         
-        print(f"SSOT compliance performance: {execution_time:.2f}s execution, {memory_usage:.2f}MB memory, {ssot_compliance_rate:.2%} compliance)")
+        print(f"SSOT compliance performance: {execution_time:.2f}s execution, {memory_usage:.2f}MB memory, {ssot_compliance_rate:.2%} compliance))"
         
         # Store SSOT compliance performance metrics
         self.performance_metrics['ssot_compliance_test'] = {
@@ -1023,8 +1023,8 @@ class SSotComplianceWithIsolationTests:
         
         # Final SSOT compliance validation
         assert ssot_validation_report['total_violations'] == 0, f"SSOT compliance violations detected: {ssot_validation_report}"
-        assert ssot_validation_report['overall_ssot_compliance'], fSSOT compliance failed: {ssot_validation_report}
-        assert all(ssot_validation_report[key] for key in ssot_validation_report if key.endswith('_ssot_compliance')), fCritical SSOT mechanisms failed: {ssot_validation_report}
+        assert ssot_validation_report['overall_ssot_compliance'], "fSSOT compliance failed: {ssot_validation_report}"
+        assert all(ssot_validation_report[key] for key in ssot_validation_report if key.endswith('_ssot_compliance')), "fCritical SSOT mechanisms failed: {ssot_validation_report}"
         
         print(f\nCOMPREHENSIVE SSOT COMPLIANCE VALIDATION PASSED"")
         print(fMemory growth: {memory_growth:.2f}MB)
@@ -1032,9 +1032,9 @@ class SSotComplianceWithIsolationTests:
         print(fWebSocket SSOT violations: {len(websocket_violations)})
         print(fJWT SSOT violations: {len(jwt_violations)})"
         print(fJWT SSOT violations: {len(jwt_violations)})"
-        print(f"Overall SSOT compliance validated successfully)")
+        print(f"Overall SSOT compliance validated successfully))"
 
 
 if __name__ == __main__:
-    pytest.main([__file__, "-v, --tb=short")
+    pytest.main([__file__, "-v, --tb=short)"
 )))))))))))))

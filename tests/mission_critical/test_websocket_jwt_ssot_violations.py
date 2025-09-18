@@ -51,7 +51,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
         ]
 
     def test_mission_critical_golden_path_jwt_validation_ssot_violations(self):
-    ""
+    """
         MISSION CRITICAL TEST - DESIGNED TO FAIL
         
         Detect P0 SSOT violations that block Golden Path user authentication flow.
@@ -274,7 +274,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
         )
 
     def test_mission_critical_websocket_auth_import_violations(self):
-        "
+        """
         "
         MISSION CRITICAL TEST - DESIGNED TO FAIL
         
@@ -301,7 +301,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
                 
             violations_in_file = self._scan_file_for_jwt_import_violations(full_path)
             if violations_in_file:
-                import_violations.extend(
+                import_violations.extend()
                     [f{file_path}:{line} - {violation} for line, violation in violations_in_file]
         
         # Check for conditional import patterns that create dual paths
@@ -328,7 +328,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
     # Helper methods for detecting SSOT violations
     
     def _scan_for_jwt_validation_implementations(self) -> List[str]:
-        ""Scan for multiple JWT validation implementations.
+        ""Scan for multiple JWT validation implementations."
         implementations = []
         
         for file_path in self.critical_websocket_files:
@@ -577,7 +577,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
         super().tearDown()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

@@ -22,7 +22,7 @@ from loguru import logger
 # Core WebSocket infrastructure imports
 try:
     from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-    from netra_backend.app.services.websocket_bridge_factory import (
+    from netra_backend.app.services.websocket_bridge_factory import ()
         WebSocketBridgeFactory,
         UserWebSocketEmitter,
         UserWebSocketContext,
@@ -32,14 +32,14 @@ try:
     )
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-    from netra_backend.app.core.websocket_exceptions import (
+    from netra_backend.app.core.websocket_exceptions import ()
         WebSocketConnectionError,
         WebSocketSendError,
         WebSocketTimeoutError,
         WebSocketAuthenticationError
     )
 except ImportError as e:
-    logger.warning(f"Some imports failed: {e}. Test will use mock implementations.)")
+    logger.warning(f"Some imports failed: {e}. Test will use mock implementations.))"
 
     # Define mock exceptions for testing
     class WebSocketConnectionError(Exception):
@@ -135,7 +135,7 @@ class LoudWebSocketFailureValidator:
         connection_failures = [
             ("connection_lost, Connection lost during operation),"
             (connection_timeout, Connection timeout),
-            ("connection_refused, Connection refused by server")
+            ("connection_refused, Connection refused by server)"
         ]
 
         for failure_type, description in connection_failures:
@@ -207,7 +207,7 @@ class LoudWebSocketFailureValidator:
                 # This should raise an exception
                 await self.test_connection.send_json({
                     event_type: test_event,
-                    "data: {test": send failure}
+                    ""data": {"test": send failure}"
                 }
 
                 # If we reach here, the failure was silent (BAD)
@@ -262,7 +262,7 @@ class LoudWebSocketFailureValidator:
             # This should raise an exception
             await failing_connection.send_json({
                 event_type: test_event,
-                "data: {test": auth failure}
+                ""data": {"test": auth failure}"
             }
 
             # If we reach here, the failure was silent (BAD)
@@ -311,7 +311,7 @@ class LoudWebSocketFailureValidator:
         try:
             send_result = await silent_connection.send_json({
                 event_type": test_event,"
-                data: {test: silent failure detection"}"
+                "data": {"test: silent failure detection""}"
             }
 
             # Check if we can detect the silent failure
@@ -339,7 +339,7 @@ class LoudWebSocketFailureValidator:
 
         await counting_connection.send_json({
             event_type: test_event,
-            data: {"test: count verification"}
+            "data": {""test: count verification"}"
         }
 
         if counting_connection.sent_count == initial_count:
@@ -350,7 +350,7 @@ class LoudWebSocketFailureValidator:
         return result
 
     async def run_loud_failure_validation(self) -> dict:
-        ""Run all loud failure validation tests.
+        ""Run all loud failure validation tests."
         logger.info(\n + =" * 80)"
         logger.info("🔊 LOUD WEBSOCKET FAILURES VALIDATION SUITE)"
         logger.info(= * 80)
@@ -398,7 +398,7 @@ class LoudWebSocketFailureValidator:
         }
 
     def _print_loud_failure_summary(self, test_results: dict):
-        ""Print comprehensive summary of loud failure tests.
+        ""Print comprehensive summary of loud failure tests."
         logger.info(\n + =" * 80)"
         logger.info("📊 LOUD WEBSOCKET FAILURES SUMMARY)"
         logger.info(= * 80)
@@ -418,7 +418,7 @@ class LoudWebSocketFailureValidator:
         # Test-by-test breakdown
         logger.info(f\n📋 TEST BREAKDOWN:)
         for test_name, result in test_results.items():
-            status = ✅ PASS" if result.get('success', False) else "❌ FAIL
+            status = ✅ PASS" if result.get('success', False) else ❌ FAIL"
             logger.info(f  {status}: {test_name})
 
         # Overall assessment
@@ -452,10 +452,10 @@ async def test_loud_websocket_failures():
 
     for critical_type in critical_failure_types:
         if critical_type in results['summary']['failures_tested']:
-            assert critical_type in loud_failures, fCritical failure type {critical_type} is silent
+            assert critical_type in loud_failures, "fCritical failure type {critical_type} is silent"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # Allow running directly for debugging
     async def main():
         validator = LoudWebSocketFailureValidator()

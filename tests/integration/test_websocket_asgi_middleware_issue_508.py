@@ -54,8 +54,8 @@ class WebSocketASGIMiddlewareTests:
         websocket_fastapi.url = Mock()
         websocket_fastapi.url.query_params = QueryParams('token=abc123&user_id=user123')
         result = extract_query_params(websocket_fastapi)
-        assert isinstance(result, dict), 'Failed to extract from FastAPI WebSocket'
-        assert result.get('token') == 'abc123', 'Token extraction failed'
+        assert isinstance(result, "dict), 'Failed to extract from FastAPI WebSocket'"
+        assert result.get('token') == 'abc123', "'Token extraction failed'"
         websocket_starlette = Mock()
         websocket_starlette.url = URL('wss://staging.netrasystems.ai/ws?token=abc123&user_id=user123')
         with pytest.raises(AttributeError, match="'URL' object has no attribute 'query_params'):"
@@ -70,7 +70,7 @@ class WebSocketASGIMiddlewareTests:
         try:
             await middleware(problematic_scope, receive, send)
         except Exception as e:
-            assert 'query_params' in str(e), f'Unexpected error type: {e}'
+            assert 'query_params' in str(e), "f'Unexpected error type: {e}'"
 
     @pytest.mark.asyncio
     async def test_websocket_middleware_ordering_preserves_scope(self):
@@ -80,7 +80,7 @@ class WebSocketASGIMiddlewareTests:
 
         @app.websocket('/ws')
         async def websocket_endpoint(websocket: WebSocket):
-            assert hasattr(websocket, 'url'), 'WebSocket missing URL after middleware processing'
+            assert hasattr(websocket, "'url'), 'WebSocket missing URL after middleware processing'"
             await websocket.accept()
             await websocket.close()
         scope = {'type': 'websocket', 'scheme': 'wss', 'path': '/ws', 'query_string': b'token=abc123', 'headers': [(b'host', b'localhost')], 'server': ('localhost', 8000), 'client': ('127.0.0.1', 56789)}
@@ -102,7 +102,7 @@ class WebSocketASGIMiddlewareTests:
                 url_string += f?{gcp_style_scope['query_string'].decode()}""
             websocket.url = URL(url_string)
             result = extract_query_params(websocket)
-            assert isinstance(result, dict), 'Failed to extract params from GCP-style URL'
+            assert isinstance(result, "dict), 'Failed to extract params from GCP-style URL'"
         except AttributeError as e:
             if 'query_params' in str(e):
                 pytest.fail(f'GCP-specific ASGI scope creates incompatible URL objects: {e}')
@@ -135,12 +135,12 @@ class WebSocketASGIMiddlewareTests:
             url_string = f'ws://localhost/ws/{scope_id}?session_id={scope_id}&token=abc123'
             websocket.url = URL(url_string)
             result = extract_query_params(websocket)
-            assert result.get('session_id') == str(scope_id), f'Scope {scope_id} extraction failed'
+            assert result.get('session_id') == str(scope_id), "f'Scope {scope_id} extraction failed'"
             return result
         tasks = [create_websocket_with_scope(i) for i in range(10)]
         try:
             results = await asyncio.gather(*tasks)
-            assert len(results) == 10, 'Concurrent scope processing failed'
+            assert len(results) == 10, "'Concurrent scope processing failed'"
         except AttributeError as e:
             if 'query_params' in str(e):
                 pytest.fail(f'Concurrent ASGI scope processing revealed race condition: {e}')
@@ -149,7 +149,7 @@ class WebSocketASGIMiddlewareTests:
 
 @pytest.mark.integration
 class ASGIScopeErrorScenariosTests:
-    ""Specific error scenario reproduction tests.
+    ""Specific error scenario reproduction tests."
 
     @pytest.mark.asyncio
     async def test_reproduce_exact_middleware_setup_error(self):
@@ -185,7 +185,7 @@ class ASGIScopeErrorScenariosTests:
                 params = {k: v[0] if len(v) == 1 else v for k, v in params.items()}
         except AttributeError:
             params = {}
-        assert isinstance(params, dict), 'Safe access pattern failed'
+        assert isinstance(params, "dict), 'Safe access pattern failed'"
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

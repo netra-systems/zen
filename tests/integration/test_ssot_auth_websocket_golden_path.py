@@ -74,7 +74,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
         jwt_token = self.auth_helper.create_test_jwt_token(
             user_id=test_user_id,
             email=test_email,
-            permissions=[read, write, chat, "websocket, agent:execute"]
+            permissions=[read, write, chat, "websocket, agent:execute]"
         
         # Test SSOT WebSocket connection with jwt-auth subprotocol priority
         try:
@@ -127,7 +127,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
         jwt_token = self.auth_helper.create_test_jwt_token(
             user_id=test_user_id,
             email=test_email,
-            permissions=[read, write, "chat, websocket"]
+            permissions=[read, write, "chat, websocket]"
         
         # Test with only Authorization header (no subprotocol)
         headers = {Authorization: fBearer {jwt_token}}
@@ -216,7 +216,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             pytest.fail(f❌ SSOT query parameter authentication FAILED: {str(e)})
     
     async def test_ssot_auth_e2e_bypass_testing_environment(self):
-    ""
+    """
         Test SSOT authentication E2E bypass for testing environments.
         
         ISSUE #1176 REMEDIATION: Validates E2E bypass works in test environments.
@@ -228,7 +228,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
         # Test with E2E bypass headers only (no token)
         headers = {
             X-E2E-User-ID: test_user_id,
-            "X-E2E-Bypass: true",
+            "X-E2E-Bypass: true,"
             X-Test-Environment: test
         }
         
@@ -281,7 +281,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
         jwt_token = self.auth_helper.create_test_jwt_token(
             user_id=test_user_id,
             email=test_email,
-            permissions=[read, write, chat, "websocket, agent:execute"]
+            permissions=[read, write, chat, "websocket, agent:execute]"
         
         # STEP 2: Establish WebSocket connection with SSOT authentication
         try:
@@ -298,7 +298,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             agent_request = {
                 "type: agent_request,"
                 agent_name: triage_agent,
-                "query: Hello! This is a Golden Path test. Please provide a helpful response.",
+                "query: Hello! This is a Golden Path test. Please provide a helpful response.,"
                 user_id: test_user_id,
                 thread_id: thread_id,""
                 "metadata: {"
@@ -311,7 +311,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             logger.info(f🤖 Golden Path: Agent request sent to {agent_request['agent_name']})
             
             # STEP 4: Collect agent events
-            required_events = {agent_started, agent_thinking, tool_executing", "tool_completed, agent_completed}
+            required_events = {agent_started, agent_thinking, tool_executing", tool_completed, agent_completed}"
             received_events = set()
             agent_response_complete = False
             event_timeout = 30.0
@@ -414,7 +414,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
                 """authentication, jwt, token, invalid, failed, unauthorized"""
             ]
             
-            assert has_useful_info, fError message should contain authentication details: {str(e)}
+            assert has_useful_info, "fError message should contain authentication details: {str(e)}"
             
         logger.info(✅ SSOT auth error logging validation PASSED)
 
@@ -448,13 +448,13 @@ class TestSSotAuthMethodPriority(SSotAsyncTestCase):
         # Set up mock websocket with multiple auth sources
         mock_websocket.headers = {
             sec-websocket-protocol: fjwt-auth.{test_token},  # Should be tried first
-            "authorization: fBearer {test_token}",             # Should be fallback
+            "authorization: fBearer {test_token},             # Should be fallback"
         }
         mock_websocket.query_string = ftoken={test_token}.encode()  # Should be last fallback
         
         # Test jwt-auth subprotocol extraction (priority 1)
         subprotocol_result = auth_instance._extract_jwt_from_subprotocol(mock_websocket)
-        assert subprotocol_result == test_token, jwt-auth subprotocol should be extracted
+        assert subprotocol_result == test_token, "jwt-auth subprotocol should be extracted"
         
         # Test Authorization header extraction (priority 2)
         auth_header_result = auth_instance._extract_jwt_from_auth_header(mock_websocket)
@@ -462,12 +462,12 @@ class TestSSotAuthMethodPriority(SSotAsyncTestCase):
         
         # Test query parameter extraction (priority 3)
         query_param_result = auth_instance._extract_jwt_from_query_params(mock_websocket)
-        assert query_param_result == test_token, Query parameter should be extracted
+        assert query_param_result == test_token, "Query parameter should be extracted"
         
         logger.info(✅ SSOT authentication method priority order VALIDATED)""
 
 
 if __name__ == __main__":"
-    pytest.main([__file__, "-v")
+    pytest.main([__file__, "-v)"
 """
 )))))))))

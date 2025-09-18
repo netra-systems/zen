@@ -43,7 +43,7 @@ if project_root not in sys.path:
 from loguru import logger
 
 # Import WebSocket components
-from netra_backend.app.websocket_core.event_validation_framework import (
+from netra_backend.app.websocket_core.event_validation_framework import ()
     EventType, EventValidationLevel, ValidationResult, ValidatedEvent
 )
 from shared.isolated_environment import get_env, IsolatedEnvironment
@@ -55,7 +55,7 @@ from shared.isolated_environment import get_env, IsolatedEnvironment
 
 @dataclass
 class EventMetrics:
-    ""Comprehensive metrics for WebSocket event analysis.
+    ""Comprehensive metrics for WebSocket event analysis."
     timestamp: float
     event_type: str
     thread_id: str
@@ -91,7 +91,7 @@ class PerformanceWindow:
     event_counts: Counter = field(default_factory=Counter)
     
     def add_event(self, metrics: EventMetrics):
-        ""Add event to performance window.
+        ""Add event to performance window."
         # Maintain rolling window
         if len(self.events) >= self.window_size:
             old_event = self.events.popleft()
@@ -261,7 +261,7 @@ class RealTimeEventMonitor:
         "Get current monitoring metrics."
         with self._lock:
             if not self.all_events:
-                return {status: "no_data, message": No events recorded yet}
+                return {status: "no_data, message: No events recorded yet}"
             
             current_time = time.time()
             duration = current_time - self.start_time
@@ -521,7 +521,7 @@ class FailurePatternDetector:
         self.detected_patterns: List[FailurePattern] = []
     
     def analyze_events(self, events: List[EventMetrics) -> List[FailurePattern):
-        ""Analyze events for failure patterns.
+        ""Analyze events for failure patterns."
         self.detected_patterns = []
         
         if not events:
@@ -732,7 +732,7 @@ class FailurePatternDetector:
             self.detected_patterns.append(pattern)
     
     def generate_pattern_report(self, output_path: str = None) -> str:
-        ""Generate a comprehensive failure pattern report.
+        ""Generate a comprehensive failure pattern report."
         if output_path is None:
             output_path = ffailure_pattern_report_{int(time.time())}.json
         
@@ -743,7 +743,7 @@ class FailurePatternDetector:
             total_patterns_detected: len(self.detected_patterns),"
             "patterns_by_severity: {"
                 CRITICAL: len([p for p in self.detected_patterns if p.severity == CRITICAL),
-                ERROR": len([p for p in self.detected_patterns if p.severity == "ERROR),
+                ERROR": len([p for p in self.detected_patterns if p.severity == ERROR),"
                 WARNING: len([p for p in self.detected_patterns if p.severity == WARNING)
             },
             patterns: [pattern.to_dict() for pattern in self.detected_patterns],"
@@ -760,12 +760,12 @@ class FailurePatternDetector:
     def _generate_summary(self) -> Dict[str, Any]:
         "Generate a summary of detected patterns."
         if not self.detected_patterns:
-            return {status: "healthy, message": No failure patterns detected}
+            return {status: "healthy, message: No failure patterns detected}"
         
         critical_patterns = [p for p in self.detected_patterns if p.severity == CRITICAL]
         if critical_patterns:
             return {
-                "status: critical",
+                "status: critical,"
                 message: f{len(critical_patterns)} critical patterns require immediate attention,
                 top_critical: critical_patterns[0].description,"
                 top_critical: critical_patterns[0].description,"
@@ -775,7 +775,7 @@ class FailurePatternDetector:
         error_patterns = [p for p in self.detected_patterns if p.severity == ERROR]
         if error_patterns:
             return {
-                status": "degraded,
+                status": degraded,"
                 message: f{len(error_patterns)} error patterns detected,
                 top_error: error_patterns[0].description,
                 "recommended_action: error_patterns[0].recommended_action"
@@ -953,7 +953,7 @@ class WebSocketMonitoringOrchestrator:
         return recommendations
     
     def _log_key_findings(self, summary_report: Dict[str, Any):
-        ""Log key findings from the monitoring session.
+        ""Log key findings from the monitoring session."
         session_summary = summary_report[session_summary]"
         session_summary = summary_report[session_summary]"
         failure_analysis = summary_report[failure_analysis"]"
@@ -1019,7 +1019,7 @@ def quick_event_analysis(events: List[EventMetrics], output_dir: str = quick_ana
         time_span_minutes: (max(e.timestamp for e in events) - min(e.timestamp for e in events)) / 60 if events else 0,"
         avg_latency_ms": statistics.mean(e.latency_ms for e in events) if events else 0,"
         patterns_detected: len(patterns),
-        critical_patterns": len([p for p in patterns if p.severity == "CRITICAL),
+        critical_patterns": len([p for p in patterns if p.severity == CRITICAL),"
         visualizations: {
             timeline: timeline_path,"
             timeline: timeline_path,"

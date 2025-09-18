@@ -37,14 +37,14 @@ from shared.isolated_environment import get_env, IsolatedEnvironment
 from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
 
 # Import WebSocket test base that requires Docker
-from tests.mission_critical.websocket_real_test_base import (
+from tests.mission_critical.websocket_real_test_base import ()
     require_docker_services,
     require_docker_services_smart,
     RealWebSocketTestBase,
 )
 
 class Issue544DockerDependencyDemonstrationTests:
-    ""Demonstrate how Docker dependency blocks mission critical tests.
+    ""Demonstrate how Docker dependency blocks mission critical tests."
     
     def test_docker_availability_fast_check(self):
         Phase 1.1: Fast Docker availability check - should demonstrate blocking.""
@@ -119,7 +119,7 @@ class Issue544DockerDependencyDemonstrationTests:
             logger.info("RealWebSocketTestBase created successfully - Docker available)"
             
             # If we get here, Docker is available, so we can test basic functionality
-            assert hasattr(test_base, 'capture_events'), WebSocket test base missing event capture
+            assert hasattr(test_base, "'capture_events'), WebSocket test base missing event capture"
             
         except Exception as e:
             logger.error(f"ISSUE #544 DEMONSTRATION: RealWebSocketTestBase creation failed: {e})"
@@ -167,7 +167,7 @@ class Issue544DockerDependencyDemonstrationTests:
         
         if os.path.exists(mission_critical_dir):
             for file in os.listdir(mission_critical_dir):
-                if file.startswith(test_) and "websocket in file and file.endswith(.py"):
+                if file.startswith(test_) and "websocket in file and file.endswith(.py):"
                     websocket_tests.append(file)
         
         logger.info(fFound {len(websocket_tests)} WebSocket-related mission critical tests)
@@ -240,7 +240,7 @@ class Issue544EnvironmentAnalysisTests:
         # Analyze configuration state
         staging_fallback_configured = (
             env.get(USE_STAGING_FALLBACK", false).lower() == true and"
-            env.get("STAGING_WEBSOCKET_URL, ") != 
+            env.get("STAGING_WEBSOCKET_URL, ) != "
         )
         
         logger.info(fStaging fallback properly configured: {staging_fallback_configured})"

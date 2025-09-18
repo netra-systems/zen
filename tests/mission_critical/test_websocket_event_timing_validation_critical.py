@@ -39,7 +39,7 @@ from loguru import logger
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Import WebSocket validation framework
-from netra_backend.app.websocket_core.event_validation_framework import (
+from netra_backend.app.websocket_core.event_validation_framework import ()
     EventType, EventValidationLevel, ValidationResult, ValidatedEvent,
     EventValidator, EventSequenceValidator, EventValidationFramework
 )
@@ -158,7 +158,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
     @pytest.mark.critical
     @pytest.mark.timeout(60)
     async def test_event_delivery_latency_validation(self):
-        ""
+        """
         CRITICAL: Test that individual events are delivered within acceptable latency limits.
         
         Validates that each of the 5 critical events is delivered within 2 seconds,
@@ -189,7 +189,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
                 # Validate event (this simulates the processing latency)
                 validated_event = await self.validation_framework.validate_event(
                     event_data,
-                    context={thread_id": thread_id, "run_id: run_id}
+                    context={thread_id": thread_id, run_id: run_id}"
                 
                 event_end_time = time.time()
                 event_latency_ms = (event_end_time - event_start_time) * 1000
@@ -249,7 +249,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
         
         assert len(critical_violations) == 0, (
             fCRITICAL FAILURE: Event delivery latency violations detected:\n +
-            "\n.join([f  - {v.message)" for v in critical_violations] +
+            "\n.join([f  - {v.message) for v in critical_violations] +"
             f\nLatency stats: avg={avg_latency:.1f}ms, max={max_latency:.1f}ms, p95={percentiles['p95']:.1f}ms
         )
         
@@ -385,7 +385,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
         
         assert len(critical_violations) == 0, (
             fCRITICAL FAILURE: Event gap timing violations detected:\n +
-            \n".join([f"  - {v.message) for v in critical_violations] +
+            \n".join([f  - {v.message) for v in critical_violations] +"
             f\nGap stats: avg={avg_gap:.1f}ms, max={max_gap:.1f}ms, count={len(event_gaps)}
         )
         
@@ -449,7 +449,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_end_to_end_sequence_timing_validation(self):
-    "
+        """
     "
         CRITICAL: Test that complete 5-event sequences finish within 30 seconds.
         
@@ -537,8 +537,8 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
         )
         
         # Validate sequence is complete
-        assert sequence_status is not None, Sequence status not found
-        assert sequence_status.get('sequence_complete', False), (
+        assert sequence_status is not None, "Sequence status not found"
+        assert sequence_status.get('sequence_complete', "False), ("
             fSequence not marked as complete within time limit. Status: {sequence_status}"
             fSequence not marked as complete within time limit. Status: {sequence_status}"
         )
@@ -571,12 +571,12 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
         base_time = time.time()
         return [
             {
-                type": "agent_started,
+                type": agent_started,"
                 thread_id: thread_id,
                 message_id: fmsg_{uuid.uuid4().hex[:8]}","
                 "timestamp: base_time,"
                 payload: {
-                    "agent_name: supervisor",
+                    "agent_name: supervisor,"
                     run_id: run_id,
                     timestamp: base_time"
                     timestamp: base_time"
@@ -585,10 +585,10 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
             {
                 "type: agent_thinking,"
                 thread_id: thread_id,
-                message_id": f"msg_{uuid.uuid4().hex[:8]},
+                message_id": fmsg_{uuid.uuid4().hex[:8]},"
                 timestamp: base_time + 1,
                 payload: {
-                    agent_name": "supervisor,
+                    agent_name": supervisor,"
                     run_id: run_id,
                     timestamp: base_time + 1,"
                     timestamp: base_time + 1,"
@@ -612,10 +612,10 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
             {
                 "type: tool_completed,"
                 thread_id: thread_id,
-                message_id": f"msg_{uuid.uuid4().hex[:8]},
+                message_id": fmsg_{uuid.uuid4().hex[:8]},"
                 timestamp: base_time + 3,
                 payload: {
-                    agent_name": "supervisor,
+                    agent_name": supervisor,"
                     run_id: run_id,
                     timestamp: base_time + 3,"
                     timestamp: base_time + 3,"
@@ -633,7 +633,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
                     agent_name: supervisor","
                     "run_id: run_id,"
                     timestamp: base_time + 4,
-                    "result: Latency test completed successfully",
+                    "result: Latency test completed successfully,"
                     final_status: completed
                 }
             }
@@ -660,7 +660,7 @@ if __name__ == __main__:
 "
     import sys
     
-    print(\n + =" * 80")
+    print(\n + =" * 80)"
     print(CRITICAL WEBSOCKET EVENT TIMING VALIDATION TESTS - Issue #1199)
     print(MISSION CRITICAL: Sub-2-Second Response Times for $500K+ ARR Chat"")
     print(= * 80)"
@@ -669,7 +669,7 @@ if __name__ == __main__:
     print(Timing requirements being validated:")"
     print(1. Event delivery latency: < 2 seconds per event")"
     print(2. Event gap timing: < 5 seconds between events)
-    print("3. End-to-end sequence: < 30 seconds total")
+    print("3. End-to-end sequence: < 30 seconds total)"
     print(4. Performance grading: A/B/C/D/F based on timing)"
     print(4. Performance grading: A/B/C/D/F based on timing)"
     print()

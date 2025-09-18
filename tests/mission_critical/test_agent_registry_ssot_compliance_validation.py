@@ -55,7 +55,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
         self.record_metric(golden_path_validation", True)"
 
     async def test_single_registry_import_resolution(self):
-    "
+        """
     "
         CRITICAL: Validate only one AgentRegistry class exists across all imports
         
@@ -98,7 +98,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
         self.record_metric(import_paths_tested", import_paths)"
         
         # Must have at least one working import
-        assert len(successful_imports) > 0, (
+        assert len(successful_imports) > 0, ()
             fSSOT COMPLIANCE FAILURE: No AgentRegistry imports work. 
             fTried: {import_paths}"
             fTried: {import_paths}"
@@ -122,13 +122,13 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
                 )
 
     async def test_unified_websocket_event_delivery(self):
-    ""
+    """
         CRITICAL: Validate consistent WebSocket event delivery across all contexts
         
         Business Impact: Ensures reliable Golden Path chat experience
         Expected: FAIL initially, PASS after SSOT fix
         
-        self.record_metric(test_type", "websocket_consistency_validation)
+        self.record_metric(test_type", websocket_consistency_validation)"
         
         # Import the SSOT AgentRegistry (should be single source)
         try:
@@ -178,7 +178,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
         self.record_metric(websocket_consistency_validated", True)"
 
     async def test_uniform_multi_user_isolation(self):
-    "
+        """
     "
         CRITICAL: Validate user isolation works consistently across all instances
         
@@ -187,7 +187,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
         "
         "
         self.record_metric(test_type, multi_user_isolation_validation)
-        self.record_metric(security_impact", "ENTERPRISE_CRITICAL)
+        self.record_metric(security_impact", ENTERPRISE_CRITICAL)"
         
         # Import SSOT AgentRegistry
         try:
@@ -199,7 +199,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
                 pytest.fail(No AgentRegistry available for isolation testing)
         
         # Test user isolation capabilities
-        user_contexts = [user_1, user_2", "user_3]
+        user_contexts = [user_1, user_2", user_3]"
         isolation_results = {}
         
         for user_id in user_contexts:
@@ -302,7 +302,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
         self.record_metric(factory_pattern_consistent, True)
 
     def _analyze_registry_factory_pattern(self, registry_class: Type) -> Dict[str, Any]:
-        ""Analyze the factory pattern of a registry class for SSOT compliance
+        ""Analyze the factory pattern of a registry class for SSOT compliance"
         
         # Get class methods
         class_methods = inspect.getmembers(registry_class, predicate=inspect.ismethod)
@@ -337,7 +337,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
         }
 
     async def test_ssot_compliance_comprehensive_validation(self):
-    ""
+    """
         Comprehensive validation of all SSOT compliance aspects
         
         Business Impact: Complete Golden Path protection validation
@@ -373,7 +373,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
                 self.record_metric("duplicate_class_check, PASS)"
             else:
                 compliance_details.append(✗ Duplicate AgentRegistry classes exist)
-                self.record_metric(duplicate_class_check", "FAIL)
+                self.record_metric(duplicate_class_check", FAIL)"
         except ImportError:
             # If one import fails, this could indicate proper consolidation
             compliance_score += 0.5  # Partial credit
@@ -400,7 +400,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
                 
         except Exception as e:
             compliance_details.append(f✗ Interface consistency check failed: {e})
-            self.record_metric(interface_consistency_check", "FAIL)
+            self.record_metric(interface_consistency_check", FAIL)"
         
         # Check 4: WebSocket integration consistency
         total_checks += 1

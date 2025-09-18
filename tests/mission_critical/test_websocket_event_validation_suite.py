@@ -52,13 +52,13 @@ from test_framework.unified_docker_manager import UnifiedDockerManager, Environm
 from test_framework.websocket_helpers import WebSocketTestHelpers, ensure_websocket_service_ready
 
 # Import WebSocket event validation framework
-from netra_backend.app.websocket_core.event_validation_framework import (
+from netra_backend.app.websocket_core.event_validation_framework import ()
     EventType, EventValidationLevel, ValidationResult, ValidatedEvent,
     EventValidator
 )
 
 # Import test base utilities - REAL SERVICES ONLY
-from tests.mission_critical.websocket_real_test_base import (
+from tests.mission_critical.websocket_real_test_base import ()
     require_docker_services, requires_docker, RealWebSocketTestConfig
 )
 
@@ -69,7 +69,7 @@ from tests.mission_critical.websocket_real_test_base import (
 
 @dataclass
 class EventValidationMetrics:
-    ""Comprehensive metrics for WebSocket event validation.
+    ""Comprehensive metrics for WebSocket event validation."
     total_events: int = 0
     valid_events: int = 0
     invalid_events: int = 0
@@ -178,7 +178,7 @@ class WebSocketEventCapture:
             self.active_sequences[thread_id] = sequence
             
     def capture_event(self, event_data: Dict[str, Any], websocket_latency: Optional[float] = None) -> ValidatedEvent:
-        ""Capture and validate a WebSocket event.
+        ""Capture and validate a WebSocket event."
         with self._lock:
             # Validate the event
             validated_event = self.validator.validate_event(event_data, context={)
@@ -304,14 +304,14 @@ class WebSocketConnectionManager:
             return fws://{staging_host}:{staging_port}/ws
         
         # Fallback to local development
-        local_host = env.get_backend_host(development") or "localhost
+        local_host = env.get_backend_host(development") or localhost"
         local_port = env.get_backend_port(development) or 8000
         
         return fws://{local_host}:{local_port}/ws
     
     @asynccontextmanager
     async def connect(self, user_id: str, auth_token: str = None) -> websockets.ServerConnection:
-        ""Create a real WebSocket connection.
+        ""Create a real WebSocket connection."
         connection_id = f{user_id}_{uuid.uuid4().hex[:8]}
         
         # Build connection URL with authentication
@@ -467,7 +467,7 @@ class WebSocketEventValidationSuiteTests:
     @requires_docker
     @pytest.mark.asyncio
     async def test_agent_started_event_validation(self, websocket_manager, test_config):
-        ""Test validation of agent_started events.
+        ""Test validation of agent_started events."
         logger.info(Testing agent_started event validation)"
         logger.info(Testing agent_started event validation)"
         
@@ -493,7 +493,7 @@ class WebSocketEventValidationSuiteTests:
             
             # Validate agent_started event was received
             agent_started_events = [e for e in events if e.event_type == EventType.AGENT_STARTED]
-            assert len(agent_started_events) > 0, agent_started event not received
+            assert len(agent_started_events) > 0, "agent_started event not received"
             
             # Validate event structure
             started_event = agent_started_events[0]
@@ -502,7 +502,7 @@ class WebSocketEventValidationSuiteTests:
             assert started_event.validation_result == ValidationResult.VALID, fEvent validation failed: {started_event.validation_errors}"
             
             # Validate required fields
-            assert agent_name in started_event.content, agent_name field missing from agent_started event
+            assert agent_name in started_event.content, "agent_name field missing from agent_started event"
             assert "timestamp in started_event.content, timestamp field missing from agent_started event"
             
             logger.info(f[U+2713] agent_started event validation passed: {started_event.event_id})
@@ -549,12 +549,12 @@ class WebSocketEventValidationSuiteTests:
         Test validation of tool_executing events.""
         logger.info(Testing tool_executing event validation)
         
-        user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        user_id = f"test_user_{uuid.uuid4().hex[:8]}""
         auth_token = create_mock_auth_token(user_id)
         
         async with websocket_manager.connect(user_id, auth_token) as websocket:
-            thread_id = ftest_thread_{uuid.uuid4().hex[:8]}"
-            thread_id = ftest_thread_{uuid.uuid4().hex[:8]}"
+            thread_id = f"test_thread_{uuid.uuid4().hex[:8]}"
+            thread_id = f"test_thread_{uuid.uuid4().hex[:8]}"
             websocket_manager.event_capture.start_sequence(
                 thread_id, user_id, [EventType.TOOL_EXECUTING]
             
@@ -566,7 +566,7 @@ class WebSocketEventValidationSuiteTests:
             
             # Validate tool_executing event was received
             executing_events = [e for e in events if e.event_type == EventType.TOOL_EXECUTING]
-            assert len(executing_events) > 0, tool_executing event not received
+            assert len(executing_events) > 0, "tool_executing event not received"
             
             executing_event = executing_events[0]
             assert executing_event.thread_id == thread_id
@@ -587,7 +587,7 @@ class WebSocketEventValidationSuiteTests:
         auth_token = create_mock_auth_token(user_id)
         
         async with websocket_manager.connect(user_id, auth_token) as websocket:
-            thread_id = ftest_thread_{uuid.uuid4().hex[:8]}""
+            thread_id = f"test_thread_{uuid.uuid4().hex[:8]}""
             websocket_manager.event_capture.start_sequence(
                 thread_id, user_id, [EventType.TOOL_COMPLETED]
             
@@ -607,15 +607,15 @@ class WebSocketEventValidationSuiteTests:
             assert completed_event.validation_result == ValidationResult.VALID
             
             # Validate completion-specific fields
-            assert tool_name in completed_event.content, tool_name field missing
-            assert results" in completed_event.content or "output in completed_event.content, Results/output missing
+            assert tool_name in completed_event.content, "tool_name field missing"
+            assert results" in completed_event.content or "output in completed_event.content, "Results/output missing"
             
             logger.info(f[U+2713] tool_completed event validation passed: {completed_event.event_id})
     
     @requires_docker
     @pytest.mark.asyncio
     async def test_agent_completed_event_validation(self, websocket_manager, test_config):
-        ""Test validation of agent_completed events.
+        ""Test validation of agent_completed events."
         logger.info(Testing agent_completed event validation)"
         logger.info(Testing agent_completed event validation)"
         
@@ -637,14 +637,14 @@ class WebSocketEventValidationSuiteTests:
             
             # Validate agent_completed event was received
             completed_events = [e for e in events if e.event_type == EventType.AGENT_COMPLETED]
-            assert len(completed_events) > 0, agent_completed event not received
+            assert len(completed_events) > 0, "agent_completed event not received"
             
             completed_event = completed_events[0]
             assert completed_event.thread_id == thread_id
             assert completed_event.validation_result == ValidationResult.VALID
             
             # Validate completion-specific fields
-            assert "response in completed_event.content or result" in completed_event.content, Final response/result missing
+            assert "response in completed_event.content or result" in completed_event.content, "Final response/result missing"
             
             logger.info(f[U+2713] agent_completed event validation passed: {completed_event.event_id})"
             logger.info(f[U+2713] agent_completed event validation passed: {completed_event.event_id})"
@@ -686,7 +686,7 @@ class WebSocketEventValidationSuiteTests:
             event_types = [e.event_type for e in events]
             
             for required_event in test_config.required_events:
-                assert required_event in event_types, fRequired event {required_event} not received. Got: {event_types}
+                assert required_event in event_types, "fRequired event {required_event} not received. Got: {event_types}"
             
             # Validate event ordering (should be in logical sequence)
             expected_order = [
@@ -822,7 +822,7 @@ class WebSocketEventValidationSuiteTests:
                     logger.debug(fRequest {i} latency: {latency_ms:.2f}ms")"
         
         # Validate performance requirements
-        assert len(latencies) > 0, No latency measurements collected
+        assert len(latencies) > 0, "No latency measurements collected"
         
         avg_latency = statistics.mean(latencies)
         max_latency = max(latencies)
@@ -926,7 +926,7 @@ class WebSocketEventValidationSuiteTests:
         
         # Security validation: ensure no cross-contamination
         assert len(user1_events) > 0, fUser 1 ({user1_id} received no events""
-        assert len(user2_events) > 0, fUser 2 ({user2_id} received no events
+        assert len(user2_events) > 0, "fUser 2 ({user2_id} received no events"
         
         # Check that user1 never received user2's events and vice versa'
         user1_thread_ids = {event.thread_id for event in user1_events}
@@ -995,8 +995,8 @@ class WebSocketEventValidationSuiteTests:
         report = websocket_manager.event_capture.get_validation_report()
         
         # Validate report completeness
-        assert summary" in report, "Validation report missing summary section
-        assert event_counts in report, Validation report missing event counts
+        assert summary" in report, Validation report missing summary section"
+        assert event_counts in report, "Validation report missing event counts"
         assert performance in report, "Validation report missing performance metrics"
         assert sequence_tracking" in report, Validation report missing sequence tracking"
         
@@ -1048,12 +1048,12 @@ class WebSocketEventValidationSuiteTests:
         logger.info(=" * 80)"
         
         # Validate key performance indicators
-        assert summary[success_rate] >= 95.0, fSuccess rate {summary['success_rate']:.2f}% below 95% threshold
+        assert summary[success_rate] >= 95.0, "fSuccess rate {summary['success_rate']:.2f}% below 95% threshold"
         assert performance[avg_latency_ms] < test_config.max_latency_ms, \"
         assert performance[avg_latency_ms] < test_config.max_latency_ms, \"
             fAverage latency {performance['avg_latency_ms']:.2f}ms exceeds {test_config.max_latency_ms}ms limit"
             fAverage latency {performance['avg_latency_ms']:.2f}ms exceeds {test_config.max_latency_ms}ms limit"
-        assert sequences[missing_events] == 0, fMissing events detected: {sequences['missing_events']}
+        assert sequences[missing_events] == 0, "fMissing events detected: {sequences['missing_events']}"
         
         logger.info("[U+2713] Comprehensive validation report generated and validated)"
 

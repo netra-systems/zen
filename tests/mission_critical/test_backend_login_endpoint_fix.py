@@ -49,7 +49,7 @@ class TestBackendLoginEndpointFix:
 
     @pytest.fixture
     def client(self):
-        ""Create test client.
+        ""Create test client."
         return TestClient(app)
 
         @pytest.fixture
@@ -66,7 +66,7 @@ class TestBackendLoginEndpointFix:
         ENVIRONMENT: "staging,"
         AUTH_SERVICE_URL": https://auth.staging.netrasystems.ai,"
         SERVICE_ID: netra-backend,
-        SERVICE_SECRET": "test-service-secret,
+        SERVICE_SECRET": test-service-secret,"
         AUTH_SERVICE_ENABLED: true
     
 
@@ -109,8 +109,8 @@ class TestBackendLoginEndpointFix:
         debug_info = debugger.log_environment_debug_info()
 
         expected_keys = [
-        "environment, auth_service_url", service_id_configured,
-        service_id_value, "service_secret_configured, auth_service_enabled",
+        "environment, auth_service_url, service_id_configured,"
+        service_id_value, "service_secret_configured, auth_service_enabled,"
         testing_flag, netra_env
     
 
@@ -208,7 +208,7 @@ recommended_actions: [Check credentials, Verify user exists]"
 
 response = client.post( )
 "/api/v1/auth/login,"
-json={email: test@example.com, password": "wrongpass}
+json={email: test@example.com, password": wrongpass}"
                                             
 
                                             # Should return 401 Unauthorized with helpful message
@@ -221,7 +221,7 @@ assert Login failed in response.json()[detail]
                                                 # Mock successful auth client response
 mock_auth_client.login.return_value = {
 access_token: test-access-token,
-"refresh_token: test-refresh-token",
+"refresh_token: test-refresh-token,"
 token_type: Bearer,
 expires_in: 900,"
 expires_in: 900,"
@@ -231,7 +231,7 @@ user_id": user-123"
                                                 # Mock connectivity test to succeed
 with patch(netra_backend.app.routes.auth_routes.debug_helpers.AuthServiceDebugger.test_auth_service_connectivity) as mock_connectivity:
     mock_connectivity.return_value = {
-"connectivity_test: success",
+"connectivity_test: success,"
 status_code: 200,
 service_auth_supported: True"
 service_auth_supported: True"
@@ -239,7 +239,7 @@ service_auth_supported: True"
 
 response = client.post( )
 "/api/v1/auth/login,"
-json={email: test@example.com, password": "testpass}
+json={email: test@example.com, password": testpass}"
                                                     
 
 assert response.status_code == 200
@@ -308,7 +308,7 @@ async def mock_operation():
 with patch("netra_backend.app.routes.auth_routes.debug_helpers.AuthServiceDebugger.test_auth_service_connectivity) as mock_connectivity:"
     mock_connectivity.return_value = {
 connectivity_test: failed,
-error": "Connection refused
+error": Connection refused"
         
 
 with pytest.raises(HTTPException) as exc_info:
@@ -330,7 +330,7 @@ from netra_backend.app.routes.auth_proxy import _http_proxy_to_auth_service
 with patch(httpx.AsyncClient) as mock_client:
                     # Mock successful response
 mock_response = Magic            mock_response.status_code = 200
-mock_response.json.return_value = {"result: success"}
+mock_response.json.return_value = {"result: success}"
 
 mock_client.return_value.__aenter__.return_value.post.return_value = mock_response
 
@@ -355,13 +355,13 @@ with patch("httpx.AsyncClient) as mock_client:"
 mock_client.return_value.__aenter__.return_value.post.side_effect = httpx.ConnectTimeout(Timeout)
 
 with pytest.raises(HTTPException) as exc_info:
-    await _http_proxy_to_auth_service(/test, POST", {"test: data)
+    await _http_proxy_to_auth_service(/test, POST", {test: data)"
 
 assert exc_info.value.status_code == 503
 assert connection timeout in exc_info.value.detail.lower()
 
 def test_debug_login_attempt_missing_credentials(self, mock_environment):
-    ""Test debug login attempt with missing service credentials.
+    ""Test debug login attempt with missing service credentials."
 pass
 with patch(shared.isolated_environment.get_env) as mock_get_env:"
 with patch(shared.isolated_environment.get_env) as mock_get_env:"
@@ -385,7 +385,7 @@ with patch(netra_backend.app.routes.auth_proxy._http_proxy_to_auth_service) as m
 
 response = client.post( )
 /api/v1/auth/register,
-json={email: "test@example.com, password": testpass}
+json={email: "test@example.com, password: testpass}"
                 
 
                 # Should await asyncio.sleep(0)
@@ -394,7 +394,7 @@ assert response.status_code == 503
 assert connection in response.json()[detail].lower()
 
 def test_environment_variable_trimming(self):
-    ""Test that service secrets are properly trimmed of whitespace.
+    ""Test that service secrets are properly trimmed of whitespace."
 pass
 with patch(shared.isolated_environment.get_env) as mock_get_env:"
 with patch(shared.isolated_environment.get_env) as mock_get_env:"
@@ -447,7 +447,7 @@ class TestAuthenticationFlowValidation:
         user_id: "user-123,"
         email": valid_user_data[email],"
         access_token: signup-token,
-        refresh_token": "signup-refresh
+        refresh_token": signup-refresh"
     
 
     # Step 1: User registration
@@ -483,7 +483,7 @@ class TestAuthenticationFlowValidation:
     # Create realistic JWT payload
         payload = {
         user_id: user-456,
-        "email: jwt@example.com",
+        "email: jwt@example.com,"
         sub: user-456,
         iat: int(time.time()),"
         iat: int(time.time()),"
@@ -532,14 +532,14 @@ class TestAuthenticationFlowValidation:
         mock_auth_client.login.return_value = {
         "access_token: initial-token,"
         refresh_token: initial-refresh,
-        "token_type: Bearer",
+        "token_type: Bearer,"
         expires_in: 60,  # Short expiry for testing
         user_id: "user-789"
     
 
         login_response = client.post( )
         /api/v1/auth/login","
-        json={email: refresh@example.com, "password: testpass"}
+        json={email: refresh@example.com, "password: testpass}"
     
         assert login_response.status_code == 200
 
@@ -549,7 +549,7 @@ class TestAuthenticationFlowValidation:
         refresh_token: new-refresh","
         "token_type: Bearer,"
         expires_in: 900,
-        user_id": "user-789
+        user_id": user-789"
     
 
     # Test token refresh endpoint
@@ -559,7 +559,7 @@ class TestAuthenticationFlowValidation:
     
 
     # Should succeed or handle gracefully
-        assert refresh_response.status_code in [200, 401, 404]  # Depending on implementation
+        assert refresh_response.status_code in [200, "401, 404]  # Depending on implementation"
 
     # Business value: Uninterrupted chat sessions maintain user engagement
 
@@ -606,7 +606,7 @@ class TestAuthenticationFlowValidation:
         refresh_token: oauth-refresh","
         "token_type: Bearer,"
         expires_in: 3600,
-        user_id": "oauth-user-456,
+        user_id": oauth-user-456,"
         is_new_user: True
     
 
@@ -615,14 +615,14 @@ class TestAuthenticationFlowValidation:
         response = client.post(/api/v1/auth/oauth/login, json=oauth_data)"
 
     # Should handle gracefully even if not fully implemented
-        assert response.status_code in [200, 201, 404, 501]
+        assert response.status_code in [200, "201, 404, 501]"
 
     # Business value: Social login reduces friction, increases conversion
 
     def test_session_management_and_tracking(self, client, mock_auth_client):
         "Test session management, tracking, and cleanup."
         session_data = {
-        "user_id: session-user-789",
+        "user_id: session-user-789,"
         email: session@example.com,
         login_time: datetime.now().isoformat(),"
         login_time: datetime.now().isoformat(),"
@@ -631,7 +631,7 @@ class TestAuthenticationFlowValidation:
     
 
         mock_auth_client.create_session.return_value = {
-        session_id": "session-abc123,
+        session_id": session-abc123,"
         expires_at: (datetime.now() + timedelta(hours=24)).isoformat()
     
 
@@ -646,7 +646,7 @@ class TestAuthenticationFlowValidation:
 
         response = client.post( )
         /api/v1/auth/login","
-        json={email: session_data[email], "password: testpass"},
+        json={email: session_data[email], "password: testpass},"
         headers={User-Agent: session_data[user_agent]}
     
 
@@ -660,7 +660,7 @@ class TestAuthenticationFlowValidation:
     # Mock MFA challenge
         mock_auth_client.initiate_mfa.return_value = {
         challenge_id: mfa-challenge-123,
-        method": "totp,
+        method": totp,"
         backup_codes_available: True
     
 
@@ -672,7 +672,7 @@ class TestAuthenticationFlowValidation:
     
 
     # Should handle gracefully
-        assert mfa_response.status_code in [200, 404, 501]
+        assert mfa_response.status_code in [200, "404, 501]"
 
     # Mock MFA verification
         mock_auth_client.verify_mfa.return_value = {
@@ -688,7 +688,7 @@ class TestAuthenticationFlowValidation:
         "Test proper handling of expired tokens and graceful degradation."
     # Create expired token payload
         expired_payload = {
-        user_id": "expired-user-456,
+        user_id": expired-user-456,"
         email: expired@example.com,
         exp: int(time.time()) - 3600  # Expired 1 hour ago"
         exp: int(time.time()) - 3600  # Expired 1 hour ago"
@@ -699,7 +699,7 @@ class TestAuthenticationFlowValidation:
     # Mock auth service response for expired token
         mock_auth_client.validate_token.return_value = {
         valid: False,
-        error": "token_expired,
+        error": token_expired,"
         message: Token has expired
     
 
@@ -726,12 +726,12 @@ class TestAuthenticationFlowValidation:
 
         logout_response = client.post( )
         /api/v1/auth/logout,
-        json={refresh_token": "test-refresh-token},
+        json={refresh_token": test-refresh-token},"
         headers={Authorization: Bearer test-access-token}
     
 
     # Should handle logout gracefully
-        assert logout_response.status_code in [200, 204, 404]
+        assert logout_response.status_code in [200, "204, 404]"
 
     # Business value: Proper logout ensures security and session management
 
@@ -739,8 +739,8 @@ class TestAuthenticationFlowValidation:
         "Test role-based and permission-based access control."
     # Test different user roles and permissions
         test_cases = [
-        {role: free, "permissions: [chat:basic"]},
-        {role: premium, permissions: [chat:basic", "chat:advanced, agents:custom]},
+        {role: free, "permissions: [chat:basic]},"
+        {role: premium, permissions: [chat:basic", chat:advanced, agents:custom]},"
         {role: enterprise, "permissions: [chat:basic", chat:advanced, agents:custom, admin:users]}"
         {role: enterprise, "permissions: [chat:basic", chat:advanced, agents:custom, admin:users]}"
     
@@ -749,7 +749,7 @@ class TestAuthenticationFlowValidation:
         mock_auth_client.get_user_permissions.return_value = {
         role": case[role],"
         permissions: case[permissions],
-        tier": case["role]
+        tier": case[role]"
         
 
         # Test permission validation logic
@@ -759,7 +759,7 @@ class TestAuthenticationFlowValidation:
         assert chat:basic in permissions["permissions]"
         assert agents:custom" not in permissions[permissions]"
         elif case[role] == enterprise:
-        assert admin:users" in permissions["permissions]
+        assert admin:users" in permissions[permissions]"
 
                 # Business value: Proper permissions drive tier upgrades and revenue
 
@@ -777,7 +777,7 @@ class TestUserJourneyValidation:
 
         @pytest.fixture
     def mock_auth_client(self):
-        ""Mock auth client for testing.
+        ""Mock auth client for testing."
         pass
         with patch(netra_backend.app.routes.auth_proxy.auth_client) as mock:"
         with patch(netra_backend.app.routes.auth_proxy.auth_client) as mock:"
@@ -787,7 +787,7 @@ class TestUserJourneyValidation:
         "Test complete first-time user onboarding experience."
     # Mock new user registration
         mock_auth_client.register.return_value = {
-        "user_id: new-user-123",
+        "user_id: new-user-123,"
         email: newuser@example.com,
         is_new_user: True,"
         is_new_user: True,"
@@ -797,7 +797,7 @@ class TestUserJourneyValidation:
 
     # Step 1: User signs up
         signup_data = {
-        "email: newuser@example.com",
+        "email: newuser@example.com,"
         password: SecurePass123!,
         first_name: New","
         "last_name: User,"
@@ -805,7 +805,7 @@ class TestUserJourneyValidation:
     
 
         signup_response = client.post("/api/v1/auth/register, json=signup_data)"
-        assert signup_response.status_code in [200, 201]
+        assert signup_response.status_code in [200, "201]"
 
     # Step 2: Complete onboarding profile
         mock_auth_client.update_profile.return_value = {
@@ -817,7 +817,7 @@ class TestUserJourneyValidation:
         profile_data = {
         "company: Test Corp,"
         role: Developer,
-        "use_case: AI Development",
+        "use_case: AI Development,"
         team_size: 1-10
     
 
@@ -832,7 +832,7 @@ class TestUserJourneyValidation:
     Track conversion from signup to first AI interaction
 
     def test_power_user_workflow_optimization(self, client, mock_auth_client):
-        ""Test power user workflows and advanced feature access.
+        ""Test power user workflows and advanced feature access."
         pass
     # Mock power user profile
         mock_auth_client.get_user_profile.return_value = {
@@ -891,7 +891,7 @@ class TestUserJourneyValidation:
 
     # Mock upgrade prompt
         mock_auth_client.get_upgrade_options.return_value = {
-        "available_plans: [premium", enterprise],
+        "available_plans: [premium, enterprise],"
         discount_available: True,"
         discount_available: True,"
         "discount_percent: 20,"
@@ -901,7 +901,7 @@ class TestUserJourneyValidation:
     # Business value: Free tier limitations drive premium conversions
 
     def test_premium_tier_feature_access(self, client, mock_auth_client):
-        ""Test premium tier features and value delivery.
+        ""Test premium tier features and value delivery."
         pass
     # Mock premium user
         mock_auth_client.get_user_tier.return_value = {
@@ -935,7 +935,7 @@ class TestUserJourneyValidation:
         role: "admin,"
         organization_id": org-enterprise-789,"
         permissions: [
-        "manage_users, manage_billing", view_analytics,
+        "manage_users, manage_billing, view_analytics,"
         configure_integrations, "export_data"
         ],
         team_members": 25,"
@@ -945,7 +945,7 @@ class TestUserJourneyValidation:
         enterprise_data = mock_auth_client.get_user_role.return_value
 
     # Test team management capabilities
-        assert manage_users" in enterprise_data["permissions]
+        assert manage_users" in enterprise_data[permissions]"
         assert enterprise_data[team_members] < enterprise_data[seat_limit]
 
     # Mock team usage analytics
@@ -954,7 +954,7 @@ class TestUserJourneyValidation:
         total_usage_hours: 2400,"
         "cost_savings: 15000,  # USD"
         productivity_gain: 35%,
-        top_use_cases": ["code_review, documentation, analysis]
+        top_use_cases": [code_review, documentation, analysis]"
     
 
     # Business value: Enterprise features drive high-value contracts
@@ -965,7 +965,7 @@ class TestUserJourneyValidation:
     # Mock billing information
         mock_auth_client.get_billing_info.return_value = {
         customer_id: cus_billing123,
-        "payment_method: card",
+        "payment_method: card,"
         last_four: 4242,
         subscription_status: active","
         "next_invoice: {"
@@ -1068,7 +1068,7 @@ class TestUserJourneyValidation:
         {
         "session_id: desktop-session-1,"
         device_type: desktop,
-        "browser: Chrome",
+        "browser: Chrome,"
         ip_address: 192.168.1.100,
         last_activity: datetime.now().isoformat(),"
         last_activity: datetime.now().isoformat(),"
@@ -1076,19 +1076,19 @@ class TestUserJourneyValidation:
         },
         {
         session_id: mobile-session-1,
-        device_type": "mobile,
+        device_type": mobile,"
         browser: Safari,
         ip_address: "192.168.1.101,"
         last_activity": (datetime.now() - timedelta(minutes=30)).isoformat(),"
         location: New York, NY
         },
         {
-        "session_id: tablet-session-1",
+        "session_id: tablet-session-1,"
         device_type: tablet,
         browser: Chrome","
         "ip_address: 192.168.1.102,"
         last_activity: (datetime.now() - timedelta(hours=2)).isoformat(),
-        location": "New York, NY
+        location": New York, NY"
     
     
     
@@ -1105,7 +1105,7 @@ class TestUserJourneyValidation:
     # Business value: Multi-device access increases user engagement
 
     def test_user_preference_persistence(self, client, mock_auth_client):
-        ""Test user preference storage and persistence across sessions.
+        ""Test user preference storage and persistence across sessions."
         pass
     # Mock user preferences
         test_preferences = {
@@ -1170,7 +1170,7 @@ class TestPerformanceUnderLoad:
         yield mock
 
     def test_concurrent_user_authentication_load(self, client, mock_auth_client):
-        ""Test authentication performance with 50+ concurrent users.
+        ""Test authentication performance with 50+ concurrent users."
     # Mock successful authentication responses
     def mock_login_response(call_number):
         return {
@@ -1193,7 +1193,7 @@ class TestPerformanceUnderLoad:
         response = client.post( )
         /api/v1/auth/login,
         json={
-        email": "formatted_string,
+        email": formatted_string,"
         password: testpass
     
     
@@ -1239,7 +1239,7 @@ class TestPerformanceUnderLoad:
 
     # Step 1: User registration (mock fast response)
         mock_auth_client.register.return_value = {
-        user_id": "journey-user-123,
+        user_id": journey-user-123,"
         access_token: journey-token,
         setup_required: True"
         setup_required: True"
@@ -1248,13 +1248,13 @@ class TestPerformanceUnderLoad:
         registration_start = time.time()
         response = client.post("/api/v1/auth/register, json={)"
         email: journey@example.com,
-        password": "SecurePass123!,
+        password": SecurePass123!,"
         first_name: Journey,
         last_name: "User"
     
         registration_time = time.time() - registration_start
 
-        assert response.status_code in [200, 201]
+        assert response.status_code in [200, "201]"
         assert registration_time < 5.0  # Registration under 5 seconds
 
     # Step 2: Profile setup
@@ -1299,7 +1299,7 @@ class TestPerformanceUnderLoad:
         mock_auth_client.login.return_value = {
         "access_token: memory-test-token,"
         refresh_token: memory-refresh,
-        "token_type: Bearer",
+        "token_type: Bearer,"
         expires_in: 900,
         user_id: "memory-user"
     
@@ -1329,7 +1329,7 @@ class TestPerformanceUnderLoad:
         memory_growth_mb = memory_growth / (1024 * 1024)
 
             # Alert if memory growth exceeds 50MB for 100 auth operations
-        assert memory_growth_mb < 50, formatted_string
+        assert memory_growth_mb < 50, "formatted_string"
 
             # Business value: Memory efficiency supports scalability and reduces hosting costs
 
@@ -1340,7 +1340,7 @@ class TestPerformanceUnderLoad:
     # Monitor CPU and memory during load test
         mock_auth_client.login.return_value = {
         access_token: resource-token,
-        "refresh_token: resource-refresh",
+        "refresh_token: resource-refresh,"
         token_type: Bearer,
         expires_in: 900,"
         expires_in: 900,"
@@ -1379,7 +1379,7 @@ class TestPerformanceUnderLoad:
         requests_per_second = num_requests / total_time
 
         # Resource utilization assertions
-        cpu_increase = final_resources[cpu"] - baseline_resources["cpu]
+        cpu_increase = final_resources[cpu"] - baseline_resources[cpu]"
         memory_increase = final_resources[memory] - baseline_resources[memory]
 
         # Reasonable resource usage expectations
@@ -1400,7 +1400,7 @@ class TestPerformanceUnderLoad:
         for load_level in load_levels:
         mock_auth_client.login.return_value = {
         access_token: formatted_string,
-        "refresh_token: formatted_string",
+        "refresh_token: formatted_string,"
         token_type: Bearer,
         expires_in: 900,"
         expires_in: 900,"
@@ -1417,7 +1417,7 @@ class TestPerformanceUnderLoad:
         response = client.post( )
         /api/v1/auth/login,
         json={
-        "email: formatted_string",
+        "email: formatted_string,"
         password: testpass
                 
                 
@@ -1464,17 +1464,17 @@ pass
         # This test will use actual environment variables and should be run in staging
         # Skip if not in appropriate test environment
 import os
-if get_env().get(ENVIRONMENT") not in [staging, "testing]:
+if get_env().get(ENVIRONMENT") not in [staging, testing]:"
     pytest.skip(Integration test requires staging/testing environment)
 
 response = client.post( )
 /api/v1/auth/login,
-json={email: "test@example.com", password: wrongpass}
+json={email: "test@example.com, password: wrongpass}"
             
 
             # Should not await asyncio.sleep(0)
 return 500 - should be 401 or 503 with proper error handling
-assert response.status_code in [401, 503]
+assert response.status_code in [401, "503]"
 
             # Should have meaningful error message, not generic 500 error
 error_detail = response.json()[detail]
@@ -1490,7 +1490,7 @@ def test_staging_compatible_authentication(self, client):
 staging_test_cases = [
 {
 email: staging-test@example.com,
-"password": invalid,
+"password: invalid,"
 expected_status: [401, 404],
 description: Invalid credentials should return proper error"
 description: Invalid credentials should return proper error"
@@ -1499,7 +1499,7 @@ description: Invalid credentials should return proper error"
 email: "malformed-email,"
 password: testpass,
 expected_status: [400, 422],
-"description": Malformed email should return validation error
+"description: Malformed email should return validation error"
 },
 {
 email: test@example.com,
@@ -1513,7 +1513,7 @@ for test_case in staging_test_cases:
     response = client.post( )
 /api/v1/auth/login,
 json={
-"email": test_case[email],
+"email: test_case[email],"
 password: test_case[password]
         
         
@@ -1553,7 +1553,7 @@ last_name: "Test"
     
 
     # Registration should either succeed or fail gracefully (not crash)
-assert registration_response.status_code in [200, 201, 400, 409, 422]
+assert registration_response.status_code in [200, "201, 400, 409, 422]"
 
 if registration_response.status_code in [200, 201]:
         # If registration succeeded, test login
@@ -1567,7 +1567,7 @@ password: E2ETestPass123!"
         
 
         # Login should succeed if registration was successful
-assert login_response.status_code in [200, 401]  # 401 if auth service is mocked
+assert login_response.status_code in [200, "401]  # 401 if auth service is mocked"
 
 if login_response.status_code == 200:
     login_data = login_response.json()
@@ -1584,7 +1584,7 @@ class TestBusinessMetricsTracking:
 
         @pytest.fixture
     def client(self):
-        ""Create test client.
+        ""Create test client."
         return TestClient(app)
 
         @pytest.fixture
@@ -1599,7 +1599,7 @@ class TestBusinessMetricsTracking:
         Test tracking of user conversion funnel metrics.
     # Mock funnel tracking data
         mock_auth_client.track_funnel_event.return_value = {
-        "event": signup_completed,
+        "event: signup_completed,"
         user_id: funnel-user-123,
         timestamp": datetime.now().isoformat(),"
         funnel_stage: "activation,"
@@ -1609,7 +1609,7 @@ class TestBusinessMetricsTracking:
     # Track signup event
         funnel_data = mock_auth_client.track_funnel_event.return_value
         assert funnel_data[event] == signup_completed
-        assert funnel_data["conversion_probability"] > 0.5
+        assert funnel_data["conversion_probability] > 0.5"
 
     # Mock progression to next stage
         mock_auth_client.track_funnel_progression.return_value = {
@@ -1637,7 +1637,7 @@ class TestBusinessMetricsTracking:
         direct_revenue: 150.75,  # Subscription revenue
         attributed_revenue: 89.25,  # Usage-based revenue
         lifetime_value: 1850.0,
-        "churn_probability": 0.12
+        "churn_probability: 0.12"
         },
         engagement_metrics: {
         avg_session_duration: 28.5,  # minutes
@@ -1657,13 +1657,13 @@ class TestBusinessMetricsTracking:
     # Business value: Revenue attribution guides investment decisions
 
     def test_user_tier_upgrade_conversion_tracking(self, client, mock_auth_client):
-        ""Test tracking of user tier upgrades and conversion rates.
+        ""Test tracking of user tier upgrades and conversion rates."
     # Mock tier upgrade tracking
         mock_auth_client.track_tier_upgrade.return_value = {
         user_id: upgrade-user-789","
         from_tier: "free,"
         to_tier: premium,
-        upgrade_trigger: "usage_limit_reached",
+        upgrade_trigger: "usage_limit_reached,"
         time_to_upgrade_days: 14,
         upgrade_value: 29.99,
         predicted_ltv_increase: 450.0,
@@ -1678,7 +1678,7 @@ class TestBusinessMetricsTracking:
 
     # Validate upgrade tracking
         assert upgrade_data[from_tier] == free
-        assert upgrade_data["to_tier"] == premium
+        assert upgrade_data["to_tier] == premium"
         assert upgrade_data[upgrade_value] > 0
         assert upgrade_data[predicted_ltv_increase] > upgrade_data[upgrade_value"]"
 
@@ -1690,7 +1690,7 @@ class TestBusinessMetricsTracking:
     # Mock reliability metrics
         mock_auth_client.get_auth_reliability_metrics.return_value = {
         period: last_30_days,
-        "total_auth_attempts": 10500,
+        "total_auth_attempts: 10500,"
         successful_auths: 10185,
         success_rate: 0.97,
         avg_response_time_ms: 245,
@@ -1701,7 +1701,7 @@ class TestBusinessMetricsTracking:
         estimated_revenue_loss: 67.50,
         user_satisfaction_impact: -0.5  # 5% decrease
         },
-        "reliability_score": 96.8  # out of 100
+        "reliability_score: 96.8  # out of 100"
     
 
         reliability_data = mock_auth_client.get_auth_reliability_metrics.return_value

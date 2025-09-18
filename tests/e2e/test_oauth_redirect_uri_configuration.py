@@ -68,7 +68,7 @@ class TestOAuthRedirectURIConfiguration:
 
         # This test MUST FAIL in current implementation
         assert expected_redirect_uri != actual_redirect_uri, \
-        f"CRITICAL BUG CONFIRMED: Auth service is using frontend URL for OAuth callback. " \
+        f"CRITICAL BUG CONFIRMED: Auth service is using frontend URL for OAuth callback.  \"
         ""
 
         @pytest.mark.e2e
@@ -88,7 +88,7 @@ class TestOAuthRedirectURIConfiguration:
         'GOOGLE_CLIENT_SECRET': 'test-secret'
         }):
         # Attempt to initiate OAuth login
-        response = client.get("/auth/login", follow_redirects=False)
+        response = client.get("/auth/login, follow_redirects=False)"
 
         # Check the redirect location
         if response.status_code == 302:
@@ -118,7 +118,7 @@ class TestOAuthRedirectURIConfiguration:
         authorized_redirect_uris = [ ]
         staging_auth_callback,
         production_auth_callback,
-        "http://localhost:8000/auth/callback",  # Local development
+        "http://localhost:8000/auth/callback,  # Local development"
     
 
         assert staging_auth_callback in authorized_redirect_uris, \
@@ -126,8 +126,8 @@ class TestOAuthRedirectURIConfiguration:
 
     # Verify frontend callbacks should NOT be authorized
         incorrect_uris = [ ]
-        "https://app.staging.netrasystems.ai/auth/callback",  # WRONG
-        "https://app.netrasystems.ai/auth/callback",  # WRONG
+        "https://app.staging.netrasystems.ai/auth/callback,  # WRONG"
+        "https://app.netrasystems.ai/auth/callback,  # WRONG"
     
 
         for uri in incorrect_uris:
@@ -135,18 +135,18 @@ class TestOAuthRedirectURIConfiguration:
         ""
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
             # Run the test to demonstrate the failure
         test = TestOAuthRedirectURIConfiguration()
 
         print("")
          + ="*80)"
-        print("CRITICAL OAUTH CONFIGURATION BUG TEST")
-        print("="*80)
+        print("CRITICAL OAUTH CONFIGURATION BUG TEST)"
+        print("=*80)"
 
         try:
         test.test_oauth_redirect_uri_must_point_to_auth_service()
-        print("ERROR: Test unexpectedly passed - bug might be fixed")
+        print("ERROR: Test unexpectedly passed - bug might be fixed)"
         except AssertionError as e:
         print("")
         print("")
@@ -154,8 +154,8 @@ class TestOAuthRedirectURIConfiguration:
 
         print("")
         REQUIRED FIX:")"
-        print("1. Change auth_routes.py lines 242, 676, 906 to use AUTH SERVICE URL")
-        print("2. Update Google OAuth Console to authorize auth service URLs")
-        print("3. Ensure auth service redirects to frontend after processing")
-        print("="*80)
+        print("1. Change auth_routes.py lines 242, 676, 906 to use AUTH SERVICE URL)"
+        print("2. Update Google OAuth Console to authorize auth service URLs)"
+        print("3. Ensure auth service redirects to frontend after processing)"
+        print("=*80)"
         pass

@@ -75,7 +75,7 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
                     self.skipTest(WebSocket response timeout - possible await error impact)
 
         except Exception as e:
-            if "await in str(e) or awaitable" in str(e):
+            if "await in str(e) or awaitable in str(e):"
                 self.fail(fE2E CRITICAL: Await error breaking WebSocket connection: {e})
             else:
                 # Other connection errors might be environmental
@@ -84,7 +84,7 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_golden_path_agent_message_flow_staging(self):
-    ""
+    """
         E2E: Test complete agent message flow on staging.
 
         Validates that users can send messages to agents and receive responses
@@ -98,7 +98,7 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
 
                 # Send agent optimization request
                 agent_message = {
-                    type": "agent_message,
+                    type": agent_message,"
                     user_id: self.user_context.user_id,
                     content: Help me optimize my AI costs - E2E staging test","
                     "agent_type: optimization"""
@@ -167,7 +167,7 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
             # Test corpus creation endpoint
             corpus_data = {
                 name: E2E Staging Await Error Test Corpus,
-                description": "Test corpus for validating await error impact,
+                description": Test corpus for validating await error impact,"
                 user_id: self.user_context.user_id
             }
 
@@ -181,7 +181,7 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
             if response.status_code >= 500:
                 # Server errors might indicate await errors
                 error_text = response.text
-                if await" in error_text or "awaitable in error_text:
+                if await" in error_text or awaitable in error_text:"
                     self.fail(fE2E CRITICAL: Await error in corpus creation: {error_text})
 
             # Even if creation fails for other reasons, we tested the await error impact
@@ -192,7 +192,7 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
             )
 
         except Exception as e:
-            if await" in str(e) or "awaitable in str(e):
+            if await" in str(e) or awaitable in str(e):"
                 self.fail(fE2E CRITICAL: Await error in corpus operations: {e})
             else:
                 self.skipTest(fCorpus operations test failed: {e})
@@ -200,7 +200,7 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_golden_path_resilience_assessment_staging(self):
-        ""
+        """
         E2E: Comprehensive assessment of Golden Path resilience to await errors.
 
         This test provides a complete assessment of how await errors affect
@@ -221,7 +221,7 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
 
                 # Test agent communication
                 test_msg = {
-                    "type: ping",
+                    "type: ping,"
                     user_id: self.user_context.user_id,
                     data: "resilience_test"
                 }
@@ -261,7 +261,7 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
         # Log assessment results
         print(f\nE2E STAGING RESILIENCE ASSESSMENT:)
         for component, working in resilience_assessment.items():
-            status = ✅ RESILIENT" if working else "❌ IMPACTED
+            status = ✅ RESILIENT" if working else ❌ IMPACTED"
             print(f  {component}: {status})
 
         # CRITICAL: User experience must remain intact

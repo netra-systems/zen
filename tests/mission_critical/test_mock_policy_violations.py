@@ -79,8 +79,8 @@ class MockDetector(ast.NodeVisitor):
         self.violations.append(MockViolation( ))
         file_path=self.file_path,"""
         file_path=self.file_path,"""
-        violation_type="Mock Import",
-        code_snippet="formatted_string",
+        violation_type="Mock Import,"
+        code_snippet="formatted_string,"
         service=self._get_service_name()
             
         self.imports.add(alias.name if not alias.asname else alias.asname)
@@ -93,8 +93,8 @@ class MockDetector(ast.NodeVisitor):
         self.violations.append(MockViolation( ))
         file_path=self.file_path,
         line_number=node.lineno,
-        violation_type="Mock Import",
-        code_snippet="formatted_string",
+        violation_type="Mock Import,"
+        code_snippet="formatted_string,"
         service=self._get_service_name()
             
         self.imports.add(alias.name if not alias.asname else alias.asname)
@@ -107,8 +107,8 @@ class MockDetector(ast.NodeVisitor):
         self.violations.append(MockViolation( ))
         file_path=self.file_path,"""
         file_path=self.file_path,"""
-        violation_type="Mock Usage",
-        code_snippet="formatted_string",
+        violation_type="Mock Usage,"
+        code_snippet="formatted_string,"
         service=self._get_service_name()
         
         self.generic_visit(node)
@@ -120,8 +120,8 @@ class MockDetector(ast.NodeVisitor):
         self.violations.append(MockViolation( ))
         file_path=self.file_path,
         line_number=decorator.lineno,
-        violation_type="Patch Decorator",
-        code_snippet="formatted_string",
+        violation_type="Patch Decorator,"
+        code_snippet="formatted_string,"
         service=self._get_service_name()
             
         self.generic_visit(node)
@@ -134,8 +134,8 @@ class MockDetector(ast.NodeVisitor):
         self.violations.append(MockViolation( ))
         file_path=self.file_path,"""
         file_path=self.file_path,"""
-        violation_type="Mock Attribute Access",
-        code_snippet="formatted_string",
+        violation_type="Mock Attribute Access,"
+        code_snippet="formatted_string,"
         service=self._get_service_name()
         
         self.generic_visit(node)
@@ -149,8 +149,8 @@ class MockDetector(ast.NodeVisitor):
         self.violations.append(MockViolation( ))
         file_path=self.file_path,"""
         file_path=self.file_path,"""
-        violation_type="Mock Context Manager",
-        code_snippet="formatted_string",
+        violation_type="Mock Context Manager,"
+        code_snippet="formatted_string,"
         service=self._get_service_name()
                 
         self.generic_visit(node)
@@ -170,8 +170,8 @@ class MockDetector(ast.NodeVisitor):
         self.violations.append(MockViolation( ))
         file_path=self.file_path,"""
         file_path=self.file_path,"""
-        violation_type="Mock Assignment",
-        code_snippet="formatted_string",
+        violation_type="Mock Assignment,"
+        code_snippet="formatted_string,"
         service=self._get_service_name()
                     
         self.generic_visit(node)
@@ -252,7 +252,7 @@ class MockDetector(ast.NodeVisitor):
 
         except (SyntaxError, UnicodeDecodeError) as e:"""
         except (SyntaxError, UnicodeDecodeError) as e:"""
-        print("formatted_string")
+        print("formatted_string)"
         continue
 
         return violations
@@ -274,10 +274,10 @@ class TestWebSocketConnection:
 """
         """Send JSON message.""""""
         """Send JSON message.""""""
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -316,7 +316,7 @@ class TestWebSocketConnection:
         violations.append(MockViolation( ))
         file_path=str(py_file),
         line_number=line_num,
-        violation_type="formatted_string",
+        violation_type="formatted_string,"
         code_snippet=line.strip()[:100],
         service=self._get_service_name_from_path(str(py_file))
                 
@@ -375,7 +375,7 @@ class TestWebSocketConnection:
         "
         "
 
-        pytest.fail("formatted_string")
+        pytest.fail("formatted_string)"
 
     def test_no_mock_imports_in_analytics_service(self):
         """
@@ -411,7 +411,7 @@ class TestWebSocketConnection:
         "
         "
 
-        pytest.fail("formatted_string")
+        pytest.fail("formatted_string)"
 
     def test_no_mock_imports_in_netra_backend(self):
         """
@@ -447,7 +447,7 @@ class TestWebSocketConnection:
         "
         "
 
-        pytest.fail("formatted_string")
+        pytest.fail("formatted_string)"
 
     def test_comprehensive_mock_audit(self):
         """
@@ -561,7 +561,7 @@ class TestWebSocketConnection:
         violations.append((str(py_file), count))
 """
 """
-        print("formatted_string")
+        print("formatted_string)"
 
         if violations:
         report = "
@@ -693,8 +693,8 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
         f.write("## Executive Summary )"
 
         ")"
-        f.write("formatted_string")
-        f.write("formatted_string")
+        f.write("formatted_string)"
+        f.write("formatted_string)"
         f.write("- **Estimated Effort**: 2-3 days with multi-agent approach )"
 
         ")"
@@ -717,8 +717,8 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
         ")"
 
         for service, violations in service_violations.items():
-        f.write("formatted_string")
-        f.write("formatted_string")
+        f.write("formatted_string)"
+        f.write("formatted_string)"
 
                         # Group by file
         by_file = defaultdict(list)
@@ -730,10 +730,10 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
         ")"
         for file_path, file_violations in list(by_file.items())[:10]:
         short_path = file_path.split('/netra-apex/')[-1]
-        f.write("formatted_string")
+        f.write("formatted_string)"
 
         if len(by_file) > 10:
-        f.write("formatted_string")
+        f.write("formatted_string)"
 
         f.write(" )"
         **Replacement Strategy**:
@@ -793,7 +793,7 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
         f.write("- [ ] Architecture compliance > 90% )"
         ")"
 
-        print("formatted_string")
+        print("formatted_string)"
 
 
         if __name__ == '__main__':

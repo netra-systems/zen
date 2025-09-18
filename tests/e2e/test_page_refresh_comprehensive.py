@@ -64,7 +64,7 @@ class PageRefreshTestSuite:
         'timestamp': datetime.now(timezone.utc).isoformat()
     
 
-    def generate_test_token(self, user_email: str = "test@example.com", expires_in: int = 3600) -> str:
+    def generate_test_token(self, user_email: str = "test@example.com, expires_in: int = 3600) -> str:"
         """Generate a valid JWT token for testing."""
         payload = { }
         'sub': 'user_123',
@@ -97,20 +97,20 @@ class PageRefreshTestSuite:
         await page.wait_for_timeout(2000)
 
             # Send a test message
-        message_input = await page.query_selector('[data-testid="message-input"], textarea[placeholder*="Message"]')
+        message_input = await page.query_selector('[data-testid="message-input"], textarea[placeholder*="Message]')"
         if not message_input:
-        raise AssertionError("Message input not found")
+        raise AssertionError("Message input not found)"
 
         test_message = "Test message before refresh"
         await message_input.fill(test_message)
-        await message_input.press("Enter")
+        await message_input.press("Enter)"
 
                 # Wait for message to appear
         await page.wait_for_selector('formatted_string', timeout=5000)
 
                 # Store current state
                 # Removed problematic line: messages_before = await page.evaluate(''' )'
-        Array.from(document.querySelectorAll('[data-testid*="message"], .message-content'))
+        Array.from(document.querySelectorAll('[data-testid*="message], .message-content'))"
         .map(el => el.textContent)
         ''')'
 
@@ -119,13 +119,13 @@ class PageRefreshTestSuite:
         await page.wait_for_timeout(3000)
 
                 # Verify chat is still active
-        chat_visible = await page.is_visible('[data-testid="main-chat"]', timeout=5000)
+        chat_visible = await page.is_visible('[data-testid="main-chat]', timeout=5000)"
         if not chat_visible:
-        raise AssertionError("Chat not visible after refresh")
+        raise AssertionError("Chat not visible after refresh)"
 
                     # Check if messages are preserved
                     # Removed problematic line: messages_after = await page.evaluate(''' )'
-        Array.from(document.querySelectorAll('[data-testid*="message"], .message-content'))
+        Array.from(document.querySelectorAll('[data-testid*="message], .message-content'))"
         .map(el => el.textContent)
         ''')'
 
@@ -185,7 +185,7 @@ class PageRefreshTestSuite:
     # Verify initial WebSocket connection
         initial_connections = len(ws_connections)
         if initial_connections == 0:
-        raise AssertionError("No initial WebSocket connection established")
+        raise AssertionError("No initial WebSocket connection established)"
 
         # Perform refresh
         await page.reload(wait_until='networkidle')
@@ -194,18 +194,18 @@ class PageRefreshTestSuite:
         # Check for new WebSocket connection
         total_connections = len(ws_connections)
         if total_connections <= initial_connections:
-        raise AssertionError("WebSocket did not reconnect after refresh")
+        raise AssertionError("WebSocket did not reconnect after refresh)"
 
             # Verify the new connection is active
         latest_connection = ws_connections[-1]
         if latest_connection['closed']:
-        raise AssertionError("WebSocket connection closed immediately after refresh")
+        raise AssertionError("WebSocket connection closed immediately after refresh)"
 
                 # Test that the connection is functional
-        message_input = await page.query_selector('[data-testid="message-input"], textarea[placeholder*="Message"]')
+        message_input = await page.query_selector('[data-testid="message-input"], textarea[placeholder*="Message]')"
         if message_input:
-        await message_input.fill("Test after reconnect")
-        await message_input.press("Enter")
+        await message_input.fill("Test after reconnect)"
+        await message_input.press("Enter)"
 
                     # Wait for response (indicates working WebSocket)
         await page.wait_for_timeout(2000)
@@ -250,10 +250,10 @@ class PageRefreshTestSuite:
                                     # Monitor console errors
     def handle_console(msg: ConsoleMessage):
         pass
-        if msg.type == "error":
+        if msg.type == "error:"
         errors_caught.append(msg.text)
 
-        page.on("console", handle_console)
+        page.on("console, handle_console)"
 
         # Perform rapid refreshes
         refresh_count = 5
@@ -275,9 +275,9 @@ class PageRefreshTestSuite:
         raise AssertionError("")
 
                 # Verify chat is still functional
-        chat_visible = await page.is_visible('[data-testid="main-chat"]', timeout=5000)
+        chat_visible = await page.is_visible('[data-testid="main-chat]', timeout=5000)"
         if not chat_visible:
-        raise AssertionError("Chat not functional after rapid refreshes")
+        raise AssertionError("Chat not functional after rapid refreshes)"
 
                     # Check WebSocket connection count (should not be excessive)
                     # Removed problematic line: ws_count = await page.evaluate(''' )'
@@ -303,7 +303,7 @@ class PageRefreshTestSuite:
         return False
         finally:
         self.test_results['total'] += 1
-        page.remove_listener("console", handle_console)
+        page.remove_listener("console, handle_console)"
 
     async def test_draft_message_persistence(self, page:
         '''
@@ -326,9 +326,9 @@ class PageRefreshTestSuite:
         await page.wait_for_timeout(2000)
 
                                     # Type a draft message (don't send)'
-        message_input = await page.query_selector('[data-testid="message-input"], textarea[placeholder*="Message"]')
+        message_input = await page.query_selector('[data-testid="message-input"], textarea[placeholder*="Message]')"
         if not message_input:
-        raise AssertionError("Message input not found")
+        raise AssertionError("Message input not found)"
 
         draft_text = "This is my draft message that should persist"
         await message_input.fill(draft_text)
@@ -338,9 +338,9 @@ class PageRefreshTestSuite:
         await page.wait_for_timeout(2000)
 
                                         # Check if draft is restored
-        message_input_after = await page.query_selector('[data-testid="message-input"], textarea[placeholder*="Message"]')
+        message_input_after = await page.query_selector('[data-testid="message-input"], textarea[placeholder*="Message]')"
         if not message_input_after:
-        raise AssertionError("Message input not found after refresh")
+        raise AssertionError("Message input not found after refresh)"
 
         restored_text = await message_input_after.input_value()
 
@@ -393,12 +393,12 @@ class PageRefreshTestSuite:
         current_url = page.url
         if '/login' in current_url:
                                                                         # Check if a refresh token mechanism kicked in
-        new_token = await page.evaluate("localStorage.getItem('jwt_token')")
+        new_token = await page.evaluate("localStorage.getItem('jwt_token'))"
         if new_token == short_lived_token:
-        raise AssertionError("Token not refreshed, redirected to login")
+        raise AssertionError("Token not refreshed, redirected to login)"
 
                                                                             # Verify chat is still accessible
-        chat_visible = await page.is_visible('[data-testid="main-chat"]', timeout=5000)
+        chat_visible = await page.is_visible('[data-testid="main-chat]', timeout=5000)"
         if not chat_visible:
                                                                                 # This might be expected behavior - log but don't fail'
         print("")
@@ -439,16 +439,16 @@ class PageRefreshTestSuite:
         await page.wait_for_timeout(2000)
 
                                                                                                 # Send multiple messages to create scrollable content
-        message_input = await page.query_selector('[data-testid="message-input"], textarea[placeholder*="Message"]')
+        message_input = await page.query_selector('[data-testid="message-input"], textarea[placeholder*="Message]')"
         if message_input:
         for i in range(5):
         await message_input.fill("")
-        await message_input.press("Enter")
+        await message_input.press("Enter)"
         await page.wait_for_timeout(500)
 
                                                                                                         # Scroll to middle of conversation
                                                                                                         # Removed problematic line: await page.evaluate(''' )'
-        const chatContainer = document.querySelector('[data-testid="chat-messages"], .messages-container, main');
+        const chatContainer = document.querySelector('[data-testid="chat-messages], .messages-container, main');"
         if (chatContainer) { }
         chatContainer.scrollTop = chatContainer.scrollHeight / 2;
                                                                                                         
@@ -456,7 +456,7 @@ class PageRefreshTestSuite:
 
                                                                                                         # Get scroll position before refresh
                                                                                                         # Removed problematic line: scroll_before = await page.evaluate(''' )'
-        const chatContainer = document.querySelector('[data-testid="chat-messages"], .messages-container, main');
+        const chatContainer = document.querySelector('[data-testid="chat-messages], .messages-container, main');"
         chatContainer ? chatContainer.scrollTop : 0;
         ''')'
 
@@ -466,7 +466,7 @@ class PageRefreshTestSuite:
 
                                                                                                         # Get scroll position after refresh
                                                                                                         # Removed problematic line: scroll_after = await page.evaluate(''' )'
-        const chatContainer = document.querySelector('[data-testid="chat-messages"], .messages-container, main');
+        const chatContainer = document.querySelector('[data-testid="chat-messages], .messages-container, main');"
         chatContainer ? chatContainer.scrollTop : 0;
         ''')'
 
@@ -511,7 +511,7 @@ class PageRefreshTestSuite:
         initial_load_time = time.time() - start_time
 
                                                                                                                                 # Wait for full initialization
-        await page.wait_for_selector('[data-testid="main-chat"], .chat-interface', timeout=10000)
+        await page.wait_for_selector('[data-testid="main-chat], .chat-interface', timeout=10000)"
 
                                                                                                                                 # Measure refresh load
         refresh_start = time.time()
@@ -565,8 +565,8 @@ class PageRefreshTestSuite:
         """Run all page refresh tests."""
         print("")
          + =" * 60)"
-        print("[U+1F680] MISSION CRITICAL: Page Refresh Test Suite")
-        print("=" * 60)
+        print("[U+1F680] MISSION CRITICAL: Page Refresh Test Suite)"
+        print("= * 60)"
 
     # Create a new browser context for each test to ensure isolation
         tests = [ ]
@@ -595,8 +595,8 @@ class PageRefreshTestSuite:
                     # Print summary
         print("")
          + =" * 60)"
-        print(" CHART:  TEST RESULTS SUMMARY")
-        print("=" * 60)
+        print(" CHART:  TEST RESULTS SUMMARY)"
+        print("= * 60)"
         print("")
         print("")
         print("")
@@ -659,7 +659,7 @@ finally:
 await browser.close()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                                                             # Allow running directly for debugging
 import asyncio
 from playwright.async_api import async_playwright

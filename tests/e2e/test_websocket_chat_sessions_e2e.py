@@ -30,7 +30,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 
-from test_framework.ssot.websocket import (
+from test_framework.ssot.websocket import ()
     WebSocketTestUtility, 
     WebSocketEventType, 
     WebSocketTestClient
@@ -57,7 +57,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
     
     @pytest.fixture 
     async def authenticated_chat_session(self, auth_helper):
-        ""Create authenticated chat session with WebSocket connection.
+        ""Create authenticated chat session with WebSocket connection."
         # Get authentication token
         auth_result = await auth_helper.authenticate_test_user()
         
@@ -89,7 +89,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
     @pytest.mark.e2e
     @pytest.mark.requires_auth
     async def test_complete_authenticated_chat_session(self, authenticated_chat_session):
-    ""
+    """
         Test complete authenticated chat session delivers business value.
         
         BUSINESS VALUE: Validates that authenticated users can have complete
@@ -173,7 +173,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             tool_event = tool_exec_events[0]
             tool_data = tool_event.data
             assert tool_name in tool_data
-            assert purpose" in tool_data or "tool_purpose in tool_data
+            assert purpose" in tool_data or tool_purpose in tool_data"
             
             # 5. Tool completion delivers actionable results
             tool_completed_events = received_events[WebSocketEventType.TOOL_COMPLETED]
@@ -193,7 +193,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             assert result" in completion_data or summary in completion_data"
             
             # 7. Performance meets user expectations
-            assert chat_duration < 60.0, fChat session took {chat_duration}s (should be < 60s)
+            assert chat_duration < 60.0, "fChat session took {chat_duration}s (should be < 60s)"
             
             # 8. User receives complete business value
             total_events = sum(len(events) for events in received_events.values())
@@ -266,7 +266,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             
             # 1. All sessions should succeed independently
             for i, result in enumerate(results):
-                assert not isinstance(result, Exception), \
+                assert not isinstance(result, "Exception), \"
                     fUser {i} chat session failed: {result}
                 assert result["success] is True"
             
@@ -287,7 +287,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                 
                 # Each user should have exactly their own events
                 assert len(agent_started) >= 1, fUser {i} missing agent_started events""
-                assert len(agent_completed) >= 1, fUser {i} missing agent_completed events
+                assert len(agent_completed) >= 1, "fUser {i} missing agent_completed events"
                 
                 # Verify events belong to this user
                 for event in agent_started + agent_completed:
@@ -333,7 +333,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
         error_scenarios = [
             {
                 scenario: rate_limit_recovery,
-                "request: Analyze massive dataset (trigger rate limit)",
+                "request: Analyze massive dataset (trigger rate limit),"
                 expected_recovery: True,
                 max_retry_time: 30.0""
             },
@@ -488,7 +488,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                     performance_results.append({
                         user": i,"
                         success: True,
-                        duration": result["duration],
+                        duration": result[duration],"
                         latency: result[avg_latency]
                     }
             

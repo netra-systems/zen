@@ -114,7 +114,7 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
             # Log status
             status = ✅ COMPLIANT if is_compliant else ❌ NON-COMPLIANT"
             status = ✅ COMPLIANT if is_compliant else ❌ NON-COMPLIANT"
-            print(f"{status}: {file_path})")
+            print(f"{status}: {file_path}))"
             if not is_compliant:
                 print(f  Issues: {'; '.join(violation_details)})
 
@@ -169,14 +169,14 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
         return False
 
     def _report_validation_results(self):
-        ""Report validation results.
+        ""Report validation results."
         total_files = len(self.mission_critical_files)
         compliant_files = total_files - len(self.violations)
         compliance_rate = (compliant_files / total_files) * 100
 
-        print(\n + -"*70")
+        print(\n + -"*70)"
         print(SSOT MIGRATION VALIDATION RESULTS)
-        print(-"*70")
+        print(-"*70)"
         print(fTotal mission-critical files: {total_files})
         print(fSSOT compliant files: {compliant_files}"")
         print(fNon-compliant files: {len(self.violations)})

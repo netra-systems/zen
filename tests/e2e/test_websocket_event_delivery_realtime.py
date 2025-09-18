@@ -41,7 +41,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
-    ""
+    """
     E2E tests for WebSocket event delivery and real-time updates.
     Validates the mission-critical WebSocket events that enable chat business value.
     
@@ -53,11 +53,11 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
     
     @pytest.fixture
     async def authenticated_user(self, auth_helper):
-        ""Create authenticated user for WebSocket tests.
+        ""Create authenticated user for WebSocket tests."
         return await create_authenticated_user(
             environment=test,""
             email=websocket_test@example.com","
-            permissions=[read, write, "agent_execution, websocket_access"]
+            permissions=[read, write, "agent_execution, websocket_access]"
 
     #  ALERT:  CRITICAL: The 5 mandatory WebSocket events for chat business value
     MANDATORY_EVENTS = [
@@ -101,7 +101,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
         comprehensive_request = {
             type": agent_request, "
             agent: supervisor,
-            message": "Analyze my AI costs and provide optimization recommendations. I'm spending $3000/month on GPT-4 for 20,0 customer service requests.,'
+            message": Analyze my AI costs and provide optimization recommendations. I'm spending $3000/month on GPT-4 for 20,0 customer service requests.,'"
             context: {
                 requires_tools: True,  # Ensure tool execution""
                 comprehensive_analysis": True,"
@@ -161,7 +161,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                         print(f[U+23F0] Timeout waiting for events after {time.time() - start_time:.2f}s)
                         break
                     except json.JSONDecodeError as e:
-                        print(f" FAIL:  JSON decode error: {e}")
+                        print(f" FAIL:  JSON decode error: {e})"
                         continue
                     except Exception as e:
                         print(f FAIL:  Event collection error: {e})
@@ -186,14 +186,14 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
             if mandatory_event not in event_types:
                 missing_events.append(mandatory_event)
         
-        assert len(missing_events) == 0, fCRITICAL FAILURE: Missing mandatory events: {missing_events}
+        assert len(missing_events) == 0, "fCRITICAL FAILURE: Missing mandatory events: {missing_events}"
         print(f PASS:  All 5 mandatory events present!"")
         
         # Validate event ordering makes logical sense
         event_order = [e['type'] for e in all_events]
         
         # agent_started should be first
-        assert event_order[0] == 'agent_started', fFirst event should be agent_started, got: {event_order[0]}
+        assert event_order[0] == 'agent_started', "fFirst event should be agent_started, got: {event_order[0]}"
         
         # agent_completed should be last  
         assert event_order[-1] == 'agent_completed', fLast event should be agent_completed, got: {event_order[-1]}""
@@ -244,7 +244,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                     print(f PASS:  Business context validated: {found_indicators}"")
                     break
         
-        assert business_context_found, Final result lacks business context
+        assert business_context_found, "Final result lacks business context"
         
         print(f CELEBRATION:  MISSION CRITICAL TEST SUCCESS!"")
         print(f   [U+2713] All 5 mandatory WebSocket events delivered)
@@ -258,7 +258,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
     @pytest.mark.real_services
     @pytest.mark.real_llm
     async def test_websocket_event_isolation_multi_user(self, auth_helper):
-        ""
+        """
         Test WebSocket event isolation between multiple concurrent users.
         
         Business Scenario: Multiple users connected simultaneously should only
@@ -280,7 +280,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
             user_token, user_data = await create_authenticated_user(
                 environment=test,
                 email=fwebsocket_isolation_{i}_{int(time.time())}@example.com,
-                permissions=[read", "write, agent_execution]
+                permissions=[read", write, agent_execution]"
             users.append((user_token, user_data))
         
         print(f PASS:  Created {len(users)} users for isolation test")"
@@ -289,7 +289,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
         user_requests = [
             {
                 message": Help me optimize costs for e-commerce chatbot,"
-                context: {use_case: ecommerce", "user_marker: ECOMMERCE_USER}
+                context: {use_case: ecommerce", user_marker: ECOMMERCE_USER}"
             },
             {
                 message: Improve performance for healthcare diagnostics", "
@@ -297,7 +297,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
             },
             {
                 message: Scale content generation for media company,
-                context: {"use_case: content", user_marker: CONTENT_USER}
+                context: {"use_case: content, user_marker: CONTENT_USER}"
             }
         ]
         
@@ -310,7 +310,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
             session_result = {
                 "user_index: user_index,"""
                 user_id: user_data[id], 
-                user_email": user_data["email],
+                user_email": user_data[email],"
                 events_received: [],
                 mandatory_events_count: 0,""
                 completion_time": None,"
@@ -324,9 +324,9 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                     # Send user-specific request
                     request = {
                         type: agent_request,
-                        "agent: supervisor",
+                        "agent: supervisor,"
                         message: request_data[message],
-                        context: {**request_data[context"], "isolation_test: True},
+                        context: {**request_data[context"], isolation_test: True},"
                         user_id: user_data[id]
                     }
                     
@@ -361,7 +361,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                             
             except Exception as e:
                 session_result[error] = str(e)
-                print(f" FAIL:  User {user_index} session error: {e}")
+                print(f" FAIL:  User {user_index} session error: {e})"
             
             return session_result
         
@@ -392,7 +392,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
         #  ALERT:  CRITICAL: Validate event isolation - no cross-user contamination
         for i, session in enumerate(successful_sessions):
             user_events = session[events_received]
-            user_marker = user_requests[i]["context][user_marker"]
+            user_marker = user_requests[i]["context][user_marker]"
             
             print(f CHART:  User {i} ({session['user_email']}:)
             print(f   Events received: {len(user_events)})""
@@ -416,7 +416,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                         other_marker = user_requests[j][context]["user_marker].lower()"
                         other_use_case = user_requests[j][context"][use_case]"
                         
-                        assert other_marker.replace(_, ) not in result_text, \
+                        assert other_marker.replace(_, ") not in result_text, \"
                             fUser {i} contaminated with User {j} marker: {other_marker}""
                         
                         # Should not heavily discuss other use cases (some overlap acceptable)
@@ -441,7 +441,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
     @pytest.mark.real_services
     @pytest.mark.real_llm
     async def test_websocket_connection_stability(self, auth_helper, authenticated_user):
-        ""
+        """
         Test WebSocket connection stability under various conditions.
         
         Business Scenario: User maintains WebSocket connection during
@@ -455,7 +455,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
 
         token, user_data = authenticated_user
         
-        print(f"[U+1F680] Testing WebSocket connection stability")
+        print(f"[U+1F680] Testing WebSocket connection stability)"
         
         websocket_url = ws://localhost:8000/ws
         headers = auth_helper.get_websocket_headers(token)
@@ -500,12 +500,12 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                         
                         current_time = time.time()
                         event_gap = current_time - last_event_time
-                        connection_metrics[max_event_gap"] = max(connection_metrics["max_event_gap], event_gap)
+                        connection_metrics[max_event_gap"] = max(connection_metrics[max_event_gap], event_gap)"
                         connection_metrics[events_received] += 1
                         last_event_time = current_time
                         
                         print(f[U+1F4E8] Event #{connection_metrics['events_received']): {event['type'])  + 
-                              f(gap: {event_gap:.1f}s")")
+                              f(gap: {event_gap:.1f}s"))"
                         
                         if event['type'] == 'agent_completed':
                             connection_metrics[total_duration] = current_time - start_time
@@ -549,7 +549,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
     @pytest.mark.real_services
     @pytest.mark.real_llm
     async def test_websocket_event_payload_validation(self, auth_helper, authenticated_user):
-    ""
+    """
         Test WebSocket event payload structure and content validation.
         
         Business Scenario: Events must contain proper structure and
@@ -569,7 +569,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
         headers = auth_helper.get_websocket_headers(token)
         
         payload_request = {
-            type": "agent_request,
+            type": agent_request,"
             agent: supervisor,
             message: "Analyze AI costs for customer service chatbot - currently spending $2000/month on 30,0 requests with GPT-4,"
             context": {"
@@ -655,25 +655,25 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
         for event_type, results in event_validation_results.items("):"
             results[avg_payload_size"] = results[avg_payload_size] / results[count]"
             
-            print(f"   {event_type}:")
+            print(f"   {event_type}:)"
             print(f     Count: {results['count']})
-            print(f"     Has type field: {results['has_type']}")
+            print(f"     Has type field: {results['has_type']})"
             print(f     Has timestamp: {results['has_timestamp']})
-            print(f"     Has data: {results['has_data']}")
+            print(f"     Has data"": {"results['has_data']"})"
             print(f     Avg payload size: {results['avg_payload_size']:.0f} bytes)
-            print(f"     Business context: {results['business_context_found']}")
+            print(f"     Business context: {results['business_context_found']})"
             
             # Validation assertions
-            assert results[has_type], f{event_type} missing required 'type' field
+            assert results[has_type], "f{event_type} missing required 'type' field"
             
             # agent_completed must have substantial data with business context
             if event_type == 'agent_completed':
-                assert results[has_data], f{event_type} must have 'data' field
-                assert results[business_context_found"], f"{event_type} must contain business context
-                assert results[avg_payload_size] > 100, f{event_type} payload too small: {results['avg_payload_size']} bytes
+                assert results[has_data], "f{event_type} must have 'data' field"
+                assert results[business_context_found"], f{event_type} must contain business context"
+                assert results[avg_payload_size] > 100, "f{event_type} payload too small: {results['avg_payload_size']} bytes"
             
             # Payload size should be reasonable (not too large)
-            assert results[avg_payload_size] < 50000, f{event_type} payload too large: {results['avg_payload_size']} bytes
+            assert results[avg_payload_size] < 50000, "f{event_type} payload too large: {results['avg_payload_size']} bytes"
         
         # Validate we have the mandatory events with proper payloads
         found_mandatory = set(event_validation_results.keys()).intersection(set(self.MANDATORY_EVENTS))
@@ -734,11 +734,11 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
             try:
                 async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
                     request = {
-                        "type: agent_request",
+                        "type: agent_request,"
                         agent: supervisor,
                         message: fQuick cost optimization for user {user_index} - need basic recommendations","
                         "context: {user_index: user_index, load_test: True},"""
-                        user_id": user_data["id]
+                        user_id": user_data[id]"
                     }
                     
                     start_time = time.time()
@@ -819,7 +819,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
             print(f"   Avg mandatory events: {avg_mandatory:.1f})"
             
             # Performance criteria
-            assert avg_response_time < 20, fAverage response time too slow under load: {avg_response_time:.2f}s
+            assert avg_response_time < 20, "fAverage response time too slow under load: {avg_response_time:.2f}s"
             assert max_response_time < 40, f"Max response time too slow under load: {max_response_time:.2f}s"
             assert avg_mandatory >= 3, fToo few mandatory events under load: {avg_mandatory:.1f}""
         

@@ -102,7 +102,7 @@ class ChaosEvent:
 
 
 class ChaosWebSocketClient:
-    ""WebSocket client that simulates network chaos.
+    ""WebSocket client that simulates network chaos."
 
     def __init__(self, user_id: str, chaos_config: Dict[str, Any):
         self.user_id = user_id
@@ -279,7 +279,7 @@ class ChaosWebSocketClient:
                 pass
 
     async def _auto_reconnect(self):
-        ""Automatic reconnection with exponential backoff.
+        ""Automatic reconnection with exponential backoff."
         retry_count = 0
         max_retries = 5
 

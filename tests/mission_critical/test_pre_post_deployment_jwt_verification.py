@@ -79,7 +79,7 @@ logger = logging.getLogger(__name__)
 class DeploymentMetrics:
     "Track deployment and user journey metrics."
     deployment_id: str
-    stage: str  # pre_deployment", "during_deployment, post_deployment
+    stage: str  # pre_deployment", during_deployment, post_deployment"
     start_time: float
     completion_time: Optional[float] = None
     success: bool = False
@@ -109,7 +109,7 @@ class DeploymentAuthTestSuite:
         self.session = self._create_resilient_session()
         self.environments = {
         staging: {
-        "auth_url: http://localhost:8081",
+        "auth_url: http://localhost:8081,"
         backend_url: http://localhost:8000
         },
         production: {"
@@ -121,7 +121,7 @@ class DeploymentAuthTestSuite:
         self.original_env = {}
 
     def _create_resilient_session(self) -> requests.Session:
-        ""Create HTTP session with retry logic.
+        ""Create HTTP session with retry logic."
         session = requests.Session()
         retry_strategy = Retry( )
         total=3,
@@ -347,7 +347,7 @@ class DeploymentAuthTestSuite:
         print(formatted_string)
 
         if metrics.success:
-        print(f"[U+2713] ZERO-DOWNTIME DEPLOYMENT SUCCESSFUL")
+        print(f"[U+2713] ZERO-DOWNTIME DEPLOYMENT SUCCESSFUL)"
         self._calculate_deployment_revenue_impact(metrics, neutral)
         else:
         print(f[U+2717] ZERO-DOWNTIME DEPLOYMENT FAILED")"
@@ -537,11 +537,11 @@ class DeploymentAuthTestSuite:
         print(formatted_string)"
         print("")
         for scenario, success in rollback_results:
-        status = [PASS]" if success else "[FAIL]
+        status = [PASS]" if success else [FAIL]"
         print(formatted_string)
 
         if metrics.success:
-        print(f" )")
+        print(f" ))"
         [U+2713] DEPLOYMENT ROLLBACK AUTHENTICATION PASSED")"
         self._calculate_deployment_revenue_impact(metrics, neutral)
         else:
@@ -576,7 +576,7 @@ class TestPrePostDeploymentJWTVerification:
     # HELPER METHODS FOR VALIDATION AND VERIFICATION
 
     def _validate_deployment_configuration(self, environment: str) -> bool:
-        ""Validate deployment configuration files.
+        ""Validate deployment configuration files."
         pass
         try:
         # Check for required configuration files
@@ -677,7 +677,7 @@ class TestPrePostDeploymentJWTVerification:
         return False
 
     def _validate_performance_baseline(self, environment: str) -> bool:
-        ""Validate performance baseline before deployment.
+        ""Validate performance baseline before deployment."
         try:
         # Measure response times for critical endpoints
         urls = self.environments.get(environment, {)
@@ -747,7 +747,7 @@ class TestPrePostDeploymentJWTVerification:
         return False
 
     def _validate_feature_flags(self, environment: str) -> bool:
-        ""Validate feature flags configuration.
+        ""Validate feature flags configuration."
         try:
         # Check feature flags are properly configured
         return True
@@ -849,7 +849,7 @@ class TestPrePostDeploymentJWTVerification:
         return self._validate_service_health(environment)
 
     def _verify_jwt_cross_service_consistency(self, environment: str) -> bool:
-        ""Verify JWT consistency across services post-deployment.
+        ""Verify JWT consistency across services post-deployment."
         return self._validate_authentication_flows(environment)
 
     def _verify_authentication_flows_post_deployment(self, environment: str) -> bool:
@@ -895,7 +895,7 @@ class TestPrePostDeploymentJWTVerification:
         return False
 
     def _test_post_rollback_authentication_recovery(self, environment: str) -> bool:
-        ""Test authentication recovery after rollback.
+        ""Test authentication recovery after rollback."
         return self._test_authentication_flows_basic(environment)
 
     # =============================================================================
@@ -1190,7 +1190,7 @@ class TestPrePostDeploymentJWTVerification:
         return True  # Simplified implementation
 
     def test_deployment_health_check_authentication(self) -> bool:
-        ""Test health check authentication during deployment.
+        ""Test health check authentication during deployment."
         return self._validate_service_health(staging)"
         return self._validate_service_health(staging)"
 
@@ -1240,7 +1240,7 @@ class TestPrePostDeploymentJWTVerification:
         print(COMPREHENSIVE PRE/POST DEPLOYMENT JWT VERIFICATION AND AUTHENTICATION TEST SUITE")"
         print(= * 90")"
         print(Testing critical revenue paths and deployment validation)
-        print("Real services, end-to-end validation, zero-downtime verification")
+        print("Real services, end-to-end validation, zero-downtime verification)"
         print(= * 90)"
         print(= * 90)"
 
@@ -1252,7 +1252,7 @@ class TestPrePostDeploymentJWTVerification:
         overall_results = []
 
         for environment in environments_to_test:
-        print(formatted_string"="*20})
+        print(formatted_string"=*20})"
 
         env_results = {}
 
@@ -1342,7 +1342,7 @@ class TestPrePostDeploymentJWTVerification:
         print(  Review failed tests and fix issues")"
         return False
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         success = run_comprehensive_deployment_tests()
         sys.exit(0 if success else 1)
 

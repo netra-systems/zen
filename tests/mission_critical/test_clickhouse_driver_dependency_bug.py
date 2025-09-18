@@ -59,7 +59,7 @@ except ImportError as e:
     if 'clickhouse_driver' in str(e):
     code_uses_driver = True  # Code tries to import it but its missing
 
-print(f" )")
+print(f" ))"
 Code import analysis:)
 print(formatted_string)
 print("")
@@ -68,7 +68,7 @@ print("")
 if code_uses_driver and not has_clickhouse_driver:
     print()
 [X] MISMATCH DETECTED:)
-print("  Code uses clickhouse_driver but requirements.txt doesn"t include it!)
+print("  Code uses clickhouse_driver but requirements.txt doesnt include it!)"
 print(  Requirements has 'clickhouse-connect' instead (different library)")"
 return False
 
@@ -84,7 +84,7 @@ print(Testing if both ClickHouse libraries are different...)
 
     # Check installed packages
 result = subprocess.run( )
-[sys.executable, -m, "pip", list, --format=json],
+[sys.executable, -m, "pip, list, --format=json],"
 capture_output=True,
 text=True
     
@@ -121,7 +121,7 @@ return True
 def main():
     "Run all tests to reproduce the bug."
 pass
-print(="*60")
+print(="*60)"
 print(ClickHouse Driver Dependency Bug Reproduction Test)"
 print(ClickHouse Driver Dependency Bug Reproduction Test)"
 print(="*60)"
@@ -157,7 +157,7 @@ else:
 Root Cause:)
 print(  1. Code imports 'clickhouse_driver' (native driver""))
 print(  2. Requirements specifies 'clickhouse-connect' (different library))
-print("  3. These are two completely different ClickHouse Python clients")
+print("  3. These are two completely different ClickHouse Python clients)"
 print()"
 print()"
 Fix Required:")"
@@ -168,5 +168,5 @@ return 1
 return 0
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     exit(main())

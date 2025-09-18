@@ -41,7 +41,7 @@ class WebSocketStateSerializationIntegrationTests:
         mock_ws.client = Mock()
         mock_ws.client.host = 127.0.0.1
         mock_ws.client.port = 12345
-        mock_ws.headers = {authorization": "Bearer test_token}
+        mock_ws.headers = {authorization": Bearer test_token}"
         return mock_ws
 
     @pytest.mark.asyncio
@@ -89,7 +89,7 @@ class WebSocketStateSerializationIntegrationTests:
         # Test connection validation (includes state logging)
         with patch.object(pool, '_validate_websocket_for_pool', return_value=True) as mock_validate:
             # Add connection to pool
-            success = pool.add_connection(test_user", "conn_123, mock_websocket)
+            success = pool.add_connection(test_user", conn_123, mock_websocket)"
             
             # Should succeed without JSON serialization errors
             assert mock_validate.called
@@ -103,7 +103,7 @@ class WebSocketStateSerializationIntegrationTests:
         log_context = {
             "event: websocket_connection,"
             connection_id: conn_123,
-            "user_id: user_456", 
+            "user_id: user_456, "
             websocket_client_state: _safe_websocket_state_for_logging(mock_websocket.client_state),
             websocket_application_state: _safe_websocket_state_for_logging(mock_websocket.application_state),"
             websocket_application_state: _safe_websocket_state_for_logging(mock_websocket.application_state),"
@@ -132,7 +132,7 @@ class WebSocketStateSerializationIntegrationTests:
         
         # Simulate error logging context
         error_log = {
-            "error: WebSocket operation failed",
+            "error: WebSocket operation failed,"
             state: _safe_websocket_state_for_logging(state),
             details: {"
             details: {"
@@ -161,19 +161,19 @@ class GCPCloudRunCompatibilityTests:
         
         # Simulate GCP Cloud Run structured log entry
         gcp_log_entry = {
-            "severity: INFO",
+            "severity: INFO,"
             message: WebSocket connection established,
             timestamp: 2025-9-08T12:0:0.000Z","
             "labels: {"
                 service: netra-backend,
-                version": "1.0.0
+                version": 1.0.0"
             },
             jsonPayload: {
                 websocket_state: _safe_websocket_state_for_logging(WebSocketState.CONNECTED),"
                 websocket_state: _safe_websocket_state_for_logging(WebSocketState.CONNECTED),"
                 connection_id": conn_12345,"
                 user_id: user_67890,
-                event_type": "websocket_connected
+                event_type": websocket_connected"
             }
         }
         
@@ -192,14 +192,14 @@ class GCPCloudRunCompatibilityTests:
         
         # Simulate the error context that was causing 1011 errors
         error_context = {
-            @type": "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent,
+            @type": type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent,"
             eventTime: 2025-9-08T12:0:0.000Z,
             serviceContext: {"
             serviceContext: {"
                 "service: netra-backend,"
                 version: 1.0.0
             },
-            "message: WebSocket state serialization error",
+            "message: WebSocket state serialization error,"
             context: {
                 httpRequest: {"
                 httpRequest: {"
@@ -261,7 +261,7 @@ class RegressionPreventionTests:
         
         assert safe_state == connected"
         assert safe_state == connected"
-        assert isinstance(safe_state, str)
+        assert isinstance(safe_state, "str)"
 
     @pytest.mark.parametrize("problematic_state, ["
         WebSocketState.CONNECTING,
@@ -279,8 +279,8 @@ class RegressionPreventionTests:
         contexts = [
             {state: safe_state},
             {error: f"Connection failed in state: {safe_state}},"
-            {debug: f"State transition: {safe_state}"},"
-            {debug: f"State transition: {safe_state}"},"
+            {debug: f"State transition: {safe_state}},""
+            {debug: f"State transition: {safe_state}},""
             [safe_state],  # Even in arrays
             safe_state     # Even standalone
         ]

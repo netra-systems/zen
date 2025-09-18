@@ -28,11 +28,11 @@ class AuthServicePortValidator:
     async def validate_auth_service_accessibility(self) -> Dict[str, Any]:
         """Test that auth service is accessible on the correct port."""
         result = { }
-        "port": self.correct_port,
-        "accessible": False,
-        "health_status": None,
-        "response_time_ms": None,
-        "error": None
+        "port: self.correct_port,"
+        "accessible: False,"
+        "health_status: None,"
+        "response_time_ms: None,"
+        "error: None"
     
 
         try:
@@ -40,21 +40,21 @@ class AuthServicePortValidator:
         start_time = time.time()
 
         async with httpx.AsyncClient(timeout=10.0) as client:
-        response = await client.get("formatted_string")
+        response = await client.get("formatted_string)"
 
-        result["response_time_ms"] = (time.time() - start_time) * 1000
-        result["accessible"] = True
-        result["health_status"] = response.status_code
+        result["response_time_ms] = (time.time() - start_time) * 1000"
+        result["accessible] = True"
+        result["health_status] = response.status_code"
 
         if response.status_code == 200:
         response_data = response.json()
                 # Verify this is actually the auth service
-        service_name = response_data.get("service", "").lower()
-        if "auth" in service_name:
-        result["verified_auth_service"] = True
+        service_name = response_data.get("service", ").lower()"
+        if "auth in service_name:"
+        result["verified_auth_service] = True"
         else:
-        result["verified_auth_service"] = False
-        result["actual_service"] = service_name
+        result["verified_auth_service] = False"
+        result["actual_service] = service_name"
         else:
         result["error"] = ""
 
@@ -70,9 +70,9 @@ class AuthServicePortValidator:
     async def validate_auth_endpoints(self) -> Dict[str, Any]:
         """Validate that key auth endpoints are available."""
         endpoints = { }
-        "/health": "Health check endpoint",
-        "/": "Root endpoint",
-        "/oauth/google": "Google OAuth endpoint",
+        "/health": "Health check endpoint,"
+        "/": "Root endpoint,"
+        "/oauth/google": "Google OAuth endpoint,"
         "/oauth/google/callback": "Google OAuth callback"
     
 
@@ -81,27 +81,27 @@ class AuthServicePortValidator:
         async with httpx.AsyncClient(timeout=5.0) as client:
         for endpoint, description in endpoints.items():
         endpoint_result = { }
-        "description": description,
-        "accessible": False,
-        "status_code": None,
-        "error": None
+        "description: description,"
+        "accessible: False,"
+        "status_code: None,"
+        "error: None"
             
 
         try:
-        response = await client.get("formatted_string")
-        endpoint_result["accessible"] = True
-        endpoint_result["status_code"] = response.status_code
+        response = await client.get("formatted_string)"
+        endpoint_result["accessible] = True"
+        endpoint_result["status_code] = response.status_code"
 
                 # For OAuth endpoints, redirects (302) are expected
-        if endpoint.startswith("/oauth") and response.status_code in [302, 307, 308]:
-        endpoint_result["expected_redirect"] = True
+        if endpoint.startswith("/oauth) and response.status_code in [302, 307, 308]:"
+        endpoint_result["expected_redirect] = True"
 
         except httpx.ConnectError:
         endpoint_result["error"] = "Connection refused"
         except httpx.TimeoutException:
         endpoint_result["error"] = "Timeout"
         except Exception as e:
-        endpoint_result["error"] = str(e)
+        endpoint_result["error] = str(e)"
 
         results[endpoint] = endpoint_result
 
@@ -129,7 +129,7 @@ print(f" )"
 print("")
 print("")
 print("")
-print("" if result['response_time_ms'] else "N/A")
+print("" if result['response_time_ms'] else "N/A)"
 
 if result['error']:
     print("")
@@ -244,13 +244,13 @@ response_range = max_response_time - min_response_time
 assert response_range < 3000, ""
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
 async def main():
 pass
 validator = AuthServicePortValidator()
 
-print("=== AUTH SERVICE PORT VALIDATION ===")
+print("=== AUTH SERVICE PORT VALIDATION ===)"
 result = await validator.validate_auth_service_accessibility()
 print("")
 

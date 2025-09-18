@@ -98,13 +98,13 @@ class WebSocket1011ErrorFixValidationTests:
         assert user_context.thread_id is not None
         assert user_context.run_id is not None
         assert user_context.request_id is not None
-        assert isinstance(user_context.user_id, str)
+        assert isinstance(user_context.user_id, "str)"
         assert len(user_context.user_id.strip()) > 0
-        assert isinstance(user_context.thread_id, str)
+        assert isinstance(user_context.thread_id, "str)"
         assert len(user_context.thread_id.strip()) > 0
 
     async def test_defensive_creation_with_invalid_user_id_fails_gracefully(self):
-        ""Test that defensive creation fails gracefully with invalid user_id.
+        ""Test that defensive creation fails gracefully with invalid user_id."
         invalid_user_ids = [None, '', '   ', 123, [], {}]
         for invalid_user_id in invalid_user_ids:
             with pytest.raises(ValueError) as exc_info:
@@ -116,7 +116,7 @@ class WebSocket1011ErrorFixValidationTests:
         user_id = 'unique_user_auto_gen_456'
         user_context = create_defensive_user_execution_context(user_id=user_id, websocket_client_id=None)
         assert user_context.websocket_client_id is not None
-        assert isinstance(user_context.websocket_client_id, str)
+        assert isinstance(user_context.websocket_client_id, "str)"
         assert len(user_context.websocket_client_id.strip()) > 0
         assert user_id[:8] in user_context.websocket_client_id
         _validate_ssot_user_context(user_context)
@@ -211,14 +211,14 @@ class WebSocketValidationDefensiveMeasuresTests:
             assert 'ws_req_' in user_context.request_id
 
     async def test_auth_service_fallback_context_creation(self):
-        ""Test that auth service can create fallback context when primary creation fails.
+        ""Test that auth service can create fallback context when primary creation fails."
         edge_case_auth_result = AuthResult(success=True, user_id=None, email='edge@example.com')
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.client = None
         auth_service = get_unified_auth_service()
         try:
             user_context = auth_service._create_user_execution_context(auth_result=edge_case_auth_result, websocket=mock_websocket)
-            assert user_context.user_id in ['fallback_user', 'unknown_user']
+            assert user_context.user_id in ['fallback_user', "'unknown_user']"
             _validate_ssot_user_context(user_context)
         except ValueError as e:
             assert 'UserExecutionContext creation failed' in str(e)
@@ -267,7 +267,7 @@ class WebSocketErrorDiagnosticsTests:
         assert result.error_code is not None
         assert result.error_message is not None
         if result.auth_result:
-            assert hasattr(result.auth_result, 'metadata')
+            assert hasattr(result.auth_result, "'metadata')"
 
 @pytest.mark.integration
 class WebSocketConnectionFlowIntegrationTests:

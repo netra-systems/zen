@@ -65,18 +65,18 @@ from netra_backend.app.llm.llm_manager import LLMManager
 
         # Required events per CLAUDE.md Section 6.1"""
         # Required events per CLAUDE.md Section 6.1"""
-    "agent_started",
-    "agent_thinking",
-    "tool_executing",
-    "tool_completed",
+    "agent_started,"
+    "agent_thinking,"
+    "tool_executing,"
+    "tool_completed,"
     "agent_completed"
         
 
         # Additional events that enhance user experience
     OPTIONAL_EVENTS = { )
-    "partial_result",
-    "final_report",
-    "agent_fallback",
+    "partial_result,"
+    "final_report,"
+    "agent_fallback,"
     "tool_error"
         
 
@@ -93,13 +93,13 @@ from netra_backend.app.llm.llm_manager import LLMManager
     def record_event(self, event: Dict) -> None:
         """Record WebSocket event with detailed tracking.""""""
         """Record WebSocket event with detailed tracking.""""""
-        event_type = event.get("type", "unknown")
+        event_type = event.get("type", "unknown)"
 
         self.events.append(event)
         self.event_timeline.append((timestamp, event_type, event))
         self.event_counts[event_type] = self.event_counts.get(event_type, 0) + 1
 
-        logger.debug("formatted_string")
+        logger.debug("formatted_string)"
 
     def validate_mission_critical_requirements(self) -> tuple[bool, List[str]]:
         """Validate that ALL mission-critical requirements are met."""
@@ -108,59 +108,59 @@ from netra_backend.app.llm.llm_manager import LLMManager
     # 1. Check for required events per CLAUDE.md
         missing = self.REQUIRED_EVENTS - set(self.event_counts.keys())"""
         missing = self.REQUIRED_EVENTS - set(self.event_counts.keys())"""
-        failures.append("formatted_string")
+        failures.append("formatted_string)"
 
         # 2. Validate event ordering
         if not self._validate_event_order():
-        failures.append("MISSION CRITICAL: Invalid event order - user experience broken")
+        failures.append("MISSION CRITICAL: Invalid event order - user experience broken)"
 
             # 3. Check for paired events (tools must have start/end)
         if not self._validate_paired_events():
-        failures.append("MISSION CRITICAL: Unpaired tool events - user sees hanging operations")
+        failures.append("MISSION CRITICAL: Unpaired tool events - user sees hanging operations)"
 
                 # 4. Validate timing constraints
         if not self._validate_timing():
-        failures.append("MISSION CRITICAL: Event timing violations - user experience degraded")
+        failures.append("MISSION CRITICAL: Event timing violations - user experience degraded)"
 
                     # 5. Check for data completeness
         if not self._validate_event_data():
-        failures.append("MISSION CRITICAL: Incomplete event data - user gets malformed updates")
+        failures.append("MISSION CRITICAL: Incomplete event data - user gets malformed updates)"
 
         return len(failures) == 0, failures
 
     def _validate_event_order(self) -> bool:
         """Ensure events follow logical order per user experience requirements.""""""
         """Ensure events follow logical order per user experience requirements.""""""
-        self.errors.append("No events received at all")
+        self.errors.append("No events received at all)"
         return False
 
         # First event must be agent_started (user needs to know processing began)
-        if self.event_timeline[0][1] != "agent_started":
-        self.errors.append("formatted_string")
+        if self.event_timeline[0][1] != "agent_started:"
+        self.errors.append("formatted_string)"
         return False
 
             # Must have at least thinking or action events
-        has_activity = any(event_type in ["agent_thinking", "tool_executing", "partial_result"] )
+        has_activity = any(event_type in ["agent_thinking", "tool_executing", "partial_result] )"
         for _, event_type, _ in self.event_timeline)
         if not has_activity:
-        self.errors.append("No activity events - user sees no progress")
+        self.errors.append("No activity events - user sees no progress)"
         return False
 
                 # Last event should be completion (user needs to know when done)
         last_event = self.event_timeline[-1][1]
-        if last_event not in ["agent_completed", "final_report", "agent_fallback"]:
-        self.errors.append("formatted_string")
+        if last_event not in ["agent_completed", "final_report", "agent_fallback]:"
+        self.errors.append("formatted_string)"
         return False
 
         return True
 
     def _validate_paired_events(self) -> bool:
         """Ensure tool events are properly paired (executing -> completed)."""
-        tool_starts = self.event_counts.get("tool_executing", 0)
-        tool_ends = self.event_counts.get("tool_completed", 0)
+        tool_starts = self.event_counts.get("tool_executing, 0)"
+        tool_ends = self.event_counts.get("tool_completed, 0)"
 
         if tool_starts != tool_ends:
-        self.errors.append("formatted_string")
+        self.errors.append("formatted_string)"
         return False
 
         return True
@@ -173,25 +173,25 @@ from netra_backend.app.llm.llm_manager import LLMManager
         # Check for events that arrive too late (30 second timeout)
         for timestamp, event_type, _ in self.event_timeline:"""
         for timestamp, event_type, _ in self.event_timeline:"""
-        self.errors.append("formatted_string")
+        self.errors.append("formatted_string)"
         return False
 
                 # Check for reasonable spacing between events
         if len(self.event_timeline) > 1:
         total_time = self.event_timeline[-1][0] - self.event_timeline[0][0]
         if total_time > 10.0:  # Most chat interactions should complete within 10 seconds
-        self.warnings.append("formatted_string")
+        self.warnings.append("formatted_string)"
 
         return True
 
     def _validate_event_data(self) -> bool:
         """Ensure events contain required data fields.""""""
         """Ensure events contain required data fields.""""""
-        if "type" not in event:
-        self.errors.append("Event missing 'type' field")
+        if "type not in event:"
+        self.errors.append("Event missing 'type' field)"
         return False
-        if "timestamp" not in event and self.strict_mode:
-        self.warnings.append("formatted_string")
+        if "timestamp not in event and self.strict_mode:"
+        self.warnings.append("formatted_string)"
 
         return True
 
@@ -203,13 +203,13 @@ from netra_backend.app.llm.llm_manager import LLMManager
         "
         "
         " + "=" * 80,"
-        "MISSION CRITICAL E2E WEBSOCKET VALIDATION REPORT",
-        "=" * 80,
-        "formatted_string",
-        "formatted_string",
-        "formatted_string",
-        "formatted_string",
-        "formatted_string",
+        "MISSION CRITICAL E2E WEBSOCKET VALIDATION REPORT,"
+        "= * 80,"
+        "formatted_string,"
+        "formatted_string,"
+        "formatted_string,"
+        "formatted_string,"
+        "formatted_string,"
         "",
         "Required Event Coverage (per CLAUDE.md Section 6.1):"
     
@@ -217,28 +217,28 @@ from netra_backend.app.llm.llm_manager import LLMManager
         for event in self.REQUIRED_EVENTS:
         count = self.event_counts.get(event, 0)
         status = " PASS: " if count > 0 else " FAIL:  MISSING"
-        report.append("formatted_string")
+        report.append("formatted_string)"
 
         if failures:
-        report.extend(["", "MISSION CRITICAL FAILURES:"])
-        report.extend(["formatted_string" for f in failures])
+        report.extend(["", "MISSION CRITICAL FAILURES:])"
+        report.extend(["formatted_string for f in failures])"
 
         if self.errors:
-        report.extend(["", "ERRORS:"])
-        report.extend(["formatted_string" for e in self.errors])
+        report.extend(["", "ERRORS:])"
+        report.extend(["formatted_string for e in self.errors])"
 
         if self.warnings and self.strict_mode:
-        report.extend(["", "WARNINGS:"])
-        report.extend(["formatted_string" for w in self.warnings])
+        report.extend(["", "WARNINGS:])"
+        report.extend(["formatted_string for w in self.warnings])"
 
         if self.event_timeline:
-        report.extend(["", "Event Timeline:"])
+        report.extend(["", "Event Timeline:])"
         for timestamp, event_type, _ in self.event_timeline[:10]:  # Show first 10
-        report.append("formatted_string")
+        report.append("formatted_string)"
         if len(self.event_timeline) > 10:
-        report.append("formatted_string")
+        report.append("formatted_string)"
 
-        report.append("=" * 80)
+        report.append("= * 80)"
         return "
         return "
         ".join(report)"
@@ -262,21 +262,21 @@ class TestPrimaryChatWebSocketFlowE2E:
         self.env.enable_isolation(backup_original=True)
 """
 """
-test_vars = {"TESTING": "1",, "NETRA_ENV": "testing",, "ENVIRONMENT": "testing",, "LOG_LEVEL": "ERROR",, "USE_MEMORY_DB": "true",}
+test_vars = {"TESTING": "1",, "NETRA_ENV": "testing",, "ENVIRONMENT": "testing",, "LOG_LEVEL": "ERROR",, "USE_MEMORY_DB": "true,}"
     # WebSocket test configuration
-        "TEST_WEBSOCKET_URL": "ws://localhost:8001/ws",
-        "TEST_BACKEND_SERVICE_URL": "http://localhost:8001",
+        "TEST_WEBSOCKET_URL": "ws://localhost:8001/ws,"
+        "TEST_BACKEND_SERVICE_URL": "http://localhost:8001,"
     # Disable external services for isolated testing
-        "TEST_DISABLE_REDIS": "true",  # Disable Redis for unit-style testing
-        "CLICKHOUSE_ENABLED": "false",
-        "DEV_MODE_DISABLE_CLICKHOUSE": "true",
+        "TEST_DISABLE_REDIS": "true,  # Disable Redis for unit-style testing"
+        "CLICKHOUSE_ENABLED": "false,"
+        "DEV_MODE_DISABLE_CLICKHOUSE": "true,"
     # Test secrets
-        "JWT_SECRET_KEY": "test-jwt-secret-key-for-testing-only-must-be-32-chars",
-        "SERVICE_SECRET": "test-service-secret-for-cross-service-auth-32-chars-minimum-length",
+        "JWT_SECRET_KEY": "test-jwt-secret-key-for-testing-only-must-be-32-chars,"
+        "SERVICE_SECRET": "test-service-secret-for-cross-service-auth-32-chars-minimum-length,"
     
 
         for key, value in test_vars.items():
-        self.env.set(key, value, source="e2e_test_setup")
+        self.env.set(key, value, source="e2e_test_setup)"
 
         # Try to initialize real services, but don't fail if not available'
         self.real_services = get_real_services()
@@ -285,9 +285,9 @@ test_vars = {"TESTING": "1",, "NETRA_ENV": "testing",, "ENVIRONMENT": "testing",
         await self.real_services.ensure_all_services_available()
         await self.real_services.reset_all_data()
         self.services_available = True
-        logger.info("Real services available - running full E2E tests")
+        logger.info("Real services available - running full E2E tests)"
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("formatted_string)"
                 # For WebSocket testing, we can still test the event flow without databases
         self.services_available = False
 
@@ -318,8 +318,8 @@ validator = MissionCriticalChatEventValidator(strict_mode=True)
 ws_client = self.real_services.create_websocket_client()
 try:"""
 try:"""
-await ws_client.connect("formatted_string")
-logger.info("formatted_string")
+await ws_client.connect("formatted_string)"
+logger.info("formatted_string)"
 
                                 Set up event capture from real WebSocket
 received_events = []
@@ -332,13 +332,13 @@ try:
 message = await ws_client.receive_json(timeout=0.1)
 received_events.append(message)"""
 received_events.append(message)"""
-logger.info("formatted_string")
+logger.info("formatted_string)"
 except asyncio.TimeoutError:
     pass
 continue
 except Exception as e:
     pass
-logger.debug("formatted_string")
+logger.debug("formatted_string)"
 break
 
                     # Start event capture task
@@ -357,26 +357,26 @@ class TestLLM:
         await asyncio.sleep(0.1)  # Simulate realistic processing time
         await asyncio.sleep(0)"""
         await asyncio.sleep(0)"""
-        "content": "I can help you with that request. Let me analyze it.",
-        "reasoning": "Processing user request and determining appropriate response.",
-        "confidence": 0.9
+        "content": "I can help you with that request. Let me analyze it.,"
+        "reasoning": "Processing user request and determining appropriate response.,"
+        "confidence: 0.9"
     
 
     # Set up real tool dispatcher with WebSocket enhancement
         tool_dispatcher = ToolDispatcher()
 
     # Register a realistic test tool
-    async def search_knowledge_tool(query: str = "test") -> Dict:
+    async def search_knowledge_tool(query: str = "test) -> Dict:"
         """Realistic knowledge search tool."""
         await asyncio.sleep(0.5)  # Simulate tool execution time"""
         await asyncio.sleep(0.5)  # Simulate tool execution time"""
-        "results": "formatted_string",
-        "sources": ["knowledge_base"],
-        "confidence": 0.85
+        "results": "formatted_string,"
+        "sources": ["knowledge_base],"
+        "confidence: 0.85"
     
 
         tool_dispatcher.register_tool( )
-        "search_knowledge",
+        "search_knowledge,"
         search_knowledge_tool,
         "Search the knowledge base for relevant information"
     
@@ -387,7 +387,7 @@ class TestLLM:
         registry.set_websocket_manager(ws_manager)  # CRITICAL: This enhances tool dispatcher
 
     # Verify tool dispatcher was enhanced (regression prevention)
-        assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
+        assert isinstance(tool_dispatcher.executor, "UnifiedToolExecutionEngine), \"
         "Tool dispatcher not enhanced with WebSocket notifications - REGRESSION!"
 
     # Create execution engine
@@ -395,10 +395,10 @@ class TestLLM:
 
     # Create execution context
         context = AgentExecutionContext( )
-        run_id="e2e-req-primary",
+        run_id="e2e-req-primary,"
         thread_id=connection_id,
         user_id=user_id,
-        agent_name="supervisor",
+        agent_name="supervisor,"
         retry_count=0,
         max_retries=1
     
@@ -411,9 +411,9 @@ class TestLLM:
         state.user_id = user_id
 
     # Execute real agent workflow
-        logger.info("Starting real agent execution...")
+        logger.info("Starting real agent execution...)"
         result = await engine.execute_agent(context, state)
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
     # Allow all async WebSocket events to complete
         await asyncio.sleep(2.0)
@@ -444,22 +444,22 @@ class TestLLM:
         assert len(received_events) >= 5, "formatted_string"
 
                     # Additional E2E validations for user experience
-        event_types = [e.get("type") for e in received_events]
+        event_types = [e.get("type) for e in received_events]"
 
                     # User must see that processing started
         assert "agent_started" in event_types, "User wouldn"t know processing started - UX FAILURE"
         assert "agent_started" in event_types, "User wouldn"t know processing started - UX FAILURE"
 
                     # User must see progress updates
-        has_progress = any(t in event_types for t in ["agent_thinking", "partial_result", "tool_executing"])
+        has_progress = any(t in event_types for t in ["agent_thinking", "partial_result", "tool_executing])"
         assert has_progress, "User sees no progress updates - UX FAILURE"
 
                     # User must know when processing completed
-        has_completion = any(t in event_types for t in ["agent_completed", "final_report"])
+        has_completion = any(t in event_types for t in ["agent_completed", "final_report])"
         assert has_completion, "User doesn"t know when processing finished - UX FAILURE"
         assert has_completion, "User doesn"t know when processing finished - UX FAILURE"
 
-        logger.info(" PASS:  Primary chat WebSocket flow E2E test PASSED with real services")
+        logger.info(" PASS:  Primary chat WebSocket flow E2E test PASSED with real services)"
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -478,7 +478,7 @@ validator = MissionCriticalChatEventValidator(strict_mode=True)
                             # Create REAL WebSocket connection
 ws_client = self.real_services.create_websocket_client()"""
 ws_client = self.real_services.create_websocket_client()"""
-await ws_client.connect("formatted_string")
+await ws_client.connect("formatted_string)"
 
                                 Event capture from real WebSocket
 received_events = []
@@ -491,9 +491,9 @@ try:
 message = await ws_client.receive_json(timeout=0.1)
 received_events.append(message)
 validator.record_event(message)
-if "tool" in message.get("type", ""):
+if "tool" in message.get("type", "):"
     pass
-logger.info("formatted_string")
+logger.info("formatted_string)"
 except asyncio.TimeoutError:
     pass
 continue
@@ -512,34 +512,34 @@ tool_dispatcher = ToolDispatcher()
 enhance_tool_dispatcher_with_notifications(tool_dispatcher, ws_manager)
 
                         # Verify enhancement worked
-assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
+assert isinstance(tool_dispatcher.executor, "UnifiedToolExecutionEngine), \"
 "Tool dispatcher not properly enhanced"
 
                         # Register realistic test tools
-async def data_analysis_tool(data: str = "sample") -> Dict:
+async def data_analysis_tool(data: str = "sample) -> Dict:"
 """Realistic data analysis tool."""
 await asyncio.sleep(0.1)  # Simulate real work
 await asyncio.sleep(0)"""
 await asyncio.sleep(0)"""
-"analysis": "formatted_string",
-"insights": ["Pattern detected", "Anomaly found"],
-"confidence": 0.87
+"analysis": "formatted_string,"
+"insights": ["Pattern detected", "Anomaly found],"
+"confidence: 0.87"
     
 
-async def knowledge_search_tool(query: str = "test query") -> Dict:
+async def knowledge_search_tool(query: str = "test query) -> Dict:"
 """Realistic knowledge search."""
 await asyncio.sleep(0.5)  # Simulate search time"""
 await asyncio.sleep(0.5)  # Simulate search time"""
-"results": "formatted_string",
-"count": 5,
-"relevance_score": 0.92
+"results": "formatted_string,"
+"count: 5,"
+"relevance_score: 0.92"
     
 
-tool_dispatcher.register_tool("data_analysis", data_analysis_tool, "Analyze data patterns")
-tool_dispatcher.register_tool("knowledge_search", knowledge_search_tool, "Search knowledge base")
+tool_dispatcher.register_tool("data_analysis", data_analysis_tool, "Analyze data patterns)"
+tool_dispatcher.register_tool("knowledge_search", knowledge_search_tool, "Search knowledge base)"
 
     # Create execution context for tool calls
-context = {"connection_id": connection_id,, "request_id": "tool-req-789",, "user_id": user_id}
+context = {"connection_id": connection_id,, "request_id": "tool-req-789",, "user_id: user_id}"
     # Create agent state
 state = DeepAgentState( )
 chat_thread_id=connection_id,
@@ -548,12 +548,12 @@ run_id="tool-req-789"
     
 
     # Execute multiple tools to test pairing
-logger.info("Executing data analysis tool...")
-result1 = await tool_dispatcher.execute("data_analysis", {"data": "test data"}, context)
+logger.info("Executing data analysis tool...)"
+result1 = await tool_dispatcher.execute("data_analysis", {"data": "test data}, context)"
 assert result1 is not None, "Data analysis tool failed"
 
-logger.info("Executing knowledge search tool...")
-result2 = await tool_dispatcher.execute("knowledge_search", {"query": "test query"}, context)
+logger.info("Executing knowledge search tool...)"
+result2 = await tool_dispatcher.execute("knowledge_search", {"query": "test query}, context)"
 assert result2 is not None, "Knowledge search tool failed"
 
     # Allow events to be captured
@@ -578,8 +578,8 @@ report = validator.generate_comprehensive_report()
 logger.info(report)
 
                 # Check that tool events were sent
-tool_executing_count = validator.event_counts.get("tool_executing", 0)
-tool_completed_count = validator.event_counts.get("tool_completed", 0)
+tool_executing_count = validator.event_counts.get("tool_executing, 0)"
+tool_completed_count = validator.event_counts.get("tool_completed, 0)"
 
 assert tool_executing_count >= 2, "formatted_string"
 assert tool_completed_count >= 2, "formatted_string"
@@ -593,15 +593,15 @@ assert len(tool_events) >= 4, "formatted_string"
 for event in tool_events:
 assert "type" in event, "Tool event missing type field"
 assert "timestamp" in event, "Tool event missing timestamp"
-if event["type"] == "tool_executing":
+if event["type"] == "tool_executing:"
     pass
 assert "tool_name" in event.get("data", {}), "tool_executing event missing tool_name"
-elif event["type"] == "tool_completed":
+elif event["type"] == "tool_completed:"
     pass
 assert "tool_name" in event.get("data", {}), "tool_completed event missing tool_name"
 assert "result" in event.get("data", {}), "tool_completed event missing result"
 
-logger.info(" PASS:  Tool execution WebSocket events test PASSED with real services")
+logger.info(" PASS:  Tool execution WebSocket events test PASSED with real services)"
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -624,8 +624,8 @@ validator = MissionCriticalChatEventValidator(strict_mode=True)
                                     # Create REAL WebSocket connection for complete user journey
 ws_client = self.real_services.create_websocket_client()"""
 ws_client = self.real_services.create_websocket_client()"""
-await ws_client.connect("formatted_string")
-logger.info("formatted_string")
+await ws_client.connect("formatted_string)"
+logger.info("formatted_string)"
 
                                         # Event capture for complete journey
 all_events = []
@@ -638,13 +638,13 @@ try:
 message = await ws_client.receive_json(timeout=0.2)
 all_events.append(message)"""
 all_events.append(message)"""
-logger.info("formatted_string")
+logger.info("formatted_string)"
 except asyncio.TimeoutError:
     pass
 continue
 except Exception as e:
     pass
-logger.debug("formatted_string")
+logger.debug("formatted_string)"
 break
 
 capture_task = asyncio.create_task(capture_complete_journey())
@@ -665,20 +665,20 @@ class RealisticChatLLM:
 """
         user_message = ""
         if messages and isinstance(messages, list):
-        user_message = messages[-1].get("content", "")
+        user_message = messages[-1].get("content", ")"
 
-        if "status" in user_message.lower():
+        if "status in user_message.lower():"
         await asyncio.sleep(0)
         return { )
         "content": "I"ll check the system status for you. Let me gather the latest information from our monitoring systems.","
-        "reasoning": "User is asking about system status. I should check our monitoring tools and provide current system health information.",
-        "confidence": 0.95
+        "reasoning": "User is asking about system status. I should check our monitoring tools and provide current system health information.,"
+        "confidence: 0.95"
             
         else:
         return { )
-        "content": "I understand your request. Let me analyze this and provide you with a helpful response.",
-        "reasoning": "Processing user request and determining the best way to help them.",
-        "confidence": 0.9
+        "content": "I understand your request. Let me analyze this and provide you with a helpful response.,"
+        "reasoning": "Processing user request and determining the best way to help them.,"
+        "confidence: 0.9"
                 
 
                 # Set up complete tool ecosystem
@@ -689,11 +689,11 @@ class RealisticChatLLM:
         """Check system status."""
         await asyncio.sleep(0.1)"""
         await asyncio.sleep(0.1)"""
-        "status": "operational",
-        "uptime": "99.9%",
-        "services": { )
-        "database": "healthy",
-        "cache": "healthy",
+        "status": "operational,"
+        "uptime": "99.9%,"
+        "services: { )"
+        "database": "healthy,"
+        "cache": "healthy,"
         "websocket": "healthy"
         },
         "last_check": "2024-1-01T12:0:00Z"
@@ -703,23 +703,23 @@ class RealisticChatLLM:
         """Search knowledge base."""
         await asyncio.sleep(0.8)"""
         await asyncio.sleep(0.8)"""
-        "results": "formatted_string",
-        "articles": ["System Architecture Guide", "Status Monitoring Best Practices"],
-        "relevance": 0.91
+        "results": "formatted_string,"
+        "articles": ["System Architecture Guide", "Status Monitoring Best Practices],"
+        "relevance: 0.91"
     
 
     async def data_analysis_tool(data: str = "") -> Dict:
         """Analyze system data."""
         await asyncio.sleep(0.12)"""
         await asyncio.sleep(0.12)"""
-        "analysis": "System metrics show healthy performance",
-        "trends": ["Stable response times", "Normal resource usage"],
-        "recommendations": ["Continue current monitoring"]
+        "analysis": "System metrics show healthy performance,"
+        "trends": ["Stable response times", "Normal resource usage],"
+        "recommendations": ["Continue current monitoring]"
     
 
-        tool_dispatcher.register_tool("system_status", system_status_tool, "Check current system status")
-        tool_dispatcher.register_tool("knowledge_search", knowledge_search_tool, "Search knowledge base")
-        tool_dispatcher.register_tool("data_analysis", data_analysis_tool, "Analyze system data")
+        tool_dispatcher.register_tool("system_status", system_status_tool, "Check current system status)"
+        tool_dispatcher.register_tool("knowledge_search", knowledge_search_tool, "Search knowledge base)"
+        tool_dispatcher.register_tool("data_analysis", data_analysis_tool, "Analyze system data)"
 
     # Create complete agent system
         llm = RealisticChatLLM()
@@ -727,7 +727,7 @@ class RealisticChatLLM:
         registry.set_websocket_manager(ws_manager)
 
     # Verify system is properly configured
-        assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
+        assert isinstance(tool_dispatcher.executor, "UnifiedToolExecutionEngine), \"
         "Tool dispatcher not enhanced - complete journey will fail"
 
         engine = UserExecutionEngine(registry, ws_manager)
@@ -736,10 +736,10 @@ class RealisticChatLLM:
         user_message = "Hi! Can you check the current system status and let me know if everything is running smoothly? I want to make sure our services are healthy."
 
         context = AgentExecutionContext( )
-        run_id="complete-journey-req",
+        run_id="complete-journey-req,"
         thread_id=connection_id,
         user_id=user_id,
-        agent_name="supervisor",
+        agent_name="supervisor,"
         retry_count=0,
         max_retries=2
     
@@ -751,11 +751,11 @@ class RealisticChatLLM:
         state.user_id = user_id
 
     # Execute complete agent workflow
-        logger.info("[U+1F680] Starting complete user chat journey...")
-        logger.info("formatted_string")
+        logger.info("[U+1F680] Starting complete user chat journey...)"
+        logger.info("formatted_string)"
 
         result = await engine.execute_agent(context, state)
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
     # Allow complete journey to finish
         await asyncio.sleep(3.0)
@@ -782,7 +782,7 @@ class RealisticChatLLM:
         assert len(all_events) >= 6, "formatted_string"
 
                     # User experience validations
-        event_types = [e.get("type") for e in all_events]
+        event_types = [e.get("type) for e in all_events]"
 
                     # Critical user experience checkpoints
         assert "agent_started" in event_types, " FAIL:  User never knew processing started - UX BROKEN"
@@ -803,9 +803,9 @@ class RealisticChatLLM:
         messages_with_content = [item for item in []]
         assert len(messages_with_content) >= 1, "User received no actual content - empty experience"
 
-        logger.info(" PASS:  COMPLETE USER CHAT JOURNEY PASSED - Product works end-to-end!")
-        logger.info("formatted_string")
-        logger.info(f"    TARGET:  User Experience: Responsive, Informative, Complete")
+        logger.info(" PASS:  COMPLETE USER CHAT JOURNEY PASSED - Product works end-to-end!)"
+        logger.info("formatted_string)"
+        logger.info(f"    TARGET:  User Experience: Responsive, Informative, Complete)"
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -823,16 +823,16 @@ This ensures the core chat functionality works independently of database service
 This ensures the core chat functionality works independently of database services."""
 pass"""
 pass"""
-logger.info("[U+1F680] Running minimal WebSocket test - bypassing external service dependencies")
+logger.info("[U+1F680] Running minimal WebSocket test - bypassing external service dependencies)"
 
                                 # Set up isolated environment manually for this test
 env = get_env()
 env.enable_isolation(backup_original=True)
 
                                 # Set minimal test environment
-test_vars = {"TESTING": "1",, "NETRA_ENV": "testing",, "ENVIRONMENT": "testing",, "LOG_LEVEL": "ERROR",, "USE_MEMORY_DB": "true",}
+test_vars = {"TESTING": "1",, "NETRA_ENV": "testing",, "ENVIRONMENT": "testing",, "LOG_LEVEL": "ERROR",, "USE_MEMORY_DB": "true,}"
 for key, value in test_vars.items():
-env.set(key, value, source="minimal_websocket_test")
+env.set(key, value, source="minimal_websocket_test)"
 
 try:
     pass
@@ -860,7 +860,7 @@ import json
         data = json.loads(message) if isinstance(message, str) else message
         received_events.append(data)"""
         received_events.append(data)"""
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
     async def close(self):
         self._connected = False
@@ -877,33 +877,33 @@ import json
 
         # Create execution context
         context = AgentExecutionContext( )
-        run_id="minimal-req-123",  thread_id=connection_id,
+        run_id="minimal-req-123,  thread_id=connection_id,"
         user_id=user_id,
-        agent_name="test_agent",
+        agent_name="test_agent,"
         retry_count=0,
         max_retries=1
         
 
         # Test complete WebSocket event flow
-        logger.info("[U+1F680] Testing minimal WebSocket event flow...")
+        logger.info("[U+1F680] Testing minimal WebSocket event flow...)"
 
         # Send all required events per CLAUDE.md Section 6.1
         await notifier.send_agent_started(context)
         await asyncio.sleep(0.1)
 
-        await notifier.send_agent_thinking(context, "Processing your request...")
+        await notifier.send_agent_thinking(context, "Processing your request...)"
         await asyncio.sleep(0.1)
 
-        await notifier.send_tool_executing(context, "test_tool")
+        await notifier.send_tool_executing(context, "test_tool)"
         await asyncio.sleep(0.1)
 
-        await notifier.send_tool_completed(context, "test_tool", {"result": "success"})
+        await notifier.send_tool_completed(context, "test_tool", {"result": "success})"
         await asyncio.sleep(0.1)
 
-        await notifier.send_partial_result(context, "Here are the results...")
+        await notifier.send_partial_result(context, "Here are the results...)"
         await asyncio.sleep(0.1)
 
-        await notifier.send_agent_completed(context, {"success": True})
+        await notifier.send_agent_completed(context, {"success: True})"
         await asyncio.sleep(0.1)
 
         # Allow final processing
@@ -926,7 +926,7 @@ import json
         assert len(received_events) >= 6, "formatted_string"
 
             # Validate all required events are present
-        event_types = [e.get("type") for e in received_events]
+        event_types = [e.get("type) for e in received_events]"
         required_events = validator.REQUIRED_EVENTS
 
         for required_event in required_events:
@@ -939,14 +939,14 @@ import json
         assert "data" in event, "formatted_string"
 
                     # Validate tool event pairing
-        tool_executing_count = event_types.count("tool_executing")
-        tool_completed_count = event_types.count("tool_completed")
+        tool_executing_count = event_types.count("tool_executing)"
+        tool_completed_count = event_types.count("tool_completed)"
         assert tool_executing_count == tool_completed_count, \
         "formatted_string"
 
-        logger.info(" PASS:  MINIMAL WEBSOCKET E2E TEST PASSED - Core event flow works!")
-        logger.info("formatted_string")
-        logger.info(f"    TARGET:  All required WebSocket events validated successfully")
+        logger.info(" PASS:  MINIMAL WEBSOCKET E2E TEST PASSED - Core event flow works!)"
+        logger.info("formatted_string)"
+        logger.info(f"    TARGET:  All required WebSocket events validated successfully)"
 
                     # Mark this as successful completion of core WebSocket testing
         await asyncio.sleep(0)
@@ -957,17 +957,17 @@ import json
         env.disable_isolation(restore_original=True)
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
                             # Run E2E tests with real services only
                             # NO MOCKS - uses real WebSocket connections, real databases, real services
         pytest.main([ ))
         __file__,
-        "-v",
-        "--tb=short",
-        "-s",  # Show real-time output
-        "-x",  # Stop on first failure
-        "--timeout=60",  # Allow time for real services
-        "-k", "real_services"  # Only run real service tests
+        "-v,"
+        "--tb=short,"
+        "-s,  # Show real-time output"
+        "-x,  # Stop on first failure"
+        "--timeout=60,  # Allow time for real services"
+        "-k", "real_services  # Only run real service tests"
                             
         pass
 

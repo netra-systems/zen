@@ -29,14 +29,14 @@ import pytest_asyncio
 import websockets
 
 # SSOT Authentication Import - CLAUDE.md Compliant
-from test_framework.ssot.e2e_auth_helper import (
+from test_framework.ssot.e2e_auth_helper import ()
     E2EAuthHelper,
     E2EWebSocketAuthHelper,
     create_authenticated_user
 )
 
 from tests.e2e.database_sync_fixtures import create_test_user_data
-from tests.e2e.harness_utils import (
+from tests.e2e.harness_utils import ()
     UnifiedTestHarnessComplete as TestHarness,
     TestClient,
 )
@@ -153,7 +153,7 @@ class WebSocketComprehensiveE2ETests:
     @pytest.mark.asyncio
     @pytest.mark.e2e
     async def test_connection_lifecycle_complete(self, ws_tester):
-        ""Test complete WebSocket connection lifecycle - CLAUDE.md Compliant.
+        ""Test complete WebSocket connection lifecycle - CLAUDE.md Compliant."
         start_time = time.time()
         
         # SSOT Authentication - CLAUDE.md Compliant
@@ -168,12 +168,12 @@ class WebSocketComprehensiveE2ETests:
         assert conn_id in ws_tester.connections
         
         # Send message - NO TRY/EXCEPT HIDING
-        test_message = {type: ping, "data: test"}
+        test_message = {"type": ping, "data: test}"
         await ws_tester.send_message(conn_id, test_message)
         
         # Receive response - HARD FAILURE IF NONE
         response = await ws_tester.wait_for_message(conn_id)
-        assert response is not None, WebSocket ping should receive response
+        assert response is not None, "WebSocket ping should receive response"
         
         # Disconnect
         await ws_tester.connections[conn_id].close()
@@ -203,18 +203,18 @@ class WebSocketComprehensiveE2ETests:
         
         # Send agent request - REAL AGENT ORCHESTRATION
         agent_request = {
-            "type: agent_request",
+            "type: agent_request,"
             payload: {
                 agent_type: "optimization,"
                 task": analyze_performance,"
-                data: {metric: latency"}"
+                "data": {"metric: latency""}"
             }
         }
         await ws_tester.send_message(conn_id, agent_request)
         
         # Wait for agent response - HARD FAILURE IF NONE
         response = await ws_tester.wait_for_message(conn_id, timeout=15.0)
-        assert response is not None, Agent orchestration should respond to requests
+        assert response is not None, "Agent orchestration should respond to requests"
         
         # Validate actual agent response structure
         assert type in response, "Response must include type field"
@@ -244,7 +244,7 @@ class WebSocketComprehensiveE2ETests:
         # Send messages from all connections - NO TRY/EXCEPT HIDING
         send_tasks = []
         for conn_id, user_id in connections:
-            message = {type": "broadcast, data: fHello from {user_id}}
+            message = {type": broadcast, data: fHello from {user_id}}"
             task = ws_tester.send_message(conn_id, message)
             send_tasks.append(task)
         
@@ -255,7 +255,7 @@ class WebSocketComprehensiveE2ETests:
             ws = ws_tester.connections[conn_id]
             # Check connection is open with proper validation
             if hasattr(ws, 'closed'):
-                assert not ws.closed, fConnection for user {user_id} should remain open
+                assert not ws.closed, "fConnection for user {user_id} should remain open"
             elif hasattr(ws, 'state'):
                 assert ws.state.name == 'OPEN', f"Connection for user {user_id} should be OPEN, got {ws.state.name}"
             else:
@@ -263,7 +263,7 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 0.1, fE2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior
+        assert execution_time >= 0.1, "fE2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -280,7 +280,7 @@ class WebSocketComprehensiveE2ETests:
         
         # First connection with session data
         conn_id_1 = await ws_tester.create_authenticated_connection(user_id, token)
-        session_data = {type: session_data, data: {state": "active}}
+        session_data = {"type": session_data, "data": {"state": "active}}"
         await ws_tester.send_message(conn_id_1, session_data)
         
         # Close first connection
@@ -290,7 +290,7 @@ class WebSocketComprehensiveE2ETests:
         conn_id_2 = await ws_tester.create_authenticated_connection(user_id, token)
         
         # Request session state
-        state_request = {type: get_session_state}
+        state_request = {"type: get_session_state}"
         await ws_tester.send_message(conn_id_2, state_request)
         
         # Verify session continuity - HARD FAILURE IF NONE
@@ -299,7 +299,7 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 0.1, fE2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior
+        assert execution_time >= 0.1, "fE2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -325,11 +325,11 @@ class WebSocketComprehensiveE2ETests:
         
         # Validate error response structure
         response_type = error_response.get(type, )
-        assert error in response_type.lower() or invalid" in str(error_response).lower(), f"Expected error response, got: {error_response}
+        assert error in response_type.lower() or invalid" in str(error_response).lower(), fExpected error response, got: {error_response}"
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 0.1, fE2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior
+        assert execution_time >= 0.1, "fE2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -353,7 +353,7 @@ class WebSocketComprehensiveE2ETests:
         # Trigger broadcast event to test real-time capabilities
         broadcast_event = {
             type: system_broadcast,
-            data: {"event: maintenance", message: System update}
+            "data": {""event: maintenance", message: System update}"
         }
         await ws_tester.send_message(conn_ids[0], broadcast_event)
         
@@ -367,7 +367,7 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 2.0, fE2E test should allow broadcast processing time: {execution_time:.3f}s
+        assert execution_time >= 2.0, "fE2E test should allow broadcast processing time: {execution_time:.3f}s"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -385,7 +385,7 @@ class WebSocketComprehensiveE2ETests:
         
         # Send ping with timestamp for real health monitoring
         ping_timestamp = datetime.now(timezone.utc).isoformat()
-        ping = {type: ping, timestamp: ping_timestamp}""
+        ping = {"type": ping, timestamp: ping_timestamp}""
         await ws_tester.send_message(conn_id, ping)
         
         # Should receive pong - HARD FAILURE IF NONE
@@ -398,7 +398,7 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 0.1, fE2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior
+        assert execution_time >= 0.1, "fE2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -426,14 +426,14 @@ class WebSocketComprehensiveE2ETests:
         
         # Verify order maintained in real WebSocket implementation
         received = ws_tester.received_messages.get(conn_id, [)
-        sequences = [msg.get("sequence) for msg in received if msg.get(sequence") is not None]
+        sequences = [msg.get("sequence) for msg in received if msg.get(sequence) is not None]"
         
         if sequences:  # If we received ordered messages
-            assert sequences == sorted(sequences), fMessage order violated: received {sequences}, expected {sorted(sequences)}
+            assert sequences == sorted(sequences), "fMessage order violated: received {sequences}, expected {sorted(sequences)}"
         else:
             # Even if no ordered responses, connection should remain active
             ws = ws_tester.connections.get(conn_id)
-            assert ws is not None, Connection should remain active during message ordering test
+            assert ws is not None, "Connection should remain active during message ordering test"
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
@@ -459,7 +459,7 @@ class WebSocketComprehensiveE2ETests:
         connection_errors = 0
         
         for i in range(rapid_message_count):
-            message = {type: rate_test", "index: i, timestamp: time.time()}
+            message = {"type": rate_test", index: i, timestamp: time.time()}"
             try:
                 await ws_tester.send_message(conn_id, message)
                 messages_sent += 1
@@ -471,7 +471,7 @@ class WebSocketComprehensiveE2ETests:
         await asyncio.sleep(2)
         
         # Validate rate limiting behavior - connection should handle rapid messages
-        assert messages_sent > 0, Should be able to send at least some messages
+        assert messages_sent > 0, "Should be able to send at least some messages"
         
         # Check if connection is still viable
         ws = ws_tester.connections.get(conn_id)
@@ -485,7 +485,7 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 2.0, fE2E test should allow rate limiting processing time: {execution_time:.3f}s
+        assert execution_time >= 2.0, "fE2E test should allow rate limiting processing time: {execution_time:.3f}s"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -507,7 +507,7 @@ class WebSocketComprehensiveE2ETests:
         await asyncio.sleep(8)  # Wait longer than token expiry
         
         # Try to send message after expiry - SHOULD RAISE ERROR OR CLOSE CONNECTION
-        message = {"type: test", data: after_expiry}
+        message = {"type: test, data: after_expiry}"
         
         # This should either raise an error or show connection closed
         connection_failed = False

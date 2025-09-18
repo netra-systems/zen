@@ -44,7 +44,7 @@ class ErrorClassDefinition:
 
     @dataclass
 class ImportStatement:
-    ""Represents an import statement found in code
+    ""Represents an import statement found in code"
     file_path: str
     line_number: int
     module: str
@@ -87,7 +87,7 @@ class ErrorHandlingSSOTValidator:
 
         for file_path in search_path.rglob(*.py):
                 # Skip __pycache__ and other generated files
-        if __pycache__" in str(file_path) or ".pyc in str(file_path):
+        if __pycache__" in str(file_path) or .pyc in str(file_path):"
         continue
 
         try:
@@ -338,7 +338,7 @@ class ErrorHandlingSSOTValidator:
 
 
 class TestErrorHandlingSSOTConsistency:
-        ""Test suite for error handling SSOT consistency
+        ""Test suite for error handling SSOT consistency"
 
         @pytest.fixture
     def validator(self):
@@ -363,7 +363,7 @@ class TestErrorHandlingSSOTConsistency:
 
     # The only non-test definition should be canonical
         non_canonical = [item for item in []]
-        assert len(non_canonical) == 0, ( )
+        assert len(non_canonical) == 0, "( )"
         formatted_string
         formatted_string""
     
@@ -382,14 +382,14 @@ class TestErrorHandlingSSOTConsistency:
     def test_agent_communication_uses_canonical_imports(self, validator):
         Test that agent_communication.py uses canonical imports, not local definitions""
         result = validator.check_agent_communication_file()
-        assert result, formatted_string
+        assert result, "formatted_string"
 
     def test_all_imports_use_canonical_sources(self, validator):
         Test that all imports of error classes use canonical sources""
         pass
         imports = validator.find_all_error_imports()
         result = validator.validate_correct_imports(imports)
-        assert result, formatted_string
+        assert result, "formatted_string"
 
     def test_error_handling_consistency(self, validator):
         "Test that error handling is consistent across all agent files"
@@ -400,13 +400,13 @@ class TestErrorHandlingSSOTConsistency:
     def test_websocket_error_inheritance_chain(self):
         "Test that WebSocketError properly inherits from NetraException"
         pass
-        assert issubclass(CanonicalWebSocketError, Exception)
+        assert issubclass(CanonicalWebSocketError, "Exception)"
 
     # Check that it has expected attributes
         error = CanonicalWebSocketError(Test error")"
-        assert hasattr(error, 'message')
-        assert hasattr(error, 'code')
-        assert hasattr(error, 'severity')
+        assert hasattr(error, "'message')"
+        assert hasattr(error, "'code')"
+        assert hasattr(error, "'severity')"
 
     def test_error_context_has_required_fields(self):
         Test that ErrorContext has all required fields"
@@ -415,7 +415,7 @@ class TestErrorHandlingSSOTConsistency:
         required_fields = ['trace_id', 'operation', 'timestamp']
 
         for field in required_fields:
-        assert field in CanonicalErrorContext.model_fields, ( )
+        assert field in CanonicalErrorContext.model_fields, "( )"
         formatted_string"
         formatted_string"
         
@@ -438,13 +438,13 @@ class TestErrorHandlingSSOTConsistency:
         for warning in warnings:
         print(formatted_string"")
 
-        assert all_valid, ( )
+        assert all_valid, "( )"
         formatted_string
                     
 
 @pytest.mark.asyncio
     async def test_websocket_error_handling_in_runtime(self):
-    ""Test that WebSocket errors are handled correctly at runtime
+    ""Test that WebSocket errors are handled correctly at runtime"
 from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
 
                         # Create a test instance
@@ -455,7 +455,7 @@ class TestAgent(AgentCommunicationMixin):
         agent = TestAgent()
 
     # Test that methods handle missing websocket_manager gracefully
-        await agent._send_update(test_run, {test": "data)
+        await agent._send_update(test_run, {test": data)"
 
     # Should not raise an error
         assert True

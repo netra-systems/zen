@@ -73,7 +73,7 @@ class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
             return any(excluded in file_name for excluded in excluded_files)
         
         def analyze_python_file(file_path: Path) -> List[Dict]:
-            ""Analyze a Python file for direct LLMManager instantiation
+            ""Analyze a Python file for direct LLMManager instantiation"
             violations = []
             
             try:

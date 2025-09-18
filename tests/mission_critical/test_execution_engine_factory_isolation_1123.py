@@ -32,7 +32,7 @@ from unittest.mock import Mock, AsyncMock, patch
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.user_execution_context import (
+from netra_backend.app.services.user_execution_context import ()
     UserExecutionContext, create_defensive_user_execution_context
 )
 
@@ -67,7 +67,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
         
         try:
             # Import canonical factory
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 get_execution_engine_factory
             )
             
@@ -173,7 +173,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             Create and execute engine for a user, return execution details.""
             try:
                 # Import canonical factory
-                from netra_backend.app.agents.supervisor.execution_engine_factory import (
+                from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                     get_execution_engine_factory
                 )
                 
@@ -295,7 +295,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
         
         try:
             # Import canonical factory
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ()
                 get_execution_engine_factory
             )
             

@@ -10,10 +10,10 @@ class TestWebSocketConnection:
 """
         """Send JSON message.""""""
         """Send JSON message.""""""
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True"""
@@ -81,8 +81,8 @@ from shared.isolated_environment import get_env"""
         """Create execution context"""
         pass"""
         pass"""
-        run_id="test_run_123",
-        agent_name="test_agent",
+        run_id="test_run_123,"
+        agent_name="test_agent,"
         stream_updates=True,
         user_id="test_user"
     
@@ -113,13 +113,13 @@ locations = []"""
 locations = []"""
 if method in comm_methods:"""
 if method in comm_methods:"""
-locations.append("AgentCommunicationMixin")
+locations.append("AgentCommunicationMixin)"
 if method in lifecycle_methods:
     pass
 count += 1
-locations.append("AgentLifecycleMixin")
+locations.append("AgentLifecycleMixin)"
 
-all_occurrences[method] = {"count": count, "locations": locations}
+all_occurrences[method] = {"count": count, "locations: locations}"
 
                     # Assert no duplicates
 duplicates = {}
@@ -139,7 +139,7 @@ class TestCommAgent(AgentCommunicationMixin):"""
         self._failed_updates = []
 
         agent = TestCommAgent()
-        await agent.emit_thinking("thinking...")
+        await agent.emit_thinking("thinking...)"
 
     # Note: emit methods work through BaseAgent's WebSocketBridgeAdapter'
     # Test validates that the unified pattern works without errors
@@ -162,7 +162,7 @@ from netra_backend.app.core.exceptions import WebSocketError as CentralWebSocket
 assert CentralWebSocketError is not None
 except ImportError:
     pass
-pytest.fail("No centralized WebSocketError found - must create one")
+pytest.fail("No centralized WebSocketError found - must create one)"
 
 @pytest.mark.asyncio
     async def test_all_websocket_events_sent_correctly(self, mock_bridge, execution_context):
@@ -177,11 +177,11 @@ events_received.append(event_type)"""
 events_received.append(event_type)"""
 return None"""
 return None"""
-mock_bridge.notify_agent_started.side_effect = lambda x: None track_event("agent_started", *a, **k)
-mock_bridge.notify_agent_thinking.side_effect = lambda x: None track_event("agent_thinking", *a, **k)
-mock_bridge.notify_tool_executing.side_effect = lambda x: None track_event("tool_executing", *a, **k)
-mock_bridge.notify_tool_completed.side_effect = lambda x: None track_event("tool_completed", *a, **k)
-mock_bridge.notify_agent_completed.side_effect = lambda x: None track_event("agent_completed", *a, **k)
+mock_bridge.notify_agent_started.side_effect = lambda x: None track_event("agent_started, *a, **k)"
+mock_bridge.notify_agent_thinking.side_effect = lambda x: None track_event("agent_thinking, *a, **k)"
+mock_bridge.notify_tool_executing.side_effect = lambda x: None track_event("tool_executing, *a, **k)"
+mock_bridge.notify_tool_completed.side_effect = lambda x: None track_event("tool_completed, *a, **k)"
+mock_bridge.notify_agent_completed.side_effect = lambda x: None track_event("agent_completed, *a, **k)"
 
     # Simulate agent execution flow
 class TestAgent(AgentLifecycleMixin):
@@ -214,32 +214,32 @@ class TestAgent(AgentLifecycleMixin):
     async def _send_update(self, run_id, data):
         """Override to use Bridge""""""
         """Override to use Bridge""""""
-        status = data.get("status", "")
+        status = data.get("status", ")"
 
-        if status == "starting":
+        if status == "starting:"
         await bridge.notify_agent_started(run_id, self.name, data)
-        elif status in ["completed", "failed"]:
+        elif status in ["completed", "failed]:"
         await bridge.notify_agent_completed(run_id, self.name, data)
 
     async def execute(self, state, run_id, stream_updates):
     # Simulate agent execution with all event types
-        await self.send_agent_thinking(run_id, "Processing request...")
-        await self.send_tool_executing(run_id, "data_analyzer")
+        await self.send_agent_thinking(run_id, "Processing request...)"
+        await self.send_tool_executing(run_id, "data_analyzer)"
         await asyncio.sleep(0.1)  # Simulate work
-        await self.send_partial_result(run_id, "Found 10 items", False)
-        await self.send_final_report(run_id, {"items": 10}, 100.0)
+        await self.send_partial_result(run_id, "Found 10 items, False)"
+        await self.send_final_report(run_id, {"items: 10}, 100.0)"
 
         agent = TestAgent()
         state = DeepAgentState()
 
     # Run agent
-        await agent.run(state, "run_123", True)
+        await agent.run(state, "run_123, True)"
 
     # Verify all critical events were sent
         required_events = [ )
-        "agent_started",
-        "agent_thinking",
-        "tool_executing",
+        "agent_started,"
+        "agent_thinking,"
+        "tool_executing,"
         "agent_completed"
     
 
@@ -263,14 +263,14 @@ class TestAgent(AgentCommunicationMixin):"""
         with pytest.raises(AttributeError) as exc_info:
         _ = agent.agent_id  # Line 162 references undefined agent_id
 
-        assert "agent_id" in str(exc_info.value)
+        assert "agent_id in str(exc_info.value)"
 
         # Test get_state() method (line 102)
         with pytest.raises(AttributeError):
         agent.get_state()
 
             # Test _user_id attribute (line 121)
-        assert not hasattr(agent, '_user_id')
+        assert not hasattr(agent, "'_user_id')"
 
 @pytest.mark.asyncio
     async def test_dead_code_removed(self):
@@ -290,10 +290,10 @@ from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 dead_method = "_setup_websocket_context_if_available"
 
                         # These assertions should FAIL if dead code still exists
-assert not hasattr(DataSubAgent, dead_method), \
+assert not hasattr(DataSubAgent, "dead_method), \"
 "formatted_string"
 
-assert not hasattr(ValidationSubAgent, dead_method), \
+assert not hasattr(ValidationSubAgent, "dead_method), \"
 "formatted_string"
 
 @pytest.mark.asyncio
@@ -307,14 +307,14 @@ patterns_found = set()
                             # Check AgentCommunicationMixin pattern"""
 comm_source = AgentCommunicationMixin._attempt_websocket_update.__code__.co_code"""
 comm_source = AgentCommunicationMixin._attempt_websocket_update.__code__.co_code"""
-patterns_found.add("bridge_pattern")
+patterns_found.add("bridge_pattern)"
 
                                 # Check AgentLifecycleMixin pattern
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
 lifecycle_source = AgentLifecycleMixin.send_agent_thinking.__code__.co_code
 if b'get_agent_websocket_bridge' in lifecycle_source:
     pass
-patterns_found.add("bridge_pattern")
+patterns_found.add("bridge_pattern)"
 
                                     # Should only have ONE consistent pattern
 assert len(patterns_found) == 1, \
@@ -377,14 +377,14 @@ chat_events = []
 """
 async def track_chat_event(event_type, *args, **kwargs):"""
 async def track_chat_event(event_type, *args, **kwargs):"""
-"type": event_type,
-"args": args,
-"kwargs": kwargs
+"type: event_type,"
+"args: args,"
+"kwargs: kwargs"
     
 
-mock_bridge.notify_agent_started = AsyncMock(side_effect=lambda x: None track_chat_event("started", *a, **k))
-mock_bridge.notify_agent_thinking = AsyncMock(side_effect=lambda x: None track_chat_event("thinking", *a, **k))
-mock_bridge.notify_agent_completed = AsyncMock(side_effect=lambda x: None track_chat_event("completed", *a, **k))
+mock_bridge.notify_agent_started = AsyncMock(side_effect=lambda x: None track_chat_event("started, *a, **k))"
+mock_bridge.notify_agent_thinking = AsyncMock(side_effect=lambda x: None track_chat_event("thinking, *a, **k))"
+mock_bridge.notify_agent_completed = AsyncMock(side_effect=lambda x: None track_chat_event("completed, *a, **k))"
 
     # Simulate chat interaction
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
@@ -399,7 +399,7 @@ lifecycle = AgentLifecycleMixin()
 lifecycle.name = "chat_agent"
 lifecycle.websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
-await lifecycle.send_agent_thinking("chat_123", "Analyzing your request...")
+await lifecycle.send_agent_thinking("chat_123", "Analyzing your request...)"
     # Removed problematic line: await lifecycle.send_final_report("chat_123", {"response": "Here"s your answer"}, 250.0)"
 
     # Verify critical chat events were sent
@@ -421,7 +421,7 @@ async def failing_notify(*args, **kwargs):"""
 async def failing_notify(*args, **kwargs):"""
 retry_count += 1"""
 retry_count += 1"""
-raise ConnectionError("WebSocket disconnected")
+raise ConnectionError("WebSocket disconnected)"
 await asyncio.sleep(0)
 return None
 
@@ -439,7 +439,7 @@ class TestAgent(AgentCommunicationMixin):
         agent = TestAgent()
 
     # Should retry and eventually succeed
-        await agent.emit_thinking("test thought")
+        await agent.emit_thinking("test thought)"
 
         assert retry_count == 3, "formatted_string"
 
@@ -448,7 +448,7 @@ class TestAgent(AgentCommunicationMixin):
 """Test graceful degradation when WebSocket fails"""
 """
 """
-mock_bridge.notify_agent_thinking = AsyncMock(side_effect=Exception("WebSocket error"))
+mock_bridge.notify_agent_thinking = AsyncMock(side_effect=Exception("WebSocket error))"
 
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
 
@@ -457,14 +457,14 @@ lifecycle.name = "test_agent"
 lifecycle.websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
         # Should not raise exception (graceful degradation)
-await lifecycle.send_agent_thinking("run_123", "test")
+await lifecycle.send_agent_thinking("run_123", "test)"
 
         # Verify error was logged but not raised
 lifecycle.logger.debug.assert_called()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
-pytest.main([__file__, "-v", "-s"])
+pytest.main([__file__, "-v", "-s])"
 
 ]

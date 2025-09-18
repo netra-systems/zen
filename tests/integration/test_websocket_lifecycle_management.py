@@ -23,7 +23,7 @@ import aiohttp
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
-from test_framework.ssot.e2e_auth_helper import (
+from test_framework.ssot.e2e_auth_helper import ()
     E2EAuthHelper,
     create_authenticated_user_context
 )
@@ -126,7 +126,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     if concurrent_read:
                         concurrent_data = json.loads(concurrent_read.decode())
                         # Check for state consistency
-                        if concurrent_data.get("status) != state_update[status"]:
+                        if concurrent_data.get("status) != state_update[status]:"
                             # Race condition detected
                             print(f WARNING: [U+FE0F]  Redis race condition detected in attempt {attempt}, update {i})
                     
@@ -213,7 +213,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         
         if race_conditions_detected:
             print(f\n ALERT:  WEBSOCKET-REDIS RACE CONDITIONS DETECTED:)
-            print(f"   State inconsistencies suggest race conditions between WebSocket and Redis")
+            print(f"   State inconsistencies suggest race conditions between WebSocket and Redis)"
             print(f   These can cause connection state corruption)
             
             # This test is designed to detect race conditions
@@ -311,7 +311,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     auth_validation_results.append({
                         delay_ms": delay_ms,"
                         success: False,
-                        error": "Auth data not found in Redis,
+                        error": Auth data not found in Redis,"
                         total_validation_time: total_validation_time,
                         auth_data_retrieved: False""
                     }
@@ -344,7 +344,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         print(f"\n[U+1F4CB] Validation Results by Delay:)"
         for result in auth_validation_results:
             delay = result.get(delay_ms, 0)
-            success = " PASS:  if result.get(success", False) else  FAIL: 
+            success = " PASS:  if result.get(success, False) else  FAIL: "
             val_time = result.get(total_validation_time, 0)""
             error = result.get("error, )"
             print(f   {delay:4d}ms delay: {success} ({val_time:.3f}s) {error})
@@ -375,7 +375,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
     @pytest.mark.integration  
     @pytest.mark.real_services
     async def test_websocket_session_persistence(self, real_services_fixture):
-        ""
+        """
         Test WebSocket session persistence in Redis during connection issues.
         
         EXPECTED RESULT: Should test session recovery after temporary disconnections.
@@ -410,11 +410,11 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         
         # Test session persistence through various scenarios
         test_scenarios = [
-            {name: normal_activity, simulation": "normal},
+            {name: normal_activity, simulation": normal},"
             {name: connection_drop, simulation: "disconnect},"
             {name": rapid_reconnect, simulation: fast_reconnect},"
-            {name": "delayed_reconnect, simulation: slow_reconnect},
-            {name: "concurrent_updates, simulation": concurrent}
+            {name": delayed_reconnect, simulation: slow_reconnect},"
+            {name: "concurrent_updates, simulation: concurrent}"
         ]
         
         for scenario in test_scenarios:
@@ -461,7 +461,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     await redis_client.setex(session_key, 3600, json.dumps(session_update))
                     
                     # Immediate reconnect
-                    session_update[status"] = "reconnecting
+                    session_update[status"] = reconnecting"
                     session_update[reconnect_attempt] = 1
                     await redis_client.setex(session_key, 3600, json.dumps(session_update))
                     
@@ -560,14 +560,14 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         avg_scenario_time = sum(r.get(scenario_time, 0) for r in session_persistence_results) / len(session_persistence_results)
         
         print(f\n[U+1F4BE] SESSION PERSISTENCE ANALYSIS:)
-        print(f CHART:  Successful scenarios: {successful_scenarios}/{len(session_persistence_results")}")
+        print(f CHART:  Successful scenarios: {successful_scenarios}/{len(session_persistence_results")})"
         print(f FAIL:  Failed scenarios: {len(failed_scenarios)})
         print(f[U+23F1][U+FE0F]  Average scenario time: {avg_scenario_time:.3f}s"")
         
         # Print detailed results
         print(f\n[U+1F4CB] Session Persistence Results:)
         for result in session_persistence_results:
-            scenario = result.get(scenario", "unknown)
+            scenario = result.get(scenario", unknown)"
             success =  PASS:  if result.get(success, False) else  FAIL: ""
             time_taken = result.get("scenario_time, 0)"
             error = result.get(error, )
@@ -650,7 +650,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     # Update user state
                     user_state["messages).append({"
                         operation: operation,
-                        "message: fUser {user_index} operation {operation}",
+                        "message: fUser {user_index} operation {operation},"
                         timestamp: datetime.now(timezone.utc).isoformat()
                     }
                     user_state[last_operation] = operation""
@@ -699,7 +699,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                         user_index: user_index,""
                         "user_id: user_id,"
                         success: False,
-                        "error: State not found in Redis",
+                        "error: State not found in Redis,"
                         state_consistent: False,
                         no_contamination: False""
                     }
@@ -730,14 +730,14 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         
         print(f\n[U+1F465] MULTI-USER ISOLATION ANALYSIS:")"
         print(f CHART:  Successful user operations: {successful_users}/{len(isolation_test_results)})
-        print(f PASS:  Consistent states: {consistent_states}/{len(isolation_test_results")}")
+        print(f PASS:  Consistent states: {consistent_states}/{len(isolation_test_results")})"
         print(f[U+1F512] No contamination: {no_contamination_count}/{len(isolation_test_results)})
         
         # Print detailed isolation results
         print(f\n[U+1F4CB] User Isolation Results:"")
         for result in isolation_test_results:
             user_idx = result.get(user_index, unknown)
-            success = " PASS:  if result.get(success", False) else  FAIL: 
+            success = " PASS:  if result.get(success, False) else  FAIL: "
             consistent =  PASS:  if result.get("state_consistent, False) else  FAIL: "
             no_contam =  PASS:  if result.get(no_contamination, False) else " FAIL: "
             msg_count = result.get(message_count, 0)

@@ -282,10 +282,10 @@ class SSOTBackwardCompatibilityTests:
         assert len(contamination_failures) == 0, f"CRITICAL: Cross-pattern contamination detected: {len(contamination_failures)} cases"
         assert len(isolation_failures) == 0, fCRITICAL: Isolation boundaries failed: {len(isolation_failures)} cases"
         assert len(isolation_failures) == 0, fCRITICAL: Isolation boundaries failed: {len(isolation_failures)} cases"
-        assert len(compatibility_failures) == 0, fBackward compatibility test failed: {len(compatibility_failures)} total failures
+        assert len(compatibility_failures) == 0, "fBackward compatibility test failed: {len(compatibility_failures)} total failures"
     
     async def test_concurrent_mixed_pattern_execution_isolation(self):
-        "
+        """
         "
         EXECUTION CRITICAL: Test concurrent execution of mixed legacy/modern patterns.
         Verifies isolation is maintained when both patterns execute simultaneously.
@@ -425,10 +425,10 @@ class SSOTBackwardCompatibilityTests:
         assert len(contamination_failures) == 0, fCRITICAL: Cross-execution contamination: {len(contamination_failures)} cases"
         assert len(contamination_failures) == 0, fCRITICAL: Cross-execution contamination: {len(contamination_failures)} cases"
         assert len(corruption_failures) == 0, f"CRITICAL: Execution data corruption: {len(corruption_failures)} cases"
-        assert len(mixed_execution_failures) == 0, fMixed execution isolation failed: {len(mixed_execution_failures)} total failures
+        assert len(mixed_execution_failures) == 0, "fMixed execution isolation failed: {len(mixed_execution_failures)} total failures"
     
     async def test_async_websocket_legacy_modern_pattern_isolation(self):
-    ""
+    """
         ASYNC ISOLATION CRITICAL: Test WebSocket isolation between async legacy/modern patterns.
         Verifies async operations maintain isolation across different pattern styles.
         
@@ -603,12 +603,12 @@ class SSOTBackwardCompatibilityTests:
             logger.error(fAsync WebSocket isolation failures: {async_isolation_failures[:10]}")"
         
         # Verify async WebSocket isolation
-        assert len(contamination_failures) == 0, fCRITICAL: Async pattern contamination: {len(contamination_failures)} cases
-        assert len(timeout_failures) <= 5, fToo many async timeouts: {len(timeout_failures)} cases (may indicate performance issues)
+        assert len(contamination_failures) == 0, "fCRITICAL: Async pattern contamination: {len(contamination_failures)} cases"
+        assert len(timeout_failures) <= 5, "fToo many async timeouts: {len(timeout_failures)} cases (may indicate performance issues)"
         assert len(async_isolation_failures) <= 8, f"Too many async isolation failures: {len(async_isolation_failures)} detected"
     
     def test_legacy_database_utility_adapter(self):
-        "
+        """
         "
         DATABASE COMPATIBILITY CRITICAL: Test legacy database patterns work.
         This ensures existing database test code doesn't break.'
@@ -640,7 +640,7 @@ class SSOTBackwardCompatibilityTests:
             self.assertIsNotNone(e)  # Should get meaningful error, not crash
     
     def test_legacy_test_pattern_detection(self):
-        ""
+        """
         DETECTION CRITICAL: Test detection of legacy test patterns.
         This validates our ability to identify tests that need migration.
 
@@ -679,7 +679,7 @@ class SSOTBackwardCompatibilityTests:
                            fLegacy pattern should be detected as present: {pattern}")"
     
     def test_legacy_to_ssot_migration_suggestions(self):
-    "
+        """
     "
         MIGRATION CRITICAL: Test migration suggestions for legacy code.
         This validates our ability to guide migration to SSOT patterns.
@@ -727,7 +727,7 @@ class SSOTBackwardCompatibilityTests:
                          Migration step should show after code")"
     
     def test_legacy_compatibility_report_generation(self):
-    "
+        """
     "
         REPORTING CRITICAL: Test legacy compatibility report generation.
         This validates our ability to track migration progress.
@@ -768,7 +768,7 @@ class SSOTBackwardCompatibilityTests:
                                 fReport metric should be integer: {metric}")"
     
     def test_ssot_environment_with_legacy_code(self):
-    "
+        """
     "
         ENVIRONMENT CRITICAL: Test SSOT environment works with legacy code.
         This ensures IsolatedEnvironment doesn't break legacy patterns.'
@@ -795,7 +795,7 @@ class SSOTBackwardCompatibilityTests:
                            Legacy and SSOT environment access should match")"
     
     def test_mixed_inheritance_patterns(self):
-    "
+        """
     "
         INHERITANCE CRITICAL: Test mixed inheritance patterns work.
         This ensures gradual migration doesn't break existing hierarchies.'
@@ -832,7 +832,7 @@ class SSOTBackwardCompatibilityTests:
         test_instance.tearDown()
     
     def test_legacy_async_pattern_compatibility(self):
-        "
+        """
         "
         ASYNC COMPATIBILITY CRITICAL: Test legacy async patterns work.
         This ensures existing async test code doesn't break with SSOT.'
@@ -882,7 +882,7 @@ class SSOTBackwardCompatibilityTests:
         asyncio.run(run_legacy_async_test())
     
     def test_performance_impact_of_compatibility_layer(self):
-    ""
+    """
         PERFORMANCE CRITICAL: Test compatibility layer doesn't degrade performance.'
         This ensures backward compatibility doesn't slow down test execution.'
         
@@ -961,7 +961,7 @@ class SSOTLegacyMigrationHelpersTests:
         logger.info(fCompleted migration helper test cleanup: {self._testMethodName} (ID: {self.test_id})
     
     def test_automatic_migration_tool(self):
-    ""
+    """
         AUTOMATION CRITICAL: Test automatic migration tool functionality.
         This validates our ability to automatically migrate simple legacy patterns.
         
@@ -1053,7 +1053,7 @@ class NewTest(BaseTestCase):
                        Should detect MockFactory usage)
     
     def test_batch_migration_tool(self):
-        ""
+        """
         BATCH CRITICAL: Test batch migration tool functionality.
         This validates our ability to migrate multiple test files at once.
 
@@ -1114,7 +1114,7 @@ class NewTest(BaseTestCase):
 
 
 class SSOTDeprecationHandlingTests:
-    ""
+    """
     DEPRECATION CRITICAL: Test SSOT deprecation handling.
     These tests ensure deprecated patterns are handled gracefully with warnings.
 
@@ -1159,7 +1159,7 @@ class SSOTDeprecationHandlingTests:
             self.assertIn(get_mock_factory, warning_message)
     
     def test_gradual_deprecation_timeline(self):
-        ""
+        """
         TIMELINE CRITICAL: Test gradual deprecation timeline is respected.
         This ensures deprecated features are removed on schedule.
 

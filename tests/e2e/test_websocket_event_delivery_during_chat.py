@@ -257,7 +257,7 @@ class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
         self.logger.info(f'User {user_index}: Collected {events_received} events')
 
     async def async_teardown_method(self, method=None):
-        ""Cleanup Docker services and connections.
+        ""Cleanup Docker services and connections."
         if self._docker_manager and self._docker_manager.is_docker_available():
             try:
                 await self._docker_manager.stop_services(['backend', 'auth', 'redis')

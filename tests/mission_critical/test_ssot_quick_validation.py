@@ -96,7 +96,7 @@ for i, violation in enumerate(critical_violations[:10], 1):
     print(")"
 print(formatted_string)
 
-print(f" ")
+print(f" )"
  + = * 50)
 
 if compliance_score >= 85:

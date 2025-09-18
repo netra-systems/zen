@@ -100,7 +100,7 @@ class EventContentScore:
 
     @dataclass
 class UserTimingAnalysis:
-    ""Analysis of event timing patterns per user.
+    ""Analysis of event timing patterns per user."
     user_id: str
     total_duration: float
     event_count: int
@@ -157,7 +157,7 @@ class ReliabilityMockConnectionPool:
         return self.connections[connection_key]
 
     def get_user_events(self, user_id: str, connection_id: str = default) -> List[Dict]:
-        ""Get all events for a specific user.
+        ""Get all events for a specific user."
         connection_key = formatted_string"
         connection_key = formatted_string"
         if connection_key in self.connections:
@@ -336,7 +336,7 @@ class FactoryPatternEventValidator:
         score.user_actionable = True
 
         # Quality indicators for thinking content
-        quality_words = [analyzing, considering", "evaluating, planning, reasoning]
+        quality_words = [analyzing, considering", evaluating, planning, reasoning]"
         if any(word in thinking.lower() for word in quality_words):
         score.quality_score = EventQuality.EXCELLENT
         score.contains_context = True
@@ -407,7 +407,7 @@ class FactoryPatternEventValidator:
         return score
 
     def validate_user_reliability(self, user_id: str) -> Tuple[bool, List[str]]:
-        ""Validate reliability for specific user.
+        ""Validate reliability for specific user."
         failures = []
 
         if user_id not in self.user_events:
@@ -601,7 +601,7 @@ class FactoryPatternReliabilityTestHarness:
         await emitter.notify_agent_started(agent_name, run_id)
         self.validator.record_user_event(user_id, {)
         event_type: agent_started,
-        data: {agent_name": agent_name, "run_id: run_id}
+        "data": {"agent_name": agent_name, "run_id: run_id}"
         
 
         if include_timing_issues:
@@ -613,8 +613,8 @@ class FactoryPatternReliabilityTestHarness:
                 # Removed problematic line: await emitter.notify_agent_thinking(agent_name, run_id,
         fIm carefully analyzing your request to provide the most helpful response for user {user_id})
         self.validator.record_user_event(user_id, {)
-        event_type: "agent_thinking",
-        data: {thinking: formatted_string}
+        event_type: "agent_thinking,"
+        "data": {"thinking: formatted_string}"
                 
 
         if include_timing_issues:
@@ -626,17 +626,17 @@ class FactoryPatternReliabilityTestHarness:
         await emitter.notify_tool_executing(agent_name, run_id, analysis_tool", {user: user_id)"
         self.validator.record_user_event(user_id, {)
         "event_type: tool_executing,"
-        data: {tool_name: "analysis_tool", parameters: {user: user_id}}
+        "data": {"tool_name: "analysis_tool", parameters: {user: user_id}}"
                         
 
         await asyncio.sleep(0.2)
 
                         # Tool completion
                         # Removed problematic line: await emitter.notify_tool_completed(agent_name, run_id, analysis_tool,
-        {result": formatted_string, "success: True}
+        {result": formatted_string, success: True}"
         self.validator.record_user_event(user_id, {)
         event_type: tool_completed,
-        data: {"tool_name": analysis_tool, result: formatted_string, success": True}"
+        "data": {""tool_name": analysis_tool, result: formatted_string, success": True"}"
                         
 
         await asyncio.sleep(0.1)
@@ -646,7 +646,7 @@ class FactoryPatternReliabilityTestHarness:
         {success: True, "summary: formatted_string}"
         self.validator.record_user_event(user_id, {)
         event_type: agent_completed,
-        "data": {success: True, summary: formatted_string}
+        "data: {success: True, summary: formatted_string}"
                         
 
         return True
@@ -676,7 +676,7 @@ class FactoryPatternReliabilityTestHarness:
         validation_passed: is_valid,
         validation_results: results,
         factory_metrics: factory_metrics,
-        "pool_statistics": pool_stats
+        "pool_statistics: pool_stats"
     
 
 
@@ -703,12 +703,12 @@ class TestComprehensiveWebSocketEventReliability:
     async def test_enhanced_event_content_quality_per_user(self):
     Test event content quality with per-user validation.
 pass
-print(" TARGET:  Testing enhanced event content quality per user")
+print(" TARGET:  Testing enhanced event content quality per user)"
 
                 # Test multiple users with different quality scenarios
 user_scenarios = [
 {user_id: quality_user_1, include_timing_issues: False},
-{"user_id": quality_user_2, include_timing_issues: False},
+{"user_id": "quality_user_2, include_timing_issues: False},"
 {user_id: quality_user_3", include_timing_issues: False}"
                 
 
@@ -723,12 +723,12 @@ results.append(result)
 
                     # Validate results
 reliability_results = self.test_harness.get_reliability_results()
-assert reliability_results[validation_passed], fContent quality validation failed
+assert reliability_results[validation_passed], "fContent quality validation failed"
 
                     # Check per-user quality
-for user_id in [s["user_id"] for s in user_scenarios]:
+for user_id in [s["user_id] for s in user_scenarios]:"
     user_quality = self.test_harness.validator.get_user_content_quality(user_id)
-assert user_quality >= 3.5, formatted_string
+assert user_quality >= 3.5, "formatted_string"
 
                         # Check overall quality
 overall_quality = reliability_results[validation_results][overall_quality]
@@ -746,7 +746,7 @@ print([U+23F1][U+FE0F] Testing timing analysis with user isolation)
 
                             # Create users with different timing patterns
 timing_scenarios = [
-{"user_id": timing_good, include_timing_issues: False},
+{"user_id": "timing_good, include_timing_issues: False},"
 {user_id: timing_slow", include_timing_issues: True},"
 {"user_id: timing_mixed, include_timing_issues: False}"
                             
@@ -755,9 +755,9 @@ timing_scenarios = [
 for scenario in timing_scenarios:
     success = await self.test_harness.simulate_comprehensive_user_flow( )
 scenario[user_id],
-scenario["include_timing_issues"]
+scenario["include_timing_issues]"
                                 
-assert success, formatted_string
+assert success, "formatted_string"
 
                                 # Analyze timing per user
 for scenario in timing_scenarios:
@@ -765,16 +765,16 @@ for scenario in timing_scenarios:
 timing_analysis = self.test_harness.validator.analyze_user_timing(user_id)
 
                                     # Basic timing assertions
-assert timing_analysis.event_count >= 5, formatted_string
+assert timing_analysis.event_count >= 5, "formatted_string"
 
 if scenario[include_timing_issues"]:"
                                         # Should detect silence periods
-assert len(timing_analysis.silent_periods) > 0, formatted_string
+assert len(timing_analysis.silent_periods) > 0, "formatted_string"
 assert timing_analysis.max_silent_period >= 5.0, "
 assert timing_analysis.max_silent_period >= 5.0, "
 else:
                                             # Should have good timing quality
-assert timing_analysis.timing_quality_score >= 0.7, formatted_string
+assert timing_analysis.timing_quality_score >= 0.7, "formatted_string"
 
                                             # Validate overall timing
 reliability_results = self.test_harness.get_reliability_results()
@@ -788,7 +788,7 @@ print("")
     async def test_concurrent_user_reliability_isolation(self):
     Test reliability under concurrent load with complete user isolation.
 pass
-print(" CYCLE:  Testing concurrent user reliability isolation")
+print(" CYCLE:  Testing concurrent user reliability isolation)"
 
                                                 # Create many concurrent users
 concurrent_users = 12
@@ -843,9 +843,9 @@ print( ALERT:  Testing edge case recovery with user isolation")"
                                                             # Create users for different edge case scenarios
 edge_case_users = [
 {user_id: "edge_normal, scenario: normal},"
-{user_id: "edge_failure", scenario: connection_failure},
-{user_id: edge_timeout", scenario: "timeout},
-{user_id: edge_recovery, scenario: "recovery_test"}
+{user_id: "edge_failure, scenario: connection_failure},"
+{user_id: edge_timeout", scenario: timeout},"
+{user_id: edge_recovery, scenario: "recovery_test}"
                                                             
 
                                                             # Configure edge cases
@@ -872,7 +872,7 @@ include_timing_issues=(user_config["scenario] == timeout)"
                                                                                 
 edge_results.append({)
 user_id: user_config[user_id],
-"scenario": user_config[scenario],
+"scenario: user_config[scenario],"
 success: result
                                                                                 
 except Exception as e:
@@ -884,8 +884,8 @@ error: str(e)
                                                                                     
 
                                                                                     # Validate edge case handling
-normal_user = next(r for r in edge_results if r[scenario] == "normal")
-assert normal_user[success], Normal user should succeed despite edge cases in other users
+normal_user = next(r for r in edge_results if r[scenario] == "normal)"
+assert normal_user[success], "Normal user should succeed despite edge cases in other users"
 
                                                                                     # At least some edge case scenarios should succeed (showing recovery)
 successful_edge_cases = sum(1 for r in edge_results if r[success)
@@ -895,7 +895,7 @@ assert successful_edge_cases >= 2, "
                                                                                     # Validate user isolation wasn't broken by edge cases'
 reliability_results = self.test_harness.get_reliability_results()
 isolation_valid = reliability_results[validation_results]["isolation_valid]"
-assert isolation_valid, User isolation broken during edge case scenarios
+assert isolation_valid, "User isolation broken during edge case scenarios"
 
 print()
 
@@ -910,8 +910,8 @@ print([U+1F465] Testing user experience reliability validation")"
                                                                                         # Create users with different UX scenarios
 ux_scenarios = [
 {user_id: "ux_excellent, quality_level: excellent},"
-{user_id: "ux_good", quality_level: good},
-{user_id: ux_degraded", quality_level: "degraded}
+{user_id: "ux_good, quality_level: good},"
+{user_id: ux_degraded", quality_level: degraded}"
                                                                                         
 
                                                                                         # Run UX scenarios
@@ -927,7 +927,7 @@ user_id, failure_rate=0.15, latency_ms=100
 
 success = await self.test_harness.simulate_comprehensive_user_flow( )
 user_id,
-include_timing_issues=(quality_level == "degraded")
+include_timing_issues=(quality_level == "degraded)"
                                                                                                 
 
                                                                                                 # Even degraded scenarios should complete (with potential retries)
@@ -943,12 +943,12 @@ if scenario[quality_level"] == excellent:"
     assert user_quality >= 4.0, "
     assert user_quality >= 4.0, "
 elif scenario[quality_level] == good:
-    assert user_quality >= 3.5, formatted_string
+    assert user_quality >= 3.5, "formatted_string"
                                                                                                                 # Degraded users allowed to be lower but should still be functional
 
                                                                                                                 # Check user isolation in UX
 reliability_results = self.test_harness.get_reliability_results()
-user_results = reliability_results["validation_results"][user_results]
+user_results = reliability_results["validation_results][user_results]"
 
                                                                                                                 # Excellent and good users should not be affected by degraded user
 excellent_user = user_results.get(ux_excellent, {)
@@ -972,14 +972,14 @@ print(=" * 100)"
 
                                                                                                                     # Test scenarios combining all reliability aspects
 comprehensive_scenarios = [
-{user_id: comp_perfect", "failure_rate: 0.0, latency_ms: 0, timing_issues: False},
+{user_id: comp_perfect", failure_rate: 0.0, latency_ms: 0, timing_issues: False},"
 {user_id": "comp_minor_issues, failure_rate: 0.5, latency_ms: 25, timing_issues: False},"
 {user_id": "comp_minor_issues, failure_rate: 0.5, latency_ms: 25, timing_issues: False},"
 {"user_id: comp_timing_issues, failure_rate: 0.0, latency_ms: 0, "timing_issues: True},"
 {"user_id: comp_timing_issues, failure_rate: 0.0, latency_ms: 0, "timing_issues: True},"
-{user_id: comp_network_issues, failure_rate: 0.1, "latency_ms: 50, timing_issues": False},
-{user_id: comp_mixed_issues, "failure_rate: 0.8, latency_ms": 75, timing_issues: True},
-{user_id: "comp_recovery, failure_rate": 0.15, latency_ms: 100, timing_issues: False}
+{user_id: comp_network_issues, failure_rate: 0.1, "latency_ms: 50, timing_issues: False},"
+{user_id: comp_mixed_issues, "failure_rate: 0.8, latency_ms: 75, timing_issues: True},"
+{user_id: "comp_recovery, failure_rate: 0.15, latency_ms: 100, timing_issues: False}"
                                                                                                                     
 
                                                                                                                     # Configure all scenarios
@@ -1013,7 +1013,7 @@ reliability_results = self.test_harness.get_reliability_results()
 
                                                                                                                             # Comprehensive validation assertions
 assert success_rate >= 0.8, formatted_string""
-assert reliability_results[validation_passed], Comprehensive reliability validation failed
+assert reliability_results[validation_passed], "Comprehensive reliability validation failed"
 
                                                                                                                             # Timing assertions
 assert total_duration < 30, formatted_string"
@@ -1024,17 +1024,17 @@ overall_quality = reliability_results[validation_results"][overall_quality]"
 overall_timing = reliability_results[validation_results][overall_timing_quality]
 
 assert overall_quality >= 3.0, formatted_string""
-assert overall_timing >= 0.6, formatted_string
+assert overall_timing >= 0.6, "formatted_string"
 
                                                                                                                             # Factory performance assertions
 factory_metrics = reliability_results[factory_metrics]"
 factory_metrics = reliability_results[factory_metrics]"
 assert factory_metrics["emitters_created] == len(comprehensive_scenarios), Factory should create all emitters"
-assert factory_metrics[emitters_active] >= len(comprehensive_scenarios) * 0.8, Most emitters should be active
+assert factory_metrics[emitters_active] >= len(comprehensive_scenarios) * 0.8, "Most emitters should be active"
 
                                                                                                                             # Pool statistics
 pool_stats = reliability_results["pool_statistics]"
-assert pool_stats[success_rate] >= 0.7, formatted_string
+assert pool_stats[success_rate] >= 0.7, "formatted_string"
 
                                                                                                                             # Generate final report
 print(f )

@@ -40,7 +40,7 @@ class WebSocketServiceDiscoveryTests:
     
     @pytest.fixture
     async def websocket_client(self, backend_client):
-        ""Get authenticated WebSocket client.
+        ""Get authenticated WebSocket client."
         token = await backend_client.get_jwt_token()
         ws_client = WebSocketTestClient()
         await ws_client.connect(token)
@@ -61,22 +61,22 @@ class WebSocketServiceDiscoveryTests:
         )
         
         config_data = response.json()
-        assert isinstance(config_data, dict), WebSocket config must be JSON object
+        assert isinstance(config_data, "dict), WebSocket config must be JSON object"
         
         # Required configuration fields per SPEC/websockets.xml
-        required_fields = [websocket_url", "connection_timeout, heartbeat_interval]
+        required_fields = [websocket_url", connection_timeout, heartbeat_interval]"
         for field in required_fields:
-            assert field in config_data, fWebSocket config missing required field: {field}
+            assert field in config_data, "fWebSocket config missing required field: {field}"
         
         # Validate WebSocket URL format
         websocket_url = config_data[websocket_url"]"
-        assert isinstance(websocket_url, str), websocket_url must be string
+        assert isinstance(websocket_url, "str), websocket_url must be string"
         assert websocket_url.startswith((ws://, "wss://)), websocket_url must use ws:// or wss:// protocol"
-        assert /ws in websocket_url, websocket_url must include /ws path
+        assert /ws in websocket_url, "websocket_url must include /ws path"
         
         # Validate numeric configuration values
         assert isinstance(config_data["connection_timeout], (int, float)), connection_timeout must be number"
-        assert config_data[connection_timeout] > 0, connection_timeout must be positive
+        assert config_data[connection_timeout] > 0, "connection_timeout must be positive"
         
         assert isinstance(config_data[heartbeat_interval], (int, float)), heartbeat_interval must be number""
         assert config_data["heartbeat_interval] > 0, heartbeat_interval must be positive"
@@ -134,16 +134,16 @@ class WebSocketServiceDiscoveryTests:
         # If token_param is specified for query auth
         if token_param in config_data:
             assert isinstance(config_data["token_param], str), token_param must be string"
-            assert config_data[token_param], token_param cannot be empty
+            assert config_data[token_param], "token_param cannot be empty"
         
         # If auth_header is specified for header auth
         if auth_header in config_data:""
             assert isinstance(config_data[auth_header"], str), auth_header must be string"
-            assert config_data[auth_header], auth_header cannot be empty
+            assert config_data[auth_header], "auth_header cannot be empty"
     
     @pytest.mark.e2e
     async def test_websocket_config_connection_parameters(self, backend_client):
-        ""Test WebSocket config includes connection optimization parameters.
+        ""Test WebSocket config includes connection optimization parameters."
         response = await backend_client.get(/api/config/websocket)""
         config_data = response.json()
         
@@ -160,7 +160,7 @@ class WebSocketServiceDiscoveryTests:
             if param in config_data:
                 value = config_data[param]
                 assert isinstance(value, expected_type), f"{param} must be {expected_type.__name__}"
-                assert validator(value), f{param} validation failed: {value}
+                assert validator(value), "f{param} validation failed: {value}"
     
     @pytest.mark.e2e
     async def test_websocket_discovery_at_application_startup(self, backend_client):
@@ -194,7 +194,7 @@ class WebSocketServiceDiscoveryTests:
     
     @pytest.mark.e2e
     async def test_websocket_config_caching_headers(self, backend_client):
-        ""Test WebSocket config includes appropriate caching headers.
+        ""Test WebSocket config includes appropriate caching headers."
         response = await backend_client.get(/api/config/websocket)""
         
         # Check caching headers for config optimization
@@ -221,21 +221,21 @@ class WebSocketServiceDiscoveryTests:
         config_data = response.json()
         
         # Version information for compatibility checking
-        version_fields = [protocol_version, "api_version, min_client_version"]
+        version_fields = [protocol_version, "api_version, min_client_version]"
         version_info_count = sum(1 for field in version_fields if field in config_data)
         
         if version_info_count > 0:
             # Validate version format if present
             if protocol_version in config_data:
                 protocol_version = config_data[protocol_version"]"
-                assert isinstance(protocol_version, str), protocol_version must be string
+                assert isinstance(protocol_version, "str), protocol_version must be string"
                 # Should follow semantic versioning or simple version format
                 assert any(char.isdigit() for char in protocol_version), protocol_version should contain version numbers""
             
             if "api_version in config_data:"
                 api_version = config_data[api_version]
                 assert isinstance(api_version, str), "api_version must be string"
-                assert any(char.isdigit() for char in api_version), api_version should contain version numbers
+                assert any(char.isdigit() for char in api_version), "api_version should contain version numbers"
     
     @pytest.mark.e2e
     async def test_websocket_config_load_balancing_support(self, backend_client):
@@ -247,7 +247,7 @@ class WebSocketServiceDiscoveryTests:
         websocket_url = config_data["websocket_url]"
         
         # Should not hardcode specific server instances
-        problematic_patterns = [server1, instance-, pod-, ":8080, :3000"]
+        problematic_patterns = [server1, instance-, pod-, ":8080, :3000]"
         for pattern in problematic_patterns:
             if pattern in websocket_url.lower():
                 # This might indicate hardcoded instance-specific URLs
@@ -260,7 +260,7 @@ class WebSocketServiceDiscoveryTests:
         if not any(local in websocket_url for local in ["localhost, 127.0.0.1):"
             # In non-local environments, should use proper service names
             url_parts = websocket_url.split(://)[1].split(/)[0]
-            assert not url_parts.endswith(":8080) and not url_parts.endswith(:3000"), (
+            assert not url_parts.endswith(":8080) and not url_parts.endswith(:3000), ("
                 fNon-local WebSocket URL should not use development ports: {websocket_url}
             )
     
@@ -298,7 +298,7 @@ class WebSocketServiceDiscoveryTests:
         try:
             response = await backend_client.get(/api/config/websocket?invalid=param)""
             # Should either succeed or return proper error
-            assert response.status_code in [200, 400), (
+            assert response.status_code in [200, "400), ("
                 f"Unexpected status code for malformed request: {response.status_code}"
             )
             

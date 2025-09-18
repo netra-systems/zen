@@ -121,7 +121,7 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
             self.fail(thinking_content should not be buried in 'data' wrapper)
 
     def validate_tool_executing_structure(self, event: Dict[str, Any):
-        ""
+        """
         Validate tool_executing event structure
         EXPECTED FAILURE: Tool details should be at top level
 
@@ -164,7 +164,7 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
 """"""
         websocket = await self.setup_staging_websocket_connection()
         try:
-            conversation_id = await self.start_agent_conversation("What's the weather like?)"'
+            conversation_id = await self.start_agent_conversation("What's the weather like?)'"
             events = await self.capture_websocket_events(duration_seconds=8)
             for event in events:
                 event_type = event.get('type')
@@ -191,7 +191,7 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_real_time_event_streaming_structure(self):
-    ""
+    """
         Test real-time event streaming maintains consistent structure
         EXPECTED FAILURE: Structure inconsistencies may affect real-time UX
         

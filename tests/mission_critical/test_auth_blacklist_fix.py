@@ -48,7 +48,7 @@ class BlacklistAsyncFixTests:
     
     @pytest.mark.asyncio
     async def test_why_1_no_await_bool_error(self, auth_service, sample_token):
-        ""WHY #1 Fix: Verify no 'object bool can't be used in await' error'
+        ""WHY #1 Fix: Verify no 'object bool can't be used in await' error'"
         # This should not raise object bool can't be used in await expression'
         try:
             result = await auth_service.is_token_blacklisted(sample_token)
@@ -115,15 +115,15 @@ class BlacklistAsyncFixTests:
         
         # Check if blacklisted
         is_blacklisted = await auth_service.is_token_blacklisted(sample_token)
-        assert is_blacklisted is True, Token should be blacklisted
+        assert is_blacklisted is True, "Token should be blacklisted"
         
         # Check a different token
         other_token = sample_token + _different""
         is_blacklisted = await auth_service.is_token_blacklisted(other_token)
-        assert is_blacklisted is False, Other token should not be blacklisted
+        assert is_blacklisted is False, "Other token should not be blacklisted"
         
-        logger.info( PASS:  WHY #4 Fix validated: Real integration works)"
-        logger.info( PASS:  WHY #4 Fix validated: Real integration works)"
+        logger.info("PASS:  WHY #4 Fix validated: Real integration works))"
+        logger.info("PASS:  WHY #4 Fix validated: Real integration works))"
     
     @pytest.mark.asyncio
     async def test_why_5_ssot_principle(self, auth_service):
@@ -167,7 +167,7 @@ class BlacklistAsyncFixTests:
         
         # Should handle errors gracefully
         result = await auth_service.is_token_blacklisted(sample_token)
-        assert result is False, Should return False on error (fail-open)
+        assert result is False, "Should return False on error (fail-open)"
         
         # Blacklist should fallback to memory on error
         await auth_service.blacklist_token(sample_token)
@@ -220,7 +220,7 @@ class BlacklistEndpointIntegrationTests:
             "/auth/check-blacklist,"
             json={token: test_token_123},
             headers={
-                X-Service-ID": "netra-backend,
+                X-Service-ID": netra-backend,"
                 X-Service-Secret: test-secret
             }
         
@@ -257,7 +257,7 @@ def test_five_whys_documentation():
     logger.info( PASS:  Five Whys documentation validated")"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # Configure logging
     logging.basicConfig(
         level=logging.INFO,

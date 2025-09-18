@@ -56,7 +56,7 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
             # Create minimal execution context for Golden Path test
             execution_context = {
                 user_id: test_user_123,
-                session_id": "test_session_456,
+                session_id": test_session_456,"
                 request: Optimize my AI infrastructure costs,
                 llm_manager: mock_llm_manager,"
                 llm_manager: mock_llm_manager,"
@@ -75,9 +75,9 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
                 # Test that supervisor can be created
                 self.assertIsNotNone(supervisor, SupervisorAgent should be instantiable)
 
-                print(f"\n=== GOLDEN PATH PROTECTION SUCCESS ===")
+                print(f"\n=== GOLDEN PATH PROTECTION SUCCESS ===)"
                 print(f✓ SupervisorAgent SSOT instantiation: Success)
-                print(f"✓ Golden Path readiness: Ready for user requests")
+                print(f"✓ Golden Path readiness: Ready for user requests)"
                 print(=*45)
 
             except Exception as instantiation_error:
@@ -144,9 +144,9 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
 
             print(f\n=== WEBSOCKET GOLDEN PATH PROTECTION ===)"
             print(f\n=== WEBSOCKET GOLDEN PATH PROTECTION ===)"
-            print(f"✓ WebSocket bridge integration: Compatible)")
+            print(f"✓ WebSocket bridge integration: Compatible))"
             print(f✓ Critical events supported: {len(required_events)})
-            print(f"✓ Golden Path real-time updates: Functional")
+            print(f"✓ Golden Path real-time updates: Functional)"
             print(=*50)
 
         except ImportError as e:
@@ -214,7 +214,7 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
             # Mock two different users
             user1_context = {
                 user_id: user_123,
-                "session_id: session_abc",
+                "session_id: session_abc,"
                 request: User 1 request
             }
 
@@ -235,7 +235,7 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
                 # Look for user context related parameters
                 user_context_support = any(
                     param in params for param in [
-                        user_context, user_id", "session_id, execution_context
+                        user_context, user_id", session_id, execution_context"
                     ]
 
                 print(f\n=== MULTI-USER ISOLATION GOLDEN PATH PROTECTION ===)
@@ -255,7 +255,7 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
             self.fail(fGOLDEN PATH FAILURE: Cannot import SSOT SupervisorAgent for multi-user testing: {e})
 
     async def test_agent_registry_integration_continues_working(self):
-        ""GOLDEN PATH: Validate agent registry integration works with SSOT consolidation.
+        ""GOLDEN PATH: Validate agent registry integration works with SSOT consolidation."
 
         Agent registry is critical for agent discovery and coordination.
         Must continue working after SSOT consolidation.
@@ -288,7 +288,7 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
 
         except Exception as e:
             # Make this informational since registry patterns may vary
-            print(f"INFO: Agent registry validation needs more context: {e})")
+            print(f"INFO: Agent registry validation needs more context: {e}))"
 
     async def test_error_handling_preserved_in_ssot_consolidation(self"):"
         GOLDEN PATH: Validate error handling continues working.
@@ -324,9 +324,9 @@ class SupervisorAgentGoldenPathProtectionTests(SSotAsyncTestCase):
 
             print(f\n=== ERROR HANDLING GOLDEN PATH PROTECTION ===)"
             print(f\n=== ERROR HANDLING GOLDEN PATH PROTECTION ===)"
-            print(f"Available error handling methods: {available_error_methods})")
+            print(f"Available error handling methods: {available_error_methods}))"
             print(f✓ Execute method callable: {hasattr(SupervisorAgent, 'execute')})
-            print(f"✓ Golden Path error resilience: Preserved")
+            print(f"✓ Golden Path error resilience: Preserved)"
             print(=*55)
 
         except ImportError as e:

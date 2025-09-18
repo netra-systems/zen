@@ -21,7 +21,7 @@ import time
 from unittest.mock import MagicMock, AsyncMock, patch
 import weakref
 
-from netra_backend.app.websocket_core.gcp_initialization_validator import (
+from netra_backend.app.websocket_core.gcp_initialization_validator import ()
     GCPWebSocketInitializationValidator,
     GCPReadinessState,
     GCPReadinessResult,
@@ -57,7 +57,7 @@ class WebSocketRaceConditionFixTests:
     
     @pytest.fixture
     def validator(self, mock_app_state):
-        ""Create validator with Cloud Run environment.
+        ""Create validator with Cloud Run environment."
         validator = GCPWebSocketInitializationValidator(mock_app_state)
         # Mock Cloud Run environment
         validator.is_cloud_run = True
@@ -94,9 +94,9 @@ class WebSocketRaceConditionFixTests:
         
         await progression_task
         
-        assert result is True, Progressive wait should succeed with extended timeout
+        assert result is True, "Progressive wait should succeed with extended timeout"
         assert elapsed >= 3.5, fShould wait for services phase completion, took {elapsed}s""
-        assert elapsed < 8.0, fShould not timeout, took {elapsed}s
+        assert elapsed < 8.0, "fShould not timeout, took {elapsed}s"
         assert validator.app_state.startup_phase == services
 
     async def test_websocket_startup_queue_basic_functionality(self):
@@ -175,7 +175,7 @@ class WebSocketRaceConditionFixTests:
         # Cleanup should remove expired connection
         await queue._cleanup_expired_connections()
         
-        assert len(queue.queued_connections) == 0, Expired connection should be removed
+        assert len(queue.queued_connections) == 0, "Expired connection should be removed"
 
     async def test_gcp_readiness_guard_with_queueing(self, mock_app_state, mock_websocket):
         "Test readiness guard with connection queueing fallback."
@@ -290,7 +290,7 @@ class RaceConditionIntegrationTests:
     "Integration tests for race condition fixes."
     
     async def test_full_race_condition_scenario(self):
-        ""Test complete race condition scenario with queueing.
+        ""Test complete race condition scenario with queueing."
         # Simulate Cloud Run startup sequence
         app_state = MagicMock()
         app_state.startup_phase = init"
@@ -333,7 +333,7 @@ class RaceConditionIntegrationTests:
             connection_id=connection_id
         ) as result:
             # Should either be immediately ready or queued
-            assert result.ready is True or result.details.get(connection_queued, False)
+            assert result.ready is True or result.details.get(connection_queued, "False)"
         
         await startup_task
 

@@ -73,7 +73,7 @@ class WebSocketStructureInspectionTests:
             tool_name="cost_optimization_tool,"
             parameters={mode: aggressive, target_reduction": 25}"
 
-        assert success, Tool executing notification should succeed
+        assert success, "Tool executing notification should succeed"
         assert len(captured_events) > 0, Should capture at least one event"
         assert len(captured_events) > 0, Should capture at least one event"
 
@@ -101,7 +101,7 @@ class WebSocketStructureInspectionTests:
         # Document the actual structure
         actual_structure = {
             has_type_field: type in event_data,
-            has_tool_name_field": "tool_name in event_data,
+            has_tool_name_field": tool_name in event_data,"
             tool_name_location: top_level if tool_name in event_data else "unknown,"
             all_fields": list(event_data.keys()) if isinstance(event_data, dict) else not_dict,"
             event_data_type: type(event_data).__name__
@@ -115,7 +115,7 @@ class WebSocketStructureInspectionTests:
             pytest.fail(fEvent missing 'type' field. Actual structure: {json.dumps(actual_structure, indent=2)})
 
     async def test_inspect_tool_completed_structure(self, bridge_with_capture):
-        ""
+        """
         Inspect actual tool_completed event structure to document the format.
 
         bridge, captured_events = bridge_with_capture
@@ -176,10 +176,10 @@ class WebSocketStructureInspectionTests:
         actual_structure = {
             "has_type_field: type in event_data,"
             has_tool_name_field: tool_name in event_data,
-            "has_result_field: result" in event_data,
+            "has_result_field: result in event_data,"
             has_results_field: results in event_data,
-            result_location: top_level" if "result in event_data else unknown,
-            results_location: top_level if "results in event_data else unknown",
+            result_location: top_level" if result in event_data else unknown,"
+            results_location: top_level if "results in event_data else unknown,"
             all_fields: list(event_data.keys()) if isinstance(event_data, dict) else not_dict,
             event_data_type: type(event_data).__name__"
             event_data_type: type(event_data).__name__"
@@ -194,7 +194,7 @@ class WebSocketStructureInspectionTests:
             pytest.fail(fEvent missing 'type' field. Actual structure: {json.dumps(actual_structure, indent=2)}")"
 
     async def test_compare_validator_expectations_vs_reality(self, bridge_with_capture):
-    "
+        """
     "
         Compare what the validator expects vs what the bridge actually delivers.
         "
@@ -224,14 +224,14 @@ class WebSocketStructureInspectionTests:
         event_data = args[1] if args and len(args) > 1 else kwargs.get('data', kwargs)
 
         print(f\n=== ACTUAL DELIVERED STRUCTURE ===)
-        print(fEvent data fields: {list(event_data.keys()) if isinstance(event_data, dict") else 'not_dict'}")
+        print(fEvent data fields: {list(event_data.keys()) if isinstance(event_data, dict") else 'not_dict'})"
         print(fHas tool_name: {'tool_name' in event_data})
         print(fHas type: {'type' in event_data}"")
 
         # Test if actual structure would pass validator
         test_event_for_validator = {
             type: tool_executing,
-            "run_id: run-123",
+            "run_id: run-123,"
             agent_name: test_agent,
             timestamp: 2025-9-14T12:0:00Z","
             "payload: {}"
@@ -241,11 +241,11 @@ class WebSocketStructureInspectionTests:
         if isinstance(event_data, dict):
             # Filter out standard fields to see what would go in payload
             payload_fields = {k: v for k, v in event_data.items()
-                            if k not in [run_id, agent_name, timestamp", "type]}
+                            if k not in [run_id, agent_name, timestamp", type]}"
             test_event_for_validator[payload] = payload_fields
 
         print(f\n=== VALIDATION TEST ===)
-        print(fSimulated event for validator: {json.dumps(test_event_for_validator, indent=2")}")
+        print(fSimulated event for validator: {json.dumps(test_event_for_validator, indent=2")})"
 
         result = validator.validate_event(test_event_for_validator, test-user-123)
 
@@ -254,7 +254,7 @@ class WebSocketStructureInspectionTests:
 
         # Document the mismatch
         mismatch_analysis = {
-            validator_expects_tool_name_in_payload": "tool_name in validator_tool_executing_schema,
+            validator_expects_tool_name_in_payload": tool_name in validator_tool_executing_schema,"
             bridge_delivers_tool_name_at_top_level: tool_name in event_data,
             validator_expects_type_field: True,"
             validator_expects_type_field: True,"
@@ -274,5 +274,5 @@ class WebSocketStructureInspectionTests:
 
 if __name__ == __main__:"
 if __name__ == __main__:"
-    pytest.main([__file__, "-v, -s")  # -s to see print output
+    pytest.main([__file__, "-v, -s)  # -s to see print output"
 )))

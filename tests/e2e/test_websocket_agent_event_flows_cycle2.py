@@ -81,12 +81,12 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
             
             # Send real agent request through WebSocket
             agent_request = {
-                "type: agent_request",
+                "type: agent_request,"
                 agent: triage_agent,  # Use simple agent for reliable testing
                 message: Help me analyze my cloud costs for this month","
                 "context: {"""
                     user_intent: cost_analysis,
-                    urgency": "medium
+                    urgency": medium"
                 }
             }
             
@@ -96,24 +96,24 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
             await event_capture_task
             
         # Assert: Validate complete business value delivery
-        assert len(all_events) >= 5, fExpected at least 5 events for complete agent flow, got {len(all_events)}
+        assert len(all_events) >= 5, "fExpected at least 5 events for complete agent flow, got {len(all_events)}"
         assert agent_execution_complete, Agent execution should complete successfully""
         
         # Validate all critical WebSocket events were delivered
         event_types = [event.get(type") for event in all_events]"
-        critical_events = [agent_started, agent_thinking, "tool_executing, tool_completed", agent_completed]
+        critical_events = [agent_started, agent_thinking, "tool_executing, tool_completed, agent_completed]"
         
         for critical_event in critical_events:
             assert critical_event in event_types, fMissing critical business event: {critical_event}""
         
         # Validate business value content
         completed_event = next(e for e in all_events if e.get("type) == agent_completed)"
-        assert result in completed_event, Agent completion must provide results
+        assert result in completed_event, "Agent completion must provide results"
         
         result = completed_event["result]"
         # Business requirement: Results must contain actionable insights
         result_str = str(result).lower()
-        business_value_indicators = [cost, saving, optimization, "recommendation, analysis", insight]
+        business_value_indicators = [cost, saving, optimization, "recommendation, analysis, insight]"
         assert any(indicator in result_str for indicator in business_value_indicators), \
             fAgent result must show business value: {result}
         
@@ -166,7 +166,7 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
                     type: "agent_request,"
                     agent": triage_agent,"
                     message: User 1 cost analysis request,
-                    context": {"user_marker: USER_1_MARKER}
+                    context": {user_marker: USER_1_MARKER}"
                 }
                 
                 # Capture User 1 events
@@ -181,7 +181,7 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
                 await ws2.send_json({
                     "type: agent_request,"""
                     agent: triage_agent, 
-                    "message: User 2 optimization request",
+                    "message: User 2 optimization request,"
                     context: {user_marker: USER_2_MARKER}""
                 }
                 
@@ -195,18 +195,18 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
         await asyncio.gather(user1_session(), user2_session())
         
         # Assert: Validate complete isolation
-        assert len(user1_events) > 0, User 1 should receive events
+        assert len(user1_events) > 0, "User 1 should receive events"
         assert len(user2_events) > 0, "User 2 should receive events"
         
         # Critical business requirement: No cross-user data leakage
         user1_content = json.dumps(user1_events)
         user2_content = json.dumps(user2_events)
         
-        assert USER_1_MARKER in user1_content, User 1 should see their own data
-        assert USER_1_MARKER not in user2_content, "User 2 MUST NOT see User 1's data"'
+        assert USER_1_MARKER in user1_content, "User 1 should see their own data"
+        assert USER_1_MARKER not in user2_content, "User 2 MUST NOT see User 1's data'"
         
         assert USER_2_MARKER" in user2_content, User 2 should see their own data"
-        assert USER_2_MARKER not in user1_content, User 1 MUST NOT see User 2's data'
+        assert USER_2_MARKER not in user1_content, "User 1 MUST NOT see User 2's data'"
         
         # Verify both users got complete agent flows
         user1_event_types = [e.get(type") for e in user1_events]"
@@ -214,7 +214,7 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
         
         for user_events, user_name in [(user1_event_types, User1), (user2_event_types, "User2)]:"
             assert agent_started" in user_events, f{user_name} should get agent_started"
-            assert agent_completed in user_events, f{user_name} should get agent_completed
+            assert agent_completed in user_events, "f{user_name} should get agent_completed"
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -236,9 +236,9 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
             # Send agent request
             await ws_client.send_json({
                 type: agent_request,
-                "agent: triage_agent",
+                "agent: triage_agent,"
                 message: Long-running analysis for connection recovery test,
-                context: {test_type": "connection_recovery}
+                context: {test_type": connection_recovery}"
             }
             
             # Capture events with simulated connection break
@@ -258,16 +258,16 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
                     break
         
         # Assert: Agent execution completed despite connection issues
-        assert len(all_events) >= 3, Should receive events despite connection interruption
+        assert len(all_events) >= 3, "Should receive events despite connection interruption"
         
         event_types = [e.get(type") for e in all_events]"
-        assert agent_started in event_types, Should receive agent_started
+        assert agent_started in event_types, "Should receive agent_started"
         assert agent_completed in event_types, Should eventually receive agent_completed""
         
         # Business requirement: Final result still shows value delivery
         if "agent_completed in event_types:"
             completed_event = next(e for e in all_events if e.get(type) == agent_completed)
-            assert result" in completed_event, "Agent should complete with results even after connection issues
+            assert result" in completed_event, Agent should complete with results even after connection issues"
 
     @pytest.mark.e2e
     @pytest.mark.real_services  
@@ -306,7 +306,7 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
                         type: agent_request", "
                         "agent: triage_agent,"""
                         message: fLoad test request from user {user_index},
-                        "context: {user_index": user_index, load_test: True}
+                        "context: {user_index: user_index, load_test: True}"
                     }
                     
                     # Collect events with timeout
@@ -323,7 +323,7 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
                 user_index: user_index,""
                 events": user_events,"
                 duration: session_duration,
-                success": len(user_events) > 0 and any(e.get("type) == agent_completed for e in user_events)
+                success": len(user_events) > 0 and any(e.get(type) == agent_completed for e in user_events)"
             }
         
         # Execute all user sessions concurrently
@@ -338,7 +338,7 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
         
         # Performance requirement: Reasonable response times under load
         for result in successful_sessions:
-            assert result[duration] < 90, fUser {result['user_index']} took too long: {result['duration']}s
+            assert result[duration] < 90, "fUser {result['user_index']} took too long: {result['duration']}s"
             
             # Verify business value delivered for each user
             events = result["events]"
@@ -346,7 +346,7 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
             assert agent_completed in event_types, fUser {result['user_index']} should receive completion""
             
             completed_event = next(e for e in events if e.get("type) == agent_completed)"
-            assert result in completed_event, fUser {result['user_index']} should get results
+            assert result in completed_event, "fUser {result['user_index']} should get results"
         
         # Business requirement: Platform handles concurrent load efficiently
         assert total_execution_time < 120, f"Total concurrent execution too slow: {total_execution_time}s"

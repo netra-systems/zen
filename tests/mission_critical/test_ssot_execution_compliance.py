@@ -110,7 +110,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
             )
     
     def test_all_test_classes_inherit_from_ssot_base_test_case(self):
-        "
+        """
         "
         CRITICAL: All test classes must inherit from SSOT BaseTestCase.
         
@@ -164,7 +164,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
             )
     
     def test_unified_test_runner_is_canonical_entry_point(self):
-        "
+        """
         "
         CRITICAL: Verify unified_test_runner.py is the canonical test execution entry point.
         
@@ -199,7 +199,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
             )
     
     def test_detect_specific_known_violating_files(self):
-    "
+        """
     "
         CRITICAL: Explicitly test detection of the 3 specific files identified in Issue #1145.
         
@@ -210,7 +210,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
             full_path = PROJECT_ROOT / file_path
             
             # Verify file exists
-            assert full_path.exists(), fKnown violating file not found: {file_path}
+            assert full_path.exists(), "fKnown violating file not found: {file_path}"
             
             # Verify we can detect violations in this specific file
             file_violations = self._analyze_single_file_for_violations(full_path)
@@ -245,7 +245,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
                         )) 
             except Exception as e:
                 # Log but don't fail on file reading errors'
-                print(f"Warning: Could not analyze {test_file}: {e})")
+                print(f"Warning: Could not analyze {test_file}: {e}))"
         
         return violations
     
@@ -258,7 +258,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
             try:
                 violations.extend(self._analyze_single_file_for_violations(test_file))
             except Exception as e:
-                print(f"Warning: Could not analyze {test_file}: {e})")
+                print(f"Warning: Could not analyze {test_file}: {e}))"
         
         return violations
     
@@ -314,7 +314,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
         return violations
     
     def _scan_for_fragmented_execution_patterns(self) -> List[SSOTViolation]:
-        ""Scan for fragmented test execution patterns.
+        ""Scan for fragmented test execution patterns."
         violations = []
         
         fragmented_patterns = [
@@ -350,7 +350,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
         return violations
     
     def _scan_for_alternative_test_runners(self) -> List[SSOTViolation]:
-        ""Scan for alternative test runners that bypass unified infrastructure.
+        ""Scan for alternative test runners that bypass unified infrastructure."
         violations = []
         
         # Look for Python files that might be alternative test runners
@@ -383,7 +383,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
                         ))
                         
             except Exception as e:
-                print(f"Warning: Could not analyze {py_file}: {e})")
+                print(f"Warning: Could not analyze {py_file}: {e}))"
         
         return violations
     
@@ -396,7 +396,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
         test_dirs = [
             PROJECT_ROOT / "tests,"
             PROJECT_ROOT / test_plans, 
-            PROJECT_ROOT / "netra_backend / tests",
+            PROJECT_ROOT / "netra_backend / tests,"
             PROJECT_ROOT / auth_service / tests,
             PROJECT_ROOT / frontend / tests","
             PROJECT_ROOT / "test_framework / tests"

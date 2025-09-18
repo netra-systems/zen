@@ -10,10 +10,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -61,7 +61,7 @@ class TestStreamingEndpointSingleton:
     async def async_client(self):
         """Create async test client."""
         pass
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(app=app, base_url="http://test) as client:"
         yield client
 
         @pytest.fixture
@@ -88,7 +88,7 @@ class TestStreamingEndpointSingleton:
         """Create auth headers for requests."""
         pass
         return { }
-        "Authorization": "Bearer test_token",
+        "Authorization": "Bearer test_token,"
         "Content-Type": "application/json"
     
 
@@ -104,12 +104,12 @@ mock_create_response.return_value = MagicNone  # TODO: Use real service instead 
 
     # Make request
 request_data = { }
-"query": "test query",
+"query": "test query,"
 "id": "test_id"
     
 
 response = test_client.post( )
-"/agent/stream",
+"/agent/stream,"
 json=request_data,
 headers=auth_headers
     
@@ -139,14 +139,14 @@ return service
 mock_get_service.side_effect = track_service
 
 request_data = { }
-"query": "test query",
+"query": "test query,"
 "id": "test_id"
     
 
     # Make multiple requests
 for _ in range(3):
     test_client.post( )
-"/agent/stream",
+"/agent/stream,"
 json=request_data,
 headers=auth_headers
         
@@ -160,16 +160,16 @@ assert len(service_instances) == 3
         # Removed problematic line: async def test_no_duplicate_registration_logs( )
 self, mock_logger, async_client, auth_headers
 ):
-"""Test that agent registration doesn't occur multiple times."""'
+"""Test that agent registration doesn't occur multiple times.""'"
 request_data = { }
-"query": "test query",
+"query": "test query,"
 "id": "test_id"
             
 
             # Make multiple streaming requests
 for _ in range(5):
     await async_client.post( )
-"/agent/stream",
+"/agent/stream,"
 json=request_data,
 headers=auth_headers
                 
@@ -183,9 +183,9 @@ assert len(info_calls) <= 7
 
 @pytest.mark.asyncio
     async def test_concurrent_stream_requests(self, async_client, auth_headers):
-        """Test that concurrent streaming requests don't cause registration issues."""'
+        """Test that concurrent streaming requests don't cause registration issues.""'"
 request_data = { }
-"query": "test query",
+"query": "test query,"
 "id": "test_id"
                     
 
@@ -207,7 +207,7 @@ original_register = mock_register.wraps
 tasks = []
 for _ in range(10):
     task = async_client.post( )
-"/agent/stream",
+"/agent/stream,"
 json=request_data,
 headers=auth_headers
                 
@@ -224,7 +224,7 @@ def test_stream_endpoint_response_structure(self, test_client, auth_headers):
     """Test that streaming endpoint returns proper response."""
 pass
 request_data = { }
-"query": "test query",
+"query": "test query,"
 "id": "test_id"
     
 
@@ -233,10 +233,10 @@ mock_response.body_iterator = [b"data: test )"
 
 "]"
 mock_response.status_code = 200
-mock_response.headers = {"Content-Type": "text/event-stream"}
+mock_response.headers = {"Content-Type": "text/event-stream}"
 
 response = test_client.post( )
-"/agent/stream",
+"/agent/stream,"
 json=request_data,
 headers=auth_headers
     
@@ -252,25 +252,25 @@ mock_instance.agents = {}
 mock_registry_class.return_value = mock_instance
 
 request_data = { }
-"query": "test query",
+"query": "test query,"
 "id": "test_id"
     
 
 test_client.post( )
-"/agent/stream",
+"/agent/stream,"
 json=request_data,
 headers=auth_headers
     
 
     # Verify registry was initialized with idempotency flag
-assert hasattr(mock_instance, '_agents_registered')
+assert hasattr(mock_instance, "'_agents_registered')"
 
 @pytest.mark.e2e
 def test_message_endpoint_also_uses_injection(self, test_client, auth_headers):
     """Test that /message endpoint also uses dependency injection."""
 pass
 request_data = { }
-"message": "test message",
+"message": "test message,"
 "thread_id": "test_thread"
     
 
@@ -278,7 +278,7 @@ with patch('netra_backend.app.routes.agent_route.get_agent_service') as mock_get
     mock_get_service.return_value = MagicNone  # TODO: Use real service instead of Mock
 
 response = test_client.post( )
-"/agent/message",
+"/agent/message,"
 json=request_data,
 headers=auth_headers
         

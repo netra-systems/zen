@@ -87,7 +87,7 @@ class PytestPluginManagementTests:
             
             # Try to run pytest with the conflicting plugin
             cmd = [
-                sys.executable, -m", "pytest,
+                sys.executable, -m", pytest,"
                 --collect-only,
                 -p, f{tmpdir}/test_plugin","
                 str(tmpdir_path)
@@ -110,7 +110,7 @@ class PytestPluginManagementTests:
             # Verify it's specifically an option conflict'
             error_output = result.stderr.lower()
             assert any(keyword in error_output for keyword in [
-                already added", "conflict, duplicate, option
+                already added", conflict, duplicate, option"
             ], fExpected option conflict error, got: {result.stderr}"
             ], fExpected option conflict error, got: {result.stderr}"
     
@@ -193,7 +193,7 @@ class PytestPluginManagementTests:
                 \n\nThese can cause function namespace pollution and duplicate registrations.""
             )
         
-        assert True, No problematic wildcard imports from plugins found
+        assert True, "No problematic wildcard imports from plugins found"
 
 
 class ConfigurationValidationTests:
@@ -414,11 +414,11 @@ class CommandLineOptionsTests:
                     f  This causes pytest to register the option twice
                 )
         
-        assert True, fSingle definition of --analyze-service-deps found in {files_with_option[0]}
+        assert True, "fSingle definition of --analyze-service-deps found in {files_with_option[0]}"
 
 
 class PluginLoadingSequenceTests:
-    ""Test the plugin loading sequence and conflicts.
+    ""Test the plugin loading sequence and conflicts."
     
     def test_phase2_plugin_discovery_vs_explicit_import(self):
         PHASE 2: Test plugin auto-discovery vs explicit import conflicts.""
@@ -432,7 +432,7 @@ class PluginLoadingSequenceTests:
             sys.executable, "-m, pytest,"
             --trace-config,
             --collect-only,
-            "-v",
+            "-v,"
             str(Path(__file__).parent.parent.parent / tests / mission_critical)
         ]
         

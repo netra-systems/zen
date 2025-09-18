@@ -10,10 +10,10 @@ class TestWebSocketConnection:
 """
         """Send JSON message.""""""
         """Send JSON message.""""""
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -55,8 +55,8 @@ notifier = WebSocketNotifier.create_for_user(mock_ws_manager)
 
         # Create test context"""
         # Create test context"""
-agent_name="TestAgent",  run_id="test_run_001",
-thread_id="test_thread_001",
+agent_name="TestAgent",  run_id="test_run_001,"
+thread_id="test_thread_001,"
 user_id="test_user_001"
         
 
@@ -68,45 +68,45 @@ assert call_args[0] == "test_thread_001"
 assert call_args[1]["type"] == "agent_started"
 
         # Test agent_thinking
-await notifier.send_agent_thinking(context, "Processing request...", 1)
+await notifier.send_agent_thinking(context, "Processing request..., 1)"
 call_args = mock_ws_manager.send_to_thread.call_args[0]
 assert call_args[1]["type"] == "agent_thinking"
 assert call_args[1]["payload"]["thought"] == "Processing request..."
-assert call_args[1]["payload"]["step_number"] == 1
+assert call_args[1]["payload"]["step_number] == 1"
 
         # Test partial_result
-await notifier.send_partial_result(context, "Partial content", False)
+await notifier.send_partial_result(context, "Partial content, False)"
 call_args = mock_ws_manager.send_to_thread.call_args[0]
 assert call_args[1]["type"] == "partial_result"
 assert call_args[1]["payload"]["content"] == "Partial content"
-assert call_args[1]["payload"]["is_complete"] == False
+assert call_args[1]["payload"]["is_complete] == False"
 
         # Test tool_executing
-await notifier.send_tool_executing(context, "test_tool")
+await notifier.send_tool_executing(context, "test_tool)"
 call_args = mock_ws_manager.send_to_thread.call_args[0]
 assert call_args[1]["type"] == "tool_executing"
 assert call_args[1]["payload"]["tool_name"] == "test_tool"
 
         # Test tool_completed
-await notifier.send_tool_completed(context, "test_tool", {"status": "success"})
+await notifier.send_tool_completed(context, "test_tool", {"status": "success})"
 call_args = mock_ws_manager.send_to_thread.call_args[0]
 assert call_args[1]["type"] == "tool_completed"
 assert call_args[1]["payload"]["tool_name"] == "test_tool"
 assert call_args[1]["payload"]["result"]["status"] == "success"
 
         # Test final_report
-report = {"summary": "Test completed", "status": "success"}
+report = {"summary": "Test completed", "status": "success}"
 await notifier.send_final_report(context, report, 1000.0)
 call_args = mock_ws_manager.send_to_thread.call_args[0]
 assert call_args[1]["type"] == "final_report"
-assert call_args[1]["payload"]["report"] == report
-assert call_args[1]["payload"]["total_duration_ms"] == 1000.0
+assert call_args[1]["payload"]["report] == report"
+assert call_args[1]["payload"]["total_duration_ms] == 1000.0"
 
         # Test agent_completed
-await notifier.send_agent_completed(context, {"status": "done"}, 1500.0)
+await notifier.send_agent_completed(context, {"status": "done}, 1500.0)"
 call_args = mock_ws_manager.send_to_thread.call_args[0]
 assert call_args[1]["type"] == "agent_completed"
-assert call_args[1]["payload"]["duration_ms"] == 1500.0
+assert call_args[1]["payload"]["duration_ms] == 1500.0"
 
         # Verify all events were sent
 assert mock_ws_manager.send_to_thread.call_count >= 7
@@ -120,17 +120,17 @@ pass
 notifier = WebSocketNotifier.create_for_user(None)
 """
 """
-agent_name="TestAgent",  run_id="test_run",
-thread_id="test_thread",
+agent_name="TestAgent",  run_id="test_run,"
+thread_id="test_thread,"
 user_id="test_user"
             
 
             # These should not raise exceptions
 await notifier.send_agent_started(context)
-await notifier.send_agent_thinking(context, "test", 1)
-await notifier.send_partial_result(context, "content", False)
-await notifier.send_tool_executing(context, "tool")
-await notifier.send_tool_completed(context, "tool", {})
+await notifier.send_agent_thinking(context, "test, 1)"
+await notifier.send_partial_result(context, "content, False)"
+await notifier.send_tool_executing(context, "tool)"
+await notifier.send_tool_completed(context, "tool, {})"
 await notifier.send_final_report(context, {}, 100.0)
 await notifier.send_agent_completed(context, {}, 100.0)
 
@@ -157,9 +157,9 @@ mock_registry.get.return_value = mock_agent
 
                 # Create test context and state"""
                 # Create test context and state"""
-agent_name="TestAgent",
-run_id="test_run",
-thread_id="test_thread",
+agent_name="TestAgent,"
+run_id="test_run,"
+thread_id="test_thread,"
 user_id="test_user"
                 
 
@@ -177,7 +177,7 @@ state=state,
 duration=1.0
                     
                     # Add data attribute for compatibility with execution tracking
-mock_result.data = {"agent_result": "success"}
+mock_result.data = {"agent_result": "success}"
 mock_execute.return_value = mock_result
 
                     # Execute agent
@@ -208,11 +208,11 @@ assert completed_call_args is not None, "notify_agent_completed was not called"
 assert completed_call_args[0][0] == context.run_id, "Wrong run_id in agent_completed call"
 assert completed_call_args[0][1] == context.agent_name, "Wrong agent_name in agent_completed call"
 
-print("WebSocket notifications verified successfully!")
+print("WebSocket notifications verified successfully!)"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
 asyncio.run(test_websocket_notifier_sends_all_events())
-print("All WebSocket notification tests passed!")
+print("All WebSocket notification tests passed!)"
 pass

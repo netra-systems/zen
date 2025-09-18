@@ -100,7 +100,7 @@ class WebSocketE2ECrossUserContaminationTests(SSotBaseTestCase):
         await asyncio.gather(*connection_tasks)
 
     async def _connect_user_websocket(self, username: str, session: UserTestSession):
-        "Connect a user's WebSocket with authentication."'
+        "Connect a user's WebSocket with authentication.'"
         websocket_url = self.auth_helper.config.websocket_url
         headers = {'Authorization': f'Bearer {session.jwt_token}', 'X-User-ID': str(session.user_id)}
         try:
@@ -113,7 +113,7 @@ class WebSocketE2ECrossUserContaminationTests(SSotBaseTestCase):
             self.fail(f'Failed to establish WebSocket connection for {username}: {e}')
 
     async def _listen_for_messages(self, username: str, session: UserTestSession):
-        "Listen for messages on user's WebSocket connection."'
+        "Listen for messages on user's WebSocket connection.'"
         try:
             async for raw_message in session.websocket_connection:
                 try:
@@ -224,7 +224,7 @@ class WebSocketE2ECrossUserContaminationTests(SSotBaseTestCase):
                             context_markers = [other_context.get('department', '').lower(), other_context.get('level', '').lower()]
                             for marker in context_markers:
                                 if marker and marker in message_content:
-                                    result_contamination_errors.append(fAGENT RESULT CONTAMINATION: User {username} received agent result with {other_username}'s context marker '{marker}'")"'
+                                    result_contamination_errors.append(fAGENT RESULT CONTAMINATION: User {username} received agent result with {other_username}'s context marker '{marker}'")'"
         if result_contamination_errors:
             self.fail(f'CRITICAL AGENT CONTAMINATION: {len(result_contamination_errors)} incidents: ' + '; '.join(result_contamination_errors))
 
@@ -275,7 +275,7 @@ class WebSocketE2ECrossUserContaminationTests(SSotBaseTestCase):
                         for thread_id, expected_message in other_threads.items():
                             other_context = expected_message['data']['thread_context'].lower()
                             if other_context in received_content:
-                                isolation_errors.append(fTHREAD ISOLATION VIOLATION: User {username} received message with {other_username}'s thread context '{other_context}'")"'
+                                isolation_errors.append(fTHREAD ISOLATION VIOLATION: User {username} received message with {other_username}'s thread context '{other_context}'")'"
         if isolation_errors:
             self.fail(f'CRITICAL THREAD ISOLATION FAILURES: {len(isolation_errors)} violations: ' + '; '.join(isolation_errors))
 
@@ -306,7 +306,7 @@ class WebSocketE2ECrossUserContaminationTests(SSotBaseTestCase):
         for message in alice_session.received_messages:
             message_content = json.dumps(message).lower()
             if 'charlie' in message_content:
-                self.fail("CRITICAL SESSION CONTAMINATION: Alice received Charlie's data after reconnection)"'
+                self.fail("CRITICAL SESSION CONTAMINATION: Alice received Charlie's data after reconnection)'"
 
     def test_multi_user_performance_impact_analysis(self):
         pass

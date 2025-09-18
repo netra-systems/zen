@@ -141,7 +141,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         logger.info(fStarting WebSocket class detection scan")"
     
     def scan_file_for_websocket_classes(self, file_path: Path) -> List[Dict[str, Any]]:
-    "
+        """
     "
         Scan a single Python file for WebSocket class definitions.
         
@@ -221,7 +221,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         return all_classes
     
     def analyze_duplicates(self, all_classes: List[Dict[str, Any)) -> Dict[str, List[Dict[str, Any))):
-    "
+        """
     "
         Analyze WebSocket classes to identify potential duplicates.
         
@@ -255,7 +255,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         return duplicate_groups
     
     def identify_ssot_violations(self, duplicate_groups: Dict[str, List[Dict[str, Any))) -> List[Dict[str, Any)):
-    "
+        """
     "
         Identify specific SSOT violations from duplicate class analysis.
         
@@ -374,7 +374,7 @@ class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
         if duplicate_groups:
             logger.warning(Duplicate Groups Detail:)
             for group_name, classes in duplicate_groups.items():
-                logger.warning(f"  Group: {group_name} ({len(classes)} duplicates))")
+                logger.warning(f"  Group: {group_name} ({len(classes)} duplicates)))"
                 for cls in classes:
                     logger.warning(f    - {cls['name']} in {cls['file_path']}:{cls['line_number']}")"
         

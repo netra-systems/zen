@@ -26,7 +26,7 @@ from shared.isolated_environment import get_env
 
 @pytest.mark.e2e
 class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
-    ""
+    """
     E2E tests with REQUIRED AUTHENTICATION reproducing WebSocket import bugs under GCP conditions.
     
     These tests simulate real GCP Cloud Run timing constraints where function-scoped
@@ -183,7 +183,7 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_authenticated_websocket_agent_execution_import_scope_failure(self):
-        ""
+        """
         DESIGNED TO FAIL: Test authenticated agent execution triggers import scope failures.
         
         This E2E test reproduces import scope bugs during authenticated agent execution
@@ -241,7 +241,7 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_authenticated_websocket_error_recovery_import_scope_failure(self):
-    ""
+    """
         DESIGNED TO FAIL: Test authenticated error recovery triggers import scope failures.
         
         This E2E test reproduces import scope bugs in error recovery and exception
@@ -258,7 +258,7 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
                 print(f[U+1F527] Testing authenticated error recovery: {scenario['error_type']}")"
                 websocket = await asyncio.wait_for(websockets.connect(self.websocket_url, additional_headers=auth_headers, open_timeout=5.0), timeout=10.0)
                 if scenario['trigger'] == 'malformed_json':
-                    await websocket.send('{type: invalid, malformed": json}')"
+                    await websocket.send('{"type": invalid, malformed": json}')"
                 elif scenario['trigger'] == 'expired_token':
                     expired_request = {'type': 'agent_request', 'auth': {'jwt_token': 'expired-token-simulation'}, 'data': {'message': 'Test with expired token'}}
                     await websocket.send(json.dumps(expired_request))

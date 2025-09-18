@@ -44,10 +44,10 @@ logger = central_logger.get_logger(__name__)
     MISSION CRITICAL: Basic chat functionality depends on these events."""
 """
 """
-    "agent_started",
-    "agent_thinking",
-    "tool_executing",
-    "tool_completed",
+    "agent_started,"
+    "agent_thinking,"
+    "tool_executing,"
+    "tool_completed,"
     "agent_completed"
     
 
@@ -59,10 +59,10 @@ logger = central_logger.get_logger(__name__)
 
     def record_event(self, event: Dict) -> None:
         """Record a WebSocket event for validation."""
-        event_type = event.get("type", "unknown")
+        event_type = event.get("type", "unknown)"
         self.events.append(event)
         self.event_counts[event_type] = self.event_counts.get(event_type, 0) + 1
-        logger.debug("formatted_string")
+        logger.debug("formatted_string)"
 
     def validate_required_events(self) -> tuple[bool, List[str]]:
         """Validate all required WebSocket events were received."""
@@ -70,17 +70,17 @@ logger = central_logger.get_logger(__name__)
         failures = []
 """
 """
-        failures.append("formatted_string")
+        failures.append("formatted_string)"
 
         # Validate event ordering - agent_started should be first
-        if self.events and self.events[0].get("type") != "agent_started":
-        failures.append("formatted_string")
+        if self.events and self.events[0].get("type") != "agent_started:"
+        failures.append("formatted_string)"
 
             # Validate tool events are paired
-        tool_starts = self.event_counts.get("tool_executing", 0)
-        tool_ends = self.event_counts.get("tool_completed", 0)
+        tool_starts = self.event_counts.get("tool_executing, 0)"
+        tool_ends = self.event_counts.get("tool_completed, 0)"
         if tool_starts != tool_ends:
-        failures.append("formatted_string")
+        failures.append("formatted_string)"
 
         return len(failures) == 0, failures
 
@@ -92,11 +92,11 @@ logger = central_logger.get_logger(__name__)
         "
         "
         " + "=" * 60,"
-        "WEBSOCKET EVENT VALIDATION REPORT",
-        "=" * 60,
-        "formatted_string",
-        "formatted_string",
-        "formatted_string",
+        "WEBSOCKET EVENT VALIDATION REPORT,"
+        "= * 60,"
+        "formatted_string,"
+        "formatted_string,"
+        "formatted_string,"
         "",
         "Event Coverage:"
     
@@ -104,12 +104,12 @@ logger = central_logger.get_logger(__name__)
         for event in self.REQUIRED_EVENTS:
         count = self.event_counts.get(event, 0)
         status = " PASS: " if count > 0 else " FAIL: "
-        report.append("formatted_string")
+        report.append("formatted_string)"
 
         if failures:
-        report.extend(["", "FAILURES:"] + ["formatted_string" for f in failures])
+        report.extend(["", "FAILURES:"] + ["formatted_string for f in failures])"
 
-        report.append("=" * 60)
+        report.append("= * 60)"
         return "
         return "
         ".join(report)"
@@ -125,11 +125,11 @@ logger = central_logger.get_logger(__name__)
         websockets.connect(websocket_url),
         timeout=timeout"""
         timeout=timeout"""
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
         await asyncio.sleep(0)
         return connection
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("formatted_string)"
         raise
 
 
@@ -153,23 +153,23 @@ logger = central_logger.get_logger(__name__)
         events_received.append(response)
 """
 """
-        event_type = response.get("type", "")
-        if "completed" in event_type or "final" in event_type or "error" in event_type:
+        event_type = response.get("type", ")"
+        if "completed" in event_type or "final" in event_type or "error in event_type:"
         final_response = response
         break
 
         except asyncio.TimeoutError:
         continue
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("formatted_string)"
         break
 
         if not final_response and events_received:
         final_response = events_received[-1]
         elif not final_response:
-        final_response = {"type": "error", "error": "No response received"}
+        final_response = {"type": "error", "error": "No response received}"
 
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
         return final_response
 
 
@@ -196,8 +196,8 @@ class MessagePipelineTester:
 """
 """
         """Record message response."""
-        response["message_id"] = message_id
-        response["timestamp"] = time.time()
+        response["message_id] = message_id"
+        response["timestamp] = time.time()"
         self.message_responses.append(response)
 
     def get_event_validator(self, message_id: str) -> WebSocketEventValidator:
@@ -208,7 +208,7 @@ class MessagePipelineTester:
 """
 """
         """Record pipeline error."""
-error_record = {"message_id": message_id,, "error": str(error),, "error_type": type(error).__name__,, "timestamp": time.time()}
+error_record = {"message_id": message_id,, "error": str(error),, "error_type": type(error).__name__,, "timestamp: time.time()}"
         self.error_log.append(error_record)
 
 
@@ -235,7 +235,7 @@ error_record = {"message_id": message_id,, "error": str(error),, "error_type": t
     # Create real JWT token for testing
         jwt_helper = JWTTestHelper(environment='test')"""
         jwt_helper = JWTTestHelper(environment='test')"""
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
         await asyncio.sleep(0)
         return websocket_url
 
@@ -252,12 +252,12 @@ error_record = {"message_id": message_id,, "error": str(error),, "error_type": t
         try:
         # Ensure all required services are available"""
         # Ensure all required services are available"""
-        logger.info("Real services setup completed")
+        logger.info("Real services setup completed)"
         yield real_services
         finally:
             # Cleanup
         await real_services.close_all()
-        logger.info("Real services cleanup completed")
+        logger.info("Real services cleanup completed)"
 
 
         @pytest.mark.e2e
@@ -272,7 +272,7 @@ class TestMessagePipelineCore:
         BVJ: Core value delivery test ensuring complete message processing works."""
         MISSION CRITICAL: Validates WebSocket agent events for chat functionality.""""""
         message_id = "test_complete_flow"
-test_message = {"type": "user_message",, "payload": { ), "content": "Test complete pipeline flow with WebSocket events",, "thread_id": "test_thread",, "message_id": message_id}
+test_message = {"type": "user_message",, "payload": { ), "content": "Test complete pipeline flow with WebSocket events",, "thread_id": "test_thread",, "message_id: message_id}"
         pipeline_tester.start_timing(message_id)
         event_validator = pipeline_tester.get_event_validator(message_id)
 
@@ -301,22 +301,22 @@ test_message = {"type": "user_message",, "payload": { ), "content": "Test comple
         logger.error(event_validator.generate_report())
         assert False, "formatted_string"
 
-        logger.info("WebSocket agent events validation PASSED")
+        logger.info("WebSocket agent events validation PASSED)"
         logger.info(event_validator.generate_report())
 
         pipeline_tester.record_response(message_id, { ))
-        "success": True,
-        "duration": duration,
-        "response": response,
-        "events_count": len(event_validator.events),
-        "websocket_events_valid": True
+        "success: True,"
+        "duration: duration,"
+        "response: response,"
+        "events_count: len(event_validator.events),"
+        "websocket_events_valid: True"
                     
 
         finally:
         await websocket.close()
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("formatted_string)"
         if 'event_validator' in locals():
         logger.error(event_validator.generate_report())
         raise
@@ -345,19 +345,19 @@ from netra_backend.app.services.agent_service_factory import get_agent_service
 
         await asyncio.sleep(0)"""
         await asyncio.sleep(0)"""
-        "processed": True,
-        "response": result,
-        "agent_type": "real_supervisor",
-        "websocket_events_expected": True
+        "processed: True,"
+        "response: result,"
+        "agent_type": "real_supervisor,"
+        "websocket_events_expected: True"
             
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("formatted_string)"
         return { )
-        "processed": False,
-        "error": str(e),
-        "agent_type": "real_supervisor",
-        "websocket_events_expected": False
+        "processed: False,"
+        "error: str(e),"
+        "agent_type": "real_supervisor,"
+        "websocket_events_expected: False"
                 
 
 
@@ -374,9 +374,9 @@ class TestMessagePipelineTypes:
         MISSION CRITICAL: Validates WebSocket events for different message types."""
         pass"""
         pass"""
-        {"type": "user_message", "payload": {"content": "What is my AI spend optimization?", "thread_id": "enterprise_test", "message_id": "enterprise_msg"}},
-        {"type": "user_message", "payload": {"content": "Analyze my usage patterns", "thread_id": "analysis_test", "message_id": "analysis_msg"}},
-        {"type": "user_message", "payload": {"content": "Optimize my costs", "thread_id": "optimization_test", "message_id": "optimization_msg"}}
+        {"type": "user_message", "payload": {"content": "What is my AI spend optimization?", "thread_id": "enterprise_test", "message_id": "enterprise_msg}},"
+        {"type": "user_message", "payload": {"content": "Analyze my usage patterns", "thread_id": "analysis_test", "message_id": "analysis_msg}},"
+        {"type": "user_message", "payload": {"content": "Optimize my costs", "thread_id": "optimization_test", "message_id": "optimization_msg}}"
         
 
         for i, case in enumerate(test_cases):
@@ -395,7 +395,7 @@ class TestMessagePipelineTypes:
         await websocket.close()
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("formatted_string)"
         raise
 
         async def _process_typed_message_real_with_events(self, pipeline_tester: MessagePipelineTester,
@@ -413,37 +413,37 @@ class TestMessagePipelineTypes:
         duration = pipeline_tester.complete_timing(message_id)
 """
 """
-        if response.get("type") == "error":
+        if response.get("type") == "error:"
         await asyncio.sleep(0)
         return { )
-        "success": False,
-        "error": response.get("error", "Unknown error"),
-        "duration": duration,
-        "websocket_events_valid": False
+        "success: False,"
+        "error": response.get("error", "Unknown error),"
+        "duration: duration,"
+        "websocket_events_valid: False"
             
 
             # Validate WebSocket events
         events_valid, failures = event_validator.validate_required_events()
         if not events_valid:
-        logger.warning("formatted_string")
+        logger.warning("formatted_string)"
         logger.warning(event_validator.generate_report())
 
         return { )
-        "success": True,
-        "response": response,
-        "duration": duration,
-        "message_type": message["type"],
-        "websocket_events_valid": events_valid,
-        "events_count": len(event_validator.events)
+        "success: True,"
+        "response: response,"
+        "duration: duration,"
+        "message_type": message["type],"
+        "websocket_events_valid: events_valid,"
+        "events_count: len(event_validator.events)"
                 
 
         except Exception as e:
         duration = pipeline_tester.complete_timing(message_id)
         return { )
-        "success": False,
-        "error": str(e),
-        "duration": duration,
-        "websocket_events_valid": False
+        "success: False,"
+        "error: str(e),"
+        "duration: duration,"
+        "websocket_events_valid: False"
                     
 
 
@@ -463,12 +463,12 @@ class TestPipelinePerformance:
         concurrent_count = 3  # Reduced for real service testing
         messages = [ )"""
         messages = [ )"""
-        "type": "user_message",
-        "payload": { )
-        "content": "formatted_string",
-        "thread_id": "formatted_string",
-        "message_id": "formatted_string",
-        "sequence": i
+        "type": "user_message,"
+        "payload: { )"
+        "content": "formatted_string,"
+        "thread_id": "formatted_string,"
+        "message_id": "formatted_string,"
+        "sequence: i"
         
         
         for i in range(concurrent_count)
@@ -481,11 +481,11 @@ class TestPipelinePerformance:
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        success_count = sum(1 for r in results if isinstance(r, dict) and r.get("success"))
-        events_valid_count = sum(1 for r in results if isinstance(r, dict) and r.get("websocket_events_valid"))
+        success_count = sum(1 for r in results if isinstance(r, dict) and r.get("success))"
+        events_valid_count = sum(1 for r in results if isinstance(r, dict) and r.get("websocket_events_valid))"
 
-        logger.info("formatted_string")
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
+        logger.info("formatted_string)"
 
         # For real services, we expect at least some messages to succeed
         assert success_count > 0, "formatted_string"
@@ -516,12 +516,12 @@ class TestPipelinePerformance:
 
         await asyncio.sleep(0)
         return { )
-        "success": response.get("type") != "error",
-        "sequence": message["payload"]["sequence"],
-        "duration": duration,
-        "response": response,
-        "websocket_events_valid": events_valid,
-        "events_count": len(event_validator.events)
+        "success": response.get("type") != "error,"
+        "sequence": message["payload"]["sequence],"
+        "duration: duration,"
+        "response: response,"
+        "websocket_events_valid: events_valid,"
+        "events_count: len(event_validator.events)"
             
 
         finally:
@@ -529,13 +529,13 @@ class TestPipelinePerformance:
 
         except Exception as e:
         duration = pipeline_tester.complete_timing(message_id)
-        logger.warning("formatted_string")
+        logger.warning("formatted_string)"
         return { )
-        "success": False,
-        "sequence": message["payload"]["sequence"],
-        "duration": duration,
-        "error": str(e),
-        "websocket_events_valid": False
+        "success: False,"
+        "sequence": message["payload"]["sequence],"
+        "duration: duration,"
+        "error: str(e),"
+        "websocket_events_valid: False"
                     
 
 
@@ -552,8 +552,8 @@ class TestPipelineErrorHandling:
         MISSION CRITICAL: Validates WebSocket events are sent even during errors."""
         pass"""
         pass"""
-        invalid_message = {"invalid": "message without type field"}
-        event_validator = pipeline_tester.get_event_validator("error_test")
+        invalid_message = {"invalid": "message without type field}"
+        event_validator = pipeline_tester.get_event_validator("error_test)"
 
         try:
         websocket = await create_real_websocket_connection(real_websocket_url, timeout=10.0)
@@ -565,51 +565,51 @@ class TestPipelineErrorHandling:
 
                 Should receive error response from real system
         assert response.get("type") == "error", "Expected error response for invalid message"
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
-        pipeline_tester.record_error("invalid_message_test", Exception(response.get("error")))
+        pipeline_tester.record_error("invalid_message_test", Exception(response.get("error)))"
 
         finally:
         await websocket.close()
 
         except Exception as e:
-        pipeline_tester.record_error("websocket_error_test", e)
+        pipeline_tester.record_error("websocket_error_test, e)"
 
                         # Test recovery with valid message after error
-        recovery_validator = pipeline_tester.get_event_validator("recovery_test")
+        recovery_validator = pipeline_tester.get_event_validator("recovery_test)"
         try:
         websocket = await create_real_websocket_connection(real_websocket_url, timeout=10.0)
 
         try:
             pass
-valid_recovery_message = {"type": "user_message",, "payload": { ), "content": "Recovery test message",, "thread_id": "recovery_test",, "message_id": "recovery_msg"}
+valid_recovery_message = {"type": "user_message",, "payload": { ), "content": "Recovery test message",, "thread_id": "recovery_test",, "message_id": "recovery_msg}"
         response = await send_and_receive_with_events( )
         websocket, valid_recovery_message, recovery_validator, timeout=10.0
                                 
 
                                 # Should succeed after previous error
         assert response.get("type") != "error", "formatted_string"
-        logger.info("Pipeline recovered successfully after error")
+        logger.info("Pipeline recovered successfully after error)"
 
                                 # Validate recovery WebSocket events
         events_valid, failures = recovery_validator.validate_required_events()
         if events_valid:
-        logger.info("Recovery WebSocket events validation PASSED")
+        logger.info("Recovery WebSocket events validation PASSED)"
         else:
-        logger.warning("formatted_string")
+        logger.warning("formatted_string)"
 
         finally:
         await websocket.close()
 
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("formatted_string)"
 
         assert len(pipeline_tester.error_log) > 0, "Error scenarios not logged properly"
 
                                                 # Log event validation results for debugging
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
         if hasattr(recovery_validator, 'events'):
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
 ]]]
 }}}}}}}}}}

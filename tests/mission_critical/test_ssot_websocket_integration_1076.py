@@ -41,7 +41,7 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
         return Path(__file__).parent.parent.parent
 
     def test_websocket_manager_ssot_import_compliance(self):
-        "
+        """
         "
         CRITICAL: Ensure WebSocket manager imports follow SSOT patterns.
 
@@ -53,7 +53,7 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
 
         # Check all files that import WebSocket functionality
         search_paths = [
-            self.project_root / netra_backend / app" / "routes,
+            self.project_root / netra_backend / app" / routes,"
             self.project_root / netra_backend / app / agents","
             self.project_root / netra_backend / app / middleware,"
             self.project_root / netra_backend / app / middleware,"
@@ -137,7 +137,7 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
             )
 
     def test_websocket_auth_integration_ssot_compliance(self):
-    ""
+    """
         CRITICAL: Ensure WebSocket auth integration uses SSOT auth service.
 
         EXPECTED: Should FAIL initially - detects non-SSOT auth in WebSocket
@@ -147,9 +147,9 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
 
         # Check WebSocket files for auth integration patterns
         websocket_files = [
-            self.project_root / netra_backend" / "app / routes / websocket.py,
-            self.project_root / netra_backend / "app / routes" / websocket_ssot.py,
-            self.project_root / netra_backend / app / websocket_core" / "websocket_manager.py,
+            self.project_root / netra_backend" / app / routes / websocket.py,"
+            self.project_root / netra_backend / "app / routes / websocket_ssot.py,"
+            self.project_root / netra_backend / app / websocket_core" / websocket_manager.py,"
             self.project_root / netra_backend / app / websocket_core / "auth.py"
         ]
 
@@ -227,7 +227,7 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
             )
 
     def test_websocket_configuration_ssot_compliance(self):
-        "
+        """
         "
         CRITICAL: Ensure WebSocket configuration uses SSOT patterns.
 
@@ -239,8 +239,8 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
 
         # Check WebSocket files for configuration patterns
         websocket_files = [
-            self.project_root / netra_backend / app" / "routes / websocket.py,
-            self.project_root / netra_backend / app / "routes / websocket_ssot.py",
+            self.project_root / netra_backend / app" / routes / websocket.py,"
+            self.project_root / netra_backend / app / "routes / websocket_ssot.py,"
             self.project_root / netra_backend / app / websocket_core / websocket_manager.py","
             self.project_root / "netra_backend / app / websocket_core / auth.py"
         ]
@@ -306,7 +306,7 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
             )
 
     def test_websocket_agent_event_integration_ssot_compliance(self):
-    "
+        """
     "
         CRITICAL: Ensure agent-WebSocket event integration follows SSOT patterns.
 
@@ -318,7 +318,7 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
 
         # Check agent files for WebSocket event integration
         agent_files = [
-            self.project_root / netra_backend / app / agents" / "supervisor,
+            self.project_root / netra_backend / app / agents" / supervisor,"
             self.project_backend / app / agents / registry.py,"
             self.project_backend / app / agents / registry.py,"
             self.project_root / "netra_backend / app / tools"

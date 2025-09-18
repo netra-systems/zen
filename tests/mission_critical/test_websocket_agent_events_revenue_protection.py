@@ -61,14 +61,14 @@ from shared.isolated_environment import get_env
 from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
 # CONSOLIDATED: from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
 # CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, create_authenticated_user_context
-# CONSOLIDATED: from test_framework.ssot.websocket_golden_path_helpers import (
+# CONSOLIDATED: from test_framework.ssot.websocket_golden_path_helpers import ()
 #     WebSocketGoldenPathHelper,
 #     GoldenPathTestConfig,
 #     GoldenPathTestResult,
 #     test_websocket_golden_path,
 #     assert_golden_path_success
 # )
-from netra_backend.app.websocket_core.event_validator import (
+from netra_backend.app.websocket_core.event_validator import ()
     AgentEventValidator,
     CriticalAgentEventType,
     assert_critical_events_received,
@@ -117,7 +117,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         super().setup_class()
         
         cls.env = get_env()
-        cls.test_environment = cls.env.get(TEST_ENV", "test)
+        cls.test_environment = cls.env.get(TEST_ENV", test)"
         cls.docker_manager = UnifiedDockerManager()
         cls.id_generator = UnifiedIdGenerator()
         
@@ -154,7 +154,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
     @pytest.mark.critical
     @pytest.mark.asyncio
     async def test_all_five_critical_events_received_single_user(self):
-    ""
+    """
         MISSION CRITICAL: Validate all 5 critical events are received for single user.
         
         This test MUST pass - it validates the core revenue-generating flow.
@@ -197,7 +197,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         )
         
         # Validate user experience rating
-        assert result.execution_metrics.user_experience_rating in [EXCELLENT", "GOOD), (
+        assert result.execution_metrics.user_experience_rating in [EXCELLENT", GOOD), ("
             fUSER EXPERIENCE FAILURE: Rating {result.execution_metrics.user_experience_rating} is insufficient. 
             fPoor UX directly impacts revenue conversion!
         )
@@ -298,7 +298,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         total_time = time.time() - start_time
         
         # CRITICAL: Validate timing requirements
-        assert result.success, fPerformance test failed: {result.validation_result.error_message}
+        assert result.success, "fPerformance test failed: {result.validation_result.error_message}"
         
         # First event must arrive quickly (user sees immediate response)
         assert result.execution_metrics.first_event_time <= 5.0, (
@@ -328,7 +328,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
     @pytest.mark.critical
     @pytest.mark.asyncio
     async def test_event_sequence_validation(self):
-        ""
+        """
         MISSION CRITICAL: Validate events are received in logical order.
         
         Tests that events follow the expected sequence to ensure coherent
@@ -403,7 +403,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
     @pytest.mark.critical
     @pytest.mark.asyncio
     async def test_business_value_content_validation(self):
-    ""
+    """
         MISSION CRITICAL: Validate event content delivers business value.
         
         Tests that events contain meaningful content that demonstrates
@@ -443,7 +443,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         # Validate tool_executing content
         if CriticalAgentEventType.TOOL_EXECUTING.value in events_by_type:
             executing_event = events_by_type[CriticalAgentEventType.TOOL_EXECUTING.value]
-            assert executing_event.data, tool_executing event missing data - no tool transparency!
+            assert executing_event.data, "tool_executing event missing data - no tool transparency!"
             assert executing_event.data.get(tool), "tool_executing missing tool info - no capability demo!"
         
         # Validate tool_completed content
@@ -455,7 +455,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         # Validate agent_completed content
         if CriticalAgentEventType.AGENT_COMPLETED.value in events_by_type:
             final_event = events_by_type[CriticalAgentEventType.AGENT_COMPLETED.value]
-            assert final_event.data, agent_completed event missing data - no final value delivery!
+            assert final_event.data, "agent_completed event missing data - no final value delivery!"
             assert final_event.data.get(agent), "agent_completed missing agent info - incomplete closure!"
         
         logger.success( PASS:  CONTENT TEST PASSED: All events contain business value content")"
@@ -542,7 +542,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
     @pytest.mark.reliability
     @pytest.mark.asyncio
     async def test_event_delivery_reliability(self):
-        ""
+        """
         RELIABILITY TEST: Validate consistent event delivery across multiple runs.
         
         Executes multiple sequential golden paths to ensure reliable
@@ -626,7 +626,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
     @pytest.mark.edge_case
     @pytest.mark.asyncio
     async def test_connection_interruption_recovery(self):
-        ""
+        """
         EDGE CASE: Test event delivery after connection interruption.
         
         Simulates connection issues to ensure the system gracefully
@@ -762,7 +762,7 @@ async def docker_services():
     try:
         # Start services
         await docker_manager.ensure_services_running([
-            backend, "auth_service, postgres", redis
+            backend, "auth_service, postgres, redis"
         ]
         
         # Wait for services to be ready
@@ -780,7 +780,7 @@ async def authenticated_test_context():
     Create authenticated test context for individual tests.""
     context = await create_authenticated_user_context(
         user_email=fmission_critical_{uuid.uuid4().hex[:8]}@example.com,
-        environment=get_env().get("TEST_ENV, test"),
+        environment=get_env().get("TEST_ENV, test),"
         permissions=[read, write],
         websocket_enabled=True
     )

@@ -61,7 +61,7 @@ class PytestBypassViolation:
 
 
 class DirectPytestBypassReproductionTests(SSotBaseTestCase):
-    ""
+    """
     Test suite to reproduce and validate direct # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution bypass violations.
@@ -83,7 +83,7 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
         ]
 
     def scan_file_for_pytest_bypass_violations(self, file_path: Path) -> List[PytestBypassViolation]:
-        ""
+        """
         Scan a Python file for direct # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution bypass violations.
@@ -221,7 +221,7 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
         return all_violations
 
     def validate_unified_test_runner_functionality(self) -> bool:
-    "
+        """
     "
         Validate that the SSOT unified_test_runner.py exists and is functional.
         This should PASS even before remediation.
@@ -261,7 +261,7 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
             return False
 
     def test_reproduce_direct_pytest_bypass_violations(self):
-        "
+        """
         "
         REPRODUCTION TEST: This test WILL FAIL until violations are remediated.
         
@@ -290,7 +290,7 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
         )
 
     def test_validate_unified_test_runner_ssot_functionality(self):
-        ""
+        """
         VALIDATION TEST: This test should PASS both before and after remediation.
         
         Validates that the SSOT unified_test_runner.py exists and is functional.
@@ -305,7 +305,7 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
         )
 
     def test_ssot_pattern_compliance_detection(self):
-    "
+        """
     "
         COMPLIANCE TEST: Validates detection of SSOT-compliant test execution patterns.
         
@@ -372,7 +372,7 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
             4. Maintain SSOT compliance for test infrastructure
         ]
         
-        return "\n".join(report_lines)
+        return "\n.join(report_lines)"
 
     def import_module_from_path(self, module_name: str, file_path: str):
         Helper to import module from file path.

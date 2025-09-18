@@ -44,7 +44,7 @@ class TestStagingAuthURLRegression:
 
     @pytest.fixture
     def setup_method(self):
-        ""Setup test environment.
+        ""Setup test environment."
         self.original_env = os.environ.copy()
 
     # Clear all URL-related env vars
@@ -142,7 +142,7 @@ class TestStagingAuthURLRegression:
         host = auth_env.get_auth_service_host()
 
         # Must not be bind address
-        assert host != '0.0.0.0', Staging auth host is bind address 0.0.0.0
+        assert host != '0.0.0.0', "Staging auth host is bind address 0.0.0.0"
         assert host != '127.0.0.1', Staging auth host is localhost"
         assert host != '127.0.0.1', Staging auth host is localhost"
 

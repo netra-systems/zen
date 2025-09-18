@@ -196,7 +196,7 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
         logger.info(f   [U+1F4C8] Analysis: {analysis})
     
     async def test_complete_chat_flow_after_toolregistry_fix(self):
-    ""
+    """
         FAILING TEST: End-to-end chat functionality validation.
         
         This is the ULTIMATE business value test.
@@ -230,7 +230,7 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
             # Step 3: Send meaningful business query
             business_query = {
                 type: agent_request,
-                agent": "data_agent,
+                agent": data_agent,"
                 message: Help me analyze my customer acquisition costs and suggest optimization strategies,
                 user_id: user_id,"
                 user_id: user_id,"
@@ -424,7 +424,7 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
         logger.info(f[U+1F4C8] Event sequence: {event_sequence})
     
     async def test_concurrent_users_chat_without_registry_conflicts(self):
-    ""
+    """
         FAILING TEST: Multi-user business value validation.
         
         Current State: Multiple users connecting simultaneously cause registry conflicts
@@ -573,7 +573,7 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
         logger.info(f CELEBRATION:  MULTI-USER BUSINESS VALUE CONFIRMED: {successful_sessions} users chatting successfully)
     
     async def test_no_performance_regression_after_registry_fixes(self):
-    ""
+    """
         Test that registry fixes don't introduce performance regressions.'
         
         Business impact: Chat system should remain fast and responsive.

@@ -94,7 +94,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     login_url = f{self.auth_service_url}/auth/login
                     login_data = {
                         email: golden_path_test@example.com,
-                        password": "test_password_123
+                        password": test_password_123"
                     }
                     
                     async with session.post(login_url, json=login_data, timeout=5.0) as resp:
@@ -237,7 +237,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_multi_user_jwt_isolation_golden_path(self):
-    ""
+    """
         GOLDEN PATH TEST: Multi-user JWT isolation in chat scenarios.
         
         EXPECTED: FAIL - JWT isolation violations cause user data bleed
@@ -252,7 +252,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
         user1_token = self.auth_helper.create_test_jwt_token(
             user_id=golden_path_user1","
             email=user1@golden-path-test.com,
-            permissions=[read, "write, chat"]
+            permissions=[read, "write, chat]"
         
         user2_token = self.auth_helper.create_test_jwt_token(
             user_id=golden_path_user2, 
@@ -268,7 +268,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                 "Test individual user authentication."
                 try:
                     async with httpx.AsyncClient() as client:
-                        headers = {"Authorization: fBearer {user_token}"}
+                        headers = {"Authorization: fBearer {user_token}}"
                         auth_url = f{self.backend_base_url}/api/v1/users/me
                         
                         response = await client.get(auth_url, headers=headers, timeout=5.0)
@@ -333,7 +333,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                             
                             # Send user-specific message
                             message = {
-                                "type: user_identity_test",
+                                "type: user_identity_test,"
                                 user_id: user_id,
                                 timestamp: time.time()"
                                 timestamp: time.time()"
@@ -353,7 +353,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                                 )
                             
                             await ws.close()
-                            return {"success: True, user_id": user_id}
+                            return {"success: True, user_id: user_id}"
                             
                         except Exception as e:
                             isolation_violations.append(fWebSocket error for {user_id}: {e})
@@ -402,7 +402,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_jwt_error_handling_golden_path_resilience(self):
-    "
+        """
     "
         GOLDEN PATH TEST: JWT error handling doesn't break Golden Path.'
         
@@ -429,7 +429,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
             },
             {
                 name: Malformed JWT Token,
-                "token: not.a.valid.jwt.token",
+                "token: not.a.valid.jwt.token,"
                 expected_response: 401_clean_error
             },
             {
@@ -473,7 +473,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                                 )
                             
                             # Check for security information leakage
-                            sensitive_terms = [secret, key, decode, "verify, signature"]
+                            sensitive_terms = [secret, key, decode, "verify, signature]"
                             if any(term in error_message for term in sensitive_terms):
                                 error_handling_violations.append(
                                     f{scenario_name}: Error message leaks sensitive info: {error_message}
@@ -490,14 +490,14 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                         )
                     else:
                         # Other status codes may be acceptable, but log for analysis
-                        logger.warning(f"{scenario_name}: Unexpected status {response.status_code})")
+                        logger.warning(f"{scenario_name}: Unexpected status {response.status_code}))"
                 
                 # Test WebSocket error handling
                 try:
                     auth_headers = {
                         Authorization: fBearer {test_token},
                         X-User-ID: error_test_user
-                    } if test_token else {X-User-ID": "error_test_user}
+                    } if test_token else {X-User-ID": error_test_user}"
                     
                     # WebSocket should reject gracefully, not crash
                     websocket = await asyncio.wait_for(
@@ -550,7 +550,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_jwt_performance_golden_path_impact(self):
-        "
+        """
         "
         GOLDEN PATH TEST: JWT performance doesn't degrade Golden Path.'
         
@@ -709,7 +709,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
         
         # ASSESSMENT: Performance Impact
         if performance_violations:
-            violation_summary = \n".join([f"  - {v) for v in performance_violations]
+            violation_summary = \n".join([f  - {v) for v in performance_violations]"
             logger.error(JWT PERFORMANCE VIOLATION: Slow JWT operations degrade Golden Path)
             logger.error(fViolations:\n{violation_summary})
             
@@ -733,7 +733,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
         payload = {
             sub": expired_test_user,"
             email: expired@test.com,
-            permissions": ["read],
+            permissions": [read],"
             iat: datetime.now(timezone.utc) - timedelta(hours=2),
             exp: datetime.now(timezone.utc) - timedelta(hours=1),  # Expired"
             exp: datetime.now(timezone.utc) - timedelta(hours=1),  # Expired"

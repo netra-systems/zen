@@ -85,7 +85,7 @@ class PerformanceMetrics:
 
     @property
     def avg_connection_time(self) -> float:
-        ""Average connection establishment time.
+        ""Average connection establishment time."
         return statistics.mean(self.connection_times) if self.connection_times else 0
 
     @property
@@ -136,7 +136,7 @@ class MockWebSocketEmitter:
         await asyncio.sleep(self.latency_ms / 1000)
 
         event = {
-            event_type": "agent_thinking,
+            event_type": agent_thinking,"
             user_id: self.user_id,
             data: {"
             data: {"
@@ -237,7 +237,7 @@ class PerformanceMonitor:
             pass
 
     def get_metrics(self) -> Dict[str, List[float]]:
-        ""Get collected performance metrics.
+        ""Get collected performance metrics."
         return self.metrics.copy()
 
 
@@ -277,7 +277,7 @@ async def test_latency_baseline():
 
     print(fLatency Results: P50={p50:.2f}ms, P90={p90:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms, Avg={avg:.2f}ms")"
     print(fSamples: {num_samples})
-    print(fP99 Requirement (< 50ms"): {'PASS' if p99 < 50.0 else 'FAIL'}")
+    print(fP99 Requirement (< 50ms"): {'PASS' if p99 < 50.0 else 'FAIL'})"
     print(fP95 Performance (< 30ms): {'PASS' if p95 < 30.0 else 'FAIL'})
     print("")
 
@@ -289,7 +289,7 @@ async def test_latency_baseline():
 
 
 async def test_throughput_baseline():
-    ""Test throughput performance baseline.
+    ""Test throughput performance baseline."
     print(Testing throughput baseline...")"
 
     emitter = MockWebSocketEmitter(throughput-test-user, latency_ms=0.1)
@@ -381,7 +381,7 @@ async def test_concurrent_users():
         emitter = MockWebSocketEmitter(fconcurrent-user-{i}, latency_ms=0.1)
         emitters.append(emitter)
 
-    print(f"Created {num_users} concurrent users)")
+    print(f"Created {num_users} concurrent users))"
 
     # Send events from all users concurrently
     start_time = time.time()
@@ -429,11 +429,11 @@ async def test_concurrent_users():
     p99 = statistics.quantiles(all_latencies, n=100)[98] if len(all_latencies) >= 100 else max(all_latencies)
     avg_latency = statistics.mean(all_latencies)
 
-    print(f"Concurrent Users: {num_users})")
+    print(f"Concurrent Users: {num_users}))"
     print(fEvents per User: {events_per_user})
     print(fTotal Events: {total_events})
     print(fTotal Duration: {total_duration:.2f}s")"
-    print(f"Overall Throughput: {overall_throughput:.2f} events/s)")
+    print(f"Overall Throughput: {overall_throughput:.2f} events/s))"
     print(fConcurrent Latency: P50={p50:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms, Avg={avg_latency:.2f}ms)
     print("")
     # Validate requirements
@@ -492,7 +492,7 @@ async def test_comprehensive_performance():
         print(fPerformance Summary:)
         print(f  P50 Latency: {metrics.p50_latency:.2f}ms)
         print(f  P90 Latency: {metrics.p90_latency:.2f}ms")"
-        print(f"  P95 Latency: {metrics.p95_latency:.2f}ms)")
+        print(f"  P95 Latency: {metrics.p95_latency:.2f}ms))"
         print(f  P99 Latency: {metrics.p99_latency:.2f}ms [CRITICAL])
         print(f  Max Throughput: {metrics.throughput:.2f} events/s [CRITICAL])
         print(f  Avg Connection Time: {metrics.avg_connection_time:.2f}ms")"
@@ -506,7 +506,7 @@ async def test_comprehensive_performance():
 
         print(f  P99 Latency < 50ms: {'PASS' if p99_passed else 'FAIL'} ({metrics.p99_latency:.2f}ms))
         print(f  Throughput > 1000/s: {'PASS' if throughput_passed else 'FAIL'} ({metrics.throughput:.2f}/s)")"
-        print(f"  Connection < 500ms: {'PASS' if connection_passed else 'FAIL'} ({metrics.avg_connection_time:.2f}ms))")
+        print(f"  Connection < 500ms: {'PASS' if connection_passed else 'FAIL'} ({metrics.avg_connection_time:.2f}ms)))"
         print(f  Memory Growth < 200MB: {'PASS' if memory_passed else 'FAIL'} ({final_memory - initial_memory:.2f}MB))
 
         all_passed = all([p99_passed, throughput_passed, connection_passed, memory_passed)
@@ -525,7 +525,7 @@ async def test_comprehensive_performance():
 
 
 def generate_performance_report(metrics: PerformanceMetrics) -> str:
-    ""Generate a comprehensive performance baseline report.
+    ""Generate a comprehensive performance baseline report."
 
     p99_pass = PASS if metrics.p99_latency < 50.0 else FAIL"
     p99_pass = PASS if metrics.p99_latency < 50.0 else FAIL"
@@ -621,7 +621,7 @@ async def main():
         )
 
         if requirements_met:
-            print("SUCCESS: All performance requirements validated!")
+            print("SUCCESS: All performance requirements validated!)"
             return 0
         else:
             print(FAILURE: Performance requirements not met!)
@@ -632,7 +632,7 @@ async def main():
         return 1
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     import sys
     result = asyncio.run(main())
     sys.exit(result)

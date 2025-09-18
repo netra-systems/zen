@@ -44,7 +44,7 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
         self.original_env = self.env.copy()
 
     def teardown_method(self, method):
-        ""Clean up mission critical test environment.
+        ""Clean up mission critical test environment."
         # Restore original environment
         for key in list(self.env._env.keys()):
             if key not in self.original_env:
@@ -54,7 +54,7 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
         super().teardown_method(method)
 
     def test_multiple_config_managers_ssot_violation(self):
-    ""
+    """
         CRITICAL SSOT VIOLATION: Test detection of multiple configuration manager instances.
 
         This detects the critical SSOT violation where multiple configuration managers
@@ -161,7 +161,7 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
                       f"This causes inconsistent secret configuration in staging: {ssot_violations})"
 
     def test_configuration_schema_duplication_ssot_violation(self):
-        "
+        """
         "
         CRITICAL SSOT VIOLATION: Test detection of duplicate configuration schema definitions.
 
@@ -225,7 +225,7 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
                       f"This causes inconsistent validation in staging environment: {ssot_violations})"
 
     def test_environment_access_ssot_violations(self):
-        "
+        """
         "
         CRITICAL SSOT VIOLATION: Test detection of direct os.environ access bypassing SSOT.
 
@@ -319,7 +319,7 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
                       fThis causes inconsistent environment state in staging: {ssot_violations})
 
     def test_configuration_loader_ssot_violations(self):
-    ""
+    """
         CRITICAL SSOT VIOLATION: Test detection of multiple configuration loader implementations.
 
         This detects SSOT violations where multiple configuration loaders exist,
@@ -433,7 +433,7 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
                       f"This causes inconsistent secret management in staging: {ssot_violations})"
 
     def test_configuration_validation_ssot_violations(self):
-        "
+        """
         "
         CRITICAL SSOT VIOLATION: Test detection of multiple configuration validator implementations.
 

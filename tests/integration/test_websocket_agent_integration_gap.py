@@ -93,7 +93,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
             
             # CRITICAL FAILURE POINT: Check if ExecutionEngine has WebSocket bridge reference
             # According to Five Whys analysis, this delegation is broken
-            assert hasattr(execution_engine, '_websocket_bridge'), (
+            assert hasattr(execution_engine, "'_websocket_bridge'), ("
                 INTEGRATION GAP: ExecutionEngine missing _websocket_bridge attribute. 
                 This confirms the factory delegation failure identified in Five Whys analysis.""
             )
@@ -106,7 +106,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
             
             # CRITICAL FAILURE POINT: Check if WebSocket bridge has user emitter
             # This is where the per-request pattern should create user-specific emitter
-            assert hasattr(websocket_bridge, '_user_emitter'), (
+            assert hasattr(websocket_bridge, "'_user_emitter'), ("
                 "INTEGRATION GAP: AgentWebSocketBridge missing _user_emitter attribute. "
                 Per-request factory pattern not creating user-specific emitters.
             )
@@ -119,7 +119,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
             
             # CRITICAL FAILURE POINT: Check if user emitter can emit events
             # This is where WebSocket events should be sent to users
-            assert hasattr(user_emitter, 'emit_agent_started'), (
+            assert hasattr(user_emitter, "'emit_agent_started'), ("
                 INTEGRATION GAP: UserWebSocketEmitter missing emit_agent_started method. 
                 Event emission interface broken.""
             )
@@ -279,7 +279,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
             # This is the key integration point that's broken'
             try:
                 # Check if ExecutionEngine was configured with WebSocket bridge
-                assert hasattr(execution_engine, '_websocket_bridge') or hasattr(execution_engine, 'websocket_bridge'), (
+                assert hasattr(execution_engine, "'_websocket_bridge') or hasattr(execution_engine, 'websocket_bridge'), ("
                     INTEGRATION GAP CONFIRMED: ExecutionEngine lacks WebSocket bridge reference. 
                     Factory delegation not establishing proper component connections.""
                 )
@@ -288,7 +288,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                 websocket_bridge = getattr(execution_engine, '_websocket_bridge', None) or getattr(execution_engine, 'websocket_bridge', None)
                 if websocket_bridge:
                     # Verify bridge has user emitter
-                    assert hasattr(websocket_bridge, '_user_emitter') or hasattr(websocket_bridge, 'user_emitter'), (
+                    assert hasattr(websocket_bridge, "'_user_emitter') or hasattr(websocket_bridge, 'user_emitter'), ("
                         "INTEGRATION GAP: WebSocket bridge lacks user emitter reference. "
                         Per-request factory pattern not creating proper user-specific connections.
                     )
@@ -310,7 +310,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services  
     async def test_websocket_emitter_creation_failure_cascade(self, real_services_fixture):
-    ""
+    """
         Test the cascade failure when WebSocket emitter creation fails.
         
         EXPECTED: This test SHOULD FAIL due to dependency chain failures.
@@ -348,7 +348,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
             
             try:
                 # Step 2: Connection pool availability  
-                assert hasattr(websocket_factory, '_connection_pool'), (
+                assert hasattr(websocket_factory, "'_connection_pool'), ("
                     Missing connection pool dependency""
                 )
                 connection_pool = websocket_factory._connection_pool
@@ -359,18 +359,18 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
             
             try:
                 # Step 3: Agent registry availability
-                assert hasattr(websocket_factory, '_agent_registry'), (
+                assert hasattr(websocket_factory, "'_agent_registry'), ("
                     Missing agent registry dependency""
                 )
                 agent_registry = websocket_factory._agent_registry
-                assert agent_registry is not None, Agent registry is None
+                assert agent_registry is not None, "Agent registry is None"
                 logger.info([U+2713] Agent registry available")"
             except Exception as e:
                 failure_points.append(fAgent registry: {e})
             
             try:
                 # Step 4: Health monitor availability
-                assert hasattr(websocket_factory, '_health_monitor'), (
+                assert hasattr(websocket_factory, "'_health_monitor'), ("
                     Missing health monitor dependency
                 )
                 health_monitor = websocket_factory._health_monitor
@@ -446,7 +446,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
         logger.info(fTesting silent failure detection for user: {user_context.user_id})
         
         # Track all WebSocket events that should be sent
-        expected_events = [agent_started, "agent_thinking, tool_executing", tool_completed, agent_completed]
+        expected_events = [agent_started, "agent_thinking, tool_executing, tool_completed, agent_completed]"
         received_events = []
         silent_failures = []
         

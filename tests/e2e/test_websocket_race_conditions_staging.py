@@ -22,7 +22,7 @@ from typing import List, Dict, Any
 import aiohttp
 import websockets
 
-from test_framework.ssot.e2e_auth_helper import (
+from test_framework.ssot.e2e_auth_helper import ()
     E2EAuthHelper,
     E2EWebSocketAuthHelper,
     create_authenticated_user_context
@@ -151,19 +151,19 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
         
         # Detect specific race condition patterns
         race_condition_indicators = {
-            1011_errors: sum(1 for r in connection_results if isinstance(r, dict) and 1011 in str(r.get("error, "))),
+            1011_errors: sum(1 for r in connection_results if isinstance(r, dict) and 1011 in str(r.get("error, ))),"
             accept_errors: sum(1 for r in connection_results if isinstance(r, dict) and accept in str(r.get(error, ")).lower()),"
             "timeout_errors: sum(1 for r in connection_results if isinstance(r, dict) and timeout in str(r.get(error, )).lower()),"
-            "connection_refused: sum(1 for r in connection_results if isinstance(r, dict) and refused" in str(r.get(error, )).lower()),
+            "connection_refused: sum(1 for r in connection_results if isinstance(r, dict) and refused in str(r.get(error, )).lower()),"
             timing_failures: sum(1 for r in connection_results if isinstance(r, dict) and r.get(connection_duration", 0) > 10.0)"
         }
         
         # Log detailed results for analysis
         print(f"\n SEARCH:  RACE CONDITION TEST RESULTS:)"
         print(f CHART:  Total connections attempted: {len(connection_results)})
-        print(f" PASS:  Successful connections: {successful_connections}")
+        print(f" PASS:  Successful connections: {successful_connections})"
         print(f FAIL:  Failed connections: {failed_connections})
-        print(f"[U+1F4C8] Failure rate: {failure_rate:.1%}")
+        print(f"[U+1F4C8] Failure rate: {failure_rate:.1%})"
         print(f[U+23F1][U+FE0F]  Total test duration: {total_duration:.2f}s)
         print(f"\n ALERT:  Race Condition Indicators:)"
         for indicator, count in race_condition_indicators.items("):"
@@ -307,7 +307,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
         avg_network_time = sum(r.get("network_handshake_time, 0) for r in successful_attempts) / len(successful_attempts) if successful_attempts else 0"
         avg_app_time = sum(r.get(app_response_time, 0) for r in successful_attempts) / len(successful_attempts) if successful_attempts else 0
         
-        timing_gaps = [r.get("timing_gap, 0) for r in successful_attempts if r.get(timing_gap", 0) > 0]
+        timing_gaps = [r.get("timing_gap, 0) for r in successful_attempts if r.get(timing_gap, 0) > 0]"
         max_timing_gap = max(timing_gaps) if timing_gaps else 0
         
         print(f\n[U+23F1][U+FE0F]  GCP CLOUD RUN TIMING ANALYSIS:)
@@ -325,7 +325,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 gap = result.get(timing_gap, 0)
                 print(f   Attempt {result['attempt']}: Network={net_time:.2f}s, App={app_time:.2f}s, Gap={gap:.2f}s)
             else:
-                print(f   Attempt {result['attempt']}: FAILED - {result.get('error', 'Unknown error'")}")
+                print(f   Attempt {result['attempt']}: FAILED - {result.get('error', 'Unknown error'")})"
         
         # Check for timing issues that indicate race conditions
         timing_issues_detected = (
@@ -356,7 +356,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
     @pytest.mark.real_services
     @pytest.mark.staging
     async def test_service_initialization_race_conditions(self):
-        ""
+        """
         Test service initialization race conditions that cause WebSocket failures.
         
         EXPECTED RESULT: Should detect initialization gaps causing service readiness failures.
@@ -396,8 +396,8 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 
                 # Test service readiness by sending service-specific messages
                 readiness_tests = [
-                    {type: service_health_check, "service: websocket"},
-                    {type: auth_validation_test, token_validation: True},""
+                    {"type": service_health_check, "service: websocket},"
+                    {"type": auth_validation_test, token_validation: True},""
                     {type": message_routing_test, routing_check: True}"
                 ]
                 
@@ -480,9 +480,9 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
         avg_connection_time = sum(r.get("connection_time, 0) for r in service_readiness_results) / len(service_readiness_results)"
         
         print(f\n[U+1F527] SERVICE INITIALIZATION ANALYSIS:)
-        print(f" CHART:  Successful connections: {successful_connections}/{len(service_readiness_results)}")
+        print(f" CHART:  Successful connections: {successful_connections}/{len(service_readiness_results)})"
         print(f LIGHTNING:  Average connection time: {avg_connection_time:.2f}s)
-        print(f" FAIL:  Total service failures: {total_service_failures}")
+        print(f" FAIL:  Total service failures: {total_service_failures})"
         
         # Print detailed service readiness results
         print(f\n[U+1F4CB] Service Readiness Results:)
@@ -495,7 +495,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 print(f   Attempt {attempt}: Connected in {conn_time:.2f}s, Services: {successful} PASS: /{failed} FAIL: "")
                 
                 for response in result.get(service_responses, [):
-                    test_type = response.get(test_type", "unknown)
+                    test_type = response.get(test_type", unknown)"
                     success =  PASS:  if response.get(success) else  FAIL: ""
                     resp_time = response.get("response_time, 0)"
                     error = response.get(error, )
@@ -533,7 +533,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
     @pytest.mark.real_services
     @pytest.mark.staging
     async def test_heartbeat_timeout_systematic_failures(self):
-    ""
+    """
         Test systematic heartbeat timeouts that occur every 2 minutes in staging.
         
         EXPECTED RESULT: Should detect heartbeat timing misalignment with GCP infrastructure.
@@ -580,7 +580,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                     current_time = time.time()
                     if current_time - last_ping_time >= 30:  # Every 30 seconds
                         test_message = {
-                            "type: heartbeat_test",
+                            "type: heartbeat_test,"
                             timestamp: datetime.now(timezone.utc).isoformat(),
                             elapsed_time: current_time - connection_start,""
                             "ping_number: len(heartbeat_events) + 1"

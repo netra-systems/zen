@@ -57,7 +57,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
         self.logger.info(f'Starting WebSocket Manager SSOT test: {method.__name__}')
 
     def test_single_websocket_manager_implementation(self):
-        ""
+        """
         Test: Only ONE WebSocket manager implementation should exist across services
 
         EXPECTED: FAIL - Multiple WebSocket manager implementations exist
@@ -223,7 +223,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
         return legitimate
 
     def _scan_for_legacy_websocket_imports(self, path: Path, service_name: str, legacy_patterns: List[str), allowed_patterns: List[str) -> List[Dict[str, Any)):
-        ""Scan for legacy WebSocket manager imports.
+        ""Scan for legacy WebSocket manager imports."
         violations = []
         if not path.exists():
             return violations

@@ -9,10 +9,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         self._closed = True
         self.is_connected = False
@@ -47,9 +47,9 @@ class TestWebSocketConnection:
 class LLMTestResponse(BaseModel):
         """Structured response model for LLM reasoning tests"""
 
-        category: str = Field(description="Response category")
-        confidence: float = Field(ge=0.0, le=1.0, description="Confidence score")
-        reasoning: str = Field(description="Reasoning explanation")
+        category: str = Field(description="Response category)"
+        confidence: float = Field(ge=0.0, le=1.0, description="Confidence score)"
+        reasoning: str = Field(description="Reasoning explanation)"
         token_count_estimate: Optional[int] = Field(default=None, ge=0)
 
 
@@ -68,7 +68,7 @@ class TokenTracker:
 
     def __init__(self):
         self.total_tokens = 0
-        self.total_cost = Decimal("0.0")
+        self.total_cost = Decimal("0.0)"
         self.requests = 0
 
     def track_usage(self, usage, cost: Decimal = None) -> None:
@@ -82,10 +82,10 @@ class TokenTracker:
         """Get tracking statistics"""
         avg_tokens = self.total_tokens / max(self.requests, 1)
         return { }
-        "total_tokens": self.total_tokens,
-        "total_requests": self.requests,
-        "total_cost": float(self.total_cost),
-        "avg_tokens_per_request": avg_tokens
+        "total_tokens: self.total_tokens,"
+        "total_requests: self.requests,"
+        "total_cost: float(self.total_cost),"
+        "avg_tokens_per_request: avg_tokens"
     
 
 
@@ -95,13 +95,13 @@ class LLMTestHelpers:
         @staticmethod
     def check_api_keys() -> Dict[str, bool]:
         """Check availability of real API keys"""
-        anthropic_key = get_env().get("ANTHROPIC_API_KEY")
-        openai_key = get_env().get("GOOGLE_API_KEY")
-        gemini_key = get_env().get("GEMINI_API_KEY")
+        anthropic_key = get_env().get("ANTHROPIC_API_KEY)"
+        openai_key = get_env().get("GOOGLE_API_KEY)"
+        gemini_key = get_env().get("GEMINI_API_KEY)"
         return { }
-        "anthropic": bool(anthropic_key and anthropic_key != "test-key"),
-        "openai": bool(openai_key and openai_key != "test-openai-key"),
-        "gemini": bool(gemini_key and gemini_key != "test-gemini-key")
+        "anthropic": bool(anthropic_key and anthropic_key != "test-key),"
+        "openai": bool(openai_key and openai_key != "test-openai-key),"
+        "gemini": bool(gemini_key and gemini_key != "test-gemini-key)"
     
 
         @staticmethod
@@ -112,7 +112,7 @@ class LLMTestHelpers:
         provider=provider,
         model_name=model,
         api_key=api_key,
-        generation_config={"temperature": 0.3, "max_tokens": 500}
+        generation_config={"temperature": 0.3, "max_tokens: 500}"
     
     
         return AppConfig(llm_configs=config_dict)
@@ -120,7 +120,7 @@ class LLMTestHelpers:
         @staticmethod
     def create_mock_llm_manager() -> MagicMock:
         """Create mock LLM manager for testing"""
-        mock_manager = MagicMock(); mock_manager.get_llm.return_value = MagicMock(); mock_manager.ask_llm = AsyncMock(return_value="LLM_INIT_SUCCESS")
+        mock_manager = MagicMock(); mock_manager.get_llm.return_value = MagicMock(); mock_manager.ask_llm = AsyncMock(return_value="LLM_INIT_SUCCESS)"
         LLMTestHelpers._setup_mock_responses(mock_manager)
         return mock_manager
 
@@ -144,7 +144,7 @@ class LLMTestHelpers:
     def _create_mock_structured_response():
         """Create mock structured response"""
         return LLMTestResponse( )
-        category="initialization",
+        category="initialization,"
         confidence=0.95,
         reasoning="Mock LLM initialization test successful"
     
@@ -179,7 +179,7 @@ class LLMTestHelpers:
         latency = await LLMTestHelpers._test_basic_prompt(mock_manager, provider)
         return LLMTestHelpers._create_success_result(latency, model)
         except Exception as e:
-        return {"success": False, "error": str(e), "model": model}
+        return {"success": False, "error": str(e), "model: model}"
 
         @staticmethod
     def _verify_client_creation(mock_manager, provider):
@@ -191,7 +191,7 @@ class LLMTestHelpers:
     async def _test_basic_prompt(mock_manager, provider):
         """Test basic prompt with timing"""
         start_time = time.time()
-        response = await mock_manager.ask_llm("Respond with: LLM_INIT_SUCCESS", provider)
+        response = await mock_manager.ask_llm("Respond with: LLM_INIT_SUCCESS, provider)"
         latency = (time.time() - start_time) * 1000
         assert "LLM_INIT_SUCCESS" in response, ""
         return latency
@@ -200,34 +200,34 @@ class LLMTestHelpers:
     def _create_success_result(latency, model):
         """Create success result dictionary"""
         return { }
-        "success": True,
-        "latency_ms": latency,
-        "response": "LLM_INIT_SUCCESS",
-        "model": model
+        "success: True,"
+        "latency_ms: latency,"
+        "response": "LLM_INIT_SUCCESS,"
+        "model: model"
     
 
         @staticmethod
     def create_failing_mock_manager():
         """Create mock manager that fails immediately"""
         mock_manager = MagicMock(); mock_manager.ask_llm = AsyncMock( )
-        side_effect=RuntimeError("LLM provider unavailable - no fallback")
+        side_effect=RuntimeError("LLM provider unavailable - no fallback)"
     
         return mock_manager
 
         @staticmethod
     async def test_provider_failure(mock_manager):
         """Test that provider failure is raised immediately"""
-        with pytest.raises(RuntimeError, match="LLM provider unavailable"):
-        await mock_manager.ask_llm("test", "primary")
+        with pytest.raises(RuntimeError, match="LLM provider unavailable):"
+        await mock_manager.ask_llm("test", "primary)"
         return True
 
         @staticmethod
     def create_failure_result():
         """Create provider failure test result"""
         return { }
-        "provider_available": False,
-        "error": "Provider unavailable",
-        "fallback_available": False
+        "provider_available: False,"
+        "error": "Provider unavailable,"
+        "fallback_available: False"
     
 
 
@@ -237,7 +237,7 @@ class ReliabilityTestHelpers:
         @staticmethod
     def create_failing_manager():
         """Create manager that always fails"""
-        mock_manager = MagicMock(); mock_manager.ask_llm = AsyncMock(side_effect=Exception("Service unavailable"))
+        mock_manager = MagicMock(); mock_manager.ask_llm = AsyncMock(side_effect=Exception("Service unavailable))"
         return mock_manager
 
         @staticmethod
@@ -246,7 +246,7 @@ class ReliabilityTestHelpers:
         failure_count = 0
         for _ in range(5):
         try:
-        await mock_manager.ask_llm("test", "test")
+        await mock_manager.ask_llm("test", "test)"
         except Exception:
         failure_count += 1
         return failure_count
@@ -268,7 +268,7 @@ class ReliabilityTestHelpers:
         """Test response under slow conditions"""
         start_time = time.time()
         try:
-        response = await mock_manager.ask_llm("test", "test")
+        response = await mock_manager.ask_llm("test", "test)"
         execution_time = time.time() - start_time
         return execution_time, response
         except Exception as e:
@@ -280,7 +280,7 @@ class ReliabilityTestHelpers:
         """Validate degradation handling behavior"""
         assert execution_time < 2.0, "Degradation handling timeout failed"
         if response is not None:
-        assert "error" in str(response).lower() or "unavailable" in str(response).lower(), \
+        assert "error" in str(response).lower() or "unavailable in str(response).lower(), \"
         "Response should indicate service unavailable"
 
 '''

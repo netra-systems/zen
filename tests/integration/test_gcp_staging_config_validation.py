@@ -10,10 +10,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -56,10 +56,10 @@ class TestGCPStagingConfigValidation:
     def test_critical_environment_variables_mapping(self):
         """Test mapping of critical environment variables"""
         critical_vars = [ ]
-        "SERVICE_SECRET",
-        "JWT_SECRET_KEY",
-        "DATABASE_URL",
-        "REDIS_URL",
+        "SERVICE_SECRET,"
+        "JWT_SECRET_KEY,"
+        "DATABASE_URL,"
+        "REDIS_URL,"
         "ENVIRONMENT"
     
 
@@ -71,20 +71,20 @@ class TestGCPStagingConfigValidation:
         """Test SERVICE_SECRET dependency chain validation"""
         pass
         dependency_chain = { }
-        "SERVICE_SECRET": { }
-        "required_by": ["AuthClientCore", "CircuitBreaker", "TokenValidation"],
-        "cascade_impact": "Complete authentication system failure",
+        "SERVICE_SECRET: { }"
+        "required_by": ["AuthClientCore", "CircuitBreaker", "TokenValidation],"
+        "cascade_impact": "Complete authentication system failure,"
         "severity": "ULTRA_CRITICAL"
     
     
 
     # Validate dependency mapping
-        service_secret_deps = dependency_chain["SERVICE_SECRET"]
-        assert "AuthClientCore" in service_secret_deps["required_by"]
+        service_secret_deps = dependency_chain["SERVICE_SECRET]"
+        assert "AuthClientCore" in service_secret_deps["required_by]"
         assert service_secret_deps["severity"] == "ULTRA_CRITICAL"
-        assert "authentication" in service_secret_deps["cascade_impact"]
+        assert "authentication" in service_secret_deps["cascade_impact]"
 
-        @pytest.fixture, reason="GCP integration tests disabled")
+        @pytest.fixture, reason="GCP integration tests disabled)"
     def test_gcp_service_configuration_validation(self):
         """Test GCP service configuration validation"""
         project = "netra-staging"
@@ -103,7 +103,7 @@ class TestGCPStagingConfigValidation:
         'gcloud', 'run', 'services', 'describe', service,
         '--project', project,
         '--region', region,
-        '--format', 'value(spec.template.spec.containers[0].env[?(@.name=="SERVICE_SECRET")].name)'
+        '--format', 'value(spec.template.spec.containers[0].env[?(@.name=="SERVICE_SECRET)].name)'"
         ], capture_output=True, text=True)
 
         # Should call gcloud with correct parameters
@@ -125,7 +125,7 @@ class MockGCPConfigValidator:
     def validate_service_config(self, service_name, required_vars):
         pass
     # Simulate missing SERVICE_SECRET
-        if "SERVICE_SECRET" in required_vars:
+        if "SERVICE_SECRET in required_vars:"
         self.errors.append("")
         return False
         return True
@@ -133,8 +133,8 @@ class MockGCPConfigValidator:
     def validate_all(self):
         pass
         backend_valid = self.validate_service_config( )
-        "netra-backend-staging",
-        ["SERVICE_SECRET", "DATABASE_URL", "JWT_SECRET_KEY"]
+        "netra-backend-staging,"
+        ["SERVICE_SECRET", "DATABASE_URL", "JWT_SECRET_KEY]"
     
         return backend_valid and len(self.errors) == 0
 
@@ -145,21 +145,21 @@ class MockGCPConfigValidator:
     # Should fail due to missing SERVICE_SECRET
         assert result is False
         assert len(validator.errors) > 0
-        assert any("SERVICE_SECRET" in error for error in validator.errors)
+        assert any("SERVICE_SECRET in error for error in validator.errors)"
 
     def test_health_endpoint_configuration_dependency(self):
         """Test health endpoint dependency on configuration"""
 
     def mock_health_check(mock_getenv):
     def getenv_side_effect(key, default=None):
-        if key == "SERVICE_SECRET":
+        if key == "SERVICE_SECRET:"
         return None  # Simulate missing SERVICE_SECRET
         return "mock_value"
 
         mock_getenv.side_effect = getenv_side_effect
 
         # Simulate health check logic
-        critical_vars = ["SERVICE_SECRET", "DATABASE_URL", "JWT_SECRET_KEY"]
+        critical_vars = ["SERVICE_SECRET", "DATABASE_URL", "JWT_SECRET_KEY]"
         missing = [item for item in []]
 
         return len(missing) == 0, missing
@@ -168,7 +168,7 @@ class MockGCPConfigValidator:
 
         # Should be unhealthy due to missing SERVICE_SECRET
         assert not healthy
-        assert "SERVICE_SECRET" in missing_vars
+        assert "SERVICE_SECRET in missing_vars"
 
     def test_circuit_breaker_configuration_dependency(self):
         """Test circuit breaker dependency on SERVICE_SECRET"""
@@ -188,7 +188,7 @@ class MockCircuitBreaker:
         self.failure_count += 1
         if self.failure_count >= self.failure_threshold:
         self.state = "OPEN"
-        raise Exception("SERVICE_SECRET missing")
+        raise Exception("SERVICE_SECRET missing)"
 
             # Simulate successful call with SERVICE_SECRET
         return func(*args, **kwargs)
@@ -202,15 +202,15 @@ class MockCircuitBreaker:
 
     # Simulate multiple failed calls
         for _ in range(6):
-        with pytest.raises(Exception, match="SERVICE_SECRET"):
-        breaker_no_secret.call(lambda x: None "success")
+        with pytest.raises(Exception, match="SERVICE_SECRET):"
+        breaker_no_secret.call(lambda x: None "success)"
 
             # Circuit breaker should be open
         assert breaker_no_secret.is_open()
 
             # Test with SERVICE_SECRET
-        breaker_with_secret = MockCircuitBreaker("test_secret")
-        result = breaker_with_secret.call(lambda x: None "success")
+        breaker_with_secret = MockCircuitBreaker("test_secret)"
+        result = breaker_with_secret.call(lambda x: None "success)"
 
             # Should work normally
         assert result == "success"
@@ -220,14 +220,14 @@ class MockCircuitBreaker:
         """Test that deployment validation prevents missing configuration"""
 
     def validate_deployment_config(config):
-        required_vars = ["SERVICE_SECRET", "DATABASE_URL", "JWT_SECRET_KEY"]
+        required_vars = ["SERVICE_SECRET", "DATABASE_URL", "JWT_SECRET_KEY]"
         missing = [item for item in []]
 
         if missing:
         return False, ""
 
         # Validate SERVICE_SECRET format
-        service_secret = config.get("SERVICE_SECRET")
+        service_secret = config.get("SERVICE_SECRET)"
         if service_secret and len(service_secret) < 16:
         return False, "SERVICE_SECRET too short"
 
@@ -235,19 +235,19 @@ class MockCircuitBreaker:
 
             # Test missing SERVICE_SECRET
         invalid_config = { }
-        "DATABASE_URL": "postgresql://test",
+        "DATABASE_URL": "postgresql://test,"
         "JWT_SECRET_KEY": "test_jwt_key"
             # SERVICE_SECRET missing
             
 
         valid, message = validate_deployment_config(invalid_config)
         assert not valid
-        assert "SERVICE_SECRET" in message
+        assert "SERVICE_SECRET in message"
 
             # Test complete configuration
         valid_config = { }
-        "SERVICE_SECRET": "valid_service_secret_12345",
-        "DATABASE_URL": "postgresql://test",
+        "SERVICE_SECRET": "valid_service_secret_12345,"
+        "DATABASE_URL": "postgresql://test,"
         "JWT_SECRET_KEY": "test_jwt_key_with_adequate_length"
             
 
@@ -266,10 +266,10 @@ class MockConfigMonitor:
     def check_service_secret(self):
         pass
     # Simulate SERVICE_SECRET check
-        if not os.getenv("SERVICE_SECRET"):
+        if not os.getenv("SERVICE_SECRET):"
         self.alerts.append({ })
-        "severity": "CRITICAL",
-        "message": "SERVICE_SECRET missing",
+        "severity": "CRITICAL,"
+        "message": "SERVICE_SECRET missing,"
         "timestamp": "2025-9-05T16:43:25Z"
         
         return False
@@ -281,8 +281,8 @@ class MockConfigMonitor:
     # In real scenario, would check actual breaker state
         if not self.check_service_secret():
         self.alerts.append({ })
-        "severity": "CRITICAL",
-        "message": "Circuit breaker open due to config",
+        "severity": "CRITICAL,"
+        "message": "Circuit breaker open due to config,"
         "timestamp": "2025-9-05T16:43:25Z"
         
         return "OPEN"
@@ -290,7 +290,7 @@ class MockConfigMonitor:
 
     def get_critical_alerts(self):
         pass
-        return [item for item in []] == "CRITICAL"]
+        return [item for item in []] == "CRITICAL]"
 
     # Test monitoring without SERVICE_SECRET
         with patch.dict(os.environ, {}, clear=True):
@@ -303,7 +303,7 @@ class MockConfigMonitor:
         # Should have critical alerts
         critical_alerts = monitor.get_critical_alerts()
         assert len(critical_alerts) >= 1
-        assert any("SERVICE_SECRET" in alert["message"] for alert in critical_alerts)
+        assert any("SERVICE_SECRET" in alert["message] for alert in critical_alerts)"
 
     def test_configuration_regression_prevention(self):
         """Test configuration regression prevention measures"""
@@ -315,11 +315,11 @@ class ConfigRegressionTracker:
         self.regressions = []
 
     def track_config_change(self, key, old_value, new_value):
-        if key == "SERVICE_SECRET":
+        if key == "SERVICE_SECRET:"
         if old_value and not new_value:
         self.regressions.append({ })
-        "type": "CRITICAL_DELETION",
-        "key": key,
+        "type": "CRITICAL_DELETION,"
+        "key: key,"
         "impact": "Complete authentication failure"
             
 
@@ -327,13 +327,13 @@ class ConfigRegressionTracker:
         self.current_config[key] = new_value
 
     def has_critical_regressions(self):
-        return any(reg["type"] == "CRITICAL_DELETION" for reg in self.regressions)
+        return any(reg["type"] == "CRITICAL_DELETION for reg in self.regressions)"
 
     # Test regression detection
         tracker = ConfigRegressionTracker()
 
     # Simulate SERVICE_SECRET removal
-        tracker.track_config_change("SERVICE_SECRET", "previous_secret", None)
+        tracker.track_config_change("SERVICE_SECRET", "previous_secret, None)"
 
     # Should detect critical regression
         assert tracker.has_critical_regressions()
@@ -385,10 +385,10 @@ class MockGCPEmergencyFix:
         fixer = MockGCPEmergencyFix()
 
     # Step 1: Create SERVICE_SECRET
-        assert fixer.create_service_secret("emergency_service_secret_12345")
+        assert fixer.create_service_secret("emergency_service_secret_12345)"
 
     # Step 2: Update service
-        assert fixer.update_service("emergency_service_secret_12345")
+        assert fixer.update_service("emergency_service_secret_12345)"
 
     # Step 3: Restart service
         assert fixer.restart_service()
@@ -406,10 +406,10 @@ class MockLoadTester:
     def test_endpoint(self, endpoint):
         if not self.service_secret_present:
         # Simulate auth failure without SERVICE_SECRET
-        return {"status": 403, "error": "Authentication failed"}
+        return {"status": 403, "error": "Authentication failed}"
 
         # Simulate success with SERVICE_SECRET
-        return {"status": 200, "response": "OK"}
+        return {"status": 200, "response": "OK}"
 
     def run_load_test(self, endpoints, concurrent_requests=100):
         results = []
@@ -419,11 +419,11 @@ class MockLoadTester:
         result = self.test_endpoint(endpoint)
         results.append(result)
 
-        success_count = sum(1 for r in results if r["status"] == 200)
+        success_count = sum(1 for r in results if r["status] == 200)"
         return { }
-        "total_requests": len(results),
-        "successful": success_count,
-        "success_rate": success_count / len(results)
+        "total_requests: len(results),"
+        "successful: success_count,"
+        "success_rate: success_count / len(results)"
             
 
             # Test without SERVICE_SECRET (should fail)
@@ -432,7 +432,7 @@ class MockLoadTester:
         "/health", "/api/discovery", "/auth/config"
             
 
-        assert results_broken["success_rate"] == 0.0
+        assert results_broken["success_rate] == 0.0"
 
             # Test with SERVICE_SECRET (should succeed)
         tester_fixed = MockLoadTester(service_secret_present=True)
@@ -440,7 +440,7 @@ class MockLoadTester:
         "/health", "/api/discovery", "/auth/config"
             
 
-        assert results_fixed["success_rate"] == 1.0
+        assert results_fixed["success_rate] == 1.0"
 
 
 class TestServiceSecretIncidentResponse:
@@ -456,42 +456,42 @@ class IncidentDetector:
     def check_circuit_breaker_errors(self, log_entries):
         breaker_errors = [ ]
         entry for entry in log_entries
-        if "Circuit breaker" in entry and "open" in entry
+        if "Circuit breaker" in entry and "open in entry"
     
 
         if len(breaker_errors) > 2:  # Lower threshold for test
         self.incidents.append({ })
-        "type": "CIRCUIT_BREAKER_OPEN",
-        "severity": "CRITICAL",
-        "count": len(breaker_errors)
+        "type": "CIRCUIT_BREAKER_OPEN,"
+        "severity": "CRITICAL,"
+        "count: len(breaker_errors)"
     
 
     def check_auth_failures(self, log_entries):
         auth_errors = [ ]
         entry for entry in log_entries
-        if "INTER-SERVICE AUTHENTICATION" in entry
+        if "INTER-SERVICE AUTHENTICATION in entry"
     
 
         if len(auth_errors) > 0:
         self.incidents.append({ })
-        "type": "AUTH_FAILURE",
-        "severity": "CRITICAL",
-        "count": len(auth_errors)
+        "type": "AUTH_FAILURE,"
+        "severity": "CRITICAL,"
+        "count: len(auth_errors)"
         
 
     def has_critical_incidents(self):
-        return any(inc["severity"] == "CRITICAL" for inc in self.incidents)
+        return any(inc["severity"] == "CRITICAL for inc in self.incidents)"
 
     # Test incident detection
         detector = IncidentDetector()
 
     Simulate log entries from actual outage
         mock_logs = [ ]
-        "Circuit breaker _validate_token_remote_breaker is open",
-        "INTER-SERVICE AUTHENTICATION CRITICAL ERROR",
-        "Circuit breaker _validate_token_remote_breaker is open",
-        "AUTH SERVICE UNREACHABLE: Circuit breaker is open",
-        "Circuit breaker _validate_token_remote_breaker is open",
+        "Circuit breaker _validate_token_remote_breaker is open,"
+        "INTER-SERVICE AUTHENTICATION CRITICAL ERROR,"
+        "Circuit breaker _validate_token_remote_breaker is open,"
+        "AUTH SERVICE UNREACHABLE: Circuit breaker is open,"
+        "Circuit breaker _validate_token_remote_breaker is open,"
         "Circuit breaker _validate_token_remote_breaker is open"
     
 
@@ -514,26 +514,26 @@ class IncidentResponse:
     def step_1_diagnose(self):
         pass
     # Check SERVICE_SECRET presence
-        service_secret_present = os.getenv("SERVICE_SECRET") is not None
-        self.steps_completed.append("diagnose")
+        service_secret_present = os.getenv("SERVICE_SECRET) is not None"
+        self.steps_completed.append("diagnose)"
         return service_secret_present
 
     def step_2_deploy_secret(self):
         pass
     # Deploy SERVICE_SECRET
-        self.steps_completed.append("deploy_secret")
+        self.steps_completed.append("deploy_secret)"
         return True  # Simulated success
 
     def step_3_restart_service(self):
         pass
     # Restart service
-        self.steps_completed.append("restart_service")
+        self.steps_completed.append("restart_service)"
         return True  # Simulated success
 
     def step_4_validate(self):
         pass
     # Validate fix
-        self.steps_completed.append("validate")
+        self.steps_completed.append("validate)"
         return True  # Simulated success
 
     def execute_response(self):
@@ -552,12 +552,12 @@ class IncidentResponse:
         resolved = responder.execute_response()
 
         assert resolved
-        assert "diagnose" in responder.steps_completed
-        assert "deploy_secret" in responder.steps_completed
-        assert "restart_service" in responder.steps_completed
-        assert "validate" in responder.steps_completed
+        assert "diagnose in responder.steps_completed"
+        assert "deploy_secret in responder.steps_completed"
+        assert "restart_service in responder.steps_completed"
+        assert "validate in responder.steps_completed"
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
                         # Run tests directly
-        pytest.main([__file__, "-v", "--tb=short"])
+        pytest.main([__file__, "-v", "--tb=short])"

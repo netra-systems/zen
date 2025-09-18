@@ -97,7 +97,7 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
         ]
         
     def test_detect_duplicate_conftest_files(self):
-    ""
+    """
         CRITICAL: Detect duplicate conftest.py files across services.
         
         Expected violations: 20+ duplicate conftest.py files
@@ -137,7 +137,7 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
             )
             
     def test_detect_fixture_definition_conflicts(self):
-    "
+        """
     "
         HIGH: Detect conflicting fixture definitions across modules.
         
@@ -198,7 +198,7 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
             )
             
     def test_detect_test_runner_duplication(self):
-    "
+        """
     "
         MEDIUM: Detect duplicate test runner implementations.
         
@@ -231,7 +231,7 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
             )
             
     def test_detect_direct_pytest_execution_patterns(self):
-    ""
+    """
         LOW: Detect direct pytest execution bypassing SSOT runner.
         
         Expected violations: 10+ direct pytest calls
@@ -259,7 +259,7 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
             )
             
     def test_comprehensive_infrastructure_violation_report(self):
-    ""
+    """
         Generate comprehensive SSOT test infrastructure violation report.
         
         This test provides actionable intelligence for SSOT infrastructure remediation.
@@ -362,7 +362,7 @@ SSOT TARGET STATE:
             pytest.fail(fSSOT Test Infrastructure Violation Report:\n{report})
             
     def _find_all_conftest_files(self) -> List[Path]:
-        ""Find all conftest.py files in the project.
+        ""Find all conftest.py files in the project."
         conftest_files = []
         
         for root, dirs, files in os.walk(self.project_root):

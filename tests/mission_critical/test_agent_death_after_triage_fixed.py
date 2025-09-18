@@ -139,14 +139,14 @@ print()
 
         # Verify execution started
 status = await tracker.get_execution_status(execution_id)
-assert status is not None, Execution status should exist
-assert status.execution_record.state in [NewExecutionState.INITIALIZING, NewExecutionState.PENDING]
+assert status is not None, "Execution status should exist"
+assert status.execution_record.state in [NewExecutionState.INITIALIZING, "NewExecutionState.PENDING]"
 
         # Simulate agent starting work with heartbeats
 await tracker.update_execution_progress( )
 execution_id,
 ExecutionProgress( )
-stage="triage_start",
+stage="triage_start,"
 percentage=10.0,
 message=Starting triage analysis...
         
@@ -223,7 +223,7 @@ report = verifier.get_verification_report()
 
 print(")"
  + =*80)
-print("EXECUTION TRACKER DEATH DETECTION RESULTS")
+print("EXECUTION TRACKER DEATH DETECTION RESULTS)"
 print(=*80)
 print()
 print(formatted_string")"

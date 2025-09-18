@@ -110,13 +110,13 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
         self._flow_failures = []
         
     async def test_websocket_manager_can_create_database_sessions(self):
-        ""
+        """
         DESIGNED TO PASS: WebSocket manager successfully creates DB sessions
         
         This test validates the critical flow where WebSocket manager needs
         to create database sessions for user interactions and agent execution.
 
-        self.record_metric("golden_path_flow, websocket_manager_database_sessions")
+        self.record_metric("golden_path_flow, websocket_manager_database_sessions)"
         
         websocket_session_success = False
         session_creation_error = None
@@ -200,7 +200,7 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
         logger.info([U+2713] WebSocket manager database session creation validated)"
     
     async def test_user_login_database_session_creation_works(self):
-        "
+        """
         "
         DESIGNED TO PASS: User login flow can create database sessions
         
@@ -267,7 +267,7 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
         
         # Record flow results
         flow_result = {
-            "flow: user_login_database_sessions",
+            "flow: user_login_database_sessions,"
             success: login_session_success,
             error: login_session_error"
             error: login_session_error"
@@ -286,7 +286,7 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
         logger.info([U+2713] User login database session access validated")"
     
     async def test_agent_execution_database_access_works(self):
-    "
+        """
     "
         DESIGNED TO PASS: Agents can access database through session factory
         
@@ -347,7 +347,7 @@ class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
         
         # Record flow results
         flow_result = {
-            "flow: agent_execution_database_access",
+            "flow: agent_execution_database_access,"
             success: agent_db_success,
             error: agent_db_error"
             error: agent_db_error"

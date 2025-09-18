@@ -83,16 +83,16 @@ class TestBasicSSOTFunctionality:
         config = OrchestrationConfig()
 
     # Test required properties exist
-        assert hasattr(config, 'orchestrator_available')
-        assert hasattr(config, 'master_orchestration_available')
-        assert hasattr(config, 'background_e2e_available')
-        assert hasattr(config, 'all_orchestration_available')
+        assert hasattr(config, "'orchestrator_available')"
+        assert hasattr(config, "'master_orchestration_available')"
+        assert hasattr(config, "'background_e2e_available')"
+        assert hasattr(config, "'all_orchestration_available')"
 
     # Test properties return boolean values
-        assert isinstance(config.orchestrator_available, bool)
-        assert isinstance(config.master_orchestration_available, bool)
-        assert isinstance(config.background_e2e_available, bool)
-        assert isinstance(config.all_orchestration_available, bool)
+        assert isinstance(config.orchestrator_available, "bool)"
+        assert isinstance(config.master_orchestration_available, "bool)"
+        assert isinstance(config.background_e2e_available, "bool)"
+        assert isinstance(config.all_orchestration_available, "bool)"
 
     def test_orchestration_config_methods_work(self):
         "Test that OrchestrationConfig methods work."
@@ -101,20 +101,20 @@ class TestBasicSSOTFunctionality:
 
     # Test methods return expected types
         status = config.get_availability_status()
-        assert isinstance(status, dict)
+        assert isinstance(status, "dict)"
         assert 'orchestrator_available' in status
 
         features = config.get_available_features()
-        assert isinstance(features, set)
+        assert isinstance(features, "set)"
 
         unavailable = config.get_unavailable_features()
-        assert isinstance(unavailable, set)
+        assert isinstance(unavailable, "set)"
 
         errors = config.get_import_errors()
-        assert isinstance(errors, dict)
+        assert isinstance(errors, "dict)"
 
     def test_enum_values_are_correct(self):
-        ""Test that enum values are correct.
+        ""Test that enum values are correct."
     # BackgroundTaskStatus
         assert BackgroundTaskStatus.QUEUED.value == queued"
         assert BackgroundTaskStatus.QUEUED.value == queued"
@@ -151,7 +151,7 @@ class TestBasicSSOTFunctionality:
         actual_strategies = [strategy.name for strategy in ExecutionStrategy]
 
         for expected in expected_strategies:
-        assert expected in actual_strategies, formatted_string
+        assert expected in actual_strategies, "formatted_string"
 
     def test_dataclass_serialization_works(self):
         "Test that dataclass serialization works with enums."
@@ -169,7 +169,7 @@ class TestBasicSSOTFunctionality:
 
     # Test serialization
         config_dict = config.to_dict()
-        assert isinstance(config_dict, dict)
+        assert isinstance(config_dict, "dict)"
         assert config_dict['category'] == "cypress"
         assert config_dict['environment'] == test
         assert config_dict['timeout_minutes'] == 30
@@ -194,7 +194,7 @@ class TestBasicSSOTFunctionality:
         actual_modes = [mode.name for mode in OrchestrationMode]
 
         for expected in expected_modes:
-        assert expected in actual_modes, formatted_string
+        assert expected in actual_modes, "formatted_string"
 
     def test_configuration_validation_works(self):
         "Test that configuration validation works."
@@ -203,11 +203,11 @@ class TestBasicSSOTFunctionality:
 
     # Validation should return a list
         issues = config.validate_configuration()
-        assert isinstance(issues, list)
+        assert isinstance(issues, "list)"
 
     # Each issue should be a string
         for issue in issues:
-        assert isinstance(issue, str)
+        assert isinstance(issue, "str)"
 
     def test_convenience_functions_work(self):
         Test that convenience functions work.""
@@ -220,14 +220,14 @@ class TestBasicSSOTFunctionality:
     
 
     # All should return boolean values
-        assert isinstance(is_orchestrator_available(), bool)
-        assert isinstance(is_master_orchestration_available(), bool)
-        assert isinstance(is_background_e2e_available(), bool)
-        assert isinstance(is_all_orchestration_available(), bool)
+        assert isinstance(is_orchestrator_available(), "bool)"
+        assert isinstance(is_master_orchestration_available(), "bool)"
+        assert isinstance(is_background_e2e_available(), "bool)"
+        assert isinstance(is_all_orchestration_available(), "bool)"
 
     # Status should return dict
         status = get_orchestration_status()
-        assert isinstance(status, dict)
+        assert isinstance(status, "dict)"
         assert 'orchestrator_available' in status
 
 
@@ -236,7 +236,7 @@ class TestBasicSSOTFunctionality:
         # Issue #1024: Unauthorized test runners blocking Golden Path
         print(MIGRATION NOTICE: This file previously used direct pytest execution.")"
         print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)
-        print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+        print("For more info: reports/TEST_EXECUTION_GUIDE.md)"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

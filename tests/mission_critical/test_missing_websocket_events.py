@@ -17,7 +17,7 @@ from loguru import logger
 
 # Core WebSocket infrastructure imports
 try:
-    from netra_backend.app.services.websocket_bridge_factory import (
+    from netra_backend.app.services.websocket_bridge_factory import ()
         WebSocketBridgeFactory,
         UserWebSocketEmitter,
         UserWebSocketContext,
@@ -33,7 +33,7 @@ try:
     from netra_backend.app.schemas.websocket_models import WebSocketMessage
     from netra_backend.app.logging_config import central_logger
 except ImportError as e:
-    logger.warning(f"Some imports failed: {e}. Test will use mock implementations.)")
+    logger.warning(f"Some imports failed: {e}. Test will use mock implementations.))"
 
 
 class TestWebSocketConnection:
@@ -421,7 +421,7 @@ class MissingWebSocketEventsValidator:
         }
 
     def _print_missing_events_summary(self, test_results: Dict, critical_missing: Set[str):
-        ""Print comprehensive summary of missing events.
+        ""Print comprehensive summary of missing events."
         logger.info(\n + =" * 80)"
         logger.info("📊 MISSING WEBSOCKET EVENTS SUMMARY)"
         logger.info(= * 80)
@@ -448,7 +448,7 @@ class MissingWebSocketEventsValidator:
         # Test-by-test breakdown
         logger.info(f\n📋 TEST BREAKDOWN:)
         for test_name, result in test_results.items():
-            status = ✅ PASS" if result.get('success', False) else "❌ FAIL
+            status = ✅ PASS" if result.get('success', False) else ❌ FAIL"
             logger.info(f  {status}: {test_name})
             if not result.get('success', False) and 'events_missing' in result:
                 for missing in result['events_missing']:
@@ -459,13 +459,13 @@ class MissingWebSocketEventsValidator:
 @pytest.mark.asyncio
 @pytest.mark.critical
 async def test_missing_websocket_events():
-    ""Pytest wrapper for missing WebSocket events validation.
+    ""Pytest wrapper for missing WebSocket events validation."
     validator = MissingWebSocketEventsValidator()
     results = await validator.run_comprehensive_missing_events_test()
 
     # Assert no critical events are missing
     critical_missing = results['critical_missing']
-    assert len(critical_missing) == 0, fCritical WebSocket events missing: {critical_missing}
+    assert len(critical_missing) == 0, "fCritical WebSocket events missing: {critical_missing}"
 
     # Assert overall test success
     assert results['overall_success'], Missing WebSocket events test failed""

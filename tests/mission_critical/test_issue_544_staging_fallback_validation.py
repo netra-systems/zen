@@ -41,7 +41,7 @@ from loguru import logger
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
 class Issue544StagingEnvironmentConnectivityTests:
-    ""Test staging environment connectivity for Issue #544 fallback solution.
+    ""Test staging environment connectivity for Issue #544 fallback solution."
     
     @pytest.fixture(autouse=True)
     def setup_staging_environment(self):
@@ -51,7 +51,7 @@ class Issue544StagingEnvironmentConnectivityTests:
         # Default staging configuration for testing
         self.staging_config = {
             STAGING_BACKEND_URL: https://netra-staging-backend-dot-netra-staging.uw.r.appspot.com,
-            STAGING_WEBSOCKET_URL": "wss://netra-staging-backend-dot-netra-staging.uw.r.appspot.com/ws,
+            STAGING_WEBSOCKET_URL": wss://netra-staging-backend-dot-netra-staging.uw.r.appspot.com/ws,"
             STAGING_AUTH_URL: https://netra-staging-auth-dot-netra-staging.uw.r.appspot.com,
         }
         
@@ -81,7 +81,7 @@ class Issue544StagingEnvironmentConnectivityTests:
             if response.status_code == 200:
                 logger.info(✅ Staging backend accessible - viable Docker alternative)
                 health_data = response.json() if response.headers.get('content-type', '').startswith('application/json') else {}
-                logger.info(fHealth data: {health_data}")"
+                logger.info(fHealth "data": {"health_data"}")"
             else:
                 logger.warning(f⚠️ Staging backend health check failed: {response.status_code})
                 pytest.skip(fStaging backend not healthy: {response.status_code})
@@ -141,7 +141,7 @@ class Issue544StagingEnvironmentConnectivityTests:
                 logger.info("✅ WebSocket connection to staging established)"
                 
                 # Test basic ping/pong
-                ping_message = {type: ping, timestamp": time.time()}"
+                ping_message = {"type": ping, timestamp": time.time()}"
                 await websocket.send(json.dumps(ping_message))
                 
                 try:
@@ -421,7 +421,7 @@ def staging_environment_setup():
     
     # Set up staging environment variables for testing
     staging_vars = {
-        "USE_STAGING_FALLBACK: true",
+        "USE_STAGING_FALLBACK: true,"
         STAGING_BACKEND_URL: https://netra-staging-backend-dot-netra-staging.uw.r.appspot.com,
         STAGING_WEBSOCKET_URL: wss://netra-staging-backend-dot-netra-staging.uw.r.appspot.com/ws","
         "STAGING_AUTH_URL: https://netra-staging-auth-dot-netra-staging.uw.r.appspot.com,"

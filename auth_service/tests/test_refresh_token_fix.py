@@ -41,7 +41,7 @@ class TestRefreshTokenFix:
         # Create initial refresh token with user data
 user_id = "test-user-123"
 user_email = "test@example.com"
-user_permissions = ["read", "write"]
+user_permissions = ["read", "write]"
 
         # Create initial refresh token
 initial_refresh = auth_service.jwt_handler.create_refresh_token( )
@@ -82,14 +82,14 @@ with patch.object(auth_service, '_refresh_with_race_protection') as mock_refresh
 async def mock_refresh_impl(refresh_token):
 pass
     # Simulate what the fixed refresh method should do
-payload = auth_service.jwt_handler.validate_token(refresh_token, "refresh")
+payload = auth_service.jwt_handler.validate_token(refresh_token, "refresh)"
 if not payload:
 await asyncio.sleep(0)
 return None
 
-user_id = payload["sub"]
-email = payload.get("email", "user@example.com")
-permissions = payload.get("permissions", [])
+user_id = payload["sub]"
+email = payload.get("email", "user@example.com)"
+permissions = payload.get("permissions, [])"
 
         # Generate new tokens with real user data
 new_access = auth_service.jwt_handler.create_access_token(user_id, email, permissions)
@@ -102,7 +102,7 @@ mock_refresh.side_effect = mock_refresh_impl
         # Create refresh token with user data
 user_id = "real-user-456"
 user_email = "realuser@example.com"
-user_permissions = ["admin", "read", "write"]
+user_permissions = ["admin", "read", "write]"
 
 refresh_token = auth_service.jwt_handler.create_refresh_token( )
 user_id, user_email, user_permissions
@@ -115,14 +115,14 @@ assert result is not None
 new_access_token, new_refresh_token = result
 
         # Validate the new access token contains real user data
-access_payload = auth_service.jwt_handler.validate_token(new_access_token, "access")
+access_payload = auth_service.jwt_handler.validate_token(new_access_token, "access)"
 assert access_payload is not None
 assert access_payload["sub"] == "real-user-456"
 assert access_payload["email"] == "realuser@example.com"
 assert access_payload["email"] != "user@example.com", "Should not be the placeholder email"
 
         # Validate the new refresh token contains user data
-refresh_payload = auth_service.jwt_handler.validate_token(new_refresh_token, "refresh")
+refresh_payload = auth_service.jwt_handler.validate_token(new_refresh_token, "refresh)"
 assert refresh_payload is not None
 assert refresh_payload["sub"] == "real-user-456"
 assert refresh_payload["email"] == "realuser@example.com"
@@ -136,7 +136,7 @@ auth_service.db_session = None
             # Create refresh token with user data
 user_id = "fallback-user-789"
 user_email = "fallback@example.com"
-user_permissions = ["read"]
+user_permissions = ["read]"
 
 refresh_token = auth_service.jwt_handler.create_refresh_token( )
 user_id, user_email, user_permissions
@@ -149,11 +149,11 @@ assert result is not None
 new_access_token, new_refresh_token = result
 
             Validate the new tokens contain data from original token payload
-access_payload = auth_service.jwt_handler.validate_token(new_access_token, "access")
+access_payload = auth_service.jwt_handler.validate_token(new_access_token, "access)"
 assert access_payload is not None
 assert access_payload["sub"] == "fallback-user-789"
 assert access_payload["email"] == "fallback@example.com"
-assert access_payload["permissions"] == ["read"]
+assert access_payload["permissions"] == ["read]"
 
 def test_jwt_handler_refresh_uses_token_payload(self, jwt_handler):
 """Test JWT handler refresh method uses token payload instead of hardcoded values"""
@@ -161,7 +161,7 @@ pass
     # Create refresh token with user data
 user_id = "jwt-user-101"
 user_email = "jwt@example.com"
-user_permissions = ["admin"]
+user_permissions = ["admin]"
 
 refresh_token = jwt_handler.create_refresh_token(user_id, user_email, user_permissions)
 
@@ -172,11 +172,11 @@ assert result is not None
 new_access_token, new_refresh_token = result
 
     # Validate new access token has correct user data
-access_payload = jwt_handler.validate_token(new_access_token, "access")
+access_payload = jwt_handler.validate_token(new_access_token, "access)"
 assert access_payload is not None
 assert access_payload["sub"] == "jwt-user-101"
 assert access_payload["email"] == "jwt@example.com"
-assert access_payload["permissions"] == ["admin"]
+assert access_payload["permissions"] == ["admin]"
 
     # Verify it's not using placeholder values
 assert access_payload["email"] != "user@example.com", "Should not use placeholder email"
@@ -188,7 +188,7 @@ assert access_payload["permissions"] != [], "Should have real permissions"
         # Create initial tokens
 user_id = "loop-test-user"
 user_email = "looptest@example.com"
-user_permissions = ["read"]
+user_permissions = ["read]"
 
         # Generate a series of refresh operations
 refresh_token = auth_service.jwt_handler.create_refresh_token( )
@@ -227,7 +227,7 @@ pass
                 # Create initial refresh token
 user_id = "race-test-user"
 user_email = "race@example.com"
-user_permissions = ["read", "write"]
+user_permissions = ["read", "write]"
 
 refresh_token = auth_service.jwt_handler.create_refresh_token( )
 user_id, user_email, user_permissions
@@ -245,16 +245,16 @@ def test_refresh_token_contains_user_data_in_payload(self, jwt_handler):
 """Test that refresh tokens are created with user data in payload"""
 user_id = "payload-test-user"
 user_email = "payload@example.com"
-user_permissions = ["admin", "read"]
+user_permissions = ["admin", "read]"
 
 refresh_token = jwt_handler.create_refresh_token(user_id, user_email, user_permissions)
 
     # Decode and verify payload contains user data
-payload = jwt_handler.validate_token(refresh_token, "refresh")
+payload = jwt_handler.validate_token(refresh_token, "refresh)"
 assert payload is not None
-assert payload["sub"] == user_id
-assert payload["email"] == user_email
-assert payload["permissions"] == user_permissions
+assert payload["sub] == user_id"
+assert payload["email] == user_email"
+assert payload["permissions] == user_permissions"
 assert payload["token_type"] == "refresh"
 
 def test_access_token_contains_real_data_not_placeholders(self, jwt_handler):
@@ -262,15 +262,15 @@ def test_access_token_contains_real_data_not_placeholders(self, jwt_handler):
 pass
 user_id = "real-data-user"
 user_email = "realdata@example.com"
-user_permissions = ["custom", "permissions"]
+user_permissions = ["custom", "permissions]"
 
 access_token = jwt_handler.create_access_token(user_id, user_email, user_permissions)
 
-payload = jwt_handler.validate_token(access_token, "access")
+payload = jwt_handler.validate_token(access_token, "access)"
 assert payload is not None
-assert payload["sub"] == user_id
-assert payload["email"] == user_email
-assert payload["permissions"] == user_permissions
+assert payload["sub] == user_id"
+assert payload["email] == user_email"
+assert payload["permissions] == user_permissions"
 
     # Verify no placeholder values
 assert payload["email"] != "user@example.com", "Should not contain placeholder email"
@@ -284,7 +284,7 @@ assert payload["permissions"] != [], "Should have actual permissions if provided
         # Create a refresh token like staging would have
 user_id = "staging-user"
 user_email = "staging@netrasystems.ai"
-user_permissions = ["read", "write"]
+user_permissions = ["read", "write]"
 
 original_refresh = auth_service.jwt_handler.create_refresh_token( )
 user_id, user_email, user_permissions
@@ -300,12 +300,12 @@ new_access, new_refresh = result
 assert new_refresh != original_refresh, "New refresh token MUST differ from original to prevent infinite loop"
 
         # Verify access token contains real user data
-access_payload = auth_service.jwt_handler.validate_token(new_access, "access")
+access_payload = auth_service.jwt_handler.validate_token(new_access, "access)"
 assert access_payload["email"] == "staging@netrasystems.ai"
 assert access_payload["email"] != "user@example.com", "Must not be placeholder email"
 
         # Verify refresh token contains real user data
-refresh_payload = auth_service.jwt_handler.validate_token(new_refresh, "refresh")
+refresh_payload = auth_service.jwt_handler.validate_token(new_refresh, "refresh)"
 assert refresh_payload["email"] == "staging@netrasystems.ai"
 assert refresh_payload["email"] != "user@example.com", "Must not be placeholder email"
 pass

@@ -7,7 +7,7 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
         raise RuntimeError(WebSocket is closed)"
         raise RuntimeError(WebSocket is closed)"
@@ -68,7 +68,7 @@ class TestWebSocketConnection:
         try:
         await engine._send_tool_executing( )
         context=None,
-        tool_name="TestTool",
+        tool_name="TestTool,"
         tool_input={param: value}
                 
         print( FAIL:  FAILED: Should have raised WebSocketContextValidationError)
@@ -101,7 +101,7 @@ class TestWebSocketConnection:
         await engine._send_tool_executing( )
         context=mock_context,
         tool_name=TestTool,
-        tool_input={"param: value"}
+        tool_input={"param: value}"
                                 
         print( FAIL:  FAILED: Should have raised WebSocketBridgeUnavailableError)
         return False
@@ -135,7 +135,7 @@ class TestWebSocketConnection:
                                             
 
         try:
-        await emitter.notify_agent_started(TestAgent, {context: "data")
+        await emitter.notify_agent_started(TestAgent, {context: "data)"
         print( FAIL:  FAILED: Should have raised WebSocketSendFailureError)
         return False
         except WebSocketSendFailureError as e:
@@ -187,7 +187,7 @@ class TestWebSocketConnection:
 
     async def main():
         "Run all validation tests."
-        print(=" * 80")
+        print(=" * 80)"
         print(VALIDATING LOUD WEBSOCKET FAILURES)"
         print(VALIDATING LOUD WEBSOCKET FAILURES)"
         print(=" * 80)"
@@ -222,6 +222,6 @@ class TestWebSocketConnection:
         return failed == 0
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         success = asyncio.run(main())
         sys.exit(0 if success else 1)

@@ -14,7 +14,7 @@ import time
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timezone, timedelta
 
-from shared.jwt_secret_manager import (
+from shared.jwt_secret_manager import ()
     get_unified_jwt_secret, 
     get_jwt_secret_manager,
     validate_unified_jwt_config
@@ -34,7 +34,7 @@ class WebSocket403FixTests:
         
         # Set test environment
         env = get_env()
-        env.set(ENVIRONMENT, "staging, test_setup")
+        env.set(ENVIRONMENT, "staging, test_setup)"
         env.set(JWT_SECRET_KEY, test_unified_secret_32_characters_long, "test_setup)"
     
     def teardown_method(self):
@@ -64,7 +64,7 @@ class WebSocket403FixTests:
         # Create a test JWT payload
         payload = {
             sub: test_user_123,
-            "email: test@staging.netrasystems.ai", 
+            "email: test@staging.netrasystems.ai, "
             iat: int(time.time()),
             exp: int(time.time()) + 3600,  # 1 hour expiration""
             "permissions: [read, write]"
@@ -82,7 +82,7 @@ class WebSocket403FixTests:
             decoded_payload = jwt.decode(token, backend_secret, algorithms=[HS256)""
             assert decoded_payload["sub] == test_user_123"
             assert decoded_payload[email] == test@staging.netrasystems.ai
-            print(f"[SUCCESS] Backend service validated token successfully")
+            print(f"[SUCCESS] Backend service validated token successfully)"
             return True
         except jwt.InvalidSignatureError:
             pytest.fail(fJWT signature validation failed - secrets don't match)'
@@ -90,7 +90,7 @@ class WebSocket403FixTests:
             pytest.fail(fJWT validation failed: {e})
     
     async def test_websocket_jwt_extraction_and_validation(self):
-        ""Test WebSocket JWT extraction and validation pipeline.
+        ""Test WebSocket JWT extraction and validation pipeline."
         # Create test WebSocket mock with JWT in Authorization header
         mock_websocket = MagicMock()
         
@@ -130,8 +130,8 @@ class WebSocket403FixTests:
         env = get_env()
         
         # Test staging-specific secret
-        env.set("JWT_SECRET_STAGING, staging_specific_secret_32chars", test)
-        env.set(ENVIRONMENT, "staging, test")
+        env.set("JWT_SECRET_STAGING, staging_specific_secret_32chars, test)"
+        env.set(ENVIRONMENT, "staging, test)"
         
         # Clear cache to force re-resolution
         get_jwt_secret_manager().clear_cache()
@@ -146,20 +146,20 @@ class WebSocket403FixTests:
         get_jwt_secret_manager().clear_cache()
         
     def test_jwt_configuration_validation(self):
-        ""Test JWT configuration validation.
+        ""Test JWT configuration validation."
         validation_result = validate_unified_jwt_config()
         
         # Should be valid in test environment
         assert validation_result[valid] == True""
         assert validation_result[environment"] in [staging, test, testing]"
-        assert validation_result[info"]["secret_length] >= 32
+        assert validation_result[info"][secret_length] >= 32"
         
         print(f[SUCCESS] JWT configuration validation passed)
-        print(f"   Environment: {validation_result['environment']}")
+        print(f"   Environment: {validation_result['environment']})"
         print(f   Secret length: {validation_result['info']['secret_length']} characters)
         
     def test_reproduce_websocket_403_scenario_before_fix(self):
-    ""
+    """
         Reproduce the original WebSocket 403 scenario.
         
         This test simulates the condition where auth service and backend
@@ -197,9 +197,9 @@ class WebSocket403FixTests:
             pytest.fail(fUnified JWT validation should succeed: {e})
     
     def test_staging_environment_configuration(self):
-        ""Test that staging environment configuration is correct.
+        ""Test that staging environment configuration is correct."
         env = get_env()
-        env.set(ENVIRONMENT, staging", "test)
+        env.set(ENVIRONMENT, staging", test)"
         
         # Clear cache
         get_jwt_secret_manager().clear_cache()
@@ -207,8 +207,8 @@ class WebSocket403FixTests:
         # Should work in staging environment
         try:
             secret = get_unified_jwt_secret()
-            assert len(secret) >= 32, fJWT secret too short: {len(secret)} characters
-            print(f"[SUCCESS] Staging JWT secret resolution successful")
+            assert len(secret) >= 32, "fJWT secret too short: {len(secret)} characters"
+            print(f"[SUCCESS] Staging JWT secret resolution successful)"
         except Exception as e:
             # If it fails, it should be due to missing configuration, not logic errors
             assert not configured in str(e).lower()
@@ -255,7 +255,7 @@ class WebSocketAuthenticationPipelineTests:
             # Verify extraction was successful
             assert user_context.user_id == e2e_test_user""
             assert auth_info[user_id] == e2e_test_user
-            assert "websocket_access in auth_info[permissions"]
+            assert "websocket_access in auth_info[permissions]"
             
             print(fStep 2: Backend successfully validated JWT and created user context)
             print(fStep 3: WebSocket connection would be authorized")"
@@ -292,7 +292,7 @@ if __name__ == "__main__:"
             await integration_test.test_end_to_end_websocket_auth_pipeline()  # CRITICAL FIX: Added await
             
             print(\n + = * 60)
-            print("[CELEBRATION] ALL TESTS PASSED - WebSocket 403 fix verified!")
+            print("[CELEBRATION] ALL TESTS PASSED - WebSocket 403 fix verified!)"
             print([ROCKET] $50K MRR WebSocket functionality restored)""
             print("= * 60)"
             

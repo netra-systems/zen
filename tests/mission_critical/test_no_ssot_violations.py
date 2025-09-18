@@ -74,7 +74,7 @@ class UserContextSimulator:
         self.errors = []
     
     def execute_user_operation(self, operation_data: Dict[str, Any) -> Dict[str, Any):
-        ""Execute operation within user context.
+        ""Execute operation within user context."
         try:
             # Simulate user-specific data processing
             result = {
@@ -102,7 +102,7 @@ class NoSSotViolationsWithIsolationTests:
         "Setup isolated test environment for all tests."
         try:
             env = IsolatedEnvironment()
-            env.set(USE_REAL_SERVICES", "true)
+            env.set(USE_REAL_SERVICES", true)"
             env.set(TEST_CONCURRENT_USERS, 15)
             env.set(TEST_ISOLATION_ENABLED, "true)"
 
@@ -131,7 +131,7 @@ class NoSSotViolationsWithIsolationTests:
                 # Create user-specific data
                 user_data = {
                     type: sensitive_operation,
-                    key": f"secret_key_{user.user_id},
+                    key": fsecret_key_{user.user_id},"
                     secret_value: fsecret_value_{user.user_id}
                 }
 
@@ -160,13 +160,13 @@ class NoSSotViolationsWithIsolationTests:
         user_ids = {result[user_id] for result in results}"
         session_ids = {result[session_id"] for result in results}"
 
-        assert len(user_ids) == user_count, fExpected {user_count} unique user IDs, got {len(user_ids)}
+        assert len(user_ids) == user_count, "fExpected {user_count} unique user IDs, got {len(user_ids)}"
         assert len(session_ids) == user_count, fExpected {user_count} unique session IDs, got {len(session_ids)}"
         assert len(session_ids) == user_count, fExpected {user_count} unique session IDs, got {len(session_ids)}"
         assert len(errors) == 0, f"Errors occurred during execution: {errors}"
 
         # Performance validation
-        assert execution_time < 10.0, fExecution took too long: {execution_time}s
+        assert execution_time < 10.0, "fExecution took too long: {execution_time}s"
 
     def test_user_context_thread_safety(self, setup_test_environment):
         CRITICAL: Verify thread safety in user context operations.""
@@ -233,7 +233,7 @@ class NoSSotViolationsWithIsolationTests:
         # Simulate WebSocket message routing
         for user_id, channel_id in websocket_channels.items():
             test_messages = [
-                {type: user_message", "content: fmessage_{j}_from_{user_id}, user_id: user_id}
+                {"type": user_message", "content": "fmessage_{j}_from_{user_id}, user_id: user_id}"
                 for j in range(5)
             ]
 

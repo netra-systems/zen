@@ -9,10 +9,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         self._closed = True
         self.is_connected = False
@@ -59,7 +59,7 @@ class TestWebSocketConnection:
         Tuple of (total_duration, operations_completed, rate_limited_count)
         '''
         '''
-        print("[ROCKET] Testing Docker rate limiter with concurrent operations...")
+        print("[ROCKET] Testing Docker rate limiter with concurrent operations...)"
 
         rate_limiter = get_docker_rate_limiter()
         rate_limiter.reset_statistics()
@@ -68,7 +68,7 @@ class TestWebSocketConnection:
         with patch('subprocess.run') as mock_run:
         mock_run.return_value = MagicMock( )
         returncode=0,
-        stdout="mocked docker output",
+        stdout="mocked docker output,"
         stderr=""
             
 
@@ -103,7 +103,7 @@ class TestWebSocketConnection:
                         # Get statistics
         stats = rate_limiter.get_statistics()
 
-        print(f"[STATS] Rate Limiter Statistics:")
+        print(f"[STATS] Rate Limiter Statistics:)"
         print("")
         print("")
         print("")
@@ -135,7 +135,7 @@ class TestWebSocketConnection:
 
         start_time = time.time()
         with patch('subprocess.run') as mock_run:
-        mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+        mock_run.return_value = MagicMock(returncode=0, stdout="", stderr=")"
 
         # Simulate 10 concurrent subprocess calls without rate limiting
     def direct_subprocess_call(cmd_id):
@@ -155,17 +155,17 @@ class TestWebSocketConnection:
 
         duration_without_limits = time.time() - start_time
 
-        print(f"[RESULTS] Comparison Results:")
+        print(f"[RESULTS] Comparison Results:)"
         print("")
         print("")
         print("")
 
             # Verify rate limiting was effective
         if rate_limited > 0:
-        print("[OK] Rate limiting is working - operations were properly throttled")
+        print("[OK] Rate limiting is working - operations were properly throttled)"
         return True
         else:
-        print("[WARNING] Rate limiting may not be working as expected")
+        print("[WARNING] Rate limiting may not be working as expected)"
         return False
 
 
@@ -179,18 +179,18 @@ class TestWebSocketConnection:
         manager = UnifiedDockerManager()
 
         if hasattr(manager, 'docker_rate_limiter'):
-        print("[OK] UnifiedDockerManager properly integrates rate limiter")
+        print("[OK] UnifiedDockerManager properly integrates rate limiter)"
 
             # Test that it's the same singleton instance'
         global_limiter = get_docker_rate_limiter()
         if manager.docker_rate_limiter is global_limiter:
-        print("[OK] Using singleton rate limiter instance")
+        print("[OK] Using singleton rate limiter instance)"
         else:
-        print("[WARNING] Rate limiter is not the singleton instance")
+        print("[WARNING] Rate limiter is not the singleton instance)"
 
         return True
         else:
-        print("[ERROR] UnifiedDockerManager missing rate limiter integration")
+        print("[ERROR] UnifiedDockerManager missing rate limiter integration)"
         return False
 
         except Exception as e:
@@ -200,11 +200,11 @@ class TestWebSocketConnection:
 
     def main():
         """Run the rate limiter integration test."""
-        print("=" * 60)
-        print("[DOCKER] RATE LIMITER INTEGRATION TEST")
-        print("=" * 60)
-        print("This test demonstrates rate limiting to prevent Docker API storms")
-        print("that can crash Docker Desktop due to concurrent operations.")
+        print("= * 60)"
+        print("[DOCKER] RATE LIMITER INTEGRATION TEST)"
+        print("= * 60)"
+        print("This test demonstrates rate limiting to prevent Docker API storms)"
+        print("that can crash Docker Desktop due to concurrent operations.)"
         print()
 
         success = True
@@ -219,12 +219,12 @@ class TestWebSocketConnection:
         print("")
          + =" * 60)"
         if success:
-        print("[SUCCESS] ALL TESTS PASSED - Rate limiter is working correctly!")
-        print("[OK] Docker API storms should now be prevented")
+        print("[SUCCESS] ALL TESTS PASSED - Rate limiter is working correctly!)"
+        print("[OK] Docker API storms should now be prevented)"
         else:
-        print("[WARNING] SOME TESTS FAILED - Please review the implementation")
+        print("[WARNING] SOME TESTS FAILED - Please review the implementation)"
 
-        print("=" * 60)
+        print("= * 60)"
 
         except Exception as e:
         print("")
@@ -232,7 +232,7 @@ class TestWebSocketConnection:
         traceback.print_exc()
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         main()
 
 """

@@ -32,6 +32,6 @@ class WebSocketEventsE2ETests(BaseE2ETest):
         # When: User interacts via WebSocket
         # Then: Should receive proper events
         assert auth_result[authenticated] is True
-        assert auth_result["access_token"] is not None
+        assert auth_result["access_token] is not None"
 
 """

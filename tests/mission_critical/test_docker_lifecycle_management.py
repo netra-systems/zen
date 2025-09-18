@@ -7,7 +7,7 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
             raise RuntimeError(WebSocket is closed)"
@@ -180,7 +180,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
                                     # Safe Container Removal Tests
                                     # =============================================================================
     def test_graceful_container_shutdown_sequence(self):
-        ""Test that containers are shut down gracefully with proper signal handling.
+        ""Test that containers are shut down gracefully with proper signal handling."
         pass
     # Create a test container that can handle signals
         container_name = formatted_string"
@@ -218,7 +218,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         result = subprocess.run(rm_cmd, capture_output=True, text=True, timeout=10)
         self.assertEqual(result.returncode, 0, 
     def test_force_removal_sequence_for_unresponsive_containers(self):
-        ""Test force removal sequence for containers that don't respond to signals.'
+        ""Test force removal sequence for containers that don't respond to signals.'"
         container_name = formatted_string"
         container_name = formatted_string"
     # Create a container that ignores SIGTERM
@@ -434,7 +434,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         for service_name, config in manager.SERVICES.items():
         self.assertIn('memory_limit', config, formatted_string)
         memory_limit = config['memory_limit']
-        # Parse memory limit (e.g., "512m, 1g")
+        # Parse memory limit (e.g., "512m, 1g)"
         if memory_limit.endswith('m'):
         memory_mb = int(memory_limit[:-1)
         elif memory_limit.endswith('g'):
@@ -445,7 +445,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         self.assertGreater(memory_mb, 0, formatted_string")"
         self.assertLessEqual(memory_mb, 4096, 
     def test_memory_pressure_container_behavior(self):
-        ""Test container behavior under memory pressure.
+        ""Test container behavior under memory pressure."
         pass
         container_name = formatted_string"
         container_name = formatted_string"
@@ -1179,7 +1179,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         read_cmd = ['docker', 'exec', container_name, 'cat', 'formatted_string']
         result = subprocess.run(read_cmd, capture_output=True, text=True, timeout=10)
         self.assertEqual(result.returncode, 0, 
-        self.assertIn(formatted_string", result.stdout, "Volume data should be correct)
+        self.assertIn(formatted_string", result.stdout, Volume data should be correct)"
                 # Perform cleanup
         cleanup_start_time = time.time()
                 # Stop and remove containers
@@ -1631,7 +1631,7 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         fUnhealthy container should report unhealthy status)
                                     # Degraded scenario may vary between healthy/unhealthy
     def test_health_check_performance_under_load(self):
-        ""Test health check performance doesn't degrade under system load.'
+        ""Test health check performance doesn't degrade under system load.'"
         pass
         test_id = formatted_string"
         test_id = formatted_string"
@@ -2057,7 +2057,7 @@ class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
                     # Some resource-hungry containers should be OOM killed
         self.assertGreater(killed_containers, 0, Resource exhaustion should trigger OOM kills)
     def test_network_failure_recovery(self):
-        ""Test recovery from network connectivity issues.
+        ""Test recovery from network connectivity issues."
         pass
         test_id = formatted_string"
         test_id = formatted_string"
@@ -2244,7 +2244,7 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         logger.info(formatted_string" )"
         
     def test_memory_usage_efficiency_validation(self):
-        ""Test containers operate within memory efficiency requirements.
+        ""Test containers operate within memory efficiency requirements."
         pass
         test_id = formatted_string"
         test_id = formatted_string"

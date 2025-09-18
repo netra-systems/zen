@@ -96,7 +96,7 @@ class WebSocketTimeoutOptimizationTests:
         
         # CRITICAL: Must use QueuePool, not NullPool
         from sqlalchemy.pool import QueuePool
-        assert isinstance(engine.pool, QueuePool), (
+        assert isinstance(engine.pool, "QueuePool), ("
             fDatabase engine should use QueuePool for connection reuse, 
             fgot {type(engine.pool).__name__}
         )
@@ -104,7 +104,7 @@ class WebSocketTimeoutOptimizationTests:
         # Verify pool configuration
         pool = engine.pool
         assert pool.size() == 5, fPool size should be 5, got {pool.size()}""
-        assert pool.timeout() == 5, fPool timeout should be 5s, got {pool.timeout()}s
+        assert pool.timeout() == 5, "fPool timeout should be 5s, got {pool.timeout()}s"
     
     @pytest.mark.asyncio
     async def test_websocket_timeout_cascade_prevention(self):
@@ -147,7 +147,7 @@ class WebSocketTimeoutOptimizationTests:
                 )
                 
                 # Verify we got a valid response
-                assert response is not None, Should receive response within timeout
+                assert response is not None, "Should receive response within timeout"
                 
         except asyncio.TimeoutError:
             elapsed = time.time() - start_time
@@ -155,7 +155,7 @@ class WebSocketTimeoutOptimizationTests:
     
     @pytest.mark.asyncio
     async def test_circuit_breaker_fast_recovery(self):
-        ""Test circuit breaker recovers quickly without blocking WebSocket.
+        ""Test circuit breaker recovers quickly without blocking WebSocket."
         agent = BaseAgent(name=CircuitBreakerTest)"
         agent = BaseAgent(name=CircuitBreakerTest)"
         

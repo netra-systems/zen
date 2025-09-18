@@ -40,7 +40,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SsotTestMetrics
 
 # Central SSOT Validator Import
-from shared.configuration.central_config_validator import (
+from shared.configuration.central_config_validator import ()
     CentralConfigurationValidator,
     get_central_validator,
     validate_platform_configuration,
@@ -72,7 +72,7 @@ class SsotValidationResult:
 
 
 class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
-    ""
+    """
     Mission-critical tests for SSOT environment validation.
     
     These tests protect the Golden Path by ensuring configuration validation
@@ -81,14 +81,14 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
     
     @classmethod
     def setup_class(cls):
-        ""Class-level setup for mission-critical SSOT validation tests.
+        ""Class-level setup for mission-critical SSOT validation tests."
         super().setup_class()
         cls.logger.info(Initializing mission-critical SSOT environment validation tests)"
         cls.logger.info(Initializing mission-critical SSOT environment validation tests)"
         cls._test_environments = [development", staging, production, test]"
         cls._critical_config_keys = [
-            JWT_SECRET_STAGING", "JWT_SECRET_PRODUCTION, JWT_SECRET_KEY,
-            POSTGRES_PASSWORD, POSTGRES_HOST", "REDIS_PASSWORD, REDIS_HOST,
+            JWT_SECRET_STAGING", JWT_SECRET_PRODUCTION, JWT_SECRET_KEY,"
+            POSTGRES_PASSWORD, POSTGRES_HOST", REDIS_PASSWORD, REDIS_HOST,"
             GEMINI_API_KEY, SERVICE_SECRET, "FERNET_KEY"
         ]
     
@@ -107,7 +107,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
         self.record_metric(revenue_protection_checks, 0)
     
     def test_central_validator_ssot_compliance(self):
-    ""
+    """
         CRITICAL: Validate Central Configuration Validator SSOT compliance.
         
         This test ensures the central validator maintains SSOT patterns and
@@ -224,7 +224,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             self.fail(fCritical error in central validator SSOT compliance test: {e})"
     
     def test_environment_isolation_ssot_consistency(self):
-    "
+        """
     "
         CRITICAL: Validate environment isolation maintains SSOT consistency.
         
@@ -244,7 +244,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             
             # Create new environment instance and verify isolation
             new_env = get_env()
-            if new_env.get("TEST_ISOLATION_VAR) != test_value_1":
+            if new_env.get("TEST_ISOLATION_VAR) != test_value_1:"
                 validation_errors.append(Environment isolation not working - variables not accessible)
             
             # Test 2: Verify environment changes don't leak between tests'
@@ -355,7 +355,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             self.fail(fCritical error in startup validator SSOT integration test: {e})
     
     def test_backend_configuration_validator_ssot_compliance(self):
-    ""
+    """
         CRITICAL: Validate backend configuration validator SSOT compliance.
         
         This test ensures the backend's ConfigurationValidator properly delegates'
@@ -387,7 +387,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             
             # Test 4: Test environment variable validation without creating config objects
             env_dict = {
-                ENVIRONMENT": "test,
+                ENVIRONMENT": test,"
                 JWT_SECRET_KEY: test-secret-32-characters-long-123456
             }
             
@@ -428,7 +428,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             self.fail(fCritical error in backend configuration validator SSOT test: {e})
     
     def test_cross_environment_validation_consistency(self):
-    ""
+    """
         CRITICAL: Validate cross-environment validation consistency.
         
         This test ensures validation behavior is consistent across all environments
@@ -496,7 +496,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
     # Helper methods for comprehensive validation
     
     def _test_environment_consistency(self) -> List[str]:
-        ""Test environment detection consistency across validators.
+        ""Test environment detection consistency across validators."
         errors = []
         
         try:
@@ -639,5 +639,5 @@ pytestmark = [
 
 if __name__ == __main__:
     # Allow running tests directly for development
-    pytest.main([__file__, "-v, --tb=short")
+    pytest.main([__file__, "-v, --tb=short)"
 )))

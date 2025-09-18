@@ -70,7 +70,7 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.unit
     async def test_user_execution_engine_provides_complete_isolation(self):
-        ""
+        """
         SHOULD PASS: Tests that UserExecutionEngine provides complete user isolation.
         
         SSOT Validation: Each user gets completely isolated ExecutionEngine instance.
@@ -218,7 +218,7 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
                 user_b_combined = ' '.join(user_b_event_data)
                 
                 self.assertNotIn(user_a_private_secret, user_b_combined,
-                    "User B must never receive User A's sensitive data)"'
+                    "User B must never receive User A's sensitive data)'"
                 self.assertNotIn(User A's private thoughts, user_b_combined,'
                     User B must never receive User A's private thoughts)"
                     User B must never receive User A's private thoughts)"
@@ -231,7 +231,7 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.unit
     async def test_factory_pattern_properly_implemented(self):
-        ""
+        """
         SHOULD PASS: Tests that UserExecutionEngine implements proper factory pattern.
         
         Architecture Validation: Factory pattern ensures proper user isolation.
@@ -292,7 +292,7 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.unit
     async def test_memory_management_prevents_leaks(self):
-        "
+        """
         "
         SHOULD PASS: Tests that UserExecutionEngine prevents memory leaks.
         
@@ -369,7 +369,7 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.unit
     async def test_concurrent_user_execution_safety(self):
-        "
+        """
         "
         SHOULD PASS: Tests that UserExecutionEngine handles concurrent users safely.
         

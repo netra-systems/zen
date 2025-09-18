@@ -41,7 +41,7 @@ class Issue601TargetedFixTests:
 
     @pytest.mark.asyncio
     async def test_issue_601_hang_fix_with_complete_mocking(self):
-    "
+        """
     "
         Test Issue #601 fix by completely mocking the hanging import chain.
         
@@ -119,18 +119,18 @@ class Issue601TargetedFixTests:
                 duration = end_time - start_time
                 
                 # Validate successful execution
-                assert duration < 2.0, fStartup took too long: {duration}s - fix not working
+                assert duration < 2.0, "fStartup took too long: {duration}s - fix not working"
                 assert app.state.startup_complete, Startup completion flag not set"
                 assert app.state.startup_complete, Startup completion flag not set"
                 
-                print(f"Issue #601 Fix Validated - Duration: {duration:.3f}s)")
+                print(f"Issue #601 Fix Validated - Duration: {duration:.3f}s))"
                 
             except asyncio.TimeoutError:
                 pytest.fail(ISSUE #601 NOT FIXED: Test still hangs despite comprehensive mocking)
 
     @pytest.mark.asyncio
     async def test_memory_leak_detection_with_issue_601_fix(self):
-    ""
+    """
         Test that memory leak detection still works with Issue #601 fix applied.
         
         This validates that the strategic mocking doesn't break memory leak detection.'
@@ -220,7 +220,7 @@ class Issue601TargetedFixTests:
 
     @pytest.mark.asyncio 
     async def test_reproduce_original_hanging_scenario(self):
-    "
+        """
     "
         Test that reproduces the original hanging scenario to prove the issue exists.
         
@@ -262,7 +262,7 @@ class Issue601TargetedFixTests:
             await asyncio.wait_for(orchestrator.initialize_system(), timeout=2.0)
         
         duration = time.time() - start_time
-        assert duration >= 1.8, fShould have timed out, but completed in {duration}s
+        assert duration >= 1.8, "fShould have timed out, but completed in {duration}s"
         
         print(fOriginal hang scenario reproduced - timed out after {duration:.3f}s")"
 
@@ -275,7 +275,7 @@ async def test_validate_pytest_collection_issue_601():
     This is a meta-test to ensure the test file itself doesn't cause collection issues.'
     ""
     # Simple validation that collection works
-    assert True, Pytest collection working for Issue #601 tests
+    assert True, "Pytest collection working for Issue #601 tests"
     print(Pytest collection validation passed")"
 
 
@@ -292,7 +292,7 @@ if __name__ == __main__:
     result = runner.run(suite)
     
     if result.wasSuccessful():
-        print("✅ Issue #601 targeted fix validation PASSED")
+        print("✅ Issue #601 targeted fix validation PASSED)"
         print(✅ Strategic mocking approach works)"
         print(✅ Strategic mocking approach works)"
         print("✅ Memory leak detection preserved)"

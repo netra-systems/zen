@@ -125,7 +125,7 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
         return any(pattern in file_path_str for pattern in production_patterns)
 
     def _scan_for_websocket_notifier_classes(self) -> List[WebSocketNotifierValidation]:
-        ""Scan entire codebase for WebSocketNotifier class definitions.
+        ""Scan entire codebase for WebSocketNotifier class definitions."
         results = []
 
         # Search for Python files containing WebSocketNotifier
@@ -161,7 +161,7 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
                     results.append(validation)
 
             except Exception as e:
-                logger.warning(f"Error scanning {file_path}: {e})")
+                logger.warning(f"Error scanning {file_path}: {e}))"
                 continue
 
         return results
@@ -254,7 +254,7 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
         )
 
         # CRITICAL ASSERTION: Canonical SSOT path must be agent_websocket_bridge.py
-        assert report.canonical_ssot_path, No canonical WebSocketNotifier SSOT implementation found
+        assert report.canonical_ssot_path, "No canonical WebSocketNotifier SSOT implementation found"
         assert 'agent_websocket_bridge.py' in report.canonical_ssot_path, (
             fWebSocketNotifier SSOT must be in agent_websocket_bridge.py, found in: {report.canonical_ssot_path}"
             fWebSocketNotifier SSOT must be in agent_websocket_bridge.py, found in: {report.canonical_ssot_path}"
@@ -292,7 +292,7 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
             # Check for essential methods
             required_methods = ['__init__', 'create_for_user']
             for method in required_methods:
-                assert hasattr(WebSocketNotifier, method), (
+                assert hasattr(WebSocketNotifier, "method), ("
                     fWebSocketNotifier missing required method: {method}"
                     fWebSocketNotifier missing required method: {method}"
                 )
@@ -311,7 +311,7 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
             from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 
             # Verify the create_for_user factory method exists (required for user isolation)
-            assert hasattr(WebSocketNotifier, 'create_for_user'), (
+            assert hasattr(WebSocketNotifier, "'create_for_user'), ("
                 "WebSocketNotifier must have create_for_user factory method for user isolation"
             )
 
@@ -403,7 +403,7 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
         return metrics
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # Direct execution for rapid testing
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

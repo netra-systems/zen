@@ -18,11 +18,11 @@ from unittest.mock import Mock, AsyncMock, patch
 
 # SSOT imports from registry  
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.unified_websocket_auth import (
+from netra_backend.app.websocket_core.unified_websocket_auth import ()
     UnifiedWebSocketAuthenticator,
     authenticate_websocket_ssot
 )
-from netra_backend.app.services.unified_authentication_service import (
+from netra_backend.app.services.unified_authentication_service import ()
     get_unified_auth_service,
     AuthResult,
     AuthenticationContext,
@@ -44,7 +44,7 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
         self.websocket_authenticator = UnifiedWebSocketAuthenticator()
         
     def create_mock_websocket(self, headers: Dict[str, str) -> Mock:
-        ""Create mock WebSocket with specific headers.
+        ""Create mock WebSocket with specific headers."
         websocket = Mock()
         websocket.headers = headers
         websocket.client = Mock()
@@ -150,7 +150,7 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
             print(json.dumps(comparison_results, indent=2))
             
             if differences:
-                print("\n=== DETECTED DIFFERENCES ===")
+                print("\n=== DETECTED DIFFERENCES ===)"
                 for diff in differences:
                     print(f- {diff})""
                     
@@ -287,10 +287,10 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
             # (client_protocols, description, expected_success)
             ([fjwt.{jwt_token}"], JWT with token, True),"
             ([jwt], JWT protocol only, True),
-            ([jwt-auth"], "JWT auth protocol, True),
+            ([jwt-auth"], JWT auth protocol, True),"
             ([fjwt.{jwt_token}, chat], JWT with other protocols, True),""
             (["chat, fjwt.{jwt_token}], JWT after other protocols, True),"
-            ([unsupported"], "Unsupported protocol, False),
+            ([unsupported"], Unsupported protocol, False),"
             ([], No protocols, False),
         ]
         
@@ -394,7 +394,7 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
                     else:
                         http_result = await http_method(jwt_token)
                 else:
-                    if method_comparison[http_auth_method"] == "authenticate_token:
+                    if method_comparison[http_auth_method"] == authenticate_token:"
                         http_result = http_method(jwt_token, AuthenticationContext.REST_API, AuthenticationMethod.JWT_TOKEN)
                     else:
                         http_result = http_method(jwt_token)
@@ -419,7 +419,7 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
                 print(json.dumps(method_results, indent=2))
                 
                 # Check for result type mismatches
-                if method_results[http_result_type"] != method_results["websocket_result_type]:
+                if method_results[http_result_type"] != method_results[websocket_result_type]:"
                     if not (isinstance(websocket_result, tuple) and len(websocket_result) == 2):
                         issues.append(fResult type mismatch: HTTP returns {method_results['http_result_type']}, WebSocket returns {method_results['websocket_result_type']})
                 

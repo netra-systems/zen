@@ -11,10 +11,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -70,7 +70,7 @@ class MockSubAgent(BaseAgent):
         await asyncio.sleep(0.1)
     # Add a simple result to state
         state.messages.append({ ))
-        "role": "assistant",
+        "role": "assistant,"
         "content": "formatted_string"
     
         self.state = SubAgentLifecycle.COMPLETED
@@ -127,13 +127,13 @@ class AgentOrchestrationTester:
         execution_time = time.time() - start_time
 
         self.orchestration_metrics[supervisor.name] = { )
-        "execution_time": execution_time,
-        "agents_coordinated": len(sub_agents),
+        "execution_time: execution_time,"
+        "agents_coordinated: len(sub_agents),"
         "success": result.get("status") == "success"
         
 
-        result["agents_coordinated"] = len(sub_agents)
-        result["execution_time"] = execution_time
+        result["agents_coordinated] = len(sub_agents)"
+        result["execution_time] = execution_time"
 
         return result
 
@@ -141,10 +141,10 @@ class AgentOrchestrationTester:
         target_agent: str, task: str) -> Dict[str, Any]:
         """Simulate supervisor invoking sub-agent."""
         invocation_event = { )
-        "supervisor": supervisor.name,
-        "target_agent": target_agent,
-        "task": task,
-        "timestamp": time.time()
+        "supervisor: supervisor.name,"
+        "target_agent: target_agent,"
+        "task: task,"
+        "timestamp: time.time()"
     
         self.coordination_events.append(invocation_event)
         result = await self._execute_sub_agent_task(target_agent, task)
@@ -152,20 +152,20 @@ class AgentOrchestrationTester:
 
     async def validate_response_accumulation(self, coordination_result: Dict[str, Any]) -> bool:
         """Validate response layer accumulation from sub-agents."""
-        responses = coordination_result.get("sub_agent_responses", [])
+        responses = coordination_result.get("sub_agent_responses, [])"
         if not responses:
         return False
-        return all(all(key in r for key in ["agent_name", "response_data"]) for r in responses)
+        return all(all(key in r for key in ["agent_name", "response_data]) for r in responses)"
 
         @pytest.mark.e2e
     async def test_agent_error_propagation(self, supervisor:
         failing_agent: str) -> Dict[str, Any]:
         """Test error propagation through agent hierarchy."""
         error_test_result = { )
-        "supervisor": supervisor.name,
-        "failing_agent": failing_agent,
-        "error_handled": False,
-        "fallback_triggered": False
+        "supervisor: supervisor.name,"
+        "failing_agent: failing_agent,"
+        "error_handled: False,"
+        "fallback_triggered: False"
             
         recovery_result = await self._simulate_agent_failure_recovery(supervisor, failing_agent)
         error_test_result.update(recovery_result)
@@ -175,72 +175,72 @@ class AgentOrchestrationTester:
         sub_agents: List[MockSubAgent], task: str) -> Dict[str, Any]:
         """Execute coordination workflow between supervisor and sub-agents."""
         test_state = DeepAgentState( )
-        messages=[{"role": "user", "content": task}],
+        messages=[{"role": "user", "content: task}],"
         run_id="test_orchestration_001"
     
 
         sub_agent_responses = []
         for agent in sub_agents:
         coordination_event = { )
-        "supervisor": supervisor.name,
-        "target_agent": agent.name,
-        "task": task,
-        "timestamp": time.time()
+        "supervisor: supervisor.name,"
+        "target_agent: agent.name,"
+        "task: task,"
+        "timestamp: time.time()"
         
         self.coordination_events.append(coordination_event)
 
         try:
-        await agent.execute(test_state, "test_run", stream_updates=False)
+        await agent.execute(test_state, "test_run, stream_updates=False)"
         sub_agent_responses.append({ ))
-        "agent_name": agent.name,
-        "response_data": "formatted_string",
+        "agent_name: agent.name,"
+        "response_data": "formatted_string,"
         "status": "success"
             
         except Exception as e:
         sub_agent_responses.append({ ))
-        "agent_name": agent.name,
-        "response_data": str(e),
+        "agent_name: agent.name,"
+        "response_data: str(e),"
         "status": "error"
                 
 
         return { )
-        "status": "success",
-        "sub_agent_responses": sub_agent_responses,
-        "coordination_complete": True
+        "status": "success,"
+        "sub_agent_responses: sub_agent_responses,"
+        "coordination_complete: True"
                 
 
     async def _execute_sub_agent_task(self, target_agent: str, task: str) -> Dict[str, Any]:
         """Execute a task on a specific sub-agent."""
         agent = self.active_agents.get(target_agent)
         if not agent:
-        return {"status": "error", "message": "formatted_string"}
+        return {"status": "error", "message": "formatted_string}"
 
         test_state = DeepAgentState( )
-        messages=[{"role": "user", "content": task}],
+        messages=[{"role": "user", "content: task}],"
         run_id="test_invocation_001"
         
 
         try:
-        await agent.execute(test_state, "test_run", stream_updates=False)
+        await agent.execute(test_state, "test_run, stream_updates=False)"
         return { )
-        "status": "success",
-        "agent_name": agent.name,
+        "status": "success,"
+        "agent_name: agent.name,"
         "response": "formatted_string"
             
         except Exception as e:
         return { )
-        "status": "error",
-        "agent_name": agent.name,
-        "error": str(e)
+        "status": "error,"
+        "agent_name: agent.name,"
+        "error: str(e)"
                 
 
         async def _simulate_agent_failure_recovery(self, supervisor: SupervisorAgent,
         failing_agent: str) -> Dict[str, Any]:
         """Simulate agent failure and recovery mechanisms."""
         return { )
-        "error_handled": True,
-        "fallback_triggered": True,
-        "recovery_strategy": "fallback_agent",
+        "error_handled: True,"
+        "fallback_triggered: True,"
+        "recovery_strategy": "fallback_agent,"
         "recovery_status": "success"
     
 
@@ -259,26 +259,26 @@ class TestAgentOrchestration:
     async def test_supervisor_sub_agent_coordination(self, orchestration_tester):
         """Test supervisor coordinating multiple sub-agents."""
 pass
-supervisor = await orchestration_tester.create_supervisor_agent("TestSupervisor001")
+supervisor = await orchestration_tester.create_supervisor_agent("TestSupervisor001)"
 sub_agents = []
-for i, agent_type in enumerate(["triage", "data", "optimization"]):
-    agent = await orchestration_tester.create_sub_agent(agent_type, "formatted_string")
+for i, agent_type in enumerate(["triage", "data", "optimization]):"
+    agent = await orchestration_tester.create_sub_agent(agent_type, "formatted_string)"
 sub_agents.append(agent)
 
 task = "Comprehensive infrastructure analysis and optimization"
 result = await orchestration_tester.test_agent_coordination(supervisor, sub_agents, task)
 
 assert result["status"] == "success", "Coordination failed"
-assert result["agents_coordinated"] == 3
+assert result["agents_coordinated] == 3"
 assert len(orchestration_tester.coordination_events) > 0
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_sub_agent_invocation_flow(self, orchestration_tester):
         """Test supervisor invoking specific sub-agents."""
-supervisor = await orchestration_tester.create_supervisor_agent("InvokeSupervisor001")
-await orchestration_tester.create_sub_agent("triage", "TriageAgent001")
-await orchestration_tester.create_sub_agent("data", "DataAgent001")
+supervisor = await orchestration_tester.create_supervisor_agent("InvokeSupervisor001)"
+await orchestration_tester.create_sub_agent("triage", "TriageAgent001)"
+await orchestration_tester.create_sub_agent("data", "DataAgent001)"
 
 triage_result = await orchestration_tester.simulate_sub_agent_invocation( )
 supervisor, "TriageAgent001", "Analyze user query complexity"
@@ -296,9 +296,9 @@ assert len(orchestration_tester.coordination_events) == 2
     async def test_response_layer_accumulation(self, orchestration_tester):
         """Test response accumulation across agent layers."""
 pass
-supervisor = await orchestration_tester.create_supervisor_agent("AccumSupervisor001")
+supervisor = await orchestration_tester.create_supervisor_agent("AccumSupervisor001)"
 sub_agents = [ )
-await orchestration_tester.create_sub_agent("accumulation", "formatted_string")
+await orchestration_tester.create_sub_agent("accumulation", "formatted_string)"
 for i in range(4)
                     
 
@@ -307,34 +307,34 @@ coordination_result = await orchestration_tester.test_agent_coordination(supervi
 accumulation_valid = await orchestration_tester.validate_response_accumulation(coordination_result)
 
 assert accumulation_valid is True, "Response accumulation failed"
-assert "sub_agent_responses" in coordination_result
-assert len(coordination_result["sub_agent_responses"]) == 4
+assert "sub_agent_responses in coordination_result"
+assert len(coordination_result["sub_agent_responses]) == 4"
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_agent_error_handling_propagation(self, orchestration_tester):
         """Test error propagation through agent hierarchy."""
-supervisor = await orchestration_tester.create_supervisor_agent("ErrorSupervisor001")
-await orchestration_tester.create_sub_agent("error_test", "FailingAgent001")
+supervisor = await orchestration_tester.create_supervisor_agent("ErrorSupervisor001)"
+await orchestration_tester.create_sub_agent("error_test", "FailingAgent001)"
 
-error_result = await orchestration_tester.test_agent_error_propagation(supervisor, "FailingAgent001")
+error_result = await orchestration_tester.test_agent_error_propagation(supervisor, "FailingAgent001)"
 
 assert error_result["error_handled"] is True, "Error not handled properly"
-assert "recovery_strategy" in error_result or error_result.get("fallback_triggered")
+assert "recovery_strategy" in error_result or error_result.get("fallback_triggered)"
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_concurrent_agent_orchestration(self, orchestration_tester):
         """Test concurrent agent orchestration scenarios."""
 pass
-supervisor = await orchestration_tester.create_supervisor_agent("ConcurrentSupervisor001")
+supervisor = await orchestration_tester.create_supervisor_agent("ConcurrentSupervisor001)"
 agent_groups = [ )
-[await orchestration_tester.create_sub_agent("concurrent", "formatted_string") for i in range(2)]
+[await orchestration_tester.create_sub_agent("concurrent", "formatted_string) for i in range(2)]"
 for g in range(3)
                             
 
 tasks = [ )
-orchestration_tester.test_agent_coordination(supervisor, group, "formatted_string")
+orchestration_tester.test_agent_coordination(supervisor, group, "formatted_string)"
 for i, group in enumerate(agent_groups)
                             
 
@@ -357,10 +357,10 @@ class TestCriticalOrchestrationScenarios:
     async def test_enterprise_scale_orchestration(self):
         """Test enterprise-scale agent orchestration."""
 tester = AgentOrchestrationTester(use_mock_llm=True)
-supervisor = await tester.create_supervisor_agent("EnterpriseSupervisor001")
+supervisor = await tester.create_supervisor_agent("EnterpriseSupervisor001)"
 
 enterprise_agents = [ )
-await tester.create_sub_agent("enterprise", "formatted_string")
+await tester.create_sub_agent("enterprise", "formatted_string)"
 for i in range(10)
         
 
@@ -368,9 +368,9 @@ enterprise_task = "Large-scale enterprise infrastructure optimization"
 result = await tester.test_agent_coordination(supervisor, enterprise_agents, enterprise_task)
 
 assert result["status"] == "success"
-metrics = tester.orchestration_metrics.get("EnterpriseSupervisor001", {})
-assert metrics.get("execution_time", 999) < 20.0  # Enterprise SLA
-assert metrics.get("agents_coordinated", 0) == 10
+metrics = tester.orchestration_metrics.get("EnterpriseSupervisor001, {})"
+assert metrics.get("execution_time", "999) < 20.0  # Enterprise SLA"
+assert metrics.get("agents_coordinated", "0) == 10"
 pass
 
 '''

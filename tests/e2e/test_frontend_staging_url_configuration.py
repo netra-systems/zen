@@ -64,7 +64,7 @@ required_env_vars = [ )
 for var_name, expected_value in required_env_vars:
         # Check that ENV variable is set BEFORE npm run build
 pattern = r'formatted_string'
-assert re.search(pattern, content), \
+assert re.search(pattern, "content), \"
 "formatted_string"
 
         # Verify it comes before the build command
@@ -96,7 +96,7 @@ required_env_vars = [ )
 
 for var_name, expected_value in required_env_vars:
 pattern = r'formatted_string'
-assert re.search(pattern, content), \
+assert re.search(pattern, "content), \"
 "formatted_string"
 
 @pytest.mark.e2e
@@ -172,7 +172,7 @@ assert 'this.endpoints.authConfig' in content, \
 "auth-service-client must use authConfig from unified endpoints"
 
     # Should NOT have hardcoded localhost URLs
-assert 'localhost:8081' not in content.replace('http://localhost:8081', ''), \
+assert 'localhost:8081' not in content.replace('http://localhost:8081', "''), \"
 "auth-service-client must not have hardcoded localhost URLs except in comments"
 
 @pytest.fixture
@@ -343,7 +343,7 @@ context = "
                         # This is just a warning, not an assertion
 if 'build' not in context.lower() and 'compile' not in context.lower():
     pass
-print("formatted_string")
+print("formatted_string)"
 
 
 class TestFrontendURLRegression:

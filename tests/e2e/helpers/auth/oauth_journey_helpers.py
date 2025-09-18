@@ -9,10 +9,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         self._closed = True
         self.is_connected = False
@@ -59,11 +59,11 @@ class OAuthFlowHelper:
         unique_email = "formatted_string"
 
         return { )
-        "id": "formatted_string",
-        "email": unique_email,
-        "name": "OAuth Journey User",
-        "picture": "https://example.com/oauth-avatar.jpg",
-        "verified_email": True,
+        "id": "formatted_string,"
+        "email: unique_email,"
+        "name": "OAuth Journey User,"
+        "picture": "https://example.com/oauth-avatar.jpg,"
+        "verified_email: True,"
         "hd": "enterprise-test.com"
     
 
@@ -71,7 +71,7 @@ class OAuthFlowHelper:
     def generate_oauth_state_and_code() -> Dict[str, str]:
         """Generate OAuth state and code for testing."""
         return { )
-        "oauth_state": "formatted_string",
+        "oauth_state": "formatted_string,"
         "oauth_code": "formatted_string"
     
 
@@ -82,8 +82,8 @@ class OAuthFlowHelper:
         query_params = parse_qs(parsed.query)
 
         return { )
-        "access_token": query_params.get("token", [None])[0],
-        "refresh_token": query_params.get("refresh", [None])[0]
+        "access_token": query_params.get("token, [None])[0],"
+        "refresh_token": query_params.get("refresh, [None])[0]"
     
 
 
@@ -102,19 +102,19 @@ class OAuthAuthenticationHelper:
         auth_time = time.time() - auth_start
 
         return { )
-        "success": True,
-        "oauth_state": oauth_data["oauth_state"],
-        "oauth_code": oauth_data["oauth_code"],
-        "user_data": user_data,
-        "auth_time": auth_time,
+        "success: True,"
+        "oauth_state": oauth_data["oauth_state],"
+        "oauth_code": oauth_data["oauth_code],"
+        "user_data: user_data,"
+        "auth_time: auth_time,"
         "provider": "google"
         
 
         except Exception as e:
         return { )
-        "success": False,
-        "error": str(e),
-        "auth_time": time.time() - auth_start
+        "success: False,"
+        "error: str(e),"
+        "auth_time: time.time() - auth_start"
             
 
 
@@ -133,7 +133,7 @@ callback_start = time.time()
 
 try:
     service_urls = services_manager.get_service_urls()
-auth_url = service_urls["auth"]
+auth_url = service_urls["auth]"
 
         # Mock Google OAuth API responses
 with patch('httpx.AsyncClient') as mock_client:
@@ -145,9 +145,9 @@ websocket = TestWebSocketConnection()
 token_response.status_code = 200
             # Mock OAuth token response
 token_response.json.return_value = { )
-"access_token": "mock_oauth_access_token",
-"token_type": "Bearer",
-"expires_in": 3600
+"access_token": "mock_oauth_access_token,"
+"token_type": "Bearer,"
+"expires_in: 3600"
             
 mock_instance.post.return_value = token_response
 
@@ -160,8 +160,8 @@ mock_instance.get.return_value = user_response
             # Call real auth service callback endpoint
 callback_url = "formatted_string"
 callback_params = { )
-"code": oauth_result["oauth_code"],
-"state": oauth_result["oauth_state"]
+"code": oauth_result["oauth_code],"
+"state": oauth_result["oauth_state]"
             
 
 response = await http_client.get(callback_url, params=callback_params, follow_redirects=False)
@@ -169,32 +169,32 @@ callback_time = time.time() - callback_start
 
             Extract tokens from redirect URL
 if response.status_code == 302:
-    redirect_url = response.headers.get("location", "")
+    redirect_url = response.headers.get("location", ")"
 tokens = OAuthFlowHelper.extract_tokens_from_redirect(redirect_url)
 
 return { )
-"success": True,
-"status_code": response.status_code,
-"redirect_url": redirect_url,
-"access_token": tokens.get("access_token"),
-"refresh_token": tokens.get("refresh_token"),
-"callback_time": callback_time,
-"user_created": True
+"success: True,"
+"status_code: response.status_code,"
+"redirect_url: redirect_url,"
+"access_token": tokens.get("access_token),"
+"refresh_token": tokens.get("refresh_token),"
+"callback_time: callback_time,"
+"user_created: True"
                 
 else:
     return { )
-"success": False,
-"status_code": response.status_code,
-"response_text": response.text,
-"callback_time": callback_time,
+"success: False,"
+"status_code: response.status_code,"
+"response_text: response.text,"
+"callback_time: callback_time,"
 "error": "Unexpected callback response"
                     
 
 except Exception as e:
     return { )
-"success": False,
-"error": str(e),
-"callback_time": time.time() - callback_start
+"success: False,"
+"error: str(e),"
+"callback_time: time.time() - callback_start"
                         
 
 
@@ -212,28 +212,28 @@ oauth_user_data: Dict[str, Any]
 sync_start = time.time()
 
 try:
-    access_token = tokens.get("access_token")
+    access_token = tokens.get("access_token)"
 if not access_token:
     return { )
-"success": False,
-"error": "No access token available",
-"sync_time": time.time() - sync_start
+"success: False,"
+"error": "No access token available,"
+"sync_time: time.time() - sync_start"
             
 
 service_urls = services_manager.get_service_urls()
-auth_url = service_urls["auth"]
-backend_url = service_urls["backend"]
+auth_url = service_urls["auth]"
+backend_url = service_urls["backend]"
 
             # Check auth service user
 auth_response = await http_client.get( )
-"formatted_string",
-headers={"Authorization": "formatted_string"}
+"formatted_string,"
+headers={"Authorization": "formatted_string}"
             
 
             # Check backend service user profile
 backend_response = await http_client.get( )
-"formatted_string",
-headers={"Authorization": "formatted_string"}
+"formatted_string,"
+headers={"Authorization": "formatted_string}"
             
 
 sync_time = time.time() - sync_start
@@ -245,21 +245,21 @@ auth_data = auth_response.json() if auth_success else {}
 backend_data = backend_response.json() if backend_response.status_code == 200 else {}
 
 return { )
-"success": auth_success,
-"auth_service_status": auth_response.status_code,
-"backend_service_status": backend_response.status_code,
-"auth_user_data": auth_data,
-"backend_user_data": backend_data,
-"user_id": auth_data.get("id"),
-"email_consistent": auth_data.get("email") == oauth_user_data.get("email"),
-"sync_time": sync_time
+"success: auth_success,"
+"auth_service_status: auth_response.status_code,"
+"backend_service_status: backend_response.status_code,"
+"auth_user_data: auth_data,"
+"backend_user_data: backend_data,"
+"user_id": auth_data.get("id),"
+"email_consistent": auth_data.get("email") == oauth_user_data.get("email),"
+"sync_time: sync_time"
             
 
 except Exception as e:
     return { )
-"success": False,
-"error": str(e),
-"sync_time": time.time() - sync_start
+"success: False,"
+"error: str(e),"
+"sync_time: time.time() - sync_start"
                 
 
 
@@ -286,9 +286,9 @@ class OAuthReturningUserHelper:
     token_response.status_code = 200
                 # Mock OAuth token response
     token_response.json.return_value = { )
-    "access_token": "mock_oauth_access_token",
-    "token_type": "Bearer",
-    "expires_in": 3600
+    "access_token": "mock_oauth_access_token,"
+    "token_type": "Bearer,"
+    "expires_in: 3600"
                 
     mock_instance.post.return_value = token_response
 
@@ -299,11 +299,11 @@ class OAuthReturningUserHelper:
 
                 # Call auth service callback again
     service_urls = services_manager.get_service_urls()
-    auth_url = service_urls["auth"]
+    auth_url = service_urls["auth]"
     callback_url = "formatted_string"
 
     callback_params = { )
-    "code": "formatted_string",
+    "code": "formatted_string,"
     "state": "formatted_string"
                 
 
@@ -311,17 +311,17 @@ class OAuthReturningUserHelper:
     returning_time = time.time() - returning_start
 
     return { )
-    "success": response.status_code == 302,
-    "status_code": response.status_code,
-    "returning_time": returning_time,
-    "no_duplicate_created": True
+    "success: response.status_code == 302,"
+    "status_code: response.status_code,"
+    "returning_time: returning_time,"
+    "no_duplicate_created: True"
                 
 
     except Exception as e:
     return { )
-    "success": False,
-    "error": str(e),
-    "returning_time": time.time() - returning_start
+    "success: False,"
+    "error: str(e),"
+    "returning_time: time.time() - returning_start"
                     
 
 }}}}}}}}}}}}}}}}}

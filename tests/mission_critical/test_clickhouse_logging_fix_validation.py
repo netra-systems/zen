@@ -97,7 +97,7 @@ class ClickHouseLoggingFixValidationTests:
         return analysis
     
     def _detect_duplicate_log_patterns(self, log_lines: List[str) -> Dict[str, int):
-        ""Detect duplicate logging patterns that indicate multiple error handlers.
+        ""Detect duplicate logging patterns that indicate multiple error handlers."
         patterns = {}
         for line in log_lines:
             # Extract key patterns
@@ -113,7 +113,7 @@ class ClickHouseLoggingFixValidationTests:
     
     @pytest.mark.asyncio
     async def test_before_fix_behavior_reproduction(self):
-    ""
+    """
         Test Case 13: Before fix behavior reproduction
         
         SETUP: Temporarily disable context-aware logging (if possible)
@@ -188,7 +188,7 @@ class ClickHouseLoggingFixValidationTests:
     
     @pytest.mark.asyncio
     async def test_after_fix_behavior_validation(self):
-    "
+        """
     "
         Test Case 14: After fix behavior validation
         
@@ -489,7 +489,7 @@ class ClickHouseLoggingFixValidationTests:
 
 
 class ClickHouseLoggingRegressionPreventionTests:
-    ""Regression prevention tests for ClickHouse logging fixes.
+    ""Regression prevention tests for ClickHouse logging fixes."
     
     def test_duplicate_logging_elimination(self):
         Test that duplicate logging paths are eliminated after fix.""
@@ -524,7 +524,7 @@ class ClickHouseLoggingRegressionPreventionTests:
                     )
     
     def test_logging_performance_impact(self):
-        "Test that logging fix doesn't negatively impact performance."'
+        "Test that logging fix doesn't negatively impact performance.'"
         env_config = {
             'ENVIRONMENT': 'staging',
             'CLICKHOUSE_REQUIRED': 'false'

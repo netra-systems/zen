@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 # Import the test module
 try:
-    from tests.mission_critical.test_docker_stability_comprehensive import (
+    from tests.mission_critical.test_docker_stability_comprehensive import ()
         DockerStabilityMetrics,
         check_docker_daemon_health,
         create_stress_container,
@@ -26,7 +26,7 @@ try:
         TestSafeContainerLifecycle,
     )
 
-    from test_framework.docker_force_flag_guardian import (
+    from test_framework.docker_force_flag_guardian import ()
         DockerForceFlagGuardian,
         DockerForceFlagViolation
     )
@@ -63,7 +63,7 @@ try:
     if daemon_health:
         print(✅ PASS:  Docker daemon is healthy and responsive)
     else:
-        print("❌ FAIL:  Docker daemon is not healthy")
+        print("❌ FAIL:  Docker daemon is not healthy)"
         sys.exit(1)
 
     print(📊 Testing Metrics Collection...)"
@@ -76,14 +76,14 @@ try:
     report = metrics.generate_report()
     print(fTotal operations: {report.total_operations})"
     print(fTotal operations: {report.total_operations})"
-    print(f"Success rate: {report.success_rate:.2%})")
+    print(f"Success rate: {report.success_rate:.2%}))"
     print(fForce flag violations: {report.force_flag_violations})"
     print(fForce flag violations: {report.force_flag_violations})"
 
     print("\n + = * 60)"
     print(✅ PASS:  DOCKER STABILITY TEST SUITE VALIDATION PASSED")"
     print(= * 60)
-    print("The comprehensive test suite is ready for production use!")
+    print("The comprehensive test suite is ready for production use!)"
     print(\nTo run the full test suite:)"
     print(\nTo run the full test suite:)"
     print("python -m pytest tests/mission_critical/test_docker_stability_comprehensive.py -v)"

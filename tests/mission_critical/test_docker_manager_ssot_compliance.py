@@ -88,7 +88,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                fExpected: Only real implementation should exist - This FAILURE proves violation exists
 
     def test_ssot_violation_mock_docker_manager_has_mock_implementations(self):
-    ""
+    """
         PROVES VIOLATION: Mock Docker Manager contains MagicMock/AsyncMock implementations.
 
         CURRENT EXPECTATION: FAIL - Mock implementations detected
@@ -120,7 +120,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                fThis proves the violation exists - tests are using mock instead of real services
 
     def test_ssot_violation_tests_import_mock_docker_manager(self):
-        "
+        """
         "
         PROVES VIOLATION: Tests import from test_framework.docker.unified_docker_manager (mock).
 
@@ -206,7 +206,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                f"Tests using mock instead of real services breaks $500K+ ARR functionality"
 
     def test_ssot_compliance_only_one_docker_manager_implementation(self):
-        "
+        """
         "
         ENFORCES SSOT: Only one Docker Manager implementation should exist.
 
@@ -240,7 +240,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                \n".join(docker_manager_files)"
 
     def test_import_consistency_all_imports_resolve_to_same_implementation(self):
-    "
+        """
     "
         VALIDATES IMPORT CONSISTENCY: All Docker Manager imports resolve to same instance.
 
@@ -294,7 +294,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                    fAll imports should resolve to real implementation only
 
     def test_golden_path_websocket_events_require_real_services(self):
-    ""
+    """
         VALIDATES GOLDEN PATH: WebSocket events require real Docker services for $500K+ ARR.
 
         CURRENT EXPECTATION: FAIL - Mock services cannot provide real WebSocket events
@@ -342,7 +342,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
             self.fail(fCRITICAL: Cannot import Docker Manager - Golden Path broken: {e}")"
 
     def test_ssot_enforcement_prevents_future_regression(self):
-    "
+        """
     "
         ENFORCES SSOT: Validates that SSOT patterns prevent future Docker Manager duplication.
 
@@ -444,7 +444,7 @@ class DockerManagerMissionCriticalIntegrationTests(SSotBaseTestCase):
             self.fail(fMISSION CRITICAL FAILURE: Docker Manager import failed: {e})"
 
     def test_mission_critical_golden_path_service_integration(self):
-    "
+        """
     "
         MISSION CRITICAL: Golden Path requires integrated service management.
 

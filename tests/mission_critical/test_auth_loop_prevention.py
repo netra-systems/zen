@@ -7,7 +7,7 @@ class WebSocketTestHelper:
         self._closed = False
         
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
             raise RuntimeError(WebSocket is closed)"
@@ -205,7 +205,7 @@ class StagingAuthLoopScenariosTests:
     
     @pytest.mark.asyncio
     async def test_network_latency_scenario(self):
-        ""Test auth behavior with high network latency (staging scenario)
+        ""Test auth behavior with high network latency (staging scenario)"
         auth_service = AuthService()
         
         # Simulate high latency
@@ -257,7 +257,7 @@ class StagingAuthLoopScenariosTests:
         
     @pytest.mark.asyncio  
     async def test_multiple_tabs_refresh_scenario(self):
-        ""Test multiple browser tabs trying to refresh simultaneously
+        ""Test multiple browser tabs trying to refresh simultaneously"
         auth_service = AuthService()
         
         # Each tab has the same refresh token

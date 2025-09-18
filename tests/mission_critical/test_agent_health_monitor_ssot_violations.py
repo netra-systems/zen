@@ -71,7 +71,7 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
         self.mock_execution_tracker = Mock()
 
     async def test_multiple_implementations_inconsistent_death_thresholds(self):
-        "
+        """
         "
         REPRODUCTION TEST: Expose different death detection thresholds across implementations.
         
@@ -136,7 +136,7 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
             )
 
     async def test_multiple_health_status_implementations_conflict(self):
-        "
+        """
         "
         REPRODUCTION TEST: Show conflicting health status from multiple implementations.
         
@@ -264,7 +264,7 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
         )
 
     async def test_inconsistent_error_history_tracking(self):
-        "
+        """
         "
         REPRODUCTION TEST: Show scattered error history tracking across multiple systems.
         
@@ -296,14 +296,14 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
             dev_error_tracking = {
                 "consecutive_failures: 2,  # Different tracking method"
                 last_failure_time: datetime.now(),
-                "failure_types: [startup_failure", health_check_failure],  # Different error types
-                error_count_method: "consecutive  # vs. core's total_errors"'
+                "failure_types: [startup_failure, health_check_failure],  # Different error types"
+                error_count_method: "consecutive  # vs. core's total_errors'"
             }
             
             # Compare tracking methods
             tracking_differences = {
                 core_total_errors: core_summary[total_errors],
-                "core_recent_errors: core_summary[recent_errors"],
+                "core_recent_errors: core_summary[recent_errors],"
                 core_error_types: list(core_summary[error_types].keys()),
                 dev_consecutive_failures: dev_error_tracking[consecutive_failures"],"
                 "dev_failure_types: dev_error_tracking[failure_types],"
@@ -355,7 +355,7 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
         )
         
         # Core monitor should detect dead agent
-        self.assertEqual(core_status.status, dead", "Core monitor should detect dead agent)
+        self.assertEqual(core_status.status, dead", Core monitor should detect dead agent)"
         
         if DEV_MONITORS_AVAILABLE:
             # Dev monitor might see agent as still in grace period or monitoring

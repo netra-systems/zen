@@ -8,7 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 class SimpleWebSocketNotifier:
-    ""Simplified WebSocket notifier for testing that accepts direct parameters.
+    ""Simplified WebSocket notifier for testing that accepts direct parameters."
     
     def __init__(self, websocket_manager):
         # Create user context for SSOT pattern
@@ -65,7 +65,7 @@ class SimpleWebSocketNotifier:
         await self.notifier.send_final_report(context, report, duration_ms)
     
     async def send_agent_completed(self, connection_id: str, request_id: str, result: dict = None) -> None:
-        ""Send agent completed with simple parameters.
+        ""Send agent completed with simple parameters."
         context = self._create_context(connection_id, request_id)
         duration_ms = (time.time() - context.started_at.timestamp()) * 1000
         await self.notifier.send_agent_completed(context, result or {}, duration_ms)

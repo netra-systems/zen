@@ -62,10 +62,10 @@ class TestRealDevLauncherer:
         """Initialize real launcher tester with process tracking."""
         self.started_processes: List[subprocess.Popen] = []
         self.launcher_instance = None  # Store launcher instance for cleanup
-        self.test_ports = {"auth": 8081, "backend": 8000, "frontend": 3000}  # Use correct auth port
+        self.test_ports = {"auth": 8081, "backend": 8000, "frontend: 3000}  # Use correct auth port"
         self.health_endpoints = { }
-        "auth": "http://localhost:8081/auth/config",
-        "backend": "http://localhost:8000/health/ready",
+        "auth": "http://localhost:8081/auth/config,"
+        "backend": "http://localhost:8000/health/ready,"
         "frontend": "http://localhost:3000"
     
         self.original_config_path = Path.cwd() / ".dev_services.json"
@@ -104,22 +104,22 @@ class TestRealDevLauncherer:
         response_time = (time.time() - start_time) * 1000  # Convert to ms
 
         return { }
-        "service": service,
-        "endpoint": endpoint,
-        "status_code": response.status_code,
-        "healthy": response.status_code in [200, 201],
-        "response_time_ms": round(response_time, 2),
-        "body": response.text[:200]  # First 200 chars for debugging
+        "service: service,"
+        "endpoint: endpoint,"
+        "status_code: response.status_code,"
+        "healthy: response.status_code in [200, 201],"
+        "response_time_ms: round(response_time, 2),"
+        "body: response.text[:200]  # First 200 chars for debugging"
         
         except requests.exceptions.RequestException as e:
         response_time = (time.time() - start_time) * 1000
         return { }
-        "service": service,
-        "endpoint": endpoint,
-        "status_code": None,
-        "healthy": False,
-        "response_time_ms": round(response_time, 2),
-        "error": str(e)
+        "service: service,"
+        "endpoint: endpoint,"
+        "status_code: None,"
+        "healthy: False,"
+        "response_time_ms: round(response_time, 2),"
+        "error: str(e)"
             
 
     def setup_test_environment(self):
@@ -134,7 +134,7 @@ class TestRealDevLauncherer:
             # Copy test config to main config location
         if self.test_config_path.exists():
         shutil.copy2(self.test_config_path, self.original_config_path)
-        print(f"Using test config with mock databases")
+        print(f"Using test config with mock databases)"
         else:
         print("")
 
@@ -182,17 +182,17 @@ class TestRealDevLauncherer:
         else:
                             # Restore original value
         os.environ[key] = original_value
-        print("Restored environment variables")
+        print("Restored environment variables)"
 
                             # Remove test config
         if self.original_config_path.exists():
         self.original_config_path.unlink()
-        print("Removed test configuration")
+        print("Removed test configuration)"
 
                                 # Restore original config if backup exists
         if self.backup_config_path.exists():
         shutil.move(self.backup_config_path, self.original_config_path)
-        print("Restored original configuration")
+        print("Restored original configuration)"
 
         except Exception as e:
         print("")
@@ -202,7 +202,7 @@ class TestRealDevLauncherer:
     # Clean up launcher instance if it exists
         if self.launcher_instance:
         try:
-        print("Cleaning up launcher instance...")
+        print("Cleaning up launcher instance...)"
         self.launcher_instance._graceful_shutdown()
         except Exception as e:
         print("")
@@ -213,7 +213,7 @@ class TestRealDevLauncherer:
         for process in self.started_processes:
         try:
         if process.poll() is None:  # Process still running
-        if sys.platform == "win32":
+        if sys.platform == "win32:"
         process.terminate()
         else:
         process.send_signal(signal.SIGTERM)
@@ -262,7 +262,7 @@ class TestDevLauncherRealStartup:
         await asyncio.sleep(0)
         return LauncherConfig( )
         project_root=Path.cwd(),
-        project_id="netra-test-real",
+        project_id="netra-test-real,"
         verbose=True,  # Enable verbose for debugging
         silent_mode=False,  # Disable silent mode to see startup logs
         no_browser=True,
@@ -270,7 +270,7 @@ class TestDevLauncherRealStartup:
         frontend_port=3000,
         load_secrets=False,  # Skip secrets for test
         parallel_startup=False,  # Disable parallel to avoid race conditions in tests
-        startup_mode="minimal",
+        startup_mode="minimal,"
         non_interactive=True,
         backend_reload=False,  # Disable reload for faster startup
         dynamic_ports=False  # Use fixed ports for testing
@@ -303,7 +303,7 @@ class TestDevLauncherRealStartup:
         health_results = await self._validate_all_services_healthy(launcher_tester)
 
         # Verify at least some services are healthy (partial success acceptable)
-        healthy_count = sum(1 for result in health_results.values() if result.get("healthy", False))
+        healthy_count = sum(1 for result in health_results.values() if result.get("healthy, False))"
 
         if healthy_count == 0:
             # If no services are healthy, fail the test
@@ -312,7 +312,7 @@ class TestDevLauncherRealStartup:
 
             # Report on service health
         for service, result in health_results.items():
-        if result.get("healthy", False):
+        if result.get("healthy, False):"
         print("")
         else:
         print("")
@@ -320,8 +320,8 @@ class TestDevLauncherRealStartup:
         print("")
 
                         # Print detailed results for healthy services
-        for service in ["auth", "backend", "frontend"]:
-        if service in health_results and health_results[service].get("healthy", False):
+        for service in ["auth", "backend", "frontend]:"
+        if service in health_results and health_results[service].get("healthy, False):"
         print("")
 
     async def _verify_ports_available(self, tester: RealDevLauncherTester):
@@ -341,7 +341,7 @@ class TestDevLauncherRealStartup:
         """Attempt to clean up port by killing process using it."""
         pass
         try:
-        if sys.platform == "win32":
+        if sys.platform == "win32:"
             # Windows: Use netstat and taskkill
         cmd = ""
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -412,7 +412,7 @@ class TestDevLauncherRealStartup:
         await task
         except asyncio.CancelledError:
         pass
-        raise asyncio.TimeoutError("Startup timeout after 30 seconds")
+        raise asyncio.TimeoutError("Startup timeout after 30 seconds)"
 
                             # If port task completed first (services bound), that's success'
         if port_task in done:
@@ -490,7 +490,7 @@ class TestDevLauncherRealStartup:
                 # For this test, we accept partial success as the main goal is testing the launcher sequence
                 # The launcher should at least successfully go through its startup process
         if bound_ports == 0:
-        print(" FAIL:  No services bound to ports - launcher startup failed")
+        print(" FAIL:  No services bound to ports - launcher startup failed)"
         return False
         elif bound_ports >= 1:
         print("")
@@ -505,14 +505,14 @@ class TestDevLauncherRealStartup:
         health_results = {}
 
     # Check each service health endpoint
-        for service in ["auth", "backend", "frontend"]:
+        for service in ["auth", "backend", "frontend]:"
         port = tester.test_ports[service]
 
         # First verify port is bound
         if tester.is_port_available(port):
         health_results[service] = { }
-        "service": service,
-        "healthy": False,
+        "service: service,"
+        "healthy: False,"
         "error": ""
             
         print("")
@@ -575,7 +575,7 @@ class TestDevLauncherRealStartup:
 
                 # In CI/test environments, we accept partial startup
         if not startup_success:
-        pytest.skip("Service startup failed in CI environment - this is expected")
+        pytest.skip("Service startup failed in CI environment - this is expected)"
 
         assert startup_success, "Service startup failed"
 
@@ -588,7 +588,7 @@ class TestDevLauncherRealStartup:
         first_service = services_by_time[0][0]
         assert first_service in ["auth", "backend"], ""
 
-        print(" PASS:  Service startup order validation passed")
+        print(" PASS:  Service startup order validation passed)"
 
         @pytest.mark.e2e
     async def test_health_endpoint_response_validation(self, launcher_tester, launcher_config):
@@ -614,7 +614,7 @@ class TestDevLauncherRealStartup:
         await asyncio.sleep(3)
 
                             # Test each health endpoint with detailed validation
-        for service in ["auth", "backend"]:  # Skip frontend for now (different endpoint)
+        for service in ["auth", "backend]:  # Skip frontend for now (different endpoint)"
         port = launcher_tester.test_ports[service]
 
         if launcher_tester.is_port_available(port):
@@ -629,15 +629,15 @@ class TestDevLauncherRealStartup:
 
         print("")
 
-        print(" PASS:  Health endpoint response validation passed")
+        print(" PASS:  Health endpoint response validation passed)"
 
 
                                 # Test execution and reporting
-        if __name__ == "__main__":
-        print("=" * 60)
-        print("[U+1F534] CRITICAL: Dev Launcher Real Startup Test")
-        print("Business Protection: $150K MRR")
-        print("=" * 60)
+        if __name__ == "__main__:"
+        print("= * 60)"
+        print("[U+1F534] CRITICAL: Dev Launcher Real Startup Test)"
+        print("Business Protection: $150K MRR)"
+        print("= * 60)"
 
                                     # Run the test
-        pytest.main([__file__, "-v", "-s"])
+        pytest.main([__file__, "-v", "-s])"

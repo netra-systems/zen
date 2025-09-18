@@ -42,7 +42,7 @@ from dataclasses import dataclass
 
 # SSOT test imports
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.event_validator import (
+from netra_backend.app.websocket_core.event_validator import ()
     UnifiedEventValidator,
     ValidationResult, 
     WebSocketEventMessage,
@@ -61,7 +61,7 @@ class TypoTestCase:
     "Test case for typo detection."
     correct_event: str
     typo_variations: List[str]
-    expected_behavior: str  # "block or warn" or pass
+    expected_behavior: str  # "block or warn or pass"
     business_impact: str
     revenue_risk: str
 
@@ -247,7 +247,7 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                 )
                 
                 # Log each typo for audit trail
-                self.record_metric(f"typo_test_{test_case.correct_event}_{typo}, detected if validation_result.is_valid else "blocked)
+                self.record_metric(f"typo_test_{test_case.correct_event}_{typo}, detected if validation_result.is_valid else blocked)"
                 
                 # CRITICAL ASSERTION: Typo should not be treated as mission critical event
                 if validation_result.is_valid:
@@ -263,7 +263,7 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                     else:
                         # CRITICAL FAILURE: Typo was treated as mission critical (revenue risk)
                         self.record_metric(fREVENUE_RISK_typo_missed_{test_case.correct_event}", typo)"
-                        assert False, fREVENUE RISK: Typo '{typo}' for '{test_case.correct_event}' was treated as mission critical!
+                        assert False, "fREVENUE RISK: Typo '{typo}' for '{test_case.correct_event}' was treated as mission critical!"
                 else:
                     # Event validation failed completely - also counts as typo detection
                     total_typos_detected += 1
@@ -291,9 +291,9 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
             correct_event = {
                 "type: test_case.correct_event,"
                 run_id: self.test_run_id,
-                "agent_name: CorrectTestAgent",
+                "agent_name: CorrectTestAgent,"
                 timestamp: datetime.now(timezone.utc).isoformat(),
-                payload: {"status: correct_test"}
+                payload: {"status: correct_test}"
             }
             
             correct_result = self.revenue_validator.validate_event(
@@ -437,8 +437,8 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                         run_id: self.test_run_id,"
                         agent_name": MixedTestAgent,"
                         timestamp: datetime.now(timezone.utc).isoformat(),
-                        "data: {agent": MixedTestAgent, status: correct}"
-                        "data: {agent": MixedTestAgent, status: correct}"
+                        ""data": {"agent": MixedTestAgent, status: correct"}"
+                        ""data": {"agent": MixedTestAgent, status: correct"}"
                     }
                     mixed_events.append(event)
                     
@@ -446,9 +446,9 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
             typo_event = {
                 type": test_case.typo_variations[0],  # First typo"
                 run_id: self.test_run_id,
-                agent_name": "MixedTestAgent,
+                agent_name": MixedTestAgent,"
                 timestamp: datetime.now(timezone.utc).isoformat(),
-                data: {agent": "MixedTestAgent, status: typo}
+                "data": {"agent": "MixedTestAgent, status: typo}"
             }
             mixed_events.append(typo_event)
             
@@ -481,7 +481,7 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
         "Test typo validation doesn't significantly impact performance - SLA PROTECTION."
         # Performance baseline with correct events
         correct_event = {
-            type": "agent_started,
+            type": agent_started,"
             run_id: self.test_run_id,
             agent_name: PerformanceAgent","
             "timestamp: datetime.now(timezone.utc).isoformat(),"
@@ -510,7 +510,7 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
             run_id: self.test_run_id,"
             agent_name": PerformanceAgent,"
             timestamp: datetime.now(timezone.utc).isoformat(),
-            "payload: {status": started}
+            "payload: {status: started}"
         }
         
         start_time = time.time()
@@ -540,7 +540,7 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
     # === CROSS-USER CONTAMINATION PREVENTION ===
     
     def test_typo_events_prevent_cross_user_contamination(self):
-        ""Test typos don't cause cross-user event contamination - SECURITY PROTECTION.'
+        ""Test typos don't cause cross-user event contamination - SECURITY PROTECTION.'"
         # Create two different users
         user_a_id = fuser_a_{uuid.uuid4().hex[:8]}
         user_b_id = fuser_b_{uuid.uuid4().hex[:8]}""
@@ -581,11 +581,11 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
             {
                 scenario: Developer fast typing in production deployment,
                 "events: ["
-                    {type: agent_started, status: "correct},"
+                    {"type": agent_started, status: "correct},"
                     {type": agent_thinkng, status: typo_missing_i},  # Fast typing typo"
-                    {type": "tool_executing, status: correct},
-                    {type: "tool_completd, status": typo_missing_e},  # Common omission
-                    {type: agent_completed, status": "correct}
+                    {type": tool_executing, status: correct},"
+                    {"type": "tool_completd, status: typo_missing_e},  # Common omission"
+                    {"type": agent_completed, status": correct}"
                 ],
                 expected_critical_count: 3,  # 3 correct, 2 typos
                 expected_business_score: 60.0  # 3/5 = 60%"
@@ -594,10 +594,10 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
             {
                 scenario": Copy-paste error with concatenation,"
                 events: [
-                    {"type: agentstarted", status: concatenation_typo},  # Missing underscore
-                    {type: agent_thinking", "status: correct},
-                    {type: toolexecuting, "status: concatenation_typo"},  # Missing underscore  
-                    {type: tool_completed, status: correct"},"
+                    {"type: agentstarted, status: concatenation_typo},  # Missing underscore"
+                    {"type": agent_thinking", status: correct},"
+                    {"type": toolexecuting, "status: concatenation_typo},  # Missing underscore  "
+                    {"type": tool_completed, status: correct"},"
                     {"type: agentcompleted, status: concatenation_typo}  # Missing underscore"
                 ],
                 "expected_critical_count: 2,  # Only 2 correct"
@@ -606,11 +606,11 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
             {
                 scenario: Keyboard layout confusion (QWERTY adjacent keys)","
                 "events: ["
-                    {type: agent_started, status": "correct},
-                    {type: agent_thinking, status: "correct},"
+                    {"type": agent_started, status": correct},"
+                    {"type": agent_thinking, status: "correct},"
                     {type": tiol_executing, status: adjacent_key_typo},  # 'o' instead of 'o'"
-                    {type": "tool_completed, status: correct},
-                    {type: "agent_completed, status": correct}
+                    {type": tool_completed, status: correct},"
+                    {"type": "agent_completed, status: correct}"
                 ],
                 expected_critical_count: 4,  # 4 correct, 1 typo
                 "expected_business_score: 80.0  # 4/5 = 80%"
@@ -628,7 +628,7 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                     "run_id: fscenario_{scenarios_protected},"
                     agent_name: ProductionScenarioAgent,
                     "timestamp: datetime.now(timezone.utc).isoformat(),"
-                    data: {scenario: scenario[scenario], "status: event_spec[status"]}
+                    "data": {"scenario: scenario[scenario], "status: event_spec[status"]}"
                 }
                 events.append(event)
                 
@@ -719,7 +719,7 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
                     total_typos_detected += 1
                     event_report["detected_typos).append({"
                         typo: typo,
-                        "classification: validation_failed",
+                        "classification: validation_failed,"
                         error: result.error_message
                     }
                 else:
@@ -795,7 +795,7 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
 
 
 class WebSocketEventTypoProductionSimulationTests(SSotAsyncTestCase):
-    ""
+    """
     Production simulation tests for typo scenarios based on real incidents.
     
     These tests simulate actual production conditions where typos have
@@ -803,7 +803,7 @@ class WebSocketEventTypoProductionSimulationTests(SSotAsyncTestCase):
     
     
     def setup_method(self, method=None):
-        ""Setup production simulation environment.
+        ""Setup production simulation environment."
         super().setup_method(method)
         
         self.production_user_id = fprod_user_{uuid.uuid4().hex[:8]}
@@ -817,9 +817,9 @@ class WebSocketEventTypoProductionSimulationTests(SSotAsyncTestCase):
         # Common typos observed in production
         production_typos = [
             (agent_started", [agnt_started, agent_stared, agentstarted),"
-            (agent_thinking", ["agent_thinkng, agentthinking, agent_thinkin),
-            (tool_executing, ["tool_executng, toolexecuting", tool_execute),
-            (tool_completed, [tool_completd, toolcompleted", "tool_complete),
+            (agent_thinking", [agent_thinkng, agentthinking, agent_thinkin),"
+            (tool_executing, ["tool_executng, toolexecuting, tool_execute),"
+            (tool_completed, [tool_completd, toolcompleted", tool_complete),"
             (agent_completed, [agent_completd, agentcompleted, "agent_complete)"
         ]
         
@@ -848,9 +848,9 @@ class WebSocketEventTypoProductionSimulationTests(SSotAsyncTestCase):
             event = {
                 type": event_type,"
                 run_id: fload_test_{i},
-                "agent_name: LoadTestAgent",
+                "agent_name: LoadTestAgent,"
                 timestamp: datetime.now(timezone.utc).isoformat(),
-                payload: {"load_test: True, iteration": i}
+                payload: {"load_test: True, iteration: i}"
             }
             
             # Measure validation performance

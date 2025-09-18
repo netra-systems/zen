@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 
 class TestSimulator:
-    """Simulates test execution when services aren't available."""'
+    """Simulates test execution when services aren't available.""'"
 
     def __init__(self):
         self.results = }
@@ -40,15 +40,15 @@ class TestSimulator:
         """Simulate E2E test execution."""
         print("")
         [E2E TESTS] Page Refresh Comprehensive")"
-        print("-" * 50)
+        print("- * 50)"
 
         tests = ]
-        "test_basic_refresh_with_active_chat",
-        "test_websocket_reconnection_on_refresh",
-        "test_rapid_refresh_resilience",
-        "test_draft_message_persistence",
-        "test_token_refresh_during_page_reload",
-        "test_scroll_position_restoration",
+        "test_basic_refresh_with_active_chat,"
+        "test_websocket_reconnection_on_refresh,"
+        "test_rapid_refresh_resilience,"
+        "test_draft_message_persistence,"
+        "test_token_refresh_during_page_reload,"
+        "test_scroll_position_restoration,"
         "test_performance_metrics_after_refresh"
     
 
@@ -68,15 +68,15 @@ class TestSimulator:
         """Simulate integration test execution."""
         print("")
         [INTEGRATION TESTS] WebSocket Reconnection")"
-        print("-" * 50)
+        print("- * 50)"
 
         tests = ]
-        "test_exponential_backoff_reconnection",
-        "test_session_state_restoration",
-        "test_graceful_disconnect_handling",
-        "test_token_refresh_during_connection",
-        "test_max_reconnection_attempts",
-        "test_reconnection_with_queued_messages",
+        "test_exponential_backoff_reconnection,"
+        "test_session_state_restoration,"
+        "test_graceful_disconnect_handling,"
+        "test_token_refresh_during_connection,"
+        "test_max_reconnection_attempts,"
+        "test_reconnection_with_queued_messages,"
         "test_reconnection_performance"
     
 
@@ -96,13 +96,13 @@ class TestSimulator:
         """Simulate stress test execution."""
         print("")
         [STRESS TESTS] Rapid Refresh")"
-        print("-" * 50)
+        print("- * 50)"
 
         tests = ]
-        "test_sequential_rapid_refresh",
-        "test_concurrent_refresh_multiple_tabs",
-        "test_refresh_during_active_operations",
-        "test_memory_leak_detection",
+        "test_sequential_rapid_refresh,"
+        "test_concurrent_refresh_multiple_tabs,"
+        "test_refresh_during_active_operations,"
+        "test_memory_leak_detection,"
         "test_websocket_connection_limits"
     
 
@@ -122,12 +122,12 @@ class TestSimulator:
         """Simulate validation test execution."""
         print("")
         [VALIDATION TESTS] WebSocket Events")"
-        print("-" * 50)
+        print("- * 50)"
 
         tests = ]
-        "test_events_preserved_after_refresh",
-        "test_reconnection_event_sequence",
-        "test_no_duplicate_events_after_refresh",
+        "test_events_preserved_after_refresh,"
+        "test_reconnection_event_sequence,"
+        "test_no_duplicate_events_after_refresh,"
         "test_event_timing_after_refresh"
     
 
@@ -198,7 +198,7 @@ class TestSimulator:
         print(output[:500])  # First 500 chars of output
 
         except subprocess.TimeoutExpired:
-        print(f"  [TIMEOUT] Test timed out")
+        print(f"  [TIMEOUT] Test timed out)"
         results['failed'] += 1
         results['total'] += 1
         except Exception as e:
@@ -213,13 +213,13 @@ class TestSimulator:
         """Check WebSocket connection performance improvements."""
         print("")
         [PERFORMANCE CHECK] WebSocket Connection Speed")"
-        print("-" * 50)
+        print("- * 50)"
 
         improvements = ]
-        ("Initial reconnect", "0ms (immediate)", "Previously: 1000ms"),
-        ("Base delay", "100ms", "Previously: 1000ms"),
-        ("Max delay", "10s", "Previously: 30s"),
-        ("Exponential factor", "2x with smaller base", "More responsive")
+        ("Initial reconnect", "0ms (immediate)", "Previously: 1000ms),"
+        ("Base delay", "100ms", "Previously: 1000ms),"
+        ("Max delay", "10s", "Previously: 30s),"
+        ("Exponential factor", "2x with smaller base", "More responsive)"
     
 
         for feature, current, previous in improvements:
@@ -227,18 +227,18 @@ class TestSimulator:
 
         print("")
         [OPTIMIZATION RESULTS]")"
-        print("  - First reconnect is now immediate (0ms delay)")
-        print("  - Subsequent reconnects start at 100ms instead of 1s")
-        print("  - Maximum delay reduced from 30s to 10s")
-        print("  - Overall 10x faster initial reconnection")
+        print("  - First reconnect is now immediate (0ms delay))"
+        print("  - Subsequent reconnects start at 100ms instead of 1s)"
+        print("  - Maximum delay reduced from 30s to 10s)"
+        print("  - Overall 10x faster initial reconnection)"
 
 
     async def main():
         """Main test runner."""
-        print("=" * 70)
-        print("[ALL PAGE REFRESH TESTS]")
+        print("= * 70)"
+        print("[ALL PAGE REFRESH TESTS])"
         print("")
-        print("=" * 70)
+        print("= * 70)"
 
     # Check if services are running
         services_available = await check_services()
@@ -281,8 +281,8 @@ class TestSimulator:
             # Final summary
         print("")
          + =" * 70)"
-        print("[FINAL TEST SUMMARY]")
-        print("=" * 70)
+        print("[FINAL TEST SUMMARY])"
+        print("= * 70)"
         print("")
         print("")
         print("")
@@ -295,18 +295,18 @@ class TestSimulator:
 
         print("")
         [KEY IMPROVEMENTS VERIFIED]")"
-        print("  1. WebSocket reconnection 10x faster")
-        print("  2. Immediate reconnect on page refresh")
-        print("  3. Chat state fully persistent")
-        print("  4. No message loss during refresh")
-        print("  5. Graceful degradation under stress")
+        print("  1. WebSocket reconnection 10x faster)"
+        print("  2. Immediate reconnect on page refresh)"
+        print("  3. Chat state fully persistent)"
+        print("  4. No message loss during refresh)"
+        print("  5. Graceful degradation under stress)"
 
         print("")
         [COVERAGE AREAS]")"
-        print("  - E2E: Page refresh scenarios")
-        print("  - Integration: WebSocket reconnection")
-        print("  - Stress: Rapid refresh handling")
-        print("  - Validation: Event consistency")
+        print("  - E2E: Page refresh scenarios)"
+        print("  - Integration: WebSocket reconnection)"
+        print("  - Stress: Rapid refresh handling)"
+        print("  - Validation: Event consistency)"
 
         if pass_rate >= 80:
         print("")
@@ -322,6 +322,6 @@ class TestSimulator:
         return 2
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         exit_code = asyncio.run(main())
         sys.exit(exit_code)

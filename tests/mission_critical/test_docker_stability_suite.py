@@ -131,7 +131,7 @@ class DockerInfrastructureValidator:
         self.metrics = InfrastructureMetrics()
 
     def validate_unified_docker_manager(self) -> bool:
-        ""Validate UnifiedDockerManager usage
+        ""Validate UnifiedDockerManager usage"
         if not self.docker_manager:
             logger.warning(UnifiedDockerManager not available, skipping validation)"
             logger.warning(UnifiedDockerManager not available, skipping validation)"
@@ -164,7 +164,7 @@ class DockerInfrastructureValidator:
             try:
                 self.docker_manager.release_environment()
             except Exception as e:
-                logger.warning(f"Cleanup warning: {e})")
+                logger.warning(f"Cleanup warning: {e}))"
             
             return True
 
@@ -297,7 +297,7 @@ class DockerStabilityP1Tests:
         assert max_memory >= 0, "Memory monitoring failed"
 
         # Resource monitoring is functional if we reach this point
-        assert True, Resource monitor functionality validated
+        assert True, "Resource monitor functionality validated"
 
     def test_volume_storage_named_volumes(self, docker_validator):
         "CRITICAL: Test volume storage using named volumes only."
@@ -311,7 +311,7 @@ class DockerStabilityP1Tests:
             volume = docker_validator.docker_client.volumes.create(name=volume_name)
             
             # Verify volume creation
-            assert volume.name == volume_name, Named volume creation failed
+            assert volume.name == volume_name, "Named volume creation failed"
             
             # Clean up
             volume.remove(force=True)
@@ -324,7 +324,7 @@ class DockerStabilityP1Tests:
     def test_parallel_execution_stability(self, docker_validator):
         CRITICAL: Test parallel execution stability.""
         result = docker_validator.test_parallel_container_creation(5)  # Reduced count
-        assert result, Parallel execution stability test failed
+        assert result, "Parallel execution stability test failed"
 
     def test_cleanup_mechanism(self, docker_validator):
         CRITICAL: Test cleanup mechanism functionality.""
@@ -334,16 +334,16 @@ class DockerStabilityP1Tests:
                 result = docker_validator.docker_manager.acquire_environment()
                 if result:
                     docker_validator.docker_manager.release_environment()
-                assert True, Cleanup mechanism test passed
+                assert True, "Cleanup mechanism test passed"
             except Exception as e:
-                logger.warning(f"Cleanup test warning: {e})")
+                logger.warning(f"Cleanup test warning: {e}))"
                 assert True, Cleanup mechanism test completed with warnings"
                 assert True, Cleanup mechanism test completed with warnings"
         else:
-            assert True, Cleanup mechanism test passed (Docker manager not available)
+            assert True, "Cleanup mechanism test passed (Docker manager not available)"
 
     def test_resource_limit_enforcement(self, docker_validator):
-        ""CRITICAL: Test resource limit enforcement.
+        ""CRITICAL: Test resource limit enforcement."
         # Test resource limits by checking metrics
         docker_validator.metrics.memory_usage.append(MAX_MEMORY_MB - 100)
         max_memory = docker_validator.metrics.max_memory_mb()
@@ -384,7 +384,7 @@ class DockerStabilityP1Tests:
             if not result:
                 logger.warning(fStress operation {i+1} failed)
         
-        assert True, Docker daemon stability stress test completed
+        assert True, "Docker daemon stability stress test completed"
 
     def test_health_monitoring_under_load(self, docker_validator):
         "CRITICAL: Test health monitoring under load."
@@ -432,13 +432,13 @@ class DockerStabilityP1Tests:
                     pass
                 
                 # Recovery test completes regardless of result due to infrastructure limitations
-                assert True, Automatic recovery test completed
+                assert True, "Automatic recovery test completed"
                 
             except Exception as e:
                 logger.warning(fRecovery test warning: {e})
                 assert True, Automatic recovery test completed with warnings""
         else:
-            assert True, Automatic recovery test passed (Docker not available)
+            assert True, "Automatic recovery test passed (Docker not available)"
 
 
 if __name__ == __main__:"

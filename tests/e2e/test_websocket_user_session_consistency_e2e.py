@@ -87,7 +87,7 @@ class WebSocketUserSessionConsistencyE2ETests:
             except Exception as e:
                 session_creation_result['error'] = str(e)
         e2e_report = {'user_context': user_context, 'websocket_context': websocket_connection_context, 'session_result': session_creation_result, 'business_impact': 'Premium user cannot start chat conversation'}
-        assert session_creation_result['success'], fAUTHENTICATED WEBSOCKET SESSION E2E FAILURE: Premium user '{user_id}' cannot establish WebSocket session due to thread ID format incompatibility. E2E Report: {e2e_report}. BUSINESS IMPACT: Users cannot start chat conversations = direct revenue loss.
+        assert session_creation_result['success'], "fAUTHENTICATED WEBSOCKET SESSION E2E FAILURE: Premium user '{user_id}' cannot establish WebSocket session due to thread ID format incompatibility. E2E Report: {e2e_report}. BUSINESS IMPACT: Users cannot start chat conversations = direct revenue loss."
 
     @pytest.mark.e2e
     @pytest.mark.asyncio
@@ -133,7 +133,7 @@ class WebSocketUserSessionConsistencyE2ETests:
         failed_isolations = [r for r in isolation_results if isinstance(r, dict) and (not r.get('success'))]
         exception_isolations = [r for r in isolation_results if isinstance(r, Exception)]
         isolation_report = {'total_enterprise_users': len(authenticated_users), 'successful_isolations': len(successful_isolations), 'failed_isolations': len(failed_isolations) + len(exception_isolations), 'isolation_success_rate': len(successful_isolations) / len(authenticated_users), 'failure_details': failed_isolations + [str(e) for e in exception_isolations], 'business_impact': 'Enterprise customer data isolation breach'}
-        assert isolation_report['isolation_success_rate'] == 1.0, fMULTI-USER WEBSOCKET ISOLATION E2E FAILURE: {isolation_report['failed_isolations']} out of {isolation_report['total_enterprise_users']} enterprise users failed session isolation. Isolation report: {isolation_report}. BUSINESS IMPACT: Enterprise customer data isolation breach = security incident.
+        assert isolation_report['isolation_success_rate'] == 1.0, "fMULTI-USER WEBSOCKET ISOLATION E2E FAILURE: {isolation_report['failed_isolations']} out of {isolation_report['total_enterprise_users']} enterprise users failed session isolation. Isolation report: {isolation_report}. BUSINESS IMPACT: Enterprise customer data isolation breach = security incident."
 
     @pytest.mark.e2e
     @pytest.mark.asyncio
@@ -181,12 +181,12 @@ class WebSocketUserSessionConsistencyE2ETests:
                 agent_execution_result['error'] = str(e)
                 execution_pipeline_log.append(f'Agent execution FAILED: {e}')
         agent_e2e_report = {'user_context': user_context, 'agent_context': agent_execution_context, 'execution_result': agent_execution_result, 'pipeline_log': execution_pipeline_log, 'business_impact': 'Premium user cannot execute AI agents'}
-        assert agent_execution_result['success'], fWEBSOCKET AGENT EXECUTION E2E FAILURE: Premium user '{user_id}' cannot execute AI agents due to WebSocket thread ID incompatibility. Agent E2E Report: {agent_e2e_report}. BUSINESS IMPACT: Core product value (AI agent execution) is broken = direct revenue loss.
+        assert agent_execution_result['success'], "fWEBSOCKET AGENT EXECUTION E2E FAILURE: Premium user '{user_id}' cannot execute AI agents due to WebSocket thread ID incompatibility. Agent E2E Report: {agent_e2e_report}. BUSINESS IMPACT: Core product value (AI agent execution) is broken = direct revenue loss."
 
     @pytest.mark.e2e
     @pytest.mark.asyncio
     async def test_websocket_session_persistence_across_reconnections(self):
-        ""FAILING E2E TEST: Verify WebSocket sessions persist correctly across reconnections
+        ""FAILING E2E TEST: Verify WebSocket sessions persist correctly across reconnections"
         
         EXPECTED FAILURE: This test should FAIL because thread ID format inconsistencies
         break session persistence when users reconnect their WebSocket connections.
@@ -239,7 +239,7 @@ class WebSocketUserSessionConsistencyE2ETests:
                 persistence_test_log.append(f'Persistence test ERROR: {e}')
         persistence_report = {'user_context': user_context, 'initial_connection': initial_connection, 'reconnection_context': reconnection_context, 'persistence_result': persistence_result, 'test_log': persistence_test_log, 'business_impact': 'Users lose conversation history on reconnect'}
         assert persistence_result['reconnection_found_thread'], f"WEBSOCKET SESSION PERSISTENCE E2E FAILURE: User '{user_id}' cannot restore WebSocket session after reconnection due to thread ID format incompatibility. Persistence report: {persistence_report}. BUSINESS IMPACT: Users lose conversation history = poor user experience = churn risk."
-        assert persistence_result['conversation_restored'], f'CONVERSATION RESTORATION FAILURE: Even if thread is found, conversation data is lost due to WebSocket session persistence issues. This breaks user experience continuity.'
+        assert persistence_result['conversation_restored'], "f'CONVERSATION RESTORATION FAILURE: Even if thread is found, conversation data is lost due to WebSocket session persistence issues. This breaks user experience continuity.'"
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

@@ -34,7 +34,7 @@ if project_root not in sys.path:
 
 import pytest
 
-from test_framework.validation import (
+from test_framework.validation import ()
     EventSequenceValidator,
     ContentQualityValidator,
     TimingValidator, 
@@ -50,14 +50,14 @@ def create_mock_websocket_event(event_type: str, data: dict) -> WebSocketEvent:
     "Create a mock WebSocket event for testing."
     event_data = {
         **data,
-        "user_id: test_user",
+        "user_id: test_user,"
         timestamp: datetime.now(timezone.utc).isoformat()
     }
     
     # Create event using the correct constructor from WebSocketEvent.from_message
     import json
-    message = json.dumps({type: event_type, **event_data)"
-    message = json.dumps({type: event_type, **event_data)"
+    message = json.dumps({"type": event_type, **event_data)"
+    message = json.dumps({"type": event_type, **event_data)"
     return WebSocketEvent.from_message(message)
 
 
@@ -65,7 +65,7 @@ class EventValidationSmokeTests:
     "Smoke tests for event validation infrastructure."
     
     def test_event_sequence_validator_initialization(self):
-        ""Test EventSequenceValidator initializes correctly.
+        ""Test EventSequenceValidator initializes correctly."
         validator = EventSequenceValidator(test_user, test_session")"
         
         assert validator.user_id == "test_user"
@@ -84,7 +84,7 @@ class EventValidationSmokeTests:
         assert validator.validated_events == 0
     
     def test_timing_validator_initialization(self):
-        ""Test TimingValidator initializes correctly.
+        ""Test TimingValidator initializes correctly."
         validator = TimingValidator(test_user, test_session")"
         
         assert validator.user_id == "test_user"
@@ -94,7 +94,7 @@ class EventValidationSmokeTests:
     
     def test_business_value_validator_initialization(self):
         "Test BusinessValueValidator initializes correctly."
-        validator = BusinessValueValidator(test_user, "test_session, free")
+        validator = BusinessValueValidator(test_user, "test_session, free)"
         
         assert validator.user_id == test_user
         assert validator.session_id == test_session""
@@ -113,7 +113,7 @@ class EventValidationSmokeTests:
             create_mock_websocket_event("tool_executing, {tool_name": analyzer, context: Processing data),"
             create_mock_websocket_event("tool_executing, {tool_name": analyzer, context: Processing data),"
             create_mock_websocket_event(tool_completed", {tool_name: analyzer, result: {insights": ["Found patterns])),"
-            create_mock_websocket_event(agent_completed, {result: {status: "success), summary": Analysis complete)
+            create_mock_websocket_event(agent_completed, {result: {status: "success), summary: Analysis complete)"
         ]
         
         # Add events to validator
@@ -136,7 +136,7 @@ class EventValidationSmokeTests:
         # Create bad event sequence (out of order, missing events)
         bad_events = [
             create_mock_websocket_event(tool_executing", {tool_name: unknown),  # No agent_started first"
-            create_mock_websocket_event("agent_thinking, {content": thinking...),  # Generic content
+            create_mock_websocket_event("agent_thinking, {content: thinking...),  # Generic content"
             # Missing agent_completed
         ]
         
@@ -192,10 +192,10 @@ class EventValidationSmokeTests:
     
     def test_timing_validation(self):
         "Test timing validation works."
-        validator = TimingValidator("test_user, test_session")
+        validator = TimingValidator("test_user, test_session)"
         
         # Test good timing
-        good_event = create_mock_websocket_event(agent_started, {agent_id: test, task": "Fast test)
+        good_event = create_mock_websocket_event(agent_started, {agent_id: test, task": Fast test)"
         
         # Simulate fast processing
         processing_start = time.time() - 0.1  # 100ms ago
@@ -210,7 +210,7 @@ class EventValidationSmokeTests:
         assert result.performance_score >= 0.7
         
         # Test slow timing
-        slow_validator = TimingValidator("test_user, test_session_slow")
+        slow_validator = TimingValidator("test_user, test_session_slow)"
         slow_event = create_mock_websocket_event(agent_started, {agent_id: slow_test)"
         slow_event = create_mock_websocket_event(agent_started, {agent_id: slow_test)"
         
@@ -234,8 +234,8 @@ class EventValidationSmokeTests:
         # Test high business value event
         high_value_event = create_mock_websocket_event("agent_completed, {"
             result: {
-                "recommendations: [Increase marketing spend by 20%", Focus on mobile users],
-                insights: ["Market trend shows 15% growth opportunity, User engagement up 23%"],
+                "recommendations: [Increase marketing spend by 20%, Focus on mobile users],"
+                insights: ["Market trend shows 15% growth opportunity, User engagement up 23%],"
                 expected_impact: Estimated 20% revenue increase
             },
             "summary: Completed comprehensive analysis and provided actionable business recommendations"
@@ -366,7 +366,7 @@ class EventValidationSmokeTests:
         assert business_summary[conversion_probability"] >= 0.2"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

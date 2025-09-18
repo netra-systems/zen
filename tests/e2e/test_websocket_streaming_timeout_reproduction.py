@@ -28,7 +28,7 @@ class WebSocketStreamingTimeoutReproduction:
         self.google_oauth_user_id = 105945141827451681156  # Exact ID from logs
         
     async def test_user_id_validation_failure(self):
-    ""
+    """
         REPRODUCES: WebSocket error: Invalid user_id format: 105945141827451681156
         EXPECTS: ValueError from shared/types/core_types.py:346
         
@@ -61,7 +61,7 @@ class WebSocketStreamingTimeoutReproduction:
         logger.info( PASS:  REPRODUCED: Missing streaming implementation)
         
     async def test_redis_dependency_timeout(self):
-    ""
+    """
         REPRODUCES: Service 'redis' validation timeout after 30.0s
         EXPECTS: Service validation timeout warnings
         
@@ -69,7 +69,7 @@ class WebSocketStreamingTimeoutReproduction:
         # In real environment, this takes 30+ seconds and fails
         
         async def simulate_redis_validation():
-            ""Simulates Redis service validation that times out
+            ""Simulates Redis service validation that times out"
             await asyncio.sleep(30.1)  # Exceeds 30s timeout
             raise asyncio.TimeoutError(Service 'redis' validation timeout after 30.0s)""
             
@@ -88,7 +88,7 @@ class WebSocketStreamingTimeoutReproduction:
         expected_thread_id = f"thread_{run_id}_461_0cc710f1"
         actual_thread_id = fthread_websocket_factory_1757432107922_461_0cc710f1""
         
-        assert run_id in expected_thread_id, Thread ID should contain run_id
+        assert run_id in expected_thread_id, "Thread ID should contain run_id"
         assert expected_thread_id != actual_thread_id, Thread ID mismatch reproduced""
         
         logger.info( PASS:  REPRODUCED: Connection tracking mismatch)
@@ -121,7 +121,7 @@ class WebSocketStreamingTimeoutReproduction:
                 auth_message = {
                     "type: authenticate,"
                     user_id: self.google_oauth_user_id,
-                    token": "test-jwt-token
+                    token": test-jwt-token"
                 }
                 await websocket.send(json.dumps(auth_message))
                 
@@ -139,7 +139,7 @@ class WebSocketStreamingTimeoutReproduction:
                     stream_message = {
                         "type: execute_agent,"
                         agent_type: data_analyst,
-                        "message: Test streaming execution",
+                        "message: Test streaming execution,"
                         stream_updates: True
                     }
                     await websocket.send(json.dumps(stream_message))
@@ -155,7 +155,7 @@ class WebSocketStreamingTimeoutReproduction:
                             events_received.append(event)
                             
                             # Check for streaming completion
-                            if event.get(type) in ["agent_completed, agent_error"]:
+                            if event.get(type) in ["agent_completed, agent_error]:"
                                 streaming_successful = True
                                 break
                                 
@@ -168,7 +168,7 @@ class WebSocketStreamingTimeoutReproduction:
         # ASSERTIONS - These should all fail before fix, pass after fix
         assert connection_successful, WebSocket connection should work""
         assert not auth_successful, "BEFORE FIX: Auth should fail on user ID validation"
-        assert not streaming_successful, BEFORE FIX: Streaming should timeout
+        assert not streaming_successful, "BEFORE FIX: Streaming should timeout"
         assert len(events_received) == 0, "BEFORE FIX: No streaming events should be received"
         
         logger.info( PASS:  REPRODUCED: Complete WebSocket streaming timeout scenario)
@@ -212,7 +212,7 @@ if __name__ == __main__:
     logging.basicConfig(level=logging.INFO)
     
     async def run_reproduction_suite():
-        ""Run the complete reproduction test suite
+        ""Run the complete reproduction test suite"
         reproducer = WebSocketStreamingTimeoutReproduction()
         
         print( SEARCH:  REPRODUCING WEBSOCKET STREAMING TIMEOUT ISSUES...")"
@@ -221,7 +221,7 @@ if __name__ == __main__:
         # Test 1: User ID validation
         try:
             await reproducer.test_user_id_validation_failure()
-            print(" PASS:  User ID validation failure reproduced")
+            print(" PASS:  User ID validation failure reproduced)"
         except Exception as e:
             print(f FAIL:  Failed to reproduce user ID validation: {e})""
             
@@ -249,7 +249,7 @@ if __name__ == __main__:
         print(= * 60")"
         print( TARGET:  REPRODUCTION COMPLETE - Issues identified and documented)
         
-    if len(sys.argv) > 1 and sys.argv[1] == "reproduce":
+    if len(sys.argv) > 1 and sys.argv[1] == "reproduce:"
         asyncio.run(run_reproduction_suite())
 
 )

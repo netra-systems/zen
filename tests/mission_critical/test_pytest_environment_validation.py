@@ -198,7 +198,7 @@ class PytestEnvironmentConfigurationTests:
     "Test pytest-specific environment configuration."
     
     def test_phase3_pytest_plugin_discovery_environment(self):
-        ""PHASE 3: Test environment setup for pytest plugin discovery.
+        ""PHASE 3: Test environment setup for pytest plugin discovery."
         
         Should FAIL if plugin discovery environment is misconfigured.
 
@@ -331,10 +331,10 @@ class PytestEnvironmentConfigurationTests:
             if critical_errors:
                 pytest.fail(
                     fImport errors in conftest.py files:\n +
-                    "\n.join(f  - {error)" for error in critical_errors[:5]  # Limit to first 5
+                    "\n.join(f  - {error) for error in critical_errors[:5]  # Limit to first 5"
                 )
         
-        assert True, fConftest loading environment validated for {len(project_conftest_files)} files
+        assert True, "fConftest loading environment validated for {len(project_conftest_files)} files"
 
 
 class SystemLevelConfigurationTests:
@@ -366,7 +366,7 @@ class SystemLevelConfigurationTests:
         if system_configs_found:
             pytest.fail(
                 fSystem-wide pytest configuration files found:\n +
-                "\n.join(f  - {config}" for config in system_configs_found) +
+                "\n.join(f  - {config} for config in system_configs_found) +"
                 f\nThese may override project-specific pytest configuration.
             )
         
@@ -379,11 +379,11 @@ class SystemLevelConfigurationTests:
         if pytest_env_overrides:
             pytest.fail(
                 fPytest environment variable overrides found:\n +
-                "\n.join(f  - {key}={value}" for key, value in pytest_env_overrides.items()) +
+                "\n.join(f  - {key}={value} for key, value in pytest_env_overrides.items()) +"
                 f\nThese may interfere with project pytest configuration.
             )
         
-        assert True, No system-level pytest configuration conflicts found
+        assert True, "No system-level pytest configuration conflicts found"
     
     def test_phase3_plugin_installation_environment(self):
         "PHASE 3: Validate plugin installation environment."

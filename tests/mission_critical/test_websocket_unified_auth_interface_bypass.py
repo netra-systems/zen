@@ -59,7 +59,7 @@ class WebSocketUnifiedAuthInterfaceBypassTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_bypasses_unified_auth_interface_violation(self):
-    "
+        """
     "
         VIOLATION REPRODUCTION: WebSocket uses local auth logic instead of UnifiedAuthInterface.
         
@@ -154,7 +154,7 @@ class WebSocketUnifiedAuthInterfaceBypassTests(SSotAsyncTestCase):
             logger.critical(f" ALERT:  Violation methods found: {violations_found})"
             logger.critical( ALERT:  ALL AUTH SHOULD GO THROUGH UnifiedAuthInterface ONLY)
             
-            assert len(violations_found) > 0, fSSOT VIOLATION: WebSocket has local auth methods: {violations_found}
+            assert len(violations_found) > 0, "fSSOT VIOLATION: WebSocket has local auth methods: {violations_found}"
             return True
         else:
             pytest.fail(VIOLATION NOT REPRODUCED: No local auth methods found")"
@@ -200,20 +200,20 @@ class WebSocketUnifiedAuthInterfaceBypassTests(SSotAsyncTestCase):
                 logger.critical(f" ALERT:  Violations: {violations_found})"
                 logger.critical( ALERT:  SHOULD USE: UnifiedAuthInterface only")"
                 
-                assert len(violations_found) > 0, fSSOT VIOLATION: Direct auth imports found: {violations_found}
+                assert len(violations_found) > 0, "fSSOT VIOLATION: Direct auth imports found: {violations_found}"
                 return True
             else:
                 pytest.fail(VIOLATION NOT REPRODUCED: No direct auth imports found)"
                 pytest.fail(VIOLATION NOT REPRODUCED: No direct auth imports found)"
                 
         except Exception as e:
-            logger.warning(f" WARNING: [U+FE0F] Could not analyze source code: {e})")
+            logger.warning(f" WARNING: [U+FE0F] Could not analyze source code: {e}))"
             pytest.skip(Cannot analyze source code for violations)
 
     @pytest.mark.asyncio
     @pytest.mark.integration
     async def test_websocket_auth_flow_bypasses_ssot_architecture(self):
-    ""
+    """
         INTEGRATION VIOLATION TEST: WebSocket auth flow bypasses SSOT architecture.
         
         This test demonstrates that WebSocket implements a parallel auth system
@@ -236,7 +236,7 @@ class WebSocketUnifiedAuthInterfaceBypassTests(SSotAsyncTestCase):
             def track_local_auth(*args, **kwargs):
                 nonlocal local_auth_logic_used
                 local_auth_logic_used = True
-                return {"success: True, valid": True, user_id: fallback_user}
+                return {"success: True, valid: True, user_id: fallback_user}"
             
             with patch('netra_backend.app.clients.auth_client_core.validate_token_with_resilience', 
                       side_effect=track_local_auth):
@@ -272,7 +272,7 @@ class WebSocketUnifiedAuthInterfaceBypassTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_auth_configuration_duplication_violation(self):
-    ""
+    """
         VIOLATION REPRODUCTION: WebSocket duplicates auth configuration logic.
         
         This test shows that WebSocket has its own auth configuration
@@ -330,7 +330,7 @@ class WebSocketUnifiedAuthInterfaceBypassTests(SSotAsyncTestCase):
         logger.info([U+1F9F9] UnifiedAuthInterface bypass violation test cleanup complete)"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # Run this test independently to verify violation reproduction
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

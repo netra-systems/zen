@@ -44,7 +44,7 @@ class MissionCriticalAccessibilityTests:
         
         # Try to collect Mission Critical tests
         cmd = [
-            sys.executable, "-m, pytest",
+            sys.executable, "-m, pytest,"
             str(mission_critical_dir),
             --collect-only,
             -q"
@@ -147,10 +147,10 @@ class MissionCriticalAccessibilityTests:
                 fCollection output: {result.stdout}
             )
         
-        assert len(found_tests) > 0, fWebSocket tests accessible: {found_tests}
+        assert len(found_tests) > 0, "fWebSocket tests accessible: {found_tests}"
     
     def test_phase4_mission_critical_with_analyze_service_deps(self):
-        ""PHASE 4: Test Mission Critical tests with the conflicting option.
+        ""PHASE 4: Test Mission Critical tests with the conflicting option."
         
         This specifically tests the --analyze-service-deps option that was
         causing the duplicate registration conflict.
@@ -179,7 +179,7 @@ class MissionCriticalAccessibilityTests:
         if result.returncode != 0:
             # Check if it's specifically the option conflict error'
             if any(keyword in result.stderr.lower() for keyword in [
-                already added", "conflict, duplicate, option
+                already added", conflict, duplicate, option"
             ]:
                 pytest.fail(
                     fOption conflict still present (Issue #519 not resolved):\n"
@@ -353,7 +353,7 @@ class StagingEnvironmentIntegrationTests:
         # This simulates the production validation process
         cmd = [
             sys.executable, -m, pytest,
-            str(project_root / tests" / "mission_critical),
+            str(project_root / tests" / mission_critical),"
             --collect-only,
             -m, staging"  # Staging marker"
         ]
@@ -442,7 +442,7 @@ class RegressionPreventionTests:
     "Test that fixes don't introduce regressions."
     
     def test_phase4_configuration_regression_detection(self):
-        ""PHASE 4: Test detection of configuration regressions.
+        ""PHASE 4: Test detection of configuration regressions."
         
         This test validates that our testing can detect if Issue #519
         regresses in the future.
@@ -453,7 +453,7 @@ class RegressionPreventionTests:
         commands = [
             # Basic collection
             [
-                sys.executable, "-m, pytest",
+                sys.executable, "-m, pytest,"
                 str(project_root / tests / mission_critical),
                 --collect-only, -q"
                 --collect-only, -q"
@@ -462,7 +462,7 @@ class RegressionPreventionTests:
             [
                 sys.executable, "-m, pytest,"
                 str(project_root / tests / mission_critical),
-                "--analyze-service-deps, --collect-only", -q
+                "--analyze-service-deps, --collect-only, -q"
             ],
             # With verbose output
             [
@@ -494,7 +494,7 @@ class RegressionPreventionTests:
             if result['returncode'] != 0:
                 error_output = result['stderr'].lower()
                 if any(keyword in error_output for keyword in [
-                    already added", "conflict, duplicate, option
+                    already added", conflict, duplicate, option"
                 ]:
                     conflicts_found.append(fCommand {result['command_index']}: {result['stderr']})"
                     conflicts_found.append(fCommand {result['command_index']}: {result['stderr']})"
@@ -571,7 +571,7 @@ class RegressionPreventionTests:
         plugin_conflicts = []
         for result in results:
             if any(keyword in result['stderr'].lower() for keyword in [
-                "already added, conflict", duplicate, plugin
+                "already added, conflict, duplicate, plugin"
             ]:
                 plugin_conflicts.append(fRun {result['run']}: {result['stderr']})
         

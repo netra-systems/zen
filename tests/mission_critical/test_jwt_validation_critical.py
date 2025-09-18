@@ -24,16 +24,16 @@ import time
 from typing import Dict, Any, Optional, List
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from netra_backend.app.core.unified.jwt_validator import (
+from netra_backend.app.core.unified.jwt_validator import ()
     UnifiedJWTValidator,
     TokenValidationResult, 
     TokenType
 )
-from netra_backend.app.core.service_dependencies.golden_path_validator import (
+from netra_backend.app.core.service_dependencies.golden_path_validator import ()
     GoldenPathValidator,
     GoldenPathValidationResult
 )
-from netra_backend.app.core.service_dependencies.models import (
+from netra_backend.app.core.service_dependencies.models import ()
     ServiceType,
     EnvironmentType
 )
@@ -73,7 +73,7 @@ class JWTValidationMissionCriticalTests:
 
     @pytest.fixture
     def mission_critical_golden_path_validator(self):
-        ""Golden Path Validator for mission critical tests.
+        ""Golden Path Validator for mission critical tests."
         return GoldenPathValidator()
 
     def test_mission_critical_jwt_validator_initialization(
@@ -87,7 +87,7 @@ class JWTValidationMissionCriticalTests:
         
         # JWT Validator MUST be properly initialized
         assert mission_critical_jwt_validator is not None
-        assert isinstance(mission_critical_jwt_validator, UnifiedJWTValidator)
+        assert isinstance(mission_critical_jwt_validator, "UnifiedJWTValidator)"
         
         # Must have required configuration
         assert mission_critical_jwt_validator.algorithm == "HS256"
@@ -95,8 +95,8 @@ class JWTValidationMissionCriticalTests:
         assert mission_critical_jwt_validator.access_token_expire_minutes > 0
         assert mission_critical_jwt_validator.refresh_token_expire_days > 0
         
-        critical_test_logger.info( PASS:  JWT Validator initialization PASSED)"
-        critical_test_logger.info( PASS:  JWT Validator initialization PASSED)"
+        critical_test_logger.info("PASS:  JWT Validator initialization PASSED))"
+        critical_test_logger.info("PASS:  JWT Validator initialization PASSED))"
 
     def test_mission_critical_jwt_methods_exist(
         self,
@@ -128,8 +128,8 @@ class JWTValidationMissionCriticalTests:
                     non_callable_methods.append(method_name)
         
         # CRITICAL ASSERTIONS: Any failure = complete auth breakdown
-        assert len(missing_methods) == 0, f ALERT:  CRITICAL: Missing JWT methods: {missing_methods}
-        assert len(non_callable_methods) == 0, f ALERT:  CRITICAL: Non-callable JWT methods: {non_callable_methods}
+        assert len(missing_methods) == 0, "f ALERT:  CRITICAL: Missing JWT methods: {missing_methods}"
+        assert len(non_callable_methods) == 0, "f ALERT:  CRITICAL: Non-callable JWT methods: {non_callable_methods}"
         
         critical_test_logger.info(f PASS:  All {len(required_methods)} JWT methods exist and are callable")"
 
@@ -165,7 +165,7 @@ class JWTValidationMissionCriticalTests:
             assert access_token is not None,  ALERT:  CRITICAL: Token creation returned None"
             assert isinstance(access_token, str), f ALERT:  CRITICAL: Token is not string: {type(access_token)}"
             assert isinstance(access_token, str), f ALERT:  CRITICAL: Token is not string: {type(access_token)}"
-            assert len(access_token) > 50, f ALERT:  CRITICAL: Token too short: {len(access_token)} chars
+            assert len(access_token) > 50, "f ALERT:  CRITICAL: Token too short: {len(access_token)} chars"
             
             # CRITICAL: Token creation must be fast (< 5 seconds)
             assert creation_time < 5.0, f ALERT:  CRITICAL: Token creation too slow: {creation_time}s"
@@ -181,11 +181,11 @@ class JWTValidationMissionCriticalTests:
             validation_time = time.time() - validation_start
             
             # CRITICAL: Validation must succeed
-            assert isinstance(validation_result, TokenValidationResult),  ALERT:  CRITICAL: Invalid validation result type
-            assert validation_result.valid is True, f ALERT:  CRITICAL: Token validation failed: {validation_result.error}
+            assert isinstance(validation_result, "TokenValidationResult),  ALERT:  CRITICAL: Invalid validation result type"
+            assert validation_result.valid is True, "f ALERT:  CRITICAL: Token validation failed: {validation_result.error}"
             assert validation_result.user_id == test_user_id, f ALERT:  CRITICAL: Wrong user_id: {validation_result.user_id}""
-            assert validation_result.email == test_email, f ALERT:  CRITICAL: Wrong email: {validation_result.email}
-            assert validation_result.error is None, f ALERT:  CRITICAL: Validation error: {validation_result.error}
+            assert validation_result.email == test_email, "f ALERT:  CRITICAL: Wrong email: {validation_result.email}"
+            assert validation_result.error is None, "f ALERT:  CRITICAL: Validation error: {validation_result.error}"
             
             # CRITICAL: Validation must be fast (< 3 seconds)
             assert validation_time < 3.0, f" ALERT:  CRITICAL: Token validation too slow: {validation_time}s"
@@ -222,9 +222,9 @@ class JWTValidationMissionCriticalTests:
             )
             
             # CRITICAL: Both tokens must be created
-            assert access_token is not None,  ALERT:  CRITICAL: Access token creation failed
+            assert access_token is not None, " ALERT:  CRITICAL: Access token creation failed"
             assert refresh_token is not None, " ALERT:  CRITICAL: Refresh token creation failed"
-            assert access_token != refresh_token,  ALERT:  CRITICAL: Tokens are identical
+            assert access_token != refresh_token, " ALERT:  CRITICAL: Tokens are identical"
             
             # CRITICAL: Refresh flow must work
             new_access_token = await mission_critical_jwt_validator.refresh_access_token(refresh_token)
@@ -233,16 +233,16 @@ class JWTValidationMissionCriticalTests:
             assert new_access_token is not None,  ALERT:  CRITICAL: Token refresh returned None"
             assert isinstance(new_access_token, str),  ALERT:  CRITICAL: Refreshed token is not string"
             assert isinstance(new_access_token, str),  ALERT:  CRITICAL: Refreshed token is not string"
-            assert new_access_token != access_token,  ALERT:  CRITICAL: Refreshed token same as original
+            assert new_access_token != access_token, " ALERT:  CRITICAL: Refreshed token same as original"
             
             # CRITICAL: New token must validate correctly
             validation_result = await mission_critical_jwt_validator.validate_token_jwt(new_access_token)
             
             assert validation_result.valid is True, f ALERT:  CRITICAL: Refreshed token validation failed: {validation_result.error}""
-            assert validation_result.user_id == test_user_id,  ALERT:  CRITICAL: Refreshed token wrong user
+            assert validation_result.user_id == test_user_id, " ALERT:  CRITICAL: Refreshed token wrong user"
             
-            critical_test_logger.info( PASS:  REFRESH TOKEN FLOW SUCCESSFUL)"
-            critical_test_logger.info( PASS:  REFRESH TOKEN FLOW SUCCESSFUL)"
+            critical_test_logger.info("PASS:  REFRESH TOKEN FLOW SUCCESSFUL))"
+            critical_test_logger.info("PASS:  REFRESH TOKEN FLOW SUCCESSFUL))"
             
         except Exception as e:
             critical_test_logger.error(f" ALERT:  CRITICAL REFRESH FLOW FAILED: {e})"
@@ -280,7 +280,7 @@ class JWTValidationMissionCriticalTests:
                 # CRITICAL: Must return validation result, not crash
                 assert isinstance(result, TokenValidationResult), f ALERT:  CRITICAL: Invalid result type for token {i}"
                 assert isinstance(result, TokenValidationResult), f ALERT:  CRITICAL: Invalid result type for token {i}"
-                assert result.valid is False, f ALERT:  CRITICAL: Invalid token marked as valid: {invalid_token[:30]}
+                assert result.valid is False, "f ALERT:  CRITICAL: Invalid token marked as valid: {invalid_token[:30]}"
                 assert result.error is not None, f ALERT:  CRITICAL: No error for invalid token: {invalid_token[:30]}"
                 assert result.error is not None, f ALERT:  CRITICAL: No error for invalid token: {invalid_token[:30]}"
                 assert result.user_id is None, f" ALERT:  CRITICAL: Invalid token has user_id: {invalid_token[:30]}"
@@ -319,8 +319,8 @@ class JWTValidationMissionCriticalTests:
         result = await mission_critical_golden_path_validator._validate_jwt_capabilities(app)
         
         # EXPECTED FAILURE: Golden Path can't find JWT capabilities'
-        assert result[success] is False, Golden Path should fail due to architectural mismatch
-        assert result["details][key_manager"] is False, key_manager should be missing
+        assert result[success] is False, "Golden Path should fail due to architectural mismatch"
+        assert result["details][key_manager"] is False, "key_manager should be missing"
         
         # But prove JWT actually works
         try:
@@ -405,11 +405,11 @@ class JWTValidationMissionCriticalTests:
         
         assert failures <= max_acceptable_failures, f ALERT:  CRITICAL: {failures} JWT operations failed"
         assert failures <= max_acceptable_failures, f ALERT:  CRITICAL: {failures} JWT operations failed"
-        assert avg_creation_time < max_token_creation_time, f ALERT:  CRITICAL: Avg creation time {avg_creation_time:.2f}s exceeds {max_token_creation_time}s
+        assert avg_creation_time < max_token_creation_time, "f ALERT:  CRITICAL: Avg creation time {avg_creation_time:.2f}s exceeds {max_token_creation_time}s"
         assert avg_validation_time < max_token_validation_time, f ALERT:  CRITICAL: Avg validation time {avg_validation_time:.2f}s exceeds {max_token_validation_time}s"
         assert avg_validation_time < max_token_validation_time, f ALERT:  CRITICAL: Avg validation time {avg_validation_time:.2f}s exceeds {max_token_validation_time}s"
         assert max_creation_time < max_token_creation_time * 2, f" ALERT:  CRITICAL: Max creation time {max_creation_time:.2f}s too high"
-        assert max_validation_time < max_token_validation_time * 2, f ALERT:  CRITICAL: Max validation time {max_validation_time:.2f}s too high
+        assert max_validation_time < max_token_validation_time * 2, "f ALERT:  CRITICAL: Max validation time {max_validation_time:.2f}s too high"
         
         critical_test_logger.info(f PASS:  PERFORMANCE REQUIREMENTS MET:)
         critical_test_logger.info(f   - Avg creation time: {avg_creation_time:.3f}s")"
@@ -454,6 +454,6 @@ class JWTValidationMissionCriticalTests:
         critical_test_logger.info(=*80)"
         critical_test_logger.info(=*80)"
         critical_test_logger.info( TARGET:  ALL MISSION CRITICAL JWT TESTS MUST PASS FOR PRODUCTION DEPLOYMENT")"
-        critical_test_logger.info("="*80)
+        critical_test_logger.info("=*80)"
 
 )

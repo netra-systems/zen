@@ -156,21 +156,21 @@ auth = auth_env.get_auth_service_url()
             # All should use consistent protocol
 if env in ['staging', 'production']:
     pass
-assert all(url.startswith('https://') for url in [frontend, backend, auth]), \
+assert all(url.startswith('https://') for url in [frontend, "backend, auth]), \"
 ""
 
                 # All should use same base domain
-assert all('netrasystems.ai' in url for url in [frontend, backend, auth]), \
+assert all('netrasystems.ai' in url for url in [frontend, "backend, auth]), \"
 ""
 
                 # Check subdomain pattern
 if env == 'staging':
     pass
-assert all('staging' in url for url in [frontend, backend, auth]), \
+assert all('staging' in url for url in [frontend, "backend, auth]), \"
 f"Staging: All services should have 'staging' in URL"
 else:
     pass
-assert all(url.startswith('http://') for url in [frontend, backend, auth]), \
+assert all(url.startswith('http://') for url in [frontend, "backend, auth]), \"
 ""
 
 def test_cors_origins_match_frontend_urls(self):
@@ -268,7 +268,7 @@ class TestEnvironmentSpecificBehavior:
         backend = auth_env.get_backend_url()
         auth = auth_env.get_auth_service_url()
 
-        assert all(url.startswith('https://') for url in [frontend, backend, auth]), \
+        assert all(url.startswith('https://') for url in [frontend, "backend, auth]), \"
         "Production must use HTTPS for all services"
 
         # Production should not contain staging references

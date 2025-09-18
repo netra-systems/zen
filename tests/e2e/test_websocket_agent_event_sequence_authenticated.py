@@ -75,7 +75,7 @@ class EventSequenceMetrics:
 
 
 class AgentEventSequenceValidator:
-    ""
+    """
     Validates the 5 CRITICAL WebSocket events with MANDATORY authentication.
     
     CLAUDE.md Section 6 Compliance: This validator enforces the event sequence that enables
@@ -83,7 +83,7 @@ class AgentEventSequenceValidator:
     
     
     def __init__(self):
-        ""Initialize with MANDATORY authentication helper.
+        ""Initialize with MANDATORY authentication helper."
         self.env = get_env()
         self.environment = self.env.get(TEST_ENV, test")"
         
@@ -99,11 +99,11 @@ class AgentEventSequenceValidator:
         self.min_progress_transparency_events = 3  # Minimum for good UX
         
         # Business value validation
-        self.business_keywords = [analyze, strategy, insight, "data, solution", recommend]
+        self.business_keywords = [analyze, strategy, insight, "data, solution, recommend]"
     
     async def validate_complete_agent_event_sequence(self, 
                                                    agent_prompt: str = Analyze market data and provide strategic insights) -> EventSequenceMetrics:
-""
+"""
         Validate complete agent event sequence with MANDATORY authentication.
         
         CRITICAL: This method validates the COMPLETE business value chain:
@@ -135,7 +135,7 @@ class AgentEventSequenceValidator:
                 type: "agent_execution_request,"
                 message: agent_prompt,
                 user_id: ftest-user-{uuid.uuid4().hex[:8]},
-                "thread_id": ftest-thread-{uuid.uuid4().hex[:8]},
+                "thread_id: ftest-thread-{uuid.uuid4().hex[:8]},"
                 timestamp: datetime.now(timezone.utc).isoformat(),
                 require_all_events: True,  # Ensure complete event sequence
                 business_context": True  # Request business-relevant processing"
@@ -229,11 +229,11 @@ class AgentEventSequenceValidator:
                             # Detailed event record
                             event_record = {
                                 type: event_type,
-                                content": event_data.get(content, "),
+                                content": event_data.get(content, ),"
                                 timestamp: event_received_time,
                                 latency_from_request_ms: event_latency_ms,
                                 sequence_position: len(metrics.events_received) + 1,
-                                "business_relevant": self._is_business_relevant_content(event_data),
+                                "business_relevant: self._is_business_relevant_content(event_data),"
                                 user_facing_progress: self._contains_progress_indicators(event_data),
                                 raw_data: event_data
                             }
@@ -315,13 +315,13 @@ class AgentEventSequenceValidator:
         
         print(f CHART:  Event Analysis Summary:)
         print(f   - All events received: {metrics.all_required_events_received})
-        print(f"   - Correct order: {metrics.events_in_correct_order}")
+        print(f"   - Correct order: {metrics.events_in_correct_order})"
         print(f   - Performance OK: {metrics.performance_requirements_met})
         print(f   - First event: {metrics.first_event_latency_ms:.0f}ms (limit: {self.max_first_event_latency_ms}ms))
         print(f   - Total time: {metrics.total_sequence_time_ms:.0f}ms (limit: {self.max_total_sequence_time_seconds * 1000}ms))
     
     def _assess_business_value_indicators(self, metrics: EventSequenceMetrics):
-        ""
+        """
         Assess business value indicators in event content.
         
         CLAUDE.md Business Requirements:
@@ -372,7 +372,7 @@ class AgentEventSequenceValidator:
         
         # Critical order requirements
         if received_sequence[0] != agent_started:
-            print(f" FAIL:  Order violation: First event should be 'agent_started', got '{received_sequence[0]}'")
+            print(f" FAIL:  Order violation: First event should be 'agent_started', got '{received_sequence[0]}')"
             return False
         
         if received_sequence[-1] != agent_completed:
@@ -380,7 +380,7 @@ class AgentEventSequenceValidator:
             return False
         
         # Tool execution order (if both present)
-        if tool_executing in received_sequence and "tool_completed" in received_sequence:
+        if tool_executing in received_sequence and "tool_completed in received_sequence:"
             executing_pos = received_sequence.index(tool_executing)
             completed_pos = received_sequence.index(tool_completed)
             if executing_pos >= completed_pos:
@@ -404,13 +404,13 @@ class AgentEventSequenceValidator:
     def _shows_tool_transparency(self, event_data: Dict[str, Any) -> bool:
         "Check if event shows tool usage transparency."""
         content = str(event_data.get(content, "")).lower()
-        tool_indicators = [using, executing, tool, api", data, "search, query]
+        tool_indicators = [using, executing, tool, api", data, search, query]"
         return any(indicator in content for indicator in tool_indicators)
     
     def _contains_progress_indicators(self, event_data: Dict[str, Any) -> bool:
         Check if event contains user-facing progress indicators.""
         content = str(event_data.get(content, )).lower()
-        progress_indicators = [starting, processing", working, "analyzing, completing, finished, %, "step"]
+        progress_indicators = [starting, processing", working, "analyzing, completing, finished, %, "step]"
         return any(indicator in content for indicator in progress_indicators)
 
 
@@ -454,11 +454,11 @@ class WebSocketAgentEventSequenceAuthenticatedTests:
         metrics = await self.validator.validate_complete_agent_event_sequence(business_prompt)
         
         # CLAUDE.md COMPLIANCE ASSERTIONS - MUST NOT BE BYPASSED
-        assert metrics.all_required_events_received, f FAIL:  CLAUDE.md VIOLATION: Missing critical events. Received: {[e['type'] for e in metrics.events_received]}
+        assert metrics.all_required_events_received, "f FAIL:  CLAUDE.md VIOLATION: Missing critical events. Received: {[e['type'] for e in metrics.events_received]}"
         
         # CRITICAL EVENT SEQUENCE ASSERTIONS
         assert metrics.events_in_correct_order, " CHART:  Critical events not in correct order for optimal UX"
-        assert len(metrics.events_received) >= 5, f CHART:  Expected 5 critical events, got {len(metrics.events_received)}
+        assert len(metrics.events_received) >= 5, "f CHART:  Expected 5 critical events, got {len(metrics.events_received)}"
         
         # PERFORMANCE ASSERTIONS - Business viability requirements
         assert metrics.performance_requirements_met, (
@@ -479,7 +479,7 @@ class WebSocketAgentEventSequenceAuthenticatedTests:
         print( PASS:  CLAUDE.md COMPLIANT: Complete agent event sequence validation PASSED)
         print(f CHART:  Events received: {[e['type'] for e in metrics.events_received]})
         print(f[U+23F1][U+FE0F] Performance: {metrics.first_event_latency_ms:.0f}ms first, {metrics.total_sequence_time_ms:.0f}ms total)
-        print(f"[U+1F4B0] Business value: {metrics.reasoning_transparency_events + metrics.tool_transparency_events} transparency events")
+        print(f"[U+1F4B0] Business value: {metrics.reasoning_transparency_events + metrics.tool_transparency_events} transparency events)"
     
     @pytest.mark.asyncio
     async def test_authenticated_event_sequence_performance_stress(self):
@@ -539,10 +539,10 @@ class WebSocketAgentEventSequenceAuthenticatedTests:
         performance_rate = performance_compliant_sequences / concurrent_sequences
         business_value_rate = business_value_sequences / concurrent_sequences
         
-        assert success_rate >= 0.9, f CHART:  Event sequence success rate {success_rate:.1%} below 90% under load
-        assert performance_rate >= 0.8, f[U+23F0] Performance compliance rate {performance_rate:.1%} below 80% under load
+        assert success_rate >= 0.9, "f CHART:  Event sequence success rate {success_rate:.1%} below 90% under load"
+        assert performance_rate >= 0.8, "f[U+23F0] Performance compliance rate {performance_rate:.1%} below 80% under load"
         assert business_value_rate >= 0.8, f[U+1F4B0] Business value rate {business_value_rate:.1%} below 80% under load""
-        assert total_execution_time <= 120.0, f[U+23F0] Total concurrent execution {total_execution_time:.1f}s exceeded 120s limit
+        assert total_execution_time <= 120.0, "f[U+23F0] Total concurrent execution {total_execution_time:.1f}s exceeded 120s limit"
         
         print(" PASS:  CLAUDE.md COMPLIANT: Event sequence performance stress test PASSED)"
         print(f CHART:  Success rate: {success_rate:.1%} ({successful_sequences}/{concurrent_sequences})
@@ -552,7 +552,7 @@ class WebSocketAgentEventSequenceAuthenticatedTests:
     
     @pytest.mark.asyncio
     async def test_authenticated_event_sequence_order_validation(self):
-    ""
+    """
         CLAUDE.md COMPLIANT: Test critical event ordering for optimal chat UX.
         
         Validates:
@@ -574,22 +574,22 @@ class WebSocketAgentEventSequenceAuthenticatedTests:
         event_sequence = [event[type] for event in metrics.events_received if event[type] in self.validator.required_events]
         
         # CRITICAL ORDER ASSERTIONS
-        assert len(event_sequence) >= 5, f CHART:  Expected all 5 events, got sequence: {event_sequence}
+        assert len(event_sequence) >= 5, "f CHART:  Expected all 5 events, got sequence: {event_sequence}"
         assert event_sequence[0] == agent_started, f" FAIL:  First event must be 'agent_started', got '{event_sequence[0]}'"
-        assert event_sequence[-1] == agent_completed, f FAIL:  Last event must be 'agent_completed', got '{event_sequence[-1]}'
+        assert event_sequence[-1] == agent_completed, "f FAIL:  Last event must be 'agent_completed', got '{event_sequence[-1]}'"
         
         # LOGICAL FLOW ASSERTIONS
         if tool_executing in event_sequence and tool_completed in event_sequence:
             executing_pos = event_sequence.index(tool_executing)
-            completed_pos = event_sequence.index("tool_completed") 
-            assert executing_pos < completed_pos,  FAIL:  tool_executing must come before tool_completed
+            completed_pos = event_sequence.index("tool_completed) "
+            assert executing_pos < completed_pos, " FAIL:  tool_executing must come before tool_completed"
         
         # UX QUALITY ASSERTIONS
-        assert metrics.events_in_correct_order,  CHART:  Event sequence order not optimal for chat UX
+        assert metrics.events_in_correct_order, " CHART:  Event sequence order not optimal for chat UX"
         
         # BUSINESS ENGAGEMENT ASSERTIONS
         reasoning_events = [e for e in metrics.events_received if e[type] == agent_thinking"]"
-        assert len(reasoning_events) >= 1, [U+1F4AD] Missing reasoning transparency events for user engagement
+        assert len(reasoning_events) >= 1, "[U+1F4AD] Missing reasoning transparency events for user engagement"
         
         # Timing quality for UX (events should be reasonably spaced)
         if metrics.average_event_interval_ms:
@@ -597,7 +597,7 @@ class WebSocketAgentEventSequenceAuthenticatedTests:
         
         print( PASS:  CLAUDE.md COMPLIANT: Event sequence order validation PASSED)
         print(f CHART:  Event sequence: {event_sequence})
-        print(f[U+23F1][U+FE0F] Average event interval: {metrics.average_event_interval_ms:.0f}ms if metrics.average_event_interval_ms else "N/A")
+        print(f[U+23F1][U+FE0F] Average event interval: {metrics.average_event_interval_ms:.0f}ms if metrics.average_event_interval_ms else "N/A)"
         print(f[U+1F4AD] Reasoning events: {len(reasoning_events)} (transparency for user engagement))
     
     @pytest.mark.asyncio
@@ -627,7 +627,7 @@ class WebSocketAgentEventSequenceAuthenticatedTests:
             
             # ESSENTIAL EVENT ASSERTIONS
             essential_events_present = essential_events.intersection(received_event_types)
-            assert len(essential_events_present) >= 1, f FAIL:  No essential events received: {received_event_types}
+            assert len(essential_events_present) >= 1, "f FAIL:  No essential events received: {received_event_types}"
             
             # If we got agent_started, UX is viable
             if "agent_started in received_event_types:"
@@ -649,7 +649,7 @@ class WebSocketAgentEventSequenceAuthenticatedTests:
             
             print( PASS:  CLAUDE.md COMPLIANT: Partial event sequence resilience PASSED)
             print(f CHART:  Events received in partial sequence: {list(received_event_types)})
-            print(f" CYCLE:  Essential events present: {list(essential_events_present)}")
+            print(f" CYCLE:  Essential events present: {list(essential_events_present)})"
             
         finally:
             # Restore original timeout
@@ -680,7 +680,7 @@ if __name__ == __main__:
         if metrics.events_received:
             print(f\n[U+1F4CB] Event Timeline:")"
             for event in metrics.events_received:
-                print(f"  {event['sequence_position']}. {event['type']} ({event['latency_from_request_ms']:.0f}ms")")"
+                print(f"  {event['sequence_position']}. {event['type']} ({event['latency_from_request_ms']:.0f}ms)"")"
     
     # Run validation
     asyncio.run(main())

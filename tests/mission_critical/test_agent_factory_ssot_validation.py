@@ -47,7 +47,7 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
         self.test_user_contexts = []
 
     def tearDown(self):
-        ""Clean up test resources.
+        ""Clean up test resources."
         super().tearDown()
         # Clean up any created contexts
         self.test_user_contexts.clear()

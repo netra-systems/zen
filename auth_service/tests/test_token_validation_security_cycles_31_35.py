@@ -67,14 +67,14 @@ class TestTokenValidationSecurity:
 
         Revenue Protection: $640K annually from preventing unauthorized access.
         '''
-        logger.info("Testing JWT signature tampering detection - Cycle 31")
+        logger.info("Testing JWT signature tampering detection - Cycle 31)"
 
     # Create valid token
         user_data = { }
-        "user_id": "test_user_31",
-        "role": "user",
-        "permissions": ["read"],
-        "exp": datetime.now(UTC) + timedelta(hours=1)
+        "user_id": "test_user_31,"
+        "role": "user,"
+        "permissions": ["read],"
+        "exp: datetime.now(UTC) + timedelta(hours=1)"
     
 
         valid_token = token_validator.create_token(user_data)
@@ -96,7 +96,7 @@ class TestTokenValidationSecurity:
 
     # Tamper with role
         decoded_payload["role"] = "admin"
-        decoded_payload["permissions"] = ["read", "write", "admin"]
+        decoded_payload["permissions"] = ["read", "write", "admin]"
 
     # Re-encode payload
         tampered_payload_bytes = json.dumps(decoded_payload).encode()
@@ -109,7 +109,7 @@ class TestTokenValidationSecurity:
         with pytest.raises(jwt.InvalidSignatureError):
         token_validator.validate_token(tampered_token)
 
-        logger.info("JWT signature tampering detection verified")
+        logger.info("JWT signature tampering detection verified)"
 
         @pytest.mark.cycle_32
     def test_token_expiration_enforcement_prevents_stale_access(self, token_validator):
@@ -119,13 +119,13 @@ class TestTokenValidationSecurity:
         Revenue Protection: $480K annually from preventing stale token abuse.
         '''
         pass
-        logger.info("Testing token expiration enforcement - Cycle 32")
+        logger.info("Testing token expiration enforcement - Cycle 32)"
 
     # Create token with very short expiration
         user_data = { }
-        "user_id": "test_user_32",
-        "role": "user",
-        "exp": datetime.now(UTC) + timedelta(seconds=1)  # 1 second expiration
+        "user_id": "test_user_32,"
+        "role": "user,"
+        "exp: datetime.now(UTC) + timedelta(seconds=1)  # 1 second expiration"
     
 
         short_lived_token = token_validator.create_token(user_data)
@@ -141,7 +141,7 @@ class TestTokenValidationSecurity:
         with pytest.raises(jwt.ExpiredSignatureError):
         token_validator.validate_token(short_lived_token)
 
-        logger.info("Token expiration enforcement verified")
+        logger.info("Token expiration enforcement verified)"
 
         @pytest.mark.cycle_33
         @pytest.fixture
@@ -152,14 +152,14 @@ class TestTokenValidationSecurity:
         Revenue Protection: $720K annually from preventing replay attacks.
         '''
         pass
-        logger.info("Testing token replay attack detection - Cycle 33")
+        logger.info("Testing token replay attack detection - Cycle 33)"
 
     # Create token with JTI (JWT ID) for replay detection
         user_data = { }
-        "user_id": "test_user_33",
-        "role": "user",
-        "jti": "unique_token_id_33",
-        "exp": datetime.now(UTC) + timedelta(hours=1)
+        "user_id": "test_user_33,"
+        "role": "user,"
+        "jti": "unique_token_id_33,"
+        "exp: datetime.now(UTC) + timedelta(hours=1)"
     
 
         token = token_validator.create_token(user_data)
@@ -169,17 +169,17 @@ class TestTokenValidationSecurity:
         assert decoded["jti"] == "unique_token_id_33", "Initial token validation failed"
 
     # Record token usage
-        security_manager.record_token_usage(decoded["jti"], decoded["user_id"])
+        security_manager.record_token_usage(decoded["jti"], decoded["user_id])"
 
     # Attempt to reuse same token - should be detected as replay
-        is_replay = security_manager.detect_token_replay(decoded["jti"])
+        is_replay = security_manager.detect_token_replay(decoded["jti])"
         assert is_replay, "Token replay not detected"
 
     # Validation should fail for replayed token
-        with pytest.raises(ValueError, match="Token replay detected"):
+        with pytest.raises(ValueError, match="Token replay detected):"
         security_manager.validate_token_not_replayed(token)
 
-        logger.info("Token replay attack detection verified")
+        logger.info("Token replay attack detection verified)"
 
         @pytest.mark.cycle_34
         @pytest.fixture
@@ -190,14 +190,14 @@ class TestTokenValidationSecurity:
         Revenue Protection: $560K annually from blocking compromised tokens.
         '''
         pass
-        logger.info("Testing token revocation enforcement - Cycle 34")
+        logger.info("Testing token revocation enforcement - Cycle 34)"
 
     # Create valid token
         user_data = { }
-        "user_id": "test_user_34",
-        "role": "user",
-        "jti": "revocation_test_token_34",
-        "exp": datetime.now(UTC) + timedelta(hours=1)
+        "user_id": "test_user_34,"
+        "role": "user,"
+        "jti": "revocation_test_token_34,"
+        "exp: datetime.now(UTC) + timedelta(hours=1)"
     
 
         token = token_validator.create_token(user_data)
@@ -207,17 +207,17 @@ class TestTokenValidationSecurity:
         assert decoded["user_id"] == "test_user_34", "Initial token validation failed"
 
     # Simulate token compromise - add to revocation list
-        security_manager.revoke_token(decoded["jti"], reason="security_breach")
+        security_manager.revoke_token(decoded["jti"], reason="security_breach)"
 
     # Verify token is in revocation list
-        is_revoked = security_manager.is_token_revoked(decoded["jti"])
+        is_revoked = security_manager.is_token_revoked(decoded["jti])"
         assert is_revoked, "Token not added to revocation list"
 
     # Attempt to use revoked token - should fail
-        with pytest.raises(ValueError, match="Token has been revoked"):
+        with pytest.raises(ValueError, match="Token has been revoked):"
         security_manager.validate_token_not_revoked(token)
 
-        logger.info("Token revocation enforcement verified")
+        logger.info("Token revocation enforcement verified)"
 
         @pytest.mark.cycle_35
         @pytest.fixture
@@ -228,16 +228,16 @@ class TestTokenValidationSecurity:
         Revenue Protection: $400K annually from preventing concurrent validation exploits.
         '''
         pass
-        logger.info("Testing concurrent token validation - Cycle 35")
+        logger.info("Testing concurrent token validation - Cycle 35)"
 
         import asyncio
 
     # Create token for concurrent testing
         user_data = { }
-        "user_id": "test_user_35",
-        "role": "user",
-        "jti": "concurrent_test_token_35",
-        "exp": datetime.now(UTC) + timedelta(hours=1)
+        "user_id": "test_user_35,"
+        "role": "user,"
+        "jti": "concurrent_test_token_35,"
+        "exp: datetime.now(UTC) + timedelta(hours=1)"
     
 
         token = token_validator.create_token(user_data)
@@ -249,25 +249,25 @@ class TestTokenValidationSecurity:
         decoded = token_validator.validate_token(token)
 
         # Perform security checks
-        is_revoked = security_manager.is_token_revoked(decoded["jti"])
-        is_replay = security_manager.detect_token_replay(decoded["jti"])
+        is_revoked = security_manager.is_token_revoked(decoded["jti])"
+        is_replay = security_manager.detect_token_replay(decoded["jti])"
 
         # Record usage
-        security_manager.record_token_usage(decoded["jti"], decoded["user_id"])
+        security_manager.record_token_usage(decoded["jti"], decoded["user_id])"
 
         await asyncio.sleep(0)
         return { }
-        "validation_id": validation_id,
-        "success": True,
-        "revoked": is_revoked,
-        "replay": is_replay
+        "validation_id: validation_id,"
+        "success: True,"
+        "revoked: is_revoked,"
+        "replay: is_replay"
         
 
         except Exception as e:
         return { }
-        "validation_id": validation_id,
-        "success": False,
-        "error": str(e)
+        "validation_id: validation_id,"
+        "success: False,"
+        "error: str(e)"
             
 
     async def run_concurrent_validations():
@@ -290,7 +290,7 @@ class TestTokenValidationSecurity:
         assert len(exceptions) == 0, ""
 
     # Security state should remain consistent
-        final_usage_count = security_manager.get_token_usage_count("concurrent_test_token_35")
+        final_usage_count = security_manager.get_token_usage_count("concurrent_test_token_35)"
         assert final_usage_count == len(successful), ""
 
         logger.info("")

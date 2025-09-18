@@ -41,7 +41,7 @@ class WebSocketConnectionAttempt:
     service_ready: bool
 
 class StagingEnvironmentManager:
-    ""Manager for staging environment interactions.
+    ""Manager for staging environment interactions."
 
     def __init__(self):
         self.staging_base_url = self._get_staging_url()
@@ -187,7 +187,7 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
         logger.info(f'Problematic points (health OK, WebSocket 1011): {len(problematic_points)}')
         for point in problematic_points:
             logger.error(f"🚨 Health check OK but WebSocket 1011 at {point['timestamp']:.1f}s)"
-        self.assertEqual(len(problematic_points), 0, fEXPECTED FAILURE: Found {len(problematic_points)} cases where health check passed but WebSocket returned 1011 errors. This demonstrates lack of coordination between health checks and WebSocket readiness, causing load balancers to route traffic to instances that aren't ready for WebSocket connections.")"'
+        self.assertEqual(len(problematic_points), 0, fEXPECTED FAILURE: Found {len(problematic_points)} cases where health check passed but WebSocket returned 1011 errors. This demonstrates lack of coordination between health checks and WebSocket readiness, causing load balancers to route traffic to instances that aren't ready for WebSocket connections.")'"
 
     @pytest.mark.staging
     async def test_concurrent_websocket_connections_cold_start(self):
