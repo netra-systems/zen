@@ -49,12 +49,12 @@ class PerformanceMetrics:
 
     @property
     def p50_latency(self) -> float:
-        ""50th" percentile latency."
+        """50th percentile latency."""
         return statistics.median(self.latencies) if self.latencies else 0
 
     @property
     def p90_latency(self) -> float:
-        ""90th" percentile latency."
+        """90th percentile latency."""
         return statistics.quantiles(self.latencies, n=10)[8] if len(self.latencies) >= 10 else max(self.latencies, default=0)
 
     @property
@@ -69,7 +69,7 @@ class PerformanceMetrics:
 
     @property
     def avg_latency(self) -> float:
-        "Average latency."
+        """Average latency."""
         return statistics.mean(self.latencies) if self.latencies else 0
 
     @property
