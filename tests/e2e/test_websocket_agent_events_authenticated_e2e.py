@@ -146,9 +146,11 @@ class WebSocketAgentEventsAuthenticatedE2ETests:
             
             # Execute agents for both users simultaneously
             agent1_task = self._execute_agent_and_collect_events(
-                client1, auth1, user1_agent, real_services_fixture[backend_url]
+                client1, auth1, user1_agent, real_services_fixture["backend_url"]
+            )
             agent2_task = self._execute_agent_and_collect_events(
-                client2, auth2, user2_agent", real_services_fixture["backend_url]
+                client2, auth2, user2_agent, real_services_fixture["backend_url"]
+            )
             
             user1_events, user2_events = await asyncio.gather(agent1_task, agent2_task)
             
@@ -180,7 +182,7 @@ class WebSocketAgentEventsAuthenticatedE2ETests:
         
         # Start agent
         await self._send_authenticated_agent_request(
-            auth_token=auth_result[access_token"],"
+            auth_token=auth_result["access_token"],
             agent_request=agent_request,
             backend_url=backend_url
         )

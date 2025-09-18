@@ -192,10 +192,12 @@ class DatabaseManager:
         for attempt in range(max_retries):
             attempt_start = time.time()
             try:
-                # Issue #1278: Use asyncio.wait_for for timeout control
+                # Issue #1278: Use asyncio.wait_for for timeout control with enhanced resilience
                 async def test_connection():
                     async with engine.begin() as conn:
-                        await conn.execute(text("SELECT 1"))
+                        result = await conn.execute(text("SELECT 1"))
+                        # Ensure we actually fetch the result to test complete round-trip
+                        await result.fetchone()
                 
                 await asyncio.wait_for(test_connection(), timeout=connection_timeout)
                 attempt_duration = time.time() - attempt_start
@@ -206,6 +208,16 @@ class DatabaseManager:
                     monitor_connection_attempt(environment, attempt_duration, True)
                 except Exception:
                     pass  # Don't fail on monitoring errors
+                
+                # Log successful connection with performance context
+                total_duration = time.time() - start_time
+                logger.info(f"✅ Database connection successful: attempt {attempt + 1}, "
+                           f"connection_time={attempt_duration:.3f}s, total_time={total_duration:.3f}s")
+                
+                # Warn if connection is slow but successful
+                if attempt_duration > (connection_timeout * 0.8):
+                    logger.warning(f"⚠️ Slow database connection detected: {attempt_duration:.3f}s "
+                                  f"(80% of timeout threshold) - infrastructure may be under pressure")
                 
                 logger.info(f"✅ Database connection test successful on attempt {attempt + 1}/{max_retries} ({environment} environment, {attempt_duration:.2f}s)")
                 return True
