@@ -9,26 +9,6 @@
       "command": "/gitissueprogressorv4 1324",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
-    },
-    {
-      "command": "/gitissueprogressorv4 1325",
-      "permission_mode": "acceptEdits",
-      "output_format": "stream-json"
-    },
-    {
-      "command": "/gitissueprogressorv4 1326",
-      "permission_mode": "acceptEdits",
-      "output_format": "stream-json"
-    },
-    {
-      "command": "/gitissueprogressorv4 1328",
-      "permission_mode": "acceptEdits",
-      "output_format": "stream-json"
-    },
-    {
-      "command": "/gitissueprogressorv4 1329",
-      "permission_mode": "acceptEdits",
-      "output_format": "stream-json"
     }
   ]
 }

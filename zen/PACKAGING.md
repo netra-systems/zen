@@ -3,6 +3,19 @@
 ## Overview
 This guide covers how to package and distribute the Zen orchestrator tool to the global community via PyPI, Homebrew, and other package managers.
 
+## Installation Method Priority
+
+### Primary: pipx (Strongly Recommended)
+Pipx should be the default installation method in all documentation because:
+- **Automatic PATH management** - No manual configuration needed
+- **Isolated environments** - Prevents dependency conflicts
+- **Cross-platform consistency** - Works the same on Windows/Mac/Linux
+- **Clean uninstalls** - Complete removal without residual files
+- **User-friendly** - No "command not found" errors
+
+### Secondary: Direct pip
+Only mentioned as a fallback with clear warnings about PATH configuration issues.
+
 ## Distribution Channels
 
 ### 1. PyPI (Python Package Index)
@@ -244,17 +257,35 @@ jobs:
 
 ## Testing Distribution
 
-### Local Testing
+### Local Testing with pipx (Recommended)
+```bash
+# Build the package
+python -m build
+
+# Test installation with pipx
+pipx install dist/zen_orchestrator-*.whl
+
+# Verify it works
+zen --help
+
+# For development testing (editable mode)
+pipx install --editable .
+
+# Clean uninstall when done
+pipx uninstall zen-orchestrator
+```
+
+### Alternative: Virtual Environment Testing
 ```bash
 # Create virtual environment
 python -m venv test-env
-source test-env/bin/activate
+source test-env/bin/activate  # On Windows: test-env\Scripts\activate
 
 # Install from local build
 pip install dist/zen_orchestrator-*.whl
 
-# Test
-zen --help
+# Test (may need python -m if PATH not configured)
+python -m zen_orchestrator --help
 ```
 
 ### Integration Testing
@@ -267,7 +298,8 @@ tox -e py38,py39,py310,py311,py312
 
 ### PyPI Documentation
 - Update README.md with:
-  - Clear installation instructions
+  - **Primary installation method: pipx** (with clear instructions)
+  - pip as secondary option with PATH warnings
   - Usage examples
   - API documentation
   - Contributing guidelines
@@ -318,18 +350,24 @@ tox -e py38,py39,py310,py311,py312
 
 ### Common Issues
 
-1. **Module not found after installation:**
-   - Check PYTHONPATH
-   - Verify installation location
-   - Check for naming conflicts
+1. **"zen: command not found" after pip install:**
+   - **Solution:** Use pipx instead of pip
+   - **Why:** pip doesn't automatically configure PATH
+   - **Fix:** `pip uninstall zen-orchestrator && pipx install zen-orchestrator`
 
-2. **Command not in PATH:**
+2. **Module not found after installation:**
+   - Check installation: `pipx list`
+   - Reinstall: `pipx reinstall zen-orchestrator`
+   - For pip users: `python -m zen_orchestrator` always works
+
+3. **Command not in PATH (pipx users):**
    - Run `pipx ensurepath`
-   - Add to shell configuration
+   - Restart terminal
+   - Verify: `which zen` or `where zen` (Windows)
 
-3. **Dependency conflicts:**
-   - Use version ranges in requirements
-   - Test with different Python versions
+4. **Dependency conflicts:**
+   - pipx prevents this by design (isolated environments)
+   - For pip users: Use virtual environments
 
 ## Checklist for Release
 

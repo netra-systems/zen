@@ -4,26 +4,57 @@ Zen runs multiple Code CLI instances for peaceful parallel task execution.
 
 ## Installation
 
-### Recommended: Using pipx (handles PATH automatically)
+### Default Method: pipx (Recommended for ALL Users)
+
+Pipx automatically handles PATH configuration and creates an isolated environment, preventing dependency conflicts.
+
+#### Step 1: Install pipx
 ```bash
+# Windows
+pip install --user pipx
+python -m pipx ensurepath
+
+# macOS
+brew install pipx
+pipx ensurepath
+
+# Linux (Ubuntu/Debian)
+sudo apt update
+sudo apt install pipx
+pipx ensurepath
+
+# Linux (Other)
+pip install --user pipx
+pipx ensurepath
+```
+
+**Note:** Restart your terminal after running `pipx ensurepath`
+
+#### Step 2: Install zen
+```bash
+# From PyPI (when published)
 pipx install zen-orchestrator
+
+# For local development (editable mode)
+cd zen/
+pipx install --editable .
+
+# Verify installation
 zen --help
 ```
 
-### Alternative: Using pip
+### Alternative: pip (Manual PATH Configuration Required)
+
+⚠️ **Warning:** Using pip directly often results in PATH issues. We strongly recommend pipx instead.
+
 ```bash
 pip install zen-orchestrator
 
-# If 'zen' command not found, use one of these:
-python -m zen_orchestrator --help  # Works everywhere
-# OR add to PATH manually (see Troubleshooting section)
-```
-
-### Development Installation
-```bash
-cd zen/
-pip install -e .
+# If 'zen' command not found, you'll need to:
+# Option 1: Use Python module directly
 python -m zen_orchestrator --help
+
+# Option 2: Manually add to PATH (see Troubleshooting)
 ```
 
 ## What is Zen?
@@ -377,15 +408,28 @@ export ZEN_DEBUG="true"
 ## Troubleshooting
 
 ### Command not found
-```bash
-# If using pip installation
-pip show zen-orchestrator
 
-# If using pipx
+#### If using pipx (recommended):
+```bash
+# Ensure PATH is configured
 pipx ensurepath
 
-# Add to PATH manually
-export PATH="$HOME/.local/bin:$PATH"
+# Restart terminal, then verify
+zen --version
+```
+
+#### If using pip (not recommended):
+```bash
+# Find where pip installed zen
+pip show zen-orchestrator
+
+# Use Python module directly (always works)
+python -m zen_orchestrator --help
+
+# Or manually add to PATH:
+# Windows: Add %APPDATA%\Python\Python3X\Scripts to PATH
+# macOS/Linux: Add ~/.local/bin to PATH
+export PATH="$HOME/.local/bin:$PATH"  # Add to ~/.bashrc or ~/.zshrc
 ```
 
 ### Permission denied

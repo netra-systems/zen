@@ -137,7 +137,8 @@ class ClaudeInstanceOrchestrator:
                  use_cloud_sql: bool = False, quiet: bool = False,
                  overall_token_budget: Optional[int] = None,
                  budget_enforcement_mode: str = "warn",
-                 enable_budget_visuals: bool = True):
+                 enable_budget_visuals: bool = True,
+                 has_command_budgets: bool = False):
         self.workspace_dir = workspace_dir
         self.instances: Dict[str, InstanceConfig] = {}
         self.statuses: Dict[str, InstanceStatus] = {}
@@ -156,9 +157,10 @@ class ClaudeInstanceOrchestrator:
         self.optimizer = None
 
         # Initialize budget manager if any budget settings are provided
-        if TokenBudgetManager and overall_token_budget is not None:
+        needs_budget_manager = (overall_token_budget is not None) or has_command_budgets
+        if TokenBudgetManager and needs_budget_manager:
             self.budget_manager = TokenBudgetManager(
-                overall_budget=overall_token_budget,
+                overall_budget=overall_token_budget,  # Can be None
                 enforcement_mode=budget_enforcement_mode
             )
         else:
@@ -2058,6 +2060,12 @@ async def main():
 
     # Initialize orchestrator with console output settings
     max_lines = 0 if args.quiet else args.max_console_lines
+
+    # Check if command budgets are configured from config file or CLI args
+    has_config_command_budgets = bool(config_budget_settings.get("command_budgets"))
+    has_cli_command_budgets = bool(args.command_budget)
+    has_command_budgets = has_config_command_budgets or has_cli_command_budgets
+
     orchestrator = ClaudeInstanceOrchestrator(
         workspace,
         max_console_lines=max_lines,
@@ -2068,7 +2076,8 @@ async def main():
         quiet=args.quiet,
         overall_token_budget=final_overall_budget,
         budget_enforcement_mode=final_enforcement_mode,
-        enable_budget_visuals=final_enable_visuals
+        enable_budget_visuals=final_enable_visuals,
+        has_command_budgets=has_command_budgets
     )
 
     # Process per-command budgets from config file first, then CLI args (CLI overrides config)
