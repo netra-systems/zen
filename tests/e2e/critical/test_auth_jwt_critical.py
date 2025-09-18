@@ -39,7 +39,7 @@ E2EServiceValidator.enforce_real_services()
 class RealAuthServiceClient:
     """Real HTTP client for auth service - NO MOCKS"""
     
-    def __init__(self, auth_url: str = "http://localhost:8081"):
+    def __init__(self, auth_url: str = "http://localhost:8080"):
         self.auth_url = auth_url.rstrip('/')
         self.client = httpx.AsyncClient(timeout=30.0)
         
@@ -65,7 +65,7 @@ class RealAuthServiceClient:
             data = response.json()
             return {
                 "success": True,
-                "token": data.get("token"),
+                "token": data.get("access_token"),
                 "user_id": user_id,
                 "expires_in": data.get("expires_in", expiry_seconds)
             }
@@ -110,8 +110,29 @@ class RealAuthServiceClient:
         try:
             response = await self.client.get(f"{self.auth_url}/auth/health")
             return response.status_code == 200
-        except:
+        except Exception as e:
+            print(f"Auth service health check failed: {e}")
             return False
+            
+    async def check_service_availability(self) -> Dict[str, Any]:
+        """Pre-flight check to ensure auth service is available before testing"""
+        try:
+            response = await self.client.get(f"{self.auth_url}/auth/health")
+            if response.status_code == 200:
+                return {"available": True, "status": "healthy"}
+            else:
+                return {
+                    "available": False, 
+                    "status": f"unhealthy (status {response.status_code})",
+                    "url": self.auth_url
+                }
+        except Exception as e:
+            return {
+                "available": False,
+                "status": f"connection_failed: {str(e)}",
+                "url": self.auth_url,
+                "error_type": type(e).__name__
+            }
 
 
 class RealBackendServiceClient:
