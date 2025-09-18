@@ -36,6 +36,10 @@ Example portion of status report:
 
 ## Example Start
 ```
+zen
+```
+
+```
 +=== STATUS REPORT [14:47:39] ===+
 | Total: 2 instances
 | Running: 2, Completed: 0, Failed: 0, Pending: 0
@@ -58,6 +62,9 @@ Example portion of status report:
 ```
 
 ## Budget Warning Only
+```
+zen --overall-token-budget 10000
+```
 ```
 +=== STATUS REPORT [14:47:44] ===+
 | Total: 2 instances
@@ -89,6 +96,9 @@ Example portion of status report:
 ```
 
 ## Budget Block
+```
+zen --overall-token-budget 10000 --budget-enforcement-mode block
+```
 ```
 2025-09-18 14:50:42,050 - zen_orchestrator - INFO - 💰 BUDGET UPDATE [analyze-repo]: Recording 32240 tokens for command '/analyze-repository'
 2025-09-18 14:50:42,050 - zen_orchestrator - INFO - 📊 BUDGET STATE [analyze-repo]: /analyze-repository now at 32240/5000 tokens (644.8%)
@@ -126,6 +136,107 @@ Example portion of status report:
 | TOTAL                1        348        0.0010
 +===============================================================================================+
 ```
+
+# Example Start At
+```
+zen --start-at "2am"
+```
+
+```
+...
+2025-09-18 14:54:29,863 - zen_orchestrator - INFO - Added instance: analyze-repo - Analyze the repository structure and codebase
+2025-09-18 14:54:29,863 - zen_orchestrator - INFO - Added instance: help-overview - Show project README and overview information
+
+2025-09-18 14:54:29,863 - zen_orchestrator - INFO - Orchestration scheduled to start at: 2025-09-19 02:00:00
+2025-09-18 14:54:29,863 - zen_orchestrator - INFO - Waiting 39930.1 seconds (11.1 hours) until start time...
+```
+
+# Example Command
+** Assumes you have a claude command \runtests **
+```
+zen "/runtests"
+```
+```
+...
+2025-09-18 14:56:18,478 - zen_orchestrator - INFO - Added instance: direct-runtests-3337c2c5 - Direct execution of /runtests
+2025-09-18 14:56:18,478 - zen_orchestrator - INFO - Starting Claude Code instance orchestration
+2025-09-18 14:56:18,478 - zen_orchestrator - INFO - Starting 1 instances with 5.0s delay between launches (timeout: 10000s each)
+2025-09-18 14:56:18,478 - zen_orchestrator - INFO - Now starting instance 'direct-runtests-3337c2c5' (after 0.0s delay)
+
+```
+# Example Config (Recommended Usage)
+
+Your JSON file as `path\my_config.json`
+```JSON
+{
+  "instances": [
+    {
+      "name": "analyze-repository",
+      "command": "/analyze-repository; Spawn three subagents to understand how the information at this website is used in the zen directory. https://docs.claude.com/en/docs/about-claude/pricing#tool-use-pricing.",
+      "description": "Reads and understands the required portion of the repository",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 5000
+    }
+  ]
+}
+```
+```
+zen --config path\my_config.json
+```
+
+```
+...
+
+2025-09-18 15:00:09,645 - zen_orchestrator - INFO - Loading config from config_example.json
+
+2025-09-18 15:00:09,657 - zen_orchestrator - INFO - 🎯 Token transparency pricing engine enabled - Claude pricing compliance active
+
+2025-09-18 15:00:09,657 - zen_orchestrator - WARNING - Command '/analyze-repository; Spawn three subagents to understand how the information at this website is used in the zen directory. https://docs.claude.com/en/docs/about-claude/pricing#tool-use-pricing.' not found in available commands
+
+2025-09-18 15:00:09,657 - zen_orchestrator - INFO - Available commands: /clear, /compact, /help
+
+2025-09-18 15:00:09,657 - zen_orchestrator - INFO - Added instance: analyze-repository - Reads and understands the required portion of the repository
+
+2025-09-18 15:00:09,657 - zen_orchestrator - INFO - Starting Claude Code instance orchestration
+
+2025-09-18 15:00:09,659 - zen_orchestrator - INFO - Starting 1 instances with 5.0s delay between launches (timeout: 10000s each)
+
+2025-09-18 15:00:09,659 - zen_orchestrator - INFO - Now starting instance 'analyze-repository' (after 0.0s delay)
+
+2025-09-18 15:00:09,659 - zen_orchestrator - INFO - Starting instance: analyze-repository
+
+2025-09-18 15:00:09,665 - zen_orchestrator - INFO - Command: claude.CMD -p /analyze-repository; Spawn three subagents to understand how the information at this website is used in the zen directory. https://docs.claude.com/en/docs/about-claude/pricing#tool-use-pricing. --output-format=stream-json --permission-mode=bypassPermissions --verbose
+
+2025-09-18 15:00:09,738 - zen_orchestrator - INFO - Permission mode: bypassPermissions (Platform: Windows)
+2025-09-18 15:00:09,746 - zen_orchestrator - INFO - Instance analyze-repository started with PID 672
+
++=== STATUS REPORT [15:00:14] ===+
+| Total: 1 instances
+| Running: 1, Completed: 0, Failed: 0, Pending: 0
+| Tokens: 0 total, 0 cached | Median: 0 | Tools: 0
+| 💰 Cost: $0.0000 total, $0.0000 avg/instance | Pricing: Claude compliant
+|
+|  📝 Model shows actual Claude model used (critical for accurate cost tracking)
+|  💡 Tip: Model may differ from your config - Claude routes requests intelligently
+|  Status   Name                           Model      Duration   Overall  Tokens   Cache Cr Cache Rd Tools  Budget
+|  -------- ------------------------------ ---------- ---------- -------- -------- -------- -------- ------ ----------
+|  🏃        analyze-repository             opus4      5.1s       0        0        0        0        0      -
++================================+
+
+
++=== STATUS REPORT [15:00:19] ===+
+| Total: 1 instances
+| Running: 1, Completed: 0, Failed: 0, Pending: 0
+| Tokens: 14.7K total, 14.7K cached | Median: 14.7K | Tools: 0
+| 💰 Cost: $0.0798 total, $0.0798 avg/instance | Pricing: Claude compliant
+|  Status   Name                           Model      Duration   Overall  Tokens   Cache Cr Cache Rd Tools  Budget
+|  -------- ------------------------------ ---------- ---------- -------- -------- -------- -------- ------ ----------
+|  🏃        analyze-repository             opus4      10.1s      14.7K    6        3.3K     11.4K    0      -
++================================+
+
+```
+
 
 ## Inspiration and background
 While developing Netra Apex (commercial product)
