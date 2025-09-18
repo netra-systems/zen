@@ -219,6 +219,14 @@ def validate_configuration() -> tuple[bool, list]:
     except Exception as e:
         return (False, [str(e)])
 
+def cache_config_value(key: str, ttl: int = 3600) -> Any:
+    """Cache configuration value with TTL support.
+
+    This function provides access to the configuration manager's cache method
+    for tests and other code that needs caching functionality.
+    """
+    return config_manager.cache(key, ttl)
+
 # BACKWARD COMPATIBILITY ALIASES
 Config = AppConfig
 DatabaseConfig = AppConfig  # For now, alias to full config - tests can access .database
