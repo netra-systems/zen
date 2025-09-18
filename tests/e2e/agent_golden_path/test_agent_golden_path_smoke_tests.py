@@ -63,7 +63,7 @@ class AgentGoldenPathSmokeTests(SSotAsyncTestCase):
             self.timeout = 25.0
         else:
             self.test_env = 'test'
-            self.websocket_url = self.env.get('TEST_WEBSOCKET_URL', 'ws://localhost:8002/ws')
+            self.websocket_url = self.env.get('TEST_WEBSOCKET_URL', 'ws://localhost:8000/ws')
             self.timeout = 20.0
         self.e2e_helper = E2EWebSocketAuthHelper(environment=self.test_env)
         self.smoke_timeout = 25.0

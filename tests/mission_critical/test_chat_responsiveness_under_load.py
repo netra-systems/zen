@@ -53,7 +53,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 try:
     from netra_backend.app.websocket_core.manager import WebSocketManager
     from netra_backend.app.agents.registry import AgentRegistry
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
     from netra_backend.app.routes.message_router import MessageRouter
     REAL_SERVICES_AVAILABLE = True
 except ImportError as e:

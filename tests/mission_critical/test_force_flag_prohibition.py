@@ -11,13 +11,12 @@ class WebSocketTestHelper:
             ""Send JSON message.""
 
             if self._closed:
-                raise RuntimeError(WebSocket is closed)"
-                raise RuntimeError(WebSocket is closed)""
+                raise RuntimeError("WebSocket is closed")
 
             self.messages_sent.append(message)
 
-            async def close(self, code: int = 1000, reason: str = Normal closure"):"
-                Close WebSocket connection.""
+            async def close(self, code: int = 1000, reason: str = "Normal closure"):
+                """Close WebSocket connection."""
                 pass
                 self._closed = True
                 self.is_connected = False

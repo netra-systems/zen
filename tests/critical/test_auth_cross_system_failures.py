@@ -68,11 +68,10 @@ except ImportError as e:
 backend_available = False
 
 try:
-    pass
-import auth_service.main
-from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.services.auth_service import AuthService
-auth_service_available = True
+    import auth_service.main
+    from auth_service.auth_core.core.jwt_handler import JWTHandler
+    from auth_service.auth_core.services.auth_service import AuthService
+    auth_service_available = True
 except ImportError as e:
     print("")
 auth_app = None
@@ -80,21 +79,18 @@ auth_service_available = False
 
 
 class TestAuthCrossSystemFailures:
-    '''
-    '''
+    """
     Authentication Cross-System Critical Failure Test Suite
 
     These tests are designed to FAIL to expose real integration issues
     between the auth service and main backend service.
-    '''
-    '''
-    pass
+    """
 
-@pytest.mark.asyncio
-@pytest.mark.critical
-# @pytest.fixture
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    # @pytest.fixture
     async def test_concurrent_login_race_condition(self):
-'''Test 1: Concurrent Login Race Condition
+        '''Test 1: Concurrent Login Race Condition
 
 This test WILL FAIL because the auth service and main backend
 don"t properly handle concurrent login attempts for the same user."
