@@ -254,9 +254,9 @@ class BaseAgentWebSocketIntegrationTests(SSotAsyncTestCase):
 class BaseAgentModernExecutionPatternsTests(SSotAsyncTestCase):
     """Test suite for modern execution patterns and UserExecutionContext compliance."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.modern_agent = MockBaseAgent(name='ModernAgent')
         self.legacy_agent = LegacyTestAgent(name='LegacyAgent')
 
