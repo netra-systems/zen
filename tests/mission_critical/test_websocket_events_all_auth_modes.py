@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Tests: WebSocket Events with All Authentication Modes
 
@@ -27,7 +27,7 @@ MISSION CRITICAL TEST STRATEGY:
 
 EXPECTED FAILURES:
     These tests MUST FAIL INITIALLY to prove events are broken:
-    """"
+    """
 
 1. Events fail due to WebSocket 1011 errors from auth blocking
 2. Permissive auth modes not implemented, so events can't be tested'
@@ -475,7 +475,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
             self.logger.info(fCHECK Demo auth events correctly failed: {e})
     
     async def test_critical_events_emergency_auth_not_implemented(self):
-        """"
+        """
 
         Test critical events with EMERGENCY auth mode - MUST FAIL (not implemented).
         
@@ -943,7 +943,7 @@ class WebSocketEventResilienceTests(SSotBaseTestCase):
         self.assertIn((auth", degradation, not found), str(cm.exception).lower())"
     
     async def test_event_delivery_fallback_mechanisms(self):
-    """"
+    """
 
         Test event delivery fallback mechanisms when primary auth fails.
         

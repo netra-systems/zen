@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 MISSION CRITICAL: WebSocket Event Timing Validation Tests - Issue #1199
 
@@ -24,7 +24,7 @@ validating that the system properly enforces performance standards.
 
 
 """
-""""
+"""
 
 import asyncio
 import time
@@ -163,7 +163,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
     @pytest.mark.critical
     @pytest.mark.timeout(60)
     async def test_event_delivery_latency_validation(self):
-        """"
+        """
 
         CRITICAL: Test that individual events are delivered within acceptable latency limits.
         

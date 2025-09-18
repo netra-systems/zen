@@ -1,5 +1,5 @@
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
-""""
+"""
 
 Mission Critical Server Message Validation Tests
 
@@ -16,7 +16,7 @@ but actual ServerMessage format has nested payload structure.
 
 
 """
-""""
+"""
 
 import json
 from datetime import datetime, timezone

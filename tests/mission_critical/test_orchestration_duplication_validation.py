@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 Mission Critical Test Suite: Orchestration Duplication Violation Reproduction - Issue #1075
 
@@ -8,7 +8,7 @@ Critical for $""500K"" plus ARR protection through unified orchestration pattern
 
 This test reproduces the critical violation where 129+ files contain duplicate orchestration 
 """
-""""
+"""
 
 systems, try-except import patterns, and competing orchestration configurations.
 
@@ -56,7 +56,7 @@ class OrchestrationViolation:
 
 
 class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
-    """"
+    """
 
     Test suite to reproduce and validate orchestration duplication violations.
     
@@ -109,7 +109,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
         }
 
     def scan_file_for_orchestration_violations(self, file_path: Path) -> List[OrchestrationViolation]:
-        """"
+        """
 
         Scan a Python file for orchestration duplication violations.
         
@@ -392,7 +392,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
         )
 
     def test_validate_ssot_orchestration_functionality(self):
-    """"
+    """
 
         VALIDATION TEST: This test should PASS both before and after remediation.
         

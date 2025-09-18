@@ -1,4 +1,4 @@
-""""
+"""
 
 Test WebSocket Business Value Protection - Revenue Protection
 
@@ -19,7 +19,7 @@ must pass for deployment approval.
 ""
 
 
-""""
+"""
 
 import pytest
 import asyncio
@@ -254,7 +254,7 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
 
     @pytest.mark.no_skip
     def test_websocket_golden_path_business_value_chain(self):
-        """"
+        """
 
         Test WebSocket golden path business value chain.
 
@@ -392,7 +392,7 @@ class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
 
     @pytest.mark.no_skip
     def test_websocket_business_value_regression_prevention(self):
-    """"
+    """
 
         Test WebSocket business value regression prevention mechanisms.
 

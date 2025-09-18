@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-""""
+"""
 
 SSOT Duplicate Type Definition Detection - Issue #1075
 """
-""""
+"""
 
 Focused unit test to detect the specific 89 duplicate type definitions identified in the analysis.
 
@@ -341,7 +341,7 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
             )
 
     def test_specific_ssot_pattern_violations(self):
-    """"
+    """
 
         Test: Check for specific SSOT pattern violations
 
@@ -391,7 +391,7 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
             )
 
     def test_comprehensive_duplicate_summary(self):
-    """"
+    """
 
         Test: Generate comprehensive duplicate type definition summary
 

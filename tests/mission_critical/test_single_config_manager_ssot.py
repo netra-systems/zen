@@ -1,4 +1,4 @@
-""""
+"""
 
 Test Single Configuration Manager SSOT Validation - Issue #667
 
@@ -14,7 +14,7 @@ PURPOSE: This test will PASS after Issue #667 consolidation is complete.
 It validates that only one configuration manager exists and provides consistent API.
 
 Test Coverage:
-    """"
+    """
 
 1. Single import path for configuration management
 2. Consistent API across all usage patterns
@@ -42,7 +42,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
     "Test suite to validate single configuration manager SSOT compliance."
 
     def test_only_one_config_manager_can_be_imported(self):
-    """"
+    """
 
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate single config manager import.
 
@@ -331,7 +331,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
             )
 
     def test_ssot_config_manager_golden_path_integration(self):
-        """"
+        """
 
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate Golden Path integration readiness.
 

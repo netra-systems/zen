@@ -1,4 +1,4 @@
-""""
+"""
 
 Standalone WebSocket Bridge Performance Test - Mission Critical
 
@@ -27,7 +27,7 @@ a baseline performance report without requiring the full application stack.
 ""
 
 
-""""
+"""
 
 import asyncio
 import json

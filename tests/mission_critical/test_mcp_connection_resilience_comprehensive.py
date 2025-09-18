@@ -1,4 +1,4 @@
-""""
+"""
 
 MISSION CRITICAL: Comprehensive MCP Connection Manager Resilience Tests
 
@@ -24,7 +24,7 @@ CRITICAL BUSINESS VALUE:
 ""
 
 
-""""
+"""
 
 import asyncio
 import pytest

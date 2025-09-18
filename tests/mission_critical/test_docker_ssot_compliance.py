@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Test: Docker SSOT Compliance Verification
 
@@ -21,7 +21,7 @@ INFRASTRUCTURE VALIDATION:
 ""
 
 
-""""
+"""
 
 import asyncio
 import inspect

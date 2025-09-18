@@ -1,4 +1,4 @@
-""""
+"""
 
 MISSION CRITICAL: ReportingSubAgent SSOT JSON Compliance Tests
 
@@ -18,7 +18,7 @@ EXPECTED BEHAVIOR:
 ""
 
 
-""""
+"""
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import ast

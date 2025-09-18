@@ -50,7 +50,7 @@ from fastapi import WebSocket
 
 
 class WebSocketScopeBugReproductionTests:
-    """"
+    """
 
     Reproduce exact WebSocket scope bug from issue #165.
     
@@ -61,7 +61,7 @@ class WebSocketScopeBugReproductionTests:
     @pytest.mark.mission_critical
     @pytest.mark.unit
     async def test_state_registry_scope_isolation_bug(self):
-    """"
+    """
 
         REPRODUCER: Test exact NameError at lines 1433,1452 due to scope bug.
         
@@ -140,7 +140,7 @@ class WebSocketScopeBugReproductionTests:
     @pytest.mark.mission_critical  
     @pytest.mark.unit
     async def test_websocket_connection_failure_rate(self):
-        """"
+        """
 
         REPRODUCER: Validate 100% connection failure rate due to scope bug.
         
@@ -317,7 +317,7 @@ class WebSocketScopeBugReproductionTests:
     @pytest.mark.mission_critical
     @pytest.mark.unit
     def test_scope_bug_static_analysis(self):
-    """"
+    """
 
         REPRODUCER: Static analysis of scope bug in websocket.py
         

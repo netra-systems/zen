@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 Mission Critical: Load Balancer Endpoint Compliance Tests
 ========================================================
@@ -27,7 +27,7 @@ WHY THIS IS MISSION CRITICAL:
 
 
 """
-""""
+"""
 
 import os
 import re

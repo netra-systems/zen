@@ -1,4 +1,4 @@
-""""
+"""
 
 System User Authentication Failure Reproduction Test Suite
 
@@ -11,7 +11,7 @@ that is blocking golden path user flows in GCP staging environment.
 Business Value: Platform/Internal - Critical system stability issue
 - Complete failure of golden path user flows  
 - Users cannot authenticate or perform any authenticated operations
-""""
+"""
 
 - System appears completely broken from user perspective
 
@@ -251,7 +251,7 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     def test_middleware_rejects_system_user_without_service_headers(self):
-        """"
+        """
 
         Test that authentication middleware properly rejects system user requests
         that lack service authentication headers.

@@ -378,7 +378,7 @@ class OptimizedStartupChecker:
             async with app.state.db_session_factory() as session:
                 for table in critical_tables:
                     result = await session.execute(
-                        f"SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '{table}')"
+                        text(f"SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '{table}')")
                     )
                     exists = result.scalar()
                     if not exists:

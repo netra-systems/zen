@@ -1,4 +1,4 @@
-""""
+"""
 
 CRITICAL MISSION TEST SUITE: Cross-Service JWT Token Validation Failure
 ========================================================================
@@ -10,7 +10,7 @@ are being rejected by backend service.
 ISSUE DESCRIPTION:
     - Auth service issues tokens successfully (200 OK)
 - Auth service can verify its own tokens (200 OK) 
-""""
+"""
 
 - Backend service rejects tokens from auth service (401 Unauthorized)
 
@@ -69,7 +69,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 class StagingAuthCrossServiceValidator:
-    """"
+    """
 
     Comprehensive cross-service validation tester.
     Designed to catch ALL potential JWT validation discrepancies.
@@ -375,7 +375,7 @@ class StagingCrossServiceJWTValidationTests:
             Backend service is not accessible
     
     async def test_01_jwt_secret_synchronization_deep_analysis(self):
-        """"
+        """
 
         CRITICAL TEST: Deep analysis of JWT secret synchronization.
         This test SHOULD FAIL if secrets are not properly synchronized.
@@ -508,7 +508,7 @@ class StagingCrossServiceJWTValidationTests:
                 fToken {i} validation returned wrong subject
     
     async def test_03_cross_service_validation_core_issue(self):
-    """"
+    """
 
         CRITICAL TEST: The core cross-service validation issue.
         This test WILL FAIL and expose the exact problem.
@@ -601,7 +601,7 @@ class StagingCrossServiceJWTValidationTests:
         self.staging_backend_url = staging_backend_url
     
     async def test_04_token_claims_validation_comprehensive(self):
-    """"
+    """
 
         CRITICAL TEST: Comprehensive token claims validation.
         Tests ALL aspects of JWT claims that could cause validation failures.
@@ -1424,7 +1424,7 @@ async def run_single_test(test_name: str):
         assert refresh_completed, "Token refresh did not complete"
     
     async def test_13_user_permission_escalation_flow(self):
-        """"
+        """
 
         CRITICAL TEST: User permission escalation from free to premium tier.
         Tests authentication changes when user upgrades subscription.
@@ -2215,7 +2215,7 @@ async def run_single_test(test_name: str):
 
     
     async def test_21_enterprise_multi_tenant_isolation(self):
-    """"
+    """
 
         CRITICAL: Test enterprise user isolation and multi-tenancy.
         Validates that enterprise accounts have proper tenant isolation.
@@ -3245,7 +3245,7 @@ async def run_single_test(test_name: str):
             return {recovery_successful: True, simulated: True, "error: str(e)}"
 
 if __name__ == __main__:
-    """"
+    """
 
     Run the test suite directly for debugging.
     This will execute all tests and provide detailed output.

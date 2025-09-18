@@ -297,7 +297,7 @@ class SSotIntegrationUserSimulator:
 
 @pytest.mark.usefixtures(isolated_test_env)
 class SSotIntegrationWithIsolationTests(IntegrationTestCase):
-    """"
+    """
 
     CRITICAL: SSOT Integration testing with comprehensive isolation.
     
@@ -477,7 +477,7 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
 
     
     def test_database_session_isolation_during_integration(self):
-    """"
+    """
 
         CRITICAL: Test database session isolation during cross-component integration.
         

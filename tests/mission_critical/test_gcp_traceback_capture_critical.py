@@ -222,7 +222,7 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
         self.increment_websocket_events(1)
     
     def test_database_transaction_error_traceback_critical(self):
-    """"
+    """
 
         MISSION CRITICAL: Validate database transaction errors have complete traceback.
         
@@ -710,7 +710,7 @@ class AgentExecutionError(Exception):
 
 class ResponseGenerationError(Exception):
     Response generation error for testing."""
-    Response generation error for testing.""""
+    Response generation error for testing."""
 
     pass
 

@@ -1,4 +1,4 @@
-""""
+"""
 
 PHASE 1: SSOT Violation Reproduction Tests
 Tests that expose current ConfigurationValidator SSOT violations and PASS before consolidation.
@@ -16,7 +16,7 @@ Business Impact: OAuth authentication failures threaten $""500K"" plus ARR
 ""
 
 
-""""
+"""
 
 import asyncio
 import logging
@@ -75,7 +75,7 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
             self.env_patcher.stop()
 
     def test_oauth_validation_inconsistency_reproduction(self):
-    """"
+    """
 
         Test OAuth validation consistency across different ConfigurationValidator implementations.
         
@@ -436,7 +436,7 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
         )
 
     def test_golden_path_configuration_failures_reproduction(self):
-    """"
+    """
 
         Test Golden Path configuration failures due to SSOT violations.
         

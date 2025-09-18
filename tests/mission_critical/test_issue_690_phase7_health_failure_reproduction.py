@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 Issue #690 - Staging Backend Health Validation Failure Reproduction Test
 =========================================================================
@@ -20,7 +20,7 @@ issues observed in staging deployment logs, specifically:
 2. LLM manager health check issues in staging environment
 3. External dependency blocking health checks
 """
-""""
+"""
 
 4. 503 Service Unavailable from staging backend health endpoint
 "
@@ -278,7 +278,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
     @pytest.mark.mission_critical
     async def test_health_check_timeout_configuration_staging_specific(self):
-    """"
+    """
 
         EXPECTED TO FAIL - TIMEOUT CONFIGURATION ISSUE
 
@@ -335,7 +335,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
 @pytest.mark.asyncio
 class Issue690RemedationStrategyValidationTests:
-    """"
+    """
 
     Tests to validate remediation strategies for Issue #690.
 

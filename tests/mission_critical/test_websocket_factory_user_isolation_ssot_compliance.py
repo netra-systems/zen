@@ -1,4 +1,4 @@
-""""
+"""
 
 WebSocket Factory User Isolation SSOT Compliance Test
 
@@ -20,7 +20,7 @@ CRITICAL: This is a mission critical test protecting enterprise compliance.
 ""
 
 
-""""
+"""
 
 import asyncio
 import threading
@@ -203,7 +203,7 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
         )
     
     def test_websocket_factory_security_clearance_isolation_violation(self):
-        """"
+        """
 
         CRITICAL: Test detecting security clearance isolation violations.
         

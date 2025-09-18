@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 MISSION CRITICAL: SSOT Test Execution Compliance Validation
 
@@ -17,7 +17,7 @@ TARGET VIOLATIONS:
 SSOT REQUIREMENTS ENFORCED:
     - ALL test execution must go through tests/unified_test_runner.py
 """
-""""
+"""
 
 - ALL tests must inherit from SSOT BaseTestCase
 - NO direct pytest execution allowed in production test files

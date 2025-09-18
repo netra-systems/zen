@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""""
+"""
 
 MISSION CRITICAL SMOKE TEST: Event Validation Infrastructure
 ============================================================
@@ -22,7 +22,7 @@ is functioning correctly before running comprehensive tests.
 
 
 """
-""""
+"""
 
 import os
 import sys

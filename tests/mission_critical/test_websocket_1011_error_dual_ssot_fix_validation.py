@@ -1,4 +1,4 @@
-""""
+"""
 
 MISSION CRITICAL TEST: WebSocket 1011 Error Dual SSOT Fix Validation
 ================================================================
@@ -25,7 +25,7 @@ VALIDATION STRATEGY:
 ""
 
 
-""""
+"""
 
 import asyncio
 import pytest
@@ -144,7 +144,7 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
             self.active_connections.clear()
                 
     def test_websocket_1011_error_business_impact_validation(self):
-        """"
+        """
 
         Validate that the fix addresses the specific business impact scenarios.
         
@@ -192,7 +192,7 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
                           Protected revenue should exceed $""2K"" for test scenarios)
         
     def test_dual_ssot_performance_impact_on_critical_path(self):
-        """"
+        """
 
         Ensure the compatibility fix doesn't impact critical path performance.'
         

@@ -1,4 +1,4 @@
-""""
+"""
 
 SSOT Factory Pattern Violation Detection Tests
 
@@ -19,7 +19,7 @@ PURPOSE: Detect and prevent SSOT violations that compromise user isolation.
 ""
 
 
-""""
+"""
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import pytest
@@ -72,7 +72,7 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
     
     @pytest.mark.mission_critical
     def test_validate_factory_pattern_enforcement_in_tests(self):
-    """"
+    """
 
         Test that validates proper factory pattern usage in test files.
         
@@ -97,7 +97,7 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
     
     @pytest.mark.mission_critical
     def test_ssot_compliance_user_isolation_validation(self):
-    """"
+    """
 
         Test that validates SSOT compliance for user isolation via factory pattern.
         
@@ -154,7 +154,7 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
     
     @pytest.mark.mission_critical
     async def test_factory_pattern_with_real_services_integration(self, real_services_fixture):
-    """"
+    """
 
         Test factory pattern compliance with real services integration.
         
@@ -196,7 +196,7 @@ class SSotFactoryPatternViolationDetectionTests(SSotAsyncTestCase):
         await user2_manager.delete_async(real_test_key)
     
     def _scan_for_direct_instantiation_violations(self) -> Dict[str, List[int]]:
-    """"
+    """
 
         Scan codebase for direct UnifiedStateManager() instantiation violations.
         
@@ -354,7 +354,7 @@ class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
     
     @pytest.mark.mission_critical
     def test_prevent_direct_instantiation_in_new_code(self):
-        """"
+        """
 
         Test that prevents new direct instantiation violations from being introduced.
         
@@ -382,7 +382,7 @@ class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
     
     @pytest.mark.mission_critical
     def test_factory_pattern_documentation_compliance(self):
-        """"
+        """
 
         Test that validates factory pattern is properly documented and enforced.
         
@@ -463,7 +463,7 @@ class SSotFactoryPatternRegressionPreventionTests(SSotAsyncTestCase):
             pytest.fail(fCould not read violation file: {e})
     
     def _is_direct_instantiation_line(self, line: str) -> bool:
-        """"
+        """
 
         Check if line contains direct UnifiedStateManager instantiation.
         

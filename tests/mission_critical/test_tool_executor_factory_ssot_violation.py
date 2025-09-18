@@ -1,4 +1,4 @@
-""""
+"""
 
 MISSION CRITICAL: ToolExecutorFactory vs UnifiedToolDispatcher SSOT Violation Tests
 
@@ -14,7 +14,7 @@ GitHub Issue: #219
 ""
 
 
-""""
+"""
 
 import pytest
 import asyncio

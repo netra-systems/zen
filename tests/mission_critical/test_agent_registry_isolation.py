@@ -1,4 +1,4 @@
-""""
+"""
 
 CRITICAL TEST SUITE: AgentRegistry Isolation Issues
 ================================================================
@@ -24,7 +24,7 @@ These tests are intentionally DIFFICULT and COMPREHENSIVE to expose all isolatio
 ""
 
 
-""""
+"""
 
 import asyncio
 import logging
@@ -186,7 +186,7 @@ class IsolationViolationDetector:
 
 @pytest.mark.asyncio
 async def test_websocket_bridge_shared_across_users_FAILING():
-    """"
+    """
 
     CRITICAL FAILING TEST: Demonstrates WebSocket bridge being shared across all users.
 

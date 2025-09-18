@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Tests for Chat Business Value Restoration
 
@@ -23,7 +23,7 @@ See: audit/staging/auto-solve-loop/toolregistry-duplicate-registration-20250109.
 ""
 
 
-""""
+"""
 
 import asyncio
 import json
@@ -204,7 +204,7 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
         logger.info(f   [U+1F4C8] Analysis: {analysis})
     
     async def test_complete_chat_flow_after_toolregistry_fix(self):
-    """"
+    """
 
         FAILING TEST: End-to-end chat functionality validation.
         
@@ -437,7 +437,7 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
         logger.info(f[U+1F4C8] Event sequence: {event_sequence})
     
     async def test_concurrent_users_chat_without_registry_conflicts(self):
-    """"
+    """
 
         FAILING TEST: Multi-user business value validation.
         
@@ -589,7 +589,7 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
         logger.info(f CELEBRATION:  MULTI-USER BUSINESS VALUE CONFIRMED: {successful_sessions} users chatting successfully)
     
     async def test_no_performance_regression_after_registry_fixes(self):
-    """"
+    """
 
         Test that registry fixes don't introduce performance regressions.'
         

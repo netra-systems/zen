@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 DEPRECATION WARNING: This mission critical test runner is deprecated in favor of UnifiedTestRunner SSOT.
 
@@ -21,7 +21,7 @@ All original test execution flags and options are preserved and forwarded to the
 
 
 """
-""""
+"""
 
 import sys
 import subprocess

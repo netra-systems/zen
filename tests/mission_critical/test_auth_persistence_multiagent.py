@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Test: Authentication Persistence in Multi-Agent Workflows
 
@@ -7,12 +7,12 @@ Tests that authentication context is properly maintained across:
 2. WebSocket reconnections
 3. Token refreshes during agent execution
 4. Concurrent multi-user agent operations
-""""
+"""
 
 
 """
 """
-""""
+"""
 
 import asyncio
 import uuid

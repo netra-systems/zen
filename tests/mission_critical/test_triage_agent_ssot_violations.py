@@ -8,8 +8,7 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
 """
-        """Send JSON message.""""""
-        """Send JSON message.""""""
+        """Send JSON message."""Send JSON message."""
         raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
@@ -22,17 +21,13 @@ class TestWebSocketConnection:
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()"""
-        return self.messages_sent.copy()"""
         """
-        """"
 
         Comprehensive test suite for TriageSubAgent SSOT violations.
 
         This test suite is designed to FAIL until all SSOT violations are fixed.
         Each test targets a specific violation pattern from the AGENT_SSOT_AUDIT_PLAN."""
-        Each test targets a specific violation pattern from the AGENT_SSOT_AUDIT_PLAN."""
         Business Value: TriageSubAgent is first contact for ALL users - CRITICAL revenue impact."""
-        Business Value: TriageSubAgent is first contact for ALL users - CRITICAL revenue impact.""""
 
 
 import asyncio
@@ -51,7 +46,6 @@ from netra_backend.app.agents.triage.unified_triage_agent import TriageSubAgent 
         try:
         Try import from main file location
 import sys
-import importlib.util"""
 import importlib.util"""
         "triage_sub_agent,"
         "C:/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1/netra_backend/app/agents/triage_sub_agent.py"
@@ -74,9 +68,7 @@ from shared.isolated_environment import get_env
 class TestTriageAgentSSOTViolations(SSotAsyncTestCase):
         """Test suite to identify and verify SSOT violations in TriageSubAgent."""
 """
-"""
         """Set up test fixtures."""
-        self.agent = TriageSubAgent()"""
         self.agent = TriageSubAgent()"""
         user_id="test_user,"
         thread_id="test_thread,"
@@ -89,18 +81,14 @@ class TestTriageAgentSSOTViolations(SSotAsyncTestCase):
 
     def test_violation_custom_hash_generation_in_cache_utils(self):
         """
-        """"
 
         pass
         VIOLATION: Custom hash generation using hashlib.md5 directly
         instead of using CacheHelpers.hash_key_data()"""
-        instead of using CacheHelpers.hash_key_data()"""
-        Location: netra_backend/app/agents/triage_sub_agent/cache_utils.py:31"""
         Location: netra_backend/app/agents/triage_sub_agent/cache_utils.py:31"""
     # This test should FAIL if the violation exists
 from netra_backend.app.agents.triage.unified_triage_agent import cache_utils
 
-    # Check if hashlib is imported (violation)"""
     # Check if hashlib is imported (violation)"""
         "PASS: hashlib not imported (violation fixed))"
 
@@ -116,14 +104,12 @@ from netra_backend.app.agents.triage.unified_triage_agent import cache_utils
         "PASS: Not using custom MD5 hash (violation fixed))"
 
     def test_violation_not_using_canonical_cache_helpers(self):
-        """"""
+        """
         instead of netra_backend.app.services.cache.cache_helpers"""
-        instead of netra_backend.app.services.cache.cache_helpers""""
 
         pass
         core = TriageCore(self.context)
 
-    # Check if CacheHelpers is properly imported and used"""
     # Check if CacheHelpers is properly imported and used"""
         "FAIL: CacheHelpers not initialized in TriageCore)"
 
@@ -138,15 +124,12 @@ from netra_backend.app.services.cache.cache_helpers import CacheHelpers
 
     def test_violation_not_extending_base_agent(self):
         """
-        """
         VIOLATION: TriageSubAgent doesn"t extend BaseAgent"
         Missing inheritance from netra_backend.app.agents.base_agent.BaseAgent"""
-        Missing inheritance from netra_backend.app.agents.base_agent.BaseAgent""""
 
         pass
 from netra_backend.app.agents.base_agent import BaseAgent
 
-    # This should FAIL if TriageSubAgent doesn't extend BaseAgent"""
     # This should FAIL if TriageSubAgent doesn't extend BaseAgent"""
         "FAIL: TriageSubAgent doesn"t extend BaseAgent")"
 
@@ -161,31 +144,24 @@ from netra_backend.app.agents.base_agent import BaseAgent
 
     def test_violation_using_extract_json_from_response(self):
         """
-        """"
 
         VIOLATION: Using custom extract_json_from_response
         instead of unified_json_handler.LLMResponseParser"""
-        instead of unified_json_handler.LLMResponseParser"""
         Location: netra_backend/app/agents/triage_sub_agent/core.py:25"""
-        Location: netra_backend/app/agents/triage_sub_agent/core.py:25""""
 
         pass
     # Check if the deprecated function is imported
 import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
 
     # This should FAIL if still importing the old function"""
-    # This should FAIL if still importing the old function"""
         "FAIL: Still importing deprecated extract_json_from_response)"
 
     def test_violation_custom_json_parsing_in_core(self):
         """
-        """
         VIOLATION: Custom JSON parsing logic instead of using unified handler"""
-        VIOLATION: Custom JSON parsing logic instead of using unified handler""""
 
         pass
         core = TriageCore(self.context)
-"""
 """
         test_response = '{"key": "value}'"
         result = core.extract_and_validate_json(test_response)
@@ -201,15 +177,11 @@ from netra_backend.app.core.serialization.unified_json_handler import LLMRespons
 
     def test_violation_direct_json_loads_usage(self):
         """
-        """
-        VIOLATION: Direct json.loads usage instead of safe_json_loads"""
         VIOLATION: Direct json.loads usage instead of safe_json_loads"""
         Location: netra_backend/app/agents/triage_sub_agent/core.py:187"""
-        Location: netra_backend/app/agents/triage_sub_agent/core.py:187""""
 
         pass
         core = TriageCore(self.context)
-"""
 """
         malformed_json = '{"key": "value'  # Missing closing brace )"
 
@@ -222,24 +194,19 @@ from netra_backend.app.core.serialization.unified_json_handler import LLMRespons
     # ========== VIOLATION 4: Custom WebSocket Handling ==========
 
     def test_violation_not_using_websocket_bridge_adapter(self):
-        """"""
+        """
         Should use the canonical WebSocket integration pattern"""
-        Should use the canonical WebSocket integration pattern""""
 
         pass
     # Check if agent has WebSocketBridgeAdapter
-        self.assertTrue(hasattr(self.agent, '_websocket_adapter') or )"""
         self.assertTrue(hasattr(self.agent, '_websocket_adapter') or )"""
         "FAIL: No WebSocketBridgeAdapter found)"
 
     async def test_violation_websocket_event_emission(self):
         """
-        """
         VIOLATION: Custom WebSocket event emission instead of using adapter methods"""
-        VIOLATION: Custom WebSocket event emission instead of using adapter methods""""
 
         pass
-        # Test that proper WebSocket events are sent"""
         # Test that proper WebSocket events are sent"""
         await self.agent._send_processing_update(self.context, "Test message)"
 
@@ -251,9 +218,7 @@ from netra_backend.app.core.serialization.unified_json_handler import LLMRespons
 
     def test_violation_custom_retry_implementation(self):
         """
-        """
         VIOLATION: Custom retry logic instead of UnifiedRetryHandler"""
-        VIOLATION: Custom retry logic instead of UnifiedRetryHandler""""
 
         pass
         processor = TriageProcessor(TriageCore(self.context), None)
@@ -264,16 +229,13 @@ from netra_backend.app.core.resilience.unified_retry_handler import UnifiedRetry
     # Should use UnifiedRetryHandler, not custom retry logic
         self.assertTrue(hasattr(processor, 'retry_handler') or )
         any('UnifiedRetryHandler' in str(type(v)) )"""
-        any('UnifiedRetryHandler' in str(type(v)) )"""
         "FAIL: Not using UnifiedRetryHandler)"
 
     # ========== VIOLATION 6: Direct Environment Access ==========
 
     def test_violation_direct_os_environ_access(self):
         """
-        """
         VIOLATION: Direct os.environ access instead of IsolatedEnvironment"""
-        VIOLATION: Direct os.environ access instead of IsolatedEnvironment""""
 
         pass
     # Search for os.environ usage in the module
@@ -288,15 +250,13 @@ import netra_backend.app.agents.triage.unified_triage_agent as triage_module
         if 'environ' in str(obj.__code__.co_names):
         violations.append(name)
 """
-"""
         "formatted_string)"
 
                 # ========== VIOLATION 7: State Storage in Instance Variables ==========
 
     async def test_violation_storing_user_data_in_instance(self):
-        """"""
+        """
         instead of passing through UserExecutionContext"""
-        instead of passing through UserExecutionContext""""
 
         pass
                     # Check that agent doesn't store user data'
@@ -306,22 +266,18 @@ import netra_backend.app.agents.triage.unified_triage_agent as triage_module
         forbidden_attrs = ['user_id', 'thread_id', 'db_session', 'current_request']
 
         for attr in forbidden_attrs:"""
-        for attr in forbidden_attrs:"""
         "formatted_string)"
 
                         # ========== VIOLATION 8: Duplicate Error Handling ==========
 
     def test_violation_custom_error_handling(self):
         """
-        """
         VIOLATION: Custom error handling instead of agent_error_handler"""
-        VIOLATION: Custom error handling instead of agent_error_handler""""
 
         pass
 from netra_backend.app.core.unified_error_handler import agent_error_handler
 
     # Check if agent uses the unified error handler
-        self.assertTrue(hasattr(self.agent, 'agent_error_handler') or )"""
         self.assertTrue(hasattr(self.agent, 'agent_error_handler') or )"""
         "FAIL: Not using unified error handler)"
 
@@ -329,14 +285,11 @@ from netra_backend.app.core.unified_error_handler import agent_error_handler
 
     async def test_violation_missing_context_parameter(self):
         """
-        """
         VIOLATION: Methods not accepting UserExecutionContext parameter"""
-        VIOLATION: Methods not accepting UserExecutionContext parameter""""
 
         pass
         # Test that execute accepts context
 import inspect
-        sig = inspect.signature(self.agent.execute)"""
         sig = inspect.signature(self.agent.execute)"""
         "FAIL: execute() doesn"t accept context parameter")"
 
@@ -348,9 +301,7 @@ import inspect
 
     def test_violation_direct_config_file_access(self):
         """
-        """
         VIOLATION: Direct config file reading instead of using configuration architecture"""
-        VIOLATION: Direct config file reading instead of using configuration architecture""""
 
         pass
     # Check for direct file reading
@@ -364,19 +315,16 @@ import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
         source = str(core_module.__file__)
 
     # This is a simple check - in reality would parse AST"""
-    # This is a simple check - in reality would parse AST"""
         "Potential direct file access detected)"
 
     # ========== Integration Tests for Combined Violations ==========
 
     async def test_concurrent_request_isolation(self):
-        """"""
+        """
         This tests multiple SSOT patterns together."""
-        This tests multiple SSOT patterns together.""""
 
         pass
         # Create multiple contexts
-        contexts = [ )"""
         contexts = [ )"""
         user_id="formatted_string,"
         thread_id="formatted_string,"
@@ -405,9 +353,7 @@ import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
 
     async def test_websocket_events_with_context(self):
         """
-        """
         Test that WebSocket events are properly sent with UserExecutionContext."""
-        Test that WebSocket events are properly sent with UserExecutionContext.""""
 
         pass
                             # Mock WebSocket adapter
@@ -422,14 +368,11 @@ import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
 
                             # Check that events were emitted (this will fail until properly integrated)
         self.assertTrue(mock_adapter.emit_thinking.called or )"""
-        self.assertTrue(mock_adapter.emit_thinking.called or )"""
         "No WebSocket events emitted)"
 
     def test_all_violations_summary(self):
-        """"""
+        """
         This test always FAILS to show the complete violation report."""
-        This test always FAILS to show the complete violation report."""
-        pass"""
         pass"""
         "1. Custom hash generation in cache_utils.py (using hashlib.md5),"
         "2. TriageSubAgent doesn"t extend BaseAgent","

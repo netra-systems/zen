@@ -1,4 +1,4 @@
-""""
+"""
 
 WebSocket Event Typo Prevention - Mission Critical Tests
 
@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: MISSION CRITICAL - These tests protect the primary revenue stream
 
 Mission: Prevent typos in critical WebSocket event names that would cause silent failures,
-""""
+"""
 
 blocking users from seeing AI value delivery and resulting in immediate revenue loss.
 
@@ -815,7 +815,7 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
 
 
 class WebSocketEventTypoProductionSimulationTests(SSotAsyncTestCase):
-    """"
+    """
 
     Production simulation tests for typo scenarios based on real incidents.
     

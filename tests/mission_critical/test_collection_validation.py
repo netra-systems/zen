@@ -1,15 +1,12 @@
-""""
+"""
 
 Mission Critical Test: Test Collection Validation for Issue #976
 
 This test validates that pytest test collection works correctly and identifies
 specific collection failures that prevent proper test execution.
-""""
+"""
 
 
-"""
-"""
-""""
 
 import os
 import sys

@@ -1,11 +1,11 @@
-""""
+"""
 
 Mission Critical Mock Response Elimination Validation
 
 Business Value Justification (BVJ):
     - Segment: All tiers (Free to Fortune 500) - System-wide authenticity
 - Business Goal: ZERO mock responses can reach ANY user under ANY condition  
-""""
+"""
 
 - Value Impact: Protect $""5M""+ ARR across entire customer base from inauthentic AI
 - Strategic Impact: Platform integrity and competitive differentiation through authenticity
@@ -103,7 +103,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
     @pytest.mark.real_services
     @pytest.mark.mission_critical
     async def test_system_wide_mock_response_elimination_all_tiers(self, real_services_fixture, free_tier_user, mid_tier_user, enterprise_user, fortune_500_user):
-    """"
+    """
 
         FAILING TEST: Prove ANY user tier can receive mock responses system-wide
         
@@ -465,7 +465,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
     @pytest.mark.real_services
     @pytest.mark.mission_critical  
     async def test_competitive_scenario_mock_detection(self, real_services_fixture, enterprise_user):
-        """"
+        """
 
         FAILING TEST: Prove mock responses appear during competitive evaluations
         

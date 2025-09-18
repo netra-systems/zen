@@ -1,4 +1,4 @@
-""""
+"""
 
 AgentRegistry SSOT Violation Reproduction Tests - Issue #1080
 
@@ -18,7 +18,7 @@ Priority: P0 Critical - Golden Path blocking
 ""
 
 
-""""
+"""
 
 import pytest
 import asyncio
@@ -125,7 +125,7 @@ class AgentRegistrySSoTViolationReproductionTests(SSotAsyncTestCase):
                 )
 
     async def test_websocket_event_delivery_inconsistency(self):
-    """"
+    """
 
         CRITICAL: Show WebSocket event delivery breaks with mixed registries
         
@@ -191,7 +191,7 @@ class AgentRegistrySSoTViolationReproductionTests(SSotAsyncTestCase):
             )
 
     async def test_multi_user_isolation_breaks_with_mixed_registries(self):
-    """"
+    """
 
         CRITICAL: Show user isolation breaks when mixing different registries
         
@@ -257,7 +257,7 @@ class AgentRegistrySSoTViolationReproductionTests(SSotAsyncTestCase):
             )
 
     async def test_factory_pattern_inconsistency_reproduction(self):
-    """"
+    """
 
         CRITICAL: Show different registries have different factory patterns
         
@@ -349,7 +349,7 @@ class AgentRegistrySSoTViolationReproductionTests(SSotAsyncTestCase):
         }
 
     async def test_ssot_violation_summary_metrics(self):
-        """"
+        """
 
         Generate comprehensive metrics on SSOT violations for business impact
         

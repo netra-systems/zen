@@ -76,7 +76,7 @@ class SimpleWebSocketNotifier:
     
     async def send_agent_fallback(self, connection_id: str, request_id: str, fallback_type: str) -> None:
         Send agent fallback with simple parameters."""
-        Send agent fallback with simple parameters.""""
+        Send agent fallback with simple parameters."""
 
         context = self._create_context(connection_id, request_id)
         await self.notifier.send_fallback_notification(context, fallback_type)

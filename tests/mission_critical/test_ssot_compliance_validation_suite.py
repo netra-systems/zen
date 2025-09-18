@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 SSOT Compliance Validation Test Suite - Issue #1075 Implementation
 Tests designed to FAIL initially and detect the specific SSOT violations identified in the analysis.
@@ -16,7 +16,7 @@ Test Implementation Strategy:
 SSOT Violations to Detect:
     - Production compliance gap: 16.6% between claimed vs actual
 """
-""""
+"""
 
 - 89 duplicate type definitions across modules
 - Test infrastructure fragmentation: -1981.6% compliance
@@ -241,7 +241,7 @@ class SsotComplianceValidator:
         return violations
 
     def validate_test_infrastructure_compliance(self) -> List[SsotComplianceViolation]:
-    """"
+    """
 
         Detect test infrastructure fragmentation leading to -1981.6% compliance
 
@@ -408,7 +408,7 @@ class TestSsotComplianceValidationSuite(SSotBaseTestCase):
         cls.validator = SsotComplianceValidator(cls.project_root)
 
     def test_unit_production_ssot_compliance_gap_detection(self):
-        """"
+        """
 
         Unit Test: Detect 16.6% production SSOT compliance gap
 
@@ -452,7 +452,7 @@ class TestSsotComplianceValidationSuite(SSotBaseTestCase):
                      Expected SSOT pattern violations)
 
     def test_unit_duplicate_type_definitions_detection(self):
-        """"
+        """
 
         Unit Test: Detect 89 duplicate type definitions
 

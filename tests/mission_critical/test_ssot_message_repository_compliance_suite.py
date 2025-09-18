@@ -1,4 +1,4 @@
-""""
+"""
 
 MISSION CRITICAL: SSOT Message Repository Compliance Test Suite
 
@@ -11,7 +11,7 @@ After proper SSOT remediation, these tests should PASS.
 Business Value:
     - Ensures consistent message creation across the entire platform
 - Validates proper message structure and metadata handling
-""""
+"""
 
 - Prevents data corruption from bypassing repository patterns
 - Maintains audit trails and business logic consistency
@@ -97,7 +97,7 @@ class SSotMessageRepositoryComplianceTests:
             
     @pytest.mark.asyncio
     async def test_ssot_message_creation_structure_compliance(self):
-    """"
+    """
 
         CRITICAL TEST: Validate SSOT message creation produces proper structure.
         
@@ -261,7 +261,7 @@ class SSotMessageRepositoryComplianceTests:
         
     @pytest.mark.asyncio
     async def test_ssot_message_field_completeness(self):
-    """"
+    """
 
         CRITICAL TEST: Validate all required fields are set properly.
         
@@ -358,7 +358,7 @@ class SSotMessageRepositoryComplianceTests:
         
     @pytest.mark.asyncio
     async def test_ssot_message_creation_audit_trail(self):
-    """"
+    """
 
         CRITICAL TEST: Validate audit trail and business logic consistency.
         

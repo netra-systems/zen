@@ -30,7 +30,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 class WebSocketScopeBugSimpleTests:
-    """"
+    """
 
     Simple reproduction of WebSocket scope bug for Issue #165.
     
@@ -41,7 +41,7 @@ class WebSocketScopeBugSimpleTests:
     @pytest.mark.mission_critical
     @pytest.mark.unit
     def test_scope_bug_code_analysis(self):
-    """"
+    """
 
         REPRODUCER: Direct code analysis of scope bug locations.
         
@@ -398,7 +398,7 @@ class WebSocketScopeBugSimpleTests:
 
 
 if __name__ == __main__:
-    """"
+    """
 
     Direct execution for scope bug analysis and reproduction.
     Run: python tests/mission_critical/test_websocket_scope_bug_simple.py

@@ -1,4 +1,4 @@
-""""
+"""
 
 LLM Manager SSOT Factory Pattern Enforcement Tests
 
@@ -19,7 +19,7 @@ to detect SSOT violations that could cause user data mixing.
 ""
 
 
-""""
+"""
 
 import ast
 import inspect

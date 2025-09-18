@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 Mission Critical Test Suite: Tool Dispatcher SSOT Compliance
 
@@ -9,7 +9,7 @@ Critical for $""500K"" plus ARR protection through tool dispatcher SSOT complian
 This test suite validates:
     1. Single tool dispatcher implementation pattern (UnifiedToolDispatcher)
 """
-""""
+"""
 
 2. No direct imports bypassing UniversalRegistry
 3. Factory pattern usage for user isolation
@@ -247,7 +247,7 @@ class ToolDispatcherSSotComplianceTests:
             )
 
     async def test_websocket_event_ssot_compliance(self):
-        """"
+        """
 
         CRITICAL: Test that WebSocket events flow through SSOT channels.
         

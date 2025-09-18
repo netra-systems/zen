@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Tests for Basic Triage & Response Revenue Protection - Issue #135
 
@@ -32,7 +32,7 @@ EXPECTED BEHAVIOR:
 ""
 
 
-""""
+"""
 
 import pytest
 import asyncio
@@ -343,7 +343,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
     
     @pytest.mark.asyncio
     async def test_multi_tier_customer_impact_analysis(self):
-    """"
+    """
 
         Test revenue protection across all customer tiers simultaneously.
         

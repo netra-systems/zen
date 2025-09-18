@@ -1,4 +1,4 @@
-""""
+"""
 
 SSOT Wrapper Function Detection Tests for Issue #1076
 
@@ -16,7 +16,7 @@ Priority: CRITICAL - These tests protect against regression during SSOT migratio
 ""
 
 
-""""
+"""
 
 import pytest
 import ast

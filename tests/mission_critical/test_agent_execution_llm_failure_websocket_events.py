@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Test: WebSocket Events During LLM API Failures
 
@@ -24,7 +24,7 @@ CRITICAL: This test MUST pass or the platform loses all user value during LLM ou
 ""
 
 
-""""
+"""
 
 import asyncio
 import json
@@ -136,7 +136,7 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
     @pytest.mark.no_skip  # NEVER skip this test
     @pytest.mark.real_services
     async def test_all_websocket_events_sent_during_complete_llm_outage(self, real_services_fixture):
-        """"
+        """
 
         MISSION CRITICAL: All 5 WebSocket events MUST be sent even during complete LLM outage.
         

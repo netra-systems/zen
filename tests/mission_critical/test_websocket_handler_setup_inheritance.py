@@ -1,8 +1,8 @@
-""""
+"""
 
 WebSocket Handler Setup Method Inheritance Validation Test Suite
 
-""""
+"""
 
 MISSION: Detect and report inheritance issues with setup_method() calls in WebSocket handler test classes.
 
@@ -104,7 +104,7 @@ class WebSocketHandlerInheritanceAnalyzer:
         self.full_target_path = self.working_directory / self.target_file_path
     
     def discover_test_classes_from_ast(self, file_path: Path) -> Dict[str, Dict[str, Any]]:
-    """"
+    """
 
         Discover test classes using AST parsing.
         
@@ -205,7 +205,7 @@ class WebSocketHandlerInheritanceAnalyzer:
             return str(base_node)
     
     def _calls_super_setup_method(self, method_node: ast.FunctionDef) -> bool:
-    """"
+    """
 
         Check if a setup_method calls super().setup_method().
         
@@ -244,7 +244,7 @@ class WebSocketHandlerInheritanceAnalyzer:
         return method_lines
     
     def analyze_inheritance_violations(self) -> InheritanceAnalysisReport:
-    """"
+    """
 
         Perform comprehensive inheritance analysis.
         
@@ -361,7 +361,7 @@ class WebSocketHandlerInheritanceAnalyzer:
 
 
 class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
-    """"
+    """
 
     MISSION CRITICAL: Test suite for detecting setup_method() inheritance violations.
     
@@ -407,7 +407,7 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
             print(f  - {class_name})
     
     def test_detect_missing_super_setup_calls(self):
-    """"
+    """
 
         CRITICAL TEST: Detect test classes missing super().setup_method() calls.
         

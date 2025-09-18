@@ -1,5 +1,5 @@
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
-""""
+"""
 
 Mission Critical Server Message Validator Integration Tests
 
@@ -16,7 +16,7 @@ real WebSocket message structures.
 
 
 """
-""""
+"""
 
 import asyncio
 import json

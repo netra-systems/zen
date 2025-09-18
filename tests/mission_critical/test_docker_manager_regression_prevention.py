@@ -1,4 +1,4 @@
-""""
+"""
 
 MISSION CRITICAL: Docker Manager SSOT Regression Prevention Tests
 
@@ -13,7 +13,7 @@ PURPOSE:
 violations. These tests will enforce SSOT compliance and prevent future duplication.
 
 REGRESSION SCENARIOS PREVENTED:
-    """"
+    """
 
 1. Accidental creation of duplicate Docker Manager classes
 2. Import path fragmentation causing inconsistent behavior
@@ -191,7 +191,7 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
         )
 
     def test_prevent_mock_implementation_leakage(self):
-        """"
+        """
 
         REGRESSION PREVENTION: Prevents mock implementations from leaking into production.
 
@@ -407,7 +407,7 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
         Returns:
             True if file should be skipped, False otherwise
 """
-""""
+"""
 
         skip_patterns = [
             '__pycache__',

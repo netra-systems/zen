@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Test: Infrastructure Remediation Comprehensive Validation
 ==========================================================================
@@ -28,7 +28,7 @@ Success Criteria:
 ""
 
 
-""""
+"""
 
 import asyncio
 import pytest

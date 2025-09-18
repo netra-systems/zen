@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-""""
+"""
 
 Phase 4: Mission Critical Tests for Issue #1024 - Blocking Issue Reproduction
 
 Business Value Justification (BVJ):
     - Segment: Platform (All segments affected by deployment blocks)
 """
-""""
+"""
 
 - Business Goal: Stability - Prevent deployment blocking from test chaos
 - Value Impact: Protects $""500K"" plus ARR from deployment delays and failures
@@ -295,7 +295,7 @@ class BusinessImpactQuantificationTests(AsyncBaseTestCase):
         )
 
     async def test_customer_experience_degradation(self):
-    """"
+    """
 
         Test customer experience degradation from unreliable deployments
         Expected to FAIL - demonstrates customer impact
@@ -456,7 +456,7 @@ class UnauthorizedRunnerImpactReproductionTests(BaseTestCase):
         )
 
     def test_reproduce_standalone_script_dependency_chaos(self):
-    """"
+    """
 
         Reproduce standalone script dependency and import chaos
         Expected to FAIL - demonstrates import system problems

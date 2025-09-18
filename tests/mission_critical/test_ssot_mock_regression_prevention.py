@@ -1,4 +1,4 @@
-""""
+"""
 
 SSOT Mock Factory Regression Prevention Tests
 Test 4 - Important Priority
@@ -18,7 +18,7 @@ Priority: Important (Mission Critical)
 ""
 
 
-""""
+"""
 
 import pytest
 import ast
@@ -94,7 +94,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         self.regression_violations = []
 
     def test_no_new_direct_mock_creation(self):
-        """"
+        """
 
         Test that no new direct Mock() creation patterns have been introduced.
         
@@ -174,7 +174,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
                         fTest files using mocks without SSOT factory: {non_compliant_files})
 
     def test_import_compliance_validation(self):
-        """"
+        """
 
         Test that new files import from SSOT mock factory correctly.
         

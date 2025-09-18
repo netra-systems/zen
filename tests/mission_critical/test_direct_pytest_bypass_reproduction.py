@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 Mission Critical Test Suite: Direct # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
@@ -34,7 +34,7 @@ Date: 2025-9-14
 
 
 """
-""""
+"""
 
 import ast
 import os
@@ -63,7 +63,7 @@ class PytestBypassViolation:
 
 
 class DirectPytestBypassReproductionTests(SSotBaseTestCase):
-    """"
+    """
 
     Test suite to reproduce and validate direct # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
@@ -86,7 +86,7 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
         ]
 
     def scan_file_for_pytest_bypass_violations(self, file_path: Path) -> List[PytestBypassViolation]:
-        """"
+        """
 
         Scan a Python file for direct # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
@@ -298,7 +298,7 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
         )
 
     def test_validate_unified_test_runner_ssot_functionality(self):
-        """"
+        """
 
         VALIDATION TEST: This test should PASS both before and after remediation.
         

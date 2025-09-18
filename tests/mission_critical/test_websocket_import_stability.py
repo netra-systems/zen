@@ -1,10 +1,10 @@
-""""
+"""
 
 Mission Critical: WebSocket Import Stability Tests
 
 Business Value Justification:
     - Segment: Platform/Internal (Mission Critical Infrastructure)
-""""
+"""
 
 - Business Goal: Prevent $""120K""+ MRR loss from chat outages
 - Value Impact: Ensure 90% of business value (chat) never fails due to import errors
@@ -41,7 +41,7 @@ from netra_backend.app.websocket_core.event_validator import AgentEventValidator
 
 
 class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
-    """"
+    """
 
     CRITICAL: Tests the exact lines that failed due to missing import time
     
@@ -148,7 +148,7 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.integration
     async def test_circuit_breaker_state_transitions_with_time(self):
-    """"
+    """
 
         CRITICAL: Tests circuit breaker state transitions that use time.time().
         
@@ -209,7 +209,7 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.integration
     async def test_concurrent_token_cache_timing_logic(self):
-    """"
+    """
 
         CRITICAL: Tests concurrent token cache timing that uses time.time().
         
@@ -451,7 +451,7 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.e2e
     async def test_chat_flow_import_regression_prevention(self):
-    """"
+    """
 
         Mission Critical: Prevent chat flow import regression.
         
@@ -518,7 +518,7 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.performance
     async def test_import_system_performance_baseline(self):
-    """"
+    """
 
         Mission Critical: Import system performance baseline.
         
@@ -582,7 +582,7 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.concurrent
     async def test_concurrent_websocket_import_stability(self):
-    """"
+    """
 
         Mission Critical: Concurrent WebSocket import stability.
         

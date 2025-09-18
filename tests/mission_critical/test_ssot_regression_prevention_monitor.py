@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-""""
+"""
 
  ALERT:  MISSION CRITICAL: SSOT Regression Prevention Monitor Tests
 
 CRITICAL MISSION: Enhanced tests that serve as automated regression monitors
 Context: Transforms existing violation detection tests into continuous regression monitors
 """
-""""
+"""
 
 Objective: Prevent reintroduction of SSOT violations from resolved GitHub issues
 
@@ -169,7 +169,7 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
     @pytest.mark.critical
     @pytest.mark.ssot_compliance
     def test_unified_auth_interface_usage_maintained(self):
-        """"
+        """
 
         CRITICAL SSOT: Ensure UnifiedAuthInterface usage is maintained.
         
@@ -260,7 +260,7 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
     @pytest.mark.error
     @pytest.mark.websocket_security
     def test_no_websocket_auth_fallback_patterns(self):
-        """"
+        """
 
         ERROR LEVEL: Ensure WebSocket auth fallback patterns are not reintroduced.
         
@@ -432,7 +432,7 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
     
     @pytest.mark.continuous_monitoring
     def test_continuous_monitoring_readiness(self):
-        """"
+        """
 
         READINESS: Test readiness for continuous monitoring deployment.
         

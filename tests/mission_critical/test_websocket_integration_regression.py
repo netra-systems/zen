@@ -1,4 +1,4 @@
-""""
+"""
 
 Test WebSocket Integration Regression Prevention
 
@@ -23,7 +23,7 @@ After fixes, this test becomes the regression prevention guardian.
 ""
 
 
-""""
+"""
 
 import pytest
 import asyncio

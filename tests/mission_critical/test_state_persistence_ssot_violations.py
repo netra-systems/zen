@@ -67,7 +67,7 @@ class StatePersistenceSSotViolationsTests(SSotBaseTestCase):
             from netra_backend.app.services.state_persistence_optimized import OptimizedStatePersistence
             
     def test_reproduction_multiple_persistence_modules_exist(self):
-    """"
+    """
 
         REPRODUCTION TEST: Validates that we have multiple persistence implementations
         

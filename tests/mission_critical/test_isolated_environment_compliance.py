@@ -1,4 +1,4 @@
-""""
+"""
 
 MISSION CRITICAL: IsolatedEnvironment Compliance Test Suite
 ==========================================================
@@ -23,7 +23,7 @@ Date: 2025-9-2
 ""
 
 
-""""
+"""
 
 import os
 import sys

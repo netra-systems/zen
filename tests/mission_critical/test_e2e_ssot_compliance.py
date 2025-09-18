@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""
+"""
 
 E2E SSOT Compliance Enhancement Suite - Mission Critical Test Suite
 
@@ -8,7 +8,7 @@ Enhances existing SSOT framework for E2E-specific validation and compliance.
 
 This suite validates and enhances SSOT framework integration for E2E tests:
     """
-""""
+"""
 
     1. Validates get_test_base_for_category('e2e') returns correct SSOT class
 2. Ensures validate_test_class() function works on E2E tests
@@ -228,7 +228,7 @@ class E2ESsotValidationEnhancer:
         return patterns_result
     
     def scan_e2e_directory_for_compliance(self, e2e_dir: Path) -> Dict[str, Any]:
-    """"
+    """
 
         Scan an entire E2E directory for SSOT compliance.
         
@@ -524,7 +524,7 @@ class E2ESsotComplianceTests(SSotBaseTestCase):
         logger.info( PASS:  Enhanced test class validation working correctly for E2E tests)
     
     def test_e2e_tests_follow_ssot_patterns(self):
-    """"
+    """
 
         Validate E2E tests follow all SSOT patterns and conventions.
         

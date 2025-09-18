@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-""""
+"""
 
 FAILING TEST: Multiple WebSocketNotifier Detection - Issue #680
 
 This test DETECTS duplicate WebSocketNotifier implementations across the codebase.
 """
-""""
+"""
 
 Business Impact: $""500K"" plus ARR at risk from conflicting WebSocket implementations
 

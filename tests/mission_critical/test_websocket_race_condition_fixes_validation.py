@@ -1,4 +1,4 @@
-""""
+"""
 
 WebSocket Authentication Race Condition Fixes Validation
 
@@ -15,7 +15,7 @@ Business Impact: $""500K"" plus ARR protection through reliable WebSocket authen
 ""
 
 
-""""
+"""
 
 import asyncio
 import json
@@ -71,7 +71,7 @@ class MockClient:
 
 
 class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
-    """"
+    """
 
     Test suite validating WebSocket authentication race condition fixes.
     
@@ -184,7 +184,7 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
     
     @pytest.mark.asyncio 
     async def test_progressive_authentication_retry(self):
-    """"
+    """
 
         Test progressive authentication retry mechanism.
         
@@ -227,7 +227,7 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
     
     @pytest.mark.asyncio
     async def test_environment_aware_service_discovery(self):
-    """"
+    """
 
         Test environment-aware service discovery for E2E tests.
         
@@ -335,7 +335,7 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
         logger.info( PASS:  WebSocket authentication statistics monitoring working)
     
     def test_websocket_auth_error_codes(self):
-    """"
+    """
 
         Test WebSocket authentication error code mappings.
         

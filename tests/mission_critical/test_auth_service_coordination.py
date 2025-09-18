@@ -1,4 +1,4 @@
-""""
+"""
 
 [U+1F534] MISSION CRITICAL: Authentication Service Coordination Test Suite
 
@@ -23,7 +23,7 @@ FAILURE = AUTH FRICTION = USER ABANDONMENT = REVENUE LOSS
 ""
 
 
-""""
+"""
 
 import asyncio
 import json
@@ -182,7 +182,7 @@ class AuthServiceCoordinationTests(BaseIntegrationTest):
         self.backend_url = self.services[backend_url]
         
     async def test_jwt_secret_synchronization_revenue_critical(self):
-    """"
+    """
 
         MISSION CRITICAL: JWT secrets must be synchronized between services.
         
@@ -227,7 +227,7 @@ class AuthServiceCoordinationTests(BaseIntegrationTest):
         logger.info( PASS:  MISSION CRITICAL: JWT secret synchronization validated)
     
     async def test_auth_token_lifecycle_coordination(self):
-        """"
+        """
 
         MISSION CRITICAL: Token lifecycle coordinated between services.
         

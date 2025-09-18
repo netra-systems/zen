@@ -1,4 +1,4 @@
-""""
+"""
 
 MISSION CRITICAL TESTS: WebSocket Supervisor Startup Sequence - 1011 Error Prevention
 
@@ -32,7 +32,7 @@ SSOT COMPLIANCE:
 ""
 
 
-""""
+"""
 
 import asyncio
 import json
@@ -86,7 +86,7 @@ class MissionCriticalWebSocketTester:
         timeout_seconds: float = 10.0,
         expect_success: bool = True
     ) -> Dict[str, Any]:
-    """"
+    """
 
         Test WebSocket connection with detailed error tracking.
         

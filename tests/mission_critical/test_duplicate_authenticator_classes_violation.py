@@ -1,9 +1,9 @@
-""""
+"""
 
 Test for WebSocket Authentication SSOT Violation: Duplicate UnifiedWebSocketAuthenticator Classes
 
 BUSINESS IMPACT: $""500K"" plus ARR - WebSocket authentication chaos blocking Golden Path
-""""
+"""
 
 ISSUE: #1076 - Two complete UnifiedWebSocketAuthenticator classes exist in unified_websocket_auth.py
 
@@ -158,7 +158,7 @@ class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
         self.assertTrue(True, SSOT metadata validation completed)
     
     def _count_class_definitions(self, file_content: str, class_name: str) -> List[Dict[str, Any]]:
-        """"
+        """
 
         Count class definitions using AST parsing for accuracy.
         

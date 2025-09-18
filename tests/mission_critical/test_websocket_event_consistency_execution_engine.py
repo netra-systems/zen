@@ -1,4 +1,4 @@
-""""
+"""
 
 Test WebSocket Event Consistency for ExecutionEngine
 
@@ -35,7 +35,7 @@ Test Coverage:
 ""
 
 
-""""
+"""
 
 import asyncio
 import pytest
@@ -522,7 +522,7 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.integration
     async def test_websocket_events_error_scenarios(self):
-    """"
+    """
 
         Test that WebSocket events are still sent correctly in error scenarios.
         

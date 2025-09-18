@@ -1,8 +1,8 @@
-""""
+"""
 
 BaseE2ETest to SSotAsyncTestCase Migration Validation Test
 
-""""
+"""
 
 CRITICAL MISSION: Track and validate the migration from BaseE2ETest to SSotAsyncTestCase
 ensuring SSOT compliance across all E2E test files.
@@ -46,7 +46,7 @@ class TestBaseE2ETestMigrationValidation(SSotAsyncTestCase):
         ]
         
     def test_scan_for_base_e2e_test_imports(self):
-        """"
+        """
 
         Scan codebase for remaining BaseE2ETest imports.
         

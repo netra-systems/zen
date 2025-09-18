@@ -1,4 +1,4 @@
-""""
+"""
 
 Mission Critical Test: WebSocket Import Collision Prevention - Deployment Gate
 
@@ -14,7 +14,7 @@ CRITICAL BUSINESS IMPACT:
 - 90% of platform value delivery blocked
 
 Business Value: All Tiers (Free  ->  Enterprise) - Mission Critical System Stability
-""""
+"""
 
 This test protects the primary value delivery channel (chat) from coroutine errors.
 
@@ -64,7 +64,7 @@ from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
 from netra_backend.app.config import get_config
 
 class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
-    """"
+    """
 
     MISSION CRITICAL: Deployment gate for WebSocket coroutine error prevention.
     
@@ -93,7 +93,7 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
         self.logger.info(f TARGET:  BUSINESS GOAL: Protect $""500K"" plus ARR chat functionality from coroutine errors)
     
     def test_mission_critical_health_report_dict_guarantee(self):
-        """"
+        """
 
         DEPLOYMENT GATE 1: health_report MUST be dict under all conditions.
         
@@ -407,7 +407,7 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
         self.logger.info( PASS:  MISSION CRITICAL SUCCESS: Concurrent user protection validated)
     
     def test_mission_critical_deployment_readiness_summary(self):
-        """"
+        """
 
         DEPLOYMENT GATE SUMMARY: Overall system readiness validation.
         

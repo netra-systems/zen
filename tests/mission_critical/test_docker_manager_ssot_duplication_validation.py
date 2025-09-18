@@ -1,4 +1,4 @@
-""""
+"""
 
 MISSION CRITICAL: Docker Manager SSOT Duplication Validation Tests
 
@@ -22,7 +22,7 @@ This violates the SSOT principle of having exactly ONE authoritative implementat
 ""
 
 
-""""
+"""
 
 import os
 import ast
@@ -52,7 +52,7 @@ class DockerManagerSSOTDuplicationValidationTests(SSotBaseTestCase, unittest.Tes
         self.project_root = Path(__file__).parent.parent.parent
 
     def test_docker_manager_class_implementations_are_unique(self):
-        """"
+        """
 
         CRITICAL SSOT TEST: Validates that UnifiedDockerManager class exists only once.
 

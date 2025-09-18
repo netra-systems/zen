@@ -1,9 +1,9 @@
-""""
+"""
 
 Issue #519: Pytest Configuration Conflicts - Mission Critical Test Suite
 
 This test suite reproduces and validates pytest configuration conflicts that are blocking
-""""
+"""
 
 the Mission Critical WebSocket Test Suite from running properly.
 

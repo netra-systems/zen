@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-""""
+"""
 
 Issue #914: AgentRegistry Import Path SSOT Violations Test Suite
 
 """
-""""
+"""
 
 This test suite specifically focuses on import path inconsistencies and violations
 in AgentRegistry implementations. These tests validate that there is a single

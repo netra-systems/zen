@@ -1,4 +1,4 @@
-""""
+"""
 
  ALERT:  MISSION CRITICAL: WebSocket UnifiedAuthInterface Bypass SSOT Violation
 
@@ -27,7 +27,7 @@ CRITICAL AUTH SSOT REQUIREMENT:
 ""
 
 
-""""
+"""
 
 import asyncio
 import json
@@ -221,7 +221,7 @@ class WebSocketUnifiedAuthInterfaceBypassTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.integration
     async def test_websocket_auth_flow_bypasses_ssot_architecture(self):
-    """"
+    """
 
         INTEGRATION VIOLATION TEST: WebSocket auth flow bypasses SSOT architecture.
         
@@ -284,7 +284,7 @@ class WebSocketUnifiedAuthInterfaceBypassTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_auth_configuration_duplication_violation(self):
-    """"
+    """
 
         VIOLATION REPRODUCTION: WebSocket duplicates auth configuration logic.
         

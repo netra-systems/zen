@@ -1,4 +1,4 @@
-""""
+"""
 
 Issue #601 Targeted Fix Validation
 
@@ -7,7 +7,7 @@ without running the full startup infrastructure that causes deadlocks.
 
 Business Value: $""500K"" plus ARR platform reliability protection
 Issue: test_startup_memory_leak_prevention hangs at orchestrator.initialize_system()
-""""
+"""
 
 Root Cause: _run_comprehensive_validation() calls service dependency validation with circular imports
 Solution: Strategic mocking of validation while preserving memory leak detection
@@ -133,7 +133,7 @@ class Issue601TargetedFixTests:
 
     @pytest.mark.asyncio
     async def test_memory_leak_detection_with_issue_601_fix(self):
-    """"
+    """
 
         Test that memory leak detection still works with Issue #601 fix applied.
         

@@ -1,4 +1,4 @@
-""""
+"""
 
 Golden Path Protection Tests for JWT SSOT Migration
 
@@ -19,7 +19,7 @@ Test Strategy: These tests must ALWAYS PASS (both before and after SSOT changes)
 ""
 
 
-""""
+"""
 
 import asyncio
 import json
@@ -309,7 +309,7 @@ class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
             self.record_metric(auth_service_calls_count, mock_auth_client.validate_token_jwt.call_count)
 
     async def test_golden_path_performance_with_ssot_jwt(self):
-    """"
+    """
 
         Test Golden Path performance is not degraded by SSOT JWT.
 
@@ -500,7 +500,7 @@ class JWTSSOTGoldenPathRegressionTests(SSotAsyncTestCase):
         self.set_env_var(TESTING, true)
 
     async def test_existing_jwt_tokens_remain_valid_during_migration(self):
-    """"
+    """
 
         Test that existing JWT tokens remain valid during SSOT migration.
 

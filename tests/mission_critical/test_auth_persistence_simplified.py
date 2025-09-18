@@ -1,15 +1,15 @@
-""""
+"""
 
 Simplified test for authentication persistence in multi-agent workflows.
-""""
+"""
 
 Tests core auth persistence patterns without importing modules with singleton issues.
 """
-""""
+"""
 
 
 """
-""""
+"""
 
 import asyncio
 import uuid

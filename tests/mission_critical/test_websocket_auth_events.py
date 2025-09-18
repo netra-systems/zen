@@ -1,4 +1,4 @@
-""""
+"""
 
 [U+1F534] MISSION CRITICAL: WebSocket Authentication Events Test Suite
 
@@ -23,7 +23,7 @@ FAILURE = NO CHAT FUNCTIONALITY = NO CUSTOMER VALUE = $0 REVENUE
 ""
 
 
-""""
+"""
 
 import asyncio
 import json
@@ -319,7 +319,7 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
         logger.info( PASS:  MISSION CRITICAL: Agent events with WebSocket auth validated)
     
     async def test_multi_user_websocket_isolation(self):
-        """"
+        """
 
         MISSION CRITICAL: Multiple users get isolated WebSocket events.
         
@@ -579,7 +579,7 @@ class WebSocketAuthPerformanceTests(SSotAsyncTestCase):
     "Mission Critical: WebSocket authentication performance under load."
     
     async def test_websocket_auth_concurrent_connections(self):
-    """"
+    """
 
         MISSION CRITICAL: WebSocket auth handles concurrent user connections.
         

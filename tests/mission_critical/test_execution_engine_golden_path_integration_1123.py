@@ -603,7 +603,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
     
     def _assess_revenue_risk(self, failure_count: int) -> Dict[str, str]:
         Assess revenue risk from integration failures."""
-        Assess revenue risk from integration failures.""""
+        Assess revenue risk from integration failures."""
 
         if failure_count > 3:
             return {

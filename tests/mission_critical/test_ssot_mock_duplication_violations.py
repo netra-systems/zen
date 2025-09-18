@@ -1,8 +1,8 @@
-""""
+"""
 
 SSOT Mock Duplication Violations Test Suite
 
-""""
+"""
 
 Detects duplicate mock classes and patterns that violate Single Source of Truth principles.
 This test is designed to FAIL initially to detect current violations (486+ expected duplicates).
@@ -53,7 +53,7 @@ class MockDuplicationViolation:
 
 
 class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
-    """"
+    """
 
     Mission Critical test suite to detect and validate SSOT mock compliance.
     
@@ -128,7 +128,7 @@ class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
             )
             
     def test_detect_websocket_mock_duplications(self):
-    """"
+    """
 
         HIGH: Detect duplicate WebSocket mock implementations.
         

@@ -1,4 +1,4 @@
-""""
+"""
 
 MISSION CRITICAL: EventValidator SSOT Violation Detection Test
 
@@ -15,7 +15,7 @@ Expected Behavior:
 - Failure proves SSOT violations exist and need consolidation
 - After SSOT migration, this test SHOULD PASS
 
-""""
+"""
 
 Business Value Impact: $""500K"" plus ARR at risk from inconsistent event validation
 "

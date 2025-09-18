@@ -1,4 +1,4 @@
-""""
+"""
 
 Test Secret Injection Bridge for Issue #683
 
@@ -10,7 +10,7 @@ Priority: P0 - Mission Critical
 
 Issue #683: Staging environment configuration validation failures
 Root Cause: Secret injection bridge gaps between SecretConfig configuration and actual GCP secret values
-""""
+"""
 
 Test Strategy: Reproduce the bridge failures between config definition and runtime secret injection
 "
@@ -54,7 +54,7 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
         super().teardown_method(method)
 
     def test_secret_reference_to_actual_value_bridge_failure(self):
-    """"
+    """
 
         REPRODUCER: Test bridge failure between SecretReference definition and actual secret values.
 
@@ -150,7 +150,7 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
             assert any(keyword in str(e).lower() for keyword in ['secret', "'missing', 'injection', 'bridge']"
 
     def test_unified_config_manager_secret_bridge_gap(self):
-        """"
+        """
 
         REPRODUCER: Test UnifiedConfigManager secret bridge gap.
 

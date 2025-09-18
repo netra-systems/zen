@@ -407,7 +407,7 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
 
     
     def test_database_session_per_user_ssot_operations(self):
-        """"
+        """
 
         CRITICAL: Test each user gets isolated database sessions for SSOT operations.
         
@@ -511,7 +511,7 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
             logger.info(f[U+2713] Database session isolation: {len(session_data)} unique sessions)
     
     def test_websocket_channel_isolation_ssot_framework(self):
-    """"
+    """
 
         CRITICAL: Test WebSocket channel isolation in SSOT framework operations.
         
@@ -619,7 +619,7 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
             logger.info(f[U+2713] WebSocket channel isolation: {len(channel_data)} unique channels)
     
     def test_race_condition_prevention_ssot_framework(self):
-        """"
+        """
 
         CRITICAL: Test SSOT framework prevents race conditions in concurrent access.
         

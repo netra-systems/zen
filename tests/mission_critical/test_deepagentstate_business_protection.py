@@ -1,4 +1,4 @@
-""""
+"""
 
 MISSION CRITICAL TESTS: DeepAgentState Business Value Protection (Issue #871)
 
@@ -13,7 +13,7 @@ DEPLOYMENT BLOCKER: These tests failing blocks all production deployments.
 ""
 
 
-""""
+"""
 
 import asyncio
 import json
