@@ -10,7 +10,7 @@ setup(
     name="zen-orchestrator",
     version="1.0.0",
     author="Netra Systems",
-    author_email="anthony.chaudhary@netrasystems.ai",
+    author_email="support@netrasystems.ai",
     description="Multi-instance Claude orchestrator for parallel task execution",
     long_description=long_description,
     long_description_content_type="text/markdown",
