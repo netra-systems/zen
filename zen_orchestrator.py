@@ -180,7 +180,7 @@ class ClaudeInstanceOrchestrator:
 
     def __init__(self, workspace_dir: Path, max_console_lines: int = 5, startup_delay: float = 1.0,
                  max_line_length: int = 500, status_report_interval: int = 30,
-                 use_cloud_sql: bool = False, quiet: bool = False,
+                 quiet: bool = False,
                  overall_token_budget: Optional[int] = None,
                  overall_cost_budget: Optional[float] = None,
                  budget_type: str = "tokens",
@@ -199,7 +199,6 @@ class ClaudeInstanceOrchestrator:
         self.status_report_interval = status_report_interval  # Seconds between status reports
         self.last_status_report = time.time()
         self.status_report_task = None  # For the rolling status report task
-        self.use_cloud_sql = use_cloud_sql
         self.quiet = quiet
         self.log_level = log_level
         self.batch_id = str(uuid4())  # Generate batch ID for this orchestration run
@@ -243,11 +242,6 @@ class ClaudeInstanceOrchestrator:
         else:
             logger.debug("Token budget tracking disabled (no budget specified)")
 
-        # Configure CloudSQL if requested
-        # CloudSQL functionality available with Netra Apex
-        if use_cloud_sql:
-            logger.warning("CloudSQL functionality has been disabled. Token metrics will be displayed locally only.")
-            logger.info("For data persistence, consider upgrading to Netra Apex.")
 
     def log_at_level(self, level: LogLevel, message: str, log_func=None):
         """Log message only if current log level permits."""
@@ -2498,7 +2492,6 @@ async def main():
         startup_delay=args.startup_delay,
         max_line_length=args.max_line_length,
         status_report_interval=args.status_report_interval,
-        use_cloud_sql=args.use_cloud_sql,
         quiet=args.quiet,
         overall_token_budget=final_overall_budget,
         overall_cost_budget=final_overall_cost_budget,
@@ -2726,9 +2719,6 @@ async def main():
 
     # Run all instances
     logger.info("Starting Claude Code instance orchestration")
-    if args.use_cloud_sql:
-        logger.info(f"Batch ID: {orchestrator.batch_id}")
-        logger.info("Metrics will be saved to CloudSQL")
     start_time = time.time()
 
     results = await orchestrator.run_all_instances(args.timeout)
@@ -2866,12 +2856,6 @@ async def main():
     print("")
     print("🌐 Learn more: https://netrasystems.ai/")
     print("="*80)
-
-    # Show CloudSQL info if enabled
-    if args.use_cloud_sql:
-        print(f"\n📊 Local metrics displayed above")
-        print(f"   Batch ID: {orchestrator.batch_id}")
-        print(f"   Database persistence disabled for security")
 
     # Exit with appropriate code
     sys.exit(0 if summary['failed'] == 0 else 1)
