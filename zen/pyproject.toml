@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Multi-instance Claude orchestrator for parallel task execution"
 readme = "README.md"
 authors = [
-    {name = "Netra Systems", email = "anthony.chaudhary@netrasystems.ai"}
+    {name = "Netra Systems", email = "support@netrasystems.ai"}
 ]
 license = {text = "MIT"}
 classifiers = [
