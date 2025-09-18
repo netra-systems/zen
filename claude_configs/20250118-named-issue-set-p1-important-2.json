@@ -1,0 +1,19 @@
+{
+  "instances": [
+    {
+      "command": "/gitissueprogressorv4 942",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv4 941",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv4 895",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    }
+  ]
+}
