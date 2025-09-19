@@ -8,7 +8,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="netra-zen",
-    version="1.0.1",
+    version="1.0.2",
     author=" Systems",
     author_email="pypi@netrasystems.ai",
     description="Multi-instance Claude orchestrator for parallel task execution",
