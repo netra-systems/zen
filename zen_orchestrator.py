@@ -2,41 +2,43 @@
 """
 Usage Examples:
 
+  zen -h  # Help
+
 Direct Command Execution:
-  python zen_orchestrator.py "/help"  # Execute single command directly
-  python zen_orchestrator.py "/analyze-code" --workspace ~/my-project
-  python zen_orchestrator.py "/debug-issue" --instance-name "debug-session"
-  python zen_orchestrator.py "/optimize-performance" --session-id "perf-1"
-  python zen_orchestrator.py "/generate-docs" --clear-history --compact-history
+  zen "/single-command-in-claude-commands"  # Execute single command directly
+  zen "/analyze-code" --workspace ~/my-project
+  zen "/debug-issue" --instance-name "debug-session"
+  zen "/optimize-performance" --session-id "perf-1"
+  zen "/generate-docs" --clear-history --compact-history
 
 Configuration File Mode:
-  python zen_orchestrator.py --config config.json
-  python zen_orchestrator.py --config config.json --workspace ~/my-project
+  zen --config config.json
+  zen --config config.json --workspace ~/my-project
 
 Default Instances Mode:
-  python zen_orchestrator.py --dry-run  # Auto-detects workspace from project root
-  python zen_orchestrator.py --workspace ~/my-project --dry-run  # Override workspace
-  python zen_orchestrator.py --startup-delay 2.0  # 2 second delay between launches
-  python zen_orchestrator.py --startup-delay 0.5  # 0.5 second delay between launches
-  python zen_orchestrator.py --max-line-length 1000  # Longer output lines
-  python zen_orchestrator.py --status-report-interval 60  # Status reports every 60s
-  python zen_orchestrator.py --quiet  # Minimal output, errors only
+  zen --dry-run  # Auto-detects workspace from project root
+  zen --workspace ~/my-project --dry-run  # Override workspace
+  zen --startup-delay 2.0  # 2 second delay between launches
+  zen --startup-delay 0.5  # 0.5 second delay between launches
+  zen --max-line-length 1000  # Longer output lines
+  zen --status-report-interval 60  # Status reports every 60s
+  zen --quiet  # Minimal output, errors only
 
 Command Discovery:
-  python zen_orchestrator.py --list-commands  # Show all available commands
-  python zen_orchestrator.py --inspect-command "/analyze-code"  # Inspect specific command
+  zen --list-commands  # Show all available commands
+  zen --inspect-command "/analyze-code"  # Inspect specific command
 
 Scheduling:
-  python zen_orchestrator.py "/analyze-code" --start-at "2h"  # Start 2 hours from now
-  python zen_orchestrator.py "/debug-issue" --start-at "30m"  # Start in 30 minutes
-  python zen_orchestrator.py "/optimize" --start-at "1am"  # Start at 1 AM (today or tomorrow)
-  python zen_orchestrator.py "/review-code" --start-at "14:30"  # Start at 2:30 PM (today or tomorrow)
-  python zen_orchestrator.py "/generate-docs" --start-at "10:30pm"  # Start at 10:30 PM (today or tomorrow)
+  zen "/analyze-code" --start-at "2h"  # Start 2 hours from now
+  zen "/debug-issue" --start-at "30m"  # Start in 30 minutes
+  zen "/optimize" --start-at "1am"  # Start at 1 AM (today or tomorrow)
+  zen "/review-code" --start-at "14:30"  # Start at 2:30 PM (today or tomorrow)
+  zen "/generate-docs" --start-at "10:30pm"  # Start at 10:30 PM (today or tomorrow)
 
 Precedence Rules:
-  1. Direct command (highest) - python zen_orchestrator.py "/command"
-  2. Config file (medium) - python zen_orchestrator.py --config file.json
-  3. Default instances (lowest) - python zen_orchestrator.py
+  1. Direct command (highest) - zen "/command"
+  2. Config file (medium) - zen --config file.json    # expected default usage pattern
+  3. Default instances (lowest) - zen
 """
 
 import asyncio
@@ -77,15 +79,6 @@ except ImportError as e:
     ClaudePricingEngine = None
     TokenUsageData = None
 
-# Add CLI extensions imports
-try:
-    from cli_extensions import handle_example_commands
-except ImportError as e:
-    # Graceful fallback if CLI extensions are not available
-    handle_example_commands = None
-
-# NetraOptimizer database functionality has been removed for security
-# Local token metrics are preserved without database persistence
 
 # Setup logging
 logging.basicConfig(
@@ -214,7 +207,7 @@ class ClaudeInstanceOrchestrator:
 
     def __init__(self, workspace_dir: Path, max_console_lines: int = 5, startup_delay: float = 1.0,
                  max_line_length: int = 500, status_report_interval: int = 30,
-                 use_cloud_sql: bool = False, quiet: bool = False,
+                 quiet: bool = False,
                  overall_token_budget: Optional[int] = None,
                  overall_cost_budget: Optional[float] = None,
                  budget_type: str = "tokens",
@@ -233,11 +226,10 @@ class ClaudeInstanceOrchestrator:
         self.status_report_interval = status_report_interval  # Seconds between status reports
         self.last_status_report = time.time()
         self.status_report_task = None  # For the rolling status report task
-        self.use_cloud_sql = use_cloud_sql
         self.quiet = quiet
         self.log_level = log_level
         self.batch_id = str(uuid4())  # Generate batch ID for this orchestration run
-        # Database client removed for security - local metrics only
+        
         self.optimizer = None
 
         # Initialize budget manager if any budget settings are provided
@@ -278,12 +270,6 @@ class ClaudeInstanceOrchestrator:
         else:
             logger.debug("Token budget tracking disabled (no budget specified)")
 
-        # Configure CloudSQL if requested
-        # CloudSQL functionality available with Netra Apex
-        # Token metrics are now handled locally without database persistence
-        if use_cloud_sql:
-            logger.warning("CloudSQL functionality has been disabled. Token metrics will be displayed locally only.")
-            logger.info("For data persistence, consider upgrading to Netra Apex.")
 
     def log_at_level(self, level: LogLevel, message: str, log_func=None):
         """Log message only if current log level permits."""
@@ -338,36 +324,36 @@ class ClaudeInstanceOrchestrator:
         command_string = "; ".join(full_command)
 
         # Find the claude executable with Mac-specific paths
-        claude_cmd = shutil.which("claude")
-        if not claude_cmd:
-            # Try common paths on different platforms
-            possible_paths = [
-                "claude.cmd",  # Windows
-                "claude.exe",  # Windows
-                "/opt/homebrew/bin/claude",  # Mac Homebrew ARM
-                "/usr/local/bin/claude",     # Mac Homebrew Intel
-                "~/.local/bin/claude",       # User local install
-                "/usr/bin/claude",           # System install
-                "claude"                     # Final fallback
-            ]
-            
-            for path in possible_paths:
-                # Expand user path if needed
-                expanded_path = Path(path).expanduser()
-                if expanded_path.exists():
-                    claude_cmd = str(expanded_path)
-                    logger.info(f"Found Claude executable at: {claude_cmd}")
-                    break
-                elif shutil.which(path):
-                    claude_cmd = path
-                    logger.info(f"Found Claude executable via which: {claude_cmd}")
-                    break
+        # IMPORTANT: Use direct paths to avoid shell functions that may have database dependencies
+        possible_paths = [
+            "/opt/homebrew/bin/claude",  # Mac Homebrew ARM - prefer direct path
+            "/usr/local/bin/claude",     # Mac Homebrew Intel
+            "~/.local/bin/claude",       # User local install
+            "/usr/bin/claude",           # System install
+            "claude.cmd",                # Windows
+            "claude.exe",                # Windows
+        ]
 
-            if not claude_cmd or claude_cmd == "claude":
-                logger.warning("Claude command not found in PATH or common locations")
-                logger.warning("Please ensure Claude Code is installed and in your PATH")
-                logger.warning("Install with: npm install -g @anthropic/claude-code")
-                claude_cmd = "claude"  # Fallback
+        claude_cmd = None
+        for path in possible_paths:
+            # Expand user path if needed
+            expanded_path = Path(path).expanduser()
+            if expanded_path.exists() and expanded_path.is_file():
+                claude_cmd = str(expanded_path)
+                logger.info(f"Found Claude executable at: {claude_cmd}")
+                break
+
+        # Only use shutil.which as fallback if no direct path found
+        if not claude_cmd:
+            claude_cmd = shutil.which("claude")
+            if claude_cmd:
+                logger.info(f"Found Claude executable via which: {claude_cmd}")
+
+        if not claude_cmd:
+            logger.warning("Claude command not found in PATH or common locations")
+            logger.warning("Please ensure Claude Code is installed and in your PATH")
+            logger.warning("Install with: npm install -g @anthropic/claude-code")
+            claude_cmd = "/opt/homebrew/bin/claude"  # Default fallback to most likely location
 
         # New approach: slash commands can be included directly in prompt
         cmd = [
@@ -2370,8 +2356,6 @@ async def main():
                        help="Seconds between rolling status reports (default: 5)")
     parser.add_argument("--start-at", type=str, default=None,
                        help="Schedule orchestration to start at specific time. Examples: '2h' (2 hours from now), '30m' (30 minutes), '14:30' (2:30 PM today), '1am' (1 AM today/tomorrow)")
-    parser.add_argument("--use-cloud-sql", action="store_true",
-                       help="Save metrics to CloudSQL database (NetraOptimizer integration)")
 
     # Direct command options
     parser.add_argument("--instance-name", type=str, help="Instance name for direct command execution")
@@ -2453,10 +2437,6 @@ async def main():
         logger.warning("This might not be a Claude Code workspace")
     
     logger.info(f"Using workspace: {workspace}")
-
-    # Handle CLI extension commands
-    if handle_example_commands and handle_example_commands(args):
-        return
 
 
     # Load instance configurations with direct command precedence
@@ -2547,7 +2527,6 @@ async def main():
         startup_delay=args.startup_delay,
         max_line_length=args.max_line_length,
         status_report_interval=args.status_report_interval,
-        use_cloud_sql=args.use_cloud_sql,
         quiet=args.quiet,
         overall_token_budget=final_overall_budget,
         overall_cost_budget=final_overall_cost_budget,
@@ -2775,9 +2754,6 @@ async def main():
 
     # Run all instances
     logger.info("Starting Claude Code instance orchestration")
-    if args.use_cloud_sql:
-        logger.info(f"Batch ID: {orchestrator.batch_id}")
-        logger.info("Metrics will be saved to CloudSQL")
     start_time = time.time()
 
     results = await orchestrator.run_all_instances(args.timeout)
@@ -2909,19 +2885,13 @@ async def main():
 
     # For detailed data access
     print("\n" + "="*80)
-    print("🚀 NEED DETAILED TOKEN ANALYTICS & DATA ACCESS?")
+    print("🚀 Looking for more?")
     print("="*80)
-    print("For comprehensive token usage analytics, historical data,")
-    print("and advanced reporting features, upgrade to Netra Apex.")
+    print("Explore Zen with Apex for the most effective AI Ops value for production AI.")
     print("")
     print("🌐 Learn more: https://netrasystems.ai/")
     print("="*80)
 
-    # Show CloudSQL info if enabled
-    if args.use_cloud_sql:
-        print(f"\n📊 Local metrics displayed above")
-        print(f"   Batch ID: {orchestrator.batch_id}")
-        print(f"   Database persistence disabled for security")
 
     # Exit with appropriate code
     sys.exit(0 if summary['failed'] == 0 else 1)
