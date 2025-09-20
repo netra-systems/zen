@@ -1,5 +1,113 @@
 # API Cost & Prompt Data Transmission Plan
 
+## Key Differences from OpenTelemetry Implementation
+
+This plan focuses specifically on **cost tracking and prompt analytics** for LLM usage, while the OpenTelemetry implementation handles **distributed tracing and performance monitoring**. Key differences:
+
+1. **Purpose**:
+   - **This Plan**: Track LLM API costs, token usage, and prompt effectiveness
+   - **OpenTelemetry**: Monitor application performance, latency, and error rates
+
+2. **Data Collected**:
+   - **This Plan**: Token counts, costs in USD, prompt categories, response times
+   - **OpenTelemetry**: Traces, spans, exceptions, service dependencies
+
+3. **Use Cases**:
+   - **This Plan**: Budget monitoring, cost optimization, prompt engineering insights
+   - **OpenTelemetry**: Debugging, performance optimization, service health monitoring
+
+4. **Privacy Focus**:
+   - **This Plan**: Heavy PII scrubbing of prompt content
+   - **OpenTelemetry**: Technical metrics only, no content data
+
+## Privacy Protection & Opt-Out
+
+### Opt-Out Mechanism
+Users can disable cost telemetry through multiple methods:
+
+```bash
+# Method 1: Environment variable
+export ZEN_COST_TELEMETRY_DISABLED=true
+
+# Method 2: Configuration file
+# ~/.zen/config.json
+{
+  "telemetry": {
+    "costTracking": false
+  }
+}
+
+# Method 3: Runtime flag
+zen --no-cost-telemetry
+```
+
+### PII Protection Measures
+
+#### 1. Content Sanitization
+```typescript
+class PrivacyFilter {
+  private readonly patterns = {
+    email: /[\w.-]+@[\w.-]+\.\w+/g,
+    phone: /(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g,
+    ssn: /\d{3}-\d{2}-\d{4}/g,
+    creditCard: /\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}/g,
+    apiKey: /([a-zA-Z0-9_-]{32,})/g,
+    ipAddress: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g
+  };
+
+  sanitize(text: string): string {
+    let sanitized = text;
+    for (const [type, pattern] of Object.entries(this.patterns)) {
+      sanitized = sanitized.replace(pattern, `[REDACTED_${type.toUpperCase()}]`);
+    }
+    return sanitized;
+  }
+}
+```
+
+#### 2. Data Minimization
+- Never send full prompt content, only metadata
+- Hash user identifiers before transmission
+- Aggregate data locally before sending
+- Remove file paths and directory structures
+
+#### 3. Local Processing
+```typescript
+interface PrivacyConfig {
+  collectFullPrompts: false,  // Never true by default
+  hashUserIds: true,
+  stripFilePaths: true,
+  redactSensitivePatterns: true,
+  localAggregationWindow: 300000  // 5 minutes
+}
+```
+
+### Consent Banner
+On first use, display clear consent request:
+```
+╔══════════════════════════════════════════════════════════╗
+║ Zen Cost Analytics                                        ║
+║                                                            ║
+║ We collect anonymous usage metrics to help improve        ║
+║ the service and provide cost insights.                    ║
+║                                                            ║
+║ What we collect:                                          ║
+║ • Token usage and costs (no prompt content)               ║
+║ • Response times and error rates                          ║
+║ • Model types and API providers                           ║
+║                                                            ║
+║ What we DON'T collect:                                    ║
+║ • Actual prompt or response content                       ║
+║ • Personal information or file contents                   ║
+║ • Directory paths or project names                        ║
+║                                                            ║
+║ You can opt-out anytime:                                  ║
+║ export ZEN_COST_TELEMETRY_DISABLED=true                   ║
+║                                                            ║
+║ [Allow Analytics] [Opt Out] [Learn More]                  ║
+╚══════════════════════════════════════════════════════════╝
+```
+
 ## 1. Data Structure
 
 ### Cost Data Schema
