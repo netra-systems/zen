@@ -3,6 +3,133 @@
 ## Overview
 Implement minimal OpenTelemetry data capture for the Zen library with automatic Google Cloud export, enabled by default with opt-out capability.
 
+## System Architecture
+
+```mermaid
+graph TB
+    subgraph "Zen Library"
+        A[User Application] --> B[zen/__init__.py]
+        B -->|Auto-initialize| C[TelemetryManager]
+        C -->|Check env vars| D{Telemetry Enabled?}
+        D -->|Yes| E[Initialize TracerProvider]
+        D -->|No| F[NoOp Tracer]
+        E --> G[Configure GCP Exporter]
+        G --> H[BatchSpanProcessor]
+        H -->|Async export| I[Google Cloud Trace]
+    end
+
+    subgraph "Instrumented Functions"
+        J[@traced decorator] --> K[Function Execution]
+        K --> L{Success?}
+        L -->|Yes| M[Set OK Status]
+        L -->|No| N[Record Exception]
+        M --> O[Create Span]
+        N --> O
+        O --> H
+    end
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style I fill:#9cf,stroke:#333,stroke-width:2px
+    style D fill:#ff9,stroke:#333,stroke-width:2px
+```
+
+## Component Flow Diagram
+
+```mermaid
+flowchart LR
+    subgraph "Initialization Flow"
+        Start([Library Import]) --> Init{First Use?}
+        Init -->|Yes| Check[Check ZEN_TELEMETRY_DISABLED]
+        Init -->|No| Ready[Return Existing Instance]
+        Check -->|Not Set| Enable[Enable Telemetry]
+        Check -->|Set| Disable[Disable Telemetry]
+        Enable --> GCP[Detect GCP Project]
+        GCP -->|Found| Export[Setup Cloud Exporter]
+        GCP -->|Not Found| Local[Local Tracing Only]
+        Export --> Ready
+        Local --> Ready
+        Disable --> NoOp[NoOp Implementation]
+        NoOp --> Ready
+    end
+```
+
+## Data Flow Diagram
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant Zen as Zen Library
+    participant TM as TelemetryManager
+    participant Trace as OpenTelemetry
+    participant GCP as Google Cloud
+
+    App->>Zen: import zen
+    Zen->>TM: initialize()
+    TM->>TM: Check ENV vars
+
+    alt Telemetry Enabled
+        TM->>Trace: Create TracerProvider
+        TM->>GCP: Setup CloudTraceExporter
+        TM-->>Zen: Ready
+    else Telemetry Disabled
+        TM-->>Zen: NoOp Mode
+    end
+
+    App->>Zen: orchestrator.run()
+    Zen->>Trace: Start Span
+    Note over Trace: Function executes
+
+    alt Success
+        Trace->>Trace: Set OK Status
+    else Error
+        Trace->>Trace: Record Exception
+    end
+
+    Trace->>GCP: Export Span (async)
+    Trace-->>Zen: Return result
+    Zen-->>App: Result
+```
+
+## Class Diagram
+
+```mermaid
+classDiagram
+    class TelemetryManager {
+        -_instance: TelemetryManager
+        -_initialized: bool
+        +initialize() void
+        +tracer: Tracer
+    }
+
+    class TelemetryConfig {
+        +is_enabled() bool
+        +get_gcp_project() str
+        +get_service_name() str
+        +get_sample_rate() float
+    }
+
+    class CloudExporter {
+        -exporter: CloudTraceSpanExporter
+        -processor: BatchSpanProcessor
+        +setup_gcp_exporter(provider) void
+    }
+
+    class Instrumentation {
+        +traced(name, attributes) decorator
+        +add_span_attributes(**kwargs) void
+    }
+
+    class ZenOrchestrator {
+        +run(config) void
+        +process_command(command) void
+    }
+
+    TelemetryManager --> TelemetryConfig: uses
+    TelemetryManager --> CloudExporter: configures
+    ZenOrchestrator --> Instrumentation: decorated by
+    Instrumentation --> TelemetryConfig: checks
+```
+
 ## Architecture Design
 
 ### Core Components
