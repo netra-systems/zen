@@ -5,66 +5,91 @@ Implement minimal OpenTelemetry data capture for the Zen library with automatic 
 
 ## Authentication & Security Model
 
-### How Authentication Works - Three Simple Options
+### How Authentication Works - Two Simple Paths
 
-Zen's telemetry is designed to "just work" out of the box while giving you full control over your data and costs.
+Zen's telemetry is designed to "just work" out of the box with anonymous public telemetry, or provide enhanced features when authenticated via OAuth.
 
-#### Option 1: Zero Setup (Default) - Public Community Telemetry
+#### Path 1: Anonymous Public Telemetry (Default - No Setup)
 **This is what happens when you do nothing:**
 
 ```python
 import zen
 # That's it! Telemetry just works with no setup required
 orchestrator = zen.ZenOrchestrator()
-orchestrator.run(config)  # Automatically traced and sent to Zen's public project
+orchestrator.run(config)  # Automatically traced and sent to Netra's GCP
 ```
 
 **What's happening behind the scenes:**
-- Zen includes an embedded, write-only service account for the public project `zen-telemetry-public`
-- Your traces are sent to this shared community project
-- You pay nothing - Zen covers all GCP costs
-- No authentication setup required on your end
+- Zen includes an embedded, write-only service account for Netra's GCP project
+- Your anonymous traces are sent to `netra-telemetry-public` project
+- No authentication or login required
+- You pay nothing - Netra covers all GCP costs
+- Data is anonymous and aggregated for community insights
 
-**What data is shared:**
+**What data is collected (anonymous):**
 - Function names and execution times
 - Error rates and basic performance metrics
-- NO personal data, credentials, or business logic
-- All data is aggregated for community insights
+- Token usage and costs (anonymized)
+- NO personal data, credentials, or identifiable information
+- All data tagged with anonymous session ID only
 
 **Security guarantees:**
 - The embedded service account can ONLY write trace data
-- It cannot read existing traces or access any other GCP services
-- You cannot access other users' data
-- Data is automatically deleted after 30 days
+- It cannot read any traces or access other GCP services
+- No user attribution - completely anonymous
+- Data automatically deleted after 30 days
 
-#### Option 2: Your Own GCP Project (Private)
-**For complete control and privacy:**
-
-```bash
-# Set your GCP project
-export GOOGLE_CLOUD_PROJECT="your-private-project"
-
-# Authenticate (one of these methods)
-gcloud auth application-default login
-# OR use service account key
-export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"
-```
+#### Path 2: Authenticated Telemetry (OAuth Login)
+**For personalized insights and history:**
 
 ```python
 import zen
-# Now uses YOUR private GCP project with YOUR authentication
-orchestrator = zen.ZenOrchestrator()
-orchestrator.run(config)  # Traced to your private project
+from zen.auth import authenticate
+
+# One-time OAuth authentication
+auth_token = authenticate()  # Opens browser for OAuth flow
+
+# Now telemetry is associated with your account
+orchestrator = zen.ZenOrchestrator(auth_token=auth_token)
+orchestrator.run(config)  # Traced with user attribution
 ```
 
-**Benefits:**
-- Complete data isolation - only you can see your traces
-- Full control over data retention and access policies
-- Custom dashboards and alerting
-- Compliance with your organization's security requirements
-- You control and pay for GCP costs
+**OAuth flow:**
+1. User calls `zen.auth.authenticate()`
+2. Browser opens to `auth.netra.ai/oauth/authorize`
+3. User logs in with Google/GitHub/Email
+4. Receives OAuth token (stored locally)
+5. All telemetry now linked to user account
 
-#### Option 3: Completely Disable Telemetry
+**Benefits of authenticated mode:**
+- View your personal usage history and trends
+- Cost tracking tied to your account
+- Personalized dashboards at `dashboard.netra.ai`
+- Usage insights and optimization recommendations
+- Data retention extended to 90 days
+- Compare your usage with anonymized community benchmarks
+
+**What changes when authenticated:**
+```json
+// Anonymous trace (default)
+{
+  "session_id": "anon_f47ac10b-58cc",
+  "user_id": null,
+  "spans": [...],
+  "retention_days": 30
+}
+
+// Authenticated trace (after OAuth)
+{
+  "session_id": "auth_8b1a9d3e-7fcd",
+  "user_id": "user_12345",  // Your Netra user ID
+  "spans": [...],
+  "retention_days": 90,
+  "features": ["history", "insights", "cost_tracking"]
+}
+```
+
+#### Optional: Completely Disable Telemetry
 **For maximum privacy or testing:**
 
 ```bash
@@ -80,17 +105,19 @@ orchestrator.run(config)  # Runs normally but no tracing
 
 ### Embedded Service Account Security Model
 
-The embedded service account in Zen has extremely limited permissions:
+The embedded service account for Netra's GCP has extremely limited permissions:
 
 ```json
 {
   "permissions": [
-    "cloudtrace.traces.patch"
+    "cloudtrace.traces.patch"  // Write-only permission
   ],
-  "description": "Can only write trace spans to zen-telemetry-public project",
+  "project": "netra-telemetry-public",
+  "description": "Can only append trace spans, cannot read or modify anything",
   "cannot_do": [
     "Read any existing traces",
     "Access other GCP services",
+    "Identify or access user data",
     "Modify project settings",
     "Create or delete resources",
     "Access billing information"
@@ -99,64 +126,79 @@ The embedded service account in Zen has extremely limited permissions:
 ```
 
 **Key security features:**
-- The service account key is embedded in the compiled library (not in source code)
-- Key rotation is handled automatically through library updates
-- Rate limiting prevents abuse (1000 spans/minute per user)
-- All traffic is encrypted with TLS 1.3
-- No authentication tokens are ever exposed to user code
+- Service account key is compiled into the library binary (not visible in source)
+- Key rotation handled automatically through library updates
+- Rate limiting: 1000 spans/minute for anonymous, 10000 spans/minute for authenticated
+- All traffic encrypted with TLS 1.3
+- No authentication tokens exposed to user code
+- Automatic fallback to no-op if Netra's GCP is unavailable
 
 ### Authentication Flow Diagram
 
 ```mermaid
 flowchart TD
-    Start([Zen Library Starts]) --> Check{GCP Project Configured?}
+    Start([Zen Library Starts]) --> Check{OAuth Token Present?}
 
-    Check -->|No| Public[Use Public Project]
-    Check -->|Yes| Private[Use Your Project]
+    Check -->|No| Anonymous[Anonymous Mode]
+    Check -->|Yes| Authenticated[Authenticated Mode]
 
-    Public --> Embedded[Use Embedded Service Account]
-    Private --> UserAuth{Authentication Method?}
+    Anonymous --> Embedded[Use Embedded Service Account]
+    Authenticated --> OAuth[Use OAuth Token]
 
-    UserAuth -->|gcloud| ADC[Application Default Credentials]
-    UserAuth -->|Service Account| SA[Service Account Key]
-    UserAuth -->|GCE/GKE| Metadata[Instance Metadata]
+    Embedded --> Send1[Send to Netra GCP<br/>Anonymous Traces]
+    OAuth --> Send2[Send to Netra GCP<br/>With User Attribution]
 
-    Embedded --> Send1[Send to zen-telemetry-public]
-    ADC --> Send2[Send to your-project]
-    SA --> Send2
-    Metadata --> Send2
+    Send1 --> Public[Public Analytics<br/>30 day retention]
+    Send2 --> Personal[Personal Dashboard<br/>90 day retention]
 
-    Send1 --> Aggregate[Community Analytics]
-    Send2 --> Private2[Your Private Traces]
+    subgraph "OAuth Flow (One-time)"
+        Login[zen.auth.authenticate()] --> Browser[Open Browser]
+        Browser --> Netra[auth.netra.ai]
+        Netra --> Token[Return OAuth Token]
+        Token --> Store[Store Locally]
+    end
 
-    style Public fill:#fff2cc,stroke:#d6b656
-    style Private fill:#d5e8d4,stroke:#82b366
+    Store -.->|Next Run| Check
+
+    style Anonymous fill:#fff2cc,stroke:#d6b656
+    style Authenticated fill:#d5e8d4,stroke:#82b366
     style Embedded fill:#ffe6cc,stroke:#d79b00
-    style Send1 fill:#fff2cc,stroke:#d6b656
-    style Send2 fill:#d5e8d4,stroke:#82b366
+    style OAuth fill:#d4e1f5,stroke:#5b9bd5
 ```
 
 ### Data Privacy & What's Collected
 
-**In the public project, we collect:**
+**In anonymous mode (default), we collect:**
 - Function names (e.g., `zen.orchestrator.run`, `zen.processor.execute`)
 - Execution duration and timestamps
 - Success/failure status
 - Basic error types (no error messages)
+- Token counts and estimated costs (anonymous)
 - Library version and Python version
 - Non-identifying system info (OS type, not hostname)
 
-**We DO NOT collect:**
-- Your data, files, or file contents
-- API keys, passwords, or credentials
-- User inputs or outputs
-- Business logic or proprietary information
-- IP addresses or user identifiers
-- File paths or directory structures
+**In authenticated mode (OAuth), we additionally link:**
+- Your Netra user ID (from OAuth)
+- Session history for your dashboard
+- Cost accumulation for your account
+- Usage patterns for personalized insights
 
-**Example of what a trace looks like:**
+**We NEVER collect (in either mode):**
+- Your actual data, files, or file contents
+- API keys, passwords, or credentials
+- User inputs or outputs to LLMs
+- Business logic or proprietary information
+- IP addresses (except during OAuth login)
+- File paths or directory structures
+- Prompt content or responses
+
+**Example traces:**
 ```json
+// Anonymous mode (default)
 {
+  "trace_id": "7c9e6679-4b5b-4c2b-a5c8",
+  "session_id": "anon_f47ac10b",
+  "user_id": null,
   "spans": [
     {
       "name": "zen.orchestrator.run",
@@ -164,60 +206,78 @@ flowchart TD
       "status": "OK",
       "attributes": {
         "zen.version": "1.2.3",
-        "operation.type": "batch_process",
-        "python.version": "3.11"
+        "tokens.input": 1500,
+        "tokens.output": 750,
+        "cost.estimated_usd": 0.0225
       }
     }
-  ],
-  "user_data": null,
-  "credentials": null,
-  "file_contents": null
+  ]
+}
+
+// Authenticated mode (after OAuth)
+{
+  "trace_id": "8d3f5b7e-6c4a-4d1f-b2e9",
+  "session_id": "auth_8b1a9d3e",
+  "user_id": "user_12345",  // Your Netra account
+  "spans": [
+    {
+      "name": "zen.orchestrator.run",
+      "duration": "145ms",
+      "status": "OK",
+      "attributes": {
+        "zen.version": "1.2.3",
+        "tokens.input": 1500,
+        "tokens.output": 750,
+        "cost.estimated_usd": 0.0225,
+        "dashboard_url": "https://dashboard.netra.ai/user_12345"
+      }
+    }
+  ]
 }
 ```
 
 ### Quick Setup Examples
 
-**Example 1: Use public telemetry (default)**
+**Example 1: Anonymous telemetry (default - zero config)**
 ```python
 # No setup needed - just import and use
 import zen
 
 orchestrator = zen.ZenOrchestrator()
-result = orchestrator.run(config)  # Automatically traced
+result = orchestrator.run(config)  # Automatically traced to Netra GCP
 ```
 
-**Example 2: Use your own GCP project**
-```bash
-# One-time setup
-export GOOGLE_CLOUD_PROJECT="my-company-telemetry"
-gcloud auth application-default login
-```
-
+**Example 2: Authenticated telemetry (OAuth)**
 ```python
 import zen
-# Now uses your private project automatically
-orchestrator = zen.ZenOrchestrator()
-result = orchestrator.run(config)
+from zen.auth import authenticate
+
+# One-time authentication (opens browser)
+auth_token = authenticate()
+
+# Pass token to orchestrator
+orchestrator = zen.ZenOrchestrator(auth_token=auth_token)
+result = orchestrator.run(config)  # Traced with user attribution
+
+# View your personal dashboard at:
+print(f"Dashboard: https://dashboard.netra.ai/user/{auth_token.user_id}")
 ```
 
-**Example 3: Production deployment with service account**
-```bash
-# Create service account (one time)
-gcloud iam service-accounts create zen-telemetry \
-  --display-name="Zen Telemetry Service Account"
+**Example 3: Persist authentication across sessions**
+```python
+import zen
+from zen.auth import authenticate, load_token, save_token
 
-# Grant necessary permissions
-gcloud projects add-iam-policy-binding my-project \
-  --member="serviceAccount:zen-telemetry@my-project.iam.gserviceaccount.com" \
-  --role="roles/cloudtrace.agent"
+# Try to load existing token
+auth_token = load_token()
 
-# Create and download key
-gcloud iam service-accounts keys create zen-telemetry-key.json \
-  --iam-account=zen-telemetry@my-project.iam.gserviceaccount.com
+if not auth_token or auth_token.is_expired():
+    # Need to authenticate
+    auth_token = authenticate()
+    save_token(auth_token)  # Save for next time
 
-# Set environment variables
-export GOOGLE_CLOUD_PROJECT="my-project"
-export GOOGLE_APPLICATION_CREDENTIALS="/path/to/zen-telemetry-key.json"
+orchestrator = zen.ZenOrchestrator(auth_token=auth_token)
+result = orchestrator.run(config)
 ```
 
 **Example 4: Complete opt-out**
@@ -225,25 +285,90 @@ export GOOGLE_APPLICATION_CREDENTIALS="/path/to/zen-telemetry-key.json"
 export ZEN_TELEMETRY_DISABLED=true
 ```
 
-### Switching Between Modes
-
-You can change authentication modes at any time without code changes:
-
-```bash
-# Currently using public project? Switch to private:
-export GOOGLE_CLOUD_PROJECT="my-private-project"
-# Restart your application - now uses private project
-
-# Want to go back to public?
-unset GOOGLE_CLOUD_PROJECT
-# Restart your application - back to public project
-
-# Need to disable temporarily?
-export ZEN_TELEMETRY_DISABLED=true
-# Restart your application - no telemetry
+```python
+import zen
+# No telemetry sent anywhere
+orchestrator = zen.ZenOrchestrator()
+result = orchestrator.run(config)
 ```
 
-The beauty of Zen's approach is that your code never changes - only environment variables.
+### OAuth Implementation Details
+
+```python
+# zen/auth.py
+class NetraAuth:
+    OAUTH_URL = "https://auth.netra.ai/oauth/authorize"
+    TOKEN_URL = "https://auth.netra.ai/oauth/token"
+
+    @staticmethod
+    def authenticate() -> AuthToken:
+        """Initiate OAuth flow"""
+        # Generate PKCE challenge
+        code_verifier = generate_code_verifier()
+        code_challenge = generate_code_challenge(code_verifier)
+
+        # Build authorization URL
+        auth_params = {
+            'client_id': 'zen-library',
+            'redirect_uri': 'http://localhost:8080/callback',
+            'response_type': 'code',
+            'scope': 'telemetry:write profile:read',
+            'code_challenge': code_challenge,
+            'code_challenge_method': 'S256'
+        }
+
+        # Open browser for user login
+        auth_url = f"{NetraAuth.OAUTH_URL}?{urlencode(auth_params)}"
+        webbrowser.open(auth_url)
+
+        # Start local server to receive callback
+        code = start_callback_server()
+
+        # Exchange code for token
+        token_response = requests.post(NetraAuth.TOKEN_URL, {
+            'grant_type': 'authorization_code',
+            'code': code,
+            'code_verifier': code_verifier,
+            'client_id': 'zen-library',
+            'redirect_uri': 'http://localhost:8080/callback'
+        })
+
+        return AuthToken.from_response(token_response.json())
+
+    @staticmethod
+    def refresh_token(refresh_token: str) -> AuthToken:
+        """Refresh an expired token"""
+        response = requests.post(NetraAuth.TOKEN_URL, {
+            'grant_type': 'refresh_token',
+            'refresh_token': refresh_token,
+            'client_id': 'zen-library'
+        })
+        return AuthToken.from_response(response.json())
+```
+
+### Switching Between Modes
+
+You can switch between anonymous and authenticated modes:
+
+```python
+# Start anonymous
+orchestrator = zen.ZenOrchestrator()
+orchestrator.run(config)  # Anonymous traces
+
+# Switch to authenticated
+auth_token = authenticate()
+orchestrator = zen.ZenOrchestrator(auth_token=auth_token)
+orchestrator.run(config)  # Now authenticated
+
+# Go back to anonymous
+orchestrator = zen.ZenOrchestrator()  # No auth token
+orchestrator.run(config)  # Anonymous again
+
+# Or disable completely
+import os
+os.environ['ZEN_TELEMETRY_DISABLED'] = 'true'
+orchestrator.run(config)  # No telemetry at all
+```
 
 ## System Architecture
 
@@ -631,33 +756,31 @@ def my_function():
 
 ### Project Selection Priority (Implementation Reference)
 
-The library follows this hierarchy when determining which GCP project to use:
+The library always uses Netra's GCP project, with authentication determining attribution:
 
 ```mermaid
 flowchart TD
-    Start([Need GCP Project]) --> Env1{GOOGLE_CLOUD_PROJECT set?}
-    Env1 -->|Yes| Use1[Use GOOGLE_CLOUD_PROJECT]
-    Env1 -->|No| Env2{GCP_PROJECT set?}
+    Start([Zen Library Starts]) --> CheckAuth{Auth Token?}
 
-    Env2 -->|Yes| Use2[Use GCP_PROJECT]
-    Env2 -->|No| Meta{Running on GCP?}
+    CheckAuth -->|No| Anonymous[Anonymous Mode]
+    CheckAuth -->|Yes| Authenticated[Authenticated Mode]
 
-    Meta -->|Yes| Metadata[Query Metadata Service]
-    Meta -->|No| Fallback[Use zen-telemetry-public]
+    Anonymous --> UsePublic[Use netra-telemetry-public]
+    Authenticated --> UsePublic
 
-    Metadata --> Valid{Valid Response?}
-    Valid -->|Yes| UseMetadata[Use Metadata Project]
-    Valid -->|No| Fallback
+    UsePublic --> ConfigureAuth{Configure Authentication}
 
-    Use1 --> Validate[Validate Project ID Format]
-    Use2 --> Validate
-    UseMetadata --> Validate
-    Fallback --> Validate
+    ConfigureAuth -->|Anonymous| EmbeddedSA[Use Embedded Service Account]
+    ConfigureAuth -->|Authenticated| OAuthHeader[Add OAuth Bearer Token]
 
-    Validate --> Final[Configure Exporter]
+    EmbeddedSA --> SendTraces[Send Traces to Netra GCP]
+    OAuthHeader --> SendTraces
 
-    style Fallback fill:#ffc,stroke:#333,stroke-width:2px
-    style Validate fill:#cfc,stroke:#333,stroke-width:2px
+    SendTraces -->|Anonymous| AnonStorage[30-day retention<br/>No user attribution]
+    SendTraces -->|Authenticated| UserStorage[90-day retention<br/>User dashboard]
+
+    style UsePublic fill:#ffc,stroke:#333,stroke-width:2px
+    style SendTraces fill:#cfc,stroke:#333,stroke-width:2px
 ```
 
 ### Configuration Implementation
@@ -672,7 +795,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class GCPConfig:
+class TelemetryConfig:
     # Zen's default public project for community telemetry
     DEFAULT_PUBLIC_PROJECT = "zen-telemetry-public"
 
@@ -680,31 +803,41 @@ class GCPConfig:
     PROJECT_ID_PATTERN = re.compile(r'^[a-z][a-z0-9-]{4,28}[a-z0-9]$')
 
     @classmethod
+    def is_enabled(cls) -> bool:
+        """Check if telemetry is enabled (default: True)"""
+        opt_out = os.environ.get('ZEN_TELEMETRY_DISABLED', '').lower()
+        return opt_out not in ('true', '1', 'yes')
+
+    @classmethod
     def get_project_id(cls) -> str:
         """
         Get GCP project ID with fallback hierarchy:
-        1. ZEN_GCP_PROJECT (for Zen-specific override)
-        2. GOOGLE_CLOUD_PROJECT (standard GCP env var)
-        3. GCP_PROJECT (alternate GCP env var)
-        4. GCP Metadata service (if on GCP)
-        5. Zen's default public project
+        1. GOOGLE_CLOUD_PROJECT (standard GCP env var)
+        2. GCP_PROJECT (alternate GCP env var)
+        3. GCP Metadata service (if on GCP)
+        4. Zen's default public project (with embedded auth)
         """
-        # Check environment variables in order
-        for env_var in ['ZEN_GCP_PROJECT', 'GOOGLE_CLOUD_PROJECT', 'GCP_PROJECT']:
+        # Check standard environment variables
+        for env_var in ['GOOGLE_CLOUD_PROJECT', 'GCP_PROJECT']:
             project_id = os.environ.get(env_var)
             if project_id and cls._validate_project_id(project_id):
                 logger.debug(f"Using GCP project from {env_var}: {project_id}")
                 return project_id
 
-        # Try GCP metadata service
+        # Try GCP metadata service (for GCE/GKE environments)
         metadata_project = cls._get_metadata_project()
         if metadata_project:
             logger.debug(f"Using GCP project from metadata: {metadata_project}")
             return metadata_project
 
-        # Fall back to Zen's public project
+        # Fall back to Zen's public project with embedded auth
         logger.info(f"Using Zen default public project: {cls.DEFAULT_PUBLIC_PROJECT}")
         return cls.DEFAULT_PUBLIC_PROJECT
+
+    @classmethod
+    def use_embedded_auth(cls) -> bool:
+        """Check if we should use embedded service account (public project)"""
+        return cls.get_project_id() == cls.DEFAULT_PUBLIC_PROJECT
 
     @classmethod
     def _validate_project_id(cls, project_id: str) -> bool:
@@ -730,6 +863,20 @@ class GCPConfig:
         except Exception:
             pass  # Not on GCP or metadata unavailable
         return None
+
+    @classmethod
+    def get_service_name(cls) -> str:
+        """Get service name for telemetry"""
+        return os.environ.get('ZEN_SERVICE_NAME', 'zen-library')
+
+    @classmethod
+    def get_sample_rate(cls) -> float:
+        """Get sampling rate (default 10%)"""
+        try:
+            rate = float(os.environ.get('ZEN_TELEMETRY_SAMPLE_RATE', '0.1'))
+            return max(0.0, min(1.0, rate))  # Clamp between 0 and 1
+        except ValueError:
+            return 0.1
 ```
 
 ### Public Project Implications
@@ -861,18 +1008,25 @@ mindmap
         Silent failures
 ```
 
-## Environment Variables
+## Environment Variables Reference
 
-| Variable | Description | Default | Security Notes |
-|----------|-------------|---------|----------------|
-| `ZEN_TELEMETRY_DISABLED` | Set to `true`, `1`, or `yes` to disable telemetry | `false` (enabled) | Immediate opt-out |
-| `ZEN_GCP_PROJECT` | Override GCP project for Zen telemetry | None | Use for private isolation |
-| `GOOGLE_CLOUD_PROJECT` | Standard GCP project ID | Auto-detected | Respects existing GCP config |
-| `GCP_PROJECT` | Alternate GCP project ID | Auto-detected | Fallback option |
-| `ZEN_SERVICE_NAME` | Service name in traces | `zen-library` | Identifies your service |
-| `ZEN_TELEMETRY_SAMPLE_RATE` | Sampling rate (0.0-1.0) | `0.1` (10%) | Reduces data volume |
-| `ZEN_TELEMETRY_BATCH_SIZE` | Max spans per batch | `512` | Controls memory usage |
-| `ZEN_TELEMETRY_FLUSH_INTERVAL` | Seconds between exports | `5` | Balances latency/efficiency |
+| Variable | Description | Default | Example | Notes |
+|----------|-------------|---------|---------|--------|
+| `ZEN_TELEMETRY_DISABLED` | Completely disable telemetry | `false` | `true`, `1`, `yes` | Immediate opt-out, no data sent |
+| `ZEN_AUTH_TOKEN` | Cached OAuth token path | `~/.zen/auth.json` | `/custom/path/token.json` | For persistent authentication |
+| `NETRA_API_URL` | Netra API endpoint | `https://api.netra.ai` | `https://staging-api.netra.ai` | For testing/staging environments |
+| `ZEN_SERVICE_NAME` | Service name in traces | `zen-library` | `my-app-prod` | Identifies your service in traces |
+| `ZEN_TELEMETRY_SAMPLE_RATE` | Sampling rate (0.0-1.0) | `0.1` (10%) | `0.05` (5%) | Reduces data volume and costs |
+| `ZEN_TELEMETRY_BATCH_SIZE` | Max spans per batch | `512` | `256` | Lower = less memory, higher = fewer API calls |
+| `ZEN_TELEMETRY_FLUSH_INTERVAL` | Seconds between exports | `5` | `10` | Higher = more batching, lower = lower latency |
+
+### Authentication States
+
+The library operates in one of three states:
+
+1. **Telemetry disabled** (`ZEN_TELEMETRY_DISABLED=true`) → No data sent anywhere
+2. **Anonymous mode** (default, no auth token) → Uses embedded service account for Netra GCP
+3. **Authenticated mode** (OAuth token present) → Sends user-attributed data to Netra GCP
 
 ## Privacy and Security Considerations
 
