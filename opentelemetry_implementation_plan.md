@@ -3,6 +3,248 @@
 ## Overview
 Implement minimal OpenTelemetry data capture for the Zen library with automatic Google Cloud export, enabled by default with opt-out capability.
 
+## Authentication & Security Model
+
+### How Authentication Works - Three Simple Options
+
+Zen's telemetry is designed to "just work" out of the box while giving you full control over your data and costs.
+
+#### Option 1: Zero Setup (Default) - Public Community Telemetry
+**This is what happens when you do nothing:**
+
+```python
+import zen
+# That's it! Telemetry just works with no setup required
+orchestrator = zen.ZenOrchestrator()
+orchestrator.run(config)  # Automatically traced and sent to Zen's public project
+```
+
+**What's happening behind the scenes:**
+- Zen includes an embedded, write-only service account for the public project `zen-telemetry-public`
+- Your traces are sent to this shared community project
+- You pay nothing - Zen covers all GCP costs
+- No authentication setup required on your end
+
+**What data is shared:**
+- Function names and execution times
+- Error rates and basic performance metrics
+- NO personal data, credentials, or business logic
+- All data is aggregated for community insights
+
+**Security guarantees:**
+- The embedded service account can ONLY write trace data
+- It cannot read existing traces or access any other GCP services
+- You cannot access other users' data
+- Data is automatically deleted after 30 days
+
+#### Option 2: Your Own GCP Project (Private)
+**For complete control and privacy:**
+
+```bash
+# Set your GCP project
+export GOOGLE_CLOUD_PROJECT="your-private-project"
+
+# Authenticate (one of these methods)
+gcloud auth application-default login
+# OR use service account key
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"
+```
+
+```python
+import zen
+# Now uses YOUR private GCP project with YOUR authentication
+orchestrator = zen.ZenOrchestrator()
+orchestrator.run(config)  # Traced to your private project
+```
+
+**Benefits:**
+- Complete data isolation - only you can see your traces
+- Full control over data retention and access policies
+- Custom dashboards and alerting
+- Compliance with your organization's security requirements
+- You control and pay for GCP costs
+
+#### Option 3: Completely Disable Telemetry
+**For maximum privacy or testing:**
+
+```bash
+export ZEN_TELEMETRY_DISABLED=true
+```
+
+```python
+import zen
+# No telemetry data collected or sent anywhere
+orchestrator = zen.ZenOrchestrator()
+orchestrator.run(config)  # Runs normally but no tracing
+```
+
+### Embedded Service Account Security Model
+
+The embedded service account in Zen has extremely limited permissions:
+
+```json
+{
+  "permissions": [
+    "cloudtrace.traces.patch"
+  ],
+  "description": "Can only write trace spans to zen-telemetry-public project",
+  "cannot_do": [
+    "Read any existing traces",
+    "Access other GCP services",
+    "Modify project settings",
+    "Create or delete resources",
+    "Access billing information"
+  ]
+}
+```
+
+**Key security features:**
+- The service account key is embedded in the compiled library (not in source code)
+- Key rotation is handled automatically through library updates
+- Rate limiting prevents abuse (1000 spans/minute per user)
+- All traffic is encrypted with TLS 1.3
+- No authentication tokens are ever exposed to user code
+
+### Authentication Flow Diagram
+
+```mermaid
+flowchart TD
+    Start([Zen Library Starts]) --> Check{GCP Project Configured?}
+
+    Check -->|No| Public[Use Public Project]
+    Check -->|Yes| Private[Use Your Project]
+
+    Public --> Embedded[Use Embedded Service Account]
+    Private --> UserAuth{Authentication Method?}
+
+    UserAuth -->|gcloud| ADC[Application Default Credentials]
+    UserAuth -->|Service Account| SA[Service Account Key]
+    UserAuth -->|GCE/GKE| Metadata[Instance Metadata]
+
+    Embedded --> Send1[Send to zen-telemetry-public]
+    ADC --> Send2[Send to your-project]
+    SA --> Send2
+    Metadata --> Send2
+
+    Send1 --> Aggregate[Community Analytics]
+    Send2 --> Private2[Your Private Traces]
+
+    style Public fill:#fff2cc,stroke:#d6b656
+    style Private fill:#d5e8d4,stroke:#82b366
+    style Embedded fill:#ffe6cc,stroke:#d79b00
+    style Send1 fill:#fff2cc,stroke:#d6b656
+    style Send2 fill:#d5e8d4,stroke:#82b366
+```
+
+### Data Privacy & What's Collected
+
+**In the public project, we collect:**
+- Function names (e.g., `zen.orchestrator.run`, `zen.processor.execute`)
+- Execution duration and timestamps
+- Success/failure status
+- Basic error types (no error messages)
+- Library version and Python version
+- Non-identifying system info (OS type, not hostname)
+
+**We DO NOT collect:**
+- Your data, files, or file contents
+- API keys, passwords, or credentials
+- User inputs or outputs
+- Business logic or proprietary information
+- IP addresses or user identifiers
+- File paths or directory structures
+
+**Example of what a trace looks like:**
+```json
+{
+  "spans": [
+    {
+      "name": "zen.orchestrator.run",
+      "duration": "145ms",
+      "status": "OK",
+      "attributes": {
+        "zen.version": "1.2.3",
+        "operation.type": "batch_process",
+        "python.version": "3.11"
+      }
+    }
+  ],
+  "user_data": null,
+  "credentials": null,
+  "file_contents": null
+}
+```
+
+### Quick Setup Examples
+
+**Example 1: Use public telemetry (default)**
+```python
+# No setup needed - just import and use
+import zen
+
+orchestrator = zen.ZenOrchestrator()
+result = orchestrator.run(config)  # Automatically traced
+```
+
+**Example 2: Use your own GCP project**
+```bash
+# One-time setup
+export GOOGLE_CLOUD_PROJECT="my-company-telemetry"
+gcloud auth application-default login
+```
+
+```python
+import zen
+# Now uses your private project automatically
+orchestrator = zen.ZenOrchestrator()
+result = orchestrator.run(config)
+```
+
+**Example 3: Production deployment with service account**
+```bash
+# Create service account (one time)
+gcloud iam service-accounts create zen-telemetry \
+  --display-name="Zen Telemetry Service Account"
+
+# Grant necessary permissions
+gcloud projects add-iam-policy-binding my-project \
+  --member="serviceAccount:zen-telemetry@my-project.iam.gserviceaccount.com" \
+  --role="roles/cloudtrace.agent"
+
+# Create and download key
+gcloud iam service-accounts keys create zen-telemetry-key.json \
+  --iam-account=zen-telemetry@my-project.iam.gserviceaccount.com
+
+# Set environment variables
+export GOOGLE_CLOUD_PROJECT="my-project"
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/zen-telemetry-key.json"
+```
+
+**Example 4: Complete opt-out**
+```bash
+export ZEN_TELEMETRY_DISABLED=true
+```
+
+### Switching Between Modes
+
+You can change authentication modes at any time without code changes:
+
+```bash
+# Currently using public project? Switch to private:
+export GOOGLE_CLOUD_PROJECT="my-private-project"
+# Restart your application - now uses private project
+
+# Want to go back to public?
+unset GOOGLE_CLOUD_PROJECT
+# Restart your application - back to public project
+
+# Need to disable temporarily?
+export ZEN_TELEMETRY_DISABLED=true
+# Restart your application - no telemetry
+```
+
+The beauty of Zen's approach is that your code never changes - only environment variables.
+
 ## System Architecture
 
 ```mermaid
@@ -385,24 +627,23 @@ def my_function():
     # Function logic
 ```
 
-## GCP Project ID Configuration & Security
+## GCP Project Configuration Details
 
-### Project ID Loading Hierarchy
+### Project Selection Priority (Implementation Reference)
+
+The library follows this hierarchy when determining which GCP project to use:
 
 ```mermaid
 flowchart TD
-    Start([Need GCP Project]) --> Env1{ZEN_GCP_PROJECT set?}
-    Env1 -->|Yes| Use1[Use ZEN_GCP_PROJECT]
-    Env1 -->|No| Env2{GOOGLE_CLOUD_PROJECT set?}
+    Start([Need GCP Project]) --> Env1{GOOGLE_CLOUD_PROJECT set?}
+    Env1 -->|Yes| Use1[Use GOOGLE_CLOUD_PROJECT]
+    Env1 -->|No| Env2{GCP_PROJECT set?}
 
-    Env2 -->|Yes| Use2[Use GOOGLE_CLOUD_PROJECT]
-    Env2 -->|No| Env3{GCP_PROJECT set?}
-
-    Env3 -->|Yes| Use3[Use GCP_PROJECT]
-    Env3 -->|No| Meta{Running on GCP?}
+    Env2 -->|Yes| Use2[Use GCP_PROJECT]
+    Env2 -->|No| Meta{Running on GCP?}
 
     Meta -->|Yes| Metadata[Query Metadata Service]
-    Meta -->|No| Fallback[Use Zen Default Project]
+    Meta -->|No| Fallback[Use zen-telemetry-public]
 
     Metadata --> Valid{Valid Response?}
     Valid -->|Yes| UseMetadata[Use Metadata Project]
@@ -410,7 +651,6 @@ flowchart TD
 
     Use1 --> Validate[Validate Project ID Format]
     Use2 --> Validate
-    Use3 --> Validate
     UseMetadata --> Validate
     Fallback --> Validate
 
