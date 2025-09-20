@@ -437,10 +437,61 @@ def test_gcp_export():
 
 ## Rollout Plan
 
-1. **Phase 1**: Implement core telemetry module with opt-out
-2. **Phase 2**: Add basic instrumentation to critical paths
-3. **Phase 3**: Monitor and adjust sampling rates based on usage
-4. **Phase 4**: Add custom metrics and enhanced instrumentation
+```mermaid
+gantt
+    title OpenTelemetry Implementation Roadmap
+    dateFormat YYYY-MM-DD
+    section Phase 1
+    Core Telemetry Module           :a1, 2025-01-20, 5d
+    Opt-out Mechanism               :a2, after a1, 2d
+    Basic Tests                     :a3, after a2, 3d
+
+    section Phase 2
+    Instrument Critical Paths       :b1, after a3, 5d
+    Add GCP Exporter               :b2, after b1, 3d
+    Integration Tests              :b3, after b2, 3d
+
+    section Phase 3
+    Monitor Usage Patterns         :c1, after b3, 7d
+    Adjust Sampling Rates         :c2, after c1, 2d
+    Performance Optimization      :c3, after c2, 3d
+
+    section Phase 4
+    Custom Metrics                :d1, after c3, 5d
+    Enhanced Instrumentation      :d2, after d1, 5d
+    Documentation & Examples      :d3, after d2, 3d
+```
+
+## Telemetry Decision Tree
+
+```mermaid
+graph TD
+    Start([Zen Library Imported]) --> Check{ZEN_TELEMETRY_DISABLED?}
+    Check -->|Not Set| Default[Enable Telemetry]
+    Check -->|true/1/yes| Disabled[Disable Telemetry]
+
+    Default --> GCPCheck{GCP Project Available?}
+    GCPCheck -->|Yes| CloudExport[Export to Cloud Trace]
+    GCPCheck -->|No| LocalOnly[Local Traces Only]
+
+    CloudExport --> Sample{Sample Rate Check}
+    LocalOnly --> Sample
+    Sample -->|Within Rate| Collect[Collect Span]
+    Sample -->|Outside Rate| Skip[Skip Collection]
+
+    Collect --> Batch[Add to Batch]
+    Batch --> Export{Batch Full?}
+    Export -->|Yes| Send[Send to GCP]
+    Export -->|No| Wait[Wait for More]
+
+    Disabled --> NoOp[No Operation]
+    Skip --> NoOp
+
+    style Start fill:#e1f5e1
+    style CloudExport fill:#b3d9ff
+    style Disabled fill:#ffcccc
+    style NoOp fill:#f0f0f0
+```
 
 ## Documentation Updates
 
