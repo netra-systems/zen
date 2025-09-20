@@ -23,22 +23,6 @@ try:
     OPENTELEMETRY_AVAILABLE = True
 except ImportError:
     OPENTELEMETRY_AVAILABLE = False
-    # Create mock classes to prevent import errors
-    class MockTracer:
-        def start_as_current_span(self, *args, **kwargs):
-            return MockSpan()
-
-    class MockSpan:
-        def __enter__(self):
-            return self
-        def __exit__(self, *args):
-            pass
-        def set_status(self, *args, **kwargs):
-            pass
-        def record_exception(self, *args, **kwargs):
-            pass
-        def set_attribute(self, *args, **kwargs):
-            pass
 
 # zen_secrets imports
 try:
@@ -50,6 +34,20 @@ except ImportError:
 from .config import TelemetryConfig, get_config
 
 logger = logging.getLogger(__name__)
+
+
+class NoOpSpan:
+    """No-operation span for when telemetry is disabled"""
+    def __enter__(self):
+        return self
+    def __exit__(self, *args):
+        pass
+    def set_status(self, *args, **kwargs):
+        pass
+    def record_exception(self, *args, **kwargs):
+        pass
+    def set_attribute(self, *args, **kwargs):
+        pass
 
 
 class TelemetryManager:
@@ -77,7 +75,7 @@ class TelemetryManager:
     def __init__(self):
         if not hasattr(self, '_init_complete'):
             self._config = get_config()
-            self._tracer: Optional[Union[trace.Tracer, MockTracer]] = None
+            self._tracer: Optional["trace.Tracer"] = None
             self._secret_manager: Optional[SecretManager] = None
             self._gcp_credentials: Optional[Dict[str, Any]] = None
             self._init_complete = True
@@ -99,13 +97,11 @@ class TelemetryManager:
 
         if not self._config.enabled:
             logger.info("Telemetry disabled via configuration")
-            self._tracer = MockTracer() if not OPENTELEMETRY_AVAILABLE else None
             self._initialized = True
             return False
 
         if not OPENTELEMETRY_AVAILABLE:
             logger.warning("OpenTelemetry not available, telemetry disabled")
-            self._tracer = MockTracer()
             self._initialized = True
             return False
 
@@ -125,7 +121,6 @@ class TelemetryManager:
 
         except Exception as e:
             logger.error(f"Failed to initialize telemetry: {e}")
-            self._tracer = MockTracer()
             self._initialized = True
             return False
 
@@ -209,7 +204,6 @@ class TelemetryManager:
 
         except Exception as e:
             logger.error(f"Failed to setup OpenTelemetry: {e}")
-            self._tracer = MockTracer()
 
     async def _setup_gcp_exporter(self, provider):
         """Setup Google Cloud Trace exporter for community analytics or private projects"""
@@ -273,13 +267,11 @@ class TelemetryManager:
         return None
 
     @property
-    def tracer(self) -> Union["trace.Tracer", MockTracer]:
+    def tracer(self) -> Optional["trace.Tracer"]:
         """Get tracer instance (lazy initialization)"""
-        if self._tracer is None:
+        if self._tracer is None and self.is_enabled():
             # Synchronous initialization for immediate use
             if not self._initialized:
-                # Create a temporary tracer for immediate use
-                self._tracer = MockTracer()
                 # Schedule async initialization if event loop is running
                 try:
                     loop = asyncio.get_running_loop()
@@ -287,8 +279,6 @@ class TelemetryManager:
                 except RuntimeError:
                     # No event loop running, will initialize later
                     pass
-            else:
-                self._tracer = MockTracer()
 
         return self._tracer
 
@@ -333,8 +323,8 @@ class TelemetryManager:
 
     def create_span(self, name: str, attributes: Optional[Dict[str, Any]] = None):
         """Create a new span"""
-        if not self.is_enabled():
-            return MockSpan()
+        if not self.is_enabled() or self.tracer is None:
+            return NoOpSpan()
 
         return self.tracer.start_as_current_span(
             name,
