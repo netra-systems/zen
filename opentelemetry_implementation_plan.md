@@ -396,11 +396,79 @@ def my_function():
 
 ## Privacy and Security Considerations
 
-1. **No PII Collection**: Only collect technical metrics (latency, error rates, function names)
-2. **Sampling**: Default 10% sampling rate to minimize overhead
-3. **Secure Transport**: All data sent over HTTPS to Google Cloud
-4. **Data Retention**: Follow Google Cloud's default retention policies (30 days)
-5. **Opt-Out First**: Easy, documented opt-out mechanism
+```mermaid
+mindmap
+  root((Telemetry Security))
+    Data Collection
+      No PII
+        Function names only
+        No user data
+        No credentials
+      Minimal scope
+        Technical metrics
+        Error rates
+        Latency data
+    Transport Security
+      HTTPS only
+      TLS 1.3
+      Certificate validation
+      No fallback to HTTP
+    Privacy Controls
+      Opt-out mechanism
+        Environment variable
+        Immediate effect
+        No restart needed
+      Data sampling
+        10% default rate
+        Configurable
+        Reduces data volume
+    Data Handling
+      Google Cloud compliance
+        SOC 2
+        ISO 27001
+        GDPR compliant
+      Retention policies
+        30 day default
+        Auto-deletion
+        No long-term storage
+```
+
+## Data Privacy Flow
+
+```mermaid
+flowchart TB
+    subgraph "Data Collection"
+        A[Function Call] --> B{Contains PII?}
+        B -->|Yes| C[Filter Out]
+        B -->|No| D[Add to Trace]
+        C --> E[Technical Data Only]
+        D --> E
+    end
+
+    subgraph "Sampling Decision"
+        E --> F{Within Sample Rate?}
+        F -->|Yes 10%| G[Process Span]
+        F -->|No 90%| H[Discard]
+    end
+
+    subgraph "Export Pipeline"
+        G --> I[Batch Processor]
+        I --> J{Batch Ready?}
+        J -->|Yes| K[Encrypt with TLS]
+        J -->|No| L[Buffer]
+        K --> M[Send to GCP]
+    end
+
+    subgraph "User Control"
+        N[ENV: ZEN_TELEMETRY_DISABLED] -.->|Override| B
+        N -.-> F
+    end
+
+    style A fill:#f9f9f9
+    style M fill:#9cf
+    style H fill:#fcc
+    style N fill:#ffc
+```
 
 ## Performance Impact
 
