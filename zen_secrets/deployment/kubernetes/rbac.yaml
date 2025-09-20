@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: zen-secrets-manager
+  namespace: zen-secrets
+  annotations:
+    iam.gke.io/gcp-service-account: zen-secrets@PROJECT_ID.iam.gserviceaccount.com
+  labels:
+    app.kubernetes.io/name: zen-secrets
+    app.kubernetes.io/component: secret-management
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: zen-secrets-manager
+  labels:
+    app.kubernetes.io/name: zen-secrets
+    app.kubernetes.io/component: secret-management
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+- apiGroups: ["secrets-store.csi.x-k8s.io"]
+  resources: ["secretproviderclasses"]
+  verbs: ["get", "list", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["serviceaccounts"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: zen-secrets-manager
+  labels:
+    app.kubernetes.io/name: zen-secrets
+    app.kubernetes.io/component: secret-management
+subjects:
+- kind: ServiceAccount
+  name: zen-secrets-manager
+  namespace: zen-secrets
+roleRef:
+  kind: ClusterRole
+  name: zen-secrets-manager
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: zen-secrets-operator
+  namespace: zen-secrets
+  labels:
+    app.kubernetes.io/name: zen-secrets
+    app.kubernetes.io/component: secret-management
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "create", "update", "patch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: zen-secrets-operator
+  namespace: zen-secrets
+  labels:
+    app.kubernetes.io/name: zen-secrets
+    app.kubernetes.io/component: secret-management
+subjects:
+- kind: ServiceAccount
+  name: zen-secrets-manager
+  namespace: zen-secrets
+roleRef:
+  kind: Role
+  name: zen-secrets-operator
+  apiGroup: rbac.authorization.k8s.io
