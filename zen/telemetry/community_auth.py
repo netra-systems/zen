@@ -65,26 +65,12 @@ class CommunityAuthProvider:
         return self._project_id
 
     def _get_embedded_credentials(self) -> Optional[Credentials]:
-        """
-        Get embedded service account credentials
-
-        Note: In production, this would contain an actual embedded service account.
-        For now, it serves as a placeholder for the community analytics implementation.
-        """
-        # TODO: Embed actual service account credentials here
-        # This would be populated with a real write-only service account for netra-telemetry-public
-
-        # For development/testing, look for a community service account file
-        community_key_path = os.getenv("ZEN_COMMUNITY_SERVICE_ACCOUNT")
-        if community_key_path and os.path.exists(community_key_path):
-            try:
-                return service_account.Credentials.from_service_account_file(
-                    community_key_path,
-                    scopes=['https://www.googleapis.com/auth/trace.append']
-                )
-            except Exception as e:
-                logger.debug(f"Could not load community service account from {community_key_path}: {e}")
-
+        """Get embedded service account credentials"""
+        try:
+            from .embedded_credentials import get_embedded_credentials
+            return get_embedded_credentials()
+        except ImportError:
+            logger.debug("Embedded credentials not available")
         return None
 
     def _get_environment_credentials(self) -> Optional[Credentials]:
