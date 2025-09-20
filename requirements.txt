@@ -1,6 +1,18 @@
-# Core dependencies for Netra Orchestrator Client
+# Core dependencies for Netra Zen Orchestrator
 PyYAML>=6.0
 python-dateutil>=2.8.2
+
+# Secret Management System dependencies
+google-cloud-secret-manager>=2.20.0
+kubernetes-asyncio>=24.2.0
+cryptography>=41.0.0
+prometheus-client>=0.20.0
+
+# OpenTelemetry dependencies for Zen monitoring
+opentelemetry-api>=1.20.0
+opentelemetry-sdk>=1.20.0
+opentelemetry-exporter-gcp-trace>=1.6.0
+opentelemetry-instrumentation>=0.41b0
 
 # Development dependencies (install with: pip install -r requirements-dev.txt)
 # pytest>=7.0.0
