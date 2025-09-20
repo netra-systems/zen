@@ -4,3 +4,7 @@
 check_install.py
 /venv
 $HOME
+.claude
+.configzen/telemetry/embedded_credentials.py
+zen-community-key.json
+scripts/embed_credentials.py

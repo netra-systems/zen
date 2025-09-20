@@ -79,6 +79,24 @@ except ImportError as e:
     ClaudePricingEngine = None
     TokenUsageData = None
 
+# Add telemetry imports
+try:
+    from zen.telemetry import traced, telemetry_manager, trace_performance
+    TELEMETRY_AVAILABLE = True
+except ImportError as e:
+    # Graceful fallback if telemetry package is not available
+    TELEMETRY_AVAILABLE = False
+    # Create no-op decorator for when telemetry is not available
+    def traced(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
+    def trace_performance(*args, **kwargs):
+        class NoOpContext:
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+        return NoOpContext()
+
 
 # Setup logging
 logging.basicConfig(
@@ -205,6 +223,10 @@ class InstanceStatus:
 class ClaudeInstanceOrchestrator:
     """Orchestrator for managing multiple Claude Code instances"""
 
+    @traced(
+        "orchestrator.init",
+        attributes={"operation.type": "orchestrator_initialization"}
+    )
     def __init__(self, workspace_dir: Path, max_console_lines: int = 5, startup_delay: float = 1.0,
                  max_line_length: int = 500, status_report_interval: int = 30,
                  quiet: bool = False,
@@ -442,6 +464,11 @@ class ClaudeInstanceOrchestrator:
             logger.error(f"Error reading command file {command_file}: {e}")
             return {"exists": False, "error": str(e)}
 
+    @traced(
+        "orchestrator.run_instance",
+        attributes={"operation.type": "instance_execution"},
+        capture_args=True
+    )
     async def run_instance(self, name: str) -> bool:
         """Run a single Claude Code instance asynchronously"""
         if name not in self.instances:
@@ -747,6 +774,11 @@ class ClaudeInstanceOrchestrator:
             # Note: StreamReader objects in asyncio don't have .close() method
             # They are automatically closed when the process terminates
 
+    @traced(
+        "orchestrator.run_all_instances",
+        attributes={"operation.type": "batch_execution"},
+        capture_args=True
+    )
     async def run_all_instances(self, timeout: int = 300) -> Dict[str, bool]:
         """Run all instances with configurable soft startup delay between launches"""
         instance_names = list(self.instances.keys())
@@ -2323,6 +2355,11 @@ def create_direct_instance(args, workspace: Path) -> Optional[InstanceConfig]:
         max_tokens_per_command=args.overall_token_budget
     )
 
+@traced(
+    "orchestrator.main",
+    attributes={"operation.type": "orchestrator_main"},
+    capture_args=False
+)
 async def main():
     """Main orchestrator function"""
     parser = argparse.ArgumentParser(description="Claude Code Instance Orchestrator")
@@ -2356,6 +2393,10 @@ async def main():
                        help="Seconds between rolling status reports (default: 5)")
     parser.add_argument("--start-at", type=str, default=None,
                        help="Schedule orchestration to start at specific time. Examples: '2h' (2 hours from now), '30m' (30 minutes), '14:30' (2:30 PM today), '1am' (1 AM today/tomorrow)")
+
+    # Telemetry options
+    parser.add_argument("--no-telemetry", action="store_true",
+                       help="Disable telemetry for this session (equivalent to ZEN_TELEMETRY_DISABLED=true)")
 
     # Direct command options
     parser.add_argument("--instance-name", type=str, help="Instance name for direct command execution")
@@ -2391,6 +2432,10 @@ async def main():
                        help="Show LLM prompt template for configuration generation")
 
     args = parser.parse_args()
+
+    # Handle telemetry flag
+    if args.no_telemetry:
+        os.environ['ZEN_TELEMETRY_DISABLED'] = 'true'
 
     # Initialize config budget settings (will be populated if config file is loaded)
     config_budget_settings = {}
