@@ -108,6 +108,153 @@ On first use, display clear consent request:
 ╚══════════════════════════════════════════════════════════╝
 ```
 
+## System Architecture
+
+### High-Level Data Flow
+```mermaid
+graph TB
+    subgraph "Client Side"
+        A[LLM API Call] --> B[Response Handler]
+        B --> C[Token Counter]
+        C --> D[Cost Calculator]
+        D --> E[Privacy Filter]
+        E --> F[Telemetry Queue]
+    end
+
+    subgraph "Transmission Layer"
+        F --> G{Batch Size Reached?}
+        G -->|Yes| H[Batch Processor]
+        G -->|No| I[Timer Check]
+        I -->|Timeout| H
+        I -->|Wait| F
+        H --> J[Circuit Breaker]
+    end
+
+    subgraph "Network Layer"
+        J --> K{Circuit Open?}
+        K -->|No| L[HTTP Client]
+        K -->|Yes| M[Local Buffer]
+        L --> N[API Endpoint]
+        L -->|Error| O[Retry Logic]
+        O --> M
+    end
+
+    subgraph "Server Side"
+        N --> P[API Gateway]
+        P --> Q[Validation]
+        Q --> R[Data Store]
+        R --> S[Analytics Engine]
+    end
+
+    style A fill:#e1f5fe
+    style E fill:#fff3e0
+    style J fill:#ffebee
+    style N fill:#e8f5e9
+```
+
+### Component Interaction Sequence
+```mermaid
+sequenceDiagram
+    participant User
+    participant ZenOrchestrator
+    participant TelemetryService
+    participant PrivacyFilter
+    participant APIClient
+    participant RemoteAPI
+
+    User->>ZenOrchestrator: Execute prompt
+    ZenOrchestrator->>ZenOrchestrator: Process with LLM
+    ZenOrchestrator->>TelemetryService: Send cost data
+
+    TelemetryService->>PrivacyFilter: Sanitize data
+    PrivacyFilter-->>TelemetryService: Cleaned data
+
+    TelemetryService->>TelemetryService: Add to queue
+
+    alt Batch ready
+        TelemetryService->>APIClient: Send batch
+        APIClient->>RemoteAPI: POST /telemetry
+        RemoteAPI-->>APIClient: 200 OK
+        APIClient-->>TelemetryService: Success
+    else Batch not ready
+        TelemetryService->>TelemetryService: Wait for more data
+    end
+
+    alt Transmission failure
+        APIClient-->>TelemetryService: Error
+        TelemetryService->>TelemetryService: Store in local buffer
+        TelemetryService->>TelemetryService: Schedule retry
+    end
+```
+
+### State Machine for Circuit Breaker
+```mermaid
+stateDiagram-v2
+    [*] --> Closed
+    Closed --> Open: Failure threshold reached
+    Closed --> Closed: Success
+    Open --> HalfOpen: Timeout expired
+    HalfOpen --> Closed: Success
+    HalfOpen --> Open: Failure
+    Open --> Open: Request blocked
+
+    note right of Closed
+        Normal operation
+        All requests pass through
+    end note
+
+    note right of Open
+        Circuit tripped
+        Fast-fail all requests
+        Use local buffer
+    end note
+
+    note right of HalfOpen
+        Testing recovery
+        Limited requests allowed
+    end note
+```
+
+### Data Privacy Pipeline
+```mermaid
+graph LR
+    subgraph "Input Data"
+        A[Raw Prompt Data]
+        B[User Context]
+        C[Cost Metrics]
+    end
+
+    subgraph "Privacy Processing"
+        D[PII Detection]
+        E[Pattern Matching]
+        F[Content Hashing]
+        G[Path Stripping]
+    end
+
+    subgraph "Output Data"
+        H[Sanitized Metadata]
+        I[Hashed IDs]
+        J[Anonymous Metrics]
+    end
+
+    A --> D
+    B --> D
+    D --> E
+    E --> F
+    F --> G
+    G --> H
+
+    B --> F
+    F --> I
+
+    C --> J
+
+    style D fill:#ffebee
+    style E fill:#ffebee
+    style F fill:#ffebee
+    style G fill:#ffebee
+```
+
 ## 1. Data Structure
 
 ### Cost Data Schema
@@ -392,3 +539,75 @@ TELEMETRY_BUFFER_SIZE=1000
 - [ ] Documentation updated
 - [ ] Rollback plan prepared
 - [ ] Performance baselines established
+
+## 10. Implementation Timeline
+
+```mermaid
+gantt
+    title Cost Telemetry Implementation Schedule
+    dateFormat YYYY-MM-DD
+    section Phase 1 - Foundation
+    Data structures design          :done, des1, 2025-01-19, 2d
+    Privacy filter implementation   :active, priv1, 2025-01-21, 3d
+    Local buffering system          :buff1, after priv1, 2d
+
+    section Phase 2 - Core Features
+    Telemetry service core          :tel1, after buff1, 4d
+    Circuit breaker pattern         :circ1, after tel1, 2d
+    Retry logic implementation      :ret1, after tel1, 2d
+
+    section Phase 3 - Integration
+    API client development          :api1, after circ1 ret1, 3d
+    Batch processing logic          :batch1, after api1, 2d
+    Queue management                :queue1, after batch1, 2d
+
+    section Phase 4 - Testing
+    Unit tests                      :test1, after queue1, 3d
+    Integration tests               :test2, after test1, 2d
+    Load testing                    :test3, after test2, 2d
+
+    section Phase 5 - Deployment
+    Staging deployment              :dep1, after test3, 1d
+    Production rollout              :dep2, after dep1, 2d
+    Monitoring setup                :mon1, after dep2, 1d
+```
+
+## 11. Error Flow Diagram
+
+```mermaid
+flowchart TD
+    Start([Telemetry Data Ready]) --> Send[Send to API]
+    Send --> Check{Response OK?}
+
+    Check -->|Yes| Success[Log Success]
+    Success --> End([Complete])
+
+    Check -->|No| ErrorType{Error Type?}
+
+    ErrorType -->|Network| Retry{Retry Count < Max?}
+    ErrorType -->|Rate Limit| Backoff[Exponential Backoff]
+    ErrorType -->|Validation| Log[Log Error]
+    ErrorType -->|Auth| RefreshAuth[Refresh Token]
+
+    Retry -->|Yes| Wait1[Wait & Retry]
+    Retry -->|No| Buffer[Store in Buffer]
+
+    Backoff --> Wait2[Wait Longer]
+    Wait2 --> Send
+
+    Wait1 --> Send
+
+    RefreshAuth --> AuthCheck{Auth Success?}
+    AuthCheck -->|Yes| Send
+    AuthCheck -->|No| Buffer
+
+    Buffer --> Schedule[Schedule Later]
+    Schedule --> End
+
+    Log --> Discard[Discard Invalid Data]
+    Discard --> End
+
+    style Success fill:#4caf50
+    style Buffer fill:#ff9800
+    style Discard fill:#f44336
+```
