@@ -19,7 +19,7 @@ graph TB
     end
 
     subgraph "Instrumented Functions"
-        J[@traced decorator] --> K[Function Execution]
+        J[Traced Decorator] --> K[Function Execution]
         K --> L{Success?}
         L -->|Yes| M[Set OK Status]
         L -->|No| N[Record Exception]
@@ -385,14 +385,254 @@ def my_function():
     # Function logic
 ```
 
+## GCP Project ID Configuration & Security
+
+### Project ID Loading Hierarchy
+
+```mermaid
+flowchart TD
+    Start([Need GCP Project]) --> Env1{ZEN_GCP_PROJECT set?}
+    Env1 -->|Yes| Use1[Use ZEN_GCP_PROJECT]
+    Env1 -->|No| Env2{GOOGLE_CLOUD_PROJECT set?}
+
+    Env2 -->|Yes| Use2[Use GOOGLE_CLOUD_PROJECT]
+    Env2 -->|No| Env3{GCP_PROJECT set?}
+
+    Env3 -->|Yes| Use3[Use GCP_PROJECT]
+    Env3 -->|No| Meta{Running on GCP?}
+
+    Meta -->|Yes| Metadata[Query Metadata Service]
+    Meta -->|No| Fallback[Use Zen Default Project]
+
+    Metadata --> Valid{Valid Response?}
+    Valid -->|Yes| UseMetadata[Use Metadata Project]
+    Valid -->|No| Fallback
+
+    Use1 --> Validate[Validate Project ID Format]
+    Use2 --> Validate
+    Use3 --> Validate
+    UseMetadata --> Validate
+    Fallback --> Validate
+
+    Validate --> Final[Configure Exporter]
+
+    style Fallback fill:#ffc,stroke:#333,stroke-width:2px
+    style Validate fill:#cfc,stroke:#333,stroke-width:2px
+```
+
+### Configuration Implementation
+
+```python
+# zen/telemetry/config.py
+import os
+import re
+import requests
+from typing import Optional
+import logging
+
+logger = logging.getLogger(__name__)
+
+class GCPConfig:
+    # Zen's default public project for community telemetry
+    DEFAULT_PUBLIC_PROJECT = "zen-telemetry-public"
+
+    # Regex for valid GCP project IDs
+    PROJECT_ID_PATTERN = re.compile(r'^[a-z][a-z0-9-]{4,28}[a-z0-9]$')
+
+    @classmethod
+    def get_project_id(cls) -> str:
+        """
+        Get GCP project ID with fallback hierarchy:
+        1. ZEN_GCP_PROJECT (for Zen-specific override)
+        2. GOOGLE_CLOUD_PROJECT (standard GCP env var)
+        3. GCP_PROJECT (alternate GCP env var)
+        4. GCP Metadata service (if on GCP)
+        5. Zen's default public project
+        """
+        # Check environment variables in order
+        for env_var in ['ZEN_GCP_PROJECT', 'GOOGLE_CLOUD_PROJECT', 'GCP_PROJECT']:
+            project_id = os.environ.get(env_var)
+            if project_id and cls._validate_project_id(project_id):
+                logger.debug(f"Using GCP project from {env_var}: {project_id}")
+                return project_id
+
+        # Try GCP metadata service
+        metadata_project = cls._get_metadata_project()
+        if metadata_project:
+            logger.debug(f"Using GCP project from metadata: {metadata_project}")
+            return metadata_project
+
+        # Fall back to Zen's public project
+        logger.info(f"Using Zen default public project: {cls.DEFAULT_PUBLIC_PROJECT}")
+        return cls.DEFAULT_PUBLIC_PROJECT
+
+    @classmethod
+    def _validate_project_id(cls, project_id: str) -> bool:
+        """Validate GCP project ID format"""
+        if not cls.PROJECT_ID_PATTERN.match(project_id):
+            logger.warning(f"Invalid GCP project ID format: {project_id}")
+            return False
+        return True
+
+    @classmethod
+    def _get_metadata_project(cls) -> Optional[str]:
+        """Query GCP metadata service for project ID"""
+        try:
+            response = requests.get(
+                "http://metadata.google.internal/computeMetadata/v1/project/project-id",
+                headers={"Metadata-Flavor": "Google"},
+                timeout=1.0
+            )
+            if response.status_code == 200:
+                project_id = response.text.strip()
+                if cls._validate_project_id(project_id):
+                    return project_id
+        except Exception:
+            pass  # Not on GCP or metadata unavailable
+        return None
+```
+
+### Public Project Implications
+
+```mermaid
+graph LR
+    subgraph "User's Environment"
+        A[Zen Library] -->|Sends traces| B{Which Project?}
+    end
+
+    subgraph "Project Types"
+        B -->|User's Project| C[Private GCP Project]
+        B -->|No Config| D[zen-telemetry-public]
+
+        C --> E[User Controls]
+        C --> F[User Pays]
+        C --> G[User's Data]
+
+        D --> H[Zen Controls]
+        D --> I[Zen Pays]
+        D --> J[Aggregated Data]
+    end
+
+    subgraph "Security & Privacy"
+        G --> K[Full Isolation]
+        J --> L[Shared Pool]
+        L --> M[No PII]
+        L --> N[Rate Limited]
+        L --> O[Sampled]
+    end
+
+    style D fill:#ffc,stroke:#333,stroke-width:2px
+    style C fill:#cfc,stroke:#333,stroke-width:2px
+```
+
+### Rate Limiting & Quotas
+
+```python
+# zen/telemetry/rate_limiter.py
+from time import time
+from threading import Lock
+from typing import Dict, Tuple
+
+class TelemetryRateLimiter:
+    """
+    Rate limiter for telemetry to prevent quota exhaustion
+    """
+    def __init__(self):
+        self.limits = {
+            'zen-telemetry-public': {
+                'spans_per_minute': 1000,
+                'spans_per_hour': 10000,
+                'bytes_per_minute': 1_000_000  # 1MB
+            },
+            'default': {
+                'spans_per_minute': 10000,
+                'spans_per_hour': 100000,
+                'bytes_per_minute': 10_000_000  # 10MB
+            }
+        }
+        self.counters: Dict[str, Tuple[float, int]] = {}
+        self.lock = Lock()
+
+    def should_send(self, project_id: str, span_size: int) -> bool:
+        """Check if span should be sent based on rate limits"""
+        with self.lock:
+            limits = self.limits.get(project_id, self.limits['default'])
+            current_time = time()
+
+            # Check per-minute limit
+            minute_key = f"{project_id}:minute"
+            minute_start, minute_count = self.counters.get(minute_key, (current_time, 0))
+
+            if current_time - minute_start > 60:
+                # Reset minute counter
+                self.counters[minute_key] = (current_time, 1)
+            elif minute_count >= limits['spans_per_minute']:
+                logger.warning(f"Rate limit exceeded for {project_id}")
+                return False
+            else:
+                self.counters[minute_key] = (minute_start, minute_count + 1)
+
+            return True
+```
+
+### Security Considerations
+
+```mermaid
+mindmap
+  root((GCP Project Security))
+    Public Project Risks
+      Data Exposure
+        Aggregated only
+        No user secrets
+        Function names visible
+      Resource Limits
+        Shared quotas
+        Rate limiting
+        Potential blocking
+      Access Control
+        Read-only for users
+        Zen admin access
+        Public dashboards
+    Private Project Benefits
+      Full Control
+        Custom quotas
+        Access policies
+        Data retention
+      Cost Management
+        Direct billing
+        Usage monitoring
+        Budget alerts
+      Compliance
+        Data residency
+        Audit logs
+        Regulatory needs
+    Mitigation Strategies
+      Default Sampling
+        10% rate
+        Configurable
+        Reduces volume
+      Data Filtering
+        No PII
+        No credentials
+        Technical only
+      Automatic Fallback
+        Graceful degradation
+        Local-only mode
+        Silent failures
+```
+
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `ZEN_TELEMETRY_DISABLED` | Set to `true`, `1`, or `yes` to disable telemetry | `false` (enabled) |
-| `GOOGLE_CLOUD_PROJECT` | GCP project ID for trace export | Auto-detected |
-| `ZEN_SERVICE_NAME` | Service name in traces | `zen-library` |
-| `ZEN_TELEMETRY_SAMPLE_RATE` | Sampling rate (0.0-1.0) | `0.1` (10%) |
+| Variable | Description | Default | Security Notes |
+|----------|-------------|---------|----------------|
+| `ZEN_TELEMETRY_DISABLED` | Set to `true`, `1`, or `yes` to disable telemetry | `false` (enabled) | Immediate opt-out |
+| `ZEN_GCP_PROJECT` | Override GCP project for Zen telemetry | None | Use for private isolation |
+| `GOOGLE_CLOUD_PROJECT` | Standard GCP project ID | Auto-detected | Respects existing GCP config |
+| `GCP_PROJECT` | Alternate GCP project ID | Auto-detected | Fallback option |
+| `ZEN_SERVICE_NAME` | Service name in traces | `zen-library` | Identifies your service |
+| `ZEN_TELEMETRY_SAMPLE_RATE` | Sampling rate (0.0-1.0) | `0.1` (10%) | Reduces data volume |
+| `ZEN_TELEMETRY_BATCH_SIZE` | Max spans per batch | `512` | Controls memory usage |
+| `ZEN_TELEMETRY_FLUSH_INTERVAL` | Seconds between exports | `5` | Balances latency/efficiency |
 
 ## Privacy and Security Considerations
 
