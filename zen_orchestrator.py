@@ -581,79 +581,125 @@ class ClaudeInstanceOrchestrator:
             status.status = "running"
             status.start_time = time.time()
 
-            cmd = self.build_claude_command(config)
-            logger.info(f"Command: {' '.join(cmd)}")
-            logger.info(f"Permission mode: {config.permission_mode} (Platform: {platform.system()})")
+            # Check if adaptive budget management is enabled and should be used
+            if (hasattr(self.budget_manager, 'execute_adaptive_command') and
+                hasattr(self.budget_manager, 'is_adaptive_mode') and
+                self.budget_manager.is_adaptive_mode):
 
-            # Create the async process with Mac-friendly environment
-            env = os.environ.copy()
-            
-            # Add common Mac paths to PATH if not present
-            if platform.system() == "Darwin":  # macOS
-                mac_paths = [
-                    "/opt/homebrew/bin",      # Homebrew ARM
-                    "/usr/local/bin",         # Homebrew Intel
-                    "/usr/bin",               # System binaries
-                    str(Path.home() / ".local" / "bin"),  # User local
-                ]
-                current_path = env.get("PATH", "")
-                for mac_path in mac_paths:
-                    if mac_path not in current_path:
-                        env["PATH"] = f"{mac_path}:{current_path}"
-                        current_path = env["PATH"]
-            
-            # Create the async process
-            process = await asyncio.create_subprocess_exec(
-                *cmd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-                cwd=self.workspace_dir,
-                env=env
-            )
+                logger.info("🚀 Using adaptive budget execution instead of direct Claude CLI")
 
-            status.pid = process.pid
-            logger.info(f"Instance {name} started with PID {process.pid}")
+                # Execute using adaptive budget management
+                try:
+                    context = {
+                        'workspace_dir': str(self.workspace_dir),
+                        'command_config': config,
+                        'instance_name': name
+                    }
 
-            # For stream-json format, stream output in parallel with process execution
-            if config.output_format == "stream-json":
-                # Create streaming task but don't await it yet
-                stream_task = asyncio.create_task(self._stream_output_parallel(name, process))
+                    result = self.budget_manager.execute_adaptive_command(config.command, context)
 
-                # Wait for process to complete
-                returncode = await process.wait()
+                    # Update status based on adaptive execution result
+                    status.end_time = time.time()
+                    if result.success:
+                        status.status = "completed"
+                        status.total_tokens = result.total_tokens_used or 0
+                        status.input_tokens = result.total_tokens_used or 0  # Approximate
+                        status.output_tokens = 0  # Approximate
+                        logger.info(f"✅ Adaptive execution completed for {name}: {result.todos_completed} todos completed")
+                    else:
+                        status.status = "failed"
+                        status.error = "Adaptive execution failed"
+                        logger.error(f"❌ Adaptive execution failed for {name}")
 
-                # Now wait for streaming to complete
-                await stream_task
+                    # Update budget tracking
+                    if self.budget_manager and result.total_tokens_used:
+                        self._update_budget_tracking(status, name)
+
+                    return result.success
+
+                except Exception as e:
+                    logger.error(f"❌ Adaptive execution error for {name}: {e}")
+                    status.status = "failed"
+                    status.error = f"Adaptive execution error: {str(e)}"
+                    status.end_time = time.time()
+                    return False
             else:
-                # For non-streaming formats, use traditional communicate
-                stdout, stderr = await process.communicate()
-                returncode = process.returncode
+                # Fall back to standard Claude CLI execution
+                logger.info("📋 Using standard Claude CLI execution")
 
-                if stdout:
-                    stdout_str = stdout.decode() if isinstance(stdout, bytes) else stdout
-                    status.output += stdout_str
-                    # Parse token usage from final output
-                    self._parse_final_output_token_usage(stdout_str, status, config.output_format, name)
-                if stderr:
-                    status.error += stderr.decode() if isinstance(stderr, bytes) else stderr
+                cmd = self.build_claude_command(config)
+                logger.info(f"Command: {' '.join(cmd)}")
+                logger.info(f"Permission mode: {config.permission_mode} (Platform: {platform.system()})")
 
-            status.end_time = time.time()
+                # Create the async process with Mac-friendly environment
+                env = os.environ.copy()
 
-            # Save metrics to database if CloudSQL is enabled
-            # Database persistence disabled - metrics preserved in local display only
-            if False:  # CloudSQL functionality removed
-                await self._save_metrics_to_database(name, config, status)
+                # Add common Mac paths to PATH if not present
+                if platform.system() == "Darwin":  # macOS
+                    mac_paths = [
+                        "/opt/homebrew/bin",      # Homebrew ARM
+                        "/usr/local/bin",         # Homebrew Intel
+                        "/usr/bin",               # System binaries
+                        str(Path.home() / ".local" / "bin"),  # User local
+                    ]
+                    current_path = env.get("PATH", "")
+                    for mac_path in mac_paths:
+                        if mac_path not in current_path:
+                            env["PATH"] = f"{mac_path}:{current_path}"
+                            current_path = env["PATH"]
 
-            if returncode == 0:
-                status.status = "completed"
-                logger.info(f"Instance {name} completed successfully")
-                return True
-            else:
-                status.status = "failed"
-                logger.error(f"Instance {name} failed with return code {returncode}")
-                if status.error:
-                    logger.error(f"Error output: {status.error}")
-                return False
+                # Create the async process
+                process = await asyncio.create_subprocess_exec(
+                    *cmd,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                    cwd=self.workspace_dir,
+                    env=env
+                )
+
+                status.pid = process.pid
+                logger.info(f"Instance {name} started with PID {process.pid}")
+
+                # For stream-json format, stream output in parallel with process execution
+                if config.output_format == "stream-json":
+                    # Create streaming task but don't await it yet
+                    stream_task = asyncio.create_task(self._stream_output_parallel(name, process))
+
+                    # Wait for process to complete
+                    returncode = await process.wait()
+
+                    # Now wait for streaming to complete
+                    await stream_task
+                else:
+                    # For non-streaming formats, use traditional communicate
+                    stdout, stderr = await process.communicate()
+                    returncode = process.returncode
+
+                    if stdout:
+                        stdout_str = stdout.decode() if isinstance(stdout, bytes) else stdout
+                        status.output += stdout_str
+                        # Parse token usage from final output
+                        self._parse_final_output_token_usage(stdout_str, status, config.output_format, name)
+                    if stderr:
+                        status.error += stderr.decode() if isinstance(stderr, bytes) else stderr
+
+                status.end_time = time.time()
+
+                # Save metrics to database if CloudSQL is enabled
+                # Database persistence disabled - metrics preserved in local display only
+                if False:  # CloudSQL functionality removed
+                    await self._save_metrics_to_database(name, config, status)
+
+                if returncode == 0:
+                    status.status = "completed"
+                    logger.info(f"Instance {name} completed successfully")
+                    return True
+                else:
+                    status.status = "failed"
+                    logger.error(f"Instance {name} failed with return code {returncode}")
+                    if status.error:
+                        logger.error(f"Error output: {status.error}")
+                    return False
 
         except Exception as e:
             status.status = "failed"
