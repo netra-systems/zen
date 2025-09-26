@@ -96,19 +96,50 @@ config = AdaptiveConfig(
 
 ## CLI Integration
 
+The adaptive budget management is now fully integrated with the zen orchestrator CLI:
+
 ```bash
 # Enable adaptive budget management
-zen "/analyze-code" --adaptive-budget --total-budget 1000
+zen "/analyze-code" --adaptive-budget --overall-token-budget 1000
 
-# Custom checkpoint intervals
-zen "/debug-issue" --adaptive-budget --checkpoint-intervals 0.25,0.5,0.75,1.0
+# Custom checkpoint intervals for more frequent monitoring
+zen "/debug-issue" --adaptive-budget --overall-token-budget 1500 \
+    --checkpoint-intervals 0.25,0.5,0.75,1.0
 
-# Set completion probability threshold
-zen "/optimize" --adaptive-budget --min-completion-prob 0.4 --restart-threshold 0.85
+# Conservative settings for production tasks
+zen "/optimize-performance" --adaptive-budget --overall-token-budget 2000 \
+    --restart-threshold 0.8 --min-completion-probability 0.7 --max-restarts 1
 
-# Block mode supersedes adaptive (adaptive disabled)
-zen "/critical-task" --adaptive-budget --enforcement-mode block
+# Cost-based budgeting
+zen "/generate-docs" --adaptive-budget --overall-cost-budget 3.50
+
+# Advanced configuration
+zen "/complex-analysis" --adaptive-budget \
+    --overall-token-budget 2000 \
+    --checkpoint-intervals 0.2,0.4,0.6,0.8,1.0 \
+    --restart-threshold 0.85 \
+    --min-completion-probability 0.6 \
+    --max-restarts 2 \
+    --todo-estimation-buffer 0.15
+
+# Block mode supersedes adaptive (adaptive automatically disabled)
+zen "/critical-task" --adaptive-budget --overall-token-budget 1000 \
+    --budget-enforcement-mode block
 ```
+
+### Available CLI Arguments
+
+- `--adaptive-budget` - Enable adaptive budget management
+- `--checkpoint-intervals` - Comma-separated intervals (default: 0.25,0.5,0.75,1.0)
+- `--restart-threshold` - Usage threshold for restart consideration (default: 0.9)
+- `--min-completion-probability` - Minimum acceptable completion probability (default: 0.5)
+- `--max-restarts` - Maximum restart attempts (default: 2)
+- `--todo-estimation-buffer` - Buffer for todo estimates (default: 0.1 = 10%)
+- `--quarter-buffer` - Buffer per quarter (default: 0.05 = 5%)
+- `--disable-context-preservation` - Disable context preservation (not recommended)
+- `--disable-learning` - Disable learning from execution patterns
+
+See [CLI_USAGE.md](../CLI_USAGE.md) for comprehensive examples and best practices.
 
 ## Implementation Details
 

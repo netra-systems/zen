@@ -536,6 +536,14 @@ Budget Insights:
 
         return summary.strip()
 
+    def create_lessons_briefing(self, lessons: List[Lesson]) -> str:
+        """Format lessons for new session briefing."""
+        return self.format_lessons_for_new_session(lessons)
+
+    def create_mistakes_briefing(self, mistakes: List[Mistake]) -> str:
+        """Format mistakes for new session briefing."""
+        return self.format_mistakes_for_new_session(mistakes)
+
     def summarize_key_results(self, todo_results: Dict[str, Any]) -> str:
         """Summarize key results from completed todos."""
         if not todo_results:
