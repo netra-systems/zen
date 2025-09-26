@@ -121,8 +121,9 @@ class SafeRestartManager:
         """Create fallback restart points to ensure at least one is always available."""
         fallback_points = []
 
-        # Fallback after first quarter of todos
-        quarter_point = len(todos) // 4
+        # Fallback after first segment of todos (based on checkpoint intervals)
+        num_segments = len(self.config.checkpoint_intervals)
+        quarter_point = len(todos) // num_segments
         if quarter_point > 0:
             fallback_points.append(PlannedRestartPoint(
                 todo_index=quarter_point - 1,

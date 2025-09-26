@@ -15,13 +15,18 @@ class QuarterManager:
         self._initialize_quarters()
 
     def _initialize_quarters(self) -> None:
-        """Initialize quarter plans with equal budget distribution."""
-        base_quarter_budget = self.total_budget * 0.25
-        buffer_per_quarter = base_quarter_budget * self.config.quarter_buffer
+        """Initialize quarter plans based on checkpoint intervals."""
+        # Use checkpoint intervals to determine number of segments/quarters
+        intervals = sorted(self.config.checkpoint_intervals)
+        num_segments = len(intervals)
 
-        for quarter in range(1, 5):
-            self.quarter_plans[quarter] = QuarterPlan(
-                allocated_budget=base_quarter_budget + buffer_per_quarter
+        # Calculate budget per segment
+        base_segment_budget = self.total_budget / num_segments
+        buffer_per_segment = base_segment_budget * self.config.quarter_buffer
+
+        for i in range(1, num_segments + 1):
+            self.quarter_plans[i] = QuarterPlan(
+                allocated_budget=base_segment_budget + buffer_per_segment
             )
 
     def get_quarter_plan(self, quarter: int) -> Optional[QuarterPlan]:
@@ -47,7 +52,7 @@ class QuarterManager:
     def get_total_remaining_budget(self, from_quarter: int = 1) -> float:
         """Get total remaining budget from a specific quarter onwards."""
         total_remaining = 0
-        for quarter in range(from_quarter, 5):
+        for quarter in range(from_quarter, len(self.quarter_plans) + 1):
             plan = self.quarter_plans.get(quarter)
             if plan:
                 total_remaining += plan.allocated_budget - plan.assigned_budget
@@ -90,7 +95,7 @@ class QuarterManager:
         """
         # Calculate total remaining budget
         remaining_budget = self.get_total_remaining_budget(current_quarter)
-        remaining_quarters = list(range(current_quarter, 5))
+        remaining_quarters = list(range(current_quarter, len(self.quarter_plans) + 1))
 
         if not remaining_quarters or remaining_budget <= 0:
             return self.quarter_plans
@@ -142,7 +147,7 @@ class QuarterManager:
             plan = self.quarter_plans[current_quarter]
             available_budget = plan.allocated_budget - quarter_budget_used
 
-            if todo.estimated_tokens > available_budget and current_quarter < 4:
+            if todo.estimated_tokens > available_budget and current_quarter < len(self.quarter_plans):
                 # Move to next quarter
                 current_quarter += 1
                 quarter_budget_used = 0
@@ -203,7 +208,7 @@ class QuarterManager:
         Returns:
             bool: True if advancement was successful, False if already at last quarter
         """
-        if self.current_quarter < 4:
+        if self.current_quarter < len(self.quarter_plans):
             self.current_quarter += 1
             return True
         return False

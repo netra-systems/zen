@@ -371,21 +371,18 @@ class ProactivePlanner:
     def distribute_todos_by_quarters(self, todos: List[TodoItem], total_budget: float) -> Dict[int, QuarterPlan]:
         """
         Distribute concrete todo items across quarters with specific budget allocations.
-
-        Quarter distribution strategy:
-        1. Q1 (25%): Setup, search, and initial data collection
-        2. Q2 (25%): Primary analysis and processing work
-        3. Q3 (25%): Implementation and modification tasks
-        4. Q4 (25%): Validation, completion, and buffer
+        Uses dynamic quarter count based on checkpoint intervals.
         """
-        # Calculate base quarter budgets
-        base_quarter_budget = total_budget * 0.25
-        quarter_plans = {
-            1: QuarterPlan(allocated_budget=base_quarter_budget),
-            2: QuarterPlan(allocated_budget=base_quarter_budget),
-            3: QuarterPlan(allocated_budget=base_quarter_budget),
-            4: QuarterPlan(allocated_budget=base_quarter_budget)
-        }
+        # Use checkpoint intervals to determine number of quarters
+        num_quarters = len(self.config.checkpoint_intervals)
+
+        # Calculate base quarter budgets (equal distribution)
+        base_quarter_budget = total_budget / num_quarters
+
+        # Create quarter plans dynamically
+        quarter_plans = {}
+        for i in range(1, num_quarters + 1):
+            quarter_plans[i] = QuarterPlan(allocated_budget=base_quarter_budget)
 
         # Sort todos by dependencies
         sorted_todos = self.sort_todos_by_dependencies(todos)
@@ -400,14 +397,14 @@ class ProactivePlanner:
 
             # Check if preferred quarter has space
             if (preferred_quarter >= current_quarter and
-                preferred_quarter <= 4 and
+                preferred_quarter <= num_quarters and
                 todo.estimated_tokens <= quarter_plans[preferred_quarter].allocated_budget - quarter_plans[preferred_quarter].assigned_budget):
                 target_quarter = preferred_quarter
             else:
                 # Use current quarter if preferred is not available
                 target_quarter = current_quarter
                 # Move to next quarter if current is full
-                if todo.estimated_tokens > remaining_budget and current_quarter < 4:
+                if todo.estimated_tokens > remaining_budget and current_quarter < num_quarters:
                     current_quarter += 1
                     target_quarter = current_quarter
                     remaining_budget = quarter_plans[current_quarter].allocated_budget
@@ -429,14 +426,17 @@ class ProactivePlanner:
 
     def get_preferred_quarter(self, todo: TodoItem) -> int:
         """Determine the preferred quarter for a todo based on its category."""
+        num_quarters = len(self.config.checkpoint_intervals)
+
+        # Map categories to proportional quarters based on available quarters
         if todo.category in [TodoCategory.SEARCH, TodoCategory.READ, TodoCategory.RESEARCH, TodoCategory.SETUP]:
-            return 1  # Early data collection
+            return 1  # Early data collection (always first quarter)
         elif todo.category in [TodoCategory.ANALYZE, TodoCategory.PLANNING]:
-            return 2  # Analysis phase
+            return min(2, num_quarters)  # Analysis phase (second quarter if available, else last)
         elif todo.category in [TodoCategory.WRITE, TodoCategory.MODIFY, TodoCategory.DEPLOY]:
-            return 3  # Implementation phase
+            return min(max(num_quarters - 1, 1), num_quarters)  # Implementation phase (second to last, or first if only one)
         else:
-            return 4  # Validation and completion
+            return num_quarters  # Validation and completion (always last quarter)
 
     def sort_todos_by_dependencies(self, todos: List[TodoItem]) -> List[TodoItem]:
         """Sort todos ensuring dependencies are satisfied before dependents."""

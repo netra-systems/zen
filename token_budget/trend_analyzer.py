@@ -13,7 +13,7 @@ class BudgetTrendAnalyzer:
     def __init__(self, config: Optional[AdaptiveConfig] = None):
         self.config = config or AdaptiveConfig()
         self.historical_data: List[Dict] = []
-        self.quarter_history: Dict[int, List[float]] = {1: [], 2: [], 3: [], 4: []}
+        self.quarter_history: Dict[int, List[float]] = {}
 
     def analyze_usage_trend(self, quarter: int, planned_budget: float, actual_usage: float,
                           completed_todos: List[TodoItem], remaining_todos: List[TodoItem]) -> TrendAnalysis:
@@ -26,6 +26,12 @@ class BudgetTrendAnalyzer:
         - Projected completion probability
         - Recommended budget reallocation
         """
+        # Ensure quarter_history is initialized for all quarters
+        max_quarters = len(self.config.checkpoint_intervals)
+        for q in range(1, max_quarters + 1):
+            if q not in self.quarter_history:
+                self.quarter_history[q] = []
+
         # Calculate actual vs. estimated accuracy
         accuracy = self.calculate_estimation_accuracy(completed_todos)
 
@@ -150,7 +156,8 @@ class BudgetTrendAnalyzer:
             return {}
 
         # Group todos by preferred quarter
-        quarter_todos = {quarter: [] for quarter in range(current_quarter, 5)}
+        max_quarters = len(self.config.checkpoint_intervals)
+        quarter_todos = {quarter: [] for quarter in range(current_quarter, max_quarters + 1)}
 
         for todo in remaining_todos:
             preferred_quarter = self.get_todo_preferred_quarter(todo, current_quarter)
@@ -191,7 +198,8 @@ class BudgetTrendAnalyzer:
         }
 
         relative_quarter = category_quarters.get(todo.category, 1)
-        preferred_quarter = min(4, current_quarter + relative_quarter)
+        max_quarters = len(self.config.checkpoint_intervals)
+        preferred_quarter = min(max_quarters, current_quarter + relative_quarter)
 
         return preferred_quarter
 

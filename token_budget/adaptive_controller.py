@@ -45,9 +45,9 @@ class AdaptiveBudgetController(TokenBudgetManager):
 
         self.config = config or AdaptiveConfig()
         self.adaptive_mode = adaptive_mode and self.config.enabled
-        self.restart_threshold = restart_threshold
+        self.restart_threshold = config.restart_threshold if config else restart_threshold
         self.checkpoint_intervals = checkpoint_intervals or self.config.checkpoint_intervals
-        self.min_completion_probability = min_completion_probability
+        self.min_completion_probability = config.min_completion_probability if config else min_completion_probability
         self.total_budget = float(total_budget)
 
         # Initialize components
@@ -168,7 +168,7 @@ class AdaptiveBudgetController(TokenBudgetManager):
         # Analyze trends and redistribute todos
         trend_analysis = self.trend_analyzer.analyze_usage_trend(
             current_quarter,
-            execution_state.planned_budget_for_checkpoint(current_checkpoint),
+            execution_state.planned_budget_for_checkpoint(current_checkpoint, self.checkpoint_intervals),
             execution_state.actual_usage,
             execution_state.completed_todos,
             execution_state.remaining_todos

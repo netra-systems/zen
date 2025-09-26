@@ -111,18 +111,37 @@ class ExecutionState:
             todo.actual_tokens = result.tokens_used
         self.completed_todos.append(todo)
         self.total_usage += todo.actual_tokens
+        self.actual_usage += todo.actual_tokens  # Update actual_usage for trend analysis
 
-    def planned_budget_for_checkpoint(self, checkpoint: float) -> float:
+    def planned_budget_for_checkpoint(self, checkpoint: float, checkpoint_intervals: Optional[List[float]] = None) -> float:
         """Get planned budget usage at a checkpoint."""
-        # Calculate based on quarter progression
-        if checkpoint <= 0.25:
-            return self.quarter_plans.get(1, QuarterPlan(0)).allocated_budget
-        elif checkpoint <= 0.5:
-            return sum(self.quarter_plans.get(i, QuarterPlan(0)).allocated_budget for i in [1, 2])
-        elif checkpoint <= 0.75:
-            return sum(self.quarter_plans.get(i, QuarterPlan(0)).allocated_budget for i in [1, 2, 3])
-        else:
-            return sum(plan.allocated_budget for plan in self.quarter_plans.values())
+        if not self.quarter_plans:
+            return 0.0
+
+        # If no checkpoint intervals provided, fall back to proportion-based calculation
+        if not checkpoint_intervals:
+            # Calculate proportionally based on checkpoint value
+            total_budget = sum(plan.allocated_budget for plan in self.quarter_plans.values())
+            return total_budget * checkpoint
+
+        # Find which quarter/segment this checkpoint represents
+        sorted_intervals = sorted(checkpoint_intervals)
+        quarter_index = None
+
+        for i, interval in enumerate(sorted_intervals):
+            if checkpoint <= interval:
+                quarter_index = i + 1  # 1-based indexing
+                break
+
+        # If checkpoint is beyond all intervals, use all quarters
+        if quarter_index is None:
+            quarter_index = len(sorted_intervals)
+
+        # Sum up budget for quarters up to and including the current quarter
+        return sum(
+            self.quarter_plans.get(i, QuarterPlan(0)).allocated_budget
+            for i in range(1, quarter_index + 1)
+        )
 
     def update_quarter_plans(self, updated_plans: Dict[int, QuarterPlan]) -> None:
         """Update quarter plans with rebalanced todos."""
