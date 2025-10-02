@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "netra-zen"
 version = "1.0.3"
-description = "Multi-instance Claude orchestrator for parallel task execution"
+description = "Multi-instance Claude orchestrator with community analytics"
 readme = "README.md"
 authors = [
     {name = "Netra Systems", email = "pypi@netrasystems.ai"}
@@ -22,15 +22,30 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Software Development :: Quality Assurance",
     "Topic :: System :: Distributed Computing",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Monitoring",
+    "Topic :: Internet :: Log Analysis",
 ]
-keywords = ["claude", "ai", "orchestration", "parallel", "automation", "llm", "anthropic"]
+keywords = [
+    "claude", "claude code", "5-hour limit", "ai", "orchestration", "parallel", "automation", "llm",
+    "anthropic", "community-analytics", "telemetry", "observability"
+]
 requires-python = ">=3.8"
 dependencies = [
     "PyYAML>=6.0",
     "python-dateutil>=2.8.2",
+    # Secret Management System
+    "google-cloud-secret-manager>=2.20.0",
+    "kubernetes-asyncio>=24.2.0",
+    "cryptography>=41.0.0",
+    "prometheus-client>=0.20.0",
+    # OpenTelemetry for Zen telemetry (enabled by default, can be disabled via ZEN_TELEMETRY_DISABLED=true)
+    "opentelemetry-api>=1.20.0",
+    "opentelemetry-sdk>=1.20.0",
+    "opentelemetry-exporter-gcp-trace>=1.6.0",
+    "opentelemetry-instrumentation>=0.41b0",
 ]
 
 [project.optional-dependencies]
@@ -58,7 +73,7 @@ zen = "zen_orchestrator:run"
 
 [tool.setuptools]
 py-modules = ["zen_orchestrator"]
-packages = ["agent_interface", "token_budget", "token_transparency"]
+packages = ["agent_interface", "token_budget", "token_transparency", "zen_secrets", "zen", "zen.telemetry"]
 
 [tool.setuptools.package-data]
 "*" = ["*.json", "*.yaml", "*.yml", "*.md"]
