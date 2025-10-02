@@ -65,10 +65,14 @@ sys.path.insert(0, str(Path(__file__).parent))
 try:
     from token_budget.budget_manager import TokenBudgetManager
     from token_budget.visualization import render_progress_bar
+    from token_budget.integration import BudgetManagerFactory
+    from token_budget.adaptive_models import AdaptiveConfig
 except ImportError as e:
     # Graceful fallback if token budget package is not available
     TokenBudgetManager = None
     render_progress_bar = None
+    BudgetManagerFactory = None
+    AdaptiveConfig = None
     # Note: logger is not yet defined here, will log warning after logger setup
 
 # Add token transparency imports
@@ -251,7 +255,17 @@ class ClaudeInstanceOrchestrator:
                  budget_enforcement_mode: str = "warn",
                  enable_budget_visuals: bool = True,
                  has_command_budgets: bool = False,
-                 log_level: LogLevel = LogLevel.CONCISE):
+                 log_level: LogLevel = LogLevel.CONCISE,
+                 # Adaptive budget arguments
+                 adaptive_budget_enabled: bool = False,
+                 checkpoint_intervals: List[float] = None,
+                 restart_threshold: float = 0.9,
+                 min_completion_probability: float = 0.5,
+                 max_restarts: int = 2,
+                 context_preservation: bool = True,
+                 learn_from_mistakes: bool = True,
+                 todo_estimation_buffer: float = 0.1,
+                 quarter_buffer: float = 0.05):
         self.workspace_dir = workspace_dir
         self.instances: Dict[str, InstanceConfig] = {}
         self.statuses: Dict[str, InstanceStatus] = {}
@@ -271,25 +285,74 @@ class ClaudeInstanceOrchestrator:
 
         # Initialize budget manager if any budget settings are provided
         needs_budget_manager = (overall_token_budget is not None) or (overall_cost_budget is not None) or has_command_budgets
-        if TokenBudgetManager and needs_budget_manager:
-            # Cost budget takes precedence over token budget
-            if overall_cost_budget is not None:
-                self.budget_manager = TokenBudgetManager(
+
+        if (TokenBudgetManager or BudgetManagerFactory) and needs_budget_manager:
+            # Use BudgetManagerFactory if available for adaptive support
+            if BudgetManagerFactory and adaptive_budget_enabled:
+                # Create adaptive configuration
+                if AdaptiveConfig:
+                    adaptive_config = AdaptiveConfig(
+                        enabled=True,
+                        checkpoint_intervals=checkpoint_intervals or [0.25, 0.5, 0.75, 1.0],
+                        restart_threshold=restart_threshold,
+                        min_completion_probability=min_completion_probability,
+                        max_restarts=max_restarts,
+                        context_preservation=context_preservation,
+                        learn_from_mistakes=learn_from_mistakes,
+                        todo_estimation_buffer=todo_estimation_buffer,
+                        quarter_buffer=quarter_buffer
+                    )
+                else:
+                    adaptive_config = None
+
+                # Create budget manager using factory
+                self.budget_manager = BudgetManagerFactory.create_budget_manager(
+                    overall_budget=overall_token_budget,
                     overall_cost_budget=overall_cost_budget,
+                    budget_type=budget_type,
                     enforcement_mode=budget_enforcement_mode,
-                    budget_type=budget_type
+                    adaptive_enabled=adaptive_budget_enabled,
+                    adaptive_config=adaptive_config
                 )
-                logger.info(f"🎯 COST BUDGET MANAGER initialized with ${overall_cost_budget} overall budget")
-            else:
-                self.budget_manager = TokenBudgetManager(
-                    overall_budget=overall_token_budget,  # Can be None
-                    enforcement_mode=budget_enforcement_mode,
-                    budget_type=budget_type
-                )
-                if overall_token_budget:
-                    logger.info(f"🎯 TOKEN BUDGET MANAGER initialized with {overall_token_budget} token overall budget")
+
+                # Log adaptive or standard creation
+                if hasattr(self.budget_manager, 'is_adaptive_mode') and self.budget_manager.is_adaptive_mode:
+                    budget_amount = overall_cost_budget or overall_token_budget
+                    budget_unit = "cost" if overall_cost_budget is not None else "tokens"
+                    logger.info(f"🚀 ADAPTIVE BUDGET MANAGER initialized with {budget_amount} {budget_unit} budget")
+                    logger.info(f"   Checkpoints: {checkpoint_intervals or [0.25, 0.5, 0.75, 1.0]}")
+                    logger.info(f"   Restart threshold: {restart_threshold}, Min completion prob: {min_completion_probability}")
+                else:
+                    if overall_cost_budget is not None:
+                        logger.info(f"🎯 COST BUDGET MANAGER initialized with ${overall_cost_budget} overall budget")
+                    elif overall_token_budget:
+                        logger.info(f"🎯 TOKEN BUDGET MANAGER initialized with {overall_token_budget} token overall budget")
+
+            elif TokenBudgetManager:
+                # Fall back to standard TokenBudgetManager
+                if adaptive_budget_enabled:
+                    logger.warning("🔶 Adaptive budget requested but not available, falling back to standard budget management")
+
+                # Cost budget takes precedence over token budget
+                if overall_cost_budget is not None:
+                    self.budget_manager = TokenBudgetManager(
+                        overall_cost_budget=overall_cost_budget,
+                        enforcement_mode=budget_enforcement_mode,
+                        budget_type=budget_type
+                    )
+                    logger.info(f"🎯 COST BUDGET MANAGER initialized with ${overall_cost_budget} overall budget")
+                else:
+                    self.budget_manager = TokenBudgetManager(
+                        overall_budget=overall_token_budget,  # Can be None
+                        enforcement_mode=budget_enforcement_mode,
+                        budget_type=budget_type
+                    )
+                    if overall_token_budget:
+                        logger.info(f"🎯 TOKEN BUDGET MANAGER initialized with {overall_token_budget} token overall budget")
         else:
             self.budget_manager = None
+            if adaptive_budget_enabled:
+                logger.warning("🔶 Adaptive budget requested but budget management components not available")
         self.enable_budget_visuals = enable_budget_visuals
 
         # Initialize token transparency pricing engine
@@ -533,79 +596,125 @@ class ClaudeInstanceOrchestrator:
             status.status = "running"
             status.start_time = time.time()
 
-            cmd = self.build_claude_command(config)
-            logger.info(f"Command: {' '.join(cmd)}")
-            logger.info(f"Permission mode: {config.permission_mode} (Platform: {platform.system()})")
+            # Check if adaptive budget management is enabled and should be used
+            if (hasattr(self.budget_manager, 'execute_adaptive_command') and
+                hasattr(self.budget_manager, 'is_adaptive_mode') and
+                self.budget_manager.is_adaptive_mode):
 
-            # Create the async process with Mac-friendly environment
-            env = os.environ.copy()
-            
-            # Add common Mac paths to PATH if not present
-            if platform.system() == "Darwin":  # macOS
-                mac_paths = [
-                    "/opt/homebrew/bin",      # Homebrew ARM
-                    "/usr/local/bin",         # Homebrew Intel
-                    "/usr/bin",               # System binaries
-                    str(Path.home() / ".local" / "bin"),  # User local
-                ]
-                current_path = env.get("PATH", "")
-                for mac_path in mac_paths:
-                    if mac_path not in current_path:
-                        env["PATH"] = f"{mac_path}:{current_path}"
-                        current_path = env["PATH"]
-            
-            # Create the async process
-            process = await asyncio.create_subprocess_exec(
-                *cmd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-                cwd=self.workspace_dir,
-                env=env
-            )
+                logger.info("🚀 Using adaptive budget execution instead of direct Claude CLI")
 
-            status.pid = process.pid
-            logger.info(f"Instance {name} started with PID {process.pid}")
+                # Execute using adaptive budget management
+                try:
+                    context = {
+                        'workspace_dir': str(self.workspace_dir),
+                        'command_config': config,
+                        'instance_name': name
+                    }
 
-            # For stream-json format, stream output in parallel with process execution
-            if config.output_format == "stream-json":
-                # Create streaming task but don't await it yet
-                stream_task = asyncio.create_task(self._stream_output_parallel(name, process))
+                    result = self.budget_manager.execute_adaptive_command(config.command, context)
 
-                # Wait for process to complete
-                returncode = await process.wait()
+                    # Update status based on adaptive execution result
+                    status.end_time = time.time()
+                    if result.success:
+                        status.status = "completed"
+                        status.total_tokens = result.total_tokens_used or 0
+                        status.input_tokens = result.total_tokens_used or 0  # Approximate
+                        status.output_tokens = 0  # Approximate
+                        logger.info(f"✅ Adaptive execution completed for {name}: {result.todos_completed} todos completed")
+                    else:
+                        status.status = "failed"
+                        status.error = "Adaptive execution failed"
+                        logger.error(f"❌ Adaptive execution failed for {name}")
 
-                # Now wait for streaming to complete
-                await stream_task
+                    # Update budget tracking
+                    if self.budget_manager and result.total_tokens_used:
+                        self._update_budget_tracking(status, name)
+
+                    return result.success
+
+                except Exception as e:
+                    logger.error(f"❌ Adaptive execution error for {name}: {e}")
+                    status.status = "failed"
+                    status.error = f"Adaptive execution error: {str(e)}"
+                    status.end_time = time.time()
+                    return False
             else:
-                # For non-streaming formats, use traditional communicate
-                stdout, stderr = await process.communicate()
-                returncode = process.returncode
+                # Fall back to standard Claude CLI execution
+                logger.info("📋 Using standard Claude CLI execution")
 
-                if stdout:
-                    stdout_str = stdout.decode() if isinstance(stdout, bytes) else stdout
-                    status.output += stdout_str
-                    # Parse token usage from final output
-                    self._parse_final_output_token_usage(stdout_str, status, config.output_format, name)
-                if stderr:
-                    status.error += stderr.decode() if isinstance(stderr, bytes) else stderr
+                cmd = self.build_claude_command(config)
+                logger.info(f"Command: {' '.join(cmd)}")
+                logger.info(f"Permission mode: {config.permission_mode} (Platform: {platform.system()})")
 
-            status.end_time = time.time()
+                # Create the async process with Mac-friendly environment
+                env = os.environ.copy()
 
-            # Save metrics to database if CloudSQL is enabled
-            # Database persistence disabled - metrics preserved in local display only
-            if False:  # CloudSQL functionality removed
-                await self._save_metrics_to_database(name, config, status)
+                # Add common Mac paths to PATH if not present
+                if platform.system() == "Darwin":  # macOS
+                    mac_paths = [
+                        "/opt/homebrew/bin",      # Homebrew ARM
+                        "/usr/local/bin",         # Homebrew Intel
+                        "/usr/bin",               # System binaries
+                        str(Path.home() / ".local" / "bin"),  # User local
+                    ]
+                    current_path = env.get("PATH", "")
+                    for mac_path in mac_paths:
+                        if mac_path not in current_path:
+                            env["PATH"] = f"{mac_path}:{current_path}"
+                            current_path = env["PATH"]
 
-            if returncode == 0:
-                status.status = "completed"
-                logger.info(f"Instance {name} completed successfully")
-                return True
-            else:
-                status.status = "failed"
-                logger.error(f"Instance {name} failed with return code {returncode}")
-                if status.error:
-                    logger.error(f"Error output: {status.error}")
-                return False
+                # Create the async process
+                process = await asyncio.create_subprocess_exec(
+                    *cmd,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                    cwd=self.workspace_dir,
+                    env=env
+                )
+
+                status.pid = process.pid
+                logger.info(f"Instance {name} started with PID {process.pid}")
+
+                # For stream-json format, stream output in parallel with process execution
+                if config.output_format == "stream-json":
+                    # Create streaming task but don't await it yet
+                    stream_task = asyncio.create_task(self._stream_output_parallel(name, process))
+
+                    # Wait for process to complete
+                    returncode = await process.wait()
+
+                    # Now wait for streaming to complete
+                    await stream_task
+                else:
+                    # For non-streaming formats, use traditional communicate
+                    stdout, stderr = await process.communicate()
+                    returncode = process.returncode
+
+                    if stdout:
+                        stdout_str = stdout.decode() if isinstance(stdout, bytes) else stdout
+                        status.output += stdout_str
+                        # Parse token usage from final output
+                        self._parse_final_output_token_usage(stdout_str, status, config.output_format, name)
+                    if stderr:
+                        status.error += stderr.decode() if isinstance(stderr, bytes) else stderr
+
+                status.end_time = time.time()
+
+                # Save metrics to database if CloudSQL is enabled
+                # Database persistence disabled - metrics preserved in local display only
+                if False:  # CloudSQL functionality removed
+                    await self._save_metrics_to_database(name, config, status)
+
+                if returncode == 0:
+                    status.status = "completed"
+                    logger.info(f"Instance {name} completed successfully")
+                    return True
+                else:
+                    status.status = "failed"
+                    logger.error(f"Instance {name} failed with return code {returncode}")
+                    if status.error:
+                        logger.error(f"Error output: {status.error}")
+                    return False
 
         except Exception as e:
             status.status = "failed"
@@ -2456,6 +2565,82 @@ class ClaudeInstanceOrchestrator:
 
         return summary
 
+    def execute_adaptive_command(self, command: str, context: Optional[Dict] = None) -> Dict:
+        """
+        Execute a command using adaptive budget management if available.
+
+        This method provides a bridge between the zen orchestrator and
+        adaptive budget execution capabilities.
+
+        Args:
+            command: Command to execute (e.g., "/analyze-code")
+            context: Additional context for execution
+
+        Returns:
+            Dict with execution results and statistics
+        """
+        context = context or {}
+
+        # Check if adaptive budget management is available
+        if (hasattr(self.budget_manager, 'execute_adaptive_command') and
+            hasattr(self.budget_manager, 'is_adaptive_mode') and
+            self.budget_manager.is_adaptive_mode):
+
+            logger.info(f"🚀 Executing command with adaptive budget management: {command}")
+
+            try:
+                # Execute using adaptive controller
+                result = self.budget_manager.execute_adaptive_command(command, context)
+
+                # Convert result to dict format
+                return {
+                    'success': result.success,
+                    'todos_completed': len(result.todos_completed),
+                    'total_tokens_used': result.total_tokens_used,
+                    'restart_occurred': result.restart_occurred,
+                    'adaptive_execution': True,
+                    'budget_statistics': self.budget_manager.get_execution_statistics() if hasattr(self.budget_manager, 'get_execution_statistics') else None
+                }
+
+            except Exception as e:
+                logger.error(f"❌ Adaptive execution failed: {e}")
+                return {
+                    'success': False,
+                    'error': str(e),
+                    'adaptive_execution': True,
+                    'fallback_used': False
+                }
+
+        else:
+            # Standard execution path (placeholder)
+            logger.info(f"📋 Standard execution mode for command: {command}")
+            return {
+                'success': True,
+                'message': 'Command would be executed using standard orchestration',
+                'adaptive_execution': False,
+                'note': 'This is a placeholder - actual command execution depends on instance management'
+            }
+
+    def get_adaptive_status(self) -> Dict:
+        """Get adaptive budget management status and statistics."""
+        if not self.budget_manager:
+            return {'status': 'no_budget_manager'}
+
+        base_status = {
+            'budget_manager_type': type(self.budget_manager).__name__,
+            'enforcement_mode': getattr(self.budget_manager, 'enforcement_mode', 'unknown'),
+            'total_usage': getattr(self.budget_manager, 'total_usage', 0),
+        }
+
+        # Add adaptive-specific status if available
+        if hasattr(self.budget_manager, 'is_adaptive_mode'):
+            base_status['adaptive_mode'] = self.budget_manager.is_adaptive_mode
+
+            if self.budget_manager.is_adaptive_mode and hasattr(self.budget_manager, 'get_execution_statistics'):
+                base_status.update(self.budget_manager.get_execution_statistics())
+
+        return base_status
+
 
 
 
@@ -2664,6 +2849,26 @@ async def main():
     parser.add_argument("--budget-parameter-type", choices=["tokens", "cost", "mixed"], default="tokens",
                        help="Type of budget parameters to use: 'tokens' (default, backward compatible), 'cost' (USD-based), or 'mixed' (both).")
 
+    # Adaptive budget management arguments
+    parser.add_argument("--adaptive-budget", action="store_true",
+                       help="Enable adaptive budget management with intelligent execution planning and restart capability.")
+    parser.add_argument("--checkpoint-intervals", type=str, default="0.25,0.5,0.75,1.0",
+                       help="Comma-separated checkpoint intervals for budget evaluation (e.g., '0.25,0.5,0.75,1.0').")
+    parser.add_argument("--restart-threshold", type=float, default=0.9,
+                       help="Budget usage percentage threshold to consider restart (default: 0.9, only applies when completion probability < 0.5).")
+    parser.add_argument("--min-completion-probability", type=float, default=0.5,
+                       help="Minimum acceptable completion probability threshold (default: 0.5).")
+    parser.add_argument("--max-restarts", type=int, default=2,
+                       help="Maximum number of restart attempts (default: 2).")
+    parser.add_argument("--disable-context-preservation", action="store_true",
+                       help="Disable context preservation across restarts (not recommended).")
+    parser.add_argument("--disable-learning", action="store_true",
+                       help="Disable learning from execution patterns and mistakes.")
+    parser.add_argument("--todo-estimation-buffer", type=float, default=0.1,
+                       help="Buffer percentage for todo estimation accuracy (default: 0.1 = 10%).")
+    parser.add_argument("--quarter-buffer", type=float, default=0.05,
+                       help="Buffer percentage per quarter for budget allocation (default: 0.05 = 5%).")
+
     # New example and template commands
     parser.add_argument("--generate-example", type=str, metavar="TYPE",
                        help="Generate example configuration (data_analysis, code_review, content_creation, testing_workflow, migration_workflow, debugging_workflow)")
@@ -2807,6 +3012,15 @@ async def main():
     has_cli_cost_budgets = bool(args.command_cost_budget)
     has_command_budgets = has_config_command_budgets or has_cli_command_budgets or has_config_cost_budgets or has_cli_cost_budgets
 
+    # Parse adaptive budget arguments
+    checkpoint_intervals = None
+    if args.adaptive_budget and hasattr(args, 'checkpoint_intervals'):
+        try:
+            checkpoint_intervals = [float(x.strip()) for x in args.checkpoint_intervals.split(',')]
+        except (ValueError, AttributeError):
+            logger.warning(f"Invalid checkpoint intervals: {getattr(args, 'checkpoint_intervals', None)}, using defaults")
+            checkpoint_intervals = [0.25, 0.5, 0.75, 1.0]
+
     orchestrator = ClaudeInstanceOrchestrator(
         workspace,
         max_console_lines=max_lines,
@@ -2820,7 +3034,17 @@ async def main():
         budget_enforcement_mode=final_enforcement_mode,
         enable_budget_visuals=final_enable_visuals,
         has_command_budgets=has_command_budgets,
-        log_level=log_level
+        log_level=log_level,
+        # Adaptive budget parameters
+        adaptive_budget_enabled=getattr(args, 'adaptive_budget', False),
+        checkpoint_intervals=checkpoint_intervals,
+        restart_threshold=getattr(args, 'restart_threshold', 0.9),
+        min_completion_probability=getattr(args, 'min_completion_probability', 0.5),
+        max_restarts=getattr(args, 'max_restarts', 2),
+        context_preservation=not getattr(args, 'disable_context_preservation', False),
+        learn_from_mistakes=not getattr(args, 'disable_learning', False),
+        todo_estimation_buffer=getattr(args, 'todo_estimation_buffer', 0.1),
+        quarter_buffer=getattr(args, 'quarter_buffer', 0.05)
     )
 
     # Process per-command budgets from config file first, then CLI args (CLI overrides config)
