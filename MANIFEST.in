@@ -23,6 +23,8 @@ recursive-include docs *.rst
 recursive-include agent_interface *.py
 recursive-include token_budget *.py
 recursive-include token_transparency *.py
+recursive-include zen_secrets *.py
+recursive-include zen *.py
 
 # Exclude unnecessary files
 global-exclude *.pyc
