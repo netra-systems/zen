@@ -8,7 +8,7 @@ The `netra-telemetry-public` feature provides **community-driven analytics** for
 
 **Zen (Open Source)**:
 - ✅ **Community Analytics**: Anonymous usage trends visible to everyone
-- ✅ **No Authentication**: Works out-of-the-box with embedded credentials
+- ✅ **No Authentication**: Works out-of-the-box once runtime credentials are supplied by the distributor
 - ✅ **Public Insights**: Aggregate data contributes to open community knowledge
 - ✅ **Free**: No cost for telemetry - Netra covers all GCP expenses
 
@@ -166,6 +166,14 @@ Your Zen Usage → Anonymous Traces → netra-telemetry-public → Public Dashbo
 | `ZEN_TELEMETRY_BATCH_SIZE` | `512` | Batch size for trace export |
 | `ZEN_TELEMETRY_QUEUE_SIZE` | `2048` | Memory queue size limit |
 | `ZEN_TELEMETRY_EXPORT_TIMEOUT` | `30` | Network timeout (seconds) |
+| `ZEN_COMMUNITY_TELEMETRY_B64` | unset | Base64-encoded service account JSON for community analytics |
+| `ZEN_COMMUNITY_TELEMETRY_FILE` | unset | Path to service account JSON (alternative to base64) |
+| `ZEN_COMMUNITY_TELEMETRY_PROJECT` | `netra-telemetry-public` | Override default community project ID |
+
+To help prepare secrets without ever checking them into git, use
+`scripts/prepare_community_credentials.py /path/to/key.json` and store the
+printed string in a secure secret store (GitHub Actions secret, HashiCorp Vault,
+etc.).
 
 ### Service Account Setup
 

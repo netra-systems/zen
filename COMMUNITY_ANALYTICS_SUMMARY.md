@@ -14,13 +14,12 @@ Successfully implemented **Path 1: Anonymous Public Telemetry** from the OpenTel
   - Anonymous session IDs with `zen_community_` prefix
   - Community-specific resource attributes
 
-### **2. ✅ Embedded Authentication System**
+### **2. ✅ Runtime-Injected Authentication System**
 - **File**: `zen/telemetry/community_auth.py`
 - **Features**:
-  - `CommunityAuthProvider` for embedded service account
-  - Write-only access to netra-telemetry-public
-  - Graceful fallback to environment credentials
-  - No user authentication required
+  - `CommunityAuthProvider` loads write-only service account from runtime secrets
+  - Graceful fallback to environment or workload-identity credentials
+  - No end-user authentication required
 
 ### **3. ✅ Enhanced Data Sanitization**
 - **File**: `zen/telemetry/sanitization.py`

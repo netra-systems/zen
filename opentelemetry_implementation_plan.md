@@ -20,9 +20,9 @@ orchestrator.run(config)  # Automatically traced and sent to Netra's GCP
 ```
 
 **What's happening behind the scenes:**
-- Zen includes an embedded, write-only service account for Netra's GCP project
+- Zen looks for a write-only service account provided at runtime (CI secret, env var, etc.)
 - Your anonymous traces are sent to `netra-telemetry-public` project
-- No authentication or login required
+- No end-user authentication or login required
 - You pay nothing - Netra covers all GCP costs
 - Data is anonymous and aggregated for community insights
 
@@ -34,7 +34,7 @@ orchestrator.run(config)  # Automatically traced and sent to Netra's GCP
 - All data tagged with anonymous session ID only
 
 **Security guarantees:**
-- The embedded service account can ONLY write trace data
+- The runtime-provided service account can ONLY write trace data
 - It cannot read any traces or access other GCP services
 - No user attribution - completely anonymous
 - Data automatically deleted after 30 days
@@ -103,9 +103,9 @@ orchestrator = zen.ZenOrchestrator()
 orchestrator.run(config)  # Runs normally but no tracing
 ```
 
-### Embedded Service Account Security Model
+### Runtime Service Account Security Model
 
-The embedded service account for Netra's GCP has extremely limited permissions:
+The write-only service account that distributors provide to Zen has extremely limited permissions:
 
 ```json
 {
@@ -126,8 +126,8 @@ The embedded service account for Netra's GCP has extremely limited permissions:
 ```
 
 **Key security features:**
-- Service account key is compiled into the library binary (not visible in source)
-- Key rotation handled automatically through library updates
+- Service account key is never committed to source control or the built wheel
+- Keys are injected at build/deploy time and can be rotated by updating secrets
 - Rate limiting: 1000 spans/minute for anonymous, 10000 spans/minute for authenticated
 - All traffic encrypted with TLS 1.3
 - No authentication tokens exposed to user code
@@ -815,7 +815,7 @@ class TelemetryConfig:
         1. GOOGLE_CLOUD_PROJECT (standard GCP env var)
         2. GCP_PROJECT (alternate GCP env var)
         3. GCP Metadata service (if on GCP)
-        4. Zen's default public project (with embedded auth)
+        4. Zen's default public project (with runtime-supplied auth)
         """
         # Check standard environment variables
         for env_var in ['GOOGLE_CLOUD_PROJECT', 'GCP_PROJECT']:
@@ -830,13 +830,13 @@ class TelemetryConfig:
             logger.debug(f"Using GCP project from metadata: {metadata_project}")
             return metadata_project
 
-        # Fall back to Zen's public project with embedded auth
+        # Fall back to Zen's public project with runtime auth
         logger.info(f"Using Zen default public project: {cls.DEFAULT_PUBLIC_PROJECT}")
         return cls.DEFAULT_PUBLIC_PROJECT
 
     @classmethod
-    def use_embedded_auth(cls) -> bool:
-        """Check if we should use embedded service account (public project)"""
+    def use_public_project_defaults(cls) -> bool:
+        """Check if we should rely on the runtime-provided public project credentials"""
         return cls.get_project_id() == cls.DEFAULT_PUBLIC_PROJECT
 
     @classmethod
@@ -1025,7 +1025,7 @@ mindmap
 The library operates in one of three states:
 
 1. **Telemetry disabled** (`ZEN_TELEMETRY_DISABLED=true`) → No data sent anywhere
-2. **Anonymous mode** (default, no auth token) → Uses embedded service account for Netra GCP
+2. **Anonymous mode** (default, no auth token) → Uses runtime-provided service account for Netra GCP
 3. **Authenticated mode** (OAuth token present) → Sends user-attributed data to Netra GCP
 
 ## Privacy and Security Considerations
