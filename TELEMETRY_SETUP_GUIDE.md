@@ -771,3 +771,17 @@ The netra-telemetry-public feature provides community-driven analytics that diff
 **This is what makes Zen different** - open, transparent, community-driven insights that benefit everyone, not just paying customers.
 
 For additional support or questions, refer to the zen_secrets documentation and Google Cloud Trace console.
+
+## 📦 Maintainer Release Checklist
+
+To publish community-enabled builds without exposing secrets:
+
+1. Store the base64 service-account JSON in the `ZEN_COMMUNITY_TELEMETRY_B64` GitHub Actions secret.
+2. Trigger the **Build Release Artifacts** workflow (on a `v*` tag or manually). The workflow will:
+   - run the telemetry smoke test with the secret,
+   - temporarily embed the credentials for packaging,
+   - build wheels/sdists, and
+   - restore the runtime loader before uploading artifacts.
+3. Download the `netra-zen-dist` artifact and publish to PyPI or other distributions.
+
+The repository never gains the embedded key; only the published wheel contains it.
