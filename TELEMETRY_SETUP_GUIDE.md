@@ -772,6 +772,20 @@ The netra-telemetry-public feature provides community-driven analytics that diff
 
 For additional support or questions, refer to the zen_secrets documentation and Google Cloud Trace console.
 
+## 📈 Building the Community Dashboard
+
+1. Provision the Cloud Trace → BigQuery sink with `scripts/setup_trace_sink.sh`.
+2. Execute `analytics/sql/create_curated_views.sql` and
+   `analytics/sql/create_materialized_tables.sql` to materialize token and cost
+   data from the raw span export.
+3. Automate refreshes via `scripts/run_curated_refresh.py` (Cloud Scheduler) or
+   BigQuery scheduled queries.
+4. Connect your BI tool (Looker Studio, Looker, Metabase) to the curated dataset
+   and build visuals for command usage, token trends, cost breakdown, and tool
+   adoption.
+5. Review `analytics/README.md` for detailed architecture, metrics, and privacy
+   guardrails.
+
 ## 📦 Maintainer Release Checklist
 
 To publish community-enabled builds without exposing secrets:
