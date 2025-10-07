@@ -11,10 +11,10 @@ permissions:
 
 jobs:
   build:
-    if: ${{ secrets.ZEN_COMMUNITY_TELEMETRY_B64 != '' }}
+    if: ${{ secrets.COMMUNITY_CREDENTIALS != '' }}
     runs-on: ubuntu-latest
     env:
-      ZEN_COMMUNITY_TELEMETRY_B64: ${{ secrets.ZEN_COMMUNITY_TELEMETRY_B64 }}
+      ZEN_COMMUNITY_TELEMETRY_B64: ${{ secrets.COMMUNITY_CREDENTIALS }}
       ZEN_TELEMETRY_SAMPLE_RATE: "1.0"
       PYTHONPATH: ${{ github.workspace }}
 
