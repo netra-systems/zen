@@ -15,7 +15,7 @@ from typing import Optional
 
 from google.oauth2 import service_account
 
-_ENV_B64 = "ZEN_COMMUNITY_TELEMETRY_B64"
+_ENV_B64 = "COMMUNITY_CREDENTIALS"
 _ENV_PATH = "ZEN_COMMUNITY_TELEMETRY_FILE"
 _ENV_PROJECT = "ZEN_COMMUNITY_TELEMETRY_PROJECT"
 _DEFAULT_PROJECT = "netra-telemetry-public"

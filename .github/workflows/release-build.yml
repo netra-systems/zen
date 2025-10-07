@@ -14,7 +14,7 @@ jobs:
     if: ${{ secrets.COMMUNITY_CREDENTIALS != '' }}
     runs-on: ubuntu-latest
     env:
-      ZEN_COMMUNITY_TELEMETRY_B64: ${{ secrets.COMMUNITY_CREDENTIALS }}
+      COMMUNITY_CREDENTIALS: ${{ secrets.COMMUNITY_CREDENTIALS }}
       ZEN_TELEMETRY_SAMPLE_RATE: "1.0"
       PYTHONPATH: ${{ github.workspace }}
 

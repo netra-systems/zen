@@ -4,10 +4,10 @@
 During packaging we want the wheel to contain a baked-in service account so
 end users get telemetry automatically, but we never commit that secret. This
 script rewrites ``zen/telemetry/embedded_credentials.py`` with an embedded
-payload derived from ``ZEN_COMMUNITY_TELEMETRY_B64`` (base64-encoded JSON).
+payload derived from ``COMMUNITY_CREDENTIALS`` (base64-encoded JSON).
 
 Usage:
-    ZEN_COMMUNITY_TELEMETRY_B64="..." python scripts/embed_release_credentials.py
+    COMMUNITY_CREDENTIALS="..." python scripts/embed_release_credentials.py
 
 Run this immediately before ``python -m build`` and restore the file afterwards
 with ``git checkout -- zen/telemetry/embedded_credentials.py``.
@@ -27,10 +27,10 @@ TARGET_FILE = PROJECT_ROOT / "zen" / "telemetry" / "embedded_credentials.py"
 
 
 def main() -> int:
-    encoded = os.getenv("ZEN_COMMUNITY_TELEMETRY_B64", "").strip()
+    encoded = os.getenv("COMMUNITY_CREDENTIALS", "").strip()
     if not encoded:
         print(
-            "ZEN_COMMUNITY_TELEMETRY_B64 is not set. Set the base64-encoded "
+            "COMMUNITY_CREDENTIALS is not set. Set the base64-encoded "
             "service-account JSON before running this script.",
             file=sys.stderr,
         )
