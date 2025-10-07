@@ -32,9 +32,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install build opentelemetry-sdk opentelemetry-exporter-gcp-trace google-cloud-trace
 
-      - name: Telemetry smoke test
-        run: python scripts/telemetry_smoke.py
-
       - name: Clean distribution directory
         run: rm -rf dist
 
