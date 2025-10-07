@@ -1,0 +1,45 @@
+name: Release with Community Analytics
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install build twine
+
+    - name: Embed community credentials
+      env:
+        COMMUNITY_CREDENTIALS: ${{ secrets.COMMUNITY_CREDENTIALS }}
+      run: |
+        echo "$COMMUNITY_CREDENTIALS" > zen-community-key.json
+        python scripts/embed_credentials.py
+
+    - name: Build package
+      run: python -m build
+
+    - name: Verify community analytics
+      run: |
+        pip install dist/*.whl
+        python -c "
+        import zen
+        from zen.telemetry import is_telemetry_enabled
+        print(f'Community analytics: {is_telemetry_enabled()}')
+        "
+
+    - name: Publish to PyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      run: twine upload dist/*

@@ -84,6 +84,24 @@ except ImportError as e:
     ClaudePricingEngine = None
     TokenUsageData = None
 
+# Add telemetry imports
+try:
+    from zen.telemetry import traced, telemetry_manager, trace_performance
+    TELEMETRY_AVAILABLE = True
+except ImportError as e:
+    # Graceful fallback if telemetry package is not available
+    TELEMETRY_AVAILABLE = False
+    # Create no-op decorator for when telemetry is not available
+    def traced(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
+    def trace_performance(*args, **kwargs):
+        class NoOpContext:
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+        return NoOpContext()
+
 
 # Setup logging
 logging.basicConfig(
@@ -193,9 +211,10 @@ class InstanceStatus:
 
     # NEW: Tool usage details
     tool_details: Dict[str, int] = None  # Tool name -> usage count
-    tool_tokens: Dict[str, int] = None   # Tool name -> token usage
+    tool_tokens: Dict[str, Dict[str, int]] = None   # Tool name -> {input, output, cache_read, cache_creation, total}
     tool_id_mapping: Dict[str, str] = field(default_factory=dict)  # tool_use_id -> tool name mapping
     telemetry_recorded: bool = False
+    recent_tools: List[str] = field(default_factory=list)  # Track recently used tools for cache attribution
 
     def __post_init__(self):
         """Initialize fields that need special handling"""
@@ -207,10 +226,28 @@ class InstanceStatus:
             self.tool_tokens = {}
         if self.tool_id_mapping is None:
             self.tool_id_mapping = {}
+        if self.recent_tools is None:
+            self.recent_tools = []
+
+    def get_tool_token_breakdown(self, tool_name: str) -> Dict[str, int]:
+        """Get or create token breakdown structure for a tool"""
+        if tool_name not in self.tool_tokens:
+            self.tool_tokens[tool_name] = {
+                'input': 0,
+                'output': 0,
+                'cache_read': 0,
+                'cache_creation': 0,
+                'total': 0
+            }
+        return self.tool_tokens[tool_name]
 
 class ClaudeInstanceOrchestrator:
     """Orchestrator for managing multiple Claude Code instances"""
 
+    @traced(
+        "orchestrator.init",
+        attributes={"operation.type": "orchestrator_initialization"}
+    )
     def __init__(self, workspace_dir: Path, max_console_lines: int = 5, startup_delay: float = 1.0,
                  max_line_length: int = 500, status_report_interval: int = 30,
                  quiet: bool = False,
@@ -448,6 +485,11 @@ class ClaudeInstanceOrchestrator:
             logger.error(f"Error reading command file {command_file}: {e}")
             return {"exists": False, "error": str(e)}
 
+    @traced(
+        "orchestrator.run_instance",
+        attributes={"operation.type": "instance_execution"},
+        capture_args=True
+    )
     async def run_instance(self, name: str) -> bool:
         """Run a single Claude Code instance asynchronously"""
         if name not in self.instances:
@@ -612,10 +654,19 @@ class ClaudeInstanceOrchestrator:
                 model=status.model_used  # Use detected model
             )
 
+            # Convert structured tool tokens to flat dict for pricing engine
+            flat_tool_tokens = {}
+            if status.tool_tokens:
+                for tool_name, token_data in status.tool_tokens.items():
+                    if isinstance(token_data, dict):
+                        flat_tool_tokens[tool_name] = token_data.get('total', 0)
+                    else:
+                        flat_tool_tokens[tool_name] = token_data
+
             cost_breakdown = self.pricing_engine.calculate_cost(
                 usage_data,
                 status.total_cost_usd,
-                status.tool_tokens  # Include tool token costs
+                flat_tool_tokens  # Include tool token costs
             )
             return cost_breakdown.total_cost
 
@@ -631,8 +682,17 @@ class ClaudeInstanceOrchestrator:
         # Tool costs (fallback calculation)
         tool_cost = 0.0
         if status.tool_tokens:
-            for tool_name, tokens in status.tool_tokens.items():
-                tool_cost += (tokens / 1_000_000) * 3.00  # Tool tokens at input rate
+            for tool_name, token_data in status.tool_tokens.items():
+                if isinstance(token_data, dict):
+                    # New structured format with cache tracking
+                    tool_input_cost = (token_data.get('input', 0) / 1_000_000) * 3.00
+                    tool_output_cost = (token_data.get('output', 0) / 1_000_000) * 15.00
+                    tool_cache_cr_cost = (token_data.get('cache_creation', 0) / 1_000_000) * 3.75
+                    tool_cache_rd_cost = (token_data.get('cache_read', 0) / 1_000_000) * 0.30
+                    tool_cost += tool_input_cost + tool_output_cost + tool_cache_cr_cost + tool_cache_rd_cost
+                else:
+                    # Legacy flat format
+                    tool_cost += (token_data / 1_000_000) * 3.00  # Tool tokens at input rate
 
         return input_cost + output_cost + cache_read_cost + cache_creation_cost + tool_cost
 
@@ -794,6 +854,11 @@ class ClaudeInstanceOrchestrator:
             # Note: StreamReader objects in asyncio don't have .close() method
             # They are automatically closed when the process terminates
 
+    @traced(
+        "orchestrator.run_all_instances",
+        attributes={"operation.type": "batch_execution"},
+        capture_args=True
+    )
     async def run_all_instances(self, timeout: int = 300) -> Dict[str, bool]:
         """Run all instances with configurable soft startup delay between launches"""
         instance_names = list(self.instances.keys())
@@ -1122,12 +1187,39 @@ class ClaudeInstanceOrchestrator:
         for status in self.statuses.values():
             for tool_name, count in status.tool_details.items():
                 if tool_name not in all_tools:
-                    all_tools[tool_name] = {"count": 0, "tokens": 0, "instances": []}
+                    all_tools[tool_name] = {
+                        "count": 0,
+                        "input": 0,
+                        "output": 0,
+                        "cache_read": 0,
+                        "cache_creation": 0,
+                        "total": 0,
+                        "instances": []
+                    }
                 all_tools[tool_name]["count"] += count
-                all_tools[tool_name]["tokens"] += status.tool_tokens.get(tool_name, 0)
+
+                # Aggregate token breakdown if available
+                if tool_name in status.tool_tokens and isinstance(status.tool_tokens[tool_name], dict):
+                    token_breakdown = status.tool_tokens[tool_name]
+                    all_tools[tool_name]["input"] += token_breakdown.get('input', 0)
+                    all_tools[tool_name]["output"] += token_breakdown.get('output', 0)
+                    all_tools[tool_name]["cache_read"] += token_breakdown.get('cache_read', 0)
+                    all_tools[tool_name]["cache_creation"] += token_breakdown.get('cache_creation', 0)
+                    all_tools[tool_name]["total"] += token_breakdown.get('total', 0)
+                elif tool_name in status.tool_tokens:
+                    # Handle legacy flat format if still present
+                    tokens = status.tool_tokens[tool_name] if isinstance(status.tool_tokens[tool_name], int) else 0
+                    all_tools[tool_name]["total"] += tokens
+                    all_tools[tool_name]["input"] += tokens  # Legacy assumed as input
 
                 # Format instance info with tokens if available
-                tool_tokens = status.tool_tokens.get(tool_name, 0)
+                tool_tokens = 0
+                if tool_name in status.tool_tokens:
+                    if isinstance(status.tool_tokens[tool_name], dict):
+                        tool_tokens = status.tool_tokens[tool_name].get('total', 0)
+                    else:
+                        tool_tokens = status.tool_tokens[tool_name]
+
                 if tool_tokens > 0:
                     all_tools[tool_name]["instances"].append(f"{status.name}({count} uses, {tool_tokens} tok)")
                 else:
@@ -1136,38 +1228,61 @@ class ClaudeInstanceOrchestrator:
 
         if all_tools:
             print(f"\n+=== TOOL USAGE DETAILS ===+")
-            print(f"| {'Tool Name':<20} {'Uses':<8} {'Tokens':<10} {'Cost ($)':<10} {'Used By':<35}")
-            print(f"| {'-'*20} {'-'*8} {'-'*10} {'-'*10} {'-'*35}")
+            print(f"| {'Tool Name':<20} {'Uses':<6} {'Overall':<10} {'Tokens':<10} {'Cache Cr':<10} {'Cache Rd':<10} {'Cost ($)':<10} {'Used By':<35}")
+            print(f"| {'-'*20} {'-'*6} {'-'*10} {'-'*10} {'-'*10} {'-'*10} {'-'*10} {'-'*35}")
 
             total_tool_uses = 0
+            total_tool_overall = 0
             total_tool_tokens = 0
+            total_tool_cache_cr = 0
+            total_tool_cache_rd = 0
             total_tool_cost = 0.0
 
-            for tool_name, details in sorted(all_tools.items()):
-                tool_count = details["count"]
-                tool_tokens = details["tokens"]
+            # Sort by total token usage (descending)
+            sorted_tools = sorted(all_tools.items(), key=lambda item: item[1]['total'], reverse=True)
 
-                # Calculate tool cost at current model rates (3.5 sonnet input rate)
-                tool_cost = (tool_tokens / 1_000_000) * 3.00 if tool_tokens > 0 else 0.0
+            for tool_name, details in sorted_tools:
+                tool_count = details["count"]
+                tool_overall = details["total"]
+                tool_tokens = details["input"] + details["output"]  # Regular tokens
+                tool_cache_cr = details["cache_creation"]
+                tool_cache_rd = details["cache_read"]
+
+                # Calculate tool cost at current model rates (3.5 sonnet rates)
+                # Input: $3.00, Output: $15.00, Cache creation: $3.75, Cache read: $0.30 per 1M tokens
+                input_cost = (details["input"] / 1_000_000) * 3.00
+                output_cost = (details["output"] / 1_000_000) * 15.00
+                cache_cr_cost = (tool_cache_cr / 1_000_000) * 3.75
+                cache_rd_cost = (tool_cache_rd / 1_000_000) * 0.30
+                tool_cost = input_cost + output_cost + cache_cr_cost + cache_rd_cost
 
                 instances_str = ", ".join(details["instances"][:2])  # Show first 2 instances
                 if len(details["instances"]) > 2:
                     instances_str += f" +{len(details['instances'])-2} more"
 
+                overall_str = f"{tool_overall:,}" if tool_overall > 0 else "0"
                 token_str = f"{tool_tokens:,}" if tool_tokens > 0 else "0"
+                cache_cr_str = f"{tool_cache_cr:,}" if tool_cache_cr > 0 else "-"
+                cache_rd_str = f"{tool_cache_rd:,}" if tool_cache_rd > 0 else "-"
                 cost_str = f"{tool_cost:.4f}" if tool_cost > 0 else "0"
 
-                print(f"| {tool_name:<20} {tool_count:<8} {token_str:<10} {cost_str:<10} {instances_str:<35}")
+                print(f"| {tool_name:<20} {tool_count:<6} {overall_str:<10} {token_str:<10} {cache_cr_str:<10} {cache_rd_str:<10} {cost_str:<10} {instances_str:<35}")
 
                 total_tool_uses += tool_count
+                total_tool_overall += tool_overall
                 total_tool_tokens += tool_tokens
+                total_tool_cache_cr += tool_cache_cr
+                total_tool_cache_rd += tool_cache_rd
                 total_tool_cost += tool_cost
 
-            print(f"| {'-'*20} {'-'*8} {'-'*10} {'-'*10} {'-'*35}")
+            print(f"| {'-'*20} {'-'*6} {'-'*10} {'-'*10} {'-'*10} {'-'*10} {'-'*10} {'-'*35}")
+            total_overall_str = f"{total_tool_overall:,}" if total_tool_overall > 0 else "0"
             total_tokens_str = f"{total_tool_tokens:,}" if total_tool_tokens > 0 else "0"
+            total_cache_cr_str = f"{total_tool_cache_cr:,}" if total_tool_cache_cr > 0 else "-"
+            total_cache_rd_str = f"{total_tool_cache_rd:,}" if total_tool_cache_rd > 0 else "-"
             total_cost_str = f"{total_tool_cost:.4f}" if total_tool_cost > 0 else "0"
-            print(f"| {'TOTAL':<20} {total_tool_uses:<8} {total_tokens_str:<10} {total_cost_str:<10}")
-            print(f"+{'='*95}+")
+            print(f"| {'TOTAL':<20} {total_tool_uses:<6} {total_overall_str:<10} {total_tokens_str:<10} {total_cache_cr_str:<10} {total_cache_rd_str:<10} {total_cost_str:<10}")
+            print(f"+{'='*130}+")
 
         print()
 
@@ -1458,6 +1573,58 @@ class ClaudeInstanceOrchestrator:
             if 'usage' in json_data:
                 usage_data = json_data['usage']
                 self.log_at_level(LogLevel.DETAILED, f"📊 TOKEN DATA: Found usage data: {usage_data}")
+
+                # Check for messages with cache that need attribution to tools
+                # Since we can't accurately map cache to specific tools, we'll accumulate it
+                cache_read = usage_data.get('cache_read_input_tokens', 0)
+                cache_creation = usage_data.get('cache_creation_input_tokens', 0)
+
+                if (cache_read > 0 or cache_creation > 0) and status.tool_details:
+                    # Distribute cache proportionally based on tool usage count
+                    total_tool_uses = sum(status.tool_details.values())
+
+                    if total_tool_uses > 0:
+                        for tool_name, use_count in status.tool_details.items():
+                            tool_breakdown = status.get_tool_token_breakdown(tool_name)
+
+                            # Proportional distribution based on usage frequency
+                            tool_proportion = use_count / total_tool_uses
+                            tool_cache_read = int(cache_read * tool_proportion)
+                            tool_cache_creation = int(cache_creation * tool_proportion)
+
+                            # Accumulate cache (not just set it once)
+                            tool_breakdown['cache_read'] += tool_cache_read
+                            tool_breakdown['cache_creation'] += tool_cache_creation
+                            tool_breakdown['total'] += tool_cache_read + tool_cache_creation
+
+                        logger.debug(f"📊 CACHE ATTRIBUTION: Distributed {cache_read} read + {cache_creation} creation tokens proportionally among {len(status.tool_details)} tools based on usage frequency")
+
+                # Check if this message has tools - if so, we might need to attribute cache to them
+                if 'type' in json_data and json_data['type'] == 'assistant':
+                    if 'message' in json_data and isinstance(json_data['message'], dict):
+                        message = json_data['message']
+                        if 'content' in message and isinstance(message['content'], list):
+                            tool_names_in_message = []
+                            for item in message['content']:
+                                if isinstance(item, dict) and item.get('type') == 'tool_use':
+                                    tool_names_in_message.append(item.get('name', 'unknown_tool'))
+
+                            # If we have tools and cache tokens, attribute cache to tools
+                            if tool_names_in_message and usage_data:
+                                cache_read = usage_data.get('cache_read_input_tokens', 0)
+                                cache_creation = usage_data.get('cache_creation_input_tokens', 0)
+                                if cache_read > 0 or cache_creation > 0:
+                                    # Distribute cache equally among tools in this message
+                                    cache_per_tool_read = cache_read // len(tool_names_in_message)
+                                    cache_per_tool_creation = cache_creation // len(tool_names_in_message)
+
+                                    for tool_name in tool_names_in_message:
+                                        tool_breakdown = status.get_tool_token_breakdown(tool_name)
+                                        tool_breakdown['cache_read'] += cache_per_tool_read
+                                        tool_breakdown['cache_creation'] += cache_per_tool_creation
+                                        tool_breakdown['total'] += cache_per_tool_read + cache_per_tool_creation
+
+                                    logger.info(f"🎯 CACHE ATTRIBUTION: Distributed {cache_read} read + {cache_creation} creation tokens among {len(tool_names_in_message)} tools: {tool_names_in_message}")
             elif 'message' in json_data and isinstance(json_data['message'], dict) and 'usage' in json_data['message']:
                 usage_data = json_data['message']['usage']
                 self.log_at_level(LogLevel.DETAILED, f"📊 TOKEN DATA: Found nested usage data: {usage_data}")
@@ -1562,28 +1729,73 @@ class ClaudeInstanceOrchestrator:
             if 'type' in json_data:
                 logger.debug(f"🔍 TOOL DETECTION: Found type='{json_data['type']}', checking for tool usage...")
 
+                # Log full JSON for tool-related types to understand structure
+                if json_data['type'] in ['tool_use', 'tool_call', 'tool_execution', 'tool_result']:
+                    # Only log if we have substantial data (not just type and name)
+                    if len(json_data) > 3 or 'usage' in json_data:
+                        logger.info(f"📦 TOOL JSON DATA: {json.dumps(json_data, indent=2)}")
+
                 if json_data['type'] in ['tool_use', 'tool_call', 'tool_execution']:
                     # Extract tool name for detailed tracking (ALWAYS track, even without message_id)
                     tool_name = json_data.get('name', json_data.get('tool_name', 'unknown_tool'))
                     status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
                     status.tool_calls += 1
 
+                    # Track recent tools for cache attribution
+                    if tool_name not in status.recent_tools:
+                        status.recent_tools.append(tool_name)
+                        # Keep only last 10 tools to avoid memory growth
+                        if len(status.recent_tools) > 10:
+                            status.recent_tools.pop(0)
+                        logger.debug(f"📌 Added {tool_name} to recent_tools for cache attribution")
+
                     logger.debug(f"🔧 TOOL FOUND: {tool_name} (message_id={message_id})")
 
-                    # Track tool token usage if available
-                    tool_tokens = 0
+                    # Track tool token usage with structured breakdown
+                    tool_token_breakdown = status.get_tool_token_breakdown(tool_name)
+
                     if 'usage' in json_data and isinstance(json_data['usage'], dict):
                         tool_usage = json_data['usage']
-                        tool_tokens = tool_usage.get('total_tokens',
-                                    tool_usage.get('input_tokens', 0) + tool_usage.get('output_tokens', 0))
-                    elif 'tokens' in json_data:
-                        tool_tokens = int(json_data.get('tokens', 0))
-                    elif 'token_usage' in json_data:
-                        tool_tokens = int(json_data.get('token_usage', 0))
 
-                    if tool_tokens > 0:
-                        status.tool_tokens[tool_name] = status.tool_tokens.get(tool_name, 0) + tool_tokens
-                        logger.debug(f"🔧 TOOL TRACKED: {tool_name} (uses: {status.tool_details[tool_name]}, tokens: {status.tool_tokens[tool_name]})")
+                        # Extract individual token types
+                        input_tokens = tool_usage.get('input_tokens', 0)
+                        output_tokens = tool_usage.get('output_tokens', 0)
+                        cache_read = tool_usage.get('cache_read_input_tokens', 0)
+                        cache_creation = tool_usage.get('cache_creation_input_tokens', 0)
+
+                        # Debug logging to understand what's being provided
+                        logger.debug(f"🔧 TOOL USAGE DATA for {tool_name}: {tool_usage}")
+                        if cache_read > 0 or cache_creation > 0:
+                            logger.info(f"🎯 TOOL CACHE TOKENS FOUND: {tool_name} has cache_read={cache_read}, cache_creation={cache_creation}")
+
+                        # Update breakdown
+                        tool_token_breakdown['input'] += input_tokens
+                        tool_token_breakdown['output'] += output_tokens
+                        tool_token_breakdown['cache_read'] += cache_read
+                        tool_token_breakdown['cache_creation'] += cache_creation
+
+                        # Calculate total (SDK may omit it)
+                        if 'total_tokens' in tool_usage:
+                            tool_token_breakdown['total'] += tool_usage['total_tokens']
+                        else:
+                            tool_token_breakdown['total'] += (input_tokens + output_tokens + cache_read + cache_creation)
+
+                        logger.debug(f"🔧 TOOL TRACKED: {tool_name} (uses: {status.tool_details[tool_name]}, "
+                                   f"tokens: total={tool_token_breakdown['total']}, input={tool_token_breakdown['input']}, "
+                                   f"output={tool_token_breakdown['output']}, cache_read={tool_token_breakdown['cache_read']}, "
+                                   f"cache_creation={tool_token_breakdown['cache_creation']})")
+                    elif 'tokens' in json_data:
+                        # Legacy format - only total available
+                        tokens = int(json_data.get('tokens', 0))
+                        tool_token_breakdown['total'] += tokens
+                        tool_token_breakdown['input'] += tokens  # Assume all are input for legacy
+                        logger.debug(f"🔧 TOOL TRACKED: {tool_name} (uses: {status.tool_details[tool_name]}, tokens: {tool_token_breakdown['total']} [legacy])")
+                    elif 'token_usage' in json_data:
+                        # Alternative legacy format
+                        tokens = int(json_data.get('token_usage', 0))
+                        tool_token_breakdown['total'] += tokens
+                        tool_token_breakdown['input'] += tokens  # Assume all are input for legacy
+                        logger.debug(f"🔧 TOOL TRACKED: {tool_name} (uses: {status.tool_details[tool_name]}, tokens: {tool_token_breakdown['total']} [legacy])")
                     else:
                         logger.debug(f"🔧 TOOL TRACKED: {tool_name} (uses: {status.tool_details[tool_name]}, no tokens)")
                     return True
@@ -1597,17 +1809,36 @@ class ClaudeInstanceOrchestrator:
                                 tool_name = tool.get('name', tool.get('function', {}).get('name', 'unknown_tool'))
                                 status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
 
-                                # Track tool tokens if available in tool data
-                                tool_tokens = 0
-                                if 'tokens' in tool:
-                                    tool_tokens = int(tool['tokens'])
-                                elif 'usage' in tool and isinstance(tool['usage'], dict):
-                                    tool_usage = tool['usage']
-                                    tool_tokens = tool_usage.get('total_tokens', 0)
+                                # Track tool tokens with structured breakdown
+                                tool_token_breakdown = status.get_tool_token_breakdown(tool_name)
 
-                                if tool_tokens > 0:
-                                    status.tool_tokens[tool_name] = status.tool_tokens.get(tool_name, 0) + tool_tokens
-                                    logger.debug(f"🔧 TOOL FROM MESSAGE: {tool_name} (tokens: {tool_tokens})")
+                                if 'usage' in tool and isinstance(tool['usage'], dict):
+                                    tool_usage = tool['usage']
+                                    # Extract individual token types
+                                    input_tokens = tool_usage.get('input_tokens', 0)
+                                    output_tokens = tool_usage.get('output_tokens', 0)
+                                    cache_read = tool_usage.get('cache_read_input_tokens', 0)
+                                    cache_creation = tool_usage.get('cache_creation_input_tokens', 0)
+
+                                    # Update breakdown
+                                    tool_token_breakdown['input'] += input_tokens
+                                    tool_token_breakdown['output'] += output_tokens
+                                    tool_token_breakdown['cache_read'] += cache_read
+                                    tool_token_breakdown['cache_creation'] += cache_creation
+
+                                    # Calculate total
+                                    if 'total_tokens' in tool_usage:
+                                        tool_token_breakdown['total'] += tool_usage['total_tokens']
+                                    else:
+                                        tool_token_breakdown['total'] += (input_tokens + output_tokens + cache_read + cache_creation)
+
+                                    logger.debug(f"🔧 TOOL FROM MESSAGE: {tool_name} (total={tool_token_breakdown['total']})")
+                                elif 'tokens' in tool:
+                                    # Legacy format
+                                    tokens = int(tool['tokens'])
+                                    tool_token_breakdown['total'] += tokens
+                                    tool_token_breakdown['input'] += tokens  # Assume all input for legacy
+                                    logger.debug(f"🔧 TOOL FROM MESSAGE: {tool_name} (tokens: {tokens} [legacy])")
 
                         status.tool_calls += len(tool_calls)
                     elif isinstance(tool_calls, (int, float)):
@@ -1621,6 +1852,16 @@ class ClaudeInstanceOrchestrator:
                 elif json_data['type'] == 'assistant' and 'message' in json_data:
                     # Handle Claude Code format: {"type":"assistant","message":{"content":[{"type":"tool_use","name":"Task",...}]}}
                     message = json_data['message']
+
+                    # Check if the message itself has usage data (which would include cache for tools)
+                    message_usage = None
+                    has_tools = False
+                    tool_names = []
+
+                    if 'usage' in message and isinstance(message['usage'], dict):
+                        message_usage = message['usage']
+                        logger.info(f"📊 ASSISTANT MESSAGE WITH TOOLS - USAGE: {message_usage}")
+
                     if isinstance(message, dict) and 'content' in message:
                         content = message['content']
                         if isinstance(content, list):
@@ -1628,6 +1869,8 @@ class ClaudeInstanceOrchestrator:
                                 if isinstance(item, dict) and item.get('type') == 'tool_use':
                                     tool_name = item.get('name', 'unknown_tool')
                                     tool_use_id = item.get('id', '')
+                                    tool_names.append(tool_name)
+                                    has_tools = True
 
                                     # Store the mapping for later tool_result processing
                                     if tool_use_id:
@@ -1635,7 +1878,33 @@ class ClaudeInstanceOrchestrator:
 
                                     status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
                                     status.tool_calls += 1
+
+                                    # Track recent tools for cache attribution
+                                    if tool_name not in status.recent_tools:
+                                        status.recent_tools.append(tool_name)
+                                        # Keep only last 10 tools to avoid memory growth
+                                        if len(status.recent_tools) > 10:
+                                            status.recent_tools.pop(0)
+
                                     logger.debug(f"🔧 TOOL FROM ASSISTANT CONTENT: {tool_name} (id: {tool_use_id})")
+
+                            # After processing all tools, attribute cache if needed
+                            if message_usage and has_tools and tool_names:
+                                cache_read = message_usage.get('cache_read_input_tokens', 0)
+                                cache_creation = message_usage.get('cache_creation_input_tokens', 0)
+                                if cache_read > 0 or cache_creation > 0:
+                                    # Divide cache equally among tools in this message
+                                    cache_per_tool_read = cache_read // len(tool_names)
+                                    cache_per_tool_creation = cache_creation // len(tool_names)
+
+                                    for tool in tool_names:
+                                        tool_breakdown = status.get_tool_token_breakdown(tool)
+                                        tool_breakdown['cache_read'] += cache_per_tool_read
+                                        tool_breakdown['cache_creation'] += cache_per_tool_creation
+                                        tool_breakdown['total'] += cache_per_tool_read + cache_per_tool_creation
+
+                                    logger.info(f"🎯 ATTRIBUTED CACHE TO {len(tool_names)} TOOLS: read={cache_read} ({cache_per_tool_read}/tool), creation={cache_creation} ({cache_per_tool_creation}/tool)")
+
                             return True
                 elif json_data['type'] == 'user' and 'message' in json_data:
                     # Handle Claude Code user messages with tool results: {"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"..."}]}}
@@ -1662,7 +1931,9 @@ class ClaudeInstanceOrchestrator:
                                         # Estimate tool token usage based on content size
                                         tool_tokens = self._estimate_tool_tokens(item)
                                         if tool_tokens > 0:
-                                            status.tool_tokens[tool_name] = status.tool_tokens.get(tool_name, 0) + tool_tokens
+                                            tool_token_breakdown = status.get_tool_token_breakdown(tool_name)
+                                            tool_token_breakdown['total'] += tool_tokens
+                                            tool_token_breakdown['input'] += tool_tokens  # Estimated tokens are input
                                             logger.debug(f"🔧 TOOL FROM USER CONTENT: {tool_name} (tool_use_id: {tool_use_id}, estimated_tokens: {tool_tokens})")
                                         else:
                                             logger.debug(f"🔧 TOOL FROM USER CONTENT: {tool_name} (tool_use_id: {tool_use_id})")
@@ -1675,7 +1946,9 @@ class ClaudeInstanceOrchestrator:
                                         # Estimate tool token usage for tool use (typically smaller than results)
                                         tool_tokens = self._estimate_tool_tokens(item, is_tool_use=True)
                                         if tool_tokens > 0:
-                                            status.tool_tokens[tool_name] = status.tool_tokens.get(tool_name, 0) + tool_tokens
+                                            tool_token_breakdown = status.get_tool_token_breakdown(tool_name)
+                                            tool_token_breakdown['total'] += tool_tokens
+                                            tool_token_breakdown['input'] += tool_tokens  # Estimated tokens are input
                                             logger.debug(f"🔧 TOOL USE FROM USER CONTENT: {tool_name} (estimated_tokens: {tool_tokens})")
                                         else:
                                             logger.debug(f"🔧 TOOL USE FROM USER CONTENT: {tool_name}")
@@ -2376,6 +2649,11 @@ def create_direct_instance(args, workspace: Path) -> Optional[InstanceConfig]:
         max_tokens_per_command=args.overall_token_budget
     )
 
+@traced(
+    "orchestrator.main",
+    attributes={"operation.type": "orchestrator_main"},
+    capture_args=False
+)
 async def main():
     """Main orchestrator function"""
     parser = argparse.ArgumentParser(description="Claude Code Instance Orchestrator")
@@ -2409,6 +2687,10 @@ async def main():
                        help="Seconds between rolling status reports (default: 5)")
     parser.add_argument("--start-at", type=str, default=None,
                        help="Schedule orchestration to start at specific time. Examples: '2h' (2 hours from now), '30m' (30 minutes), '14:30' (2:30 PM today), '1am' (1 AM today/tomorrow)")
+
+    # Telemetry options
+    parser.add_argument("--no-telemetry", action="store_true",
+                       help="Disable telemetry for this session (equivalent to ZEN_TELEMETRY_DISABLED=true)")
 
     # Direct command options
     parser.add_argument("--instance-name", type=str, help="Instance name for direct command execution")
@@ -2444,6 +2726,10 @@ async def main():
                        help="Show LLM prompt template for configuration generation")
 
     args = parser.parse_args()
+
+    # Handle telemetry flag
+    if args.no_telemetry:
+        os.environ['ZEN_TELEMETRY_DISABLED'] = 'true'
 
     # Initialize config budget settings (will be populated if config file is loaded)
     config_budget_settings = {}
