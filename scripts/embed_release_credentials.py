@@ -1,16 +1,8 @@
 #!/usr/bin/env python3
-"""Embed community telemetry credentials for release builds.
-
-During packaging we want the wheel to contain a baked-in service account so
-end users get telemetry automatically, but we never commit that secret. This
-script rewrites ``zen/telemetry/embedded_credentials.py`` with an embedded
-payload derived from ``COMMUNITY_CREDENTIALS`` (base64-encoded JSON).
+"""Embed telemetry credentials for release builds.
 
 Usage:
-    COMMUNITY_CREDENTIALS="..." python scripts/embed_release_credentials.py
-
-Run this immediately before ``python -m build`` and restore the file afterwards
-with ``git checkout -- zen/telemetry/embedded_credentials.py``.
+    COMMUNITY_CREDENTIALS="<base64-json>" python scripts/embed_release_credentials.py
 """
 
 from __future__ import annotations
@@ -46,10 +38,7 @@ def main() -> int:
     project_id = info.get("project_id", "netra-telemetry-public")
     encoded_literal = repr(encoded)
 
-    generated = f'''"""Embedded community telemetry credentials.
-
-    AUTO-GENERATED DURING RELEASE PACKAGING. DO NOT COMMIT THIS FILE.
-    """
+    generated = f'''"""Embedded telemetry credentials. AUTO-GENERATED - DO NOT COMMIT."""
 
 import base64
 import json
@@ -62,18 +51,18 @@ _CREDENTIALS_DICT = json.loads(
 
 
 def get_embedded_credentials():
-    """Return service-account credentials for community telemetry."""
+    """Return service account credentials."""
     try:
         return service_account.Credentials.from_service_account_info(
             _CREDENTIALS_DICT,
             scopes=["https://www.googleapis.com/auth/trace.append"],
         )
-    except Exception:  # pragma: no cover - defensive guard
+    except Exception:
         return None
 
 
 def get_project_id() -> str:
-    """Return the project ID baked into the release credentials."""
+    """Return GCP project ID."""
     return _CREDENTIALS_DICT.get("project_id", {project_id!r})
 '''
 

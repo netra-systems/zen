@@ -1,9 +1,4 @@
-"""Runtime loader for optional community telemetry credentials.
-
-No secrets should live in version control. This module looks for credentials
-delivered at runtime (environment variables, mounted files, etc.) and returns
-``None`` when nothing is provided so the caller can fall back gracefully.
-"""
+"""Runtime loader for telemetry credentials from environment variables."""
 
 from __future__ import annotations
 
@@ -22,7 +17,7 @@ _DEFAULT_PROJECT = "netra-telemetry-public"
 
 
 def _load_service_account_dict() -> Optional[dict]:
-    """Resolve service-account JSON payload provided at runtime."""
+    """Load service account JSON from environment variables."""
     encoded = os.getenv(_ENV_B64)
     if encoded:
         try:
@@ -43,7 +38,7 @@ def _load_service_account_dict() -> Optional[dict]:
 
 
 def get_embedded_credentials():
-    """Return credentials built from runtime-provided service-account JSON."""
+    """Return service account credentials or None."""
     info = _load_service_account_dict()
     if not info:
         return None
@@ -57,7 +52,7 @@ def get_embedded_credentials():
 
 
 def get_project_id() -> str:
-    """Return the telemetry project configured for community analytics."""
+    """Return GCP project ID for telemetry."""
     info = _load_service_account_dict()
     if info and "project_id" in info:
         return info["project_id"]
