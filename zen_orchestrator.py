@@ -60,6 +60,11 @@ import re
 from uuid import uuid4, UUID
 from enum import Enum
 
+try:
+    from zen.telemetry import telemetry_manager
+except Exception:  # pragma: no cover - telemetry optional
+    telemetry_manager = None
+
 # Add token budget imports with proper path handling
 sys.path.insert(0, str(Path(__file__).parent))
 try:
@@ -208,6 +213,7 @@ class InstanceStatus:
     tool_details: Dict[str, int] = None  # Tool name -> usage count
     tool_tokens: Dict[str, Dict[str, int]] = None   # Tool name -> {input, output, cache_read, cache_creation, total}
     tool_id_mapping: Dict[str, str] = field(default_factory=dict)  # tool_use_id -> tool name mapping
+    telemetry_recorded: bool = False
     recent_tools: List[str] = field(default_factory=list)  # Track recently used tools for cache attribution
 
     def __post_init__(self):
@@ -522,6 +528,11 @@ class ClaudeInstanceOrchestrator:
                     logger.error(f"🚫 BLOCK MODE: {message}")
                     status.status = "failed"
                     status.error = f"Blocked by budget limit - {reason}"
+                    timestamp = time.time()
+                    if status.start_time is None:
+                        status.start_time = timestamp
+                    status.end_time = timestamp
+                    self._emit_instance_telemetry(name, config, status)
                     return False
                 else:  # warn mode
                     logger.warning(f"⚠️  WARN MODE: {message}")
@@ -599,18 +610,22 @@ class ClaudeInstanceOrchestrator:
             if returncode == 0:
                 status.status = "completed"
                 logger.info(f"Instance {name} completed successfully")
+                self._emit_instance_telemetry(name, config, status)
                 return True
             else:
                 status.status = "failed"
                 logger.error(f"Instance {name} failed with return code {returncode}")
                 if status.error:
                     logger.error(f"Error output: {status.error}")
+                self._emit_instance_telemetry(name, config, status)
                 return False
 
         except Exception as e:
             status.status = "failed"
             status.error = str(e)
             logger.error(f"Exception running instance {name}: {e}")
+            status.end_time = status.end_time or time.time()
+            self._emit_instance_telemetry(name, config, status)
             return False
 
     async def _save_metrics_to_database(self, name: str, config: InstanceConfig, status: InstanceStatus):
@@ -680,6 +695,38 @@ class ClaudeInstanceOrchestrator:
                     tool_cost += (token_data / 1_000_000) * 3.00  # Tool tokens at input rate
 
         return input_cost + output_cost + cache_read_cost + cache_creation_cost + tool_cost
+
+    def _emit_instance_telemetry(self, name: str, config: InstanceConfig, status: InstanceStatus) -> None:
+        """Send telemetry span with token usage and cost metadata."""
+
+        if telemetry_manager is None or not hasattr(telemetry_manager, "is_enabled"):
+            return
+
+        if getattr(status, "telemetry_recorded", False):
+            return
+
+        if not telemetry_manager.is_enabled():
+            return
+
+        cost_usd: Optional[float]
+        try:
+            cost_usd = self._calculate_cost(status)
+        except Exception as exc:  # pragma: no cover - defensive guard
+            logger.debug(f"Cost calculation failed for telemetry span ({name}): {exc}")
+            cost_usd = None
+
+        try:
+            telemetry_manager.record_instance_span(
+                batch_id=self.batch_id,
+                instance_name=name,
+                status=status,
+                config=config,
+                cost_usd=cost_usd,
+                workspace=str(self.workspace_dir),
+            )
+            status.telemetry_recorded = True
+        except Exception as exc:  # pragma: no cover - Network/export errors
+            logger.debug(f"Telemetry emission failed for {name}: {exc}")
 
     async def _stream_output(self, name: str, process):
         """Stream output in real-time for stream-json format (DEPRECATED - use _stream_output_parallel)"""
@@ -861,13 +908,19 @@ class ClaudeInstanceOrchestrator:
         for name, result in zip(self.instances.keys(), results):
             if isinstance(result, asyncio.TimeoutError):
                 logger.error(f"Instance {name} timed out after {timeout}s")
-                self.statuses[name].status = "failed"
-                self.statuses[name].error = f"Timeout after {timeout}s"
+                status = self.statuses[name]
+                status.status = "failed"
+                status.error = f"Timeout after {timeout}s"
+                status.end_time = time.time()
+                self._emit_instance_telemetry(name, self.instances[name], status)
                 final_results[name] = False
             elif isinstance(result, Exception):
                 logger.error(f"Instance {name} failed with exception: {result}")
-                self.statuses[name].status = "failed"
-                self.statuses[name].error = str(result)
+                status = self.statuses[name]
+                status.status = "failed"
+                status.error = str(result)
+                status.end_time = time.time()
+                self._emit_instance_telemetry(name, self.instances[name], status)
                 final_results[name] = False
             else:
                 final_results[name] = result
@@ -3178,6 +3231,10 @@ async def main():
     print("🌐 Learn more: https://netrasystems.ai/")
     print("="*80)
 
+
+    # Flush telemetry before exit
+    if telemetry_manager is not None and hasattr(telemetry_manager, "shutdown"):
+        telemetry_manager.shutdown()
 
     # Exit with appropriate code
     sys.exit(0 if summary['failed'] == 0 else 1)

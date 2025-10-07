@@ -1,352 +1,249 @@
-"""
-Telemetry Manager
+"""Telemetry manager for Zen orchestrator.
 
-Core telemetry management with zen_secrets integration for secure credential handling.
-Implements singleton pattern and lazy initialization for optimal performance.
+Provides minimal OpenTelemetry integration that records anonymous spans with
+token usage and cost metadata. If OpenTelemetry or Google Cloud libraries are
+missing, the manager silently degrades to a no-op implementation.
 """
 
-import os
+from __future__ import annotations
+
+import hashlib
 import logging
-import asyncio
-from typing import Optional, Dict, Any, Union
-from threading import Lock
-import json
+import os
+import re
+from dataclasses import asdict
+from typing import Any, Dict, Optional
 
-# OpenTelemetry imports
 try:
     from opentelemetry import trace
-    from opentelemetry.sdk.trace import TracerProvider
-    from opentelemetry.sdk.trace.sampling import TraceIdRatioBased
     from opentelemetry.sdk.resources import Resource
-    from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+    from opentelemetry.sdk.trace import TracerProvider
     from opentelemetry.sdk.trace.export import BatchSpanProcessor
+    from opentelemetry.trace import SpanKind
+
     OPENTELEMETRY_AVAILABLE = True
-except ImportError:
+except ImportError:  # pragma: no cover - optional dependency
     OPENTELEMETRY_AVAILABLE = False
 
-# zen_secrets imports
 try:
-    from zen_secrets import SecretManager, SecretConfig
-    ZEN_SECRETS_AVAILABLE = True
-except ImportError:
-    ZEN_SECRETS_AVAILABLE = False
+    from google.cloud.trace_v2 import TraceServiceClient
+    from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+    from google.api_core.exceptions import GoogleAPICallError  # type: ignore
 
-from .config import TelemetryConfig, get_config
+    GCP_EXPORT_AVAILABLE = True
+except ImportError:  # pragma: no cover - optional dependency
+    GCP_EXPORT_AVAILABLE = False
+
+    class GoogleAPICallError(Exception):  # type: ignore
+        """Fallback exception used when google-api-core is unavailable."""
+
+        pass
+
+from .embedded_credentials import get_embedded_credentials, get_project_id
 
 logger = logging.getLogger(__name__)
 
 
-class NoOpSpan:
-    """No-operation span for when telemetry is disabled"""
-    def __enter__(self):
-        return self
-    def __exit__(self, *args):
-        pass
-    def set_status(self, *args, **kwargs):
-        pass
-    def record_exception(self, *args, **kwargs):
-        pass
-    def set_attribute(self, *args, **kwargs):
-        pass
+def _sanitize_tool_name(tool: str) -> str:
+    """Convert tool names to telemetry-safe attribute suffixes."""
+    safe = re.sub(r"[^a-z0-9_]+", "_", tool.lower()).strip("_")
+    return safe or "tool"
+
+
+class _NoOpTelemetryManager:
+    """Fallback manager when telemetry dependencies are unavailable."""
+
+    def is_enabled(self) -> bool:
+        return False
+
+    def record_instance_span(self, *_, **__):  # pragma: no cover - trivial
+        return
+
+    def shutdown(self) -> None:  # pragma: no cover - trivial
+        return
 
 
 class TelemetryManager:
-    """
-    Singleton telemetry manager with zen_secrets integration
+    """Manage OpenTelemetry setup and span emission for Zen."""
 
-    Provides secure, privacy-first telemetry collection with:
-    - zen_secrets integration for credential management
-    - Automatic GCP project detection
-    - Lazy initialization with minimal performance impact
-    - Comprehensive error handling and fallback mechanisms
-    """
+    def __init__(self) -> None:
+        self._enabled = False
+        self._provider: Optional[TracerProvider] = None
+        self._tracer = None
+        self._initialize()
 
-    _instance: Optional["TelemetryManager"] = None
-    _lock = Lock()
-    _initialized = False
+    def _initialize(self) -> None:
+        if os.getenv("ZEN_TELEMETRY_DISABLED", "").lower() in {"1", "true", "yes"}:
+            logger.debug("Telemetry disabled via ZEN_TELEMETRY_DISABLED")
+            return
 
-    def __new__(cls) -> "TelemetryManager":
-        if cls._instance is None:
-            with cls._lock:
-                if cls._instance is None:
-                    cls._instance = super().__new__(cls)
-        return cls._instance
+        if not (OPENTELEMETRY_AVAILABLE and GCP_EXPORT_AVAILABLE):
+            logger.debug("OpenTelemetry or Google Cloud exporter not available; telemetry disabled")
+            return
 
-    def __init__(self):
-        if not hasattr(self, '_init_complete'):
-            self._config = get_config()
-            self._tracer: Optional["trace.Tracer"] = None
-            self._secret_manager: Optional[SecretManager] = None
-            self._gcp_credentials: Optional[Dict[str, Any]] = None
-            self._init_complete = True
-
-    @classmethod
-    def get_instance(cls) -> "TelemetryManager":
-        """Get the singleton telemetry manager instance"""
-        return cls()
-
-    async def initialize(self) -> bool:
-        """
-        Initialize telemetry manager
-
-        Returns:
-            bool: True if initialization successful, False otherwise
-        """
-        if self._initialized:
-            return True
-
-        if not self._config.enabled:
-            logger.info("Telemetry disabled via configuration")
-            self._initialized = True
-            return False
-
-        if not OPENTELEMETRY_AVAILABLE:
-            logger.warning("OpenTelemetry not available, telemetry disabled")
-            self._initialized = True
-            return False
-
-        try:
-            # Initialize secret manager if available
-            await self._setup_secret_manager()
-
-            # Setup GCP credentials
-            await self._setup_gcp_credentials()
-
-            # Initialize OpenTelemetry
-            await self._setup_opentelemetry()
-
-            self._initialized = True
-            logger.info("Telemetry initialized successfully")
-            return True
-
-        except Exception as e:
-            logger.error(f"Failed to initialize telemetry: {e}")
-            self._initialized = True
-            return False
-
-    async def _setup_secret_manager(self):
-        """Setup zen_secrets integration"""
-        if not ZEN_SECRETS_AVAILABLE:
-            logger.debug("zen_secrets not available, skipping secret manager setup")
+        credentials = get_embedded_credentials()
+        if credentials is None:
+            logger.debug("No telemetry credentials detected; telemetry disabled")
             return
 
         try:
-            # Initialize secret manager with environment-based config
-            secret_config = SecretConfig.from_environment()
-            self._secret_manager = SecretManager(secret_config)
-            logger.debug("Secret manager initialized")
-        except Exception as e:
-            logger.warning(f"Failed to initialize secret manager: {e}")
-            self._secret_manager = None
+            project_id = get_project_id()
+            client = TraceServiceClient(credentials=credentials)
+            exporter = CloudTraceSpanExporter(project_id=project_id, client=client)
 
-    async def _setup_gcp_credentials(self):
-        """Setup GCP credentials for telemetry including community analytics"""
-        try:
-            # Check if using community analytics (Path 1)
-            if self._config.use_community_analytics:
-                from .community_auth import get_community_auth_provider
-                community_provider = get_community_auth_provider()
-                community_creds = community_provider.get_credentials()
-
-                if community_creds:
-                    self._gcp_credentials = community_creds
-                    logger.info("Using community analytics (no authentication required)")
-                    return
-
-                logger.info("Community analytics not available, falling back to standard auth")
-
-            # Try to get credentials from zen_secrets (for private projects)
-            if self._secret_manager:
-                try:
-                    credentials_json = await self._secret_manager.get_secret(
-                        "zen-telemetry-service-account"
-                    )
-                    if credentials_json:
-                        self._gcp_credentials = json.loads(credentials_json.value)
-                        logger.debug("GCP credentials loaded from zen_secrets")
-                        return
-                except Exception as e:
-                    logger.debug(f"Failed to load credentials from zen_secrets: {e}")
-
-            # Try environment variable
-            creds_env = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-            if creds_env and os.path.exists(creds_env):
-                logger.debug("Using GCP credentials from GOOGLE_APPLICATION_CREDENTIALS")
-                return
-
-            # Try default service account (for GKE/Cloud Run)
-            logger.debug("Using default GCP service account")
-
-        except Exception as e:
-            logger.warning(f"Failed to setup GCP credentials: {e}")
-
-    async def _setup_opentelemetry(self):
-        """Setup OpenTelemetry with GCP integration"""
-        try:
-            # Create resource with service metadata
-            resource = Resource.create(self._config.get_resource_attributes())
-
-            # Setup tracer provider with sampling
-            sampler = TraceIdRatioBased(self._config.sample_rate)
-            provider = TracerProvider(
-                resource=resource,
-                sampler=sampler
-            )
-
-            # Setup GCP exporter if possible
-            await self._setup_gcp_exporter(provider)
-
-            # Set tracer provider
-            trace.set_tracer_provider(provider)
-            self._tracer = trace.get_tracer(__name__)
-
-            logger.debug("OpenTelemetry setup completed")
-
-        except Exception as e:
-            logger.error(f"Failed to setup OpenTelemetry: {e}")
-
-    async def _setup_gcp_exporter(self, provider):
-        """Setup Google Cloud Trace exporter for community analytics or private projects"""
-        try:
-            # Get project ID (community project by default)
-            gcp_project = self._config.get_gcp_project()
-
-            # Setup exporter with appropriate credentials
-            exporter_kwargs = {"project_id": gcp_project}
-
-            # If using community analytics, provide embedded credentials
-            if self._config.use_community_analytics and isinstance(self._gcp_credentials, object):
-                exporter_kwargs["credentials"] = self._gcp_credentials
-
-            exporter = CloudTraceSpanExporter(**exporter_kwargs)
-
-            # Create batch processor optimized for community analytics
-            batch_config = {
-                "max_queue_size": self._config.queue_size,
-                "max_export_batch_size": self._config.batch_size,
-                "schedule_delay_millis": 5000,
-                "export_timeout_millis": self._config.export_timeout * 1000,
+            resource_attrs = {
+                "service.name": "zen-orchestrator",
+                "service.version": os.getenv("ZEN_VERSION", "1.0.3"),
+                "telemetry.sdk.language": "python",
+                "telemetry.sdk.name": "opentelemetry",
+                "zen.analytics.type": "community",
             }
 
-            # Optimize for community analytics (higher throughput, lower latency)
-            if self._config.use_community_analytics:
-                batch_config.update({
-                    "max_export_batch_size": 256,  # Smaller batches for community
-                    "schedule_delay_millis": 3000,  # Faster export
-                })
+            resource = Resource.create(resource_attrs)
+            provider = TracerProvider(resource=resource)
+            provider.add_span_processor(BatchSpanProcessor(exporter))
 
-            processor = BatchSpanProcessor(exporter, **batch_config)
-            provider.add_span_processor(processor)
+            trace.set_tracer_provider(provider)
+            self._provider = provider
+            self._tracer = trace.get_tracer("zen.telemetry")
+            self._enabled = True
+            logger.info("Telemetry initialized with community credentials")
+        except Exception as exc:  # pragma: no cover - defensive guard
+            logger.warning(f"Failed to initialize telemetry: {exc}")
+            self._enabled = False
+            self._provider = None
+            self._tracer = None
 
-            if self._config.use_community_analytics:
-                logger.info(f"Community analytics enabled - contributing to public insights (project: {gcp_project})")
-            else:
-                logger.info(f"Private telemetry configured for project: {gcp_project}")
-
-        except Exception as e:
-            logger.warning(f"Failed to setup GCP exporter: {e}")
-
-    async def _detect_gcp_project(self) -> Optional[str]:
-        """Detect GCP project from metadata service"""
-        try:
-            # Try metadata service (works on GCE, GKE, Cloud Run)
-            import aiohttp
-            metadata_url = "http://metadata.google.internal/computeMetadata/v1/project/project-id"
-            headers = {"Metadata-Flavor": "Google"}
-
-            async with aiohttp.ClientSession() as session:
-                async with session.get(metadata_url, headers=headers, timeout=5) as response:
-                    if response.status == 200:
-                        project_id = await response.text()
-                        logger.debug(f"Detected GCP project: {project_id}")
-                        return project_id
-
-        except Exception as e:
-            logger.debug(f"Failed to detect GCP project: {e}")
-
-        return None
-
-    @property
-    def tracer(self) -> Optional["trace.Tracer"]:
-        """Get tracer instance (lazy initialization)"""
-        if self._tracer is None and self.is_enabled():
-            # Synchronous initialization for immediate use
-            if not self._initialized:
-                # Schedule async initialization if event loop is running
-                try:
-                    loop = asyncio.get_running_loop()
-                    loop.create_task(self.initialize())
-                except RuntimeError:
-                    # No event loop running, will initialize later
-                    pass
-
-        return self._tracer
+    # Public API -----------------------------------------------------
 
     def is_enabled(self) -> bool:
-        """Check if telemetry is enabled"""
-        return self._config.enabled and OPENTELEMETRY_AVAILABLE
+        return self._enabled and self._tracer is not None
 
-    def disable(self):
-        """Programmatically disable telemetry for this session"""
-        import os
-        os.environ['ZEN_TELEMETRY_DISABLED'] = 'true'
-        # Reload config to pick up the change
-        self._config = get_config()
-        logger.info("Telemetry disabled programmatically")
-
-    def enable(self):
-        """Programmatically enable telemetry for this session"""
-        import os
-        os.environ.pop('ZEN_TELEMETRY_DISABLED', None)
-        # Reload config to pick up the change
-        self._config = get_config()
-        logger.info("Telemetry enabled programmatically")
-
-    def get_config(self) -> TelemetryConfig:
-        """Get telemetry configuration"""
-        return self._config
-
-    async def shutdown(self):
-        """Shutdown telemetry manager"""
-        try:
-            if OPENTELEMETRY_AVAILABLE and self._tracer:
-                provider = trace.get_tracer_provider()
-                if hasattr(provider, 'force_flush'):
-                    provider.force_flush(timeout_millis=5000)
-                if hasattr(provider, 'shutdown'):
-                    provider.shutdown()
-
-            logger.info("Telemetry shutdown completed")
-
-        except Exception as e:
-            logger.error(f"Error during telemetry shutdown: {e}")
-
-    def create_span(self, name: str, attributes: Optional[Dict[str, Any]] = None):
-        """Create a new span"""
-        if not self.is_enabled() or self.tracer is None:
-            return NoOpSpan()
-
-        return self.tracer.start_as_current_span(
-            name,
-            attributes=attributes or {}
-        )
-
-    def record_exception(self, exception: Exception, span=None):
-        """Record an exception in telemetry"""
+    def record_instance_span(
+        self,
+        batch_id: str,
+        instance_name: str,
+        status: Any,
+        config: Any,
+        cost_usd: Optional[float] = None,
+        workspace: Optional[str] = None,
+    ) -> None:
         if not self.is_enabled():
             return
 
+        assert self._tracer is not None  # mypy hint
+
+        attributes: Dict[str, Any] = {
+            "zen.batch.id": batch_id,
+            "zen.instance.name": instance_name,
+            "zen.instance.status": getattr(status, "status", "unknown"),
+            "zen.instance.success": getattr(status, "status", "") == "completed",
+            "zen.instance.permission_mode": getattr(config, "permission_mode", "unknown"),
+            "zen.instance.tool_calls": getattr(status, "tool_calls", 0),
+            "zen.tokens.total": getattr(status, "total_tokens", 0),
+            "zen.tokens.input": getattr(status, "input_tokens", 0),
+            "zen.tokens.output": getattr(status, "output_tokens", 0),
+            "zen.tokens.cache.read": getattr(status, "cache_read_tokens", 0),
+            "zen.tokens.cache.creation": getattr(status, "cache_creation_tokens", 0),
+            "zen.tokens.cached_total": getattr(status, "cached_tokens", 0),
+        }
+
+        start_time = getattr(status, "start_time", None)
+        end_time = getattr(status, "end_time", None)
+        if start_time and end_time:
+            attributes["zen.instance.duration_ms"] = int((end_time - start_time) * 1000)
+
+        command = getattr(config, "command", None) or getattr(config, "prompt", None)
+        if isinstance(command, str) and command.startswith("/"):
+            attributes["zen.instance.command_type"] = "slash"
+            attributes["zen.instance.command"] = command
+        elif isinstance(command, str):
+            attributes["zen.instance.command_type"] = "prompt"
+        else:
+            attributes["zen.instance.command_type"] = "unknown"
+
+        session_id = getattr(config, "session_id", None)
+        if session_id:
+            session_hash = hashlib.sha256(session_id.encode("utf-8")).hexdigest()[:16]
+            attributes["zen.session.hash"] = session_hash
+
+        if workspace:
+            workspace_hash = hashlib.sha256(workspace.encode("utf-8")).hexdigest()[:16]
+            attributes["zen.workspace.hash"] = workspace_hash
+
+        # Tool metadata
+        tool_tokens = getattr(status, "tool_tokens", {}) or {}
+        attributes["zen.tools.unique"] = len(tool_tokens)
+        total_tool_tokens = 0
+        for tool_name, tokens in tool_tokens.items():
+            sanitized = _sanitize_tool_name(tool_name)
+            attributes[f"zen.tools.tokens.{sanitized}"] = int(tokens)
+            total_tool_tokens += int(tokens)
+        attributes["zen.tokens.tools_total"] = total_tool_tokens
+
+        tool_details = getattr(status, "tool_details", {}) or {}
+        for tool_name, count in tool_details.items():
+            sanitized = _sanitize_tool_name(tool_name)
+            attributes[f"zen.tools.invocations.{sanitized}"] = int(count)
+
+        # Cost metadata
+        if cost_usd is not None:
+            attributes["zen.cost.usd_total"] = round(float(cost_usd), 6)
+
+        reported_cost = getattr(status, "total_cost_usd", None)
+        if reported_cost is not None:
+            attributes["zen.cost.usd_reported"] = round(float(reported_cost), 6)
+
+        # Derive cost components using fallback pricing (USD per million tokens)
+        input_tokens = getattr(status, "input_tokens", 0)
+        output_tokens = getattr(status, "output_tokens", 0)
+        cache_read_tokens = getattr(status, "cache_read_tokens", 0)
+        cache_creation_tokens = getattr(status, "cache_creation_tokens", 0)
+
+        input_cost = (input_tokens / 1_000_000) * 3.00
+        output_cost = (output_tokens / 1_000_000) * 15.00
+        cache_read_cost = (cache_read_tokens / 1_000_000) * (3.00 * 0.1)
+        cache_creation_cost = (cache_creation_tokens / 1_000_000) * (3.00 * 1.25)
+        tool_cost = (total_tool_tokens / 1_000_000) * 3.00
+
+        attributes.update(
+            {
+                "zen.cost.usd_input": round(input_cost, 6),
+                "zen.cost.usd_output": round(output_cost, 6),
+                "zen.cost.usd_cache_read": round(cache_read_cost, 6),
+                "zen.cost.usd_cache_creation": round(cache_creation_cost, 6),
+                "zen.cost.usd_tools": round(tool_cost, 6),
+            }
+        )
+
+        # Emit span
         try:
-            if span:
-                span.record_exception(exception)
-            else:
-                # Get current span if available
-                current_span = trace.get_current_span()
-                if current_span:
-                    current_span.record_exception(exception)
-        except Exception as e:
-            logger.debug(f"Failed to record exception in telemetry: {e}")
+            with self._tracer.start_as_current_span(
+                "zen.instance", kind=SpanKind.INTERNAL
+            ) as span:
+                for key, value in attributes.items():
+                    span.set_attribute(key, value)
+        except GoogleAPICallError as exc:  # pragma: no cover - network failure safety
+            logger.warning(f"Failed to export telemetry span: {exc}")
+
+    def shutdown(self) -> None:
+        if not self._provider:
+            return
+        try:
+            if hasattr(self._provider, "force_flush"):
+                self._provider.force_flush()
+            if hasattr(self._provider, "shutdown"):
+                self._provider.shutdown()
+        except Exception as exc:  # pragma: no cover
+            logger.debug(f"Telemetry shutdown warning: {exc}")
 
 
-# Global instance - will be initialized when imported
-telemetry_manager = TelemetryManager()
+def _build_manager() -> TelemetryManager | _NoOpTelemetryManager:
+    if not (OPENTELEMETRY_AVAILABLE and GCP_EXPORT_AVAILABLE):
+        return _NoOpTelemetryManager()
+    return TelemetryManager()
+
+
+telemetry_manager = _build_manager()
+
+__all__ = ["TelemetryManager", "telemetry_manager"]
