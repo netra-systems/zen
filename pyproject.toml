@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "netra-zen"
-version = "1.0.3"
+version = "1.0.4"
 description = "Multi-instance Claude orchestrator for parallel task execution"
 readme = "README.md"
 authors = [
@@ -58,7 +58,7 @@ zen = "zen_orchestrator:run"
 
 [tool.setuptools]
 py-modules = ["zen_orchestrator"]
-packages = ["agent_interface", "token_budget", "token_transparency"]
+packages = ["agent_interface", "token_budget", "token_transparency", "zen", "zen.telemetry"]
 
 [tool.setuptools.package-data]
 "*" = ["*.json", "*.yaml", "*.yml", "*.md"]
