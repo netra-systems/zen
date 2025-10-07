@@ -112,11 +112,67 @@ python scripts/run_curated_refresh.py \
 * Use row access policies or authorized views if additional segmentation is
   required before the data becomes public.
 
-## 6. Next Steps
+## 6. Deployment Status (Project: netra-telemetry-public)
 
-1. Wire the scheduled refresh job (Cloud Scheduler → Cloud Run or BigQuery
-   scheduled queries).
-2. Build the Looker Studio dashboard using the curated tables.
-3. Embed the dashboard into the community portal and document the metrics.
-4. Monitor query costs and add caching (materialized views) where needed.
+✅ **Completed:**
+- Datasets created: `zen_community_raw`, `zen_community_curated`
+- Raw table: `zen_community_raw.cloud_trace_export`
+- Curated views: `fact_instance_usage`, `fact_tool_usage`
+- Materialized table: `fact_cost_daily` (partitioned by date)
+- BigQuery Data Transfer API: Enabled
+- Telemetry configured to export to Cloud Trace
+
+⏸️ **Pending (requires billing):**
+- Cloud Trace → BigQuery export configuration
+- Scheduled query for daily refresh (see command below)
+
+### Setting up Cloud Trace Export (Requires Billing)
+
+Once billing is enabled, set up continuous export from Cloud Trace to BigQuery:
+
+**Option 1: Cloud Console UI (Recommended)**
+1. Go to [Cloud Trace Console](https://console.cloud.google.com/traces/traces?project=netra-telemetry-public)
+2. Navigate to "Settings" or "Export"
+3. Configure continuous export to BigQuery
+4. Select dataset: `zen_community_raw`
+5. Table will be auto-created as `cloud_trace_spans`
+
+**Option 2: Use gcloud CLI**
+```bash
+# Enable the required APIs
+gcloud services enable cloudtrace.googleapis.com bigquery.googleapis.com \
+  --project=netra-telemetry-public
+
+# Configure export (via Cloud Console - no direct CLI command)
+```
+
+**Note:** Cloud Trace export to BigQuery is a managed feature that requires billing. Once configured, traces will automatically flow to BigQuery with minimal latency.
+
+### Manual Refresh (Until Billing Enabled)
+
+```bash
+pip install -r analytics/requirements.txt
+python scripts/run_curated_refresh.py \
+    --project netra-telemetry-public \
+    --sql analytics/sql/create_materialized_tables.sql
+```
+
+### Enable Scheduled Query (After Billing Enabled)
+
+```bash
+bq mk --transfer_config \
+  --project_id=netra-telemetry-public \
+  --data_source=scheduled_query \
+  --display_name="Zen Community Analytics - Daily Refresh" \
+  --schedule="every day 00:00" \
+  --target_dataset=zen_community_curated \
+  --params='{"query":"INSERT INTO `netra-telemetry-public.zen_community_curated.fact_cost_daily` SELECT DATE(start_time) AS event_date, start_time AS event_timestamp, command_type, COALESCE(command, TO_HEX(SHA256(IFNULL(command, '\'\'')))) AS command_identifier, SUM(tokens_total) AS tokens_total, SUM(tokens_input) AS tokens_input, SUM(tokens_output) AS tokens_output, SUM(tokens_cache_read) AS tokens_cache_read, SUM(tokens_cache_creation) AS tokens_cache_creation, SUM(tokens_tool_total) AS tokens_tool_total, SUM(cost_total_usd) AS cost_total_usd, SUM(cost_input_usd) AS cost_input_usd, SUM(cost_output_usd) AS cost_output_usd, SUM(cost_cache_read_usd) AS cost_cache_read_usd, SUM(cost_cache_creation_usd) AS cost_cache_creation_usd, SUM(cost_tools_usd) AS cost_tool_usd, COUNT(*) AS runs FROM `netra-telemetry-public.zen_community_curated.fact_instance_usage` WHERE DATE(start_time) = CURRENT_DATE() - 1 GROUP BY event_date, event_timestamp, command_type, command_identifier"}'
+```
+
+## 7. Next Steps
+
+1. ✅ Wire the scheduled refresh job (pending billing activation)
+2. Build the Looker Studio dashboard using the curated tables
+3. Embed the dashboard into the community portal and document the metrics
+4. Monitor query costs and add caching (materialized views) where needed
 

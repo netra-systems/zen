@@ -6,7 +6,7 @@ SELECT
   DATE(start_time) AS event_date,
   start_time AS event_timestamp,
   command_type,
-  COALESCE(command, SHA256(IFNULL(command, ''))) AS command_identifier,
+  COALESCE(command, TO_HEX(SHA256(IFNULL(command, '')))) AS command_identifier,
   SUM(tokens_total) AS tokens_total,
   SUM(tokens_input) AS tokens_input,
   SUM(tokens_output) AS tokens_output,

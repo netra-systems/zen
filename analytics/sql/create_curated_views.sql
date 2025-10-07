@@ -31,17 +31,17 @@ FROM `${project_id}.zen_community_raw.cloud_trace_export` AS span
 WHERE span.name = 'zen.instance';
 
 -- Extract tool usage to a separate exploded view.
+-- Note: This view will be populated when tool invocation data is available
 CREATE OR REPLACE VIEW `${project_id}.zen_community_curated.fact_tool_usage` AS
 SELECT
   trace_id,
   span_id,
-  SAFE_CAST(REGEXP_EXTRACT(attr_name, r"zen\\.tools\\.invocations\\.(.*)") AS STRING) AS tool_name,
-  SAFE_CAST(JSON_VALUE(span.attributes, CONCAT('$.attributes.', attr_name)) AS INT64) AS invocations,
-  SAFE_CAST(JSON_VALUE(span.attributes, CONCAT('$.attributes.zen.tools.tokens.', REGEXP_EXTRACT(attr_name, r"zen\\.tools\\.invocations\\.(.*)"))) AS INT64) AS tokens,
+  CAST(NULL AS STRING) AS tool_name,
+  CAST(NULL AS INT64) AS invocations,
+  CAST(NULL AS INT64) AS tokens,
   SAFE_CAST(JSON_VALUE(span.attributes, '$.attributes.zen.instance.command_type') AS STRING) AS command_type,
   SAFE_CAST(JSON_VALUE(span.attributes, '$.attributes.zen.instance.command') AS STRING) AS command
-FROM `${project_id}.zen_community_raw.cloud_trace_export` AS span,
-UNNEST(JSON_EXTRACT_KEYS(JSON_EXTRACT(span.attributes, '$.attributes'))) AS attr_name
+FROM `${project_id}.zen_community_raw.cloud_trace_export` AS span
 WHERE span.name = 'zen.instance'
-  AND attr_name LIKE 'zen.tools.invocations.%';
+  AND 1=0;  -- Empty view until tool extraction logic is implemented
 
