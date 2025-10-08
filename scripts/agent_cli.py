@@ -1626,6 +1626,7 @@ class Config:
     skip_timeout_validation: bool = False  # Issue #2483: Skip timeout hierarchy validation
     json_mode: bool = False  # ISSUE #2766: JSON output mode - suppress console output
     ci_mode: bool = False  # ISSUE #2766: CI mode - suppress Rich terminal output
+    use_backend_threads: bool = True  # SSOT: Use backend for thread ID management (can disable for backward compat)
 
     def get_websocket_url(self) -> str:
         """Get WebSocket URL for compatibility with test framework"""
@@ -2600,6 +2601,11 @@ class WebSocketClient:
         # ISSUE #2417 Phase 2: Store thread_id for filtering backend logs
         self.current_thread_id: Optional[str] = None
 
+        # SSOT: Thread management cache for performance
+        self.thread_cache_file = Path.home() / ".netra" / "cli_thread_cache.json"
+        self.thread_cache: Dict[str, Dict[str, Any]] = {}
+        self._load_thread_cache()
+
         # Log forwarding configuration
         self.send_logs = send_logs
         self.logs_count = logs_count
@@ -2955,6 +2961,300 @@ class WebSocketClient:
         )
         return True
 
+    def _load_thread_cache(self) -> None:
+        """
+        Load thread cache from disk for SSOT thread management.
+
+        Cache structure:
+        {
+            "user_id": {
+                "thread_id": "backend_thread_123",
+                "created_at": "2024-01-01T00:00:00",
+                "last_used": "2024-01-01T00:00:00",
+                "environment": "staging"
+            }
+        }
+        """
+        try:
+            if self.thread_cache_file.exists():
+                with open(self.thread_cache_file, 'r') as f:
+                    self.thread_cache = json.load(f)
+                    self.debug.debug_print(
+                        f"SSOT: Loaded thread cache with {len(self.thread_cache)} entries",
+                        DebugLevel.VERBOSE
+                    )
+        except Exception as e:
+            self.debug.debug_print(
+                f"SSOT: Could not load thread cache: {e}",
+                DebugLevel.TRACE
+            )
+            self.thread_cache = {}
+
+    def _save_thread_cache(self) -> None:
+        """Save thread cache to disk for persistence."""
+        try:
+            # Ensure directory exists
+            self.thread_cache_file.parent.mkdir(parents=True, exist_ok=True)
+
+            # Save cache
+            with open(self.thread_cache_file, 'w') as f:
+                json.dump(self.thread_cache, f, indent=2)
+
+            self.debug.debug_print(
+                "SSOT: Thread cache saved successfully",
+                DebugLevel.TRACE
+            )
+        except Exception as e:
+            self.debug.debug_print(
+                f"SSOT: Could not save thread cache: {e}",
+                DebugLevel.TRACE
+            )
+
+    def _get_cached_thread_id(self) -> Optional[str]:
+        """
+        Get cached thread ID for current user and environment.
+
+        SSOT: Uses cached thread but validates with backend.
+        """
+        try:
+            # Get user identifier from token
+            if not self.token:
+                return None
+
+            # Decode token to get user_id
+            payload = jwt.decode(self.token, options={"verify_signature": False})
+            user_id = payload.get('user_id') or payload.get('sub') or payload.get('email')
+
+            if not user_id:
+                return None
+
+            # Check cache for this user
+            if user_id in self.thread_cache:
+                cached_data = self.thread_cache[user_id]
+
+                # Check if cache is for same environment
+                cached_env = cached_data.get('environment')
+                current_env = self.config.environment.value if hasattr(self.config, 'environment') else None
+
+                if cached_env == current_env:
+                    thread_id = cached_data.get('thread_id')
+                    last_used = cached_data.get('last_used')
+
+                    # Check if cache is recent (within 24 hours)
+                    if last_used:
+                        last_used_dt = datetime.fromisoformat(last_used)
+                        if datetime.now() - last_used_dt < timedelta(hours=24):
+                            self.debug.debug_print(
+                                f"SSOT: Found cached thread_id: {thread_id}",
+                                DebugLevel.VERBOSE
+                            )
+                            return thread_id
+
+        except Exception as e:
+            self.debug.debug_print(
+                f"SSOT: Error accessing thread cache: {e}",
+                DebugLevel.TRACE
+            )
+
+        return None
+
+    def _update_thread_cache(self, thread_id: str) -> None:
+        """Update thread cache with new or validated thread ID."""
+        try:
+            # Get user identifier
+            payload = jwt.decode(self.token, options={"verify_signature": False})
+            user_id = payload.get('user_id') or payload.get('sub') or payload.get('email')
+
+            if user_id:
+                # Update cache entry
+                self.thread_cache[user_id] = {
+                    'thread_id': thread_id,
+                    'created_at': self.thread_cache.get(user_id, {}).get('created_at', datetime.now().isoformat()),
+                    'last_used': datetime.now().isoformat(),
+                    'environment': self.config.environment.value if hasattr(self.config, 'environment') else "unknown"
+                }
+
+                # Save to disk
+                self._save_thread_cache()
+
+                self.debug.debug_print(
+                    f"SSOT: Updated thread cache for user {user_id[:10]}...",
+                    DebugLevel.TRACE
+                )
+
+        except Exception as e:
+            self.debug.debug_print(
+                f"SSOT: Could not update thread cache: {e}",
+                DebugLevel.TRACE
+            )
+
+    async def get_or_create_thread_from_backend(self) -> Optional[str]:
+        """
+        SSOT: Get or create a thread ID from the backend.
+
+        This ensures thread IDs are managed by the backend as the single source of truth,
+        not generated locally by the client.
+
+        Returns:
+            Thread ID from backend, or None if creation fails
+        """
+        # Check if backend thread management is disabled
+        if not self.config.use_backend_threads:
+            self.debug.debug_print(
+                "SSOT: Backend thread management disabled by configuration",
+                DebugLevel.VERBOSE
+            )
+            return None
+
+        try:
+            # First check if we have a cached thread_id for this session
+            if self.current_thread_id and await self._validate_thread_with_backend(self.current_thread_id):
+                self.debug.debug_print(
+                    f"SSOT: Using existing validated thread_id: {self.current_thread_id}",
+                    DebugLevel.VERBOSE
+                )
+                self._update_thread_cache(self.current_thread_id)
+                return self.current_thread_id
+
+            # Check persistent cache for thread ID
+            cached_thread_id = self._get_cached_thread_id()
+            if cached_thread_id and await self._validate_thread_with_backend(cached_thread_id):
+                self.current_thread_id = cached_thread_id
+                self.debug.debug_print(
+                    f"SSOT: Using cached and validated thread_id: {cached_thread_id}",
+                    DebugLevel.VERBOSE
+                )
+                self._update_thread_cache(cached_thread_id)
+                return cached_thread_id
+
+            # Create a new thread via backend API
+            thread_id = await self._create_thread_on_backend()
+            if thread_id:
+                self.current_thread_id = thread_id
+                self._update_thread_cache(thread_id)
+                self.debug.debug_print(
+                    f"SSOT: Created new thread_id from backend: {thread_id}",
+                    DebugLevel.BASIC,
+                    style="green"
+                )
+                return thread_id
+
+            # Fallback: Use local generation with warning (backward compatibility)
+            self.debug.debug_print(
+                "SSOT WARNING: Backend thread creation failed, falling back to local generation",
+                DebugLevel.BASIC,
+                style="yellow"
+            )
+            return None
+
+        except Exception as e:
+            self.debug.debug_print(
+                f"SSOT ERROR: Thread management failed: {e}",
+                DebugLevel.BASIC,
+                style="red"
+            )
+            return None
+
+    async def _create_thread_on_backend(self) -> Optional[str]:
+        """
+        Create a new thread on the backend and return its ID.
+
+        SSOT: Backend is the authoritative source for thread IDs.
+        """
+        try:
+            # Construct the thread creation endpoint
+            thread_url = f"{self.config.backend_url}/api/threads/create"
+
+            headers = {
+                "Authorization": f"Bearer {self.token}",
+                "Content-Type": "application/json"
+            }
+
+            # Thread creation payload with metadata
+            payload = {
+                "source": "agent_cli",
+                "environment": self.config.environment.value if hasattr(self.config, 'environment') else "unknown",
+                "client_version": "1.0.0",  # Could be made configurable
+                "timestamp": datetime.now().isoformat()
+            }
+
+            # Use aiohttp session if available, otherwise create one
+            import aiohttp
+            async with aiohttp.ClientSession() as session:
+                async with session.post(thread_url, json=payload, headers=headers) as response:
+                    if response.status == 200 or response.status == 201:
+                        data = await response.json()
+                        thread_id = data.get("thread_id") or data.get("id")
+                        if thread_id:
+                            self.debug.debug_print(
+                                f"SSOT: Backend created thread with ID: {thread_id}",
+                                DebugLevel.VERBOSE
+                            )
+                            return thread_id
+                    else:
+                        error_text = await response.text()
+                        self.debug.debug_print(
+                            f"SSOT: Backend thread creation failed with status {response.status}: {error_text}",
+                            DebugLevel.BASIC,
+                            style="yellow"
+                        )
+
+        except aiohttp.ClientError as e:
+            # Network or connection errors - expected in some environments
+            self.debug.debug_print(
+                f"SSOT: Backend thread API not available (network error): {e}",
+                DebugLevel.VERBOSE
+            )
+        except Exception as e:
+            self.debug.debug_print(
+                f"SSOT: Unexpected error creating backend thread: {e}",
+                DebugLevel.VERBOSE
+            )
+
+        return None
+
+    async def _validate_thread_with_backend(self, thread_id: str) -> bool:
+        """
+        Validate that a thread ID exists and is valid on the backend.
+
+        SSOT: Backend validates thread existence and status.
+        """
+        try:
+            # Quick validation - check if thread exists on backend
+            validate_url = f"{self.config.backend_url}/api/threads/{thread_id}/validate"
+
+            headers = {
+                "Authorization": f"Bearer {self.token}"
+            }
+
+            import aiohttp
+            async with aiohttp.ClientSession() as session:
+                async with session.get(validate_url, headers=headers) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        is_valid = data.get("valid", False)
+                        if is_valid:
+                            self.debug.debug_print(
+                                f"SSOT: Thread {thread_id} validated successfully",
+                                DebugLevel.TRACE
+                            )
+                        return is_valid
+                    elif response.status == 404:
+                        self.debug.debug_print(
+                            f"SSOT: Thread {thread_id} not found on backend",
+                            DebugLevel.VERBOSE
+                        )
+                        return False
+
+        except Exception as e:
+            # If validation fails, assume thread is invalid
+            self.debug.debug_print(
+                f"SSOT: Thread validation failed for {thread_id}: {e}",
+                DebugLevel.TRACE
+            )
+
+        return False
+
     async def send_message(self, message: str) -> str:
         """Send a message and return the run_id"""
         if not self.ws:
@@ -2966,8 +3266,18 @@ class WebSocketClient:
         # Create message payload
         # ISSUE #1671 FIX: Add thread_id for proper WebSocket event routing
         # The WebSocket manager expects both user_id and thread_id to route events correctly
-        # ISSUE #2782: Simple UUID generation - no backend dependency
-        thread_id = f"cli_thread_{uuid.uuid4().hex[:12]}"
+        # SSOT: Get thread_id from backend as single source of truth
+        thread_id = await self.get_or_create_thread_from_backend()
+
+        # Fallback to local generation if backend is unavailable (backward compatibility)
+        if not thread_id:
+            self.debug.debug_print(
+                "SSOT: Using local thread generation as fallback",
+                DebugLevel.VERBOSE,
+                style="yellow"
+            )
+            # ISSUE #2782: Simple UUID generation - backward compatibility fallback
+            thread_id = f"cli_thread_{uuid.uuid4().hex[:12]}"
 
         # ISSUE #2417 Phase 2: Store thread_id for filtering backend logs
         self.current_thread_id = thread_id
@@ -5475,6 +5785,19 @@ def main(argv=None):
         help="Disable WebSocket error diagnostics (opt-out)"
     )
 
+    # SSOT Thread Management Arguments
+    parser.add_argument(
+        "--disable-backend-threads",
+        action="store_true",
+        help="SSOT: Disable backend thread ID management and use local generation (backward compatibility)"
+    )
+
+    parser.add_argument(
+        "--clear-thread-cache",
+        action="store_true",
+        help="SSOT: Clear cached thread IDs and force new thread creation"
+    )
+
     parser.add_argument(
         "--health-check",
         action="store_true",
@@ -5842,7 +6165,8 @@ def main(argv=None):
         enable_websocket_diagnostics=enable_diagnostics,  # Issue #2484 Phase 2: Default enabled with opt-out
         skip_timeout_validation=args.skip_timeout_validation,  # Issue #2483: Skip timeout hierarchy validation
         json_mode=json_mode,  # ISSUE #2766: Pass json_mode to config for output suppression
-        ci_mode=ci_mode  # ISSUE #2766: Pass ci_mode to config for output suppression
+        ci_mode=ci_mode,  # ISSUE #2766: Pass ci_mode to config for output suppression
+        use_backend_threads=not args.disable_backend_threads  # SSOT: Backend thread management (enabled by default)
     )
 
     # ISSUE #2839: Load validation framework imports when validation is explicitly requested
@@ -5888,6 +6212,14 @@ def main(argv=None):
         if config.token_file.exists():
             config.token_file.unlink()
             safe_console_print("SUCCESS: Cleared cached authentication token", style="green",
+                             json_mode=json_mode, ci_mode=ci_mode)
+
+    # SSOT: Clear thread cache if requested
+    if args.clear_thread_cache:
+        thread_cache_file = Path.home() / ".netra" / "cli_thread_cache.json"
+        if thread_cache_file.exists():
+            thread_cache_file.unlink()
+            safe_console_print("SUCCESS: Cleared cached thread IDs", style="green",
                              json_mode=json_mode, ci_mode=ci_mode)
 
     # ISSUE #2766: json_mode and ci_mode already determined at top of main()
