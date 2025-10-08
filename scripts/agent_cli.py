@@ -3987,8 +3987,8 @@ class AgentCLI:
 
                             safe_console_print(
                                 Panel(
-                                    Syntax(pretty_result, "json"),
-                                    title="Final Agent Result",
+                                    Syntax(pretty_result, "json", word_wrap=True),
+                                    title="Final Agent Result - Optimization Pointers",
                                     border_style="green"
                                 ),
                                 json_mode=self.json_mode,
@@ -4011,7 +4011,7 @@ class AgentCLI:
             # Display raw data in verbose mode
             if self.debug.debug_level >= DebugLevel.DIAGNOSTIC:
                 safe_console_print(Panel(
-                    Syntax(json.dumps(event.data, indent=2), "json"),
+                    Syntax(json.dumps(event.data, indent=2), "json", word_wrap=True),
                     title=f"Event: {event.type}",
                     border_style="dim"
                 ))
@@ -5834,7 +5834,7 @@ def main(argv=None):
                     result = await cli.health_checker.check_backend_health()
                     safe_console_print(f"Backend Status: {result['status']}")
                     if result['status'] == 'healthy' and 'data' in result:
-                        safe_console_print(Panel(Syntax(json.dumps(result['data'], indent=2), "json"), title="Health Data"))
+                        safe_console_print(Panel(Syntax(json.dumps(result['data'], indent=2), "json", word_wrap=True), title="Health Data"))
                     elif 'error' in result:
                         safe_console_print(f"Error: {result['error']}", style="red")
 
@@ -5843,7 +5843,7 @@ def main(argv=None):
                     result = await cli.health_checker.check_auth_service_health()
                     safe_console_print(f"Auth Service Status: {result['status']}")
                     if result['status'] == 'healthy' and 'data' in result:
-                        safe_console_print(Panel(Syntax(json.dumps(result['data'], indent=2), "json"), title="Health Data"))
+                        safe_console_print(Panel(Syntax(json.dumps(result['data'], indent=2), "json", word_wrap=True), title="Health Data"))
                     elif 'error' in result:
                         safe_console_print(f"Error: {result['error']}", style="red")
 
