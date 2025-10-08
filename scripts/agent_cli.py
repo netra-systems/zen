@@ -2992,17 +2992,28 @@ class WebSocketClient:
             try:
                 from scripts.agent_logs import collect_recent_logs
 
-                logs = collect_recent_logs(
+                result = collect_recent_logs(
                     limit=self.logs_count,
                     project_name=self.logs_project,
                     base_path=self.logs_path,
                     username=self.logs_user
                 )
 
-                if logs:
+                if result:
+                    logs, files_read = result
                     payload["payload"]["jsonl_logs"] = logs
+
+                    # Log detailed information about what's being sent (always at INFO level)
+                    import logging
+                    log_info_msg = f"📤 Sending {len(logs)} log entries from {files_read} file{'s' if files_read != 1 else ''} to agent"
+                    if self.logs_project:
+                        log_info_msg += f" (project: {self.logs_project})"
+
+                    logging.info(log_info_msg)
+
+                    # Also print via debug system for consistency
                     self.debug.debug_print(
-                        f"Attached {len(logs)} log entries to message payload",
+                        log_info_msg,
                         DebugLevel.BASIC
                     )
                 else:
@@ -6109,6 +6120,16 @@ def main(argv=None):
             elif args.message:
                 # Issue #1822: Handle validation exit codes
                 result = await cli.run_single_message(args.message, args.wait)
+                # ISSUE #2766: Use structured exit code from ExitCodeGenerator
+                if hasattr(cli, 'exit_code'):
+                    sys.exit(cli.exit_code)
+                elif args.validate_outputs and result is False:
+                    # Validation failed, exit with code 1 (fallback)
+                    sys.exit(1)
+            elif args.send_logs:
+                # Handle --send-logs without --message: use default message
+                default_message = "claude-code optimizer default message"
+                result = await cli.run_single_message(default_message, args.wait)
                 # ISSUE #2766: Use structured exit code from ExitCodeGenerator
                 if hasattr(cli, 'exit_code'):
                     sys.exit(cli.exit_code)

@@ -4,6 +4,7 @@ Agent Logs Collection Helper
 Collects recent JSONL logs from .claude/Projects for agent CLI integration
 """
 
+import hashlib
 import json
 import logging
 import os
@@ -127,7 +128,7 @@ def _find_most_recent_project(projects_root: Path) -> Optional[Path]:
         return None
 
 
-def _collect_jsonl_files(project_path: Path, limit: int) -> List[Dict[str, Any]]:
+def _collect_jsonl_files(project_path: Path, limit: int) -> tuple[List[Dict[str, Any]], int, List[Dict[str, str]]]:
     """
     Collect and parse JSONL files from project directory.
 
@@ -136,11 +137,11 @@ def _collect_jsonl_files(project_path: Path, limit: int) -> List[Dict[str, Any]]
         limit: Maximum number of log files to read
 
     Returns:
-        List of parsed log entries (dicts)
+        Tuple of (list of parsed log entries, number of files read, list of file info dicts)
     """
     if not project_path.exists() or not project_path.is_dir():
         logger.warning(f"Project path does not exist: {project_path}")
-        return []
+        return [], 0, []
 
     try:
         # Find all .jsonl files
@@ -148,18 +149,32 @@ def _collect_jsonl_files(project_path: Path, limit: int) -> List[Dict[str, Any]]
 
         if not jsonl_files:
             logger.info(f"No .jsonl files found in {project_path}")
-            return []
+            return [], 0, []
 
         # Sort by modification time, most recent first
         jsonl_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
 
         # Limit number of files to read
         jsonl_files = jsonl_files[:limit]
+        files_read = len(jsonl_files)
 
         all_logs = []
+        file_info = []
 
         for jsonl_file in jsonl_files:
             try:
+                # Calculate file hash for tracking
+                hasher = hashlib.sha256()
+                entry_count = 0
+
+                with open(jsonl_file, 'rb') as f:
+                    # Read in chunks for efficient hashing
+                    for chunk in iter(lambda: f.read(4096), b''):
+                        hasher.update(chunk)
+
+                file_hash = hasher.hexdigest()[:8]  # First 8 chars of hash
+
+                # Now read and parse the file
                 with open(jsonl_file, 'r', encoding='utf-8') as f:
                     for line_num, line in enumerate(f, 1):
                         line = line.strip()
@@ -169,22 +184,29 @@ def _collect_jsonl_files(project_path: Path, limit: int) -> List[Dict[str, Any]]
                         try:
                             log_entry = json.loads(line)
                             all_logs.append(log_entry)
+                            entry_count += 1
                         except json.JSONDecodeError as e:
                             logger.debug(
                                 f"Skipping malformed JSON in {jsonl_file.name}:{line_num}: {e}"
                             )
                             continue
 
+                file_info.append({
+                    'name': jsonl_file.name,
+                    'hash': file_hash,
+                    'entries': entry_count
+                })
+
             except Exception as e:
                 logger.warning(f"Error reading {jsonl_file.name}: {e}")
                 continue
 
-        logger.info(f"Collected {len(all_logs)} log entries from {len(jsonl_files)} files")
-        return all_logs
+        logger.info(f"Collected {len(all_logs)} log entries from {files_read} files")
+        return all_logs, files_read, file_info
 
     except Exception as e:
         logger.error(f"Error collecting JSONL files: {e}")
-        return []
+        return [], 0, []
 
 
 def collect_recent_logs(
@@ -193,7 +215,7 @@ def collect_recent_logs(
     base_path: Optional[str] = None,
     username: Optional[str] = None,
     platform_name: Optional[str] = None
-) -> Optional[List[Dict[str, Any]]]:
+) -> Optional[tuple[List[Dict[str, Any]], int]]:
     """
     Collect recent JSONL logs from .claude/Projects directory.
 
@@ -205,7 +227,7 @@ def collect_recent_logs(
         platform_name: Platform override for testing ('Darwin', 'Windows', 'Linux')
 
     Returns:
-        List of log entry dicts or None if no logs found
+        Tuple of (list of log entry dicts, number of files read) or None if no logs found
 
     Raises:
         ValueError: If limit is not positive or project_name is invalid
@@ -237,12 +259,12 @@ def collect_recent_logs(
                 return None
 
         # Collect logs
-        logs = _collect_jsonl_files(project_path, limit)
+        logs, files_read = _collect_jsonl_files(project_path, limit)
 
         if not logs:
             return None
 
-        return logs
+        return logs, files_read
 
     except Exception as e:
         logger.error(f"Failed to collect logs: {e}")

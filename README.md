@@ -11,11 +11,39 @@ The process is simple. One time install, then one command. It auto grabs the las
 ## Quick start
 
 1. `pip install netra-zen`
-2. `zen --apex --send-logs --message "claude code"`
+2. `zen --apex --send-logs`
 3. Read the results and update claude settings, prompts, commands, etc. as needed to benefit
 
-By default it will optimize based on logs no thought on the message is needed. Just copy and paste #2!
 See detailed install below if needed.
+
+### Log Collection Options
+
+The optimizer analyzes your Claude Code usage logs to identify optimization opportunities. You can customize what logs are sent:
+
+```bash
+# Send logs from the 5 most recent files (default)
+zen --apex --send-logs
+
+# Send logs from more files for deeper analysis
+zen --apex --send-logs --logs-count 10
+
+# Send logs from a specific project
+zen --apex --send-logs --logs-project "my-project-name"
+
+# Send logs from a custom location
+zen --apex --send-logs --logs-path "/path/to/.claude/Projects"
+
+# Send logs with a custom message
+zen --apex --send-logs --message "analyze my authentication flow usage"
+
+# Combine options for targeted analysis
+zen --apex --send-logs --logs-count 3 --logs-project "production-app"
+```
+
+**Important:**
+- `--logs-count` specifies the number of **files** to read, not entries
+- Each file may contain many log entries
+- The tool will display exactly how many entries from how many files are being sent
 
 ## Example output
 ![example](https://github.com/user-attachments/assets/94ed0180-9fed-4d76-ab69-657b7d3ab1b2)
