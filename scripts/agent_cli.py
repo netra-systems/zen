@@ -3000,21 +3000,46 @@ class WebSocketClient:
                 )
 
                 if result:
-                    logs, files_read = result
+                    logs, files_read, file_info = result
                     payload["payload"]["jsonl_logs"] = logs
 
-                    # Log detailed information about what's being sent (always at INFO level)
+                    # Create prominent, formatted log message
                     import logging
-                    log_info_msg = f"📤 Sending {len(logs)} log entries from {files_read} file{'s' if files_read != 1 else ''} to agent"
-                    if self.logs_project:
-                        log_info_msg += f" (project: {self.logs_project})"
+                    separator = "=" * 60
+                    log_msg_parts = [
+                        "",
+                        separator,
+                        f"📤 SENDING LOGS TO OPTIMIZER",
+                        separator,
+                        f"  Total Entries: {len(logs)}",
+                        f"  Files Read: {files_read}",
+                    ]
 
-                    logging.info(log_info_msg)
+                    if self.logs_project:
+                        log_msg_parts.append(f"  Project: {self.logs_project}")
+
+                    log_msg_parts.append("")
+                    log_msg_parts.append("  Files:")
+
+                    # Add file details with hashes
+                    for info in file_info:
+                        log_msg_parts.append(
+                            f"    • {info['name']} (hash: {info['hash']}, {info['entries']} entries)"
+                        )
+
+                    log_msg_parts.append(separator)
+                    log_msg_parts.append("")
+
+                    log_msg = "\n".join(log_msg_parts)
+
+                    # Log at INFO level
+                    logging.info(log_msg)
 
                     # Also print via debug system for consistency
                     self.debug.debug_print(
-                        log_info_msg,
-                        DebugLevel.BASIC
+                        log_msg,
+                        DebugLevel.BASIC,
+                        style="cyan"
                     )
                 else:
                     self.debug.debug_print(
@@ -5502,9 +5527,9 @@ def main(argv=None):
     parser.add_argument(
         "--logs-count",
         type=int,
-        default=5,
+        default=3,
         metavar="N",
-        help="Number of recent log files to collect (default: 5, must be positive)"
+        help="Number of recent log files to collect (default: 3, must be positive)"
     )
 
     parser.add_argument(

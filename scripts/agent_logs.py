@@ -210,24 +210,24 @@ def _collect_jsonl_files(project_path: Path, limit: int) -> tuple[List[Dict[str,
 
 
 def collect_recent_logs(
-    limit: int = 5,
+    limit: int = 3,
     project_name: Optional[str] = None,
     base_path: Optional[str] = None,
     username: Optional[str] = None,
     platform_name: Optional[str] = None
-) -> Optional[tuple[List[Dict[str, Any]], int]]:
+) -> Optional[tuple[List[Dict[str, Any]], int, List[Dict[str, str]]]]:
     """
     Collect recent JSONL logs from .claude/Projects directory.
 
     Args:
-        limit: Maximum number of log files to read (default: 5)
+        limit: Maximum number of log files to read (default: 3)
         project_name: Specific project name or None for most recent
         base_path: Direct path override to logs directory
         username: Windows username override
         platform_name: Platform override for testing ('Darwin', 'Windows', 'Linux')
 
     Returns:
-        Tuple of (list of log entry dicts, number of files read) or None if no logs found
+        Tuple of (list of log entry dicts, number of files read, list of file info) or None if no logs found
 
     Raises:
         ValueError: If limit is not positive or project_name is invalid
@@ -259,12 +259,12 @@ def collect_recent_logs(
                 return None
 
         # Collect logs
-        logs, files_read = _collect_jsonl_files(project_path, limit)
+        logs, files_read, file_info = _collect_jsonl_files(project_path, limit)
 
         if not logs:
             return None
 
-        return logs, files_read
+        return logs, files_read, file_info
 
     except Exception as e:
         logger.error(f"Failed to collect logs: {e}")

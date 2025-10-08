@@ -6,7 +6,7 @@ It works by analyzing your usage logs for metadata optimizations. It is focused 
 
 This is a micro startup effort, aiming to provide real value for individual devs in exchange for feedback. Our intent is to charge businesses for larger scale optimizations.
 
-The process is simple. One time install, then one command. It auto grabs the last 5 logs and provides actionable items to update going forward to get the value of the optimizations.
+The process is simple. One time install, then one command. It auto grabs the last 3 log files and provides actionable items to update going forward to get the value of the optimizations.
 
 ## Quick start
 
@@ -21,7 +21,7 @@ See detailed install below if needed.
 The optimizer analyzes your Claude Code usage logs to identify optimization opportunities. You can customize what logs are sent:
 
 ```bash
-# Send logs from the 5 most recent files (default)
+# Send logs from the 3 most recent files (default)
 zen --apex --send-logs
 
 # Send logs from more files for deeper analysis
