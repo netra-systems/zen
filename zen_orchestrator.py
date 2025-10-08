@@ -2967,12 +2967,13 @@ def run():
         # Keep all other arguments to pass through to agent_cli
         filtered_argv = [arg for arg in sys.argv[1:] if arg not in ('--apex', '-a')]
 
-        # Set PYTHONPATH for agent_cli to access shared module and dependencies
-        # In GCP deployment, PYTHONPATH should already include backend modules
+        # Set PYTHONPATH for optional advanced backend features
+        # Note: The minimal shared/ module is vendored in zen repo (no external dependency)
+        # PYTHONPATH is only needed for advanced backend features beyond basic agent_cli
         env = os.environ.copy()
 
         # Check if APEX_BACKEND_PATH env var is set (for GCP deployment)
-        # Otherwise try ../netra-apex (for local development)
+        # Otherwise try ../netra-apex (for local development with advanced features)
         if 'APEX_BACKEND_PATH' in env:
             backend_paths = [env['APEX_BACKEND_PATH']]
         else:

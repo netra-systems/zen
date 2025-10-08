@@ -93,15 +93,16 @@ zen --apex \
 ## Deployment Requirements
 
 ### GCP Environment
-- `shared` module must be available via PYTHONPATH
+- `shared` module is vendored in the zen repo (no external dependency required)
 - E2E_OAUTH_SIMULATION_KEY configured for authentication
 - Backend services running and accessible
-- Optional: Set `APEX_BACKEND_PATH` environment variable to override default backend location
+- Optional: Set `APEX_BACKEND_PATH` environment variable for advanced backend features
 
 ### Local Development
-- netra-apex repository in `../netra-apex` (auto-detected)
-- OR set `APEX_BACKEND_PATH` environment variable: `export APEX_BACKEND_PATH=/path/to/netra-apex`
-- Install netra-apex dependencies: `cd ../netra-apex && pip install -r requirements.txt`
+- The vendored `shared/` module is included in the zen repository
+- No external netra-apex dependency required for basic agent_cli functionality
+- Optional: Set `APEX_BACKEND_PATH` environment variable for advanced features: `export APEX_BACKEND_PATH=/path/to/netra-apex`
+- Install agent_cli dependencies: `pip install websockets aiohttp rich pyjwt psutil pyyaml pydantic email-validator`
 
 ### Package Installation
 ```bash

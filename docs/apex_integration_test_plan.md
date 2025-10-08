@@ -4,7 +4,7 @@
 
 The `zen --apex` integration has been successfully implemented with the following components:
 
-**⚠️ IMPORTANT**: This implementation is designed for GCP deployment where the `shared` module is available via PYTHONPATH. The apex functionality uses `python -m scripts.agent_cli` to avoid hardcoded local paths and work correctly in packaged installations.
+**⚠️ IMPORTANT**: This implementation includes a vendored minimal `shared/` package (containing only `windows_encoding.py` and `types/websocket_closure_codes.py`) required by `agent_cli.py`. The module is accessible via the zen repo root in `sys.path`. The apex functionality uses `python -m scripts.agent_cli` to avoid hardcoded local paths and work correctly in packaged installations.
 
 ### 1. Core Modules Created
 
@@ -62,35 +62,35 @@ pytest tests/test_agent_logs.py -v
 
 ### ✅ Integration Tests - WORKING
 
-The `zen --apex` command successfully delegates to `agent_cli.py` with automatic PYTHONPATH configuration:
+The `zen --apex` command successfully delegates to `agent_cli.py` with vendored shared module:
 
 **Dependency Chain**:
 ```
 agent_cli.py
-  └── shared.windows_encoding (from netra-apex repo)
-      └── shared.types.*
-          └── pydantic
-              └── email_validator
-                  └── ... (more dependencies)
+  └── shared.windows_encoding (vendored in zen/shared/)
+      └── shared.types.websocket_closure_codes (vendored in zen/shared/types/)
+          └── No external dependencies required
 ```
 
 **Current Status**:
 - ✅ CLI argument parsing works correctly
 - ✅ `--apex` flag properly filters and delegates arguments
-- ✅ subprocess invocation with PYTHONPATH configured
-- ✅ Auto-detects netra-apex in ../netra-apex for local development
-- ✅ Supports APEX_BACKEND_PATH env var for custom backend location
+- ✅ subprocess invocation uses vendored shared/ module from zen repo
+- ✅ No external netra-apex dependency required for basic agent_cli functionality
+- ✅ Supports APEX_BACKEND_PATH env var for advanced backend features (optional)
 - ✅ `zen --apex --help` displays agent_cli help with log options
 
 ## Manual Testing Instructions
 
 ### Prerequisites
-To test `zen --apex` functionality, ensure all agent_cli dependencies are installed:
+To test `zen --apex` functionality:
 
 ```bash
-# Install from netra-apex requirements if available
-cd ../netra-apex
-pip install -r requirements.txt
+# The vendored shared/ module is included in the zen repo
+# No external dependencies required for basic agent_cli functionality
+
+# Optional: For advanced backend features, set APEX_BACKEND_PATH
+# export APEX_BACKEND_PATH=/path/to/netra-apex
 
 # Or install individual dependencies:
 pip install websockets aiohttp rich pyjwt psutil pyyaml pydantic email-validator
@@ -217,9 +217,13 @@ zen CLI
   ├─> --apex flag detected (zen_orchestrator.py:2961)
   │
   ├─> subprocess delegates to agent_cli.py (zen_orchestrator.py:2984)
-  │   └─> PYTHONPATH set to include netra-apex
+  │   └─> Uses vendored shared/ module from zen repo
   │
   └─> agent_cli.py
+        │
+        ├─> sys.path.append(parent_dir) → makes shared/ accessible
+        │
+        ├─> Imports from shared.windows_encoding & shared.types.websocket_closure_codes
         │
         ├─> Parses --send-logs arguments
         │
