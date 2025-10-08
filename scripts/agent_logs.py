@@ -222,7 +222,7 @@ def collect_recent_logs(
     Args:
         limit: Maximum number of log files to read (default: 3)
         project_name: Specific project name or None for most recent
-        base_path: Direct path override to logs directory
+        base_path: Direct path override to logs directory OR a specific .jsonl file
         username: Windows username override
         platform_name: Platform override for testing ('Darwin', 'Windows', 'Linux')
 
@@ -236,7 +236,63 @@ def collect_recent_logs(
         raise ValueError(f"Limit must be positive, got {limit}")
 
     try:
-        # Resolve projects root
+        # Check if base_path points to a specific .jsonl file
+        if base_path:
+            base_path_obj = Path(base_path)
+            if base_path_obj.is_file() and base_path_obj.suffix == '.jsonl':
+                # Handle direct file path
+                logger.info(f"Reading specific log file: {base_path_obj}")
+
+                if not base_path_obj.exists():
+                    logger.warning(f"Specified log file does not exist: {base_path_obj}")
+                    return None
+
+                # Read the single file
+                all_logs = []
+                file_info = []
+
+                try:
+                    # Calculate file hash
+                    hasher = hashlib.sha256()
+                    entry_count = 0
+
+                    with open(base_path_obj, 'rb') as f:
+                        for chunk in iter(lambda: f.read(4096), b''):
+                            hasher.update(chunk)
+
+                    file_hash = hasher.hexdigest()[:8]
+
+                    # Read and parse the file
+                    with open(base_path_obj, 'r', encoding='utf-8') as f:
+                        for line_num, line in enumerate(f, 1):
+                            line = line.strip()
+                            if not line:
+                                continue
+
+                            try:
+                                log_entry = json.loads(line)
+                                all_logs.append(log_entry)
+                                entry_count += 1
+                            except json.JSONDecodeError as e:
+                                logger.debug(
+                                    f"Skipping malformed JSON in {base_path_obj.name}:{line_num}: {e}"
+                                )
+                                continue
+
+                    file_info.append({
+                        'name': base_path_obj.name,
+                        'hash': file_hash,
+                        'entries': entry_count
+                    })
+
+                    logger.info(f"Collected {len(all_logs)} log entries from {base_path_obj.name}")
+                    return all_logs, 1, file_info
+
+                except Exception as e:
+                    logger.error(f"Error reading log file {base_path_obj}: {e}")
+                    return None
+
+        # Original directory-based logic
         base = Path(base_path) if base_path else None
         projects_root = _resolve_projects_root(
             platform_name=platform_name,
