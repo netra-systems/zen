@@ -1,10 +1,37 @@
-# Zen
+# Free more claude usage through optimization.
 
-Zen runs multiple Code CLI instances for peaceful parallel task execution.
+Extend your claude usage (all plans) for free with minimal effort and no risk.
 
-## What is Zen?
+It works by analyzing your usage logs for metadata optimizations. It is focused on the metadata not the semantics of the prompt, so no risk in drop of quality.
+
+This is a micro startup effort, aiming to provide real value for individual devs in exchange for feedback. Our intent is to charge businesses for larger scale optimizations.
+
+The process is simple. One time install, then one command. It auto grabs the last 5 logs and provides actionable items to update going forward to get the value of the optimizations.
+
+## Quick start
+
+1. `pip install netra-zen`
+2. `zen --apex --send-logs --message "claude code"`
+3. Read the results and update claude settings, prompts, commands, etc. as needed to benefit
+
+By default it will optimize based on logs no thought on the message is needed. Just copy and paste #2!
+See detailed install below if needed.
+
+## Example output
+![example](https://github.com/user-attachments/assets/94ed0180-9fed-4d76-ab69-657b7d3ab1b2)
+
+
+## Proof it works
+### Example savings on real world production git issue progressor task (complex claude code command)
+This was just changing a few small lines on a 400 line command.
+![savings](https://github.com/user-attachments/assets/9298e7cc-4f15-4dc0-97e3-1f126757dde6)
+
+
+# Other features & detailed install guide
+### Orchestrator
 
 Zen allows you to:
+- Zen Orchestrator runs multiple Code CLI instances for peaceful parallel task execution.
 - Run multiple headless Claude Code CLI instances simultaneously.
 - Calm unified results (status, time, token usage)
 - Relax **"5-hour limit reached"** lockout fears with easy token budget limits
