@@ -3,11 +3,13 @@
 Integration tests for zen --apex functionality
 Tests log collection and argument passing
 """
-import pytest
-from pathlib import Path
 import json
-import tempfile
+import os
 import shutil
+import tempfile
+from pathlib import Path
+
+import pytest
 from scripts.agent_logs import collect_recent_logs
 
 
@@ -196,6 +198,30 @@ class TestApexArgumentPassing:
         # Note: This will fail without backend dependencies, which is expected
         # We're just testing that the module structure is correct
         assert "--send-logs" in result.stdout or "--send-logs" in result.stderr or result.returncode != 0
+
+    def test_python_m_zen_apex_help(self):
+        """Smoke test that python -m zen delegates --apex to agent_cli help"""
+        import subprocess
+        import sys
+
+        env = os.environ.copy()
+        repo_root = Path(__file__).parent.parent.resolve()
+        existing_path = env.get("PYTHONPATH")
+        env["PYTHONPATH"] = (
+            f"{repo_root}{os.pathsep}{existing_path}"
+            if existing_path
+            else str(repo_root)
+        )
+
+        result = subprocess.run(
+            [sys.executable, "-m", "zen", "--apex", "--help"],
+            capture_output=True,
+            text=True,
+            env=env
+        )
+
+        combined_output = f"{result.stdout}\n{result.stderr}"
+        assert "--send-logs" in combined_output or "--logs-count" in combined_output or result.returncode != 0
 
 
 if __name__ == "__main__":

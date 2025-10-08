@@ -5157,13 +5157,14 @@ def main(argv=None):
     """
 
     parser = argparse.ArgumentParser(
+        prog="zen --apex",
         description="Netra Agent CLI - Test agent interactions from command line (ISSUE #1603: Enhanced with event output and GCP error lookup)",
         epilog="Examples:\n"
-               "  %(prog)s --message 'Hello world' --wait 15\n"
-               "  %(prog)s --message 'analyze data' --verbose\n"
-               "  %(prog)s --message 'optimize costs' --validate-outputs\n"
-               "  %(prog)s --lookup-errors cli_20250121_123456_789\n"
-               "  %(prog)s --health-check",
+               "  %(prog)s --message 'triage this incident'\n"
+               "  %(prog)s --message 'analyze rollout' --send-logs --logs-count 5\n"
+               "  %(prog)s --message 'review QA findings' --send-logs --logs-project qa-suite\n"
+               "  %(prog)s --send-logs --logs-path ~/.claude/Projects --message 'audit sessions'\n"
+               "  %(prog)s --lookup-errors cli_20250121_123456_789",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
 
