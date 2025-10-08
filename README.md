@@ -25,16 +25,13 @@ The optimizer analyzes your Claude Code usage logs to identify optimization oppo
 zen --apex --send-logs
 
 # Send logs from more files for deeper analysis
-zen --apex --send-logs --logs-count 10
+zen --apex --send-logs --logs-count 5
 
 # Send logs from a specific project
 zen --apex --send-logs --logs-project "my-project-name"
 
 # Send logs from a custom location
 zen --apex --send-logs --logs-path "/path/to/.claude/Projects"
-
-# Send logs with a custom message
-zen --apex --send-logs --message "analyze my authentication flow usage"
 
 # Combine options for targeted analysis
 zen --apex --send-logs --logs-count 3 --logs-project "production-app"
@@ -57,11 +54,144 @@ This was just changing a few small lines on a 400 line command.
 ## Notes
 - Have an optimization idea or area you want it to focus on? Create a git issue and we can add that to our evals.
 
-# Other features & detailed install guide
+## Example output from single file
+```
+zen --apex --send-logs --logs-path /Users/user/.claude/projects/-Users-Desktop-netra-apex/7ac6d7ac-abc3-4903-a482-......-1.jsonl
+
+SUCCESS: WebSocket connected successfully!
+
+============================================================
+📤 SENDING LOGS TO OPTIMIZER
+============================================================
+  Total Entries: 781
+  Files Read: 1
+  Payload Size: 5.52 MB
+
+  Files:
+    • 7ac6d7ac-abc3-4903-a482-.....jsonl (hash: 908dbc51, 781 entries)
+
+  Payload Confirmation:
+    ✓ 'jsonl_logs' key added to payload
+    ✓ First log entry timestamp: 2025-10-03T18:26:02.089Z
+    ✓ Last log entry timestamp: 2025-10-03T19:31:21.876Z
+============================================================
+
+[11:32:55.190] [DEBUG] GOLDEN PATH TRACE: Prepared WebSocket payload for run_id=cli_20251008_113255_25048, 
+thread_id=cli_thread_f887c58e7759
+[11:32:55.191] [DEBUG] ✓ TRANSMISSION PROOF: Payload contains 781 JSONL log entries in 'jsonl_logs' key
+SUCCESS: Message sent with run_id: cli_20251008_113255_25048
+⏳ Waiting 120 seconds for events...
+Receiving events...
+[11:32:55.284] [DEBUG] Listening for WebSocket events...
+[11:32:55.284] [DEBUG] GOLDEN PATH TRACE: Event listener started after successful connection
+[11:32:56.655] [DEBUG] WebSocket Event #1: raw_message_received
+[11:32:56.657] [DEBUG] GOLDEN PATH TRACE: Parsed WebSocket event type=connection_established
+[11:32:56.658] [DEBUG] WebSocket Event #2: connection_established
+[11:32:56] [CONN] Connected as: e2e-staging-2d677771
+[11:33:01.364] [DEBUG] WebSocket Event #3: raw_message_received
+[11:33:01.366] [DEBUG] GOLDEN PATH TRACE: Parsed WebSocket event type=thread_created
+[11:33:01.367] [DEBUG] WebSocket Event #4: thread_created
+[11:33:01] [EVENT] thread_created: {"type": "thread_created", "payload": {"thread_id": 
+"thread_session_969_44184cce", "timestamp": 1759...
+[11:33:02.901] [DEBUG] WebSocket Event #5: raw_message_received
+[11:33:02.903] [DEBUG] GOLDEN PATH TRACE: Parsed WebSocket event type=agent_started
+[11:33:02.904] [DEBUG] WebSocket Event #6: agent_started
+[11:33:02]     🧠 Agent: netra-assistant started (run: run_sess...)
+[11:33:04.744] [DEBUG] WebSocket Event #7: raw_message_received
+[11:33:04.746] [DEBUG] GOLDEN PATH TRACE: Parsed WebSocket event type=agent_started
+[11:33:04.747] [DEBUG] WebSocket Event #8: agent_started
+[11:33:04]     🧠 Agent: netra-assistant started (run: run_sess...)
+[11:33:06.366] [DEBUG] WebSocket Event #9: raw_message_received
+[11:33:06.368] [DEBUG] GOLDEN PATH TRACE: Parsed WebSocket event type=agent_started
+[11:33:06.369] [DEBUG] WebSocket Event #10: agent_started
+[11:33:06]     🧠 Agent: MessageHandler started (run: run_sess...)
+[11:33:14.781] [DEBUG] WebSocket Event #11: raw_message_received
+[11:33:14.783] [DEBUG] GOLDEN PATH TRACE: Parsed WebSocket event type=agent_started
+[11:33:14.784] [DEBUG] WebSocket Event #12: agent_started
+[11:33:14]     🧠 Agent: claude_code_optimizer started (run: run_sess...)
+[11:33:23.241] [DEBUG] WebSocket Event #13: raw_message_received
+[11:33:23.243] [DEBUG] GOLDEN PATH TRACE: Parsed WebSocket event type=agent_thinking
+[11:33:23.244] [DEBUG] WebSocket Event #14: agent_thinking
+[11:33:23]     💭 Thinking: Preparing optimization prompt
+⠹ 💭 Preparing optimization prompt[11:34:27.586] [DEBUG] WebSocket Event #15: raw_message_received
+[11:34:27.588] [DEBUG] GOLDEN PATH TRACE: Parsed WebSocket event type=agent_completed
+[11:34:27.589] [DEBUG] WebSocket Event #16: agent_completed
+⠹ 💭 Preparing optimization prompt
+[11:34:27]     🧠 Agent Completed: claude_code_optimizer (run: run_sess...) - {"status": "done", "result": 
+{"optimizations": [{"issue": "Repeated Full File Read", "evidence": "Th...
+╭────────────────────────────────── Final Agent Result - Optimization Pointers ──────────────────────────────────╮
+│ {                                                                                                              │
+│   "status": "done",                                                                                            │
+│   "result": {                                                                                                  │
+│     "optimizations": [                                                                                         │
+│       {                                                                                                        │
+│         "issue": "Repeated Full File Read",                                                                    │
+│         "evidence": "The file `api/src/routes/user.js` was read in its entirety using `cat` twice. The model   │
+│ read it once to understand the code, but then read the entire file again later to re-confirm a detail it had   │
+│ forgotten.",                                                                                                   │
+│         "token_waste": "High (~2.5k tokens). The entire content of the 250-line file was added to the context  │
+│ a second time, providing no new information.",                                                                 │
+│         "fix": "The model should retain the context of files it has already read within the same task. If it   │
+│ needs to re-check a specific detail, it should use a targeted tool like `grep` or `read_lines` (e.g., `grep -C │
+│ 5 'findUser' api/src/routes/user.js`) instead of re-reading the entire file.",                                 │
+│         "ideal prompt": "The user profile page isn't loading the user's name. The API endpoint is in           │
+│ `api/src/routes/user.js` and it calls the `findUser` function from `api/src/db/utils.js`. Please investigate   │
+│ the data flow between these two files and fix the issue.",                                                     │
+│         "priority": "high"                                                                                     │
+│       },                                                                                                       │
+│       {                                                                                                        │
+│         "issue": "Excessive Context Gathering",                                                                │
+│         "evidence": "The `cat` command was used on two large files (`user.js` and `utils.js`), ingesting a     │
+│ total of 400 lines of code into the context. The actual bug was confined to a small 5-line function within     │
+│ `utils.js`.",                                                                                                  │
+│         "token_waste": "High (~4k tokens). Most of the file content was irrelevant to the specific task of     │
+│ fixing the `findUser` function's return value.",                                                               │
+│         "fix": "Instead of `cat`, the model should use more precise tools to gather context. After identifying │
+│ the relevant function with `grep`, it could have used a command like `read_lines('api/src/db/utils.js',        │
+│ start_line, end_line)` or `grep -A 10 'const findUser' api/src/db/utils.js` to read only the function's        │
+│ definition and its immediate surroundings.",                                                                   │
+│         "ideal prompt": "The `findUser` function in `api/src/db/utils.js` is not returning the user's name     │
+│ field. Please add it to the return object.",                                                                   │
+│         "priority": "high"                                                                                     │
+│       },                                                                                                       │
+│       {                                                                                                        │
+│         "issue": "Inefficient Project-Wide Search",                                                            │
+│         "evidence": "A recursive grep (`grep -r \"findUser\" .`) was used to find the definition of            │
+│ `findUser`. While effective, this can be slow and return a lot of irrelevant matches (like comments, logs,     │
+│ etc.) in a large codebase, consuming tokens in the tool output.",                                              │
+│         "token_waste": "Medium (~500 tokens). The `grep` returned multiple matches, including the call site    │
+│ which was already known. In a larger project, this could return dozens of matches.",                           │
+│         "fix": "If the project structure is conventional, a more targeted search would be better. For example, │
+│ knowing `db` utilities are likely in a `db` or `utils` directory, a command like `grep 'findUser'              │
+│ api/src/db/*.js` would be more direct and produce less noise.",                                                │
+│         "ideal prompt": "The `findUser` function, defined in the `api/src/db/` directory, seems to be causing  │
+│ a bug. Can you find its definition and check what it returns?",                                                │
+│         "priority": "low"                                                                                      │
+│       }                                                                                                        │
+│     ],                                                                                                         │
+│     "summary": {                                                                                               │
+│       "total_issues": 3,                                                                                       │
+│       "estimated_savings": "~7k tokens",                                                                       │
+│       "top_priority": "Avoid repeated full file reads. The model should trust its context or use targeted      │
+│ tools like `grep` to refresh specific details instead of re-ingesting entire files."                           │
+│     }                                                                                                          │
+│   },                                                                                                           │
+│   "message": "Claude Code optimization analysis complete"                                                      │
+│ }                                                                                                              │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+📊 Received 8 events
+```
+
+# Advanced features & detailed install guide
+
+In addition to optimizing your costs and latency,
+you can control budgets and other advanced features.
+
 ### Orchestrator
 
-Zen allows you to:
-- Zen Orchestrator runs multiple Code CLI instances for peaceful parallel task execution.
+Orchestrator allows you to:
+- Orchestrator runs multiple Code CLI instances for peaceful parallel task execution.
 - Run multiple headless Claude Code CLI instances simultaneously.
 - Calm unified results (status, time, token usage)
 - Relax **"5-hour limit reached"** lockout fears with easy token budget limits
