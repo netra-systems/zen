@@ -3003,8 +3003,25 @@ class WebSocketClient:
                     logs, files_read, file_info = result
                     payload["payload"]["jsonl_logs"] = logs
 
-                    # Create prominent, formatted log message
+                    # Calculate payload size for transmission proof
                     import logging
+                    import sys
+
+                    # Get size of logs in payload
+                    logs_json = json.dumps(logs)
+                    logs_size_bytes = len(logs_json.encode('utf-8'))
+                    logs_size_kb = logs_size_bytes / 1024
+                    logs_size_mb = logs_size_kb / 1024
+
+                    # Format size appropriately
+                    if logs_size_mb >= 1:
+                        size_str = f"{logs_size_mb:.2f} MB"
+                    elif logs_size_kb >= 1:
+                        size_str = f"{logs_size_kb:.2f} KB"
+                    else:
+                        size_str = f"{logs_size_bytes} bytes"
+
+                    # Create prominent, formatted log message
                     separator = "=" * 60
                     log_msg_parts = [
                         "",
@@ -3013,6 +3030,7 @@ class WebSocketClient:
                         separator,
                         f"  Total Entries: {len(logs)}",
                         f"  Files Read: {files_read}",
+                        f"  Payload Size: {size_str}",
                     ]
 
                     if self.logs_project:
@@ -3026,6 +3044,13 @@ class WebSocketClient:
                         log_msg_parts.append(
                             f"    • {info['name']} (hash: {info['hash']}, {info['entries']} entries)"
                         )
+
+                    # Add payload proof
+                    log_msg_parts.append("")
+                    log_msg_parts.append("  Payload Confirmation:")
+                    log_msg_parts.append(f"    ✓ 'jsonl_logs' key added to payload")
+                    log_msg_parts.append(f"    ✓ First log entry timestamp: {logs[0].get('timestamp', 'N/A') if logs else 'N/A'}")
+                    log_msg_parts.append(f"    ✓ Last log entry timestamp: {logs[-1].get('timestamp', 'N/A') if logs else 'N/A'}")
 
                     log_msg_parts.append(separator)
                     log_msg_parts.append("")
@@ -3060,6 +3085,51 @@ class WebSocketClient:
             DebugLevel.BASIC,
             style="yellow"
         )
+
+        # Proof of logs in transmission
+        if "jsonl_logs" in payload["payload"]:
+            log_count = len(payload["payload"]["jsonl_logs"])
+            self.debug.debug_print(
+                f"✓ TRANSMISSION PROOF: Payload contains {log_count} JSONL log entries in 'jsonl_logs' key",
+                DebugLevel.BASIC,
+                style="green"
+            )
+
+            # Optional: Save payload proof to file for verification
+            if os.environ.get('ZEN_SAVE_PAYLOAD_PROOF'):
+                try:
+                    import tempfile
+                    proof_file = tempfile.NamedTemporaryFile(
+                        mode='w',
+                        prefix='zen_payload_proof_',
+                        suffix='.json',
+                        delete=False
+                    )
+
+                    # Save payload structure (with truncated logs for readability)
+                    proof_payload = {
+                        "run_id": payload.get("run_id"),
+                        "payload": {
+                            "message": payload["payload"].get("message"),
+                            "jsonl_logs": {
+                                "count": len(payload["payload"]["jsonl_logs"]),
+                                "sample_first": payload["payload"]["jsonl_logs"][0] if payload["payload"]["jsonl_logs"] else None,
+                                "sample_last": payload["payload"]["jsonl_logs"][-1] if payload["payload"]["jsonl_logs"] else None,
+                            }
+                        }
+                    }
+
+                    json.dump(proof_payload, proof_file, indent=2)
+                    proof_file.close()
+
+                    self.debug.debug_print(
+                        f"📝 Payload proof saved to: {proof_file.name}",
+                        DebugLevel.BASIC,
+                        style="cyan"
+                    )
+                except Exception as e:
+                    # Don't fail transmission if proof saving fails
+                    pass
 
         # ISSUE #1603 FIX: Add critical logging for message sending (only in diagnostic mode)
         if self.debug.debug_level >= DebugLevel.DIAGNOSTIC:
