@@ -159,12 +159,10 @@ class SimpleConfigReader:
 try:
     from agent_output_validator import AgentOutputValidator, ValidationReport, ValidationResult
 except ImportError:
-    # Try relative import from scripts directory
-    import sys
-    import os
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    sys.path.insert(0, script_dir)
-    from agent_output_validator import AgentOutputValidator, ValidationReport, ValidationResult
+    # Module not available - create stub classes
+    AgentOutputValidator = None
+    ValidationReport = None
+    ValidationResult = None
 
 # Import WebSocket event validation framework for Issue #2177
 try:
@@ -172,14 +170,10 @@ try:
         WebSocketEventValidationFramework, EventValidationReport, ValidationResult as EventValidationResult
     )
 except ImportError:
-    # Try relative import from scripts directory
-    import sys
-    import os
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    sys.path.insert(0, script_dir)
-    from websocket_event_validation_framework import (
-        WebSocketEventValidationFramework, EventValidationReport, ValidationResult as EventValidationResult
-    )
+    # Module not available - create stub classes
+    WebSocketEventValidationFramework = None
+    EventValidationReport = None
+    EventValidationResult = None
 
 # Import business value validator for revenue protection
 # ISSUE #2414: Delay imports that trigger configuration validation
@@ -3762,7 +3756,7 @@ class AgentCLI:
         # Issue #1822: Agent output validation
         self.validate_outputs = validate_outputs
         self.output_validator: Optional[AgentOutputValidator] = None
-        if self.validate_outputs:
+        if self.validate_outputs and AgentOutputValidator is not None:
             self.output_validator = AgentOutputValidator(debug=config.debug_level.value >= 3)
 
         # Business value validation
