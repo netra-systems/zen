@@ -3971,9 +3971,42 @@ class AgentCLI:
                     if tool_output:
                         safe_console_print(f"📤 Tool output: {str(tool_output)[:200]}...", style="dim green")
                 elif event.type == "agent_completed":
-                    result = event.data.get('result', event.data.get('response', ''))
-                    if result:
-                        safe_console_print(f"✅ Final result: {str(result)[:300]}...", style="bold green")
+                    # Prefer structured result payloads but fall back to legacy keys
+                    result = (
+                        event.data.get('result')
+                        or event.data.get('response')
+                        or event.data.get('final_response')
+                    )
+
+                    if result is not None:
+                        if isinstance(result, (dict, list)):
+                            try:
+                                pretty_result = json.dumps(result, indent=2, ensure_ascii=False)
+                            except (TypeError, ValueError):
+                                pretty_result = str(result)
+
+                            safe_console_print(
+                                Panel(
+                                    Syntax(pretty_result, "json"),
+                                    title="Final Agent Result",
+                                    border_style="green"
+                                ),
+                                json_mode=self.json_mode,
+                                ci_mode=self.ci_mode
+                            )
+                        else:
+                            safe_console_print(
+                                "✅ Final result:",
+                                style="bold green",
+                                json_mode=self.json_mode,
+                                ci_mode=self.ci_mode
+                            )
+                            safe_console_print(
+                                str(result),
+                                style="green",
+                                json_mode=self.json_mode,
+                                ci_mode=self.ci_mode
+                            )
 
             # Display raw data in verbose mode
             if self.debug.debug_level >= DebugLevel.DIAGNOSTIC:
