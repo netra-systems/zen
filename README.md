@@ -54,6 +54,8 @@ zen --apex --send-logs --logs-count 3 --logs-project "production-app"
 This was just changing a few small lines on a 400 line command.
 ![savings](https://github.com/user-attachments/assets/9298e7cc-4f15-4dc0-97e3-1f126757dde6)
 
+## Notes
+- Have an optimization idea or area you want it to focus on? Create a git issue and we can add that to our evals.
 
 # Other features & detailed install guide
 ### Orchestrator
