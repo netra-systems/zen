@@ -61,7 +61,7 @@ zen = "zen_orchestrator:run"
 
 [tool.setuptools]
 py-modules = ["zen_orchestrator"]
-packages = ["agent_interface", "token_budget", "token_transparency", "zen", "zen.telemetry"]
+packages = ["agent_interface", "token_budget", "token_transparency", "zen", "zen.telemetry", "scripts"]
 
 [tool.setuptools.package-data]
 "*" = ["*.json", "*.yaml", "*.yml", "*.md"]

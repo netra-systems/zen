@@ -2442,6 +2442,8 @@ async def main():
                        help="List all available example configurations")
     parser.add_argument("--show-prompt-template", action="store_true",
                        help="Show LLM prompt template for configuration generation")
+    parser.add_argument("--apex", "-a", action="store_true",
+                       help="Invoke Apex agent CLI (passes remaining args to scripts.agent_cli)")
 
     args = parser.parse_args()
 
@@ -2955,6 +2957,50 @@ async def main():
 
 def run():
     """Synchronous wrapper for the main function to be used as console script entry point."""
+    # Early check for --apex flag to delegate to agent_cli before main() processing
+    if '--apex' in sys.argv or '-a' in sys.argv:
+        # Delegate to agent_cli via subprocess to avoid dependency conflicts
+        import subprocess
+        import os
+
+        # Filter sys.argv to remove 'zen' and '--apex'/'-a' flags
+        # Keep all other arguments to pass through to agent_cli
+        filtered_argv = [arg for arg in sys.argv[1:] if arg not in ('--apex', '-a')]
+
+        # Set PYTHONPATH for agent_cli to access shared module and dependencies
+        # In GCP deployment, PYTHONPATH should already include backend modules
+        env = os.environ.copy()
+
+        # Check if APEX_BACKEND_PATH env var is set (for GCP deployment)
+        # Otherwise try ../netra-apex (for local development)
+        if 'APEX_BACKEND_PATH' in env:
+            backend_paths = [env['APEX_BACKEND_PATH']]
+        else:
+            # Try to find netra-apex in parent directory (development mode)
+            zen_parent = Path(__file__).parent.parent
+            netra_apex = zen_parent / "netra-apex"
+            if netra_apex.exists():
+                # Add both netra-apex root and netra-apex/scripts for imports
+                backend_paths = [str(netra_apex), str(netra_apex / "scripts")]
+            else:
+                # In GCP, backend modules might be in PYTHONPATH already
+                backend_paths = []
+
+        if backend_paths:
+            paths_to_add = ":".join(backend_paths)
+            if 'PYTHONPATH' in env:
+                env['PYTHONPATH'] = f"{paths_to_add}:{env['PYTHONPATH']}"
+            else:
+                env['PYTHONPATH'] = paths_to_add
+
+        # Run agent_cli.py as a module (works in packaged installations)
+        result = subprocess.run(
+            [sys.executable, "-m", "scripts.agent_cli"] + filtered_argv,
+            env=env
+        )
+
+        sys.exit(result.returncode)
+
     asyncio.run(main())
 
 if __name__ == "__main__":
