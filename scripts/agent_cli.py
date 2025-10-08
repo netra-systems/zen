@@ -2861,9 +2861,16 @@ class WebSocketClient:
                         DebugLevel.BASIC,
                         style="green"
                     )
-                    safe_console_print("SUCCESS: WebSocket connected successfully!", style="green")
-                    self.connected = True
-                    return True
+
+                    # SSOT: Perform handshake to get backend-provided thread_id
+                    if await self._perform_handshake():
+                        safe_console_print("SUCCESS: WebSocket connected and handshake completed!", style="green")
+                        self.connected = True
+                        return True
+                    else:
+                        self.debug.debug_print("Handshake failed, closing connection", style="red")
+                        await self.ws.close()
+                        continue
             except Exception as e:
                 self.debug.log_connection_attempt(method_name, self.config.ws_url, success=False, error=str(e))
                 self.debug.debug_print(
@@ -2960,6 +2967,96 @@ class WebSocketClient:
             close_timeout=self._get_close_timeout()
         )
         return True
+
+    async def _perform_handshake(self) -> bool:
+        """
+        SSOT: Perform handshake protocol to get backend-provided thread_id.
+        This ensures both CLI and backend agree on the thread_id for proper event routing.
+        """
+        try:
+            # Send handshake request to establish session
+            handshake_request = {
+                "type": "session_request",
+                "client_type": "cli",
+                "client_version": "2.0.0",
+                "environment": self.config.environment.value,
+                "preferred_thread_id": None  # Let backend decide
+            }
+
+            self.debug.debug_print(
+                "SSOT: Sending handshake request for thread_id agreement",
+                DebugLevel.BASIC,
+                style="cyan"
+            )
+
+            await self.ws.send(json.dumps(handshake_request))
+
+            # Wait for backend response with timeout
+            import asyncio
+            try:
+                response_msg = await asyncio.wait_for(self.ws.recv(), timeout=5.0)
+                response = json.loads(response_msg)
+
+                # Check if this is a connection_established message with thread_id
+                if response.get('type') == 'connection_established':
+                    # Extract thread_id from backend response
+                    backend_thread_id = None
+
+                    # Check various possible locations for thread_id
+                    if 'thread_id' in response:
+                        backend_thread_id = response['thread_id']
+                    elif 'data' in response and 'thread_id' in response['data']:
+                        backend_thread_id = response['data']['thread_id']
+                    elif 'payload' in response and 'thread_id' in response['payload']:
+                        backend_thread_id = response['payload']['thread_id']
+
+                    if backend_thread_id:
+                        # CRITICAL: Accept backend's thread_id as single source of truth
+                        self.current_thread_id = backend_thread_id
+                        self._update_thread_cache(backend_thread_id)
+
+                        self.debug.debug_print(
+                            f"SSOT: Accepted backend thread_id: {backend_thread_id}",
+                            DebugLevel.BASIC,
+                            style="green"
+                        )
+
+                        # Acknowledge receipt of thread_id
+                        ack_message = {
+                            "type": "session_acknowledged",
+                            "thread_id": backend_thread_id,
+                            "timestamp": datetime.now(timezone.utc).isoformat()
+                        }
+                        await self.ws.send(json.dumps(ack_message))
+
+                        return True
+                    else:
+                        # Backend didn't provide thread_id - this is now a failure
+                        error_msg = "ERROR: Backend did not provide thread ID. Events may not be received."
+                        self.debug.debug_print(error_msg, DebugLevel.BASIC, style="red")
+                        safe_console_print(error_msg, style="red")
+                        return False
+                else:
+                    # Not a connection_established message - failure
+                    error_msg = f"ERROR: Expected connection_established, got {response.get('type', 'unknown')}"
+                    self.debug.debug_print(error_msg, DebugLevel.BASIC, style="red")
+                    safe_console_print(error_msg, style="red")
+                    return False
+
+            except asyncio.TimeoutError:
+                # Handshake timeout - failure
+                error_msg = "ERROR: Handshake timed out - no response from backend"
+                self.debug.debug_print(error_msg, DebugLevel.BASIC, style="red")
+                safe_console_print(error_msg, style="red")
+                return False
+
+        except Exception as e:
+            # Handshake error - failure
+            error_msg = f"ERROR: Handshake failed: {e}"
+            self.debug.log_error(e, "handshake protocol")
+            self.debug.debug_print(error_msg, DebugLevel.BASIC, style="red")
+            safe_console_print(error_msg, style="red")
+            return False
 
     def _get_platform_cache_path(self) -> Path:
         """
@@ -3304,22 +3401,19 @@ class WebSocketClient:
 
         # Create message payload
         # ISSUE #1671 FIX: Add thread_id for proper WebSocket event routing
-        # The WebSocket manager expects both user_id and thread_id to route events correctly
-        # SSOT: Get thread_id from backend as single source of truth
-        thread_id = await self.get_or_create_thread_from_backend()
+        # SSOT: Thread ID from backend is REQUIRED
+        if not self.current_thread_id:
+            error_msg = "ERROR: No thread ID available. Connection handshake failed."
+            self.debug.debug_print(error_msg, DebugLevel.BASIC, style="red")
+            safe_console_print(error_msg, style="red")
+            raise RuntimeError("Thread ID not established with backend")
 
-        # Fallback to local generation if backend is unavailable (backward compatibility)
-        if not thread_id:
-            self.debug.debug_print(
-                "SSOT: Using local thread generation as fallback",
-                DebugLevel.VERBOSE,
-                style="yellow"
-            )
-            # ISSUE #2782: Simple UUID generation - backward compatibility fallback
-            thread_id = f"cli_thread_{uuid.uuid4().hex[:12]}"
-
-        # ISSUE #2417 Phase 2: Store thread_id for filtering backend logs
-        self.current_thread_id = thread_id
+        thread_id = self.current_thread_id
+        self.debug.debug_print(
+            f"SSOT: Using backend-provided thread_id: {thread_id}",
+            DebugLevel.VERBOSE,
+            style="green"
+        )
 
         # ISSUE #1673 FIX: Backend expects payload structure with nested data
         # The backend AgentServiceCore._parse_message expects:
@@ -3512,6 +3606,26 @@ class WebSocketClient:
                     data=data
                 )
                 self.events.append(event)
+
+                # SSOT: Check for thread_id in connection_established messages
+                if event.type == 'connection_established' and not self.current_thread_id:
+                    # Extract thread_id if backend provides it after initial connection
+                    backend_thread_id = None
+                    if 'thread_id' in data:
+                        backend_thread_id = data['thread_id']
+                    elif 'data' in data and 'thread_id' in data['data']:
+                        backend_thread_id = data['data']['thread_id']
+                    elif 'payload' in data and 'thread_id' in data['payload']:
+                        backend_thread_id = data['payload']['thread_id']
+
+                    if backend_thread_id:
+                        self.current_thread_id = backend_thread_id
+                        self._update_thread_cache(backend_thread_id)
+                        self.debug.debug_print(
+                            f"SSOT: Updated to backend thread_id from event: {backend_thread_id}",
+                            DebugLevel.BASIC,
+                            style="green"
+                        )
 
                 self.debug.debug_print(
                     f"GOLDEN PATH TRACE: Parsed WebSocket event type={event.type}",
@@ -5825,6 +5939,13 @@ def main(argv=None):
     )
 
     # SSOT Thread Management Arguments
+    parser.add_argument(
+        "--handshake-timeout",
+        type=float,
+        default=5.0,
+        help="Timeout for handshake with backend (seconds, default: 5.0)"
+    )
+
     parser.add_argument(
         "--disable-backend-threads",
         action="store_true",
