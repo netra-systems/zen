@@ -8,10 +8,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="netra-zen",
-    version="1.0.5",
+    version="1.0.6",
     author=" Systems",
     author_email="pypi@netrasystems.ai",
-    description="Multi-instance Claude orchestrator for parallel task execution",
+    description="Code CLI Optimization and Tools",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/netra-systems/zen",
