@@ -40,6 +40,11 @@ setup(
     install_requires=[
         "PyYAML>=6.0",
         "python-dateutil>=2.8.2",
+        "aiohttp>=3.8.0",
+        "websockets>=11.0",
+        "rich>=13.0.0",
+        "PyJWT>=2.8.0",
+        "psutil>=5.9.0",
     ],
     extras_require={
         "dev": ["pytest", "pytest-asyncio", "pytest-cov"],
