@@ -2865,14 +2865,16 @@ class WebSocketClient:
                     # SSOT: Perform handshake to get backend-provided thread_id
                     handshake_success = await self._perform_handshake()
                     if handshake_success:
-                        safe_console_print("✅ SUCCESS: WebSocket connected and handshake completed!", style="green")
-                        safe_console_print(f"📌 Thread ID: {self.current_thread_id}", style="cyan")
+                        safe_console_print(f"✅ Connected with thread ID: {self.current_thread_id}", style="green")
                         self.connected = True
                         return True
                     else:
                         # Handshake failed - backend might be old version
-                        self.debug.debug_print("WARNING: Handshake failed - backend may not support thread agreement", style="yellow")
-                        safe_console_print("⚠️ WARNING: Connected but thread agreement failed. Events may not be received properly.", style="yellow")
+                        self.debug.debug_print(
+                            "WARNING: Handshake failed - backend may not support thread agreement",
+                            DebugLevel.BASIC,
+                            style="yellow"
+                        )
 
                         # Still mark as connected for backward compatibility
                         # Old backends might work without the handshake
@@ -2988,40 +2990,48 @@ class WebSocketClient:
             import asyncio
 
             self.debug.debug_print(
-                "SSOT: Starting handshake protocol...",
-                DebugLevel.BASIC,
+                "Starting handshake...",
+                DebugLevel.VERBOSE,
                 style="cyan"
             )
 
             # Try to receive immediately (new protocol where backend sends first)
             try:
                 # Non-blocking check if backend sent connection_established
-                response_msg = await asyncio.wait_for(self.ws.recv(), timeout=0.5)
+                response_msg = await asyncio.wait_for(self.ws.recv(), timeout=2.0)
                 response = json.loads(response_msg)
 
                 # Process if we got a connection_established immediately
                 if response.get('type') == 'connection_established':
+                    self.debug.debug_print(
+                        "Received thread ID from backend",
+                        DebugLevel.VERBOSE,
+                        style="green"
+                    )
                     return await self._process_connection_established(response)
+                else:
+                    # Got a different message type - log it
+                    self.debug.debug_print(
+                        f"Got {response.get('type')} instead of connection_established",
+                        DebugLevel.VERBOSE,
+                        style="yellow"
+                    )
             except asyncio.TimeoutError:
                 # Backend didn't send immediately, try sending a trigger message
-                self.debug.debug_print(
-                    "SSOT: Backend didn't send connection_established immediately, sending trigger...",
-                    DebugLevel.VERBOSE,
-                    style="cyan"
-                )
+                pass  # Silent - this is normal for backends that wait for trigger
 
             # If we didn't get connection_established immediately, send a trigger
             # This handles backends that wait for an initial message
             trigger_message = {
-                "type": "session_request",
+                "type": "handshake_request",
                 "client_type": "cli",
                 "client_version": "2.0.0",
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
 
             self.debug.debug_print(
-                "SSOT: Sending session_request to trigger handshake...",
-                DebugLevel.BASIC,
+                "Sending handshake_request...",
+                DebugLevel.VERBOSE,
                 style="cyan"
             )
 
@@ -3029,80 +3039,39 @@ class WebSocketClient:
 
             # Now wait for the response
             try:
-                response_msg = await asyncio.wait_for(self.ws.recv(), timeout=5.0)
+                response_msg = await asyncio.wait_for(self.ws.recv(), timeout=10.0)
                 response = json.loads(response_msg)
-
-                self.debug.debug_print(
-                    f"SSOT: Received response type: {response.get('type', 'unknown')}",
-                    DebugLevel.VERBOSE,
-                    style="cyan"
-                )
 
                 if response.get('type') == 'connection_established':
                     return await self._process_connection_established(response)
                 else:
-                    # Not a connection_established message - log details
+                    # Not a connection_established message - show actual response
                     response_type = response.get('type', 'unknown')
                     self.debug.debug_print(
-                        f"ERROR: Handshake failed - unexpected response type: '{response_type}'",
+                        f"ERROR: Unexpected response type: '{response_type}'",
                         DebugLevel.BASIC,
                         style="red"
                     )
+
+                    # CRITICAL: Show the actual response data for debugging
                     self.debug.debug_print(
-                        f"DETAILS: Expected 'connection_established', got '{response_type}'",
+                        "ACTUAL RESPONSE DATA:",
                         DebugLevel.BASIC,
                         style="yellow"
                     )
                     self.debug.debug_print(
-                        f"RESPONSE KEYS: {list(response.keys())}",
-                        DebugLevel.VERBOSE,
-                        style="dim"
-                    )
-
-                    # Provide actionable guidance
-                    safe_console_print(
-                        "🔍 TROUBLESHOOTING: Backend responded but didn't provide thread ID",
-                        style="yellow"
-                    )
-                    safe_console_print(
-                        "   • Backend may not have the latest handshake protocol",
-                        style="dim"
-                    )
-                    safe_console_print(
-                        "   • Check backend logs for handshake errors",
-                        style="dim"
+                        json.dumps(response, indent=2),
+                        DebugLevel.BASIC,
+                        style="cyan"
                     )
                     return False
 
             except asyncio.TimeoutError:
-                # Detailed timeout diagnostics
+                # Timeout - log error concisely
                 self.debug.debug_print(
-                    "ERROR: Handshake timeout after sending session_request",
+                    "ERROR: Handshake timeout - no response from backend",
                     DebugLevel.BASIC,
                     style="red"
-                )
-                self.debug.debug_print(
-                    "DETAILS: No response received within 5 seconds",
-                    DebugLevel.BASIC,
-                    style="yellow"
-                )
-
-                # Provide actionable guidance
-                safe_console_print(
-                    "🔍 TROUBLESHOOTING: Backend did not respond to handshake request",
-                    style="yellow"
-                )
-                safe_console_print(
-                    "   • Check if backend WebSocket handler is running",
-                    style="dim"
-                )
-                safe_console_print(
-                    "   • Verify backend has CLIHandshakeProtocol implemented",
-                    style="dim"
-                )
-                safe_console_print(
-                    "   • Check backend logs for connection issues",
-                    style="dim"
                 )
                 return False
 
@@ -3145,17 +3114,10 @@ class WebSocketClient:
         self._update_thread_cache(backend_thread_id)
 
         self.debug.debug_print(
-            f"SSOT: Received backend thread_id: {backend_thread_id}",
-            DebugLevel.BASIC,
+            f"Thread ID: {backend_thread_id}",
+            DebugLevel.VERBOSE,
             style="green"
         )
-
-        if backend_run_id:
-            self.debug.debug_print(
-                f"SSOT: Received run_id: {backend_run_id}",
-                DebugLevel.VERBOSE,
-                style="green"
-            )
 
         # CRITICAL: Send acknowledgment with the SAME thread_id
         ack_message = {
@@ -3165,12 +3127,6 @@ class WebSocketClient:
         }
 
         await self.ws.send(json.dumps(ack_message))
-
-        self.debug.debug_print(
-            f"SSOT: Sent acknowledgment for thread_id: {backend_thread_id}",
-            DebugLevel.BASIC,
-            style="green"
-        )
 
         return True
 
@@ -3519,10 +3475,64 @@ class WebSocketClient:
         # ISSUE #1671 FIX: Add thread_id for proper WebSocket event routing
         # SSOT: Thread ID from backend is REQUIRED
         if not self.current_thread_id:
-            error_msg = "ERROR: No thread ID available. Connection handshake failed."
-            self.debug.debug_print(error_msg, DebugLevel.BASIC, style="red")
-            safe_console_print(error_msg, style="red")
-            raise RuntimeError("Thread ID not established with backend")
+            # Detailed error diagnostics
+            self.debug.debug_print(
+                "CRITICAL ERROR: Cannot send message - no thread ID available",
+                DebugLevel.BASIC,
+                style="red"
+            )
+            self.debug.debug_print(
+                "CAUSE: Backend handshake did not complete successfully",
+                DebugLevel.BASIC,
+                style="yellow"
+            )
+
+            # User-facing error with actionable guidance
+            safe_console_print(
+                "\n❌ ERROR: Cannot send message - thread ID not established",
+                style="red"
+            )
+            safe_console_print(
+                "\n🔍 TROUBLESHOOTING STEPS:",
+                style="yellow"
+            )
+            safe_console_print(
+                "   1. Check if backend is running the latest version",
+                style="dim"
+            )
+            safe_console_print(
+                "   2. Verify backend has CLIHandshakeProtocol implemented",
+                style="dim"
+            )
+            safe_console_print(
+                "   3. Check backend logs for WebSocket connection errors",
+                style="dim"
+            )
+            safe_console_print(
+                "   4. Try running with --debug-level=verbose for more details",
+                style="dim"
+            )
+            safe_console_print(
+                "\n📝 WHAT HAPPENED:",
+                style="cyan"
+            )
+            safe_console_print(
+                "   • CLI connected to WebSocket successfully",
+                style="dim"
+            )
+            safe_console_print(
+                "   • Backend did not provide a thread ID during handshake",
+                style="dim"
+            )
+            safe_console_print(
+                "   • Without thread ID, events cannot be properly routed",
+                style="dim"
+            )
+
+            raise RuntimeError(
+                "Thread ID not established with backend. "
+                "See troubleshooting steps above."
+            )
 
         thread_id = self.current_thread_id
         self.debug.debug_print(
