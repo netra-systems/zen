@@ -3948,10 +3948,36 @@ class AgentCLI:
 
     async def _receive_events(self):
         """Background task to receive and display events"""
+        thinking_spinner = None
+        thinking_live = None
+
         async def handle_event(event: WebSocketEvent):
+            nonlocal thinking_spinner, thinking_live
+
+            # Stop spinner if it's running and we get any non-thinking event
+            if thinking_live and event.type != "agent_thinking":
+                thinking_live.stop()
+                thinking_live = None
+                thinking_spinner = None
+
             # Display event with enhanced formatting
             formatted_event = event.format_for_display(self.debug)
             safe_console_print(f"[{event.timestamp.strftime('%H:%M:%S')}] {formatted_event}")
+
+            # Start spinner for agent_thinking events (20-60 second wait indicator)
+            if event.type == "agent_thinking" and not thinking_live:
+                thought = event.data.get('thought', event.data.get('reasoning', ''))
+                spinner_text = truncate_with_ellipsis(thought, 60) if thought else "Processing..."
+
+                thinking_spinner = Progress(
+                    SpinnerColumn(spinner_name="dots"),
+                    TextColumn("[cyan]{task.description}"),
+                    console=Console(file=sys.stderr),
+                    transient=True
+                )
+                thinking_live = Live(thinking_spinner, console=Console(file=sys.stderr), refresh_per_second=10)
+                thinking_live.start()
+                thinking_spinner.add_task(f"💭 {spinner_text}", total=None)
 
             # Display raw data in verbose mode
             if self.debug.debug_level >= DebugLevel.DIAGNOSTIC:
@@ -3961,15 +3987,46 @@ class AgentCLI:
                     border_style="dim"
                 ))
 
-        await self.ws_client.receive_events(callback=handle_event)
+        try:
+            await self.ws_client.receive_events(callback=handle_event)
+        finally:
+            # Clean up spinner if it's still running
+            if thinking_live:
+                thinking_live.stop()
 
     async def _receive_events_with_display(self):
         """ISSUE #1603 FIX: Enhanced event receiver with better display for single message mode"""
+        thinking_spinner = None
+        thinking_live = None
+
         async def handle_event_with_display(event: WebSocketEvent):
+            nonlocal thinking_spinner, thinking_live
+
+            # Stop spinner if it's running and we get any non-thinking event
+            if thinking_live and event.type != "agent_thinking":
+                thinking_live.stop()
+                thinking_live = None
+                thinking_spinner = None
+
             # Display event with enhanced formatting and emojis
             formatted_event = event.format_for_display(self.debug)
             timestamp = event.timestamp.strftime('%H:%M:%S')
             safe_console_print(f"[{timestamp}] {formatted_event}")
+
+            # Start spinner for agent_thinking events (20-60 second wait indicator)
+            if event.type == "agent_thinking" and not thinking_live:
+                thought = event.data.get('thought', event.data.get('reasoning', ''))
+                spinner_text = truncate_with_ellipsis(thought, 60) if thought else "Processing..."
+
+                thinking_spinner = Progress(
+                    SpinnerColumn(spinner_name="dots"),
+                    TextColumn("[cyan]{task.description}"),
+                    console=Console(file=sys.stderr),
+                    transient=True
+                )
+                thinking_live = Live(thinking_spinner, console=Console(file=sys.stderr), refresh_per_second=10)
+                thinking_live.start()
+                thinking_spinner.add_task(f"💭 {spinner_text}", total=None)
 
             # Issue #2177: WebSocket event validation
             if self.validate_events and self.event_validator:
@@ -4046,7 +4103,12 @@ class AgentCLI:
                     border_style="dim"
                 ))
 
-        await self.ws_client.receive_events(callback=handle_event_with_display)
+        try:
+            await self.ws_client.receive_events(callback=handle_event_with_display)
+        finally:
+            # Clean up spinner if it's still running
+            if thinking_live:
+                thinking_live.stop()
 
     def _get_event_summary(self, event: WebSocketEvent) -> str:
         """ISSUE #1603 FIX: Get a concise summary of an event for display"""
