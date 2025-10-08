@@ -5,3 +5,4 @@ __pycache__/
 check_install.py
 /venv
 $HOME
+/build
