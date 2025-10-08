@@ -22,9 +22,36 @@ def run_cli_command(args):
     result = subprocess.run(cmd, capture_output=True, text=True)
     return result
 
+def get_cache_file_path():
+    """Get platform-appropriate cache file path"""
+    import platform
+    import os
+
+    system = platform.system()
+    if system == "Windows":
+        app_data = os.environ.get('LOCALAPPDATA', str(Path.home() / "AppData" / "Local"))
+        return Path(app_data) / "Netra" / "CLI" / "thread_cache.json"
+    elif system == "Darwin":
+        return Path.home() / "Library" / "Application Support" / "Netra" / "CLI" / "thread_cache.json"
+    else:
+        # Linux - check multiple locations
+        xdg_data = os.environ.get('XDG_DATA_HOME', str(Path.home() / ".local" / "share"))
+        modern_path = Path(xdg_data) / "netra" / "cli" / "thread_cache.json"
+        legacy_path = Path.home() / ".netra" / "thread_cache.json"
+
+        # Check both locations
+        if modern_path.exists():
+            return modern_path
+        elif legacy_path.exists():
+            return legacy_path
+        else:
+            return modern_path  # Default to modern path
+
 def check_thread_cache():
     """Check if thread cache file exists and contains data"""
-    cache_file = Path.home() / ".netra" / "cli_thread_cache.json"
+    cache_file = get_cache_file_path()
+    print(f"Checking cache at: {cache_file}")
+
     if cache_file.exists():
         with open(cache_file, 'r') as f:
             data = json.load(f)

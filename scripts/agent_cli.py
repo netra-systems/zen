@@ -2602,7 +2602,7 @@ class WebSocketClient:
         self.current_thread_id: Optional[str] = None
 
         # SSOT: Thread management cache for performance
-        self.thread_cache_file = Path.home() / ".netra" / "cli_thread_cache.json"
+        self.thread_cache_file = self._get_platform_cache_path()
         self.thread_cache: Dict[str, Dict[str, Any]] = {}
         self._load_thread_cache()
 
@@ -2960,6 +2960,45 @@ class WebSocketClient:
             close_timeout=self._get_close_timeout()
         )
         return True
+
+    def _get_platform_cache_path(self) -> Path:
+        """
+        Get platform-appropriate cache directory path.
+
+        Windows: %LOCALAPPDATA%/Netra/CLI/thread_cache.json
+        macOS: ~/Library/Application Support/Netra/CLI/thread_cache.json
+        Linux: ~/.local/share/netra/cli/thread_cache.json or ~/.netra/thread_cache.json
+        """
+        import platform as stdlib_platform
+
+        system = stdlib_platform.system()
+
+        if system == "Windows":
+            # Use Windows AppData/Local directory
+            app_data = os.environ.get('LOCALAPPDATA')
+            if app_data:
+                cache_dir = Path(app_data) / "Netra" / "CLI"
+            else:
+                # Fallback to user home
+                cache_dir = Path.home() / "AppData" / "Local" / "Netra" / "CLI"
+        elif system == "Darwin":  # macOS
+            # Use macOS Application Support directory
+            cache_dir = Path.home() / "Library" / "Application Support" / "Netra" / "CLI"
+        else:  # Linux and other Unix-like systems
+            # Follow XDG Base Directory Specification
+            xdg_data_home = os.environ.get('XDG_DATA_HOME')
+            if xdg_data_home:
+                cache_dir = Path(xdg_data_home) / "netra" / "cli"
+            else:
+                # Fallback to ~/.local/share or ~/.netra for compatibility
+                local_share = Path.home() / ".local" / "share" / "netra" / "cli"
+                if local_share.parent.exists():
+                    cache_dir = local_share
+                else:
+                    # Legacy path for backward compatibility
+                    cache_dir = Path.home() / ".netra"
+
+        return cache_dir / "thread_cache.json"
 
     def _load_thread_cache(self) -> None:
         """
@@ -6216,7 +6255,24 @@ def main(argv=None):
 
     # SSOT: Clear thread cache if requested
     if args.clear_thread_cache:
-        thread_cache_file = Path.home() / ".netra" / "cli_thread_cache.json"
+        # Use platform-aware cache path
+        from pathlib import Path
+        import platform as stdlib_platform
+
+        system = stdlib_platform.system()
+        if system == "Windows":
+            app_data = os.environ.get('LOCALAPPDATA', str(Path.home() / "AppData" / "Local"))
+            thread_cache_file = Path(app_data) / "Netra" / "CLI" / "thread_cache.json"
+        elif system == "Darwin":
+            thread_cache_file = Path.home() / "Library" / "Application Support" / "Netra" / "CLI" / "thread_cache.json"
+        else:
+            xdg_data = os.environ.get('XDG_DATA_HOME', str(Path.home() / ".local" / "share"))
+            thread_cache_file = Path(xdg_data) / "netra" / "cli" / "thread_cache.json"
+            # Also check legacy location
+            legacy_cache = Path.home() / ".netra" / "thread_cache.json"
+            if legacy_cache.exists():
+                legacy_cache.unlink()
+
         if thread_cache_file.exists():
             thread_cache_file.unlink()
             safe_console_print("SUCCESS: Cleared cached thread IDs", style="green",
