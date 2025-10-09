@@ -976,6 +976,9 @@ class DebugManager:
         elif event_type == "connection_established":
             user_id = data.get('data', {}).get('user_id', 'unknown')
             return f"[CONN] Connected as: {user_id}"
+        elif event_type == "handshake_response":
+            thread_id = data.get('thread_id', 'unknown')
+            return f"[HANDSHAKE] Handshake complete - Thread ID: {thread_id}"
         elif event_type == "agent_timeout_warning":
             # Issue #2409: Agent execution timeout warning display
             agent_name = data.get('agent_name', 'Unknown')
@@ -2585,6 +2588,9 @@ class WebSocketEvent:
         elif event_type == "connection_established":
             user_id = data.get('data', {}).get('user_id', 'unknown')
             return f"[CONN] Connected as: {user_id}"
+        elif event_type == "handshake_response":
+            thread_id = data.get('thread_id', 'unknown')
+            return f"[HANDSHAKE] Handshake complete - Thread ID: {thread_id}"
         else:
             return safe_format_message(f"📡 {event_type}: {smart_truncate_json(data, None)}")
 
@@ -2994,9 +3000,13 @@ class WebSocketClient:
         SSOT: Perform handshake protocol to get backend-provided thread_id.
         This ensures both CLI and backend agree on the thread_id for proper event routing.
 
-        Protocol (tries both approaches):
-        A. New protocol: Backend sends connection_established immediately
-        B. Legacy protocol: CLI sends initial message to trigger backend response
+        Protocol:
+        1. Client sends handshake_request with client info
+        2. Backend responds with handshake_response containing thread_id and session info
+        3. Client extracts thread_id and sends session_acknowledged
+
+        The handshake_response is distinct from connection_established to avoid
+        race conditions and clearly separate WebSocket connection from session handshake.
         """
         try:
             import asyncio
@@ -3007,26 +3017,26 @@ class WebSocketClient:
                 style="cyan"
             )
 
-            # Try to receive immediately (new protocol where backend sends first)
+            # Try to receive immediately (backend may send immediately)
             try:
-                # Non-blocking check if backend sent connection_established
+                # Non-blocking check if backend sent handshake_response immediately
                 # Use configurable timeout (default 2.0 seconds for initial check)
                 initial_timeout = min(2.0, self.handshake_timeout / 6)
                 response_msg = await asyncio.wait_for(self.ws.recv(), timeout=initial_timeout)
                 response = json.loads(response_msg)
 
-                # Process if we got a connection_established immediately
-                if response.get('type') == 'connection_established':
+                # Process if we got a handshake_response
+                if response.get('type') == 'handshake_response':
                     self.debug.debug_print(
-                        "Received thread ID from backend",
+                        "Received handshake response from backend",
                         DebugLevel.VERBOSE,
                         style="green"
                     )
-                    return await self._process_connection_established(response)
+                    return await self._process_handshake_response(response)
                 else:
                     # Got a different message type - log it
                     self.debug.debug_print(
-                        f"Got {response.get('type')} instead of connection_established",
+                        f"Got {response.get('type')} instead of handshake_response",
                         DebugLevel.VERBOSE,
                         style="yellow"
                     )
@@ -3034,7 +3044,7 @@ class WebSocketClient:
                 # Backend didn't send immediately, try sending a trigger message
                 pass  # Silent - this is normal for backends that wait for trigger
 
-            # If we didn't get connection_established immediately, send a trigger
+            # If we didn't get handshake_response immediately, send a trigger
             # This handles backends that wait for an initial message
             trigger_message = {
                 "type": "handshake_request",
@@ -3057,10 +3067,15 @@ class WebSocketClient:
                 response_msg = await asyncio.wait_for(self.ws.recv(), timeout=self.handshake_timeout)
                 response = json.loads(response_msg)
 
-                if response.get('type') == 'connection_established':
-                    return await self._process_connection_established(response)
+                if response.get('type') == 'handshake_response':
+                    self.debug.debug_print(
+                        "Received handshake_response",
+                        DebugLevel.VERBOSE,
+                        style="green"
+                    )
+                    return await self._process_handshake_response(response)
                 else:
-                    # Not a connection_established message - show actual response
+                    # Not a handshake_response message - show actual response
                     response_type = response.get('type', 'unknown')
                     self.debug.debug_print(
                         f"ERROR: Unexpected response type: '{response_type}'",
@@ -3098,26 +3113,31 @@ class WebSocketClient:
             safe_console_print(error_msg, style="yellow")
             return False
 
-    async def _process_connection_established(self, response: Dict[str, Any]) -> bool:
+    async def _process_handshake_response(self, response: Dict[str, Any]) -> bool:
         """
-        Process a connection_established message from backend.
+        Process a handshake_response message from backend.
+
+        This is the new, distinct handshake response event that clearly separates
+        handshake completion from basic WebSocket connection establishment.
 
         Args:
-            response: The connection_established message from backend
+            response: The handshake_response message from backend
 
         Returns:
             True if thread_id was successfully extracted and acknowledged
         """
-        # Extract all IDs from backend response
+        # Extract all IDs from the handshake response
         backend_thread_id = response.get('thread_id')
         backend_run_id = response.get('run_id')
         backend_request_id = response.get('request_id')
         backend_session_token = response.get('session_token')
+        backend_timestamp = response.get('timestamp')
+        backend_message = response.get('message', 'Handshake complete')
 
         if not backend_thread_id:
             # Backend didn't provide thread_id
             self.debug.debug_print(
-                "ERROR: Backend connection_established missing thread_id",
+                "ERROR: Backend handshake_response missing thread_id",
                 DebugLevel.BASIC,
                 style="red"
             )
@@ -3129,10 +3149,17 @@ class WebSocketClient:
         self._update_thread_cache(backend_thread_id)
 
         self.debug.debug_print(
-            f"Thread ID: {backend_thread_id}",
+            f"Handshake complete - Thread ID: {backend_thread_id}",
             DebugLevel.VERBOSE,
             style="green"
         )
+
+        if backend_message:
+            self.debug.debug_print(
+                f"Backend message: {backend_message}",
+                DebugLevel.VERBOSE,
+                style="cyan"
+            )
 
         # CRITICAL: Send acknowledgment with the SAME thread_id
         ack_message = {
@@ -3830,11 +3857,12 @@ class WebSocketClient:
                 )
                 self.events.append(event)
 
-                # Skip connection_established - already handled in handshake
-                # This prevents duplicate processing since handshake now waits for it first
-                if event.type == 'connection_established' and self.current_thread_id:
+                # Handle connection_established as a basic WebSocket connection event
+                # Note: handshake_response is now used for thread_id exchange, not connection_established
+                if event.type == 'connection_established':
+                    # This is now just a basic connection confirmation, not part of handshake
                     self.debug.debug_print(
-                        f"SSOT: Ignoring duplicate connection_established (thread already set: {self.current_thread_id})",
+                        f"WebSocket connection established event received",
                         DebugLevel.VERBOSE,
                         style="dim"
                     )
@@ -4313,7 +4341,7 @@ class JSONOutputGenerator:
             return "tool_execution"
         elif event_type in ['validation_started', 'validation_completed']:
             return "validation"
-        elif event_type in ['connection_established', 'cleanup_started', 'cleanup_completed']:
+        elif event_type in ['connection_established', 'handshake_response', 'cleanup_started', 'cleanup_completed']:
             return "connection"
         else:
             return "other"
@@ -4908,6 +4936,10 @@ class AgentCLI:
         if event_type == "connection_established":
             user_id = data.get('data', {}).get('user_id', 'unknown')
             return safe_format_message(f"🔌 Connected as: {user_id}")
+        elif event_type == "handshake_response":
+            thread_id = data.get('thread_id', 'unknown')
+            message = data.get('message', 'Handshake complete')
+            return safe_format_message(f"🤝 {message} - Thread ID: {thread_id}")
         elif event_type == "tool_executing":
             tool = data.get('tool', data.get('tool_name', 'Unknown'))
             return safe_format_message(f"🔧 Executing Tool: {tool}")
