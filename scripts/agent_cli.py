@@ -2883,15 +2883,20 @@ class WebSocketClient:
                         self.connected = True
                         return True
                     else:
-                        # Handshake failed - backend might be old version
+                        # Handshake failed - backend might be using old reactive model
                         self.debug.debug_print(
-                            "WARNING: Handshake failed - backend may not support thread agreement",
+                            "WARNING: No proactive handshake received from server",
                             DebugLevel.BASIC,
+                            style="yellow"
+                        )
+                        self.debug.debug_print(
+                            "Server may be using pre-2025-10-09 architecture (reactive handshake)",
+                            DebugLevel.VERBOSE,
                             style="yellow"
                         )
 
                         # Still mark as connected for backward compatibility
-                        # Old backends might work without the handshake
+                        # Old backends might work without the proactive handshake
                         self.connected = True
                         return True
             except Exception as e:
@@ -2999,77 +3004,149 @@ class WebSocketClient:
 
     async def _perform_handshake(self) -> bool:
         """
-        SSOT: Perform handshake protocol to get backend-provided thread_id.
-        This ensures both CLI and backend agree on the thread_id for proper event routing.
+        Wait for proactive handshake from server (as of 2025-10-09).
 
-        Protocol:
-        1. Client sends handshake_request with client info
-        2. Backend responds with handshake_response containing thread_id and session info
-        3. Client extracts thread_id and sends session_acknowledged
+        Server Phase Alignment:
+        - INITIALIZING: WebSocket connection accepted
+        - AUTHENTICATING: User validation (happens during connect())
+        - HANDSHAKING: Server proactively sends handshake_response (we wait here)
+        - READY: Services initialized
+        - PROCESSING: Message handling begins
 
-        The handshake_response is distinct from connection_established to avoid
-        race conditions and clearly separate WebSocket connection from session handshake.
+        The client waits during server's HANDSHAKING phase to receive the
+        proactive handshake_response without sending any request.
         """
         try:
             import asyncio
 
             self.debug.debug_print(
-                "Starting handshake...",
+                "Waiting for server to enter HANDSHAKING phase and send handshake...",
                 DebugLevel.VERBOSE,
                 style="cyan"
             )
 
-            # Try to receive immediately (backend may send immediately)
+            # Server enters HANDSHAKING phase after authentication
+            # and proactively sends handshake_response
+            handshake_timeout = 10.0  # Wait up to 10 seconds
+            start_time = asyncio.get_event_loop().time()
+
             try:
-                # Non-blocking check if backend sent handshake_response immediately
-                # Use configurable timeout (default 2.0 seconds for initial check)
-                initial_timeout = min(2.0, self.handshake_timeout / 6)
-                response_msg = await asyncio.wait_for(self.ws.recv(), timeout=initial_timeout)
-                response = json.loads(response_msg)
+                while (asyncio.get_event_loop().time() - start_time) < handshake_timeout:
+                    remaining_time = handshake_timeout - (asyncio.get_event_loop().time() - start_time)
 
-                # SSOT: Process any handshake-related response
-                return await self._process_any_handshake_response(response)
+                    # Be ready to receive messages during server's HANDSHAKING phase
+                    self.debug.debug_print(
+                        f"Listening for handshake (remaining: {remaining_time:.1f}s)...",
+                        DebugLevel.VERBOSE,
+                        style="dim"
+                    )
+
+                    try:
+                        # Use the full remaining time for recv to avoid timeout errors
+                        # This prevents premature connection closure during handshake
+                        response_msg = await asyncio.wait_for(
+                            self.ws.recv(),
+                            timeout=remaining_time
+                        )
+                        response = json.loads(response_msg)
+                    except asyncio.TimeoutError:
+                        # Gracefully handle timeout - don't let it propagate and close connection
+                        self.debug.debug_print(
+                            "Handshake wait timed out after 10 seconds",
+                            DebugLevel.VERBOSE,
+                            style="yellow"
+                        )
+                        break  # Exit loop to handle timeout below
+                    except json.JSONDecodeError as e:
+                        # Handle JSON parsing errors gracefully
+                        self.debug.debug_print(
+                            f"Invalid JSON received during handshake: {e}",
+                            DebugLevel.VERBOSE,
+                            style="yellow"
+                        )
+                        continue  # Try to receive next message
+                    except websockets.exceptions.ConnectionClosed as e:
+                        # Connection closed during handshake - this is the issue!
+                        self.debug.debug_print(
+                            f"Connection closed during handshake wait: {e}",
+                            DebugLevel.BASIC,
+                            style="red"
+                        )
+                        return False  # Connection lost, can't continue
+
+                    msg_type = response.get('type', 'unknown')
+                    self.debug.debug_print(
+                        f"Received: {msg_type}",
+                        DebugLevel.VERBOSE,
+                        style="cyan"
+                    )
+
+                    # Check for the proactive handshake_response
+                    if msg_type == 'handshake_response':
+                        # Server is in HANDSHAKING phase and sent the handshake
+                        self.debug.debug_print(
+                            "✅ Server sent proactive handshake (HANDSHAKING phase)",
+                            DebugLevel.VERBOSE,
+                            style="green"
+                        )
+
+                        # Process the handshake
+                        result = await self._process_handshake_response(response)
+
+                        if result:
+                            self.debug.debug_print(
+                                f"Handshake complete - Thread ID: {self.current_thread_id}",
+                                DebugLevel.BASIC,
+                                style="green"
+                            )
+                            self.debug.debug_print(
+                                "Server phases: AUTH ✓ → HANDSHAKING ✓ → READY",
+                                DebugLevel.VERBOSE,
+                                style="green"
+                            )
+
+                        return result
+
+                    # Handle other message types while waiting
+                    elif msg_type == 'connection_established':
+                        # This is from AUTHENTICATING phase completion
+                        self.debug.debug_print(
+                            "Connection established (AUTH phase) - waiting for HANDSHAKING phase",
+                            DebugLevel.VERBOSE,
+                            style="yellow"
+                        )
+                        # Store the event but continue waiting
+                        if hasattr(self, 'events'):
+                            self.events.append(WebSocketEvent.from_dict(response))
+
+                    else:
+                        # Other event types - store but keep waiting for handshake
+                        self.debug.debug_print(
+                            f"Storing {msg_type} event - still waiting for handshake",
+                            DebugLevel.VERBOSE,
+                            style="dim"
+                        )
+                        if hasattr(self, 'events'):
+                            self.events.append(WebSocketEvent.from_dict(response))
+
             except asyncio.TimeoutError:
-                # Backend didn't send immediately, try sending a trigger message
-                pass  # Silent - this is normal for backends that wait for trigger
+                pass  # Fall through to timeout handling below
 
-            # If we didn't get handshake_response immediately, send a trigger
-            # This handles backends that wait for an initial message
-            trigger_message = {
-                "type": "handshake_request",
-                "client_type": "cli",
-                "client_version": "2.0.0",
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            }
-
+            # Timeout - server didn't send handshake
             self.debug.debug_print(
-                "Sending handshake_request...",
-                DebugLevel.VERBOSE,
-                style="cyan"
+                "ERROR: Server did not send handshake within 10 seconds",
+                DebugLevel.BASIC,
+                style="red"
             )
-
-            await self.ws.send(json.dumps(trigger_message))
-
-            # Now wait for the response
-            try:
-                # Use configurable handshake timeout for main wait
-                response_msg = await asyncio.wait_for(self.ws.recv(), timeout=self.handshake_timeout)
-                response = json.loads(response_msg)
-
-                # SSOT: Process any handshake-related response
-                return await self._process_any_handshake_response(response)
-
-            except asyncio.TimeoutError:
-                # Timeout - log error concisely
-                self.debug.debug_print(
-                    "ERROR: Handshake timeout - no response from backend",
-                    DebugLevel.BASIC,
-                    style="red"
-                )
-                return False
+            self.debug.debug_print(
+                "Server may not have HANDSHAKING phase (pre-2025-10-09 version)",
+                DebugLevel.BASIC,
+                style="yellow"
+            )
+            return False
 
         except Exception as e:
-            # Handshake error - log but don't completely fail
+            # Handshake error
             error_msg = f"WARNING: Handshake error: {e}"
             self.debug.log_error(e, "handshake protocol")
             self.debug.debug_print(error_msg, DebugLevel.BASIC, style="yellow")
