@@ -2675,8 +2675,8 @@ class WebSocketClient:
         # Use environment-aware fallback timeouts
         if self.config.environment == Environment.STAGING:
             # Issue #2662: Staging agents routinely exceed 60s; align fallback with cloud-native defaults
-            self.websocket_recv_timeout = 95  # Staging fallback aligned with backend SSOT
-            self.close_timeout = 97  # Maintain 2s safety margin for cleanup coordination
+            self.websocket_recv_timeout = 300  # Staging fallback aligned with backend SSOT
+            self.close_timeout = 302  # Maintain 2s safety margin for cleanup coordination
         elif self.config.environment == Environment.PRODUCTION:
             # Issue #2861: Production workflows now require 100s+ for multi-agent LLM responses
             self.websocket_recv_timeout = 120  # Production fallback aligned with extended Cloud Run windows
@@ -5250,10 +5250,10 @@ class AgentCLI:
                 safe_console_print(traceback.format_exc(), style="dim red")
             return False
 
-    async def run_single_message(self, message: str, wait_time: int = 120):
+    async def run_single_message(self, message: str, wait_time: int = 300):
         """Run a single message and wait for response.
 
-        Issue #2665: Default wait time increased from 10s to 120s to accommodate
+        Issue #2665: Default wait time increased from 10s to 300s to accommodate
         real agent execution times (100s+ in staging with real LLM calls).
 
         ISSUE #2832: JSON output must be generated even on failure paths.
@@ -5536,7 +5536,7 @@ class AgentCLI:
                 # Send message
                 message = scenario['message']
                 expected_events = scenario.get('expected_events', [])
-                wait_time = scenario.get('wait_time', 120)  # Issue #2665: Match real agent execution times
+                wait_time = scenario.get('wait_time', 300)  # Issue #2665: Match real agent execution times
 
                 run_id = await self.ws_client.send_message(message)
 
@@ -6059,8 +6059,8 @@ def main(argv=None):
         "--wait",
         "-w",
         type=int,
-        default=120,
-        help="Time to wait for events (default: 120 seconds) - Issue #2665: Agents take 100s+ in staging"
+        default=300,
+        help="Time to wait for events (default: 300 seconds) - Issue #2665: Agents take 100s+ in staging"
     )
 
     parser.add_argument(
