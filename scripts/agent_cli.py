@@ -3008,7 +3008,8 @@ class WebSocketClient:
             # Try to receive immediately (new protocol where backend sends first)
             try:
                 # Non-blocking check if backend sent connection_established
-                response_msg = await asyncio.wait_for(self.ws.recv(), timeout=2.0)
+                # Increased timeout from 2.0 to 5.0 seconds for slower connections
+                response_msg = await asyncio.wait_for(self.ws.recv(), timeout=5.0)
                 response = json.loads(response_msg)
 
                 # Process if we got a connection_established immediately
@@ -3049,7 +3050,8 @@ class WebSocketClient:
 
             # Now wait for the response
             try:
-                response_msg = await asyncio.wait_for(self.ws.recv(), timeout=10.0)
+                # Increased timeout from 10.0 to 30.0 seconds for slower connections
+                response_msg = await asyncio.wait_for(self.ws.recv(), timeout=30.0)
                 response = json.loads(response_msg)
 
                 if response.get('type') == 'connection_established':
@@ -4694,8 +4696,8 @@ class AgentCLI:
         async def handle_event(event: WebSocketEvent):
             nonlocal thinking_spinner, thinking_live
 
-            # Stop spinner if it's running and we get any non-thinking event
-            if thinking_live and event.type != "agent_thinking":
+            # Stop spinner if it's running and we get any non-thinking/non-executing event
+            if thinking_live and event.type not in ["agent_thinking", "tool_executing"]:
                 thinking_live.stop()
                 thinking_live = None
                 thinking_spinner = None
@@ -4718,6 +4720,21 @@ class AgentCLI:
                 thinking_live = Live(thinking_spinner, console=Console(file=sys.stderr), refresh_per_second=10)
                 thinking_live.start()
                 thinking_spinner.add_task(f"💭 {spinner_text}", total=None)
+
+            # Start spinner for tool_executing events
+            elif event.type == "tool_executing" and not thinking_live:
+                tool_name = event.data.get('tool', event.data.get('tool_name', 'Unknown'))
+                spinner_text = f"Executing {tool_name}..."
+
+                thinking_spinner = Progress(
+                    SpinnerColumn(spinner_name="dots"),
+                    TextColumn("[blue]{task.description}"),
+                    console=Console(file=sys.stderr),
+                    transient=True
+                )
+                thinking_live = Live(thinking_spinner, console=Console(file=sys.stderr), refresh_per_second=10)
+                thinking_live.start()
+                thinking_spinner.add_task(f"🔧 {spinner_text}", total=None)
 
             # Display raw data in verbose mode
             if self.debug.debug_level >= DebugLevel.DIAGNOSTIC:
@@ -4742,8 +4759,8 @@ class AgentCLI:
         async def handle_event_with_display(event: WebSocketEvent):
             nonlocal thinking_spinner, thinking_live
 
-            # Stop spinner if it's running and we get any non-thinking event
-            if thinking_live and event.type != "agent_thinking":
+            # Stop spinner if it's running and we get any non-thinking/non-executing event
+            if thinking_live and event.type not in ["agent_thinking", "tool_executing"]:
                 thinking_live.stop()
                 thinking_live = None
                 thinking_spinner = None
@@ -4767,6 +4784,21 @@ class AgentCLI:
                 thinking_live = Live(thinking_spinner, console=Console(file=sys.stderr), refresh_per_second=10)
                 thinking_live.start()
                 thinking_spinner.add_task(f"💭 {spinner_text}", total=None)
+
+            # Start spinner for tool_executing events
+            elif event.type == "tool_executing" and not thinking_live:
+                tool_name = event.data.get('tool', event.data.get('tool_name', 'Unknown'))
+                spinner_text = f"Executing {tool_name}..."
+
+                thinking_spinner = Progress(
+                    SpinnerColumn(spinner_name="dots"),
+                    TextColumn("[blue]{task.description}"),
+                    console=Console(file=sys.stderr),
+                    transient=True
+                )
+                thinking_live = Live(thinking_spinner, console=Console(file=sys.stderr), refresh_per_second=10)
+                thinking_live.start()
+                thinking_spinner.add_task(f"🔧 {spinner_text}", total=None)
 
             # Issue #2177: WebSocket event validation
             if self.validate_events and self.event_validator:
