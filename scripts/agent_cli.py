@@ -3025,21 +3025,8 @@ class WebSocketClient:
                 response_msg = await asyncio.wait_for(self.ws.recv(), timeout=initial_timeout)
                 response = json.loads(response_msg)
 
-                # Process if we got a handshake_response
-                if response.get('type') == 'handshake_response':
-                    self.debug.debug_print(
-                        "Received handshake response from backend",
-                        DebugLevel.VERBOSE,
-                        style="green"
-                    )
-                    return await self._process_handshake_response(response)
-                else:
-                    # Got a different message type - log it
-                    self.debug.debug_print(
-                        f"Got {response.get('type')} instead of handshake_response",
-                        DebugLevel.VERBOSE,
-                        style="yellow"
-                    )
+                # SSOT: Process any handshake-related response
+                return await self._process_any_handshake_response(response)
             except asyncio.TimeoutError:
                 # Backend didn't send immediately, try sending a trigger message
                 pass  # Silent - this is normal for backends that wait for trigger
@@ -3067,34 +3054,8 @@ class WebSocketClient:
                 response_msg = await asyncio.wait_for(self.ws.recv(), timeout=self.handshake_timeout)
                 response = json.loads(response_msg)
 
-                if response.get('type') == 'handshake_response':
-                    self.debug.debug_print(
-                        "Received handshake_response",
-                        DebugLevel.VERBOSE,
-                        style="green"
-                    )
-                    return await self._process_handshake_response(response)
-                else:
-                    # Not a handshake_response message - show actual response
-                    response_type = response.get('type', 'unknown')
-                    self.debug.debug_print(
-                        f"ERROR: Unexpected response type: '{response_type}'",
-                        DebugLevel.BASIC,
-                        style="red"
-                    )
-
-                    # CRITICAL: Show the actual response data for debugging
-                    self.debug.debug_print(
-                        "ACTUAL RESPONSE DATA:",
-                        DebugLevel.BASIC,
-                        style="yellow"
-                    )
-                    self.debug.debug_print(
-                        json.dumps(response, indent=2),
-                        DebugLevel.BASIC,
-                        style="cyan"
-                    )
-                    return False
+                # SSOT: Process any handshake-related response
+                return await self._process_any_handshake_response(response)
 
             except asyncio.TimeoutError:
                 # Timeout - log error concisely
@@ -3111,6 +3072,100 @@ class WebSocketClient:
             self.debug.log_error(e, "handshake protocol")
             self.debug.debug_print(error_msg, DebugLevel.BASIC, style="yellow")
             safe_console_print(error_msg, style="yellow")
+            return False
+
+    async def _process_any_handshake_response(self, response: Dict[str, Any]) -> bool:
+        """
+        SSOT: Process any handshake-related response from backend.
+        Handles both 'handshake_response' and 'connection_established' event types.
+
+        This method ensures we have a single source of truth for handshake processing,
+        avoiding duplicate logic across the codebase.
+
+        Args:
+            response: The response message from backend
+
+        Returns:
+            True if a valid thread_id was extracted and acknowledged, False otherwise
+        """
+        response_type = response.get('type')
+
+        if response_type == 'handshake_response':
+            # Standard handshake_response with thread_id directly in response
+            self.debug.debug_print(
+                "Processing handshake_response",
+                DebugLevel.VERBOSE,
+                style="green"
+            )
+            return await self._process_handshake_response(response)
+
+        elif response_type == 'connection_established':
+            # Backend sends connection_established with connection_id as thread identifier
+            self.debug.debug_print(
+                "Processing connection_established as handshake response",
+                DebugLevel.VERBOSE,
+                style="green"
+            )
+
+            # Extract connection_id from the data field and use as thread_id
+            connection_data = response.get('data', {})
+            connection_id = connection_data.get('connection_id')
+
+            if not connection_id:
+                self.debug.debug_print(
+                    "ERROR: connection_established missing connection_id",
+                    DebugLevel.BASIC,
+                    style="red"
+                )
+                return False
+
+            # Use connection_id as thread_id (SSOT for thread identification)
+            self.current_thread_id = connection_id
+            self.run_id = connection_id  # Also use as run_id
+            self._update_thread_cache(connection_id)
+
+            self.debug.debug_print(
+                f"Handshake complete - Using connection_id as thread ID: {connection_id}",
+                DebugLevel.VERBOSE,
+                style="green"
+            )
+
+            # Send acknowledgment with the connection_id
+            ack_message = {
+                "type": "session_acknowledged",
+                "thread_id": connection_id,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+
+            await self.ws.send(json.dumps(ack_message))
+            self.debug.debug_print(
+                f"Sent session_acknowledged with thread_id: {connection_id}",
+                DebugLevel.VERBOSE,
+                style="cyan"
+            )
+
+            return True
+
+        else:
+            # Unexpected response type
+            self.debug.debug_print(
+                f"ERROR: Unexpected handshake response type: '{response_type}'",
+                DebugLevel.BASIC,
+                style="red"
+            )
+
+            # Show the actual response data for debugging
+            self.debug.debug_print(
+                "ACTUAL RESPONSE DATA:",
+                DebugLevel.BASIC,
+                style="yellow"
+            )
+            self.debug.debug_print(
+                json.dumps(response, indent=2),
+                DebugLevel.BASIC,
+                style="cyan"
+            )
+
             return False
 
     async def _process_handshake_response(self, response: Dict[str, Any]) -> bool:
