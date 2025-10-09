@@ -18,14 +18,11 @@ See detailed install below if needed.
 
 ### Log Collection Options
 
-The optimizer automatically analyzes your Claude Code usage logs to identify optimization opportunities. Logs are sent by default, but you can customize the behavior:
+The optimizer automatically analyzes your Claude Code usage logs to identify optimization opportunities. You can customize the behavior:
 
 ```bash
 # Send logs from the most recent file (default behavior)
 zen --apex
-
-# Disable log sending
-zen --apex --no-send-logs
 
 # Send logs from a specific project
 zen --apex --logs-project "my-project-name"
@@ -38,7 +35,7 @@ zen --apex --logs-count 2
 ```
 
 **Important:**
-- `--logs-count` default is now **1** for best results
+- `--logs-count` default is **1** for current Alpha release limitations. 
 - For optimal analysis, use **1 log file at a time** and keep payload under 1MB
 - Multiple log files can dilute the analysis and reduce accuracy
 - Each file may contain many log entries
@@ -184,6 +181,28 @@ Receiving events...
 
 📊 Received 8 events
 ```
+
+# Another example
+```
+"issue": "Confused execution path and backtracking",                                               │
+
+"evidence": "The model initially assumes a JavaScript/TypeScript frontend based on the term 
+│ \"client side\", leading to incorrect file searches. After realizing it's a Python project, it gets stuck  
+│ repeatedly grepping `scripts/agent_cli.py` and requires multiple user interventions to be redirected to    
+│ the actual root cause in `zen_orchestrator.py` and `zen/telemetry/apex_telemetry.py`",         ...                                                                          │
+│         "token_waste": "8000-10000",                                                                       │
+│         "fix": "When an initial search term (e.g., 'ultrathink') fails, the model should prioritize        │
+│ understanding the project's overall structure and language (`ls -R` or `find . -type f | head -n 20`)      │
+│ before making assumptions. For regressions, `git log` should be used earlier in the process to identify    │
+│ recent, relevant changes that could have introduced the bug.",        
+
+│         "ideal prompt": "There's a regression where events are batched instead of streamed. The user       │
+│ mentioned 'client side ultrathink', but that could be a red herring. Start by checking the project         │
+│ structure and language, then review the git history for recent changes related to event handling,          │
+│ streaming, telemetry, or subprocess execution before deep-diving into code.",                              │
+│         "priority": "high"                                                                                 │
+│       }
+```                                    
 
 # Advanced features & detailed install guide
 
