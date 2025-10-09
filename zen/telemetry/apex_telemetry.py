@@ -57,23 +57,39 @@ class ApexTelemetryWrapper:
         cmd = [sys.executable, agent_cli_path] + filtered_argv
 
         try:
-            # Run subprocess
-            result = subprocess.run(
+            # Use Popen for real-time streaming while still capturing output for telemetry
+            process = subprocess.Popen(
                 cmd,
                 env=env,
-                capture_output=True,
-                text=True
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1  # Line buffered for real-time output
             )
 
-            self.exit_code = result.returncode
-            self.stdout = result.stdout
-            self.stderr = result.stderr
+            # Collect output while streaming in real-time
+            stdout_lines = []
+            stderr_lines = []
 
-            # Print output
-            if result.stdout:
-                print(result.stdout, end='')
-            if result.stderr:
-                print(result.stderr, end='', file=sys.stderr)
+            # Stream stdout in real-time
+            if process.stdout:
+                for line in iter(process.stdout.readline, ''):
+                    if line:
+                        print(line, end='')  # Print immediately for real-time display
+                        stdout_lines.append(line)
+
+            # Wait for process to complete and get stderr
+            stderr_output = process.stderr.read() if process.stderr else ""
+            if stderr_output:
+                print(stderr_output, end='', file=sys.stderr)
+                stderr_lines.append(stderr_output)
+
+            # Wait for process to complete
+            self.exit_code = process.wait()
+
+            # Store captured output for telemetry parsing
+            self.stdout = ''.join(stdout_lines)
+            self.stderr = ''.join(stderr_lines)
 
         except Exception as e:
             logger.warning(f"Failed to run apex subprocess: {e}")
@@ -167,13 +183,8 @@ class ApexTelemetryWrapper:
             logger.info(f"✅ Emitted apex telemetry span with {len(attributes)} attributes")
             logger.debug(f"Apex span attributes: {attributes}")
 
-            # Force flush to ensure span is sent immediately
-            if hasattr(telemetry_manager, '_provider') and telemetry_manager._provider:
-                try:
-                    telemetry_manager._provider.force_flush(timeout_millis=5000)
-                    logger.debug("Telemetry provider flushed successfully")
-                except Exception as flush_exc:
-                    logger.warning(f"Failed to flush telemetry provider: {flush_exc}")
+            # Note: Removed force_flush to prevent blocking event streaming
+            # Spans will still be sent via the normal batch export process
 
         except Exception as exc:
             logger.error(f"❌ Failed to emit apex telemetry span: {exc}")
