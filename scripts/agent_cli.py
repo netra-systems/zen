@@ -216,7 +216,9 @@ EMOJI_FALLBACKS = {
     '🔥': '[HOT]',
     '💭': '[THOUGHT]',
     '📥': '[INPUT]',
-    '📤': '[OUTPUT]'
+    '📤': '[OUTPUT]',
+    '📍': '[ENV]',
+    '🔗': '[LINK]'
 }
 
 def detect_terminal_capabilities(override_mode: str = None) -> str:
@@ -1593,13 +1595,13 @@ def show_startup_banner(config):
     """
     print()
     print("=" * 75)
-    print("🤖 Netra Agent CLI - Interactive Mode")
+    safe_console_print("🤖 Netra Agent CLI - Interactive Mode", display_mode=detect_terminal_capabilities())
     print("=" * 75)
     print()
-    print(f"📍 Environment: {config.environment.value.upper()}")
+    safe_console_print(f"📍 Environment: {config.environment.value.upper()}", display_mode=detect_terminal_capabilities())
     print()
 
-    print("🔗 Endpoints: ")
+    safe_console_print("🔗 Endpoints: ", display_mode=detect_terminal_capabilities())
     print(f"Backend: {config.backend_url}")
     print(f"Auth: {config.auth_url}")
     print()
@@ -4759,51 +4761,47 @@ class AgentCLI:
 
     async def _receive_events(self):
         """Background task to receive and display events"""
-        thinking_spinner = None
-        thinking_live = None
+        # Create persistent spinner that stays at bottom
+        thinking_spinner = Progress(
+            SpinnerColumn(spinner_name="dots"),
+            TextColumn("[dim]{task.description}"),
+            console=Console(file=sys.stderr),
+            transient=True
+        )
+        thinking_live = Live(thinking_spinner, console=Console(file=sys.stderr), refresh_per_second=10)
+        thinking_task = None
+
+        # Start the spinner live display
+        thinking_live.start()
 
         async def handle_event(event: WebSocketEvent):
-            nonlocal thinking_spinner, thinking_live
-
-            # Stop spinner if it's running and we get any non-thinking/non-executing event
-            if thinking_live and event.type not in ["agent_thinking", "tool_executing"]:
-                thinking_live.stop()
-                thinking_live = None
-                thinking_spinner = None
+            nonlocal thinking_task
 
             # Display event with enhanced formatting
             formatted_event = event.format_for_display(self.debug)
             safe_console_print(f"[{event.timestamp.strftime('%H:%M:%S')}] {formatted_event}")
 
-            # Start spinner for agent_thinking events (20-60 second wait indicator)
-            if event.type == "agent_thinking" and not thinking_live:
-                thought = event.data.get('thought', event.data.get('reasoning', ''))
-                spinner_text = truncate_with_ellipsis(thought, 60) if thought else "Processing..."
+            # Update spinner for thinking and tool_executing events
+            if event.type in ["agent_thinking", "tool_executing"]:
+                # Remove old task if exists
+                if thinking_task is not None:
+                    thinking_spinner.remove_task(thinking_task)
+                    thinking_task = None
 
-                thinking_spinner = Progress(
-                    SpinnerColumn(spinner_name="dots"),
-                    TextColumn("[cyan]{task.description}"),
-                    console=Console(file=sys.stderr),
-                    transient=True
-                )
-                thinking_live = Live(thinking_spinner, console=Console(file=sys.stderr), refresh_per_second=10)
-                thinking_live.start()
-                thinking_spinner.add_task(f"💭 {spinner_text}", total=None)
+                # Add new task with latest event
+                if event.type == "agent_thinking":
+                    thought = event.data.get('thought', event.data.get('reasoning', ''))
+                    spinner_text = truncate_with_ellipsis(thought, 60) if thought else "Processing..."
+                    thinking_task = thinking_spinner.add_task(f"💭 {spinner_text}", total=None)
+                elif event.type == "tool_executing":
+                    tool_name = event.data.get('tool', event.data.get('tool_name', 'Unknown'))
+                    spinner_text = f"Executing {tool_name}..."
+                    thinking_task = thinking_spinner.add_task(f"🔧 {spinner_text}", total=None)
 
-            # Start spinner for tool_executing events
-            elif event.type == "tool_executing" and not thinking_live:
-                tool_name = event.data.get('tool', event.data.get('tool_name', 'Unknown'))
-                spinner_text = f"Executing {tool_name}..."
-
-                thinking_spinner = Progress(
-                    SpinnerColumn(spinner_name="dots"),
-                    TextColumn("[blue]{task.description}"),
-                    console=Console(file=sys.stderr),
-                    transient=True
-                )
-                thinking_live = Live(thinking_spinner, console=Console(file=sys.stderr), refresh_per_second=10)
-                thinking_live.start()
-                thinking_spinner.add_task(f"🔧 {spinner_text}", total=None)
+            # Clear spinner for any other event type
+            elif thinking_task is not None:
+                thinking_spinner.remove_task(thinking_task)
+                thinking_task = None
 
             # Display raw data in verbose mode
             if self.debug.debug_level >= DebugLevel.DIAGNOSTIC:
@@ -4816,58 +4814,53 @@ class AgentCLI:
         try:
             await self.ws_client.receive_events(callback=handle_event)
         finally:
-            # Clean up spinner if it's still running
-            if thinking_live:
-                thinking_live.stop()
+            # Clean up spinner
+            thinking_live.stop()
 
     async def _receive_events_with_display(self):
         """ISSUE #1603 FIX: Enhanced event receiver with better display for single message mode"""
-        thinking_spinner = None
-        thinking_live = None
+        # Create persistent spinner that stays at bottom
+        thinking_spinner = Progress(
+            SpinnerColumn(spinner_name="dots"),
+            TextColumn("[dim]{task.description}"),
+            console=Console(file=sys.stderr),
+            transient=True
+        )
+        thinking_live = Live(thinking_spinner, console=Console(file=sys.stderr), refresh_per_second=10)
+        thinking_task = None
+
+        # Start the spinner live display
+        thinking_live.start()
 
         async def handle_event_with_display(event: WebSocketEvent):
-            nonlocal thinking_spinner, thinking_live
-
-            # Stop spinner if it's running and we get any non-thinking/non-executing event
-            if thinking_live and event.type not in ["agent_thinking", "tool_executing"]:
-                thinking_live.stop()
-                thinking_live = None
-                thinking_spinner = None
+            nonlocal thinking_task
 
             # Display event with enhanced formatting and emojis
             formatted_event = event.format_for_display(self.debug)
             timestamp = event.timestamp.strftime('%H:%M:%S')
             safe_console_print(f"[{timestamp}] {formatted_event}")
 
-            # Start spinner for agent_thinking events (20-60 second wait indicator)
-            if event.type == "agent_thinking" and not thinking_live:
-                thought = event.data.get('thought', event.data.get('reasoning', ''))
-                spinner_text = truncate_with_ellipsis(thought, 60) if thought else "Processing..."
+            # Update spinner for thinking and tool_executing events
+            if event.type in ["agent_thinking", "tool_executing"]:
+                # Remove old task if exists
+                if thinking_task is not None:
+                    thinking_spinner.remove_task(thinking_task)
+                    thinking_task = None
 
-                thinking_spinner = Progress(
-                    SpinnerColumn(spinner_name="dots"),
-                    TextColumn("[cyan]{task.description}"),
-                    console=Console(file=sys.stderr),
-                    transient=True
-                )
-                thinking_live = Live(thinking_spinner, console=Console(file=sys.stderr), refresh_per_second=10)
-                thinking_live.start()
-                thinking_spinner.add_task(f"💭 {spinner_text}", total=None)
+                # Add new task with latest event
+                if event.type == "agent_thinking":
+                    thought = event.data.get('thought', event.data.get('reasoning', ''))
+                    spinner_text = truncate_with_ellipsis(thought, 60) if thought else "Processing..."
+                    thinking_task = thinking_spinner.add_task(f"💭 {spinner_text}", total=None)
+                elif event.type == "tool_executing":
+                    tool_name = event.data.get('tool', event.data.get('tool_name', 'Unknown'))
+                    spinner_text = f"Executing {tool_name}..."
+                    thinking_task = thinking_spinner.add_task(f"🔧 {spinner_text}", total=None)
 
-            # Start spinner for tool_executing events
-            elif event.type == "tool_executing" and not thinking_live:
-                tool_name = event.data.get('tool', event.data.get('tool_name', 'Unknown'))
-                spinner_text = f"Executing {tool_name}..."
-
-                thinking_spinner = Progress(
-                    SpinnerColumn(spinner_name="dots"),
-                    TextColumn("[blue]{task.description}"),
-                    console=Console(file=sys.stderr),
-                    transient=True
-                )
-                thinking_live = Live(thinking_spinner, console=Console(file=sys.stderr), refresh_per_second=10)
-                thinking_live.start()
-                thinking_spinner.add_task(f"🔧 {spinner_text}", total=None)
+            # Clear spinner for any other event type
+            elif thinking_task is not None:
+                thinking_spinner.remove_task(thinking_task)
+                thinking_task = None
 
             # Issue #2177: WebSocket event validation
             if self.validate_events and self.event_validator:
@@ -4947,9 +4940,8 @@ class AgentCLI:
         try:
             await self.ws_client.receive_events(callback=handle_event_with_display)
         finally:
-            # Clean up spinner if it's still running
-            if thinking_live:
-                thinking_live.stop()
+            # Clean up spinner
+            thinking_live.stop()
 
     def _get_event_summary(self, event: WebSocketEvent) -> str:
         """ISSUE #1603 FIX: Get a concise summary of an event for display"""
