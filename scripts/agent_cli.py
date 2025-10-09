@@ -1592,9 +1592,9 @@ def show_startup_banner(config):
         config: Config object containing environment, backend_url, and auth_url
     """
     print()
-    print("━" * 75)
+    print("=" * 75)
     print("🤖 Netra Agent CLI - Interactive Mode")
-    print("━" * 75)
+    print("=" * 75)
     print()
     print(f"📍 Environment: {config.environment.value.upper()}")
     print()
@@ -1603,7 +1603,7 @@ def show_startup_banner(config):
     print(f"Backend: {config.backend_url}")
     print(f"Auth: {config.auth_url}")
     print()
-    print("━" * 75)
+    print("=" * 75)
     print()
 
 
@@ -3788,9 +3788,9 @@ class WebSocketClient:
         # Check if payload exceeds maximum allowed size
         if payload_size_mb > MAX_SIZE_MB:
             error_msg = f"""
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                         ❌ PAYLOAD SIZE EXCEEDED                              ║
-╔══════════════════════════════════════════════════════════════════════════════╗
++==============================================================================+
+|                         ❌ PAYLOAD SIZE EXCEEDED                              |
++==============================================================================+
 
   Payload Size: {payload_size_mb:.2f} MB
   Maximum Allowed: {MAX_SIZE_MB:.1f} MB
@@ -3818,7 +3818,7 @@ class WebSocketClient:
 
 ✨ OPTIMAL PERFORMANCE: Keep payload under {OPTIMAL_SIZE_MB:.1f} MB for best results
 
-╚══════════════════════════════════════════════════════════════════════════════╝
++==============================================================================+
 """
             safe_console_print(error_msg, style="red")
             raise RuntimeError(f"Payload size ({payload_size_mb:.2f} MB) exceeds maximum allowed ({MAX_SIZE_MB:.1f} MB)")
@@ -3826,9 +3826,9 @@ class WebSocketClient:
         # Warn if payload is large but within limits
         if payload_size_mb > WARNING_SIZE_MB:
             warning_msg = f"""
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                      ⚠️  LARGE PAYLOAD WARNING                                ║
-╔══════════════════════════════════════════════════════════════════════════════╗
++==============================================================================+
+|                      ⚠️  LARGE PAYLOAD WARNING                                |
++==============================================================================+
 
   Payload Size: {payload_size_mb:.2f} MB
   Maximum Allowed: {MAX_SIZE_MB:.1f} MB
@@ -3853,7 +3853,7 @@ class WebSocketClient:
   • Keep total payload under {OPTIMAL_SIZE_MB:.1f} MB for best results
   • Larger payloads may take longer to process
 
-╚══════════════════════════════════════════════════════════════════════════════╝
++==============================================================================+
 """
             safe_console_print(warning_msg, style="yellow")
 
