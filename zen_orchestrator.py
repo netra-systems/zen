@@ -2994,7 +2994,23 @@ def run():
             else:
                 env['PYTHONPATH'] = paths_to_add
 
-        # Run agent_cli.py as a module (works in packaged installations)
+        # Try to use telemetry wrapper for apex instances
+        try:
+            from zen.telemetry import run_apex_with_telemetry
+
+            # Find agent_cli.py path
+            import importlib.util
+            spec = importlib.util.find_spec("scripts.agent_cli")
+            if spec and spec.origin:
+                agent_cli_path = spec.origin
+                # Run with telemetry tracking
+                exit_code = run_apex_with_telemetry(agent_cli_path, filtered_argv, env)
+                sys.exit(exit_code)
+        except (ImportError, AttributeError) as e:
+            # Fallback to direct subprocess if telemetry unavailable
+            pass
+
+        # Fallback: Run agent_cli.py as a module (works in packaged installations)
         result = subprocess.run(
             [sys.executable, "-m", "scripts.agent_cli"] + filtered_argv,
             env=env
