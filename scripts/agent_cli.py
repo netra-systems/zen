@@ -2593,10 +2593,12 @@ class WebSocketClient:
 
     def __init__(self, config: Config, token: str, debug_manager: Optional[DebugManager] = None,
                  send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
-                 logs_path: Optional[str] = None, logs_user: Optional[str] = None):
+                 logs_path: Optional[str] = None, logs_user: Optional[str] = None,
+                 handshake_timeout: float = 2.0):
         self.config = config
         self.token = token
         self.debug = debug_manager or DebugManager(config.debug_level, config.debug_log_file, config.enable_websocket_diagnostics)
+        self.handshake_timeout = handshake_timeout  # Configurable handshake timeout
         self.ws: Optional[WebSocketClientProtocol] = None
         self.events: List[WebSocketEvent] = []
         self.connected = False
@@ -3008,8 +3010,9 @@ class WebSocketClient:
             # Try to receive immediately (new protocol where backend sends first)
             try:
                 # Non-blocking check if backend sent connection_established
-                # Increased timeout from 2.0 to 5.0 seconds for slower connections
-                response_msg = await asyncio.wait_for(self.ws.recv(), timeout=5.0)
+                # Use configurable timeout (default 2.0 seconds for initial check)
+                initial_timeout = min(2.0, self.handshake_timeout / 6)
+                response_msg = await asyncio.wait_for(self.ws.recv(), timeout=initial_timeout)
                 response = json.loads(response_msg)
 
                 # Process if we got a connection_established immediately
@@ -3050,8 +3053,8 @@ class WebSocketClient:
 
             # Now wait for the response
             try:
-                # Increased timeout from 10.0 to 30.0 seconds for slower connections
-                response_msg = await asyncio.wait_for(self.ws.recv(), timeout=30.0)
+                # Use configurable handshake timeout for main wait
+                response_msg = await asyncio.wait_for(self.ws.recv(), timeout=self.handshake_timeout)
                 response = json.loads(response_msg)
 
                 if response.get('type') == 'connection_established':
@@ -4506,7 +4509,8 @@ class AgentCLI:
                  retry_config: Optional[Dict[str, Any]] = None,
                  json_mode: bool = False, ci_mode: bool = False, json_output_file: Optional[str] = None,
                  send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
-                 logs_path: Optional[str] = None, logs_user: Optional[str] = None):
+                 logs_path: Optional[str] = None, logs_user: Optional[str] = None,
+                 handshake_timeout: float = 2.0):
         # ISSUE #2766: Store JSON/CI mode flags early for output suppression
         self.json_mode = json_mode
         self.ci_mode = ci_mode
@@ -4518,6 +4522,9 @@ class AgentCLI:
         self.logs_project = logs_project
         self.logs_path = logs_path
         self.logs_user = logs_user
+
+        # Store handshake timeout
+        self.handshake_timeout = handshake_timeout
 
         self.config = config
         # ISSUE #2766: Pass json_mode/ci_mode to DebugManager for output suppression
@@ -4654,7 +4661,8 @@ class AgentCLI:
                 logs_count=self.logs_count,
                 logs_project=self.logs_project,
                 logs_path=self.logs_path,
-                logs_user=self.logs_user
+                logs_user=self.logs_user,
+                handshake_timeout=self.handshake_timeout
             )
             if not await self.ws_client.connect():
                 # The WebSocket client will already show detailed troubleshooting (Issue #2414)
@@ -5352,7 +5360,8 @@ class AgentCLI:
                     logs_count=self.logs_count,
                     logs_project=self.logs_project,
                     logs_path=self.logs_path,
-                    logs_user=self.logs_user
+                    logs_user=self.logs_user,
+                    handshake_timeout=self.handshake_timeout
                 )
                 if not await self.ws_client.connect():
                     # ISSUE #2766: Track WebSocket connection failure error
@@ -5559,7 +5568,8 @@ class AgentCLI:
                     logs_count=self.logs_count,
                     logs_project=self.logs_project,
                     logs_path=self.logs_path,
-                    logs_user=self.logs_user
+                    logs_user=self.logs_user,
+                    handshake_timeout=self.handshake_timeout
                 )
                 if not await self.ws_client.connect():
                     results.append({'scenario': scenario['name'], 'status': 'FAILED', 'error': 'WebSocket connection failed'})
@@ -6057,10 +6067,10 @@ def main(argv=None):
         prog="zen --apex",
         description="Netra Agent CLI - Test agent interactions from command line (ISSUE #1603: Enhanced with event output and GCP error lookup)",
         epilog="Examples:\n"
-               "  %(prog)s --message 'triage this incident'\n"
-               "  %(prog)s --message 'analyze rollout' --send-logs\n"
-               "  %(prog)s --message 'review QA findings' --send-logs --logs-project qa-suite\n"
-               "  %(prog)s --send-logs --logs-path ~/.claude/Projects --message 'audit sessions'\n"
+               "  %(prog)s --message 'triage this incident'  # logs attached by default\n"
+               "  %(prog)s --message 'analyze rollout' --no-send-logs  # disable log attachment\n"
+               "  %(prog)s --message 'review QA findings' --logs-project qa-suite\n"
+               "  %(prog)s --logs-path ~/.claude/Projects --message 'audit sessions'\n"
                "  %(prog)s --lookup-errors cli_20250121_123456_789",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
@@ -6181,8 +6191,8 @@ def main(argv=None):
     parser.add_argument(
         "--handshake-timeout",
         type=float,
-        default=5.0,
-        help="Timeout for handshake with backend (seconds, default: 5.0)"
+        default=2.0,
+        help="Timeout for handshake with backend (seconds, default: 2.0)"
     )
 
     parser.add_argument(
@@ -6375,7 +6385,16 @@ def main(argv=None):
         "--logs",
         dest="send_logs",
         action="store_true",
-        help="Attach recent JSONL logs from .claude/Projects to message payload"
+        default=True,
+        help="Attach recent JSONL logs from .claude/Projects to message payload (default: enabled)"
+    )
+
+    parser.add_argument(
+        "--no-send-logs",
+        "--no-logs",
+        dest="send_logs",
+        action="store_false",
+        help="Disable automatic log attachment"
     )
 
     parser.add_argument(
@@ -6661,7 +6680,8 @@ def main(argv=None):
         logs_count=args.logs_count,
         logs_project=args.logs_project,
         logs_path=args.logs_path,
-        logs_user=args.logs_user
+        logs_user=args.logs_user,
+        handshake_timeout=args.handshake_timeout
     )
 
     # ISSUE #2766: Store output formatter reference in CLI instance

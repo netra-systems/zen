@@ -11,27 +11,30 @@ The process is simple. One time install, then one command. It analyzes your most
 ## Quick start
 
 1. `pip install netra-zen`
-2. `zen --apex --send-logs`
+2. `zen --apex`  # Logs are now sent by default
 3. Read the results and update claude settings, prompts, commands, etc. as needed to benefit
 
 See detailed install below if needed.
 
 ### Log Collection Options
 
-The optimizer analyzes your Claude Code usage logs to identify optimization opportunities. You can customize what logs are sent:
+The optimizer automatically analyzes your Claude Code usage logs to identify optimization opportunities. Logs are sent by default, but you can customize the behavior:
 
 ```bash
-# Send logs from the most recent file (default, recommended)
-zen --apex --send-logs
+# Send logs from the most recent file (default behavior)
+zen --apex
+
+# Disable log sending
+zen --apex --no-send-logs
 
 # Send logs from a specific project
-zen --apex --send-logs --logs-project "my-project-name"
+zen --apex --logs-project "my-project-name"
 
 # Send logs from a custom location
-zen --apex --send-logs --logs-path "/path/to/.claude/Projects"
+zen --apex --logs-path "/path/to/.claude/Projects"
 
 # Advanced: Send multiple files (use with caution)
-zen --apex --send-logs --logs-count 2
+zen --apex --logs-count 2
 ```
 
 **Important:**
@@ -55,7 +58,7 @@ This was just changing a few small lines on a 400 line command.
 
 ## Example output from single file
 ```
-zen --apex --send-logs --logs-path /Users/user/.claude/projects/-Users-Desktop-netra-apex/7ac6d7ac-abc3-4903-a482-......-1.jsonl
+zen --apex --logs-path /Users/user/.claude/projects/-Users-Desktop-netra-apex/7ac6d7ac-abc3-4903-a482-......-1.jsonl
 
 SUCCESS: WebSocket connected successfully!
 

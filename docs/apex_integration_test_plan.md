@@ -113,7 +113,7 @@ zen --apex --help
 #### 3. Test log-forwarding arguments
 ```bash
 zen --apex --help | grep -A 2 "send-logs"
-# Expected: Shows --send-logs, --logs-count, etc.
+# Expected: Shows --send-logs (default: enabled), --no-send-logs, --logs-count, etc.
 ```
 
 #### 4. Test basic agent interaction (requires backend)
@@ -127,8 +127,11 @@ zen --apex --message "test message" --env staging
 mkdir -p ~/.claude/Projects/test-project
 echo '{"event": "test", "timestamp": "2025-01-01"}' > ~/.claude/Projects/test-project/session1.jsonl
 
-# Test with log forwarding (default: 1 log file for best results)
-zen --apex --message "test" --send-logs --logs-project test-project --env staging
+# Test with log forwarding (logs sent by default, 1 log file for best results)
+zen --apex --message "test" --logs-project test-project --env staging
+
+# Or to disable log forwarding
+zen --apex --message "test" --no-send-logs --env staging
 ```
 
 ## Known Limitations & Deployment Notes
@@ -178,8 +181,8 @@ Per plan section 13:
    # Test delegation
    zen --apex --help
 
-   # Test with backend (requires backend running)
-   zen --apex --message "test" --env local --send-logs
+   # Test with backend (requires backend running, logs sent by default)
+   zen --apex --message "test" --env local
    ```
 
 ## Files Modified/Created
