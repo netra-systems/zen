@@ -6909,6 +6909,15 @@ def main(argv=None):
                     sys.exit(1)
             elif args.send_logs:
                 # Handle --send-logs without --message: use default message
+                # the jsonl logs are attached in payload
+                #   {
+                #    "type": "user_message",
+                #    "payload": { 
+                #           ...
+                #   *** "jsonl_logs": [... actual logs here ...] ***
+                #    }
+                #}
+
                 default_message = "claude-code optimizer default message"
                 result = await cli.run_single_message(default_message, args.wait)
                 # ISSUE #2766: Use structured exit code from ExitCodeGenerator
