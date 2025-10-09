@@ -3100,51 +3100,29 @@ class WebSocketClient:
             return await self._process_handshake_response(response)
 
         elif response_type == 'connection_established':
-            # Backend sends connection_established with connection_id as thread identifier
+            # connection_established is NOT a handshake response!
+            # It's just a WebSocket connection event. We should NOT acknowledge it.
+            # We need to wait for the actual handshake_response message.
             self.debug.debug_print(
-                "Processing connection_established as handshake response",
+                "Received connection_established - waiting for handshake_response",
                 DebugLevel.VERBOSE,
-                style="green"
+                style="yellow"
             )
 
-            # Extract connection_id from the data field and use as thread_id
+            # Extract connection_id for logging purposes only
             connection_data = response.get('data', {})
             connection_id = connection_data.get('connection_id')
 
-            if not connection_id:
+            if connection_id:
                 self.debug.debug_print(
-                    "ERROR: connection_established missing connection_id",
-                    DebugLevel.BASIC,
-                    style="red"
+                    f"Connection established with connection_id: {connection_id} (not using as thread_id)",
+                    DebugLevel.VERBOSE,
+                    style="yellow"
                 )
-                return False
 
-            # Use connection_id as thread_id (SSOT for thread identification)
-            self.current_thread_id = connection_id
-            self.run_id = connection_id  # Also use as run_id
-            self._update_thread_cache(connection_id)
-
-            self.debug.debug_print(
-                f"Handshake complete - Using connection_id as thread ID: {connection_id}",
-                DebugLevel.VERBOSE,
-                style="green"
-            )
-
-            # Send acknowledgment with the connection_id
-            ack_message = {
-                "type": "session_acknowledged",
-                "thread_id": connection_id,
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            }
-
-            await self.ws.send(json.dumps(ack_message))
-            self.debug.debug_print(
-                f"Sent session_acknowledged with thread_id: {connection_id}",
-                DebugLevel.VERBOSE,
-                style="cyan"
-            )
-
-            return True
+            # Return False to indicate we're still waiting for handshake_response
+            # DO NOT send session_acknowledged here!
+            return False
 
         else:
             # Unexpected response type
