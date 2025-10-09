@@ -60,7 +60,7 @@
 
 - In `agent_cli.py`, update the parser to include:
   - `--send-logs` / `--logs` (action=`store_true`) to toggle log transmission.
-  - `--logs-count` (int, default 5, validated to be positive).
+  - `--logs-count` (int, default 1, validated to be positive). For best results, use 1 log at a time with payloads under 1MB.
   - `--logs-project` (string) to select a specific project folder.
   - `--logs-path` (path) direct override for the logs directory; if provided, skip platform resolution.
   - `--logs-user` (string) to explicitly set the Windows username portion of the path.
@@ -99,7 +99,7 @@
 - Modify Zen’s top-level CLI documentation (if any, e.g., `README.md`, `docs/zen/usage.md`) with a concise section on the new parallel agent workflow.
 - Include examples for:
   - Default invocation: `zen --apex --message '{"prompt": "..."}'`.
-  - Enabling logs: `zen -a --send-logs --logs-count 3`.
+  - Enabling logs: `zen -a --send-logs` (uses default of 1 log file for optimal analysis).
   - Overriding project path: `zen --apex --send-logs --logs-path "/tmp/mock_logs"`.
 - Note the non-intrusive nature of the integration (no changes to existing workflows) and suggest when to use the apex pathway.
 - Document limitations/assumptions (requires `.claude/Projects` structure, default username detection may need overrides in shared environments).
