@@ -3967,7 +3967,16 @@ class WebSocketClient:
                     type=data.get('type', 'unknown'),
                     data=data
                 )
-                self.events.append(event)
+                # Skip duplicate connection_established events after handshake
+                if event.type == 'connection_established' and self.connected and self.current_thread_id:
+                    self.debug.debug_print(
+                        "Ignoring duplicate connection_established (already connected with thread_id)",
+                        DebugLevel.VERBOSE,
+                        style="yellow"
+                    )
+                    # Don't append duplicate connection events
+                else:
+                    self.events.append(event)
 
                 # Handle connection_established as a basic WebSocket connection event
                 # Note: handshake_response is now used for thread_id exchange, not connection_established
