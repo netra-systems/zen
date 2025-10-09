@@ -2957,6 +2957,40 @@ async def main():
 
 def run():
     """Synchronous wrapper for the main function to be used as console script entry point."""
+    # Import version and log it at startup
+    __version__ = "unknown"
+
+    # Try different import methods to get the version
+    try:
+        # When run as a package
+        import zen
+        __version__ = zen.__version__
+    except (ImportError, AttributeError):
+        try:
+            # When run from the zen directory
+            from __init__ import __version__
+        except ImportError:
+            try:
+                # Try relative import
+                from . import __version__
+            except ImportError:
+                # Try to read version from __init__.py directly as last resort
+                try:
+                    import os
+                    init_path = Path(__file__).parent / "__init__.py"
+                    if init_path.exists():
+                        with open(init_path) as f:
+                            for line in f:
+                                if line.startswith('__version__'):
+                                    # Extract version from line like: __version__ = "1.0.9"
+                                    __version__ = line.split('=')[1].strip().strip('"').strip("'")
+                                    break
+                except Exception:
+                    pass
+
+    # Log version information at startup
+    logger.info(f"Starting zen version {__version__}")
+
     # Early check for --apex flag to delegate to agent_cli before main() processing
     if '--apex' in sys.argv or '-a' in sys.argv:
         # Delegate to agent_cli via subprocess to avoid dependency conflicts
