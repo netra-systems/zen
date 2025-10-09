@@ -6,7 +6,7 @@ It works by analyzing your usage logs for metadata optimizations. It is focused 
 
 This is a micro startup effort, aiming to provide real value for individual devs in exchange for feedback. Our intent is to charge businesses for larger scale optimizations.
 
-The process is simple. One time install, then one command. It auto grabs the last 3 log files and provides actionable items to update going forward to get the value of the optimizations.
+The process is simple. One time install, then one command. It analyzes your most recent log file and provides actionable items to update going forward to get the value of the optimizations. For best results, analyze one log file at a time with payloads under 1MB for focused, accurate analysis.
 
 ## Quick start
 
@@ -21,11 +21,8 @@ See detailed install below if needed.
 The optimizer analyzes your Claude Code usage logs to identify optimization opportunities. You can customize what logs are sent:
 
 ```bash
-# Send logs from the 3 most recent files (default)
+# Send logs from the most recent file (default, recommended)
 zen --apex --send-logs
-
-# Send logs from more files for deeper analysis
-zen --apex --send-logs --logs-count 5
 
 # Send logs from a specific project
 zen --apex --send-logs --logs-project "my-project-name"
@@ -33,12 +30,14 @@ zen --apex --send-logs --logs-project "my-project-name"
 # Send logs from a custom location
 zen --apex --send-logs --logs-path "/path/to/.claude/Projects"
 
-# Combine options for targeted analysis
-zen --apex --send-logs --logs-count 3 --logs-project "production-app"
+# Advanced: Send multiple files (use with caution)
+zen --apex --send-logs --logs-count 2
 ```
 
 **Important:**
-- `--logs-count` specifies the number of **files** to read, not entries
+- `--logs-count` default is now **1** for best results
+- For optimal analysis, use **1 log file at a time** and keep payload under 1MB
+- Multiple log files can dilute the analysis and reduce accuracy
 - Each file may contain many log entries
 - The tool will display exactly how many entries from how many files are being sent
 

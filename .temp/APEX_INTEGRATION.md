@@ -35,9 +35,9 @@ WebSocket → Backend (with optional JSONL logs)
 zen --apex --message "your prompt" --env staging
 ```
 
-### With Log Forwarding
+### With Log Forwarding (Recommended - Single Log)
 ```bash
-zen --apex --message "analyze these logs" --send-logs --logs-count 5
+zen --apex --message "analyze these logs" --send-logs
 ```
 
 ### Custom Log Location
@@ -45,12 +45,12 @@ zen --apex --message "analyze these logs" --send-logs --logs-count 5
 zen --apex --send-logs --logs-project my-project --logs-path /custom/path
 ```
 
-### All Log Options
+### Advanced: Multiple Logs (Use with Caution)
 ```bash
 zen --apex \
   --message "prompt" \
   --send-logs \
-  --logs-count 10 \
+  --logs-count 2 \
   --logs-project specific-project \
   --logs-path /path/to/logs \
   --logs-user username
@@ -63,10 +63,12 @@ zen --apex \
 
 ### Log Forwarding
 - `--send-logs`, `--logs`: Attach recent JSONL logs to message payload
-- `--logs-count N`: Number of log files to collect (default: 5)
+- `--logs-count N`: Number of log files to collect (default: 1, recommended for best results)
 - `--logs-project NAME`: Specific project to collect logs from
 - `--logs-path PATH`: Custom path to `.claude/Projects` directory
 - `--logs-user USERNAME`: Windows username for path resolution
+
+**Best Practice:** Use 1 log file at a time (default) with payloads under 1MB for optimal analysis accuracy.
 
 ## Files Added/Modified
 

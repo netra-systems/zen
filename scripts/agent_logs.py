@@ -210,7 +210,7 @@ def _collect_jsonl_files(project_path: Path, limit: int) -> tuple[List[Dict[str,
 
 
 def collect_recent_logs(
-    limit: int = 3,
+    limit: int = 1,
     project_name: Optional[str] = None,
     base_path: Optional[str] = None,
     username: Optional[str] = None,
@@ -220,7 +220,7 @@ def collect_recent_logs(
     Collect recent JSONL logs from .claude/Projects directory.
 
     Args:
-        limit: Maximum number of log files to read (default: 3)
+        limit: Maximum number of log files to read (default: 1). For best results, use 1 log at a time for focused analysis.
         project_name: Specific project name or None for most recent
         base_path: Direct path override to logs directory OR a specific .jsonl file
         username: Windows username override

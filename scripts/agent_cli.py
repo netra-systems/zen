@@ -1459,7 +1459,11 @@ class HealthChecker:
         try:
             # Try to connect without auth first to check basic connectivity
             # Use default timeout for connectivity check since no cleanup coordination available yet
-            async with websockets.connect(self.config.ws_url, close_timeout=10) as ws:
+            async with websockets.connect(
+                self.config.ws_url,
+                close_timeout=10,
+                max_size=5 * 1024 * 1024  # 5 MB max message size
+            ) as ws:
                 self.debug.debug_print("[PASS] WebSocket basic connectivity check passed", style="green")
                 return {
                     "status": "reachable",
@@ -2588,7 +2592,7 @@ class WebSocketClient:
     """WebSocket client for agent interactions"""
 
     def __init__(self, config: Config, token: str, debug_manager: Optional[DebugManager] = None,
-                 send_logs: bool = False, logs_count: int = 5, logs_project: Optional[str] = None,
+                 send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
                  logs_path: Optional[str] = None, logs_user: Optional[str] = None):
         self.config = config
         self.token = token
@@ -2671,8 +2675,8 @@ class WebSocketClient:
         # Use environment-aware fallback timeouts
         if self.config.environment == Environment.STAGING:
             # Issue #2662: Staging agents routinely exceed 60s; align fallback with cloud-native defaults
-            self.websocket_recv_timeout = 95  # Staging fallback aligned with backend SSOT
-            self.close_timeout = 97  # Maintain 2s safety margin for cleanup coordination
+            self.websocket_recv_timeout = 300  # Staging fallback aligned with backend SSOT
+            self.close_timeout = 302  # Maintain 2s safety margin for cleanup coordination
         elif self.config.environment == Environment.PRODUCTION:
             # Issue #2861: Production workflows now require 100s+ for multi-agent LLM responses
             self.websocket_recv_timeout = 120  # Production fallback aligned with extended Cloud Run windows
@@ -2947,7 +2951,8 @@ class WebSocketClient:
         self.ws = await websockets.connect(
             self.config.ws_url,
             subprotocols=subprotocols,
-            close_timeout=self._get_close_timeout()
+            close_timeout=self._get_close_timeout(),
+            max_size=5 * 1024 * 1024  # 5 MB max message size
         )
         return True
 
@@ -2958,7 +2963,11 @@ class WebSocketClient:
         # Add environment parameter for Issue #1906
         env = self.config.environment.value
         url = f"{self.config.ws_url}?token={self.token}&env={env}"
-        self.ws = await websockets.connect(url, close_timeout=self._get_close_timeout())
+        self.ws = await websockets.connect(
+            url,
+            close_timeout=self._get_close_timeout(),
+            max_size=5 * 1024 * 1024  # 5 MB max message size
+        )
         return True
 
     async def _connect_with_header(self) -> bool:
@@ -2973,7 +2982,8 @@ class WebSocketClient:
         self.ws = await websockets.connect(
             self.config.ws_url,
             additional_headers=headers,
-            close_timeout=self._get_close_timeout()
+            close_timeout=self._get_close_timeout(),
+            max_size=5 * 1024 * 1024  # 5 MB max message size
         )
         return True
 
@@ -3700,11 +3710,93 @@ class WebSocketClient:
                     # Don't fail transmission if proof saving fails
                     pass
 
+        # Validate payload size before sending
+        payload_json = json.dumps(payload)
+        payload_size_bytes = len(payload_json.encode('utf-8'))
+        payload_size_mb = payload_size_bytes / (1024 * 1024)
+
+        # Define size limits
+        MAX_SIZE_MB = 4.5  # Maximum allowed (give 0.5MB buffer below 5MB)
+        WARNING_SIZE_MB = 3.0  # Warning threshold
+        OPTIMAL_SIZE_MB = 1.0  # Optimal for best performance
+
+        # Check if payload exceeds maximum allowed size
+        if payload_size_mb > MAX_SIZE_MB:
+            error_msg = f"""
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         ❌ PAYLOAD SIZE EXCEEDED                              ║
+╔══════════════════════════════════════════════════════════════════════════════╗
+
+  Payload Size: {payload_size_mb:.2f} MB
+  Maximum Allowed: {MAX_SIZE_MB:.1f} MB
+
+  ⚠️  Your payload is too large to send to the backend.
+
+📊 SIZE BREAKDOWN:
+  • Total payload: {payload_size_mb:.2f} MB ({payload_size_bytes:,} bytes)
+  • Limit: {MAX_SIZE_MB:.1f} MB"""
+
+            if "jsonl_logs" in payload["payload"]:
+                logs_json = json.dumps(payload["payload"]["jsonl_logs"])
+                logs_size_mb = len(logs_json.encode('utf-8')) / (1024 * 1024)
+                error_msg += f"""
+  • Logs contribution: {logs_size_mb:.2f} MB
+  • Log entries: {len(payload["payload"]["jsonl_logs"])}"""
+
+            error_msg += f"""
+
+💡 RECOMMENDATIONS:
+  1. Reduce --logs-count to 1 (default, recommended)
+  2. Target specific project with --logs-project
+  3. Use smaller log files (aim for < {OPTIMAL_SIZE_MB:.1f} MB total payload)
+  4. Split analysis into multiple runs with fewer logs
+
+✨ OPTIMAL PERFORMANCE: Keep payload under {OPTIMAL_SIZE_MB:.1f} MB for best results
+
+╚══════════════════════════════════════════════════════════════════════════════╝
+"""
+            safe_console_print(error_msg, style="red")
+            raise RuntimeError(f"Payload size ({payload_size_mb:.2f} MB) exceeds maximum allowed ({MAX_SIZE_MB:.1f} MB)")
+
+        # Warn if payload is large but within limits
+        if payload_size_mb > WARNING_SIZE_MB:
+            warning_msg = f"""
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                      ⚠️  LARGE PAYLOAD WARNING                                ║
+╔══════════════════════════════════════════════════════════════════════════════╗
+
+  Payload Size: {payload_size_mb:.2f} MB
+  Maximum Allowed: {MAX_SIZE_MB:.1f} MB
+  Optimal Size: < {OPTIMAL_SIZE_MB:.1f} MB
+
+  ✅ Your payload will be sent, but it's larger than recommended.
+
+📊 SIZE BREAKDOWN:
+  • Total payload: {payload_size_mb:.2f} MB ({payload_size_bytes:,} bytes)"""
+
+            if "jsonl_logs" in payload["payload"]:
+                logs_json = json.dumps(payload["payload"]["jsonl_logs"])
+                logs_size_mb = len(logs_json.encode('utf-8')) / (1024 * 1024)
+                warning_msg += f"""
+  • Logs contribution: {logs_size_mb:.2f} MB
+  • Log entries: {len(payload["payload"]["jsonl_logs"])}"""
+
+            warning_msg += f"""
+
+💡 FOR BETTER PERFORMANCE:
+  • Use --logs-count 1 (default) for optimal analysis
+  • Keep total payload under {OPTIMAL_SIZE_MB:.1f} MB for best results
+  • Larger payloads may take longer to process
+
+╚══════════════════════════════════════════════════════════════════════════════╝
+"""
+            safe_console_print(warning_msg, style="yellow")
+
         # ISSUE #1603 FIX: Add critical logging for message sending (only in diagnostic mode)
         if self.debug.debug_level >= DebugLevel.DIAGNOSTIC:
             self.debug.debug_print(f"SENDING WEBSOCKET MESSAGE: {json.dumps(payload, indent=2)}", DebugLevel.DIAGNOSTIC)
 
-        await self.ws.send(json.dumps(payload))
+        await self.ws.send(payload_json)
         if self.debug.debug_level >= DebugLevel.VERBOSE:
             self.debug.debug_print(f"WEBSOCKET MESSAGE SENT SUCCESSFULLY - run_id: {self.run_id}, thread_id: {thread_id}", DebugLevel.VERBOSE)
         return self.run_id
@@ -4411,7 +4503,7 @@ class AgentCLI:
                  validate_events: bool = False, event_validation_strict: bool = False,
                  retry_config: Optional[Dict[str, Any]] = None,
                  json_mode: bool = False, ci_mode: bool = False, json_output_file: Optional[str] = None,
-                 send_logs: bool = False, logs_count: int = 5, logs_project: Optional[str] = None,
+                 send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
                  logs_path: Optional[str] = None, logs_user: Optional[str] = None):
         # ISSUE #2766: Store JSON/CI mode flags early for output suppression
         self.json_mode = json_mode
@@ -5158,10 +5250,10 @@ class AgentCLI:
                 safe_console_print(traceback.format_exc(), style="dim red")
             return False
 
-    async def run_single_message(self, message: str, wait_time: int = 120):
+    async def run_single_message(self, message: str, wait_time: int = 300):
         """Run a single message and wait for response.
 
-        Issue #2665: Default wait time increased from 10s to 120s to accommodate
+        Issue #2665: Default wait time increased from 10s to 300s to accommodate
         real agent execution times (100s+ in staging with real LLM calls).
 
         ISSUE #2832: JSON output must be generated even on failure paths.
@@ -5444,7 +5536,7 @@ class AgentCLI:
                 # Send message
                 message = scenario['message']
                 expected_events = scenario.get('expected_events', [])
-                wait_time = scenario.get('wait_time', 120)  # Issue #2665: Match real agent execution times
+                wait_time = scenario.get('wait_time', 300)  # Issue #2665: Match real agent execution times
 
                 run_id = await self.ws_client.send_message(message)
 
@@ -5934,7 +6026,7 @@ def main(argv=None):
         description="Netra Agent CLI - Test agent interactions from command line (ISSUE #1603: Enhanced with event output and GCP error lookup)",
         epilog="Examples:\n"
                "  %(prog)s --message 'triage this incident'\n"
-               "  %(prog)s --message 'analyze rollout' --send-logs --logs-count 5\n"
+               "  %(prog)s --message 'analyze rollout' --send-logs\n"
                "  %(prog)s --message 'review QA findings' --send-logs --logs-project qa-suite\n"
                "  %(prog)s --send-logs --logs-path ~/.claude/Projects --message 'audit sessions'\n"
                "  %(prog)s --lookup-errors cli_20250121_123456_789",
@@ -5967,8 +6059,8 @@ def main(argv=None):
         "--wait",
         "-w",
         type=int,
-        default=120,
-        help="Time to wait for events (default: 120 seconds) - Issue #2665: Agents take 100s+ in staging"
+        default=300,
+        help="Time to wait for events (default: 300 seconds) - Issue #2665: Agents take 100s+ in staging"
     )
 
     parser.add_argument(
@@ -6257,9 +6349,9 @@ def main(argv=None):
     parser.add_argument(
         "--logs-count",
         type=int,
-        default=3,
+        default=1,
         metavar="N",
-        help="Number of recent log files to collect (default: 3, must be positive)"
+        help="Number of recent log files to collect (default: 1, must be positive). For best results, use 1 log at a time for focused analysis."
     )
 
     parser.add_argument(

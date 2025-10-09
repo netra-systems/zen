@@ -46,9 +46,9 @@ def demo_log_collection():
         print()
 
     # Scenario 1: Collect with defaults
-    print("Scenario 1: Collect logs with defaults (limit=5, auto-detect project)")
+    print("Scenario 1: Collect logs with defaults (limit=1, auto-detect project)")
     print("-" * 60)
-    logs = collect_recent_logs(limit=5)
+    logs = collect_recent_logs(limit=1)
 
     if logs:
         print(f"✅ Collected {len(logs)} log entries")
@@ -97,7 +97,7 @@ def demo_log_collection():
     # Scenario 4: Show what would be sent with --send-logs
     print("Scenario 4: What gets sent with 'zen --apex --send-logs --message \"..\"'")
     print("-" * 60)
-    logs = collect_recent_logs(limit=5)
+    logs = collect_recent_logs(limit=1)
     if logs:
         payload_preview = {
             "type": "user_message",
@@ -124,11 +124,13 @@ def demo_log_collection():
     print()
     print("To use log forwarding with zen --apex:")
     print()
-    print("  # Basic usage (attaches last 5 log files)")
+    print("  # Basic usage (default: 1 log file for best results)")
     print("  zen --apex --send-logs --message \"analyze these sessions\"")
     print()
-    print("  # Custom number of logs")
-    print("  zen --apex --send-logs --logs-count 10 --message \"review last 10\"")
+    print("  # Custom number of logs (default: 1 for best results)")
+    print("  zen --apex --send-logs --message \"review recent log\" (analyzes 1 file)")
+    print("  # Multiple files (use with caution - keep payload under 1MB)")
+    print("  zen --apex --send-logs --logs-count 2 --message \"review last 2\"")
     print()
     print("  # Specific project")
     if claude_path.exists() and list(claude_path.iterdir()):

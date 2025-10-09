@@ -127,8 +127,8 @@ zen --apex --message "test message" --env staging
 mkdir -p ~/.claude/Projects/test-project
 echo '{"event": "test", "timestamp": "2025-01-01"}' > ~/.claude/Projects/test-project/session1.jsonl
 
-# Test with log forwarding
-zen --apex --message "test" --send-logs --logs-count 1 --logs-project test-project --env staging
+# Test with log forwarding (default: 1 log file for best results)
+zen --apex --message "test" --send-logs --logs-project test-project --env staging
 ```
 
 ## Known Limitations & Deployment Notes
