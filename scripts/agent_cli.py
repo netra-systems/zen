@@ -373,7 +373,7 @@ class DebugManager:
     Provides comprehensive debugging capabilities with different verbosity levels
     """
 
-    def __init__(self, debug_level: DebugLevel = DebugLevel.BASIC, log_file: Optional[Path] = None,
+    def __init__(self, debug_level: DebugLevel = DebugLevel.SILENT, log_file: Optional[Path] = None,
                  enable_websocket_diagnostics: bool = False, json_mode: bool = False, ci_mode: bool = False):
         self.debug_level = debug_level
         self.log_file = log_file or Path.home() / ".netra" / "cli_debug.log"
@@ -1629,7 +1629,7 @@ class Config:
     log_level: str = "INFO"
     timeout: int = 30
     default_email: str = "test@netra.ai"
-    debug_level: DebugLevel = DebugLevel.BASIC
+    debug_level: DebugLevel = DebugLevel.SILENT
     debug_log_file: Optional[Path] = None
     stream_logs: bool = False  # Issue #1828: Stream backend logs via WebSocket
     enable_websocket_diagnostics: bool = False  # Issue #2478: Enhanced WebSocket error diagnostics
@@ -2869,16 +2869,16 @@ class WebSocketClient:
         for method_name, method in methods:
             try:
                 self.debug.debug_print(
-                    f"GOLDEN PATH TRACE: Initiating WebSocket auth via {method_name}",
-                    DebugLevel.BASIC,
+                    f"Initiating WebSocket auth via {method_name}",
+                    DebugLevel.VERBOSE,
                     style="cyan"
                 )
                 self.debug.log_connection_attempt(method_name, self.config.ws_url)
                 if await method():
                     self.debug.log_connection_attempt(method_name, self.config.ws_url, success=True)
                     self.debug.debug_print(
-                        f"GOLDEN PATH TRACE: WebSocket connected using {method_name}",
-                        DebugLevel.BASIC,
+                        f"WebSocket connected using {method_name}",
+                        DebugLevel.VERBOSE,
                         style="green"
                     )
 
@@ -2887,14 +2887,20 @@ class WebSocketClient:
                     if handshake_success:
                         safe_console_print(f"✅ Connected with thread ID: {self.current_thread_id}", style="green")
                         self.connected = True
+
+                        # Check if connection_established was already received during handshake
+                        # and set ready_to_send_events if both conditions are met
+                        if self.connection_established_received and not self.ready_to_send_events:
+                            self.ready_to_send_events = True
+                            self.debug.debug_print(
+                                "✅ Both handshake and connection_established received - ready to send",
+                                DebugLevel.BASIC,
+                                style="green"
+                            )
+
                         return True
                     else:
                         # Handshake failed - server not ready to process messages
-                        self.debug.debug_print(
-                            "WARNING: Server handshake not completed - server not ready",
-                            DebugLevel.BASIC,
-                            style="yellow"
-                        )
                         self.debug.debug_print(
                             "Server still completing lifecycle phases (Initialize → Authenticate → Handshake → Prepare → Processing)",
                             DebugLevel.VERBOSE,
@@ -2917,6 +2923,17 @@ class WebSocketClient:
                             safe_console_print(f"✅ Connected with thread ID: {self.current_thread_id}", style="green",
                                              json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
                             self.connected = True
+
+                            # Check if connection_established was already received during handshake
+                            # and set ready_to_send_events if both conditions are met
+                            if self.connection_established_received and not self.ready_to_send_events:
+                                self.ready_to_send_events = True
+                                self.debug.debug_print(
+                                    "✅ Both handshake and connection_established received - ready to send",
+                                    DebugLevel.BASIC,
+                                    style="green"
+                                )
+
                             return True
                         else:
                             # Server still not ready - fail the connection
@@ -2935,7 +2952,7 @@ class WebSocketClient:
             except Exception as e:
                 self.debug.log_connection_attempt(method_name, self.config.ws_url, success=False, error=str(e))
                 self.debug.debug_print(
-                    f"GOLDEN PATH TRACE: WebSocket authentication via {method_name} failed with {type(e).__name__}: {e}",
+                    f"WebSocket authentication via {method_name} failed with {type(e).__name__}: {e}",
                     DebugLevel.BASIC,
                     style="red"
                 )
@@ -3180,7 +3197,10 @@ class WebSocketClient:
                         )
                         # Store the event but continue waiting
                         if hasattr(self, 'events'):
-                            self.events.append(WebSocketEvent.from_dict(response))
+                            self.events.append(WebSocketEvent(
+                                type=response.get('type', 'unknown'),
+                                data=response
+                            ))
 
                     else:
                         # Other event types - store but keep waiting for handshake
@@ -3190,20 +3210,18 @@ class WebSocketClient:
                             style="dim"
                         )
                         if hasattr(self, 'events'):
-                            self.events.append(WebSocketEvent.from_dict(response))
+                            self.events.append(WebSocketEvent(
+                                type=response.get('type', 'unknown'),
+                                data=response
+                            ))
 
             except asyncio.TimeoutError:
                 pass  # Fall through to timeout handling below
 
             # Timeout - server didn't send handshake
             self.debug.debug_print(
-                "ERROR: Server did not send handshake within 10 seconds",
-                DebugLevel.BASIC,
-                style="red"
-            )
-            self.debug.debug_print(
-                "Server may not have HANDSHAKING phase (pre-2025-10-09 version)",
-                DebugLevel.BASIC,
+                "Server did not send handshake - may be using pre-2025-10-09 version without HANDSHAKING phase",
+                DebugLevel.VERBOSE,
                 style="yellow"
             )
             return False
@@ -4066,7 +4084,7 @@ class WebSocketClient:
                 )
 
         self.debug.debug_print(
-            f"GOLDEN PATH TRACE: Prepared WebSocket payload for run_id={self.run_id}, thread_id={thread_id}",
+            f"Prepared WebSocket payload for run_id={self.run_id}, thread_id={thread_id}",
             DebugLevel.BASIC,
             style="yellow"
         )
@@ -4214,7 +4232,7 @@ class WebSocketClient:
 
         self.debug.debug_print("Listening for WebSocket events...")
         self.debug.debug_print(
-            "GOLDEN PATH TRACE: Event listener started after successful connection",
+            "Event listener started after successful connection",
             DebugLevel.BASIC,
             style="cyan"
         )
@@ -4279,7 +4297,7 @@ class WebSocketClient:
                         )
 
                 self.debug.debug_print(
-                    f"GOLDEN PATH TRACE: Parsed WebSocket event type={event.type}",
+                    f"Parsed WebSocket event type={event.type}",
                     DebugLevel.BASIC,
                     style="green"
                 )
@@ -6597,8 +6615,8 @@ def main(argv=None):
         "--debug-level",
         type=str,
         choices=["silent", "basic", "verbose", "trace", "diagnostic"],
-        default="basic",
-        help="Debug verbosity level (default: basic)"
+        default="silent",
+        help="Debug verbosity level (default: silent)"
     )
 
     parser.add_argument(
@@ -6947,7 +6965,7 @@ def main(argv=None):
         safe_console_print("📡 Stream logs enabled - backend logging active", style="cyan")
     else:
         # Keep logging minimal to prevent JSON output noise during CLI operations
-        log_level = logging.WARNING
+        log_level = logging.INFO
         logging.basicConfig(
             level=log_level,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
