@@ -8,7 +8,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="netra-zen",
-    version="1.2.0",
+    version="1.2.1",
     author=" Systems",
     author_email="pypi@netrasystems.ai",
     description="Multi-instance Claude orchestrator for parallel task execution",
@@ -45,6 +45,9 @@ setup(
         "rich>=13.0.0",
         "PyJWT>=2.8.0",
         "psutil>=5.9.0",
+        "opentelemetry-sdk>=1.20.0",
+        "opentelemetry-exporter-gcp-trace>=1.6.0",
+        "google-cloud-trace>=1.11.0",
     ],
     extras_require={
         "dev": ["pytest", "pytest-asyncio", "pytest-cov"],
