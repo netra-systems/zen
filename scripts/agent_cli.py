@@ -9,6 +9,7 @@ import json
 import sys
 import os
 import argparse
+import time
 
 import logging
 
@@ -372,7 +373,7 @@ class DebugManager:
     Provides comprehensive debugging capabilities with different verbosity levels
     """
 
-    def __init__(self, debug_level: DebugLevel = DebugLevel.BASIC, log_file: Optional[Path] = None,
+    def __init__(self, debug_level: DebugLevel = DebugLevel.SILENT, log_file: Optional[Path] = None,
                  enable_websocket_diagnostics: bool = False, json_mode: bool = False, ci_mode: bool = False):
         self.debug_level = debug_level
         self.log_file = log_file or Path.home() / ".netra" / "cli_debug.log"
@@ -1628,7 +1629,7 @@ class Config:
     log_level: str = "INFO"
     timeout: int = 30
     default_email: str = "test@netra.ai"
-    debug_level: DebugLevel = DebugLevel.BASIC
+    debug_level: DebugLevel = DebugLevel.SILENT
     debug_log_file: Optional[Path] = None
     stream_logs: bool = False  # Issue #1828: Stream backend logs via WebSocket
     enable_websocket_diagnostics: bool = False  # Issue #2478: Enhanced WebSocket error diagnostics
@@ -2602,7 +2603,7 @@ class WebSocketClient:
     def __init__(self, config: Config, token: str, debug_manager: Optional[DebugManager] = None,
                  send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
                  logs_path: Optional[str] = None, logs_user: Optional[str] = None,
-                 handshake_timeout: float = 2.0):
+                 handshake_timeout: float = 10.0):
         self.config = config
         self.token = token
         self.debug = debug_manager or DebugManager(config.debug_level, config.debug_log_file, config.enable_websocket_diagnostics)
@@ -2642,6 +2643,11 @@ class WebSocketClient:
         self.closure_code: Optional[int] = None
         self.closure_reason: Optional[str] = None
         self.closure_category: Optional[WebSocketClosureCategory] = None
+
+        # Event queuing mechanism: Wait for BOTH handshake AND connection_established
+        self.connection_established_received = False
+        self.event_queue: List[Dict[str, Any]] = []
+        self.ready_to_send_events = False
 
     def _initialize_timeouts(self) -> None:
         """Initialize WebSocket timeouts using backend timeout configuration.
@@ -2863,16 +2869,16 @@ class WebSocketClient:
         for method_name, method in methods:
             try:
                 self.debug.debug_print(
-                    f"GOLDEN PATH TRACE: Initiating WebSocket auth via {method_name}",
-                    DebugLevel.BASIC,
+                    f"Initiating WebSocket auth via {method_name}",
+                    DebugLevel.VERBOSE,
                     style="cyan"
                 )
                 self.debug.log_connection_attempt(method_name, self.config.ws_url)
                 if await method():
                     self.debug.log_connection_attempt(method_name, self.config.ws_url, success=True)
                     self.debug.debug_print(
-                        f"GOLDEN PATH TRACE: WebSocket connected using {method_name}",
-                        DebugLevel.BASIC,
+                        f"WebSocket connected using {method_name}",
+                        DebugLevel.VERBOSE,
                         style="green"
                     )
 
@@ -2881,14 +2887,35 @@ class WebSocketClient:
                     if handshake_success:
                         safe_console_print(f"✅ Connected with thread ID: {self.current_thread_id}", style="green")
                         self.connected = True
+
+                        # Start listening for events in background immediately
+                        asyncio.create_task(self.receive_events())
+
+                        # Wait for connection_established event
+                        wait_start = asyncio.get_event_loop().time()
+                        timeout = 5.0
+                        while not self.connection_established_received:
+                            if (asyncio.get_event_loop().time() - wait_start) > timeout:
+                                self.debug.debug_print(
+                                    f"⚠️ Timeout waiting for connection_established after {timeout}s",
+                                    DebugLevel.BASIC,
+                                    style="yellow"
+                                )
+                                break
+                            await asyncio.sleep(0.1)
+
+                        # Set ready flag if we got the event
+                        if self.connection_established_received:
+                            self.ready_to_send_events = True
+                            self.debug.debug_print(
+                                "✅ Connection fully established - ready to send events",
+                                DebugLevel.BASIC,
+                                style="green"
+                            )
+
                         return True
                     else:
                         # Handshake failed - server not ready to process messages
-                        self.debug.debug_print(
-                            "WARNING: Server handshake not completed - server not ready",
-                            DebugLevel.BASIC,
-                            style="yellow"
-                        )
                         self.debug.debug_print(
                             "Server still completing lifecycle phases (Initialize → Authenticate → Handshake → Prepare → Processing)",
                             DebugLevel.VERBOSE,
@@ -2911,6 +2938,32 @@ class WebSocketClient:
                             safe_console_print(f"✅ Connected with thread ID: {self.current_thread_id}", style="green",
                                              json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
                             self.connected = True
+
+                            # Start listening for events in background immediately
+                            asyncio.create_task(self.receive_events())
+
+                            # Wait for connection_established event
+                            wait_start = asyncio.get_event_loop().time()
+                            timeout = 5.0
+                            while not self.connection_established_received:
+                                if (asyncio.get_event_loop().time() - wait_start) > timeout:
+                                    self.debug.debug_print(
+                                        f"⚠️ Timeout waiting for connection_established after {timeout}s",
+                                        DebugLevel.BASIC,
+                                        style="yellow"
+                                    )
+                                    break
+                                await asyncio.sleep(0.1)
+
+                            # Set ready flag if we got the event
+                            if self.connection_established_received:
+                                self.ready_to_send_events = True
+                                self.debug.debug_print(
+                                    "✅ Connection fully established - ready to send events",
+                                    DebugLevel.BASIC,
+                                    style="green"
+                                )
+
                             return True
                         else:
                             # Server still not ready - fail the connection
@@ -2929,7 +2982,7 @@ class WebSocketClient:
             except Exception as e:
                 self.debug.log_connection_attempt(method_name, self.config.ws_url, success=False, error=str(e))
                 self.debug.debug_print(
-                    f"GOLDEN PATH TRACE: WebSocket authentication via {method_name} failed with {type(e).__name__}: {e}",
+                    f"WebSocket authentication via {method_name} failed with {type(e).__name__}: {e}",
                     DebugLevel.BASIC,
                     style="red"
                 )
@@ -3133,19 +3186,51 @@ class WebSocketClient:
                                 style="green"
                             )
 
+                            # Check if we can start sending events
+                            # We need BOTH handshake AND connection_established
+                            if self.connection_established_received:
+                                self.ready_to_send_events = True
+                                self.debug.debug_print(
+                                    "✅ Ready to send events: Handshake ✓ | connection_established ✓",
+                                    DebugLevel.BASIC,
+                                    style="green"
+                                )
+                                safe_console_print(
+                                    "✅ Fully connected: Handshake ✓ | connection_established ✓",
+                                    style="green",
+                                    json_mode=self.config.json_mode,
+                                    ci_mode=self.config.ci_mode
+                                )
+                            else:
+                                self.debug.debug_print(
+                                    "⏳ Handshake complete, waiting for connection_established event",
+                                    DebugLevel.BASIC,
+                                    style="yellow"
+                                )
+
                         return result
 
                     # Handle other message types while waiting
                     elif msg_type == 'connection_established':
                         # This is from AUTHENTICATING phase completion
                         self.debug.debug_print(
-                            "Connection established (AUTH phase) - waiting for HANDSHAKING phase",
+                            "✓ Connection established (AUTH phase) - waiting for HANDSHAKING phase",
                             DebugLevel.VERBOSE,
                             style="yellow"
                         )
+                        # Track that connection_established was received
+                        self.connection_established_received = True
+                        self.debug.debug_print(
+                            "📌 connection_established event received during handshake",
+                            DebugLevel.BASIC,
+                            style="cyan"
+                        )
                         # Store the event but continue waiting
                         if hasattr(self, 'events'):
-                            self.events.append(WebSocketEvent.from_dict(response))
+                            self.events.append(WebSocketEvent(
+                                type=response.get('type', 'unknown'),
+                                data=response
+                            ))
 
                     else:
                         # Other event types - store but keep waiting for handshake
@@ -3155,20 +3240,18 @@ class WebSocketClient:
                             style="dim"
                         )
                         if hasattr(self, 'events'):
-                            self.events.append(WebSocketEvent.from_dict(response))
+                            self.events.append(WebSocketEvent(
+                                type=response.get('type', 'unknown'),
+                                data=response
+                            ))
 
             except asyncio.TimeoutError:
                 pass  # Fall through to timeout handling below
 
             # Timeout - server didn't send handshake
             self.debug.debug_print(
-                "ERROR: Server did not send handshake within 10 seconds",
-                DebugLevel.BASIC,
-                style="red"
-            )
-            self.debug.debug_print(
-                "Server may not have HANDSHAKING phase (pre-2025-10-09 version)",
-                DebugLevel.BASIC,
+                "Server did not send handshake - may be using pre-2025-10-09 version without HANDSHAKING phase",
+                DebugLevel.VERBOSE,
                 style="yellow"
             )
             return False
@@ -3695,6 +3778,101 @@ class WebSocketClient:
 
         return False
 
+    async def _flush_queued_events(self) -> None:
+        """
+        Flush all queued events after connection_established is received.
+
+        This method sends all events that were queued while waiting for
+        the connection_established event (which comes after handshake).
+        """
+        if not self.event_queue:
+            self.debug.debug_print(
+                "No queued events to flush",
+                DebugLevel.VERBOSE,
+                style="dim"
+            )
+            return
+
+        queue_size = len(self.event_queue)
+        self.debug.debug_print(
+            f"🚀 Flushing {queue_size} queued event(s) after connection_established",
+            DebugLevel.BASIC,
+            style="green"
+        )
+        safe_console_print(
+            f"🚀 Connection fully established! Sending {queue_size} queued event(s)...",
+            style="green",
+            json_mode=self.config.json_mode,
+            ci_mode=self.config.ci_mode
+        )
+
+        # Send all queued events
+        for i, event_payload in enumerate(self.event_queue, 1):
+            try:
+                self.debug.debug_print(
+                    f"Sending queued event {i}/{queue_size}: {event_payload.get('type', 'unknown')}",
+                    DebugLevel.VERBOSE,
+                    style="cyan"
+                )
+                await self.ws.send(json.dumps(event_payload))
+                self.debug.debug_print(
+                    f"✓ Queued event {i}/{queue_size} sent successfully",
+                    DebugLevel.VERBOSE,
+                    style="green"
+                )
+            except Exception as e:
+                self.debug.log_error(e, f"sending queued event {i}/{queue_size}")
+                safe_console_print(
+                    f"⚠️ Failed to send queued event {i}/{queue_size}: {e}",
+                    style="yellow",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+
+        # Clear the queue
+        self.event_queue.clear()
+        self.debug.debug_print(
+            f"✅ All {queue_size} queued events have been sent",
+            DebugLevel.BASIC,
+            style="green"
+        )
+
+    def _display_log_collection_info(self, info: dict) -> None:
+        """Display log collection information to the console"""
+        separator = "=" * 60
+
+        # Display log collection details
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("SENDING LOGS TO OPTIMIZER", style="bold cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Total Entries: {len(info['logs'])}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Files Read: {info['files_read']}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Payload Size: {info['size_str']}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        if self.logs_project:
+            safe_console_print(f"  Project: {self.logs_project}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("  Files:", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        # Add file details with hashes
+        for file_info in info['file_info']:
+            safe_console_print(
+                f"    * {file_info['name']} (hash: {file_info['hash']}, {file_info['entries']} entries)",
+                json_mode=self.config.json_mode, ci_mode=self.config.ci_mode
+            )
+
+        # Add payload proof
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("  Payload Confirmation:", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"    [OK] 'jsonl_logs' key added to payload", style="green", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"    [OK] First log entry timestamp: {info['logs'][0].get('timestamp', 'N/A') if info['logs'] else 'N/A'}", style="green", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"    [OK] Last log entry timestamp: {info['logs'][-1].get('timestamp', 'N/A') if info['logs'] else 'N/A'}", style="green", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
     async def send_message(self, message: str) -> str:
         """Send a message and return the run_id"""
         if not self.ws:
@@ -3720,6 +3898,75 @@ class WebSocketClient:
                 ci_mode=self.config.ci_mode
             )
             raise RuntimeError("Connection not ready - handshake incomplete. Server needs to reach Processing phase.")
+
+        # NEW: Check if ready to send events
+        # Events can only be sent AFTER both handshake AND connection_established
+        if not self.ready_to_send_events:
+            # Wait for connection_established event with timeout
+            self.debug.debug_print(
+                "⏳ Waiting for connection_established event before sending message...",
+                DebugLevel.BASIC,
+                style="yellow"
+            )
+            safe_console_print(
+                "⏳ Waiting for connection_established event (up to 5 seconds)...",
+                style="yellow",
+                json_mode=self.config.json_mode,
+                ci_mode=self.config.ci_mode
+            )
+
+            # Wait up to 30 seconds for connection_established
+            wait_timeout = 30.0
+            wait_start = time.time()
+            wait_interval = 0.1
+
+            while not self.ready_to_send_events and (time.time() - wait_start) < wait_timeout:
+                await asyncio.sleep(wait_interval)
+                # Check if connection_established arrived
+                if self.ready_to_send_events:
+                    self.debug.debug_print(
+                        "✅ connection_established received - ready to send events",
+                        DebugLevel.BASIC,
+                        style="green"
+                    )
+                    safe_console_print(
+                        "✅ connection_established received - proceeding with message",
+                        style="green",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+                    break
+
+            # If still not ready after timeout, then error
+            if not self.ready_to_send_events:
+                elapsed = time.time() - wait_start
+                self.debug.debug_print(
+                    f"❌ Timeout waiting for connection_established after {elapsed:.1f} seconds",
+                    DebugLevel.BASIC,
+                    style="red"
+                )
+                safe_console_print(
+                    f"❌ Timeout: connection_established event not received after {elapsed:.1f} seconds",
+                    style="red",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+                safe_console_print(
+                    "   Handshake complete: ✓ | connection_established: ✗",
+                    style="dim",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+                safe_console_print(
+                    "\n💡 The server may not be sending the connection_established event.",
+                    style="yellow",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+                raise RuntimeError(
+                    f"Cannot send message - connection_established event not received after {elapsed:.1f}s timeout. "
+                    "Both handshake and connection_established are required before sending events."
+                )
 
         # Generate run_id
         self.run_id = f"cli_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{os.getpid()}"
@@ -3843,51 +4090,13 @@ class WebSocketClient:
                     else:
                         size_str = f"{logs_size_bytes} bytes"
 
-                    # Create prominent, formatted log message
-                    separator = "=" * 60
-                    log_msg_parts = [
-                        "",
-                        separator,
-                        f"📤 SENDING LOGS TO OPTIMIZER",
-                        separator,
-                        f"  Total Entries: {len(logs)}",
-                        f"  Files Read: {files_read}",
-                        f"  Payload Size: {size_str}",
-                    ]
-
-                    if self.logs_project:
-                        log_msg_parts.append(f"  Project: {self.logs_project}")
-
-                    log_msg_parts.append("")
-                    log_msg_parts.append("  Files:")
-
-                    # Add file details with hashes
-                    for info in file_info:
-                        log_msg_parts.append(
-                            f"    • {info['name']} (hash: {info['hash']}, {info['entries']} entries)"
-                        )
-
-                    # Add payload proof
-                    log_msg_parts.append("")
-                    log_msg_parts.append("  Payload Confirmation:")
-                    log_msg_parts.append(f"    ✓ 'jsonl_logs' key added to payload")
-                    log_msg_parts.append(f"    ✓ First log entry timestamp: {logs[0].get('timestamp', 'N/A') if logs else 'N/A'}")
-                    log_msg_parts.append(f"    ✓ Last log entry timestamp: {logs[-1].get('timestamp', 'N/A') if logs else 'N/A'}")
-
-                    log_msg_parts.append(separator)
-                    log_msg_parts.append("")
-
-                    log_msg = "\n".join(log_msg_parts)
-
-                    # Log at INFO level
-                    logging.info(log_msg)
-
-                    # Also print via debug system for consistency
-                    self.debug.debug_print(
-                        log_msg,
-                        DebugLevel.BASIC,
-                        style="cyan"
-                    )
+                    # Save log display info for later (will be displayed after "Sending message:")
+                    self._log_display_info = {
+                        'logs': logs,
+                        'files_read': files_read,
+                        'file_info': file_info,
+                        'size_str': size_str
+                    }
                 else:
                     self.debug.debug_print(
                         "Warning: --send-logs enabled but no logs found",
@@ -3903,7 +4112,7 @@ class WebSocketClient:
                 )
 
         self.debug.debug_print(
-            f"GOLDEN PATH TRACE: Prepared WebSocket payload for run_id={self.run_id}, thread_id={thread_id}",
+            f"Prepared WebSocket payload for run_id={self.run_id}, thread_id={thread_id}",
             DebugLevel.BASIC,
             style="yellow"
         )
@@ -4039,6 +4248,15 @@ class WebSocketClient:
         if self.debug.debug_level >= DebugLevel.DIAGNOSTIC:
             self.debug.debug_print(f"SENDING WEBSOCKET MESSAGE: {json.dumps(payload, indent=2)}", DebugLevel.DIAGNOSTIC)
 
+        # Print sending message after logs section (moved from run_cli method)
+        safe_console_print(f"Sending message: {payload['payload']['content']}", style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        # Display log collection info after "Sending message:" if logs were collected
+        if self.send_logs and hasattr(self, '_log_display_info'):
+            self._display_log_collection_info(self._log_display_info)
+            # Clean up the temporary display info
+            del self._log_display_info
+
         await self.ws.send(payload_json)
         if self.debug.debug_level >= DebugLevel.VERBOSE:
             self.debug.debug_print(f"WEBSOCKET MESSAGE SENT SUCCESSFULLY - run_id: {self.run_id}, thread_id: {thread_id}", DebugLevel.VERBOSE)
@@ -4051,7 +4269,7 @@ class WebSocketClient:
 
         self.debug.debug_print("Listening for WebSocket events...")
         self.debug.debug_print(
-            "GOLDEN PATH TRACE: Event listener started after successful connection",
+            "Event listener started after successful connection",
             DebugLevel.BASIC,
             style="cyan"
         )
@@ -4080,15 +4298,43 @@ class WebSocketClient:
                 # Handle connection_established as a basic WebSocket connection event
                 # Note: handshake_response is now used for thread_id exchange, not connection_established
                 if event.type == 'connection_established':
-                    # This is now just a basic connection confirmation, not part of handshake
-                    self.debug.debug_print(
-                        f"WebSocket connection established event received",
-                        DebugLevel.VERBOSE,
-                        style="dim"
-                    )
+                    # Track that connection_established was received
+                    if not self.connection_established_received:
+                        self.connection_established_received = True
+                        self.debug.debug_print(
+                            "📌 connection_established event received after handshake",
+                            DebugLevel.BASIC,
+                            style="cyan"
+                        )
+
+                        # Check if we can now start sending events
+                        # We need BOTH handshake (self.connected) AND connection_established
+                        if self.connected and not self.ready_to_send_events:
+                            self.ready_to_send_events = True
+                            self.debug.debug_print(
+                                "✅ Ready to send events: Handshake ✓ | connection_established ✓",
+                                DebugLevel.BASIC,
+                                style="green"
+                            )
+                            safe_console_print(
+                                "✅ Fully connected: Handshake ✓ | connection_established ✓",
+                                style="green",
+                                json_mode=self.config.json_mode,
+                                ci_mode=self.config.ci_mode
+                            )
+
+                            # Flush any queued events
+                            await self._flush_queued_events()
+                    else:
+                        # This is a duplicate connection_established event
+                        self.debug.debug_print(
+                            f"WebSocket connection_established event received (duplicate, already tracked)",
+                            DebugLevel.VERBOSE,
+                            style="dim"
+                        )
 
                 self.debug.debug_print(
-                    f"GOLDEN PATH TRACE: Parsed WebSocket event type={event.type}",
+                    f"Parsed WebSocket event type={event.type}",
                     DebugLevel.BASIC,
                     style="green"
                 )
@@ -4758,7 +5004,7 @@ class AgentCLI:
                  json_mode: bool = False, ci_mode: bool = False, json_output_file: Optional[str] = None,
                  send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
                  logs_path: Optional[str] = None, logs_user: Optional[str] = None,
-                 handshake_timeout: float = 2.0):
+                 handshake_timeout: float = 10.0):
         # ISSUE #2766: Store JSON/CI mode flags early for output suppression
         self.json_mode = json_mode
         self.ci_mode = ci_mode
@@ -4966,8 +5212,8 @@ class AgentCLI:
             formatted_event = event.format_for_display(self.debug)
             safe_console_print(f"[{event.timestamp.strftime('%H:%M:%S')}] {formatted_event}")
 
-            # Update spinner for thinking and tool_executing events
-            if event.type in ["agent_thinking", "tool_executing"]:
+            # Update spinner for thinking and tool_executing events (if spinner is enabled)
+            if spinner_enabled and event.type in ["agent_thinking", "tool_executing"]:
                 # Remove old task if exists
                 if thinking_task is not None:
                     thinking_spinner.remove_task(thinking_task)
@@ -4983,8 +5229,8 @@ class AgentCLI:
                     spinner_text = f"Executing {tool_name}..."
                     thinking_task = thinking_spinner.add_task(f"🔧 {spinner_text}", total=None)
 
-            # Clear spinner for any other event type
-            elif thinking_task is not None:
+            # Clear spinner for any other event type (if spinner is enabled)
+            elif spinner_enabled and thinking_task is not None:
                 thinking_spinner.remove_task(thinking_task)
                 thinking_task = None
 
@@ -5004,29 +5250,47 @@ class AgentCLI:
 
     async def _receive_events_with_display(self):
         """ISSUE #1603 FIX: Enhanced event receiver with better display for single message mode"""
+        # Debug: Confirm function is called
+        if self.debug.debug_level >= DebugLevel.SILENT:
+            safe_console_print("⏳ Waiting for agent response...", style="dim", json_mode=self.json_mode, ci_mode=self.ci_mode)
+
         # Create persistent spinner that stays at bottom
-        thinking_spinner = Progress(
-            SpinnerColumn(spinner_name="dots"),
-            TextColumn("[dim]{task.description}"),
-            console=Console(file=sys.stderr),
-            transient=True
-        )
-        thinking_live = Live(thinking_spinner, console=Console(file=sys.stderr), refresh_per_second=10)
+        # Note: Using Console() without file parameter for better Windows compatibility
+        thinking_spinner = None
+        thinking_live = None
         thinking_task = None
+        spinner_enabled = False
+        event_count = 0  # Track number of events received
+        last_event_index = len(self.ws_client.events)  # Track where we are in the event list
 
-        # Start the spinner live display
-        thinking_live.start()
+        try:
+            thinking_spinner = Progress(
+                SpinnerColumn(spinner_name="dots"),
+                TextColumn("[dim]{task.description}"),
+                console=Console(),
+                transient=True
+            )
+            thinking_live = Live(thinking_spinner, console=Console(), refresh_per_second=10)
+            # Start the spinner live display
+            thinking_live.start()
+            spinner_enabled = True
+        except Exception as e:
+            # Spinner failed to start (common on Windows), continue without it
+            if self.debug.debug_level >= DebugLevel.SILENT:
+                safe_console_print(f"Note: Live spinner disabled ({str(e)[:50]})", style="dim yellow", json_mode=self.json_mode, ci_mode=self.ci_mode)
+            spinner_enabled = False
 
-        async def handle_event_with_display(event: WebSocketEvent):
-            nonlocal thinking_task
+        def handle_event_with_display(event: WebSocketEvent):
+            nonlocal thinking_task, event_count
+            event_count += 1
 
             # Display event with enhanced formatting and emojis
             formatted_event = event.format_for_display(self.debug)
             timestamp = event.timestamp.strftime('%H:%M:%S')
-            safe_console_print(f"[{timestamp}] {formatted_event}")
+            safe_console_print(f"[{timestamp}] {formatted_event}", json_mode=self.json_mode, ci_mode=self.ci_mode)
 
-            # Update spinner for thinking and tool_executing events
-            if event.type in ["agent_thinking", "tool_executing"]:
+            # Update spinner for thinking and tool_executing events (if spinner is enabled)
+            if spinner_enabled and event.type in ["agent_thinking", "tool_executing"]:
                 # Remove old task if exists
                 if thinking_task is not None:
                     thinking_spinner.remove_task(thinking_task)
@@ -5042,8 +5306,8 @@ class AgentCLI:
                     spinner_text = f"Executing {tool_name}..."
                     thinking_task = thinking_spinner.add_task(f"🔧 {spinner_text}", total=None)
 
-            # Clear spinner for any other event type
-            elif thinking_task is not None:
+            # Clear spinner for any other event type (if spinner is enabled)
+            elif spinner_enabled and thinking_task is not None:
                 thinking_spinner.remove_task(thinking_task)
                 thinking_task = None
 
@@ -5067,15 +5331,15 @@ class AgentCLI:
                 if event.type == "agent_thinking":
                     thought = event.data.get('thought', event.data.get('reasoning', ''))
                     if thought and len(thought) > 100:
-                        safe_console_print(f"💭 Full thought: {thought}", style="dim cyan")
+                        safe_console_print(f"💭 Full thought: {thought}", style="dim cyan", json_mode=self.json_mode, ci_mode=self.ci_mode)
                 elif event.type == "tool_executing":
                     tool_input = event.data.get('input', event.data.get('parameters', {}))
                     if tool_input:
-                        safe_console_print(f"📥 Tool input: {json.dumps(tool_input, indent=2)[:200]}...", style="dim blue")
+                        safe_console_print(f"📥 Tool input: {json.dumps(tool_input, indent=2)[:200]}...", style="dim blue", json_mode=self.json_mode, ci_mode=self.ci_mode)
                 elif event.type == "tool_completed":
                     tool_output = event.data.get('output', event.data.get('result', ''))
                     if tool_output:
-                        safe_console_print(f"📤 Tool output: {str(tool_output)[:200]}...", style="dim green")
+                        safe_console_print(f"📤 Tool output: {str(tool_output)[:200]}...", style="dim green", json_mode=self.json_mode, ci_mode=self.ci_mode)
                 elif event.type == "agent_completed":
                     # Prefer structured result payloads but fall back to legacy keys
                     result = (
@@ -5120,13 +5384,41 @@ class AgentCLI:
                     Syntax(json.dumps(event.data, indent=2), "json", word_wrap=True),
                     title=f"Event: {event.type}",
                     border_style="dim"
-                ))
+                ), json_mode=self.json_mode, ci_mode=self.ci_mode)
 
         try:
-            await self.ws_client.receive_events(callback=handle_event_with_display)
+            # Debug: Track if monitoring events
+            if self.debug.debug_level >= DebugLevel.SILENT:
+                safe_console_print("📡 Monitoring events from server...", style="dim cyan", json_mode=self.json_mode, ci_mode=self.ci_mode)
+
+            # Poll for new events from the existing event stream
+            # The WebSocketClient already has a background task receiving events
+            while True:
+                # Check for new events
+                while last_event_index < len(self.ws_client.events):
+                    event = self.ws_client.events[last_event_index]
+                    last_event_index += 1
+                    handle_event_with_display(event)
+
+                # Check if we should stop
+                if self.ws_client.cleanup_complete or self.ws_client.timeout_occurred:
+                    break
+
+                # Small delay to avoid busy waiting
+                await asyncio.sleep(0.1)
+
+        except Exception as e:
+            # Log any errors
+            safe_console_print(f"❌ Error monitoring events: {str(e)}", style="red", json_mode=self.json_mode, ci_mode=self.ci_mode)
+            raise
         finally:
-            # Clean up spinner
-            thinking_live.stop()
+            # Clean up spinner if it was started
+            if spinner_enabled and thinking_live:
+                thinking_live.stop()
+
+            # Debug: Report how many events were received
+            if self.debug.debug_level >= DebugLevel.SILENT and event_count == 0:
+                safe_console_print("⚠️ No events received from server", style="yellow", json_mode=self.json_mode, ci_mode=self.ci_mode)
 
     def _get_event_summary(self, event: WebSocketEvent) -> str:
         """ISSUE #1603 FIX: Get a concise summary of an event for display"""
@@ -5546,7 +5838,7 @@ class AgentCLI:
 
         try:
             # ISSUE #2766: Suppress output in JSON/CI mode
-            safe_console_print(f"Sending message: {message}", style="cyan", json_mode=self.json_mode, ci_mode=self.ci_mode)
+            # Note: "Sending message:" is now printed inside send_message() after logs section
 
             async with AuthManager(self.config) as auth_manager:
                 self.auth_manager = auth_manager
@@ -6406,8 +6698,8 @@ def main(argv=None):
         "--debug-level",
         type=str,
         choices=["silent", "basic", "verbose", "trace", "diagnostic"],
-        default="basic",
-        help="Debug verbosity level (default: basic)"
+        default="silent",
+        help="Debug verbosity level (default: silent)"
     )
 
     parser.add_argument(
@@ -6756,7 +7048,7 @@ def main(argv=None):
         safe_console_print("📡 Stream logs enabled - backend logging active", style="cyan")
     else:
         # Keep logging minimal to prevent JSON output noise during CLI operations
-        log_level = logging.WARNING
+        log_level = logging.INFO
         logging.basicConfig(
             level=log_level,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
