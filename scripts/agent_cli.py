@@ -2888,12 +2888,27 @@ class WebSocketClient:
                         safe_console_print(f"✅ Connected with thread ID: {self.current_thread_id}", style="green")
                         self.connected = True
 
-                        # Check if connection_established was already received during handshake
-                        # and set ready_to_send_events if both conditions are met
-                        if self.connection_established_received and not self.ready_to_send_events:
+                        # Start listening for events in background immediately
+                        asyncio.create_task(self.receive_events())
+
+                        # Wait for connection_established event
+                        wait_start = asyncio.get_event_loop().time()
+                        timeout = 5.0
+                        while not self.connection_established_received:
+                            if (asyncio.get_event_loop().time() - wait_start) > timeout:
+                                self.debug.debug_print(
+                                    f"⚠️ Timeout waiting for connection_established after {timeout}s",
+                                    DebugLevel.BASIC,
+                                    style="yellow"
+                                )
+                                break
+                            await asyncio.sleep(0.1)
+
+                        # Set ready flag if we got the event
+                        if self.connection_established_received:
                             self.ready_to_send_events = True
                             self.debug.debug_print(
-                                "✅ Both handshake and connection_established received - ready to send",
+                                "✅ Connection fully established - ready to send events",
                                 DebugLevel.BASIC,
                                 style="green"
                             )
@@ -2924,12 +2939,27 @@ class WebSocketClient:
                                              json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
                             self.connected = True
 
-                            # Check if connection_established was already received during handshake
-                            # and set ready_to_send_events if both conditions are met
-                            if self.connection_established_received and not self.ready_to_send_events:
+                            # Start listening for events in background immediately
+                            asyncio.create_task(self.receive_events())
+
+                            # Wait for connection_established event
+                            wait_start = asyncio.get_event_loop().time()
+                            timeout = 5.0
+                            while not self.connection_established_received:
+                                if (asyncio.get_event_loop().time() - wait_start) > timeout:
+                                    self.debug.debug_print(
+                                        f"⚠️ Timeout waiting for connection_established after {timeout}s",
+                                        DebugLevel.BASIC,
+                                        style="yellow"
+                                    )
+                                    break
+                                await asyncio.sleep(0.1)
+
+                            # Set ready flag if we got the event
+                            if self.connection_established_received:
                                 self.ready_to_send_events = True
                                 self.debug.debug_print(
-                                    "✅ Both handshake and connection_established received - ready to send",
+                                    "✅ Connection fully established - ready to send events",
                                     DebugLevel.BASIC,
                                     style="green"
                                 )
