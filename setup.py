@@ -45,6 +45,9 @@ setup(
         "rich>=13.0.0",
         "PyJWT>=2.8.0",
         "psutil>=5.9.0",
+        "opentelemetry-sdk>=1.20.0",
+        "opentelemetry-exporter-gcp-trace>=1.6.0",
+        "google-cloud-trace>=1.11.0",
     ],
     extras_require={
         "dev": ["pytest", "pytest-asyncio", "pytest-cov"],
