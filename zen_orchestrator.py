@@ -1428,11 +1428,11 @@ class ClaudeInstanceOrchestrator:
                         content = message.get('content', [])
                         if isinstance(content, list):
                             tool_types = [item.get('type') for item in content if isinstance(item, dict)]
-                            logger.debug(f"🎯 CONTENT TYPES: {tool_types}")
+                            logger.info(f"🎯 CONTENT TYPES: {tool_types}")
 
             # Check if this looks like a tool usage line
             if 'name' in json_data and ('type' in json_data and json_data['type'] in ['tool_use', 'tool_call']):
-                logger.debug(f"🎯 POTENTIAL TOOL: type={json_data.get('type')}, name={json_data.get('name')}")
+                logger.info(f"🎯 POTENTIAL TOOL: type={json_data.get('type')}, name={json_data.get('name')}")
 
             # Extract message ID for deduplication
             message_id = self._extract_message_id(json_data)
@@ -1560,7 +1560,7 @@ class ClaudeInstanceOrchestrator:
 
             # Handle tool calls with detailed tracking
             if 'type' in json_data:
-                logger.debug(f"🔍 TOOL DETECTION: Found type='{json_data['type']}', checking for tool usage...")
+                logger.info(f"🔍 TOOL DETECTION: Found type='{json_data['type']}', checking for tool usage...")
 
                 if json_data['type'] in ['tool_use', 'tool_call', 'tool_execution']:
                     # Extract tool name for detailed tracking (ALWAYS track, even without message_id)
@@ -1568,7 +1568,7 @@ class ClaudeInstanceOrchestrator:
                     status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
                     status.tool_calls += 1
 
-                    logger.debug(f"🔧 TOOL FOUND: {tool_name} (message_id={message_id})")
+                    logger.info(f"🔧 TOOL FOUND: {tool_name} (message_id={message_id})")
 
                     # Track tool token usage if available
                     tool_tokens = 0
@@ -1583,14 +1583,14 @@ class ClaudeInstanceOrchestrator:
 
                     if tool_tokens > 0:
                         status.tool_tokens[tool_name] = status.tool_tokens.get(tool_name, 0) + tool_tokens
-                        logger.debug(f"🔧 TOOL TRACKED: {tool_name} (uses: {status.tool_details[tool_name]}, tokens: {status.tool_tokens[tool_name]})")
+                        logger.info(f"🔧 TOOL TRACKED: {tool_name} (uses: {status.tool_details[tool_name]}, tokens: {status.tool_tokens[tool_name]})")
                     else:
-                        logger.debug(f"🔧 TOOL TRACKED: {tool_name} (uses: {status.tool_details[tool_name]}, no tokens)")
+                        logger.info(f"🔧 TOOL TRACKED: {tool_name} (uses: {status.tool_details[tool_name]}, no tokens)")
                     return True
                 elif json_data['type'] == 'message' and 'tool_calls' in json_data:
                     # Count tool calls in message with token tracking
                     tool_calls = json_data['tool_calls']
-                    logger.debug(f"🔧 TOOL MESSAGE: Found tool_calls in message: {tool_calls}")
+                    logger.info(f"🔧 TOOL MESSAGE: Found tool_calls in message: {tool_calls}")
                     if isinstance(tool_calls, list):
                         for tool in tool_calls:
                             if isinstance(tool, dict):
@@ -1607,7 +1607,7 @@ class ClaudeInstanceOrchestrator:
 
                                 if tool_tokens > 0:
                                     status.tool_tokens[tool_name] = status.tool_tokens.get(tool_name, 0) + tool_tokens
-                                    logger.debug(f"🔧 TOOL FROM MESSAGE: {tool_name} (tokens: {tool_tokens})")
+                                    logger.info(f"🔧 TOOL FROM MESSAGE: {tool_name} (tokens: {tool_tokens})")
 
                         status.tool_calls += len(tool_calls)
                     elif isinstance(tool_calls, (int, float)):
@@ -1635,7 +1635,7 @@ class ClaudeInstanceOrchestrator:
 
                                     status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
                                     status.tool_calls += 1
-                                    logger.debug(f"🔧 TOOL FROM ASSISTANT CONTENT: {tool_name} (id: {tool_use_id})")
+                                    logger.info(f"🔧 TOOL FROM ASSISTANT CONTENT: {tool_name} (id: {tool_use_id})")
                             return True
                 elif json_data['type'] == 'user' and 'message' in json_data:
                     # Handle Claude Code user messages with tool results: {"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"..."}]}}
@@ -1663,9 +1663,9 @@ class ClaudeInstanceOrchestrator:
                                         tool_tokens = self._estimate_tool_tokens(item)
                                         if tool_tokens > 0:
                                             status.tool_tokens[tool_name] = status.tool_tokens.get(tool_name, 0) + tool_tokens
-                                            logger.debug(f"🔧 TOOL FROM USER CONTENT: {tool_name} (tool_use_id: {tool_use_id}, estimated_tokens: {tool_tokens})")
+                                            logger.info(f"🔧 TOOL FROM USER CONTENT: {tool_name} (tool_use_id: {tool_use_id}, estimated_tokens: {tool_tokens})")
                                         else:
-                                            logger.debug(f"🔧 TOOL FROM USER CONTENT: {tool_name} (tool_use_id: {tool_use_id})")
+                                            logger.info(f"🔧 TOOL FROM USER CONTENT: {tool_name} (tool_use_id: {tool_use_id})")
                                     # Tool use in user message (request)
                                     elif item.get('type') == 'tool_use' and 'name' in item:
                                         tool_name = item.get('name', 'unknown_tool')
@@ -1676,9 +1676,9 @@ class ClaudeInstanceOrchestrator:
                                         tool_tokens = self._estimate_tool_tokens(item, is_tool_use=True)
                                         if tool_tokens > 0:
                                             status.tool_tokens[tool_name] = status.tool_tokens.get(tool_name, 0) + tool_tokens
-                                            logger.debug(f"🔧 TOOL USE FROM USER CONTENT: {tool_name} (estimated_tokens: {tool_tokens})")
+                                            logger.info(f"🔧 TOOL USE FROM USER CONTENT: {tool_name} (estimated_tokens: {tool_tokens})")
                                         else:
-                                            logger.debug(f"🔧 TOOL USE FROM USER CONTENT: {tool_name}")
+                                            logger.info(f"🔧 TOOL USE FROM USER CONTENT: {tool_name}")
                             return True
 
             # Handle direct token fields at root level (without message ID - treat as individual message tokens)
@@ -1823,7 +1823,7 @@ class ClaudeInstanceOrchestrator:
                     elif isinstance(tool_calls, (int, float)):
                         status.tool_calls += int(tool_calls)
                 
-                logger.debug(f"Parsed JSON final output: tokens={status.total_tokens}, tools={status.tool_calls}")
+                logger.info(f"Parsed JSON final output: tokens={status.total_tokens}, tools={status.tool_calls}")
                 
         except (json.JSONDecodeError, ValueError) as e:
             logger.debug(f"Failed to parse final output as JSON: {e}")

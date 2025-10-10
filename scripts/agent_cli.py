@@ -4056,49 +4056,38 @@ class WebSocketClient:
 
                     # Create prominent, formatted log message
                     separator = "=" * 60
-                    log_msg_parts = [
-                        "",
-                        separator,
-                        f"📤 SENDING LOGS TO OPTIMIZER",
-                        separator,
-                        f"  Total Entries: {len(logs)}",
-                        f"  Files Read: {files_read}",
-                        f"  Payload Size: {size_str}",
-                    ]
+
+                    # Display immediately using safe_console_print
+                    safe_console_print("", json_mode=self.json_mode, ci_mode=self.ci_mode)
+                    safe_console_print(separator, style="cyan", json_mode=self.json_mode, ci_mode=self.ci_mode)
+                    safe_console_print("SENDING LOGS TO OPTIMIZER", style="bold cyan", json_mode=self.json_mode, ci_mode=self.ci_mode)
+                    safe_console_print(separator, style="cyan", json_mode=self.json_mode, ci_mode=self.ci_mode)
+                    safe_console_print(f"  Total Entries: {len(logs)}", json_mode=self.json_mode, ci_mode=self.ci_mode)
+                    safe_console_print(f"  Files Read: {files_read}", json_mode=self.json_mode, ci_mode=self.ci_mode)
+                    safe_console_print(f"  Payload Size: {size_str}", json_mode=self.json_mode, ci_mode=self.ci_mode)
 
                     if self.logs_project:
-                        log_msg_parts.append(f"  Project: {self.logs_project}")
+                        safe_console_print(f"  Project: {self.logs_project}", json_mode=self.json_mode, ci_mode=self.ci_mode)
 
-                    log_msg_parts.append("")
-                    log_msg_parts.append("  Files:")
+                    safe_console_print("", json_mode=self.json_mode, ci_mode=self.ci_mode)
+                    safe_console_print("  Files:", json_mode=self.json_mode, ci_mode=self.ci_mode)
 
                     # Add file details with hashes
                     for info in file_info:
-                        log_msg_parts.append(
-                            f"    • {info['name']} (hash: {info['hash']}, {info['entries']} entries)"
+                        safe_console_print(
+                            f"    * {info['name']} (hash: {info['hash']}, {info['entries']} entries)",
+                            json_mode=self.json_mode, ci_mode=self.ci_mode
                         )
 
                     # Add payload proof
-                    log_msg_parts.append("")
-                    log_msg_parts.append("  Payload Confirmation:")
-                    log_msg_parts.append(f"    ✓ 'jsonl_logs' key added to payload")
-                    log_msg_parts.append(f"    ✓ First log entry timestamp: {logs[0].get('timestamp', 'N/A') if logs else 'N/A'}")
-                    log_msg_parts.append(f"    ✓ Last log entry timestamp: {logs[-1].get('timestamp', 'N/A') if logs else 'N/A'}")
+                    safe_console_print("", json_mode=self.json_mode, ci_mode=self.ci_mode)
+                    safe_console_print("  Payload Confirmation:", json_mode=self.json_mode, ci_mode=self.ci_mode)
+                    safe_console_print(f"    [OK] 'jsonl_logs' key added to payload", style="green", json_mode=self.json_mode, ci_mode=self.ci_mode)
+                    safe_console_print(f"    [OK] First log entry timestamp: {logs[0].get('timestamp', 'N/A') if logs else 'N/A'}", style="green", json_mode=self.json_mode, ci_mode=self.ci_mode)
+                    safe_console_print(f"    [OK] Last log entry timestamp: {logs[-1].get('timestamp', 'N/A') if logs else 'N/A'}", style="green", json_mode=self.json_mode, ci_mode=self.ci_mode)
 
-                    log_msg_parts.append(separator)
-                    log_msg_parts.append("")
-
-                    log_msg = "\n".join(log_msg_parts)
-
-                    # Log at INFO level
-                    logging.info(log_msg)
-
-                    # Also print via debug system for consistency
-                    self.debug.debug_print(
-                        log_msg,
-                        DebugLevel.BASIC,
-                        style="cyan"
-                    )
+                    safe_console_print(separator, style="cyan", json_mode=self.json_mode, ci_mode=self.ci_mode)
+                    safe_console_print("", json_mode=self.json_mode, ci_mode=self.ci_mode)
                 else:
                     self.debug.debug_print(
                         "Warning: --send-logs enabled but no logs found",
@@ -5205,8 +5194,8 @@ class AgentCLI:
             formatted_event = event.format_for_display(self.debug)
             safe_console_print(f"[{event.timestamp.strftime('%H:%M:%S')}] {formatted_event}")
 
-            # Update spinner for thinking and tool_executing events
-            if event.type in ["agent_thinking", "tool_executing"]:
+            # Update spinner for thinking and tool_executing events (if spinner is enabled)
+            if spinner_enabled and event.type in ["agent_thinking", "tool_executing"]:
                 # Remove old task if exists
                 if thinking_task is not None:
                     thinking_spinner.remove_task(thinking_task)
@@ -5222,8 +5211,8 @@ class AgentCLI:
                     spinner_text = f"Executing {tool_name}..."
                     thinking_task = thinking_spinner.add_task(f"🔧 {spinner_text}", total=None)
 
-            # Clear spinner for any other event type
-            elif thinking_task is not None:
+            # Clear spinner for any other event type (if spinner is enabled)
+            elif spinner_enabled and thinking_task is not None:
                 thinking_spinner.remove_task(thinking_task)
                 thinking_task = None
 
@@ -5243,29 +5232,47 @@ class AgentCLI:
 
     async def _receive_events_with_display(self):
         """ISSUE #1603 FIX: Enhanced event receiver with better display for single message mode"""
+        # Debug: Confirm function is called
+        if self.debug.debug_level >= DebugLevel.SILENT:
+            safe_console_print("⏳ Waiting for agent response...", style="dim", json_mode=self.json_mode, ci_mode=self.ci_mode)
+
         # Create persistent spinner that stays at bottom
-        thinking_spinner = Progress(
-            SpinnerColumn(spinner_name="dots"),
-            TextColumn("[dim]{task.description}"),
-            console=Console(file=sys.stderr),
-            transient=True
-        )
-        thinking_live = Live(thinking_spinner, console=Console(file=sys.stderr), refresh_per_second=10)
+        # Note: Using Console() without file parameter for better Windows compatibility
+        thinking_spinner = None
+        thinking_live = None
         thinking_task = None
+        spinner_enabled = False
+        event_count = 0  # Track number of events received
+        last_event_index = len(self.ws_client.events)  # Track where we are in the event list
 
-        # Start the spinner live display
-        thinking_live.start()
+        try:
+            thinking_spinner = Progress(
+                SpinnerColumn(spinner_name="dots"),
+                TextColumn("[dim]{task.description}"),
+                console=Console(),
+                transient=True
+            )
+            thinking_live = Live(thinking_spinner, console=Console(), refresh_per_second=10)
+            # Start the spinner live display
+            thinking_live.start()
+            spinner_enabled = True
+        except Exception as e:
+            # Spinner failed to start (common on Windows), continue without it
+            if self.debug.debug_level >= DebugLevel.SILENT:
+                safe_console_print(f"Note: Live spinner disabled ({str(e)[:50]})", style="dim yellow", json_mode=self.json_mode, ci_mode=self.ci_mode)
+            spinner_enabled = False
 
-        async def handle_event_with_display(event: WebSocketEvent):
-            nonlocal thinking_task
+        def handle_event_with_display(event: WebSocketEvent):
+            nonlocal thinking_task, event_count
+            event_count += 1
 
             # Display event with enhanced formatting and emojis
             formatted_event = event.format_for_display(self.debug)
             timestamp = event.timestamp.strftime('%H:%M:%S')
-            safe_console_print(f"[{timestamp}] {formatted_event}")
+            safe_console_print(f"[{timestamp}] {formatted_event}", json_mode=self.json_mode, ci_mode=self.ci_mode)
 
-            # Update spinner for thinking and tool_executing events
-            if event.type in ["agent_thinking", "tool_executing"]:
+            # Update spinner for thinking and tool_executing events (if spinner is enabled)
+            if spinner_enabled and event.type in ["agent_thinking", "tool_executing"]:
                 # Remove old task if exists
                 if thinking_task is not None:
                     thinking_spinner.remove_task(thinking_task)
@@ -5281,8 +5288,8 @@ class AgentCLI:
                     spinner_text = f"Executing {tool_name}..."
                     thinking_task = thinking_spinner.add_task(f"🔧 {spinner_text}", total=None)
 
-            # Clear spinner for any other event type
-            elif thinking_task is not None:
+            # Clear spinner for any other event type (if spinner is enabled)
+            elif spinner_enabled and thinking_task is not None:
                 thinking_spinner.remove_task(thinking_task)
                 thinking_task = None
 
@@ -5306,15 +5313,15 @@ class AgentCLI:
                 if event.type == "agent_thinking":
                     thought = event.data.get('thought', event.data.get('reasoning', ''))
                     if thought and len(thought) > 100:
-                        safe_console_print(f"💭 Full thought: {thought}", style="dim cyan")
+                        safe_console_print(f"💭 Full thought: {thought}", style="dim cyan", json_mode=self.json_mode, ci_mode=self.ci_mode)
                 elif event.type == "tool_executing":
                     tool_input = event.data.get('input', event.data.get('parameters', {}))
                     if tool_input:
-                        safe_console_print(f"📥 Tool input: {json.dumps(tool_input, indent=2)[:200]}...", style="dim blue")
+                        safe_console_print(f"📥 Tool input: {json.dumps(tool_input, indent=2)[:200]}...", style="dim blue", json_mode=self.json_mode, ci_mode=self.ci_mode)
                 elif event.type == "tool_completed":
                     tool_output = event.data.get('output', event.data.get('result', ''))
                     if tool_output:
-                        safe_console_print(f"📤 Tool output: {str(tool_output)[:200]}...", style="dim green")
+                        safe_console_print(f"📤 Tool output: {str(tool_output)[:200]}...", style="dim green", json_mode=self.json_mode, ci_mode=self.ci_mode)
                 elif event.type == "agent_completed":
                     # Prefer structured result payloads but fall back to legacy keys
                     result = (
@@ -5359,13 +5366,41 @@ class AgentCLI:
                     Syntax(json.dumps(event.data, indent=2), "json", word_wrap=True),
                     title=f"Event: {event.type}",
                     border_style="dim"
-                ))
+                ), json_mode=self.json_mode, ci_mode=self.ci_mode)
 
         try:
-            await self.ws_client.receive_events(callback=handle_event_with_display)
+            # Debug: Track if monitoring events
+            if self.debug.debug_level >= DebugLevel.SILENT:
+                safe_console_print("📡 Monitoring events from server...", style="dim cyan", json_mode=self.json_mode, ci_mode=self.ci_mode)
+
+            # Poll for new events from the existing event stream
+            # The WebSocketClient already has a background task receiving events
+            while True:
+                # Check for new events
+                while last_event_index < len(self.ws_client.events):
+                    event = self.ws_client.events[last_event_index]
+                    last_event_index += 1
+                    handle_event_with_display(event)
+
+                # Check if we should stop
+                if self.ws_client.cleanup_complete or self.ws_client.timeout_occurred:
+                    break
+
+                # Small delay to avoid busy waiting
+                await asyncio.sleep(0.1)
+
+        except Exception as e:
+            # Log any errors
+            safe_console_print(f"❌ Error monitoring events: {str(e)}", style="red", json_mode=self.json_mode, ci_mode=self.ci_mode)
+            raise
         finally:
-            # Clean up spinner
-            thinking_live.stop()
+            # Clean up spinner if it was started
+            if spinner_enabled and thinking_live:
+                thinking_live.stop()
+
+            # Debug: Report how many events were received
+            if self.debug.debug_level >= DebugLevel.SILENT and event_count == 0:
+                safe_console_print("⚠️ No events received from server", style="yellow", json_mode=self.json_mode, ci_mode=self.ci_mode)
 
     def _get_event_summary(self, event: WebSocketEvent) -> str:
         """ISSUE #1603 FIX: Get a concise summary of an event for display"""
