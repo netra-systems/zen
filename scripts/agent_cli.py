@@ -9,6 +9,7 @@ import json
 import sys
 import os
 import argparse
+import time
 
 import logging
 
@@ -2602,7 +2603,7 @@ class WebSocketClient:
     def __init__(self, config: Config, token: str, debug_manager: Optional[DebugManager] = None,
                  send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
                  logs_path: Optional[str] = None, logs_user: Optional[str] = None,
-                 handshake_timeout: float = 2.0):
+                 handshake_timeout: float = 10.0):
         self.config = config
         self.token = token
         self.debug = debug_manager or DebugManager(config.debug_level, config.debug_log_file, config.enable_websocket_diagnostics)
@@ -2642,6 +2643,11 @@ class WebSocketClient:
         self.closure_code: Optional[int] = None
         self.closure_reason: Optional[str] = None
         self.closure_category: Optional[WebSocketClosureCategory] = None
+
+        # Event queuing mechanism: Wait for BOTH handshake AND connection_established
+        self.connection_established_received = False
+        self.event_queue: List[Dict[str, Any]] = []
+        self.ready_to_send_events = False
 
     def _initialize_timeouts(self) -> None:
         """Initialize WebSocket timeouts using backend timeout configuration.
@@ -3133,15 +3139,44 @@ class WebSocketClient:
                                 style="green"
                             )
 
+                            # Check if we can start sending events
+                            # We need BOTH handshake AND connection_established
+                            if self.connection_established_received:
+                                self.ready_to_send_events = True
+                                self.debug.debug_print(
+                                    "✅ Ready to send events: Handshake ✓ | connection_established ✓",
+                                    DebugLevel.BASIC,
+                                    style="green"
+                                )
+                                safe_console_print(
+                                    "✅ Fully connected: Handshake ✓ | connection_established ✓",
+                                    style="green",
+                                    json_mode=self.config.json_mode,
+                                    ci_mode=self.config.ci_mode
+                                )
+                            else:
+                                self.debug.debug_print(
+                                    "⏳ Handshake complete, waiting for connection_established event",
+                                    DebugLevel.BASIC,
+                                    style="yellow"
+                                )
+
                         return result
 
                     # Handle other message types while waiting
                     elif msg_type == 'connection_established':
                         # This is from AUTHENTICATING phase completion
                         self.debug.debug_print(
-                            "Connection established (AUTH phase) - waiting for HANDSHAKING phase",
+                            "✓ Connection established (AUTH phase) - waiting for HANDSHAKING phase",
                             DebugLevel.VERBOSE,
                             style="yellow"
+                        )
+                        # Track that connection_established was received
+                        self.connection_established_received = True
+                        self.debug.debug_print(
+                            "📌 connection_established event received during handshake",
+                            DebugLevel.BASIC,
+                            style="cyan"
                         )
                         # Store the event but continue waiting
                         if hasattr(self, 'events'):
@@ -3695,6 +3730,65 @@ class WebSocketClient:
 
         return False
 
+    async def _flush_queued_events(self) -> None:
+        """
+        Flush all queued events after connection_established is received.
+
+        This method sends all events that were queued while waiting for
+        the connection_established event (which comes after handshake).
+        """
+        if not self.event_queue:
+            self.debug.debug_print(
+                "No queued events to flush",
+                DebugLevel.VERBOSE,
+                style="dim"
+            )
+            return
+
+        queue_size = len(self.event_queue)
+        self.debug.debug_print(
+            f"🚀 Flushing {queue_size} queued event(s) after connection_established",
+            DebugLevel.BASIC,
+            style="green"
+        )
+        safe_console_print(
+            f"🚀 Connection fully established! Sending {queue_size} queued event(s)...",
+            style="green",
+            json_mode=self.config.json_mode,
+            ci_mode=self.config.ci_mode
+        )
+
+        # Send all queued events
+        for i, event_payload in enumerate(self.event_queue, 1):
+            try:
+                self.debug.debug_print(
+                    f"Sending queued event {i}/{queue_size}: {event_payload.get('type', 'unknown')}",
+                    DebugLevel.VERBOSE,
+                    style="cyan"
+                )
+                await self.ws.send(json.dumps(event_payload))
+                self.debug.debug_print(
+                    f"✓ Queued event {i}/{queue_size} sent successfully",
+                    DebugLevel.VERBOSE,
+                    style="green"
+                )
+            except Exception as e:
+                self.debug.log_error(e, f"sending queued event {i}/{queue_size}")
+                safe_console_print(
+                    f"⚠️ Failed to send queued event {i}/{queue_size}: {e}",
+                    style="yellow",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+
+        # Clear the queue
+        self.event_queue.clear()
+        self.debug.debug_print(
+            f"✅ All {queue_size} queued events have been sent",
+            DebugLevel.BASIC,
+            style="green"
+        )
+
     async def send_message(self, message: str) -> str:
         """Send a message and return the run_id"""
         if not self.ws:
@@ -3720,6 +3814,75 @@ class WebSocketClient:
                 ci_mode=self.config.ci_mode
             )
             raise RuntimeError("Connection not ready - handshake incomplete. Server needs to reach Processing phase.")
+
+        # NEW: Check if ready to send events
+        # Events can only be sent AFTER both handshake AND connection_established
+        if not self.ready_to_send_events:
+            # Wait for connection_established event with timeout
+            self.debug.debug_print(
+                "⏳ Waiting for connection_established event before sending message...",
+                DebugLevel.BASIC,
+                style="yellow"
+            )
+            safe_console_print(
+                "⏳ Waiting for connection_established event (up to 5 seconds)...",
+                style="yellow",
+                json_mode=self.config.json_mode,
+                ci_mode=self.config.ci_mode
+            )
+
+            # Wait up to 30 seconds for connection_established
+            wait_timeout = 30.0
+            wait_start = time.time()
+            wait_interval = 0.1
+
+            while not self.ready_to_send_events and (time.time() - wait_start) < wait_timeout:
+                await asyncio.sleep(wait_interval)
+                # Check if connection_established arrived
+                if self.ready_to_send_events:
+                    self.debug.debug_print(
+                        "✅ connection_established received - ready to send events",
+                        DebugLevel.BASIC,
+                        style="green"
+                    )
+                    safe_console_print(
+                        "✅ connection_established received - proceeding with message",
+                        style="green",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+                    break
+
+            # If still not ready after timeout, then error
+            if not self.ready_to_send_events:
+                elapsed = time.time() - wait_start
+                self.debug.debug_print(
+                    f"❌ Timeout waiting for connection_established after {elapsed:.1f} seconds",
+                    DebugLevel.BASIC,
+                    style="red"
+                )
+                safe_console_print(
+                    f"❌ Timeout: connection_established event not received after {elapsed:.1f} seconds",
+                    style="red",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+                safe_console_print(
+                    "   Handshake complete: ✓ | connection_established: ✗",
+                    style="dim",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+                safe_console_print(
+                    "\n💡 The server may not be sending the connection_established event.",
+                    style="yellow",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+                raise RuntimeError(
+                    f"Cannot send message - connection_established event not received after {elapsed:.1f}s timeout. "
+                    "Both handshake and connection_established are required before sending events."
+                )
 
         # Generate run_id
         self.run_id = f"cli_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{os.getpid()}"
@@ -4080,12 +4243,40 @@ class WebSocketClient:
                 # Handle connection_established as a basic WebSocket connection event
                 # Note: handshake_response is now used for thread_id exchange, not connection_established
                 if event.type == 'connection_established':
-                    # This is now just a basic connection confirmation, not part of handshake
-                    self.debug.debug_print(
-                        f"WebSocket connection established event received",
-                        DebugLevel.VERBOSE,
-                        style="dim"
-                    )
+                    # Track that connection_established was received
+                    if not self.connection_established_received:
+                        self.connection_established_received = True
+                        self.debug.debug_print(
+                            "📌 connection_established event received after handshake",
+                            DebugLevel.BASIC,
+                            style="cyan"
+                        )
+
+                        # Check if we can now start sending events
+                        # We need BOTH handshake (self.connected) AND connection_established
+                        if self.connected and not self.ready_to_send_events:
+                            self.ready_to_send_events = True
+                            self.debug.debug_print(
+                                "✅ Ready to send events: Handshake ✓ | connection_established ✓",
+                                DebugLevel.BASIC,
+                                style="green"
+                            )
+                            safe_console_print(
+                                "✅ Fully connected: Handshake ✓ | connection_established ✓",
+                                style="green",
+                                json_mode=self.config.json_mode,
+                                ci_mode=self.config.ci_mode
+                            )
+
+                            # Flush any queued events
+                            await self._flush_queued_events()
+                    else:
+                        # This is a duplicate connection_established event
+                        self.debug.debug_print(
+                            f"WebSocket connection_established event received (duplicate, already tracked)",
+                            DebugLevel.VERBOSE,
+                            style="dim"
+                        )
 
                 self.debug.debug_print(
                     f"GOLDEN PATH TRACE: Parsed WebSocket event type={event.type}",
@@ -4758,7 +4949,7 @@ class AgentCLI:
                  json_mode: bool = False, ci_mode: bool = False, json_output_file: Optional[str] = None,
                  send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
                  logs_path: Optional[str] = None, logs_user: Optional[str] = None,
-                 handshake_timeout: float = 2.0):
+                 handshake_timeout: float = 10.0):
         # ISSUE #2766: Store JSON/CI mode flags early for output suppression
         self.json_mode = json_mode
         self.ci_mode = ci_mode
