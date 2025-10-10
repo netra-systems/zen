@@ -3837,6 +3837,42 @@ class WebSocketClient:
             style="green"
         )
 
+    def _display_log_collection_info(self, info: dict) -> None:
+        """Display log collection information to the console"""
+        separator = "=" * 60
+
+        # Display log collection details
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("SENDING LOGS TO OPTIMIZER", style="bold cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Total Entries: {len(info['logs'])}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Files Read: {info['files_read']}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Payload Size: {info['size_str']}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        if self.logs_project:
+            safe_console_print(f"  Project: {self.logs_project}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("  Files:", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        # Add file details with hashes
+        for file_info in info['file_info']:
+            safe_console_print(
+                f"    * {file_info['name']} (hash: {file_info['hash']}, {file_info['entries']} entries)",
+                json_mode=self.config.json_mode, ci_mode=self.config.ci_mode
+            )
+
+        # Add payload proof
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("  Payload Confirmation:", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"    [OK] 'jsonl_logs' key added to payload", style="green", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"    [OK] First log entry timestamp: {info['logs'][0].get('timestamp', 'N/A') if info['logs'] else 'N/A'}", style="green", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"    [OK] Last log entry timestamp: {info['logs'][-1].get('timestamp', 'N/A') if info['logs'] else 'N/A'}", style="green", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
     async def send_message(self, message: str) -> str:
         """Send a message and return the run_id"""
         if not self.ws:
@@ -4054,40 +4090,13 @@ class WebSocketClient:
                     else:
                         size_str = f"{logs_size_bytes} bytes"
 
-                    # Create prominent, formatted log message
-                    separator = "=" * 60
-
-                    # Display immediately using safe_console_print
-                    safe_console_print("", json_mode=self.json_mode, ci_mode=self.ci_mode)
-                    safe_console_print(separator, style="cyan", json_mode=self.json_mode, ci_mode=self.ci_mode)
-                    safe_console_print("SENDING LOGS TO OPTIMIZER", style="bold cyan", json_mode=self.json_mode, ci_mode=self.ci_mode)
-                    safe_console_print(separator, style="cyan", json_mode=self.json_mode, ci_mode=self.ci_mode)
-                    safe_console_print(f"  Total Entries: {len(logs)}", json_mode=self.json_mode, ci_mode=self.ci_mode)
-                    safe_console_print(f"  Files Read: {files_read}", json_mode=self.json_mode, ci_mode=self.ci_mode)
-                    safe_console_print(f"  Payload Size: {size_str}", json_mode=self.json_mode, ci_mode=self.ci_mode)
-
-                    if self.logs_project:
-                        safe_console_print(f"  Project: {self.logs_project}", json_mode=self.json_mode, ci_mode=self.ci_mode)
-
-                    safe_console_print("", json_mode=self.json_mode, ci_mode=self.ci_mode)
-                    safe_console_print("  Files:", json_mode=self.json_mode, ci_mode=self.ci_mode)
-
-                    # Add file details with hashes
-                    for info in file_info:
-                        safe_console_print(
-                            f"    * {info['name']} (hash: {info['hash']}, {info['entries']} entries)",
-                            json_mode=self.json_mode, ci_mode=self.ci_mode
-                        )
-
-                    # Add payload proof
-                    safe_console_print("", json_mode=self.json_mode, ci_mode=self.ci_mode)
-                    safe_console_print("  Payload Confirmation:", json_mode=self.json_mode, ci_mode=self.ci_mode)
-                    safe_console_print(f"    [OK] 'jsonl_logs' key added to payload", style="green", json_mode=self.json_mode, ci_mode=self.ci_mode)
-                    safe_console_print(f"    [OK] First log entry timestamp: {logs[0].get('timestamp', 'N/A') if logs else 'N/A'}", style="green", json_mode=self.json_mode, ci_mode=self.ci_mode)
-                    safe_console_print(f"    [OK] Last log entry timestamp: {logs[-1].get('timestamp', 'N/A') if logs else 'N/A'}", style="green", json_mode=self.json_mode, ci_mode=self.ci_mode)
-
-                    safe_console_print(separator, style="cyan", json_mode=self.json_mode, ci_mode=self.ci_mode)
-                    safe_console_print("", json_mode=self.json_mode, ci_mode=self.ci_mode)
+                    # Save log display info for later (will be displayed after "Sending message:")
+                    self._log_display_info = {
+                        'logs': logs,
+                        'files_read': files_read,
+                        'file_info': file_info,
+                        'size_str': size_str
+                    }
                 else:
                     self.debug.debug_print(
                         "Warning: --send-logs enabled but no logs found",
@@ -4238,6 +4247,15 @@ class WebSocketClient:
         # ISSUE #1603 FIX: Add critical logging for message sending (only in diagnostic mode)
         if self.debug.debug_level >= DebugLevel.DIAGNOSTIC:
             self.debug.debug_print(f"SENDING WEBSOCKET MESSAGE: {json.dumps(payload, indent=2)}", DebugLevel.DIAGNOSTIC)
+
+        # Print sending message after logs section (moved from run_cli method)
+        safe_console_print(f"Sending message: {payload['payload']['content']}", style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        # Display log collection info after "Sending message:" if logs were collected
+        if self.send_logs and hasattr(self, '_log_display_info'):
+            self._display_log_collection_info(self._log_display_info)
+            # Clean up the temporary display info
+            del self._log_display_info
 
         await self.ws.send(payload_json)
         if self.debug.debug_level >= DebugLevel.VERBOSE:
@@ -5820,7 +5838,7 @@ class AgentCLI:
 
         try:
             # ISSUE #2766: Suppress output in JSON/CI mode
-            safe_console_print(f"Sending message: {message}", style="cyan", json_mode=self.json_mode, ci_mode=self.ci_mode)
+            # Note: "Sending message:" is now printed inside send_message() after logs section
 
             async with AuthManager(self.config) as auth_manager:
                 self.auth_manager = auth_manager
