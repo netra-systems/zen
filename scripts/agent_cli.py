@@ -2883,22 +2883,49 @@ class WebSocketClient:
                         self.connected = True
                         return True
                     else:
-                        # Handshake failed - backend might be using old reactive model
+                        # Handshake failed - server not ready to process messages
                         self.debug.debug_print(
-                            "WARNING: No proactive handshake received from server",
+                            "WARNING: Server handshake not completed - server not ready",
                             DebugLevel.BASIC,
                             style="yellow"
                         )
                         self.debug.debug_print(
-                            "Server may be using pre-2025-10-09 architecture (reactive handshake)",
+                            "Server still completing lifecycle phases (Initialize → Authenticate → Handshake → Prepare → Processing)",
                             DebugLevel.VERBOSE,
                             style="yellow"
                         )
 
-                        # Still mark as connected for backward compatibility
-                        # Old backends might work without the proactive handshake
-                        self.connected = True
-                        return True
+                        # Wait briefly for server to complete its phases and retry
+                        safe_console_print("⏳ Waiting for server to complete initialization...", style="yellow",
+                                         json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+                        await asyncio.sleep(3.0)  # Give server time to reach PROCESSING phase
+
+                        # Retry handshake once more
+                        self.debug.debug_print(
+                            "Retrying handshake after delay...",
+                            DebugLevel.VERBOSE,
+                            style="cyan"
+                        )
+                        handshake_success = await self._perform_handshake()
+                        if handshake_success:
+                            safe_console_print(f"✅ Connected with thread ID: {self.current_thread_id}", style="green",
+                                             json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+                            self.connected = True
+                            return True
+                        else:
+                            # Server still not ready - fail the connection
+                            self.debug.debug_print(
+                                "ERROR: Server not ready after retry",
+                                DebugLevel.BASIC,
+                                style="red"
+                            )
+                            safe_console_print("❌ Server not ready to process messages. Please try again.", style="red",
+                                             json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+                            # Close WebSocket and fail gracefully
+                            if self.ws:
+                                await self.ws.close()
+                            return False
             except Exception as e:
                 self.debug.log_connection_attempt(method_name, self.config.ws_url, success=False, error=str(e))
                 self.debug.debug_print(
@@ -3027,7 +3054,8 @@ class WebSocketClient:
 
             # Server enters HANDSHAKING phase after authentication
             # and proactively sends handshake_response
-            handshake_timeout = 10.0  # Wait up to 10 seconds
+            # Use configured timeout or default to 10 seconds
+            handshake_timeout = self.handshake_timeout if hasattr(self, 'handshake_timeout') and self.handshake_timeout else 10.0
             start_time = asyncio.get_event_loop().time()
 
             try:
@@ -3274,13 +3302,63 @@ class WebSocketClient:
             )
 
         # CRITICAL: Send acknowledgment with the SAME thread_id
+        # Per WebSocket Client Lifecycle Guide, use "handshake_acknowledged"
         ack_message = {
-            "type": "session_acknowledged",
+            "type": "handshake_acknowledged",
             "thread_id": backend_thread_id,  # Echo back the same ID
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
         await self.ws.send(json.dumps(ack_message))
+
+        # Per WebSocket Client Lifecycle Guide, wait for handshake_complete
+        # and then add delay for server to enter Phase 5 (Processing)
+        self.debug.debug_print(
+            "Waiting for handshake_complete confirmation...",
+            DebugLevel.VERBOSE,
+            style="cyan"
+        )
+
+        # Wait briefly for handshake_complete message
+        try:
+            complete_msg = await asyncio.wait_for(self.ws.recv(), timeout=2.0)
+            complete_data = json.loads(complete_msg)
+            if complete_data.get('type') == 'handshake_complete':
+                self.debug.debug_print(
+                    "✅ Received handshake_complete - Server at Phase 4 (Ready)",
+                    DebugLevel.VERBOSE,
+                    style="green"
+                )
+
+                # CRITICAL: Add delay for server to enter Phase 5 (Processing)
+                # Per documentation, 500ms is recommended
+                self.debug.debug_print(
+                    "Waiting 500ms for server to enter Phase 5 (Processing)...",
+                    DebugLevel.VERBOSE,
+                    style="cyan"
+                )
+                await asyncio.sleep(0.5)
+
+                self.debug.debug_print(
+                    "✅ Server should now be in Phase 5 (Processing) - ready for messages",
+                    DebugLevel.VERBOSE,
+                    style="green"
+                )
+        except asyncio.TimeoutError:
+            # If no handshake_complete, still add a delay to be safe
+            self.debug.debug_print(
+                "No handshake_complete received, adding safety delay",
+                DebugLevel.VERBOSE,
+                style="yellow"
+            )
+            await asyncio.sleep(0.5)
+        except Exception as e:
+            self.debug.debug_print(
+                f"Error waiting for handshake_complete: {e}",
+                DebugLevel.VERBOSE,
+                style="yellow"
+            )
+            await asyncio.sleep(0.5)
 
         return True
 
@@ -3621,6 +3699,27 @@ class WebSocketClient:
         """Send a message and return the run_id"""
         if not self.ws:
             raise RuntimeError("WebSocket not connected")
+
+        # Check if connection handshake is fully complete
+        if not self.connected:
+            self.debug.debug_print(
+                "ERROR: Connection not ready - handshake not complete",
+                DebugLevel.BASIC,
+                style="red"
+            )
+            safe_console_print(
+                "\n❌ ERROR: Cannot send message - server not ready",
+                style="red",
+                json_mode=self.config.json_mode,
+                ci_mode=self.config.ci_mode
+            )
+            safe_console_print(
+                "The server is still completing its initialization phases.",
+                style="yellow",
+                json_mode=self.config.json_mode,
+                ci_mode=self.config.ci_mode
+            )
+            raise RuntimeError("Connection not ready - handshake incomplete. Server needs to reach Processing phase.")
 
         # Generate run_id
         self.run_id = f"cli_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{os.getpid()}"
