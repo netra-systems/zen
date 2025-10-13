@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "netra-zen"
-version = "1.2.3"
+version = "1.2.4"
 description = "Multi-instance Claude orchestrator for parallel task execution"
 readme = "README.md"
 authors = [
