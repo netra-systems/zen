@@ -14,6 +14,11 @@ import re
 from dataclasses import asdict
 from typing import Any, Dict, Optional
 
+# Fix for gRPC DNS resolution issues on macOS - MUST be set before importing gRPC
+# This prevents "DNS query cancelled" errors when connecting to cloudtrace.googleapis.com
+if "GRPC_DNS_RESOLVER" not in os.environ:
+    os.environ["GRPC_DNS_RESOLVER"] = "native"
+
 try:
     from opentelemetry import trace
     from opentelemetry.sdk.resources import Resource
@@ -85,11 +90,6 @@ class TelemetryManager:
         if credentials is None:
             logger.debug("No telemetry credentials detected; telemetry disabled")
             return
-
-        # Fix for gRPC DNS resolution issues on macOS (uses native resolver instead of C-ares)
-        # This prevents "DNS query cancelled" errors when connecting to cloudtrace.googleapis.com
-        if "GRPC_DNS_RESOLVER" not in os.environ:
-            os.environ["GRPC_DNS_RESOLVER"] = "native"
 
         try:
             project_id = get_project_id()
