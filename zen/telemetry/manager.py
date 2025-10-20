@@ -86,6 +86,11 @@ class TelemetryManager:
             logger.debug("No telemetry credentials detected; telemetry disabled")
             return
 
+        # Fix for gRPC DNS resolution issues on macOS (uses native resolver instead of C-ares)
+        # This prevents "DNS query cancelled" errors when connecting to cloudtrace.googleapis.com
+        if "GRPC_DNS_RESOLVER" not in os.environ:
+            os.environ["GRPC_DNS_RESOLVER"] = "native"
+
         try:
             project_id = get_project_id()
             client = TraceServiceClient(credentials=credentials)
