@@ -3930,72 +3930,97 @@ class WebSocketClient:
 
         # NEW: Check if ready to send events
         # Events can only be sent AFTER both handshake AND connection_established
+        # DEVELOPMENT OVERRIDE: Skip connection_established requirement for development environment
+        skip_connection_established = self.config.environment == Environment.DEVELOPMENT
+
         if not self.ready_to_send_events:
-            # Wait for connection_established event with timeout
-            self.debug.debug_print(
-                "⏳ Waiting for connection_established event before sending message...",
-                DebugLevel.BASIC,
-                style="yellow"
-            )
-            safe_console_print(
-                "⏳ Waiting for connection_established event (up to 5 seconds)...",
-                style="yellow",
-                json_mode=self.config.json_mode,
-                ci_mode=self.config.ci_mode
-            )
-
-            # Wait up to 30 seconds for connection_established
-            wait_timeout = 30.0
-            wait_start = time.time()
-            wait_interval = 0.1
-
-            while not self.ready_to_send_events and (time.time() - wait_start) < wait_timeout:
-                await asyncio.sleep(wait_interval)
-                # Check if connection_established arrived
-                if self.ready_to_send_events:
-                    self.debug.debug_print(
-                        "✅ connection_established received - ready to send events",
-                        DebugLevel.BASIC,
-                        style="green"
-                    )
-                    safe_console_print(
-                        "✅ connection_established received - proceeding with message",
-                        style="green",
-                        json_mode=self.config.json_mode,
-                        ci_mode=self.config.ci_mode
-                    )
-                    break
-
-            # If still not ready after timeout, then error
-            if not self.ready_to_send_events:
-                elapsed = time.time() - wait_start
+            if skip_connection_established:
+                # Development environment: Override and proceed without connection_established
                 self.debug.debug_print(
-                    f"❌ Timeout waiting for connection_established after {elapsed:.1f} seconds",
+                    "⚠️ DEVELOPMENT MODE: Skipping connection_established requirement",
                     DebugLevel.BASIC,
-                    style="red"
+                    style="yellow"
                 )
                 safe_console_print(
-                    f"❌ Timeout: connection_established event not received after {elapsed:.1f} seconds",
-                    style="red",
-                    json_mode=self.config.json_mode,
-                    ci_mode=self.config.ci_mode
-                )
-                safe_console_print(
-                    "   Handshake complete: ✓ | connection_established: ✗",
-                    style="dim",
-                    json_mode=self.config.json_mode,
-                    ci_mode=self.config.ci_mode
-                )
-                safe_console_print(
-                    "\n💡 The server may not be sending the connection_established event.",
+                    "⚠️ Development mode: Proceeding without connection_established event",
                     style="yellow",
                     json_mode=self.config.json_mode,
                     ci_mode=self.config.ci_mode
                 )
-                raise RuntimeError(
-                    f"Cannot send message - connection_established event not received after {elapsed:.1f}s timeout. "
-                    "Both handshake and connection_established are required before sending events."
+                safe_console_print(
+                    "   (This is normal for development backends that may not send this event)",
+                    style="dim",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
                 )
+                # Force ready state for development
+                self.ready_to_send_events = True
+            else:
+                # Production/Staging: Wait for connection_established event with timeout
+                self.debug.debug_print(
+                    "⏳ Waiting for connection_established event before sending message...",
+                    DebugLevel.BASIC,
+                    style="yellow"
+                )
+                safe_console_print(
+                    "⏳ Waiting for connection_established event (up to 5 seconds)...",
+                    style="yellow",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+
+                # Wait up to 30 seconds for connection_established
+                wait_timeout = 30.0
+                wait_start = time.time()
+                wait_interval = 0.1
+
+                while not self.ready_to_send_events and (time.time() - wait_start) < wait_timeout:
+                    await asyncio.sleep(wait_interval)
+                    # Check if connection_established arrived
+                    if self.ready_to_send_events:
+                        self.debug.debug_print(
+                            "✅ connection_established received - ready to send events",
+                            DebugLevel.BASIC,
+                            style="green"
+                        )
+                        safe_console_print(
+                            "✅ connection_established received - proceeding with message",
+                            style="green",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+                        break
+
+                # If still not ready after timeout, then error
+                if not self.ready_to_send_events:
+                    elapsed = time.time() - wait_start
+                    self.debug.debug_print(
+                        f"❌ Timeout waiting for connection_established after {elapsed:.1f} seconds",
+                        DebugLevel.BASIC,
+                        style="red"
+                    )
+                    safe_console_print(
+                        f"❌ Timeout: connection_established event not received after {elapsed:.1f} seconds",
+                        style="red",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+                    safe_console_print(
+                        "   Handshake complete: ✓ | connection_established: ✗",
+                        style="dim",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+                    safe_console_print(
+                        "\n💡 The server may not be sending the connection_established event.",
+                        style="yellow",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+                    raise RuntimeError(
+                        f"Cannot send message - connection_established event not received after {elapsed:.1f}s timeout. "
+                        "Both handshake and connection_established are required before sending events."
+                    )
 
         # Generate run_id
         self.run_id = f"cli_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{os.getpid()}"
