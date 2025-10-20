@@ -100,7 +100,7 @@ if "--env" in sys.argv:
     env_idx = sys.argv.index("--env")
     if env_idx + 1 < len(sys.argv):
         env_value = sys.argv[env_idx + 1]
-        if env_value in ["staging", "production", "local"]:
+        if env_value in ["staging", "production", "local", "development"]:
             os.environ["ENVIRONMENT"] = env_value
             # Will be displayed later after logging is set up
 
@@ -140,8 +140,8 @@ class SimpleConfigReader:
         """Load only the env vars CLI actually needs."""
         config = {}
 
-        # For staging: try to get E2E key from environment or GCP
-        if self.environment == "staging":
+        # For staging and development: try to get E2E key from environment or GCP
+        if self.environment in ["staging", "development"]:
             e2e_key = E2E_OAUTH_SIMULATION_KEY
             if e2e_key:
                 config['E2E_OAUTH_SIMULATION_KEY'] = e2e_key
@@ -1616,12 +1616,14 @@ class Environment(Enum):
     LOCAL = "local"
     STAGING = "staging"
     PRODUCTION = "production"
+    DEVELOPMENT = "development"  # Custom backend URL for development/testing
 
 @dataclass
 class Config:
     """Configuration for the CLI"""
     environment: Environment = Environment.STAGING
     client_environment: Optional[str] = None  # Issue #2442: Client environment for timeout coordination
+    custom_backend_url: Optional[str] = None  # Custom backend URL for DEVELOPMENT environment
     backend_url: str = ""
     auth_url: str = ""
     ws_url: str = ""
@@ -1661,6 +1663,27 @@ class Config:
             self.backend_url = "https://api.netrasystems.ai"
             self.auth_url = "https://auth.netrasystems.ai"
             self.ws_url = "wss://api.netrasystems.ai/ws"
+        elif self.environment == Environment.DEVELOPMENT:
+            # DEVELOPMENT mode: Use custom backend URL or fallback to localhost
+            if self.custom_backend_url:
+                # Parse custom URL to determine protocol
+                from urllib.parse import urlparse
+                parsed = urlparse(self.custom_backend_url)
+
+                # Use the custom backend URL
+                self.backend_url = self.custom_backend_url
+
+                # Derive WebSocket URL based on HTTP/HTTPS protocol
+                ws_scheme = "wss" if parsed.scheme == "https" else "ws"
+                self.ws_url = f"{ws_scheme}://{parsed.netloc}/ws"
+
+                # For development, use the same host for auth (simplified)
+                self.auth_url = self.custom_backend_url.replace("/api", "/auth") if "/api" in self.custom_backend_url else self.custom_backend_url
+            else:
+                # Fallback to localhost if no custom URL provided
+                self.backend_url = "http://localhost:8000"
+                self.auth_url = "http://localhost:8081"
+                self.ws_url = "ws://localhost:8000/ws"
 
         # Create token directory if needed
         self.token_file.parent.mkdir(parents=True, exist_ok=True)
@@ -2252,14 +2275,14 @@ class AuthManager:
         if await self.authenticate_oauth("google"):
             return True
 
-        # 2. E2E test auth (fallback for staging/testing)
-        if self.config.environment in [Environment.STAGING, Environment.LOCAL]:
+        # 2. E2E test auth (fallback for staging/testing/development)
+        if self.config.environment in [Environment.STAGING, Environment.LOCAL, Environment.DEVELOPMENT]:
             safe_console_print("Trying E2E test authentication...", style="yellow")
             if await self._authenticate_e2e(email):
                 return True
 
-        # 3. Dev auth (development environment only)
-        if self.config.environment == Environment.LOCAL:
+        # 3. Dev auth (development/local environment only)
+        if self.config.environment in [Environment.LOCAL, Environment.DEVELOPMENT]:
             safe_console_print("Trying development authentication...", style="yellow")
             if await self.authenticate_dev(email):
                 return True
@@ -2603,7 +2626,7 @@ class WebSocketClient:
     def __init__(self, config: Config, token: str, debug_manager: Optional[DebugManager] = None,
                  send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
                  logs_path: Optional[str] = None, logs_user: Optional[str] = None,
-                 handshake_timeout: float = 10.0):
+                 logs_provider: str = "claude", handshake_timeout: float = 10.0):
         self.config = config
         self.token = token
         self.debug = debug_manager or DebugManager(config.debug_level, config.debug_log_file, config.enable_websocket_diagnostics)
@@ -2627,6 +2650,7 @@ class WebSocketClient:
         self.logs_project = logs_project
         self.logs_path = logs_path
         self.logs_user = logs_user
+        self.logs_provider = logs_provider
 
         # ISSUE #2134 FIX: Cleanup coordination protocol support
         self.cleanup_in_progress = False
@@ -2697,6 +2721,10 @@ class WebSocketClient:
             # Issue #2861: Production workflows now require 100s+ for multi-agent LLM responses
             self.websocket_recv_timeout = 120  # Production fallback aligned with extended Cloud Run windows
             self.close_timeout = 122
+        elif self.config.environment == Environment.DEVELOPMENT:
+            # Development environment: Use generous timeouts for custom backends
+            self.websocket_recv_timeout = 300  # Development fallback (same as staging for flexibility)
+            self.close_timeout = 302  # Maintain 2s safety margin
         else:  # LOCAL or other
             self.websocket_recv_timeout = 10  # Local default
             self.close_timeout = 12
@@ -3846,6 +3874,7 @@ class WebSocketClient:
         safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print("SENDING LOGS TO OPTIMIZER", style="bold cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Provider: {self.logs_provider.upper()}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(f"  Total Entries: {len(info['logs'])}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(f"  Files Read: {info['files_read']}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(f"  Payload Size: {info['size_str']}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
@@ -4065,7 +4094,8 @@ class WebSocketClient:
                     limit=self.logs_count,
                     project_name=self.logs_project,
                     base_path=self.logs_path,
-                    username=self.logs_user
+                    username=self.logs_user,
+                    provider=self.logs_provider
                 )
 
                 if result:
@@ -5004,7 +5034,7 @@ class AgentCLI:
                  json_mode: bool = False, ci_mode: bool = False, json_output_file: Optional[str] = None,
                  send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
                  logs_path: Optional[str] = None, logs_user: Optional[str] = None,
-                 handshake_timeout: float = 10.0):
+                 logs_provider: str = "claude", handshake_timeout: float = 10.0):
         # ISSUE #2766: Store JSON/CI mode flags early for output suppression
         self.json_mode = json_mode
         self.ci_mode = ci_mode
@@ -5016,6 +5046,7 @@ class AgentCLI:
         self.logs_project = logs_project
         self.logs_path = logs_path
         self.logs_user = logs_user
+        self.logs_provider = logs_provider
 
         # Store handshake timeout
         self.handshake_timeout = handshake_timeout
@@ -5156,6 +5187,7 @@ class AgentCLI:
                 logs_project=self.logs_project,
                 logs_path=self.logs_path,
                 logs_user=self.logs_user,
+                logs_provider=self.logs_provider,
                 handshake_timeout=self.handshake_timeout
             )
             if not await self.ws_client.connect():
@@ -5895,6 +5927,7 @@ class AgentCLI:
                     logs_project=self.logs_project,
                     logs_path=self.logs_path,
                     logs_user=self.logs_user,
+                    logs_provider=self.logs_provider,
                     handshake_timeout=self.handshake_timeout
                 )
                 if not await self.ws_client.connect():
@@ -6103,6 +6136,7 @@ class AgentCLI:
                     logs_project=self.logs_project,
                     logs_path=self.logs_path,
                     logs_user=self.logs_user,
+                    logs_provider=self.logs_provider,
                     handshake_timeout=self.handshake_timeout
                 )
                 if not await self.ws_client.connect():
@@ -6612,9 +6646,16 @@ def main(argv=None):
     parser.add_argument(
         "--env",
         type=str,
-        choices=["local", "staging", "production"],
+        choices=["local", "staging", "production", "development"],
         default="staging",
-        help="Environment to connect to (default: staging)"
+        help="Environment to connect to (default: staging). Use 'development' with --backend-url for custom backend."
+    )
+
+    parser.add_argument(
+        "--backend-url",
+        type=str,
+        help="Custom backend URL for development environment (e.g., https://api.custom.example.com). "
+             "Only used when --env development is specified."
     )
 
     parser.add_argument(
@@ -6960,11 +7001,26 @@ def main(argv=None):
         help="Windows username for path resolution (Windows only)"
     )
 
+    parser.add_argument(
+        "--logs-provider",
+        type=str,
+        choices=["claude", "codex", "gemini"],
+        default="claude",
+        metavar="PROVIDER",
+        help="AI tool provider to collect logs from: claude (default), codex (OpenAI Codex CLI), gemini (Google Gemini CLI)"
+    )
+
     args = parser.parse_args(argv)
 
     # Validate log-forwarding arguments
     if args.logs_count < 1:
         parser.error("--logs-count must be a positive integer")
+
+    # Validate development environment configuration
+    if args.backend_url and args.env != "development":
+        parser.error("--backend-url can only be used with --env development")
+    if args.env == "development" and not args.backend_url:
+        parser.error("--backend-url is required when using --env development")
 
     # ISSUE #2766: Determine JSON/CI mode EARLY (before any output)
     json_mode = args.json or args.json_output is not None
@@ -7110,6 +7166,7 @@ def main(argv=None):
     config = Config(
         environment=Environment(args.env),
         client_environment=getattr(args, 'client_environment', None),  # Issue #2442: Client environment override for timeouts
+        custom_backend_url=getattr(args, 'backend_url', None),  # Custom backend URL for development environment
         log_level="DEBUG" if args.verbose else "INFO",
         debug_level=debug_level_map[args.debug_level],
         debug_log_file=Path(args.debug_log) if args.debug_log else None,
@@ -7215,6 +7272,7 @@ def main(argv=None):
         logs_project=args.logs_project,
         logs_path=args.logs_path,
         logs_user=args.logs_user,
+        logs_provider=args.logs_provider,
         handshake_timeout=args.handshake_timeout
     )
 
