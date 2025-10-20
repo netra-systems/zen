@@ -2603,7 +2603,7 @@ class WebSocketClient:
     def __init__(self, config: Config, token: str, debug_manager: Optional[DebugManager] = None,
                  send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
                  logs_path: Optional[str] = None, logs_user: Optional[str] = None,
-                 handshake_timeout: float = 10.0):
+                 logs_provider: str = "claude", handshake_timeout: float = 10.0):
         self.config = config
         self.token = token
         self.debug = debug_manager or DebugManager(config.debug_level, config.debug_log_file, config.enable_websocket_diagnostics)
@@ -2627,6 +2627,7 @@ class WebSocketClient:
         self.logs_project = logs_project
         self.logs_path = logs_path
         self.logs_user = logs_user
+        self.logs_provider = logs_provider
 
         # ISSUE #2134 FIX: Cleanup coordination protocol support
         self.cleanup_in_progress = False
@@ -3846,6 +3847,7 @@ class WebSocketClient:
         safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print("SENDING LOGS TO OPTIMIZER", style="bold cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Provider: {self.logs_provider.upper()}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(f"  Total Entries: {len(info['logs'])}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(f"  Files Read: {info['files_read']}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(f"  Payload Size: {info['size_str']}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
@@ -4065,7 +4067,8 @@ class WebSocketClient:
                     limit=self.logs_count,
                     project_name=self.logs_project,
                     base_path=self.logs_path,
-                    username=self.logs_user
+                    username=self.logs_user,
+                    provider=self.logs_provider
                 )
 
                 if result:
@@ -5004,7 +5007,7 @@ class AgentCLI:
                  json_mode: bool = False, ci_mode: bool = False, json_output_file: Optional[str] = None,
                  send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
                  logs_path: Optional[str] = None, logs_user: Optional[str] = None,
-                 handshake_timeout: float = 10.0):
+                 logs_provider: str = "claude", handshake_timeout: float = 10.0):
         # ISSUE #2766: Store JSON/CI mode flags early for output suppression
         self.json_mode = json_mode
         self.ci_mode = ci_mode
@@ -5016,6 +5019,7 @@ class AgentCLI:
         self.logs_project = logs_project
         self.logs_path = logs_path
         self.logs_user = logs_user
+        self.logs_provider = logs_provider
 
         # Store handshake timeout
         self.handshake_timeout = handshake_timeout
@@ -5156,6 +5160,7 @@ class AgentCLI:
                 logs_project=self.logs_project,
                 logs_path=self.logs_path,
                 logs_user=self.logs_user,
+                logs_provider=self.logs_provider,
                 handshake_timeout=self.handshake_timeout
             )
             if not await self.ws_client.connect():
@@ -5895,6 +5900,7 @@ class AgentCLI:
                     logs_project=self.logs_project,
                     logs_path=self.logs_path,
                     logs_user=self.logs_user,
+                    logs_provider=self.logs_provider,
                     handshake_timeout=self.handshake_timeout
                 )
                 if not await self.ws_client.connect():
@@ -6103,6 +6109,7 @@ class AgentCLI:
                     logs_project=self.logs_project,
                     logs_path=self.logs_path,
                     logs_user=self.logs_user,
+                    logs_provider=self.logs_provider,
                     handshake_timeout=self.handshake_timeout
                 )
                 if not await self.ws_client.connect():
@@ -6960,6 +6967,15 @@ def main(argv=None):
         help="Windows username for path resolution (Windows only)"
     )
 
+    parser.add_argument(
+        "--logs-provider",
+        type=str,
+        choices=["claude", "codex", "gemini"],
+        default="claude",
+        metavar="PROVIDER",
+        help="AI tool provider to collect logs from: claude (default), codex (OpenAI Codex CLI), gemini (Google Gemini CLI)"
+    )
+
     args = parser.parse_args(argv)
 
     # Validate log-forwarding arguments
@@ -7215,6 +7231,7 @@ def main(argv=None):
         logs_project=args.logs_project,
         logs_path=args.logs_path,
         logs_user=args.logs_user,
+        logs_provider=args.logs_provider,
         handshake_timeout=args.handshake_timeout
     )
 
