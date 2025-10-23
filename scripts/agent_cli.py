@@ -4113,7 +4113,9 @@ class WebSocketClient:
         # Attach logs if --send-logs is enabled
         if self.send_logs:
             try:
-                from scripts.agent_logs import collect_recent_logs
+                from agent_logs import collect_recent_logs
+                from chunking_analyzer import ChunkingAnalyzer
+                from chunk_creator import ChunkCreator
 
                 result = collect_recent_logs(
                     limit=self.logs_count,
@@ -4125,33 +4127,51 @@ class WebSocketClient:
 
                 if result:
                     logs, files_read, file_info = result
-                    payload["payload"]["jsonl_logs"] = logs
 
-                    # Calculate payload size for transmission proof
-                    import logging
-                    import sys
+                    # NEW: Analyze if chunking needed
+                    analyzer = ChunkingAnalyzer()
+                    chunking_strategy = analyzer.analyze_files(logs, file_info)
 
-                    # Get size of logs in payload
-                    logs_json = json.dumps(logs)
-                    logs_size_bytes = len(logs_json.encode('utf-8'))
-                    logs_size_kb = logs_size_bytes / 1024
-                    logs_size_mb = logs_size_kb / 1024
+                    if chunking_strategy.strategy == 'no_chunking':
+                        # Original behavior: send all logs at once
+                        payload["payload"]["jsonl_logs"] = logs
 
-                    # Format size appropriately
-                    if logs_size_mb >= 1:
-                        size_str = f"{logs_size_mb:.2f} MB"
-                    elif logs_size_kb >= 1:
-                        size_str = f"{logs_size_kb:.2f} KB"
+                        # Calculate payload size for transmission proof
+                        import logging
+                        import sys
+
+                        # Get size of logs in payload
+                        logs_json = json.dumps(logs)
+                        logs_size_bytes = len(logs_json.encode('utf-8'))
+                        logs_size_kb = logs_size_bytes / 1024
+                        logs_size_mb = logs_size_kb / 1024
+
+                        # Format size appropriately
+                        if logs_size_mb >= 1:
+                            size_str = f"{logs_size_mb:.2f} MB"
+                        elif logs_size_kb >= 1:
+                            size_str = f"{logs_size_kb:.2f} KB"
+                        else:
+                            size_str = f"{logs_size_bytes} bytes"
+
+                        # Save log display info for later (will be displayed after "Sending message:")
+                        self._log_display_info = {
+                            'logs': logs,
+                            'files_read': files_read,
+                            'file_info': file_info,
+                            'size_str': size_str
+                        }
                     else:
-                        size_str = f"{logs_size_bytes} bytes"
+                        # NEW: Chunking required
+                        await self._send_chunked_logs(
+                            logs=logs,
+                            file_info=file_info,
+                            chunking_strategy=chunking_strategy,
+                            message=message,
+                            thread_id=thread_id
+                        )
+                        return  # Early return - chunks sent separately
 
-                    # Save log display info for later (will be displayed after "Sending message:")
-                    self._log_display_info = {
-                        'logs': logs,
-                        'files_read': files_read,
-                        'file_info': file_info,
-                        'size_str': size_str
-                    }
                 else:
                     self.debug.debug_print(
                         "Warning: --send-logs enabled but no logs found",
@@ -4316,6 +4336,269 @@ class WebSocketClient:
         if self.debug.debug_level >= DebugLevel.VERBOSE:
             self.debug.debug_print(f"WEBSOCKET MESSAGE SENT SUCCESSFULLY - run_id: {self.run_id}, thread_id: {thread_id}", DebugLevel.VERBOSE)
         return self.run_id
+
+    async def _send_chunked_logs(
+        self,
+        logs: List[Dict[str, Any]],
+        file_info: Dict[str, Any],
+        chunking_strategy: Any,
+        message: str,
+        thread_id: str
+    ) -> None:
+        """
+        Send logs in chunks when chunking is required.
+
+        Args:
+            logs: List of log entries
+            file_info: Dictionary with file metadata
+            chunking_strategy: ChunkingStrategy object from analyzer
+            message: Original user message
+            thread_id: Thread ID for this conversation
+        """
+        from chunk_creator import ChunkCreator
+
+        # Display chunking info
+        safe_console_print(
+            f"\nChunking strategy: {chunking_strategy.strategy}",
+            style="yellow",
+            json_mode=self.config.json_mode,
+            ci_mode=self.config.ci_mode
+        )
+
+        # Create chunks from file analyses
+        chunk_creator = ChunkCreator()
+        all_chunks = []
+
+        # Track entry offset for extracting entries per file
+        entry_offset = 0
+
+        for file_idx, file_analysis in enumerate(chunking_strategy.file_analyses):
+            if file_analysis.needs_chunking:
+                # Extract entries for this file
+                file_entries = logs[entry_offset:entry_offset + file_analysis.entry_count]
+
+                safe_console_print(
+                    f"\nChunking file: {file_analysis.file_name} "
+                    f"({file_analysis.size_mb:.2f} MB, {file_analysis.entry_count} entries)",
+                    style="yellow",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+
+                # Create chunks for this file
+                is_multi_file = len(chunking_strategy.file_analyses) > 1
+                file_chunks = chunk_creator.create_chunks(
+                    entries=file_entries,
+                    file_name=file_analysis.file_name,
+                    file_hash=file_analysis.file_hash,
+                    is_multi_file=is_multi_file,
+                    file_index=file_idx if is_multi_file else None
+                )
+
+                all_chunks.extend(file_chunks)
+            else:
+                # File doesn't need chunking - will be sent as single chunk
+                file_entries = logs[entry_offset:entry_offset + file_analysis.entry_count]
+
+                safe_console_print(
+                    f"\nFile doesn't need chunking: {file_analysis.file_name} "
+                    f"({file_analysis.size_mb:.2f} MB, {file_analysis.entry_count} entries) - sending as single unit",
+                    style="cyan",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+
+                # Create a single "chunk" for this file
+                from chunk_creator import Chunk, ChunkMetadata
+                metadata = ChunkMetadata(
+                    chunk_id=file_analysis.file_hash[:12],
+                    chunk_index=0,
+                    total_chunks=1,
+                    file_hash=file_analysis.file_hash,
+                    file_name=file_analysis.file_name,
+                    entries_in_chunk=file_analysis.entry_count,
+                    chunk_size_bytes=file_analysis.size_bytes,
+                    chunk_size_mb=file_analysis.size_mb,
+                    is_multi_file=len(chunking_strategy.file_analyses) > 1,
+                    file_index=file_idx if len(chunking_strategy.file_analyses) > 1 else None,
+                    aggregation_required=False  # Single file, no aggregation needed
+                )
+                single_chunk = Chunk(entries=file_entries, metadata=metadata)
+                all_chunks.append(single_chunk)
+
+            entry_offset += file_analysis.entry_count
+
+        total_chunks = len(all_chunks)
+        safe_console_print(
+            f"\nSending {total_chunks} chunk(s)...",
+            style="cyan",
+            json_mode=self.config.json_mode,
+            ci_mode=self.config.ci_mode
+        )
+
+        # Send each chunk
+        for i, chunk in enumerate(all_chunks, 1):
+            chunk_num = i
+
+            # Determine chunk type based on metadata
+            # All chunks now use the same structure, no chunk_type attribute
+            if chunk.metadata.total_chunks == 1 and not chunk.metadata.aggregation_required:
+                # Single file chunk
+                await self._send_single_file(
+                    chunk=chunk,
+                    chunk_num=chunk_num,
+                    total_chunks=total_chunks,
+                    message=message,
+                    thread_id=thread_id
+                )
+            else:
+                # Regular chunk
+                await self._send_single_chunk(
+                    chunk=chunk,
+                    chunk_num=chunk_num,
+                    total_chunks=total_chunks,
+                    message=message,
+                    thread_id=thread_id
+                )
+
+            # Delay between chunks (except after last chunk)
+            if i < total_chunks:
+                await asyncio.sleep(0.5)
+
+        safe_console_print(
+            f"\n✓ All {total_chunks} chunk(s) sent successfully",
+            style="green",
+            json_mode=self.config.json_mode,
+            ci_mode=self.config.ci_mode
+        )
+
+    async def _send_single_chunk(
+        self,
+        chunk: Any,
+        chunk_num: int,
+        total_chunks: int,
+        message: str,
+        thread_id: str
+    ) -> None:
+        """
+        Send a single chunk of logs.
+
+        Args:
+            chunk: Chunk object containing logs and metadata
+            chunk_num: Current chunk number (1-indexed)
+            total_chunks: Total number of chunks
+            message: Original user message
+            thread_id: Thread ID for this conversation
+        """
+        # Create payload for this chunk
+        payload = {
+            "type": "user_message",
+            "payload": {
+                "content": message,
+                "run_id": self.run_id,
+                "thread_id": thread_id,
+                "timestamp": datetime.now().isoformat(),
+                "jsonl_logs": chunk.entries,
+                "chunk_metadata": {
+                    "chunk_id": chunk.metadata.chunk_id,
+                    "chunk_index": chunk.metadata.chunk_index,
+                    "total_chunks": chunk.metadata.total_chunks,
+                    "file_hash": chunk.metadata.file_hash,
+                    "file_name": chunk.metadata.file_name,
+                    "entries_in_chunk": chunk.metadata.entries_in_chunk,
+                    "chunk_size_bytes": chunk.metadata.chunk_size_bytes,
+                    "is_multi_file": chunk.metadata.is_multi_file,
+                    "file_index": chunk.metadata.file_index,
+                    "aggregation_required": chunk.metadata.aggregation_required
+                },
+                "client_environment": self.config.client_environment if hasattr(self.config, 'client_environment') and self.config.client_environment else None
+            }
+        }
+
+        # Display chunk info with warning if oversized
+        chunk_display = (
+            f"  Chunk {chunk.metadata.chunk_index + 1}/{chunk.metadata.total_chunks}: "
+            f"{chunk.metadata.entries_in_chunk} entries, {chunk.metadata.chunk_size_mb:.2f} MB"
+        )
+
+        # Warning if chunk exceeds recommended size (happens with large single entries)
+        if chunk.metadata.chunk_size_mb > 2.5:
+            chunk_display += f" ⚠️  OVERSIZED (single entry > 2.5 MB limit)"
+            safe_console_print(chunk_display, style="yellow", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        else:
+            safe_console_print(chunk_display, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        # Send chunk
+        payload_json = json.dumps(payload)
+        await self.ws.send(payload_json)
+
+        self.debug.debug_print(
+            f"Sent chunk {chunk_num}/{total_chunks}",
+            DebugLevel.VERBOSE,
+            style="green"
+        )
+
+    async def _send_single_file(
+        self,
+        chunk: Any,
+        chunk_num: int,
+        total_chunks: int,
+        message: str,
+        thread_id: str
+    ) -> None:
+        """
+        Send a single file as a chunk (for file-based chunking).
+
+        Args:
+            chunk: Chunk object containing file logs
+            chunk_num: Current chunk number (1-indexed)
+            total_chunks: Total number of chunks
+            message: Original user message
+            thread_id: Thread ID for this conversation
+        """
+        # Create payload for this file chunk (same structure as regular chunks)
+        payload = {
+            "type": "user_message",
+            "payload": {
+                "content": message,
+                "run_id": self.run_id,
+                "thread_id": thread_id,
+                "timestamp": datetime.now().isoformat(),
+                "jsonl_logs": chunk.entries,
+                "chunk_metadata": {
+                    "chunk_id": chunk.metadata.chunk_id,
+                    "chunk_index": chunk.metadata.chunk_index,
+                    "total_chunks": chunk.metadata.total_chunks,
+                    "file_hash": chunk.metadata.file_hash,
+                    "file_name": chunk.metadata.file_name,
+                    "entries_in_chunk": chunk.metadata.entries_in_chunk,
+                    "chunk_size_bytes": chunk.metadata.chunk_size_bytes,
+                    "is_multi_file": chunk.metadata.is_multi_file,
+                    "file_index": chunk.metadata.file_index,
+                    "aggregation_required": chunk.metadata.aggregation_required
+                },
+                "client_environment": self.config.client_environment if hasattr(self.config, 'client_environment') and self.config.client_environment else None
+            }
+        }
+
+        # Display file chunk info
+        safe_console_print(
+            f"  File: {chunk.metadata.file_name} - "
+            f"{chunk.metadata.entries_in_chunk} entries, {chunk.metadata.chunk_size_mb:.2f} MB (no aggregation needed)",
+            style="cyan",
+            json_mode=self.config.json_mode,
+            ci_mode=self.config.ci_mode
+        )
+
+        # Send file chunk
+        payload_json = json.dumps(payload)
+        await self.ws.send(payload_json)
+
+        self.debug.debug_print(
+            f"Sent file: {chunk.metadata.file_name}",
+            DebugLevel.VERBOSE,
+            style="green"
+        )
 
     async def receive_events(self, callback=None):
         """Receive and process events from WebSocket"""
