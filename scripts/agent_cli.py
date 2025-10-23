@@ -962,6 +962,35 @@ class DebugManager:
             else:
                 # Individual agent level indentation
                 return f"    🧠 Agent Completed: {agent_name} (run: {truncate_with_ellipsis(run_id, 8)}) - {result_str}{retry_suffix}{validation_status}"
+        elif event_type == "agent_aggregation_complete":
+            # Display aggregation completion event with unified response
+            aggregation_reason = data.get('aggregation_reason', 'unknown')
+            chunks_processed = data.get('chunks_processed', 0)
+            total_chunks = data.get('total_chunks', 0)
+            file_name = data.get('file_name', 'unknown')
+            response = data.get('response', '')
+
+            # Use smart truncation for response content
+            response_str = smart_truncate_json(response, self) if isinstance(response, (dict, list)) else str(response)
+            max_len = 200  # Larger default for aggregation
+            if self.debug_level >= DebugLevel.VERBOSE:
+                max_len = 500
+            elif self.debug_level >= DebugLevel.TRACE:
+                max_len = 2000
+            elif self.debug_level >= DebugLevel.DIAGNOSTIC:
+                max_len = len(response_str)  # No truncation
+            if not isinstance(response, (dict, list)):
+                response_str = truncate_with_ellipsis(response_str, max_len)
+
+            # Format based on aggregation reason
+            reason_icon = "✅" if aggregation_reason == "all_chunks_received" else "⏱️"
+            reason_text = {
+                "all_chunks_received": "All chunks received",
+                "timeout": "Timeout reached",
+                "max_wait_exceeded": "Max wait exceeded"
+            }.get(aggregation_reason, aggregation_reason)
+
+            return f"🎯 Aggregation Complete: {file_name} ({reason_icon} {reason_text} - {chunks_processed}/{total_chunks} chunks) - {response_str}"
         elif event_type == "message":
             content = data.get('content', '')
             # Use smart truncation for message content
@@ -4595,7 +4624,9 @@ class WebSocketClient:
                         style="cyan"
                     )
 
-                    received = await self._wait_for_event("agent_aggregation_complete", timeout=180.0)
+                    # Backend MAX_WAIT_SECONDS is 1200s (20 minutes)
+                    # Use 1200s to align with backend's maximum aggregation window
+                    received = await self._wait_for_event("agent_aggregation_complete", timeout=1200.0)
 
                     if not received:
                         safe_console_print(
