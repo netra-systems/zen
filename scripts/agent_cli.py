@@ -4438,9 +4438,46 @@ class WebSocketClient:
             ci_mode=self.config.ci_mode
         )
 
+        # Track thread_id for multi-chunk files
+        # For chunk 0: send with thread_id=null, backend creates thread
+        # For chunks 1+: reuse thread_id from chunk 0 response
+        current_thread_id = thread_id
+        captured_thread_id = None
+
         # Send each chunk
         for i, chunk in enumerate(all_chunks, 1):
             chunk_num = i
+
+            # For aggregation_required chunks (multi-chunk files):
+            # - Chunk 0: Send with null thread_id, capture thread_id from response
+            # - Chunks 1+: Reuse captured thread_id from chunk 0
+            if chunk.metadata.aggregation_required:
+                if chunk.metadata.chunk_index == 0:
+                    # First chunk: Let backend create thread
+                    current_thread_id = None
+                    safe_console_print(
+                        f"  Chunk 0: Sending with thread_id=null (backend will create)",
+                        style="dim",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+                else:
+                    # Subsequent chunks: Reuse captured thread_id
+                    if captured_thread_id:
+                        current_thread_id = captured_thread_id
+                        safe_console_print(
+                            f"  Chunk {chunk.metadata.chunk_index}: Reusing thread_id={captured_thread_id[:20]}...",
+                            style="dim",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+                    else:
+                        safe_console_print(
+                            f"  ⚠️  Warning: No thread_id captured from chunk 0",
+                            style="yellow",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
 
             # Determine chunk type based on metadata
             # All chunks now use the same structure, no chunk_type attribute
@@ -4451,17 +4488,73 @@ class WebSocketClient:
                     chunk_num=chunk_num,
                     total_chunks=total_chunks,
                     message=message,
-                    thread_id=thread_id
+                    thread_id=current_thread_id
                 )
             else:
-                # Regular chunk
+                # Regular chunk (including aggregation_required chunks)
                 await self._send_single_chunk(
                     chunk=chunk,
                     chunk_num=chunk_num,
                     total_chunks=total_chunks,
                     message=message,
-                    thread_id=thread_id
+                    thread_id=current_thread_id
                 )
+
+            # For aggregation_required chunks, wait for response and capture thread_id
+            if chunk.metadata.aggregation_required and chunk.metadata.chunk_index == 0:
+                # Wait for agent_completed response to capture thread_id
+                try:
+                    safe_console_print(
+                        f"  Waiting for chunk 0 response to capture thread_id...",
+                        style="dim",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+
+                    # Wait up to 30 seconds for agent_completed event
+                    timeout = 30
+                    start_time = asyncio.get_event_loop().time()
+
+                    while (asyncio.get_event_loop().time() - start_time) < timeout:
+                        try:
+                            # Receive next message
+                            response = await asyncio.wait_for(self.ws.recv(), timeout=1.0)
+                            response_data = json.loads(response)
+
+                            # Check if this is agent_completed event
+                            event_type = response_data.get('type', '')
+                            if event_type == "system_message":
+                                inner_event = response_data.get('data', {}).get('event', '')
+                                if inner_event == 'agent_completed':
+                                    payload = response_data.get('data', {}).get('payload', {})
+                                    captured_thread_id = payload.get('thread_id')
+
+                                    if captured_thread_id:
+                                        safe_console_print(
+                                            f"  ✓ Captured thread_id from chunk 0: {captured_thread_id[:20]}...",
+                                            style="green",
+                                            json_mode=self.config.json_mode,
+                                            ci_mode=self.config.ci_mode
+                                        )
+                                        break
+
+                        except asyncio.TimeoutError:
+                            continue  # Continue waiting
+
+                    if not captured_thread_id:
+                        safe_console_print(
+                            f"  ⚠️  Timeout waiting for thread_id from chunk 0",
+                            style="yellow",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+
+                except Exception as e:
+                    self.debug.debug_print(
+                        f"Error capturing thread_id: {str(e)}",
+                        DebugLevel.VERBOSE,
+                        style="red"
+                    )
 
             # Delay between chunks (except after last chunk)
             if i < total_chunks:
