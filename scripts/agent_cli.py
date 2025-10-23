@@ -4355,7 +4355,7 @@ class WebSocketClient:
             message: Original user message
             thread_id: Thread ID for this conversation
         """
-        from scripts.chunk_creator import ChunkCreator
+        from chunk_creator import ChunkCreator
 
         # Display chunking info
         safe_console_print(
@@ -4409,7 +4409,7 @@ class WebSocketClient:
                 )
 
                 # Create a single "chunk" for this file
-                from scripts.chunk_creator import Chunk, ChunkMetadata
+                from chunk_creator import Chunk, ChunkMetadata
                 metadata = ChunkMetadata(
                     chunk_id=file_analysis.file_hash[:12],
                     chunk_index=0,
