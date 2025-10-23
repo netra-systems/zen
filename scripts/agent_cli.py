@@ -4113,9 +4113,9 @@ class WebSocketClient:
         # Attach logs if --send-logs is enabled
         if self.send_logs:
             try:
-                from scripts.agent_logs import collect_recent_logs
-                from scripts.chunking_analyzer import ChunkingAnalyzer
-                from scripts.chunk_creator import ChunkCreator
+                from agent_logs import collect_recent_logs
+                from chunking_analyzer import ChunkingAnalyzer
+                from chunk_creator import ChunkCreator
 
                 result = collect_recent_logs(
                     limit=self.logs_count,
