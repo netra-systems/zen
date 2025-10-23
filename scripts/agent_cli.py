@@ -4504,10 +4504,9 @@ class WebSocketClient:
                     thread_id=current_thread_id
                 )
 
-            # Small delay to avoid overwhelming the WebSocket
-            # This is critical for chunked uploads to ensure backend receives all chunks
-            if i < total_chunks:
-                await asyncio.sleep(0.2)  # Increased from 0.1s for reliability
+            # Small delay to avoid overwhelming the WebSocket (optional, can be removed if backend handles it)
+            if i < total_chunks and not chunk.metadata.aggregation_required:
+                await asyncio.sleep(0.1)
 
         # CRITICAL FIX for Issue #28: Wait for backend to aggregate all chunks
         # After sending all chunks in parallel, wait for the aggregation to complete
