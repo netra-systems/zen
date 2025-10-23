@@ -4364,18 +4364,71 @@ class WebSocketClient:
             json_mode=self.config.json_mode,
             ci_mode=self.config.ci_mode
         )
-        safe_console_print(
-            f"Reason: {chunking_strategy.reason}",
-            style="yellow",
-            json_mode=self.config.json_mode,
-            ci_mode=self.config.ci_mode
-        )
 
-        # Create chunks
+        # Create chunks from file analyses
         chunk_creator = ChunkCreator()
-        chunks = chunk_creator.create_chunks(logs, file_info, chunking_strategy)
+        all_chunks = []
 
-        total_chunks = len(chunks)
+        # Track entry offset for extracting entries per file
+        entry_offset = 0
+
+        for file_idx, file_analysis in enumerate(chunking_strategy.file_analyses):
+            if file_analysis.needs_chunking:
+                # Extract entries for this file
+                file_entries = logs[entry_offset:entry_offset + file_analysis.entry_count]
+
+                safe_console_print(
+                    f"\nChunking file: {file_analysis.file_name} "
+                    f"({file_analysis.size_mb:.2f} MB, {file_analysis.entry_count} entries)",
+                    style="yellow",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+
+                # Create chunks for this file
+                is_multi_file = len(chunking_strategy.file_analyses) > 1
+                file_chunks = chunk_creator.create_chunks(
+                    entries=file_entries,
+                    file_name=file_analysis.file_name,
+                    file_hash=file_analysis.file_hash,
+                    is_multi_file=is_multi_file,
+                    file_index=file_idx if is_multi_file else None
+                )
+
+                all_chunks.extend(file_chunks)
+            else:
+                # File doesn't need chunking - will be sent as single chunk
+                file_entries = logs[entry_offset:entry_offset + file_analysis.entry_count]
+
+                safe_console_print(
+                    f"\nFile doesn't need chunking: {file_analysis.file_name} "
+                    f"({file_analysis.size_mb:.2f} MB, {file_analysis.entry_count} entries) - sending as single unit",
+                    style="cyan",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+
+                # Create a single "chunk" for this file
+                from scripts.chunk_creator import Chunk, ChunkMetadata
+                metadata = ChunkMetadata(
+                    chunk_id=file_analysis.file_hash[:12],
+                    chunk_index=0,
+                    total_chunks=1,
+                    file_hash=file_analysis.file_hash,
+                    file_name=file_analysis.file_name,
+                    entries_in_chunk=file_analysis.entry_count,
+                    chunk_size_bytes=file_analysis.size_bytes,
+                    chunk_size_mb=file_analysis.size_mb,
+                    is_multi_file=len(chunking_strategy.file_analyses) > 1,
+                    file_index=file_idx if len(chunking_strategy.file_analyses) > 1 else None,
+                    aggregation_required=False  # Single file, no aggregation needed
+                )
+                single_chunk = Chunk(entries=file_entries, metadata=metadata)
+                all_chunks.append(single_chunk)
+
+            entry_offset += file_analysis.entry_count
+
+        total_chunks = len(all_chunks)
         safe_console_print(
             f"\nSending {total_chunks} chunk(s)...",
             style="cyan",
@@ -4384,10 +4437,12 @@ class WebSocketClient:
         )
 
         # Send each chunk
-        for i, chunk in enumerate(chunks, 1):
+        for i, chunk in enumerate(all_chunks, 1):
             chunk_num = i
 
-            if chunk.chunk_type == 'file':
+            # Determine chunk type based on metadata
+            # All chunks now use the same structure, no chunk_type attribute
+            if chunk.metadata.total_chunks == 1 and not chunk.metadata.aggregation_required:
                 # Single file chunk
                 await self._send_single_file(
                     chunk=chunk,
@@ -4443,14 +4498,18 @@ class WebSocketClient:
                 "run_id": self.run_id,
                 "thread_id": thread_id,
                 "timestamp": datetime.now().isoformat(),
-                "jsonl_logs": chunk.logs,
+                "jsonl_logs": chunk.entries,
                 "chunk_metadata": {
-                    "chunk_number": chunk_num,
-                    "total_chunks": total_chunks,
-                    "chunk_type": chunk.chunk_type,
-                    "file_path": chunk.file_path if hasattr(chunk, 'file_path') else None,
-                    "line_range": chunk.line_range if hasattr(chunk, 'line_range') else None,
-                    "chunk_size_bytes": chunk.size_bytes
+                    "chunk_id": chunk.metadata.chunk_id,
+                    "chunk_index": chunk.metadata.chunk_index,
+                    "total_chunks": chunk.metadata.total_chunks,
+                    "file_hash": chunk.metadata.file_hash,
+                    "file_name": chunk.metadata.file_name,
+                    "entries_in_chunk": chunk.metadata.entries_in_chunk,
+                    "chunk_size_bytes": chunk.metadata.chunk_size_bytes,
+                    "is_multi_file": chunk.metadata.is_multi_file,
+                    "file_index": chunk.metadata.file_index,
+                    "aggregation_required": chunk.metadata.aggregation_required
                 },
                 "client_environment": self.config.client_environment if hasattr(self.config, 'client_environment') and self.config.client_environment else None
             }
@@ -4458,7 +4517,8 @@ class WebSocketClient:
 
         # Display chunk info
         safe_console_print(
-            f"  Chunk {chunk_num}/{total_chunks}: {len(chunk.logs)} entries, {chunk.size_bytes / 1024:.2f} KB",
+            f"  Chunk {chunk.metadata.chunk_index + 1}/{chunk.metadata.total_chunks}: "
+            f"{chunk.metadata.entries_in_chunk} entries, {chunk.metadata.chunk_size_mb:.2f} MB",
             style="cyan",
             json_mode=self.config.json_mode,
             ci_mode=self.config.ci_mode
@@ -4492,7 +4552,7 @@ class WebSocketClient:
             message: Original user message
             thread_id: Thread ID for this conversation
         """
-        # Create payload for this file chunk
+        # Create payload for this file chunk (same structure as regular chunks)
         payload = {
             "type": "user_message",
             "payload": {
@@ -4500,22 +4560,27 @@ class WebSocketClient:
                 "run_id": self.run_id,
                 "thread_id": thread_id,
                 "timestamp": datetime.now().isoformat(),
-                "jsonl_logs": chunk.logs,
+                "jsonl_logs": chunk.entries,
                 "chunk_metadata": {
-                    "chunk_number": chunk_num,
-                    "total_chunks": total_chunks,
-                    "chunk_type": "file",
-                    "file_path": chunk.file_path,
-                    "chunk_size_bytes": chunk.size_bytes
+                    "chunk_id": chunk.metadata.chunk_id,
+                    "chunk_index": chunk.metadata.chunk_index,
+                    "total_chunks": chunk.metadata.total_chunks,
+                    "file_hash": chunk.metadata.file_hash,
+                    "file_name": chunk.metadata.file_name,
+                    "entries_in_chunk": chunk.metadata.entries_in_chunk,
+                    "chunk_size_bytes": chunk.metadata.chunk_size_bytes,
+                    "is_multi_file": chunk.metadata.is_multi_file,
+                    "file_index": chunk.metadata.file_index,
+                    "aggregation_required": chunk.metadata.aggregation_required
                 },
                 "client_environment": self.config.client_environment if hasattr(self.config, 'client_environment') and self.config.client_environment else None
             }
         }
 
         # Display file chunk info
-        file_name = chunk.file_path.split('/')[-1] if chunk.file_path else 'unknown'
         safe_console_print(
-            f"  File {chunk_num}/{total_chunks}: {file_name} - {len(chunk.logs)} entries, {chunk.size_bytes / 1024:.2f} KB",
+            f"  File: {chunk.metadata.file_name} - "
+            f"{chunk.metadata.entries_in_chunk} entries, {chunk.metadata.chunk_size_mb:.2f} MB (no aggregation needed)",
             style="cyan",
             json_mode=self.config.json_mode,
             ci_mode=self.config.ci_mode
@@ -4526,7 +4591,7 @@ class WebSocketClient:
         await self.ws.send(payload_json)
 
         self.debug.debug_print(
-            f"Sent file chunk {chunk_num}/{total_chunks}: {file_name}",
+            f"Sent file: {chunk.metadata.file_name}",
             DebugLevel.VERBOSE,
             style="green"
         )
