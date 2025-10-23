@@ -4515,14 +4515,18 @@ class WebSocketClient:
             }
         }
 
-        # Display chunk info
-        safe_console_print(
+        # Display chunk info with warning if oversized
+        chunk_display = (
             f"  Chunk {chunk.metadata.chunk_index + 1}/{chunk.metadata.total_chunks}: "
-            f"{chunk.metadata.entries_in_chunk} entries, {chunk.metadata.chunk_size_mb:.2f} MB",
-            style="cyan",
-            json_mode=self.config.json_mode,
-            ci_mode=self.config.ci_mode
+            f"{chunk.metadata.entries_in_chunk} entries, {chunk.metadata.chunk_size_mb:.2f} MB"
         )
+
+        # Warning if chunk exceeds recommended size (happens with large single entries)
+        if chunk.metadata.chunk_size_mb > 2.5:
+            chunk_display += f" ⚠️  OVERSIZED (single entry > 2.5 MB limit)"
+            safe_console_print(chunk_display, style="yellow", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        else:
+            safe_console_print(chunk_display, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
 
         # Send chunk
         payload_json = json.dumps(payload)

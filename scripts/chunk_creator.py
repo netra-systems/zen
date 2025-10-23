@@ -100,6 +100,25 @@ class ChunkCreator:
             entry_json = json.dumps(entry)
             entry_size = len(entry_json.encode('utf-8'))
 
+            # Check if this single entry exceeds max size
+            if entry_size > max_size_bytes:
+                # CRITICAL: Single entry larger than chunk size limit
+                # This happens with large tool results, file contents, etc.
+                # We cannot split a single JSON object, so we create a warning chunk
+
+                # Save current chunk first if it has entries
+                if current_chunk_entries:
+                    chunks.append((current_chunk_entries, current_chunk_size))
+                    current_chunk_entries = []
+                    current_chunk_size = 0
+
+                # Create oversized single-entry chunk with warning
+                # The backend will need to handle this specially
+                chunks.append(([entry], entry_size))
+
+                # Warning will be logged when chunk is sent
+                continue
+
             # Check if adding this entry would exceed limits
             would_exceed_count = len(current_chunk_entries) >= self.MAX_ENTRIES_PER_CHUNK
             would_exceed_size = (current_chunk_size + entry_size) > max_size_bytes
