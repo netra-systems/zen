@@ -4628,7 +4628,7 @@ class WebSocketClient:
             message: Original user message
             thread_id: Thread ID for this conversation
         """
-        # Create payload for this file (must include agent_context for backend processing)
+        # Create payload for this file (no chunk_metadata needed for single files)
         payload = {
             "type": "user_message",
             "payload": {
@@ -4637,21 +4637,6 @@ class WebSocketClient:
                 "thread_id": thread_id,
                 "timestamp": datetime.now().isoformat(),
                 "jsonl_logs": chunk.entries,
-                "agent_context": {
-                    "chunk_metadata": {
-                        "chunk_index": chunk.metadata.chunk_index,
-                        "total_chunks": chunk.metadata.total_chunks,
-                        "file_hash": chunk.metadata.file_hash,
-                        "file_name": chunk.metadata.file_name,
-                        "aggregation_required": chunk.metadata.aggregation_required,
-                        "entries_in_chunk": chunk.metadata.entries_in_chunk,
-                        "chunk_size_bytes": chunk.metadata.chunk_size_bytes,
-                        "start_entry_index": chunk.metadata.start_entry_index,
-                        "end_entry_index": chunk.metadata.end_entry_index,
-                        "is_multi_file": chunk.metadata.is_multi_file,
-                        "file_index": chunk.metadata.file_index
-                    }
-                },
                 "client_environment": self.config.client_environment if hasattr(self.config, 'client_environment') and self.config.client_environment else None
             }
         }
