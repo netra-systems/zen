@@ -4419,6 +4419,8 @@ class WebSocketClient:
                     entries_in_chunk=file_analysis.entry_count,
                     chunk_size_bytes=file_analysis.size_bytes,
                     chunk_size_mb=file_analysis.size_mb,
+                    start_entry_index=0,
+                    end_entry_index=file_analysis.entry_count - 1,
                     is_multi_file=len(chunking_strategy.file_analyses) > 1,
                     file_index=file_idx if len(chunking_strategy.file_analyses) > 1 else None,
                     aggregation_required=False  # Single file, no aggregation needed
@@ -4499,17 +4501,20 @@ class WebSocketClient:
                 "thread_id": thread_id,
                 "timestamp": datetime.now().isoformat(),
                 "jsonl_logs": chunk.entries,
-                "chunk_metadata": {
-                    "chunk_id": chunk.metadata.chunk_id,
-                    "chunk_index": chunk.metadata.chunk_index,
-                    "total_chunks": chunk.metadata.total_chunks,
-                    "file_hash": chunk.metadata.file_hash,
-                    "file_name": chunk.metadata.file_name,
-                    "entries_in_chunk": chunk.metadata.entries_in_chunk,
-                    "chunk_size_bytes": chunk.metadata.chunk_size_bytes,
-                    "is_multi_file": chunk.metadata.is_multi_file,
-                    "file_index": chunk.metadata.file_index,
-                    "aggregation_required": chunk.metadata.aggregation_required
+                "agent_context": {
+                    "chunk_metadata": {
+                        "chunk_index": chunk.metadata.chunk_index,
+                        "total_chunks": chunk.metadata.total_chunks,
+                        "file_hash": chunk.metadata.file_hash,
+                        "file_name": chunk.metadata.file_name,
+                        "aggregation_required": chunk.metadata.aggregation_required,
+                        "entries_in_chunk": chunk.metadata.entries_in_chunk,
+                        "chunk_size_bytes": chunk.metadata.chunk_size_bytes,
+                        "start_entry_index": chunk.metadata.start_entry_index,
+                        "end_entry_index": chunk.metadata.end_entry_index,
+                        "is_multi_file": chunk.metadata.is_multi_file,
+                        "file_index": chunk.metadata.file_index
+                    }
                 },
                 "client_environment": self.config.client_environment if hasattr(self.config, 'client_environment') and self.config.client_environment else None
             }
@@ -4556,7 +4561,7 @@ class WebSocketClient:
             message: Original user message
             thread_id: Thread ID for this conversation
         """
-        # Create payload for this file chunk (same structure as regular chunks)
+        # Create payload for this file (no chunk_metadata needed for single files)
         payload = {
             "type": "user_message",
             "payload": {
@@ -4565,18 +4570,6 @@ class WebSocketClient:
                 "thread_id": thread_id,
                 "timestamp": datetime.now().isoformat(),
                 "jsonl_logs": chunk.entries,
-                "chunk_metadata": {
-                    "chunk_id": chunk.metadata.chunk_id,
-                    "chunk_index": chunk.metadata.chunk_index,
-                    "total_chunks": chunk.metadata.total_chunks,
-                    "file_hash": chunk.metadata.file_hash,
-                    "file_name": chunk.metadata.file_name,
-                    "entries_in_chunk": chunk.metadata.entries_in_chunk,
-                    "chunk_size_bytes": chunk.metadata.chunk_size_bytes,
-                    "is_multi_file": chunk.metadata.is_multi_file,
-                    "file_index": chunk.metadata.file_index,
-                    "aggregation_required": chunk.metadata.aggregation_required
-                },
                 "client_environment": self.config.client_environment if hasattr(self.config, 'client_environment') and self.config.client_environment else None
             }
         }

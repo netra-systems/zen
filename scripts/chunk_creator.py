@@ -25,6 +25,8 @@ class ChunkMetadata:
     entries_in_chunk: int  # Number of entries in this chunk
     chunk_size_bytes: int  # Size of this chunk in bytes
     chunk_size_mb: float  # Size of this chunk in MB
+    start_entry_index: int  # 0-based index of first entry in original file
+    end_entry_index: int  # 0-based index of last entry in original file
     is_multi_file: bool  # Part of multi-file analysis
     file_index: Optional[int]  # Index if multi-file (0-based)
     aggregation_required: bool  # True if backend should aggregate
@@ -147,22 +149,34 @@ class ChunkCreator:
         total_chunks = len(chunks)
         chunk_objects = []
 
+        # Track entry indices across chunks
+        entry_offset = 0
+
         for idx, (chunk_entries, chunk_size) in enumerate(chunks):
+            num_entries = len(chunk_entries)
+            start_entry_index = entry_offset
+            end_entry_index = entry_offset + num_entries - 1
+
             metadata = ChunkMetadata(
                 chunk_id=session_chunk_id,
                 chunk_index=idx,
                 total_chunks=total_chunks,
                 file_hash=file_hash,
                 file_name=file_name,
-                entries_in_chunk=len(chunk_entries),
+                entries_in_chunk=num_entries,
                 chunk_size_bytes=chunk_size,
                 chunk_size_mb=chunk_size / (1024 * 1024),
+                start_entry_index=start_entry_index,
+                end_entry_index=end_entry_index,
                 is_multi_file=is_multi_file,
                 file_index=file_index,
                 aggregation_required=True  # Backend should aggregate
             )
 
             chunk_objects.append(Chunk(entries=chunk_entries, metadata=metadata))
+
+            # Update offset for next chunk
+            entry_offset += num_entries
 
         return chunk_objects
 
