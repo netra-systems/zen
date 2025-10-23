@@ -4362,6 +4362,64 @@ class WebSocketClient:
             self.debug.debug_print(f"WEBSOCKET MESSAGE SENT SUCCESSFULLY - run_id: {self.run_id}, thread_id: {thread_id}", DebugLevel.VERBOSE)
         return self.run_id
 
+    async def _wait_for_event(self, event_type: str, timeout: float = 120.0) -> bool:
+        """
+        Wait for a specific event type to be received.
+
+        Args:
+            event_type: The event type to wait for (e.g., 'agent_completed', 'agent_aggregation_complete')
+            timeout: Maximum time to wait in seconds (default: 120s)
+
+        Returns:
+            True if event was received, False if timeout occurred
+        """
+        start_time = asyncio.get_event_loop().time()
+        initial_event_count = len(self.events)
+
+        self.debug.debug_print(
+            f"Waiting for event: {event_type} (timeout: {timeout}s)",
+            DebugLevel.VERBOSE,
+            style="cyan"
+        )
+
+        while True:
+            # Check if timeout occurred
+            elapsed = asyncio.get_event_loop().time() - start_time
+            if elapsed > timeout:
+                self.debug.debug_print(
+                    f"Timeout waiting for {event_type} after {elapsed:.1f}s",
+                    DebugLevel.BASIC,
+                    style="yellow"
+                )
+                return False
+
+            # Check if we have new events
+            if len(self.events) > initial_event_count:
+                # Check the new events for the one we're waiting for
+                for event in self.events[initial_event_count:]:
+                    if event.type == event_type:
+                        self.debug.debug_print(
+                            f"Received {event_type} event after {elapsed:.1f}s",
+                            DebugLevel.VERBOSE,
+                            style="green"
+                        )
+                        return True
+
+                    # Also check for nested events in system_message
+                    if event.type == "system_message" and event.data.get('event') == event_type:
+                        self.debug.debug_print(
+                            f"Received {event_type} event (nested in system_message) after {elapsed:.1f}s",
+                            DebugLevel.VERBOSE,
+                            style="green"
+                        )
+                        return True
+
+            # Update initial_event_count to avoid re-checking same events
+            initial_event_count = len(self.events)
+
+            # Short sleep to avoid busy waiting
+            await asyncio.sleep(0.1)
+
     async def _send_chunked_logs(
         self,
         logs: List[Dict[str, Any]],
@@ -4502,8 +4560,65 @@ class WebSocketClient:
                     thread_id=current_thread_id
                 )
 
-            # Delay between chunks (except after last chunk)
-            if i < total_chunks:
+            # Wait for backend to process this chunk before sending next one
+            # For chunks that require aggregation, wait for agent_completed event
+            if chunk.metadata.aggregation_required:
+                # Not the last chunk - wait for agent_completed
+                if i < total_chunks:
+                    self.debug.debug_print(
+                        f"Waiting for agent_completed event for chunk {i}/{total_chunks}",
+                        DebugLevel.VERBOSE,
+                        style="cyan"
+                    )
+
+                    received = await self._wait_for_event("agent_completed", timeout=120.0)
+
+                    if not received:
+                        safe_console_print(
+                            f"⚠️  Warning: Timeout waiting for agent_completed for chunk {i}/{total_chunks}",
+                            style="yellow",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+                    else:
+                        self.debug.debug_print(
+                            f"✓ Received agent_completed for chunk {i}/{total_chunks}",
+                            DebugLevel.VERBOSE,
+                            style="green"
+                        )
+
+                # Last chunk - wait for agent_aggregation_complete
+                else:
+                    self.debug.debug_print(
+                        f"Waiting for agent_aggregation_complete event for final chunk {i}/{total_chunks}",
+                        DebugLevel.VERBOSE,
+                        style="cyan"
+                    )
+
+                    received = await self._wait_for_event("agent_aggregation_complete", timeout=180.0)
+
+                    if not received:
+                        safe_console_print(
+                            f"⚠️  Warning: Timeout waiting for agent_aggregation_complete",
+                            style="yellow",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+                    else:
+                        self.debug.debug_print(
+                            f"✓ Received agent_aggregation_complete",
+                            DebugLevel.VERBOSE,
+                            style="green"
+                        )
+
+                        safe_console_print(
+                            f"✓ All chunks processed and aggregated successfully",
+                            style="green",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+            # For non-aggregation chunks, keep the original delay
+            elif i < total_chunks:
                 await asyncio.sleep(0.5)
 
         safe_console_print(
