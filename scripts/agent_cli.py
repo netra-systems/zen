@@ -4468,14 +4468,15 @@ class WebSocketClient:
         # - If thread_id is None: send null for all chunks, backend groups by chunk_id
         current_thread_id = thread_id
 
-        # Send each chunk
+        # Send all chunks in parallel for better performance
+        # Backend is designed to handle chunks arriving in any order and aggregate them
         for i, chunk in enumerate(all_chunks, 1):
             chunk_num = i
 
             # Debug logging for chunked uploads
             if chunk.metadata.aggregation_required and i == 1:
                 safe_console_print(
-                    f"  Sending {total_chunks} chunks with thread_id={'null' if current_thread_id is None else current_thread_id[:20] + '...'}",
+                    f"  Sending {total_chunks} chunks in parallel with thread_id={'null' if current_thread_id is None else current_thread_id[:20] + '...'}",
                     style="dim",
                     json_mode=self.config.json_mode,
                     ci_mode=self.config.ci_mode
@@ -4494,6 +4495,7 @@ class WebSocketClient:
                 )
             else:
                 # Regular chunk (including aggregation_required chunks)
+                # Send immediately without waiting - parallel sending
                 await self._send_single_chunk(
                     chunk=chunk,
                     chunk_num=chunk_num,
@@ -4502,12 +4504,38 @@ class WebSocketClient:
                     thread_id=current_thread_id
                 )
 
-            # Delay between chunks (except after last chunk)
-            if i < total_chunks:
-                await asyncio.sleep(0.5)
+            # Small delay to avoid overwhelming the WebSocket (optional, can be removed if backend handles it)
+            if i < total_chunks and not chunk.metadata.aggregation_required:
+                await asyncio.sleep(0.1)
+
+        # CRITICAL FIX for Issue #28: Wait for backend to aggregate all chunks
+        # After sending all chunks in parallel, wait for the aggregation to complete
+        # This ensures the user gets the final aggregated response
+        if any(chunk.metadata.aggregation_required for chunk in all_chunks):
+            self.debug.debug_print(
+                f"⏳ Waiting for backend to aggregate all {total_chunks} chunks...",
+                DebugLevel.VERBOSE,
+                style="yellow"
+            )
+            safe_console_print(
+                f"  ⏳ Waiting for backend to aggregate all {total_chunks} chunks...",
+                style="cyan",
+                json_mode=self.config.json_mode,
+                ci_mode=self.config.ci_mode
+            )
+
+            # Wait for the aggregation_complete event
+            # Timeout is longer to account for processing all chunks
+            await self._wait_for_event_type('agent_aggregation_complete', timeout=120.0, chunk_context=f"all {total_chunks} chunks")
+
+            self.debug.debug_print(
+                f"✓ Received agent_aggregation_complete for all {total_chunks} chunks",
+                DebugLevel.VERBOSE,
+                style="green"
+            )
 
         safe_console_print(
-            f"\n✓ All {total_chunks} chunk(s) sent successfully",
+            f"\n✓ All {total_chunks} chunk(s) processed successfully",
             style="green",
             json_mode=self.config.json_mode,
             ci_mode=self.config.ci_mode
@@ -4631,6 +4659,60 @@ class WebSocketClient:
             DebugLevel.VERBOSE,
             style="green"
         )
+
+    async def _wait_for_event_type(self, event_type: str, timeout: float = 60.0, chunk_context: str = "") -> None:
+        """
+        Wait for a specific event type to be received from the WebSocket.
+
+        This is critical for chunked uploads where we must wait for backend acknowledgment
+        (agent_completed or agent_aggregation_complete) before sending the next chunk.
+
+        Args:
+            event_type: The type of event to wait for (e.g., 'agent_completed', 'agent_aggregation_complete')
+            timeout: Maximum time to wait in seconds
+            chunk_context: Context string for logging (e.g., "chunk 1/5")
+
+        Raises:
+            TimeoutError: If event is not received within timeout period
+            RuntimeError: If WebSocket connection is lost while waiting
+        """
+        start_time = asyncio.get_event_loop().time()
+        initial_event_count = len(self.events)
+
+        self.debug.debug_print(
+            f"Waiting for '{event_type}' event (timeout: {timeout}s) - {chunk_context}",
+            DebugLevel.DIAGNOSTIC,
+            style="cyan"
+        )
+
+        while True:
+            # Check if the event has arrived
+            for i in range(initial_event_count, len(self.events)):
+                event = self.events[i]
+                if event.type == event_type:
+                    self.debug.debug_print(
+                        f"✓ Received '{event_type}' event - {chunk_context}",
+                        DebugLevel.DIAGNOSTIC,
+                        style="green"
+                    )
+                    return
+
+            # Check timeout
+            elapsed = asyncio.get_event_loop().time() - start_time
+            if elapsed >= timeout:
+                raise TimeoutError(
+                    f"Timeout waiting for '{event_type}' event after {elapsed:.1f}s - {chunk_context}. "
+                    f"Backend may not be processing chunks correctly."
+                )
+
+            # Check if WebSocket is still connected
+            if not self.ws or not self.connected:
+                raise RuntimeError(
+                    f"WebSocket connection lost while waiting for '{event_type}' event - {chunk_context}"
+                )
+
+            # Wait a bit before checking again
+            await asyncio.sleep(0.1)
 
     async def receive_events(self, callback=None):
         """Receive and process events from WebSocket"""
