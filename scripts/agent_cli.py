@@ -4137,9 +4137,29 @@ class WebSocketClient:
                     analyzer = ChunkingAnalyzer()
                     chunking_strategy = analyzer.analyze_files(logs, file_info)
 
-                    if chunking_strategy.strategy == 'no_chunking':
+                    if chunking_strategy.strategy in ('no_chunking', 'multi_file_no_chunking'):
                         # Original behavior: send all logs at once
                         payload["payload"]["jsonl_logs"] = logs
+
+                        # Add agent_context with chunk_metadata for non-chunked logs
+                        # This maintains consistency with backend expectations
+                        file_analysis = chunking_strategy.file_analyses[0] if chunking_strategy.file_analyses else None
+                        if file_analysis:
+                            payload["payload"]["agent_context"] = {
+                                "chunk_metadata": {
+                                    "chunk_index": 0,
+                                    "total_chunks": 1,
+                                    "file_hash": file_analysis.file_hash,
+                                    "file_name": file_analysis.file_name,
+                                    "aggregation_required": False,  # No aggregation needed for non-chunked
+                                    "entries_in_chunk": file_analysis.entry_count,
+                                    "chunk_size_bytes": file_analysis.size_bytes,
+                                    "start_entry_index": 0,
+                                    "end_entry_index": file_analysis.entry_count - 1,
+                                    "is_multi_file": False,
+                                    "file_index": 0
+                                }
+                            }
 
                         # Calculate payload size for transmission proof
                         import logging
