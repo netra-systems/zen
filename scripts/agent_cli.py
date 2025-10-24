@@ -100,7 +100,7 @@ if "--env" in sys.argv:
     env_idx = sys.argv.index("--env")
     if env_idx + 1 < len(sys.argv):
         env_value = sys.argv[env_idx + 1]
-        if env_value in ["staging", "production", "local"]:
+        if env_value in ["staging", "production", "local", "development"]:
             os.environ["ENVIRONMENT"] = env_value
             # Will be displayed later after logging is set up
 
@@ -140,8 +140,8 @@ class SimpleConfigReader:
         """Load only the env vars CLI actually needs."""
         config = {}
 
-        # For staging: try to get E2E key from environment or GCP
-        if self.environment == "staging":
+        # For staging and development: try to get E2E key from environment or GCP
+        if self.environment in ["staging", "development"]:
             e2e_key = E2E_OAUTH_SIMULATION_KEY
             if e2e_key:
                 config['E2E_OAUTH_SIMULATION_KEY'] = e2e_key
@@ -1616,12 +1616,14 @@ class Environment(Enum):
     LOCAL = "local"
     STAGING = "staging"
     PRODUCTION = "production"
+    DEVELOPMENT = "development"  # Custom backend URL for development/testing
 
 @dataclass
 class Config:
     """Configuration for the CLI"""
     environment: Environment = Environment.STAGING
     client_environment: Optional[str] = None  # Issue #2442: Client environment for timeout coordination
+    custom_backend_url: Optional[str] = None  # Custom backend URL for DEVELOPMENT environment
     backend_url: str = ""
     auth_url: str = ""
     ws_url: str = ""
@@ -1661,6 +1663,27 @@ class Config:
             self.backend_url = "https://api.netrasystems.ai"
             self.auth_url = "https://auth.netrasystems.ai"
             self.ws_url = "wss://api.netrasystems.ai/ws"
+        elif self.environment == Environment.DEVELOPMENT:
+            # DEVELOPMENT mode: Use custom backend URL or fallback to localhost
+            if self.custom_backend_url:
+                # Parse custom URL to determine protocol
+                from urllib.parse import urlparse
+                parsed = urlparse(self.custom_backend_url)
+
+                # Use the custom backend URL
+                self.backend_url = self.custom_backend_url
+
+                # Derive WebSocket URL based on HTTP/HTTPS protocol
+                ws_scheme = "wss" if parsed.scheme == "https" else "ws"
+                self.ws_url = f"{ws_scheme}://{parsed.netloc}/ws"
+
+                # For development, use the same host for auth (simplified)
+                self.auth_url = self.custom_backend_url.replace("/api", "/auth") if "/api" in self.custom_backend_url else self.custom_backend_url
+            else:
+                # Fallback to localhost if no custom URL provided
+                self.backend_url = "http://localhost:8000"
+                self.auth_url = "http://localhost:8081"
+                self.ws_url = "ws://localhost:8000/ws"
 
         # Create token directory if needed
         self.token_file.parent.mkdir(parents=True, exist_ok=True)
@@ -2252,14 +2275,14 @@ class AuthManager:
         if await self.authenticate_oauth("google"):
             return True
 
-        # 2. E2E test auth (fallback for staging/testing)
-        if self.config.environment in [Environment.STAGING, Environment.LOCAL]:
+        # 2. E2E test auth (fallback for staging/testing/development)
+        if self.config.environment in [Environment.STAGING, Environment.LOCAL, Environment.DEVELOPMENT]:
             safe_console_print("Trying E2E test authentication...", style="yellow")
             if await self._authenticate_e2e(email):
                 return True
 
-        # 3. Dev auth (development environment only)
-        if self.config.environment == Environment.LOCAL:
+        # 3. Dev auth (development/local environment only)
+        if self.config.environment in [Environment.LOCAL, Environment.DEVELOPMENT]:
             safe_console_print("Trying development authentication...", style="yellow")
             if await self.authenticate_dev(email):
                 return True
@@ -2603,7 +2626,7 @@ class WebSocketClient:
     def __init__(self, config: Config, token: str, debug_manager: Optional[DebugManager] = None,
                  send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
                  logs_path: Optional[str] = None, logs_user: Optional[str] = None,
-                 handshake_timeout: float = 10.0):
+                 logs_provider: str = "claude", handshake_timeout: float = 10.0):
         self.config = config
         self.token = token
         self.debug = debug_manager or DebugManager(config.debug_level, config.debug_log_file, config.enable_websocket_diagnostics)
@@ -2627,6 +2650,7 @@ class WebSocketClient:
         self.logs_project = logs_project
         self.logs_path = logs_path
         self.logs_user = logs_user
+        self.logs_provider = logs_provider
 
         # ISSUE #2134 FIX: Cleanup coordination protocol support
         self.cleanup_in_progress = False
@@ -2648,6 +2672,11 @@ class WebSocketClient:
         self.connection_established_received = False
         self.event_queue: List[Dict[str, Any]] = []
         self.ready_to_send_events = False
+
+        # Thread ID capture for chunked uploads
+        self.awaiting_chunk_thread_id = False
+        self.captured_chunk_thread_id: Optional[str] = None
+        self.chunk_thread_id_event: Optional[asyncio.Event] = None
 
     def _initialize_timeouts(self) -> None:
         """Initialize WebSocket timeouts using backend timeout configuration.
@@ -2697,6 +2726,10 @@ class WebSocketClient:
             # Issue #2861: Production workflows now require 100s+ for multi-agent LLM responses
             self.websocket_recv_timeout = 120  # Production fallback aligned with extended Cloud Run windows
             self.close_timeout = 122
+        elif self.config.environment == Environment.DEVELOPMENT:
+            # Development environment: Use generous timeouts for custom backends
+            self.websocket_recv_timeout = 300  # Development fallback (same as staging for flexibility)
+            self.close_timeout = 302  # Maintain 2s safety margin
         else:  # LOCAL or other
             self.websocket_recv_timeout = 10  # Local default
             self.close_timeout = 12
@@ -3846,6 +3879,7 @@ class WebSocketClient:
         safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print("SENDING LOGS TO OPTIMIZER", style="bold cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Provider: {self.logs_provider.upper()}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(f"  Total Entries: {len(info['logs'])}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(f"  Files Read: {info['files_read']}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(f"  Payload Size: {info['size_str']}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
@@ -3901,72 +3935,97 @@ class WebSocketClient:
 
         # NEW: Check if ready to send events
         # Events can only be sent AFTER both handshake AND connection_established
+        # DEVELOPMENT OVERRIDE: Skip connection_established requirement for development environment
+        skip_connection_established = self.config.environment == Environment.DEVELOPMENT
+
         if not self.ready_to_send_events:
-            # Wait for connection_established event with timeout
-            self.debug.debug_print(
-                "⏳ Waiting for connection_established event before sending message...",
-                DebugLevel.BASIC,
-                style="yellow"
-            )
-            safe_console_print(
-                "⏳ Waiting for connection_established event (up to 5 seconds)...",
-                style="yellow",
-                json_mode=self.config.json_mode,
-                ci_mode=self.config.ci_mode
-            )
-
-            # Wait up to 30 seconds for connection_established
-            wait_timeout = 30.0
-            wait_start = time.time()
-            wait_interval = 0.1
-
-            while not self.ready_to_send_events and (time.time() - wait_start) < wait_timeout:
-                await asyncio.sleep(wait_interval)
-                # Check if connection_established arrived
-                if self.ready_to_send_events:
-                    self.debug.debug_print(
-                        "✅ connection_established received - ready to send events",
-                        DebugLevel.BASIC,
-                        style="green"
-                    )
-                    safe_console_print(
-                        "✅ connection_established received - proceeding with message",
-                        style="green",
-                        json_mode=self.config.json_mode,
-                        ci_mode=self.config.ci_mode
-                    )
-                    break
-
-            # If still not ready after timeout, then error
-            if not self.ready_to_send_events:
-                elapsed = time.time() - wait_start
+            if skip_connection_established:
+                # Development environment: Override and proceed without connection_established
                 self.debug.debug_print(
-                    f"❌ Timeout waiting for connection_established after {elapsed:.1f} seconds",
+                    "⚠️ DEVELOPMENT MODE: Skipping connection_established requirement",
                     DebugLevel.BASIC,
-                    style="red"
+                    style="yellow"
                 )
                 safe_console_print(
-                    f"❌ Timeout: connection_established event not received after {elapsed:.1f} seconds",
-                    style="red",
-                    json_mode=self.config.json_mode,
-                    ci_mode=self.config.ci_mode
-                )
-                safe_console_print(
-                    "   Handshake complete: ✓ | connection_established: ✗",
-                    style="dim",
-                    json_mode=self.config.json_mode,
-                    ci_mode=self.config.ci_mode
-                )
-                safe_console_print(
-                    "\n💡 The server may not be sending the connection_established event.",
+                    "⚠️ Development mode: Proceeding without connection_established event",
                     style="yellow",
                     json_mode=self.config.json_mode,
                     ci_mode=self.config.ci_mode
                 )
-                raise RuntimeError(
-                    f"Cannot send message - connection_established event not received after {elapsed:.1f}s timeout. "
-                    "Both handshake and connection_established are required before sending events."
+                safe_console_print(
+                    "   (This is normal for development backends that may not send this event)",
+                    style="dim",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
                 )
+                # Force ready state for development
+                self.ready_to_send_events = True
+            else:
+                # Production/Staging: Wait for connection_established event with timeout
+                self.debug.debug_print(
+                    "⏳ Waiting for connection_established event before sending message...",
+                    DebugLevel.BASIC,
+                    style="yellow"
+                )
+                safe_console_print(
+                    "⏳ Waiting for connection_established event (up to 5 seconds)...",
+                    style="yellow",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+
+                # Wait up to 30 seconds for connection_established
+                wait_timeout = 30.0
+                wait_start = time.time()
+                wait_interval = 0.1
+
+                while not self.ready_to_send_events and (time.time() - wait_start) < wait_timeout:
+                    await asyncio.sleep(wait_interval)
+                    # Check if connection_established arrived
+                    if self.ready_to_send_events:
+                        self.debug.debug_print(
+                            "✅ connection_established received - ready to send events",
+                            DebugLevel.BASIC,
+                            style="green"
+                        )
+                        safe_console_print(
+                            "✅ connection_established received - proceeding with message",
+                            style="green",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+                        break
+
+                # If still not ready after timeout, then error
+                if not self.ready_to_send_events:
+                    elapsed = time.time() - wait_start
+                    self.debug.debug_print(
+                        f"❌ Timeout waiting for connection_established after {elapsed:.1f} seconds",
+                        DebugLevel.BASIC,
+                        style="red"
+                    )
+                    safe_console_print(
+                        f"❌ Timeout: connection_established event not received after {elapsed:.1f} seconds",
+                        style="red",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+                    safe_console_print(
+                        "   Handshake complete: ✓ | connection_established: ✗",
+                        style="dim",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+                    safe_console_print(
+                        "\n💡 The server may not be sending the connection_established event.",
+                        style="yellow",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+                    raise RuntimeError(
+                        f"Cannot send message - connection_established event not received after {elapsed:.1f}s timeout. "
+                        "Both handshake and connection_established are required before sending events."
+                    )
 
         # Generate run_id
         self.run_id = f"cli_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{os.getpid()}"
@@ -4059,44 +4118,85 @@ class WebSocketClient:
         # Attach logs if --send-logs is enabled
         if self.send_logs:
             try:
-                from scripts.agent_logs import collect_recent_logs
+                from agent_logs import collect_recent_logs
+                from chunking_analyzer import ChunkingAnalyzer
+                from chunk_creator import ChunkCreator
 
                 result = collect_recent_logs(
                     limit=self.logs_count,
                     project_name=self.logs_project,
                     base_path=self.logs_path,
-                    username=self.logs_user
+                    username=self.logs_user,
+                    provider=self.logs_provider
                 )
 
                 if result:
                     logs, files_read, file_info = result
-                    payload["payload"]["jsonl_logs"] = logs
 
-                    # Calculate payload size for transmission proof
-                    import logging
-                    import sys
+                    # NEW: Analyze if chunking needed
+                    analyzer = ChunkingAnalyzer()
+                    chunking_strategy = analyzer.analyze_files(logs, file_info)
 
-                    # Get size of logs in payload
-                    logs_json = json.dumps(logs)
-                    logs_size_bytes = len(logs_json.encode('utf-8'))
-                    logs_size_kb = logs_size_bytes / 1024
-                    logs_size_mb = logs_size_kb / 1024
+                    if chunking_strategy.strategy in ('no_chunking', 'multi_file_no_chunking'):
+                        # Original behavior: send all logs at once
+                        payload["payload"]["jsonl_logs"] = logs
 
-                    # Format size appropriately
-                    if logs_size_mb >= 1:
-                        size_str = f"{logs_size_mb:.2f} MB"
-                    elif logs_size_kb >= 1:
-                        size_str = f"{logs_size_kb:.2f} KB"
+                        # Add agent_context with chunk_metadata for non-chunked logs
+                        # This maintains consistency with backend expectations
+                        file_analysis = chunking_strategy.file_analyses[0] if chunking_strategy.file_analyses else None
+                        if file_analysis:
+                            payload["payload"]["agent_context"] = {
+                                "chunk_metadata": {
+                                    "chunk_index": 0,
+                                    "total_chunks": 1,
+                                    "file_hash": file_analysis.file_hash,
+                                    "file_name": file_analysis.file_name,
+                                    "aggregation_required": False,  # No aggregation needed for non-chunked
+                                    "entries_in_chunk": file_analysis.entry_count,
+                                    "chunk_size_bytes": file_analysis.size_bytes,
+                                    "start_entry_index": 0,
+                                    "end_entry_index": file_analysis.entry_count - 1,
+                                    "is_multi_file": False,
+                                    "file_index": 0
+                                }
+                            }
+
+                        # Calculate payload size for transmission proof
+                        import logging
+                        import sys
+
+                        # Get size of logs in payload
+                        logs_json = json.dumps(logs)
+                        logs_size_bytes = len(logs_json.encode('utf-8'))
+                        logs_size_kb = logs_size_bytes / 1024
+                        logs_size_mb = logs_size_kb / 1024
+
+                        # Format size appropriately
+                        if logs_size_mb >= 1:
+                            size_str = f"{logs_size_mb:.2f} MB"
+                        elif logs_size_kb >= 1:
+                            size_str = f"{logs_size_kb:.2f} KB"
+                        else:
+                            size_str = f"{logs_size_bytes} bytes"
+
+                        # Save log display info for later (will be displayed after "Sending message:")
+                        self._log_display_info = {
+                            'logs': logs,
+                            'files_read': files_read,
+                            'file_info': file_info,
+                            'size_str': size_str
+                        }
                     else:
-                        size_str = f"{logs_size_bytes} bytes"
+                        # NEW: Chunking required
+                        await self._send_chunked_logs(
+                            logs=logs,
+                            file_info=file_info,
+                            chunking_strategy=chunking_strategy,
+                            message=message,
+                            thread_id=thread_id
+                        )
+                        return  # Early return - chunks sent separately
 
-                    # Save log display info for later (will be displayed after "Sending message:")
-                    self._log_display_info = {
-                        'logs': logs,
-                        'files_read': files_read,
-                        'file_info': file_info,
-                        'size_str': size_str
-                    }
                 else:
                     self.debug.debug_print(
                         "Warning: --send-logs enabled but no logs found",
@@ -4261,6 +4361,391 @@ class WebSocketClient:
         if self.debug.debug_level >= DebugLevel.VERBOSE:
             self.debug.debug_print(f"WEBSOCKET MESSAGE SENT SUCCESSFULLY - run_id: {self.run_id}, thread_id: {thread_id}", DebugLevel.VERBOSE)
         return self.run_id
+
+    async def _wait_for_event(self, event_type: str, timeout: float = 120.0) -> bool:
+        """
+        Wait for a specific event type to be received.
+
+        Args:
+            event_type: The event type to wait for (e.g., 'agent_completed', 'agent_aggregation_complete')
+            timeout: Maximum time to wait in seconds (default: 120s)
+
+        Returns:
+            True if event was received, False if timeout occurred
+        """
+        start_time = asyncio.get_event_loop().time()
+        initial_event_count = len(self.events)
+
+        self.debug.debug_print(
+            f"Waiting for event: {event_type} (timeout: {timeout}s)",
+            DebugLevel.VERBOSE,
+            style="cyan"
+        )
+
+        while True:
+            # Check if timeout occurred
+            elapsed = asyncio.get_event_loop().time() - start_time
+            if elapsed > timeout:
+                self.debug.debug_print(
+                    f"Timeout waiting for {event_type} after {elapsed:.1f}s",
+                    DebugLevel.BASIC,
+                    style="yellow"
+                )
+                return False
+
+            # Check if we have new events
+            if len(self.events) > initial_event_count:
+                # Check the new events for the one we're waiting for
+                for event in self.events[initial_event_count:]:
+                    if event.type == event_type:
+                        self.debug.debug_print(
+                            f"Received {event_type} event after {elapsed:.1f}s",
+                            DebugLevel.VERBOSE,
+                            style="green"
+                        )
+                        return True
+
+                    # Also check for nested events in system_message
+                    if event.type == "system_message" and event.data.get('event') == event_type:
+                        self.debug.debug_print(
+                            f"Received {event_type} event (nested in system_message) after {elapsed:.1f}s",
+                            DebugLevel.VERBOSE,
+                            style="green"
+                        )
+                        return True
+
+            # Update initial_event_count to avoid re-checking same events
+            initial_event_count = len(self.events)
+
+            # Short sleep to avoid busy waiting
+            await asyncio.sleep(0.1)
+
+    async def _send_chunked_logs(
+        self,
+        logs: List[Dict[str, Any]],
+        file_info: Dict[str, Any],
+        chunking_strategy: Any,
+        message: str,
+        thread_id: str
+    ) -> None:
+        """
+        Send logs in chunks when chunking is required.
+
+        Args:
+            logs: List of log entries
+            file_info: Dictionary with file metadata
+            chunking_strategy: ChunkingStrategy object from analyzer
+            message: Original user message
+            thread_id: Thread ID for this conversation
+        """
+        from chunk_creator import ChunkCreator
+
+        # Display chunking info
+        safe_console_print(
+            f"\nChunking strategy: {chunking_strategy.strategy}",
+            style="yellow",
+            json_mode=self.config.json_mode,
+            ci_mode=self.config.ci_mode
+        )
+
+        # Create chunks from file analyses
+        chunk_creator = ChunkCreator()
+        all_chunks = []
+
+        # Track entry offset for extracting entries per file
+        entry_offset = 0
+
+        for file_idx, file_analysis in enumerate(chunking_strategy.file_analyses):
+            if file_analysis.needs_chunking:
+                # Extract entries for this file
+                file_entries = logs[entry_offset:entry_offset + file_analysis.entry_count]
+
+                safe_console_print(
+                    f"\nChunking file: {file_analysis.file_name} "
+                    f"({file_analysis.size_mb:.2f} MB, {file_analysis.entry_count} entries)",
+                    style="yellow",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+
+                # Create chunks for this file
+                is_multi_file = len(chunking_strategy.file_analyses) > 1
+                file_chunks = chunk_creator.create_chunks(
+                    entries=file_entries,
+                    file_name=file_analysis.file_name,
+                    file_hash=file_analysis.file_hash,
+                    is_multi_file=is_multi_file,
+                    file_index=file_idx if is_multi_file else None
+                )
+
+                all_chunks.extend(file_chunks)
+            else:
+                # File doesn't need chunking - will be sent as single chunk
+                file_entries = logs[entry_offset:entry_offset + file_analysis.entry_count]
+
+                safe_console_print(
+                    f"\nFile doesn't need chunking: {file_analysis.file_name} "
+                    f"({file_analysis.size_mb:.2f} MB, {file_analysis.entry_count} entries) - sending as single unit",
+                    style="cyan",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+
+                # Create a single "chunk" for this file
+                from chunk_creator import Chunk, ChunkMetadata
+                metadata = ChunkMetadata(
+                    chunk_id=file_analysis.file_hash[:12],
+                    chunk_index=0,
+                    total_chunks=1,
+                    file_hash=file_analysis.file_hash,
+                    file_name=file_analysis.file_name,
+                    entries_in_chunk=file_analysis.entry_count,
+                    chunk_size_bytes=file_analysis.size_bytes,
+                    chunk_size_mb=file_analysis.size_mb,
+                    start_entry_index=0,
+                    end_entry_index=file_analysis.entry_count - 1,
+                    is_multi_file=len(chunking_strategy.file_analyses) > 1,
+                    file_index=file_idx if len(chunking_strategy.file_analyses) > 1 else None,
+                    aggregation_required=False  # Single file, no aggregation needed
+                )
+                single_chunk = Chunk(entries=file_entries, metadata=metadata)
+                all_chunks.append(single_chunk)
+
+            entry_offset += file_analysis.entry_count
+
+        total_chunks = len(all_chunks)
+        safe_console_print(
+            f"\nSending {total_chunks} chunk(s)...",
+            style="cyan",
+            json_mode=self.config.json_mode,
+            ci_mode=self.config.ci_mode
+        )
+
+        # For chunked uploads, ALL chunks must use the SAME thread_id
+        # - If thread_id is provided: use it for all chunks
+        # - If thread_id is None: send null for all chunks, backend groups by chunk_id
+        current_thread_id = thread_id
+
+        # Send each chunk
+        for i, chunk in enumerate(all_chunks, 1):
+            chunk_num = i
+
+            # Debug logging for chunked uploads
+            if chunk.metadata.aggregation_required and i == 1:
+                safe_console_print(
+                    f"  Sending {total_chunks} chunks with thread_id={'null' if current_thread_id is None else current_thread_id[:20] + '...'}",
+                    style="dim",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+
+            # Determine chunk type based on metadata
+            # All chunks now use the same structure, no chunk_type attribute
+            if chunk.metadata.total_chunks == 1 and not chunk.metadata.aggregation_required:
+                # Single file chunk
+                await self._send_single_file(
+                    chunk=chunk,
+                    chunk_num=chunk_num,
+                    total_chunks=total_chunks,
+                    message=message,
+                    thread_id=current_thread_id
+                )
+            else:
+                # Regular chunk (including aggregation_required chunks)
+                await self._send_single_chunk(
+                    chunk=chunk,
+                    chunk_num=chunk_num,
+                    total_chunks=total_chunks,
+                    message=message,
+                    thread_id=current_thread_id
+                )
+
+            # Wait for backend to process this chunk before sending next one
+            # For chunks that require aggregation, wait for agent_completed event
+            if chunk.metadata.aggregation_required:
+                # Not the last chunk - wait for agent_completed
+                if i < total_chunks:
+                    self.debug.debug_print(
+                        f"Waiting for agent_completed event for chunk {i}/{total_chunks}",
+                        DebugLevel.VERBOSE,
+                        style="cyan"
+                    )
+
+                    received = await self._wait_for_event("agent_completed", timeout=120.0)
+
+                    if not received:
+                        safe_console_print(
+                            f"⚠️  Warning: Timeout waiting for agent_completed for chunk {i}/{total_chunks}",
+                            style="yellow",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+                    else:
+                        self.debug.debug_print(
+                            f"✓ Received agent_completed for chunk {i}/{total_chunks}",
+                            DebugLevel.VERBOSE,
+                            style="green"
+                        )
+
+                # Last chunk - wait for agent_aggregation_complete
+                else:
+                    self.debug.debug_print(
+                        f"Waiting for agent_aggregation_complete event for final chunk {i}/{total_chunks}",
+                        DebugLevel.VERBOSE,
+                        style="cyan"
+                    )
+
+                    received = await self._wait_for_event("agent_aggregation_complete", timeout=180.0)
+
+                    if not received:
+                        safe_console_print(
+                            f"⚠️  Warning: Timeout waiting for agent_aggregation_complete",
+                            style="yellow",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+                    else:
+                        self.debug.debug_print(
+                            f"✓ Received agent_aggregation_complete",
+                            DebugLevel.VERBOSE,
+                            style="green"
+                        )
+
+                        safe_console_print(
+                            f"✓ All chunks processed and aggregated successfully",
+                            style="green",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+            # For non-aggregation chunks, keep the original delay
+            elif i < total_chunks:
+                await asyncio.sleep(0.5)
+
+        safe_console_print(
+            f"\n✓ All {total_chunks} chunk(s) sent successfully",
+            style="green",
+            json_mode=self.config.json_mode,
+            ci_mode=self.config.ci_mode
+        )
+
+    async def _send_single_chunk(
+        self,
+        chunk: Any,
+        chunk_num: int,
+        total_chunks: int,
+        message: str,
+        thread_id: str
+    ) -> None:
+        """
+        Send a single chunk of logs.
+
+        Args:
+            chunk: Chunk object containing logs and metadata
+            chunk_num: Current chunk number (1-indexed)
+            total_chunks: Total number of chunks
+            message: Original user message
+            thread_id: Thread ID for this conversation
+        """
+        # Create payload for this chunk
+        payload = {
+            "type": "user_message",
+            "payload": {
+                "content": message,
+                "run_id": self.run_id,
+                "thread_id": thread_id,
+                "timestamp": datetime.now().isoformat(),
+                "jsonl_logs": chunk.entries,
+                "agent_context": {
+                    "chunk_metadata": {
+                        "chunk_index": chunk.metadata.chunk_index,
+                        "total_chunks": chunk.metadata.total_chunks,
+                        "file_hash": chunk.metadata.file_hash,
+                        "file_name": chunk.metadata.file_name,
+                        "aggregation_required": chunk.metadata.aggregation_required,
+                        "entries_in_chunk": chunk.metadata.entries_in_chunk,
+                        "chunk_size_bytes": chunk.metadata.chunk_size_bytes,
+                        "start_entry_index": chunk.metadata.start_entry_index,
+                        "end_entry_index": chunk.metadata.end_entry_index,
+                        "is_multi_file": chunk.metadata.is_multi_file,
+                        "file_index": chunk.metadata.file_index
+                    }
+                },
+                "client_environment": self.config.client_environment if hasattr(self.config, 'client_environment') and self.config.client_environment else None
+            }
+        }
+
+        # Display chunk info with warning if oversized
+        chunk_display = (
+            f"  Chunk {chunk.metadata.chunk_index + 1}/{chunk.metadata.total_chunks}: "
+            f"{chunk.metadata.entries_in_chunk} entries, {chunk.metadata.chunk_size_mb:.2f} MB"
+        )
+
+        # Warning if chunk exceeds recommended size (happens with large single entries)
+        if chunk.metadata.chunk_size_mb > 2.5:
+            chunk_display += f" ⚠️  OVERSIZED (single entry > 2.5 MB limit)"
+            safe_console_print(chunk_display, style="yellow", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        else:
+            safe_console_print(chunk_display, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        # Send chunk
+        payload_json = json.dumps(payload)
+        await self.ws.send(payload_json)
+
+        self.debug.debug_print(
+            f"Sent chunk {chunk_num}/{total_chunks}",
+            DebugLevel.VERBOSE,
+            style="green"
+        )
+
+    async def _send_single_file(
+        self,
+        chunk: Any,
+        chunk_num: int,
+        total_chunks: int,
+        message: str,
+        thread_id: str
+    ) -> None:
+        """
+        Send a single file as a chunk (for file-based chunking).
+
+        Args:
+            chunk: Chunk object containing file logs
+            chunk_num: Current chunk number (1-indexed)
+            total_chunks: Total number of chunks
+            message: Original user message
+            thread_id: Thread ID for this conversation
+        """
+        # Create payload for this file (no chunk_metadata needed for single files)
+        payload = {
+            "type": "user_message",
+            "payload": {
+                "content": message,
+                "run_id": self.run_id,
+                "thread_id": thread_id,
+                "timestamp": datetime.now().isoformat(),
+                "jsonl_logs": chunk.entries,
+                "client_environment": self.config.client_environment if hasattr(self.config, 'client_environment') and self.config.client_environment else None
+            }
+        }
+
+        # Display file chunk info
+        safe_console_print(
+            f"  File: {chunk.metadata.file_name} - "
+            f"{chunk.metadata.entries_in_chunk} entries, {chunk.metadata.chunk_size_mb:.2f} MB (no aggregation needed)",
+            style="cyan",
+            json_mode=self.config.json_mode,
+            ci_mode=self.config.ci_mode
+        )
+
+        # Send file chunk
+        payload_json = json.dumps(payload)
+        await self.ws.send(payload_json)
+
+        self.debug.debug_print(
+            f"Sent file: {chunk.metadata.file_name}",
+            DebugLevel.VERBOSE,
+            style="green"
+        )
 
     async def receive_events(self, callback=None):
         """Receive and process events from WebSocket"""
@@ -5004,7 +5489,7 @@ class AgentCLI:
                  json_mode: bool = False, ci_mode: bool = False, json_output_file: Optional[str] = None,
                  send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
                  logs_path: Optional[str] = None, logs_user: Optional[str] = None,
-                 handshake_timeout: float = 10.0):
+                 logs_provider: str = "claude", handshake_timeout: float = 10.0):
         # ISSUE #2766: Store JSON/CI mode flags early for output suppression
         self.json_mode = json_mode
         self.ci_mode = ci_mode
@@ -5016,6 +5501,7 @@ class AgentCLI:
         self.logs_project = logs_project
         self.logs_path = logs_path
         self.logs_user = logs_user
+        self.logs_provider = logs_provider
 
         # Store handshake timeout
         self.handshake_timeout = handshake_timeout
@@ -5156,6 +5642,7 @@ class AgentCLI:
                 logs_project=self.logs_project,
                 logs_path=self.logs_path,
                 logs_user=self.logs_user,
+                logs_provider=self.logs_provider,
                 handshake_timeout=self.handshake_timeout
             )
             if not await self.ws_client.connect():
@@ -5895,6 +6382,7 @@ class AgentCLI:
                     logs_project=self.logs_project,
                     logs_path=self.logs_path,
                     logs_user=self.logs_user,
+                    logs_provider=self.logs_provider,
                     handshake_timeout=self.handshake_timeout
                 )
                 if not await self.ws_client.connect():
@@ -6103,6 +6591,7 @@ class AgentCLI:
                     logs_project=self.logs_project,
                     logs_path=self.logs_path,
                     logs_user=self.logs_user,
+                    logs_provider=self.logs_provider,
                     handshake_timeout=self.handshake_timeout
                 )
                 if not await self.ws_client.connect():
@@ -6612,9 +7101,16 @@ def main(argv=None):
     parser.add_argument(
         "--env",
         type=str,
-        choices=["local", "staging", "production"],
+        choices=["local", "staging", "production", "development"],
         default="staging",
-        help="Environment to connect to (default: staging)"
+        help="Environment to connect to (default: staging). Use 'development' with --backend-url for custom backend."
+    )
+
+    parser.add_argument(
+        "--backend-url",
+        type=str,
+        help="Custom backend URL for development environment (e.g., https://api.custom.example.com). "
+             "Only used when --env development is specified."
     )
 
     parser.add_argument(
@@ -6960,11 +7456,26 @@ def main(argv=None):
         help="Windows username for path resolution (Windows only)"
     )
 
+    parser.add_argument(
+        "--logs-provider",
+        type=str,
+        choices=["claude", "codex", "gemini"],
+        default="claude",
+        metavar="PROVIDER",
+        help="AI tool provider to collect logs from: claude (default), codex (OpenAI Codex CLI), gemini (Google Gemini CLI)"
+    )
+
     args = parser.parse_args(argv)
 
     # Validate log-forwarding arguments
     if args.logs_count < 1:
         parser.error("--logs-count must be a positive integer")
+
+    # Validate development environment configuration
+    if args.backend_url and args.env != "development":
+        parser.error("--backend-url can only be used with --env development")
+    if args.env == "development" and not args.backend_url:
+        parser.error("--backend-url is required when using --env development")
 
     # ISSUE #2766: Determine JSON/CI mode EARLY (before any output)
     json_mode = args.json or args.json_output is not None
@@ -7110,6 +7621,7 @@ def main(argv=None):
     config = Config(
         environment=Environment(args.env),
         client_environment=getattr(args, 'client_environment', None),  # Issue #2442: Client environment override for timeouts
+        custom_backend_url=getattr(args, 'backend_url', None),  # Custom backend URL for development environment
         log_level="DEBUG" if args.verbose else "INFO",
         debug_level=debug_level_map[args.debug_level],
         debug_log_file=Path(args.debug_log) if args.debug_log else None,
@@ -7215,6 +7727,7 @@ def main(argv=None):
         logs_project=args.logs_project,
         logs_path=args.logs_path,
         logs_user=args.logs_user,
+        logs_provider=args.logs_provider,
         handshake_timeout=args.handshake_timeout
     )
 

@@ -24,6 +24,11 @@ The optimizer automatically analyzes your Claude Code usage logs to identify opt
 # Send logs from the most recent file (default behavior)
 zen --apex
 
+# Choose your CLI (Default Claude)
+zen --apex --logs-provider claude
+zen --apex --logs-provider gemini
+zen --apex --logs-provider codex
+
 # Send logs from a specific project
 zen --apex --logs-project "my-project-name"
 
