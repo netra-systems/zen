@@ -4391,7 +4391,7 @@ class WebSocketClient:
             self.debug.debug_print(f"WEBSOCKET MESSAGE SENT SUCCESSFULLY - run_id: {self.run_id}, thread_id: {thread_id}", DebugLevel.VERBOSE)
         return self.run_id
 
-    async def _wait_for_event(self, event_type: str, timeout: float = 120.0) -> bool:
+    async def _wait_for_event(self, event_type: str, timeout: float = 120.0) -> Optional[WebSocketEvent]:
         """
         Wait for a specific event type to be received.
 
@@ -4400,7 +4400,7 @@ class WebSocketClient:
             timeout: Maximum time to wait in seconds (default: 120s)
 
         Returns:
-            True if event was received, False if timeout occurred
+            The event object if received, None if timeout occurred
         """
         start_time = asyncio.get_event_loop().time()
         initial_event_count = len(self.events)
@@ -4420,7 +4420,7 @@ class WebSocketClient:
                     DebugLevel.BASIC,
                     style="yellow"
                 )
-                return False
+                return None
 
             # Check if we have new events
             if len(self.events) > initial_event_count:
@@ -4432,7 +4432,7 @@ class WebSocketClient:
                             DebugLevel.VERBOSE,
                             style="green"
                         )
-                        return True
+                        return event
 
                     # Also check for nested events in system_message
                     if event.type == "system_message" and event.data.get('event') == event_type:
@@ -4441,7 +4441,7 @@ class WebSocketClient:
                             DebugLevel.VERBOSE,
                             style="green"
                         )
-                        return True
+                        return event
 
             # Update initial_event_count to avoid re-checking same events
             initial_event_count = len(self.events)
@@ -4600,9 +4600,9 @@ class WebSocketClient:
                         style="cyan"
                     )
 
-                    received = await self._wait_for_event("agent_completed", timeout=120.0)
+                    received_event = await self._wait_for_event("agent_completed", timeout=120.0)
 
-                    if not received:
+                    if not received_event:
                         safe_console_print(
                             f"⚠️  Warning: Timeout waiting for agent_completed for chunk {i}/{total_chunks}",
                             style="yellow",
@@ -4626,9 +4626,9 @@ class WebSocketClient:
 
                     # Backend MAX_WAIT_SECONDS is 1200s (20 minutes)
                     # Use 1200s to align with backend's maximum aggregation window
-                    received = await self._wait_for_event("agent_aggregation_complete", timeout=1200.0)
+                    aggregation_event = await self._wait_for_event("agent_aggregation_complete", timeout=1200.0)
 
-                    if not received:
+                    if not aggregation_event:
                         safe_console_print(
                             f"⚠️  Warning: Timeout waiting for agent_aggregation_complete",
                             style="yellow",
@@ -4648,6 +4648,28 @@ class WebSocketClient:
                             json_mode=self.config.json_mode,
                             ci_mode=self.config.ci_mode
                         )
+
+                        # Extract and display the unified response from the aggregation event
+                        response = aggregation_event.data.get('response', '')
+                        if response:
+                            safe_console_print(
+                                f"\n📊 Unified Analysis from All Chunks:",
+                                style="bold cyan",
+                                json_mode=self.config.json_mode,
+                                ci_mode=self.config.ci_mode
+                            )
+                            safe_console_print(
+                                response,
+                                style="cyan",
+                                json_mode=self.config.json_mode,
+                                ci_mode=self.config.ci_mode
+                            )
+                        else:
+                            self.debug.debug_print(
+                                "Warning: agent_aggregation_complete event has no response content",
+                                DebugLevel.BASIC,
+                                style="yellow"
+                            )
             # For non-aggregation chunks, keep the original delay
             elif i < total_chunks:
                 await asyncio.sleep(0.5)
