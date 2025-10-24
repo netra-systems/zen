@@ -962,6 +962,35 @@ class DebugManager:
             else:
                 # Individual agent level indentation
                 return f"    🧠 Agent Completed: {agent_name} (run: {truncate_with_ellipsis(run_id, 8)}) - {result_str}{retry_suffix}{validation_status}"
+        elif event_type == "agent_aggregation_complete":
+            # Display aggregation completion event with unified response
+            aggregation_reason = data.get('aggregation_reason', 'unknown')
+            chunks_processed = data.get('chunks_processed', 0)
+            total_chunks = data.get('total_chunks', 0)
+            file_name = data.get('file_name', 'unknown')
+            response = data.get('response', '')
+
+            # Use smart truncation for response content
+            response_str = smart_truncate_json(response, self) if isinstance(response, (dict, list)) else str(response)
+            max_len = 200  # Larger default for aggregation
+            if self.debug_level >= DebugLevel.VERBOSE:
+                max_len = 500
+            elif self.debug_level >= DebugLevel.TRACE:
+                max_len = 2000
+            elif self.debug_level >= DebugLevel.DIAGNOSTIC:
+                max_len = len(response_str)  # No truncation
+            if not isinstance(response, (dict, list)):
+                response_str = truncate_with_ellipsis(response_str, max_len)
+
+            # Format based on aggregation reason
+            reason_icon = "✅" if aggregation_reason == "all_chunks_received" else "⏱️"
+            reason_text = {
+                "all_chunks_received": "All chunks received",
+                "timeout": "Timeout reached",
+                "max_wait_exceeded": "Max wait exceeded"
+            }.get(aggregation_reason, aggregation_reason)
+
+            return f"🎯 Aggregation Complete: {file_name} ({reason_icon} {reason_text} - {chunks_processed}/{total_chunks} chunks) - {response_str}"
         elif event_type == "message":
             content = data.get('content', '')
             # Use smart truncation for message content
@@ -2638,6 +2667,10 @@ class WebSocketClient:
 
         # ISSUE #2417 Phase 2: Store thread_id for filtering backend logs
         self.current_thread_id: Optional[str] = None
+
+        # Track when backend signals it's ready for concurrent chunk burst
+        self.thread_ready_for_chunks: bool = False
+        self.thread_ready_event: Optional[WebSocketEvent] = None
 
         # SSOT: Thread management cache for performance
         self.thread_cache_file = self._get_platform_cache_path()
@@ -4362,7 +4395,7 @@ class WebSocketClient:
             self.debug.debug_print(f"WEBSOCKET MESSAGE SENT SUCCESSFULLY - run_id: {self.run_id}, thread_id: {thread_id}", DebugLevel.VERBOSE)
         return self.run_id
 
-    async def _wait_for_event(self, event_type: str, timeout: float = 120.0) -> bool:
+    async def _wait_for_event(self, event_type: str, timeout: float = 120.0) -> Optional[WebSocketEvent]:
         """
         Wait for a specific event type to be received.
 
@@ -4371,7 +4404,7 @@ class WebSocketClient:
             timeout: Maximum time to wait in seconds (default: 120s)
 
         Returns:
-            True if event was received, False if timeout occurred
+            The event object if received, None if timeout occurred
         """
         start_time = asyncio.get_event_loop().time()
         initial_event_count = len(self.events)
@@ -4391,7 +4424,7 @@ class WebSocketClient:
                     DebugLevel.BASIC,
                     style="yellow"
                 )
-                return False
+                return None
 
             # Check if we have new events
             if len(self.events) > initial_event_count:
@@ -4403,7 +4436,7 @@ class WebSocketClient:
                             DebugLevel.VERBOSE,
                             style="green"
                         )
-                        return True
+                        return event
 
                     # Also check for nested events in system_message
                     if event.type == "system_message" and event.data.get('event') == event_type:
@@ -4412,7 +4445,7 @@ class WebSocketClient:
                             DebugLevel.VERBOSE,
                             style="green"
                         )
-                        return True
+                        return event
 
             # Update initial_event_count to avoid re-checking same events
             initial_event_count = len(self.events)
@@ -4526,100 +4559,193 @@ class WebSocketClient:
         # - If thread_id is None: send null for all chunks, backend groups by chunk_id
         current_thread_id = thread_id
 
-        # Send each chunk
-        for i, chunk in enumerate(all_chunks, 1):
-            chunk_num = i
+        # Check if this is a chunked aggregation upload
+        is_chunked_aggregation = total_chunks > 1 and all_chunks[0].metadata.aggregation_required
 
-            # Debug logging for chunked uploads
-            if chunk.metadata.aggregation_required and i == 1:
+        if is_chunked_aggregation:
+            # NEW FLOW: Concurrent chunk bursting with thread_ready_for_chunks signal
+            safe_console_print(
+                f"  Sending {total_chunks} chunks with thread_id={'null' if current_thread_id is None else current_thread_id[:20] + '...'}",
+                style="dim",
+                json_mode=self.config.json_mode,
+                ci_mode=self.config.ci_mode
+            )
+
+            # Step 1: Send first chunk to initiate the thread
+            first_chunk = all_chunks[0]
+            self.debug.debug_print(
+                f"Sending initial chunk 1/{total_chunks}",
+                DebugLevel.VERBOSE,
+                style="cyan"
+            )
+
+            await self._send_single_chunk(
+                chunk=first_chunk,
+                chunk_num=1,
+                total_chunks=total_chunks,
+                message=message,
+                thread_id=current_thread_id
+            )
+
+            # Step 2: Wait for thread_ready_for_chunks signal (with timeout)
+            self.debug.debug_print(
+                "Waiting for thread_ready_for_chunks signal from backend...",
+                DebugLevel.VERBOSE,
+                style="cyan"
+            )
+
+            # Wait up to 10 seconds for the backend to signal readiness
+            wait_start = asyncio.get_event_loop().time()
+            while not self.thread_ready_for_chunks:
+                await asyncio.sleep(0.1)
+                elapsed = asyncio.get_event_loop().time() - wait_start
+                if elapsed > 10.0:
+                    self.debug.debug_print(
+                        "⚠️  Timeout waiting for thread_ready_for_chunks - falling back to sequential sending",
+                        DebugLevel.BASIC,
+                        style="yellow"
+                    )
+                    break
+
+            # Step 3: Send remaining chunks (burst mode if signal received, else sequential)
+            remaining_chunks = all_chunks[1:]
+
+            if self.thread_ready_for_chunks:
+                # BURST MODE: Send all remaining chunks concurrently
+                self.debug.debug_print(
+                    f"🚀 Burst mode activated - sending {len(remaining_chunks)} chunks concurrently",
+                    DebugLevel.BASIC,
+                    style="green"
+                )
+
+                # Create concurrent tasks for all remaining chunks
+                send_tasks = []
+                for i, chunk in enumerate(remaining_chunks, 2):
+                    task = self._send_single_chunk(
+                        chunk=chunk,
+                        chunk_num=i,
+                        total_chunks=total_chunks,
+                        message=message,
+                        thread_id=current_thread_id
+                    )
+                    send_tasks.append(task)
+
+                # Send all chunks concurrently
+                await asyncio.gather(*send_tasks)
+
+                self.debug.debug_print(
+                    f"✓ All {len(remaining_chunks)} remaining chunks sent concurrently",
+                    DebugLevel.BASIC,
+                    style="green"
+                )
+            else:
+                # FALLBACK: Sequential sending (old behavior)
+                self.debug.debug_print(
+                    f"Falling back to sequential chunk sending for {len(remaining_chunks)} remaining chunks",
+                    DebugLevel.BASIC,
+                    style="yellow"
+                )
+
+                for i, chunk in enumerate(remaining_chunks, 2):
+                    await self._send_single_chunk(
+                        chunk=chunk,
+                        chunk_num=i,
+                        total_chunks=total_chunks,
+                        message=message,
+                        thread_id=current_thread_id
+                    )
+
+                    # Wait for agent_completed between chunks (old behavior)
+                    if i < total_chunks:
+                        received_event = await self._wait_for_event("agent_completed", timeout=120.0)
+                        if not received_event:
+                            safe_console_print(
+                                f"⚠️  Warning: Timeout waiting for agent_completed for chunk {i}/{total_chunks}",
+                                style="yellow",
+                                json_mode=self.config.json_mode,
+                                ci_mode=self.config.ci_mode
+                            )
+
+            # Step 4: Wait for agent_aggregation_complete (for both burst and sequential modes)
+            self.debug.debug_print(
+                "Waiting for agent_aggregation_complete event...",
+                DebugLevel.VERBOSE,
+                style="cyan"
+            )
+
+            # Backend MAX_WAIT_SECONDS is 1200s (20 minutes)
+            aggregation_event = await self._wait_for_event("agent_aggregation_complete", timeout=1200.0)
+
+            if not aggregation_event:
                 safe_console_print(
-                    f"  Sending {total_chunks} chunks with thread_id={'null' if current_thread_id is None else current_thread_id[:20] + '...'}",
-                    style="dim",
+                    f"⚠️  Warning: Timeout waiting for agent_aggregation_complete",
+                    style="yellow",
+                    json_mode=self.config.json_mode,
+                    ci_mode=self.config.ci_mode
+                )
+            else:
+                self.debug.debug_print(
+                    f"✓ Received agent_aggregation_complete",
+                    DebugLevel.VERBOSE,
+                    style="green"
+                )
+
+                safe_console_print(
+                    f"✓ All chunks processed and aggregated successfully",
+                    style="green",
                     json_mode=self.config.json_mode,
                     ci_mode=self.config.ci_mode
                 )
 
-            # Determine chunk type based on metadata
-            # All chunks now use the same structure, no chunk_type attribute
-            if chunk.metadata.total_chunks == 1 and not chunk.metadata.aggregation_required:
-                # Single file chunk
-                await self._send_single_file(
-                    chunk=chunk,
-                    chunk_num=chunk_num,
-                    total_chunks=total_chunks,
-                    message=message,
-                    thread_id=current_thread_id
-                )
-            else:
-                # Regular chunk (including aggregation_required chunks)
-                await self._send_single_chunk(
-                    chunk=chunk,
-                    chunk_num=chunk_num,
-                    total_chunks=total_chunks,
-                    message=message,
-                    thread_id=current_thread_id
-                )
-
-            # Wait for backend to process this chunk before sending next one
-            # For chunks that require aggregation, wait for agent_completed event
-            if chunk.metadata.aggregation_required:
-                # Not the last chunk - wait for agent_completed
-                if i < total_chunks:
-                    self.debug.debug_print(
-                        f"Waiting for agent_completed event for chunk {i}/{total_chunks}",
-                        DebugLevel.VERBOSE,
-                        style="cyan"
+                # Extract and display the unified response from the aggregation event
+                response = aggregation_event.data.get('response', '')
+                if response:
+                    safe_console_print(
+                        f"\n📊 Unified Analysis from All Chunks:",
+                        style="bold cyan",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
                     )
-
-                    received = await self._wait_for_event("agent_completed", timeout=120.0)
-
-                    if not received:
-                        safe_console_print(
-                            f"⚠️  Warning: Timeout waiting for agent_completed for chunk {i}/{total_chunks}",
-                            style="yellow",
-                            json_mode=self.config.json_mode,
-                            ci_mode=self.config.ci_mode
-                        )
-                    else:
-                        self.debug.debug_print(
-                            f"✓ Received agent_completed for chunk {i}/{total_chunks}",
-                            DebugLevel.VERBOSE,
-                            style="green"
-                        )
-
-                # Last chunk - wait for agent_aggregation_complete
+                    safe_console_print(
+                        response,
+                        style="cyan",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
                 else:
                     self.debug.debug_print(
-                        f"Waiting for agent_aggregation_complete event for final chunk {i}/{total_chunks}",
-                        DebugLevel.VERBOSE,
-                        style="cyan"
+                        "Warning: agent_aggregation_complete event has no response content",
+                        DebugLevel.BASIC,
+                        style="yellow"
+                    )
+        else:
+            # OLD FLOW: Single chunk or non-aggregation chunks - send normally
+            for i, chunk in enumerate(all_chunks, 1):
+                chunk_num = i
+
+                # Determine chunk type based on metadata
+                if chunk.metadata.total_chunks == 1 and not chunk.metadata.aggregation_required:
+                    # Single file chunk
+                    await self._send_single_file(
+                        chunk=chunk,
+                        chunk_num=chunk_num,
+                        total_chunks=total_chunks,
+                        message=message,
+                        thread_id=current_thread_id
+                    )
+                else:
+                    # Regular chunk
+                    await self._send_single_chunk(
+                        chunk=chunk,
+                        chunk_num=chunk_num,
+                        total_chunks=total_chunks,
+                        message=message,
+                        thread_id=current_thread_id
                     )
 
-                    received = await self._wait_for_event("agent_aggregation_complete", timeout=180.0)
-
-                    if not received:
-                        safe_console_print(
-                            f"⚠️  Warning: Timeout waiting for agent_aggregation_complete",
-                            style="yellow",
-                            json_mode=self.config.json_mode,
-                            ci_mode=self.config.ci_mode
-                        )
-                    else:
-                        self.debug.debug_print(
-                            f"✓ Received agent_aggregation_complete",
-                            DebugLevel.VERBOSE,
-                            style="green"
-                        )
-
-                        safe_console_print(
-                            f"✓ All chunks processed and aggregated successfully",
-                            style="green",
-                            json_mode=self.config.json_mode,
-                            ci_mode=self.config.ci_mode
-                        )
-            # For non-aggregation chunks, keep the original delay
-            elif i < total_chunks:
-                await asyncio.sleep(0.5)
+                # For non-aggregation chunks, keep the original delay
+                if i < total_chunks:
+                    await asyncio.sleep(0.5)
 
         safe_console_print(
             f"\n✓ All {total_chunks} chunk(s) sent successfully",
@@ -4834,6 +4960,16 @@ class WebSocketClient:
                 # ISSUE #2134 FIX: Handle cleanup coordination events
                 if event.type in ['cleanup_started', 'cleanup_duration_estimate', 'cleanup_complete']:
                     await self.handle_cleanup_events(event)
+
+                # Handle thread_ready_for_chunks signal for concurrent chunk bursting
+                if event.type == 'thread_ready_for_chunks':
+                    self.thread_ready_for_chunks = True
+                    self.thread_ready_event = event
+                    self.debug.debug_print(
+                        f"🚀 Backend ready for concurrent chunk burst (thread_id: {event.data.get('thread_id', 'unknown')})",
+                        DebugLevel.BASIC,
+                        style="cyan"
+                    )
 
                 # ISSUE #1603 FIX: Keep original critical logging for now (can be disabled with debug level)
                 if self.debug.debug_level >= DebugLevel.TRACE:
