@@ -7780,13 +7780,14 @@ def main(argv=None):
         help="Disable automatic log attachment"
     )
 
-    parser.add_argument(
-        "--logs-count",
-        type=int,
-        default=1,
-        metavar="N",
-        help="Number of recent log files to collect (default: 1, must be positive). For best results, use 1 log at a time for focused analysis."
-    )
+    # FROZEN: Temporarily disabled for stability
+    # parser.add_argument(
+    #     "--logs-count",
+    #     type=int,
+    #     default=1,
+    #     metavar="N",
+    #     help="Number of recent log files to collect (default: 1, must be positive). For best results, use 1 log at a time for focused analysis."
+    # )
 
     parser.add_argument(
         "--logs-project",
@@ -7820,9 +7821,13 @@ def main(argv=None):
 
     args = parser.parse_args(argv)
 
+    # FROZEN: Set default logs_count since flag is commented out
+    args.logs_count = 1
+
     # Validate log-forwarding arguments
-    if args.logs_count < 1:
-        parser.error("--logs-count must be a positive integer")
+    # FROZEN: logs_count validation disabled while flag is frozen
+    # if args.logs_count < 1:
+    #     parser.error("--logs-count must be a positive integer")
 
     # Validate development environment configuration
     if args.backend_url and args.env != "development":
