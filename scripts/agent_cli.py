@@ -991,6 +991,31 @@ class DebugManager:
             }.get(aggregation_reason, aggregation_reason)
 
             return f"🎯 Aggregation Complete: {file_name} ({reason_icon} {reason_text} - {chunks_processed}/{total_chunks} chunks) - {response_str}"
+        elif event_type == "chunk_response_immediate":
+            # Display immediate chunk response (no aggregation)
+            chunk_data = data.get('chunk_data', {})
+            chunk_index = chunk_data.get('chunk_index', 0)
+            total_chunks = chunk_data.get('total_chunks', 1)
+            file_name = chunk_data.get('file_name', 'unknown')
+            response = chunk_data.get('response', '')
+
+            # Use smart truncation for response content
+            response_str = smart_truncate_json(response, self) if isinstance(response, (dict, list)) else str(response)
+            max_len = 200  # Default for chunk responses
+            if self.debug_level >= DebugLevel.VERBOSE:
+                max_len = 500
+            elif self.debug_level >= DebugLevel.TRACE:
+                max_len = 2000
+            elif self.debug_level >= DebugLevel.DIAGNOSTIC:
+                max_len = len(response_str)  # No truncation
+            if not isinstance(response, (dict, list)):
+                response_str = truncate_with_ellipsis(response_str, max_len)
+
+            # Format chunk progress indicator
+            progress_indicator = f"[{chunk_index + 1}/{total_chunks}]"
+            completion_icon = "✅" if chunk_index + 1 == total_chunks else "📦"
+
+            return f"{completion_icon} Chunk {progress_indicator} - {file_name}: {response_str}"
         elif event_type == "message":
             content = data.get('content', '')
             # Use smart truncation for message content
@@ -2674,6 +2699,11 @@ class WebSocketClient:
 
         # Track when chunked aggregation completes (all events already received)
         self.chunked_aggregation_complete: bool = False
+
+        # Track chunk_response_immediate events for no-aggregation chunks
+        self.chunk_responses_received: int = 0
+        self.chunk_total_expected: Optional[int] = None
+        self.chunk_responses: List[Dict[str, Any]] = []
 
         # SSOT: Thread management cache for performance
         self.thread_cache_file = self._get_platform_cache_path()
@@ -4469,6 +4499,10 @@ class WebSocketClient:
         """
         Wait for a specific event type AND display all intermediate events with chunk awareness.
 
+        Note: If we're waiting for 'agent_aggregation_complete' but receive
+        'chunk_response_immediate' events instead (indicating no-aggregation mode),
+        this method will return early once all chunks are received.
+
         Args:
             event_type: The event type to wait for (e.g., 'agent_aggregation_complete')
             timeout: Maximum time to wait in seconds
@@ -4602,6 +4636,26 @@ class WebSocketClient:
                     )
                     return event
 
+            # Special case: If waiting for agent_aggregation_complete but receiving
+            # chunk_response_immediate events instead (no-aggregation mode),
+            # check if we've received all chunks and return early
+            if event_type == "agent_aggregation_complete" and self.chunked_aggregation_complete:
+                self.debug.debug_print(
+                    f"All {total_chunks} chunk_response_immediate events received - completing without aggregation",
+                    DebugLevel.BASIC,
+                    style="green"
+                )
+                # Create a synthetic completion event to signal success
+                synthetic_event = WebSocketEvent(
+                    type="chunk_responses_complete",
+                    data={
+                        "total_chunks": total_chunks,
+                        "chunks_received": self.chunk_responses_received,
+                        "mode": "immediate_response"
+                    }
+                )
+                return synthetic_event
+
             # Short sleep to avoid busy waiting
             await asyncio.sleep(0.1)
 
@@ -4628,6 +4682,12 @@ class WebSocketClient:
                   False if chunks sent without aggregation or aggregation incomplete
         """
         from chunk_creator import ChunkCreator
+
+        # Reset chunk tracking state before sending new chunks
+        self.chunk_responses_received = 0
+        self.chunk_total_expected = None
+        self.chunk_responses = []
+        self.chunked_aggregation_complete = False
 
         # Display detailed chunking info (similar to non-chunked UI)
         separator = "=" * 60
@@ -4866,43 +4926,63 @@ class WebSocketClient:
                 )
                 return False  # Aggregation incomplete
             else:
-                self.debug.debug_print(
-                    f"✓ Received agent_aggregation_complete",
-                    DebugLevel.VERBOSE,
-                    style="green"
-                )
-
-                safe_console_print(
-                    f"✓ All chunks processed and aggregated successfully",
-                    style="green",
-                    json_mode=self.config.json_mode,
-                    ci_mode=self.config.ci_mode
-                )
-
-                # Extract and display the unified response from the aggregation event
-                response = aggregation_event.data.get('response', '')
-                if response:
-                    safe_console_print(
-                        f"\n📊 Unified Analysis from All Chunks:",
-                        style="bold cyan",
-                        json_mode=self.config.json_mode,
-                        ci_mode=self.config.ci_mode
-                    )
-                    safe_console_print(
-                        response,
-                        style="cyan",
-                        json_mode=self.config.json_mode,
-                        ci_mode=self.config.ci_mode
-                    )
-                else:
+                # Check if this is the new immediate response mode (no aggregation)
+                if aggregation_event.type == "chunk_responses_complete":
                     self.debug.debug_print(
-                        "Warning: agent_aggregation_complete event has no response content",
-                        DebugLevel.BASIC,
-                        style="yellow"
+                        f"✓ All chunks received via chunk_response_immediate (no aggregation)",
+                        DebugLevel.VERBOSE,
+                        style="green"
                     )
 
-                # Aggregation completed successfully - all events already received
-                return True
+                    safe_console_print(
+                        f"\n✅ All {total_chunks} chunks processed successfully (immediate response mode)",
+                        style="green bold",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+
+                    # Responses were already displayed as they arrived
+                    # No unified response to display
+                    return True
+                else:
+                    # Traditional aggregation mode
+                    self.debug.debug_print(
+                        f"✓ Received agent_aggregation_complete",
+                        DebugLevel.VERBOSE,
+                        style="green"
+                    )
+
+                    safe_console_print(
+                        f"✓ All chunks processed and aggregated successfully",
+                        style="green",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+
+                    # Extract and display the unified response from the aggregation event
+                    response = aggregation_event.data.get('response', '')
+                    if response:
+                        safe_console_print(
+                            f"\n📊 Unified Analysis from All Chunks:",
+                            style="bold cyan",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+                        safe_console_print(
+                            response,
+                            style="cyan",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+                    else:
+                        self.debug.debug_print(
+                            "Warning: agent_aggregation_complete event has no response content",
+                            DebugLevel.BASIC,
+                            style="yellow"
+                        )
+
+                    # Aggregation completed successfully - all events already received
+                    return True
         else:
             # OLD FLOW: Single chunk or non-aggregation chunks - send normally
             # This path is used when:
@@ -4953,7 +5033,44 @@ class WebSocketClient:
                 style="yellow"
             )
 
-        # Non-aggregation chunks - events will arrive normally
+        # For non-aggregation chunks, wait for chunk_response_immediate events
+        # The backend will send these immediately as each chunk is processed
+        if total_chunks > 0:
+            safe_console_print(
+                f"\n⏳ Waiting for {total_chunks} chunk response(s)...",
+                style="cyan",
+                json_mode=self.config.json_mode,
+                ci_mode=self.config.ci_mode
+            )
+
+            # Wait for all chunk_response_immediate events (timeout: 300s for non-aggregation)
+            # We use a shorter timeout since responses should be immediate
+            start_time = asyncio.get_event_loop().time()
+            timeout = 300.0  # 5 minutes should be plenty for immediate responses
+
+            while self.chunk_responses_received < total_chunks:
+                elapsed = asyncio.get_event_loop().time() - start_time
+                if elapsed > timeout:
+                    safe_console_print(
+                        f"⚠️  Warning: Timeout waiting for chunk responses ({self.chunk_responses_received}/{total_chunks} received)",
+                        style="yellow",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+                    return False
+
+                await asyncio.sleep(0.1)
+
+            # All chunk responses received
+            safe_console_print(
+                f"✅ All {total_chunks} chunk responses received",
+                style="green bold",
+                json_mode=self.config.json_mode,
+                ci_mode=self.config.ci_mode
+            )
+            return True
+
+        # No chunks sent - this shouldn't happen but handle gracefully
         return False
 
     async def _send_single_chunk(
@@ -5169,6 +5286,87 @@ class WebSocketClient:
                     self.thread_ready_event = event
                     self.debug.debug_print(
                         f"🚀 Backend ready for concurrent chunk burst (thread_id: {event.data.get('thread_id', 'unknown')})",
+                        DebugLevel.BASIC,
+                        style="cyan"
+                    )
+
+                # Handle chunk_response_immediate for no-aggregation chunks
+                if event.type == 'chunk_response_immediate':
+                    chunk_data = data.get('chunk_data', {})
+                    chunk_index = chunk_data.get('chunk_index', 0)
+                    total_chunks = chunk_data.get('total_chunks', 1)
+                    file_name = chunk_data.get('file_name', 'unknown')
+                    response = chunk_data.get('response', '')
+                    formatted_response = data.get('formatted_response', '')
+
+                    # Track chunk responses
+                    self.chunk_responses_received += 1
+                    if self.chunk_total_expected is None:
+                        self.chunk_total_expected = total_chunks
+                    self.chunk_responses.append({
+                        'chunk_index': chunk_index,
+                        'file_name': file_name,
+                        'response': response,
+                        'formatted_response': formatted_response
+                    })
+
+                    # Display chunk response immediately
+                    safe_console_print(
+                        f"\n{'='*80}",
+                        style="cyan",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+                    safe_console_print(
+                        f"📦 Chunk {chunk_index + 1}/{total_chunks} - {file_name}",
+                        style="cyan bold",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+                    safe_console_print(
+                        f"{'='*80}\n",
+                        style="cyan",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+
+                    # Display the formatted response (already in JSON format from backend)
+                    if formatted_response:
+                        safe_console_print(
+                            formatted_response,
+                            style="white",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+                    else:
+                        # Fallback: display raw response
+                        safe_console_print(
+                            response,
+                            style="white",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+
+                    safe_console_print(
+                        f"\n{'='*80}\n",
+                        style="cyan",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+
+                    # Check if all chunks received
+                    if self.chunk_responses_received == total_chunks:
+                        safe_console_print(
+                            f"✅ All {total_chunks} chunks received for {file_name}",
+                            style="green bold",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+                        # Set completion flag
+                        self.chunked_aggregation_complete = True
+
+                    self.debug.debug_print(
+                        f"📦 Chunk response immediate: {chunk_index + 1}/{total_chunks} - {file_name}",
                         DebugLevel.BASIC,
                         style="cyan"
                     )
