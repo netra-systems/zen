@@ -2672,6 +2672,9 @@ class WebSocketClient:
         self.thread_ready_for_chunks: bool = False
         self.thread_ready_event: Optional[WebSocketEvent] = None
 
+        # Track when chunked aggregation completes (all events already received)
+        self.chunked_aggregation_complete: bool = False
+
         # SSOT: Thread management cache for performance
         self.thread_cache_file = self._get_platform_cache_path()
         self.thread_cache: Dict[str, Dict[str, Any]] = {}
@@ -4221,14 +4224,18 @@ class WebSocketClient:
                         }
                     else:
                         # NEW: Chunking required
-                        await self._send_chunked_logs(
+                        chunked_aggregation_complete = await self._send_chunked_logs(
                             logs=logs,
                             file_info=file_info,
                             chunking_strategy=chunking_strategy,
                             message=message,
                             thread_id=thread_id
                         )
-                        return  # Early return - chunks sent separately
+
+                        # Store flag for caller to check
+                        self.chunked_aggregation_complete = chunked_aggregation_complete
+
+                        return None  # Early return - chunks sent separately
 
                 else:
                     self.debug.debug_print(
@@ -4460,7 +4467,7 @@ class WebSocketClient:
         chunking_strategy: Any,
         message: str,
         thread_id: str
-    ) -> None:
+    ) -> bool:
         """
         Send logs in chunks when chunking is required.
 
@@ -4470,6 +4477,10 @@ class WebSocketClient:
             chunking_strategy: ChunkingStrategy object from analyzer
             message: Original user message
             thread_id: Thread ID for this conversation
+
+        Returns:
+            bool: True if chunked aggregation completed (all events processed),
+                  False if chunks sent without aggregation or aggregation incomplete
         """
         from chunk_creator import ChunkCreator
 
@@ -4683,6 +4694,7 @@ class WebSocketClient:
                     json_mode=self.config.json_mode,
                     ci_mode=self.config.ci_mode
                 )
+                return False  # Aggregation incomplete
             else:
                 self.debug.debug_print(
                     f"✓ Received agent_aggregation_complete",
@@ -4718,6 +4730,9 @@ class WebSocketClient:
                         DebugLevel.BASIC,
                         style="yellow"
                     )
+
+                # Aggregation completed successfully - all events already received
+                return True
         else:
             # OLD FLOW: Single chunk or non-aggregation chunks - send normally
             for i, chunk in enumerate(all_chunks, 1):
@@ -4753,6 +4768,9 @@ class WebSocketClient:
             json_mode=self.config.json_mode,
             ci_mode=self.config.ci_mode
         )
+
+        # Non-aggregation chunks - events will arrive normally
+        return False
 
     async def _send_single_chunk(
         self,
@@ -6560,6 +6578,21 @@ class AgentCLI:
 
                 # Send message
                 run_id = await self.ws_client.send_message(message)
+
+                # Check if chunked aggregation already completed
+                if hasattr(self.ws_client, 'chunked_aggregation_complete') and self.ws_client.chunked_aggregation_complete:
+                    # Chunked aggregation completed - all events already received and displayed
+                    safe_console_print(f"\n📊 Received {len(self.ws_client.events)} events", style="cyan",
+                                      json_mode=self.json_mode, ci_mode=self.ci_mode)
+                    safe_console_print("✅ Chunked aggregation completed successfully", style="green",
+                                      json_mode=self.json_mode, ci_mode=self.ci_mode)
+
+                    # Reset flag for next message
+                    self.ws_client.chunked_aggregation_complete = False
+
+                    return True  # Early exit, skip event monitoring loop
+
+                # Normal flow: wait for events
                 safe_console_print(f"SUCCESS: Message sent with run_id: {run_id}", style="green",
                                  json_mode=self.json_mode, ci_mode=self.ci_mode)
 
