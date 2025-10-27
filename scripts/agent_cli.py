@@ -4638,7 +4638,7 @@ class WebSocketClient:
         safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print("SENDING LOGS TO OPTIMIZER (CHUNKED)", style="bold cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
-        safe_console_print(f"  Provider: {self.config.logs_provider.upper()}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Provider: {self.logs_provider.upper()}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(f"  Total Entries: {total_entries}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(f"  Files Read: {len(chunking_strategy.file_analyses)}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(f"  Total Size: {total_size_mb:.2f} MB", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
