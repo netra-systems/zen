@@ -4460,6 +4460,120 @@ class WebSocketClient:
             # Short sleep to avoid busy waiting
             await asyncio.sleep(0.1)
 
+    async def _wait_and_display_events(
+        self,
+        event_type: str,
+        timeout: float,
+        total_chunks: int
+    ) -> Optional[WebSocketEvent]:
+        """
+        Wait for a specific event type AND display all intermediate events with chunk awareness.
+
+        Args:
+            event_type: The event type to wait for (e.g., 'agent_aggregation_complete')
+            timeout: Maximum time to wait in seconds
+            total_chunks: Total number of chunks being processed
+
+        Returns:
+            The event object if received, None if timeout occurred
+        """
+        start_time = asyncio.get_event_loop().time()
+        last_displayed_index = len(self.events)
+
+        # Emoji mappings for different event types
+        event_emojis = {
+            'agent_started': '🚀',
+            'agent_thinking': '💭',
+            'tool_executing': '🔧',
+            'tool_completed': '✅',
+            'agent_completed': '✓'
+        }
+
+        self.debug.debug_print(
+            f"Waiting for {event_type} while displaying chunk events...",
+            DebugLevel.VERBOSE,
+            style="cyan"
+        )
+
+        while True:
+            # Check if timeout occurred
+            elapsed = asyncio.get_event_loop().time() - start_time
+            if elapsed > timeout:
+                self.debug.debug_print(
+                    f"Timeout waiting for {event_type} after {elapsed:.1f}s",
+                    DebugLevel.BASIC,
+                    style="yellow"
+                )
+                return None
+
+            # Display any new events
+            while last_displayed_index < len(self.events):
+                event = self.events[last_displayed_index]
+                last_displayed_index += 1
+
+                # Extract event type (handle nested system_message events)
+                display_event_type = event.type
+                event_data = event.data
+
+                if event.type == "system_message":
+                    inner_event = event_data.get('event', '')
+                    if inner_event in ['agent_started', 'agent_thinking', 'agent_completed', 'tool_executing', 'tool_completed']:
+                        display_event_type = inner_event
+                        payload = event_data.get('payload', {})
+                        event_data = {**event_data, **payload}
+
+                # Extract chunk metadata if present
+                chunk_metadata = event_data.get('agent_context', {}).get('chunk_metadata', {})
+                chunk_index = chunk_metadata.get('chunk_index')
+
+                # Format brief chunk-aware message
+                if chunk_index is not None and display_event_type in event_emojis:
+                    emoji = event_emojis[display_event_type]
+                    chunk_num = chunk_index + 1  # Convert 0-based to 1-based
+
+                    # Create brief status message
+                    if display_event_type == 'agent_started':
+                        msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Started"
+                    elif display_event_type == 'agent_thinking':
+                        msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Analyzing..."
+                    elif display_event_type == 'tool_executing':
+                        tool_name = event_data.get('tool', event_data.get('tool_name', 'tool'))
+                        msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Using {tool_name}"
+                    elif display_event_type == 'tool_completed':
+                        msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Tool complete"
+                    elif display_event_type == 'agent_completed':
+                        msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Complete"
+                    else:
+                        msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: {display_event_type}"
+
+                    safe_console_print(
+                        msg,
+                        style="dim cyan",
+                        json_mode=self.config.json_mode,
+                        ci_mode=self.config.ci_mode
+                    )
+
+                # Check if this is the event we're waiting for
+                if event.type == event_type:
+                    self.debug.debug_print(
+                        f"Received {event_type} event after {elapsed:.1f}s",
+                        DebugLevel.VERBOSE,
+                        style="green"
+                    )
+                    return event
+
+                # Also check for nested events in system_message
+                if event.type == "system_message" and event_data.get('event') == event_type:
+                    self.debug.debug_print(
+                        f"Received {event_type} event (nested in system_message) after {elapsed:.1f}s",
+                        DebugLevel.VERBOSE,
+                        style="green"
+                    )
+                    return event
+
+            # Short sleep to avoid busy waiting
+            await asyncio.sleep(0.1)
+
     async def _send_chunked_logs(
         self,
         logs: List[Dict[str, Any]],
@@ -4678,14 +4792,20 @@ class WebSocketClient:
                             )
 
             # Step 4: Wait for agent_aggregation_complete (for both burst and sequential modes)
-            self.debug.debug_print(
-                "Waiting for agent_aggregation_complete event...",
-                DebugLevel.VERBOSE,
-                style="cyan"
+            safe_console_print(
+                f"\n⏳ Processing {total_chunks} chunks... (displaying events in real-time)",
+                style="cyan",
+                json_mode=self.config.json_mode,
+                ci_mode=self.config.ci_mode
             )
 
             # Backend MAX_WAIT_SECONDS is 1200s (20 minutes)
-            aggregation_event = await self._wait_for_event("agent_aggregation_complete", timeout=1200.0)
+            # Use new method that displays events as they arrive
+            aggregation_event = await self._wait_and_display_events(
+                event_type="agent_aggregation_complete",
+                timeout=1200.0,
+                total_chunks=total_chunks
+            )
 
             if not aggregation_event:
                 safe_console_print(
