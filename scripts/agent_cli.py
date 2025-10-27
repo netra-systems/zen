@@ -4523,28 +4523,59 @@ class WebSocketClient:
                         event_data = {**event_data, **payload}
 
                 # Extract chunk metadata if present
+                # Backend may return chunk info in different locations
                 chunk_metadata = event_data.get('agent_context', {}).get('chunk_metadata', {})
                 chunk_index = chunk_metadata.get('chunk_index')
 
-                # Format brief chunk-aware message
-                if chunk_index is not None and display_event_type in event_emojis:
-                    emoji = event_emojis[display_event_type]
-                    chunk_num = chunk_index + 1  # Convert 0-based to 1-based
+                # Also check data directly for chunk_index (backend may structure differently)
+                if chunk_index is None:
+                    chunk_index = event_data.get('chunk_index')
 
-                    # Create brief status message
-                    if display_event_type == 'agent_started':
-                        msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Started"
-                    elif display_event_type == 'agent_thinking':
-                        msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Analyzing..."
-                    elif display_event_type == 'tool_executing':
-                        tool_name = event_data.get('tool', event_data.get('tool_name', 'tool'))
-                        msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Using {tool_name}"
-                    elif display_event_type == 'tool_completed':
-                        msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Tool complete"
-                    elif display_event_type == 'agent_completed':
-                        msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Complete"
+                # Also check in nested data field
+                if chunk_index is None:
+                    nested_data = event_data.get('data', {})
+                    chunk_index = nested_data.get('chunk_index')
+                    if chunk_index is None:
+                        chunk_metadata_nested = nested_data.get('chunk_metadata', {})
+                        chunk_index = chunk_metadata_nested.get('chunk_index')
+
+                # Format brief chunk-aware message
+                if display_event_type in event_emojis:
+                    emoji = event_emojis[display_event_type]
+
+                    # If we have chunk metadata, show chunk-aware format
+                    if chunk_index is not None:
+                        chunk_num = chunk_index + 1  # Convert 0-based to 1-based
+
+                        # Create brief status message
+                        if display_event_type == 'agent_started':
+                            msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Started"
+                        elif display_event_type == 'agent_thinking':
+                            msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Analyzing..."
+                        elif display_event_type == 'tool_executing':
+                            tool_name = event_data.get('tool', event_data.get('tool_name', 'tool'))
+                            msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Using {tool_name}"
+                        elif display_event_type == 'tool_completed':
+                            msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Tool complete"
+                        elif display_event_type == 'agent_completed':
+                            msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Complete"
+                        else:
+                            msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: {display_event_type}"
                     else:
-                        msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: {display_event_type}"
+                        # Fallback: Show events without chunk number (backend may not include metadata)
+                        if display_event_type == 'agent_started':
+                            msg = f"{emoji} Agent started"
+                        elif display_event_type == 'agent_thinking':
+                            msg = f"{emoji} Analyzing..."
+                        elif display_event_type == 'tool_executing':
+                            tool_name = event_data.get('tool', event_data.get('tool_name', 'tool'))
+                            msg = f"{emoji} Using {tool_name}"
+                        elif display_event_type == 'tool_completed':
+                            msg = f"{emoji} Tool complete"
+                        elif display_event_type == 'agent_completed':
+                            msg = f"{emoji} Processing complete"
+                        else:
+                            msg = f"{emoji} {display_event_type}"
 
                     safe_console_print(
                         msg,
@@ -4598,13 +4629,44 @@ class WebSocketClient:
         """
         from chunk_creator import ChunkCreator
 
-        # Display chunking info
-        safe_console_print(
-            f"\nChunking strategy: {chunking_strategy.strategy}",
-            style="yellow",
-            json_mode=self.config.json_mode,
-            ci_mode=self.config.ci_mode
-        )
+        # Display detailed chunking info (similar to non-chunked UI)
+        separator = "=" * 60
+        total_entries = sum(fa.entry_count for fa in chunking_strategy.file_analyses)
+        total_size_mb = sum(fa.size_mb for fa in chunking_strategy.file_analyses)
+
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("SENDING LOGS TO OPTIMIZER (CHUNKED)", style="bold cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Provider: {self.config.logs_provider.upper()}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Total Entries: {total_entries}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Files Read: {len(chunking_strategy.file_analyses)}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Total Size: {total_size_mb:.2f} MB", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Chunking Strategy: {chunking_strategy.strategy}", style="yellow", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("  Files:", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        for file_analysis in chunking_strategy.file_analyses:
+            chunking_status = "will be chunked" if file_analysis.needs_chunking else "single file"
+            safe_console_print(
+                f"    * {file_analysis.file_name}",
+                json_mode=self.config.json_mode,
+                ci_mode=self.config.ci_mode
+            )
+            safe_console_print(
+                f"      - Hash: {file_analysis.file_hash[:8]}, Size: {file_analysis.size_mb:.2f} MB, Entries: {file_analysis.entry_count}",
+                style="dim",
+                json_mode=self.config.json_mode,
+                ci_mode=self.config.ci_mode
+            )
+            safe_console_print(
+                f"      - Status: {chunking_status}",
+                style="yellow" if file_analysis.needs_chunking else "cyan",
+                json_mode=self.config.json_mode,
+                ci_mode=self.config.ci_mode
+            )
+
+        safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
 
         # Create chunks from file analyses
         chunk_creator = ChunkCreator()
@@ -4617,14 +4679,6 @@ class WebSocketClient:
             if file_analysis.needs_chunking:
                 # Extract entries for this file
                 file_entries = logs[entry_offset:entry_offset + file_analysis.entry_count]
-
-                safe_console_print(
-                    f"\nChunking file: {file_analysis.file_name} "
-                    f"({file_analysis.size_mb:.2f} MB, {file_analysis.entry_count} entries)",
-                    style="yellow",
-                    json_mode=self.config.json_mode,
-                    ci_mode=self.config.ci_mode
-                )
 
                 # Create chunks for this file
                 is_multi_file = len(chunking_strategy.file_analyses) > 1
@@ -4640,14 +4694,6 @@ class WebSocketClient:
             else:
                 # File doesn't need chunking - will be sent as single chunk
                 file_entries = logs[entry_offset:entry_offset + file_analysis.entry_count]
-
-                safe_console_print(
-                    f"\nFile doesn't need chunking: {file_analysis.file_name} "
-                    f"({file_analysis.size_mb:.2f} MB, {file_analysis.entry_count} entries) - sending as single unit",
-                    style="cyan",
-                    json_mode=self.config.json_mode,
-                    ci_mode=self.config.ci_mode
-                )
 
                 # Create a single "chunk" for this file
                 from chunk_creator import Chunk, ChunkMetadata
@@ -4685,7 +4731,11 @@ class WebSocketClient:
         current_thread_id = thread_id
 
         # Check if this is a chunked aggregation upload
-        is_chunked_aggregation = total_chunks > 1 and all_chunks[0].metadata.aggregation_required
+        # Need to check if ANY chunk requires aggregation (not just first one)
+        # In multi-file scenarios, first chunk might be a non-chunked single file
+        is_chunked_aggregation = total_chunks > 1 and any(
+            chunk.metadata.aggregation_required for chunk in all_chunks
+        )
 
         if is_chunked_aggregation:
             # NEW FLOW: Concurrent chunk bursting with thread_ready_for_chunks signal
@@ -4793,7 +4843,7 @@ class WebSocketClient:
 
             # Step 4: Wait for agent_aggregation_complete (for both burst and sequential modes)
             safe_console_print(
-                f"\n⏳ Processing {total_chunks} chunks... (displaying events in real-time)",
+                f"\n⏳ Processing {total_chunks} chunks...",
                 style="cyan",
                 json_mode=self.config.json_mode,
                 ci_mode=self.config.ci_mode
@@ -4855,6 +4905,9 @@ class WebSocketClient:
                 return True
         else:
             # OLD FLOW: Single chunk or non-aggregation chunks - send normally
+            # This path is used when:
+            # 1. Total chunks = 1 (single file, no chunking)
+            # 2. All chunks have aggregation_required=False (multiple small files)
             for i, chunk in enumerate(all_chunks, 1):
                 chunk_num = i
 
@@ -4888,6 +4941,17 @@ class WebSocketClient:
             json_mode=self.config.json_mode,
             ci_mode=self.config.ci_mode
         )
+
+        # Check if we should wait for aggregation even in this path
+        # This handles edge cases where chunks don't meet burst mode criteria
+        # but still need aggregation (shouldn't normally happen with current logic)
+        has_any_aggregation = any(chunk.metadata.aggregation_required for chunk in all_chunks)
+        if has_any_aggregation:
+            self.debug.debug_print(
+                "Warning: Mixed aggregation chunks sent sequentially - this may indicate a logic issue",
+                DebugLevel.BASIC,
+                style="yellow"
+            )
 
         # Non-aggregation chunks - events will arrive normally
         return False
