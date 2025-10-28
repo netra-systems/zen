@@ -4463,13 +4463,26 @@ class WebSocketClient:
 
         async def send_chunk_in_new_thread(chunk, chunk_num):
             """Helper to send a single chunk in a new WebSocket connection."""
+            self.debug.debug_print(f"[CHUNK {chunk_num}] Starting to send chunk.", DebugLevel.VERBOSE, style="cyan")
             try:
                 # Create a new WebSocket client for each chunk
+                self.debug.debug_print(f"[CHUNK {chunk_num}] Creating WebSocketClient.", DebugLevel.VERBOSE, style="cyan")
                 ws_client = WebSocketClient(
                     self.config, self.token, self.debug,
                     handshake_timeout=self.handshake_timeout
                 )
+                ws_client.events = self.events
+
+                self.debug.debug_print(f"[CHUNK {chunk_num}] Connecting to WebSocket.", DebugLevel.VERBOSE, style="cyan")
                 if await ws_client.connect():
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] WebSocket connected.", DebugLevel.VERBOSE, style="green")
+                    
+                    # Start receiving events in the background
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] Starting event receiver.", DebugLevel.VERBOSE, style="cyan")
+                    event_task = asyncio.create_task(ws_client.receive_events())
+
+                    # Send the chunk
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] Sending chunk.", DebugLevel.VERBOSE, style="cyan")
                     await ws_client._send_single_chunk(
                         chunk=chunk,
                         chunk_num=chunk_num,
@@ -4477,11 +4490,26 @@ class WebSocketClient:
                         message=message,
                         thread_id=None  # Send as a new thread
                     )
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] Chunk sent.", DebugLevel.VERBOSE, style="green")
+
+                    # Wait for agent to complete
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] Waiting for agent_completed event.", DebugLevel.VERBOSE, style="cyan")
+                    completion_event = await ws_client._wait_for_event('agent_completed', timeout=300.0)
+                    if completion_event:
+                        self.debug.debug_print(f"[CHUNK {chunk_num}] agent_completed event received.", DebugLevel.VERBOSE, style="green")
+                    else:
+                        self.debug.debug_print(f"[CHUNK {chunk_num}] Timed out waiting for agent_completed event.", DebugLevel.VERBOSE, style="yellow")
+
+
+                    # Clean up
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] Closing WebSocket.", DebugLevel.VERBOSE, style="cyan")
+                    event_task.cancel()
                     await ws_client.close()
-                    self.debug.debug_print(f"Chunk {chunk_num}/{total_chunks} sent successfully in a new thread.", DebugLevel.VERBOSE, style="green")
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] WebSocket closed.", DebugLevel.VERBOSE, style="green")
+                    self.debug.debug_print(f"Chunk {chunk_num}/{total_chunks} sent and processed successfully in a new thread.", DebugLevel.VERBOSE, style="green")
                     return True
                 else:
-                    self.debug.debug_print(f"Failed to connect WebSocket for chunk {chunk_num}/{total_chunks}.", DebugLevel.BASIC, style="red")
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] Failed to connect WebSocket.", DebugLevel.BASIC, style="red")
                     return False
             except Exception as e:
                 self.debug.log_error(e, f"sending chunk {chunk_num}")
