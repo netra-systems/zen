@@ -2601,7 +2601,7 @@ class WebSocketEvent:
 class WebSocketClient:
     """WebSocket client for agent interactions"""
 
-    def __init__(self, config: Config, token: str, debug_manager: Optional[DebugManager] = None,
+    def __init__(self, config: Config, token: str, debug_manager: Optional[DebugManager] = None, run_id: Optional[str] = None,
                  send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
                  logs_path: Optional[str] = None, logs_user: Optional[str] = None,
                  logs_provider: str = "claude", handshake_timeout: float = 10.0):
@@ -2612,7 +2612,7 @@ class WebSocketClient:
         self.ws: Optional[WebSocketClientProtocol] = None
         self.events: List[WebSocketEvent] = []
         self.connected = False
-        self.run_id: Optional[str] = None
+        self.run_id: Optional[str] = run_id
 
         # ISSUE #2417 Phase 2: Store thread_id for filtering backend logs
         self.current_thread_id: Optional[str] = None
@@ -3892,7 +3892,7 @@ class WebSocketClient:
         safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
 
-    async def send_message(self, message: str) -> str:
+    async def send_message(self, message: str, jsonl_logs: Optional[List[Dict[str, Any]]] = None) -> bool:
         """Send a message and return the run_id"""
         if not self.ws:
             raise RuntimeError("WebSocket not connected")
@@ -4099,6 +4099,8 @@ class WebSocketClient:
                 "client_environment": self.config.client_environment if hasattr(self.config, 'client_environment') and self.config.client_environment else None
             }
         }
+        if jsonl_logs is not None:
+            payload["payload"]["jsonl_logs"] = jsonl_logs
 
         # Attach logs if --send-logs is enabled
         if self.send_logs:
@@ -4173,15 +4175,23 @@ class WebSocketClient:
                         }
                     else:
                         # NEW: Chunking required
-                        await self._send_chunked_logs(
+                        successful_completions = await self._send_chunked_logs(
                             logs=logs,
                             file_info=file_info,
                             chunking_strategy=chunking_strategy,
                             message=message,
                             thread_id=thread_id
                         )
+                        if not jsonl_logs and successful_completions:
+                            # Extract results from completion events and add to payload
+                            aggregated_results = []
+                            for comp_event in successful_completions:
+                                if comp_event.data and 'result' in comp_event.data:
+                                    aggregated_results.append(comp_event.data['result'])
+                            if aggregated_results:
+                                payload["payload"]["jsonl_logs"] = aggregated_results
 
-                        return None  # Early return - chunks sent separately
+
 
                 else:
                     self.debug.debug_print(
@@ -4360,7 +4370,7 @@ class WebSocketClient:
             The event object if received, None if timeout occurred
         """
         start_time = asyncio.get_event_loop().time()
-        initial_event_count = len(self.events)
+        last_checked_index = 0
 
         self.debug.debug_print(
             f"Waiting for event: {event_type} (timeout: {timeout}s)",
@@ -4379,10 +4389,11 @@ class WebSocketClient:
                 )
                 return None
 
-            # Check if we have new events
-            if len(self.events) > initial_event_count:
-                # Check the new events for the one we're waiting for
-                for event in self.events[initial_event_count:]:
+            # Check for new events since last check
+            current_events_len = len(self.events)
+            if current_events_len > last_checked_index:
+                for i in range(last_checked_index, current_events_len):
+                    event = self.events[i]
                     if event.type == event_type:
                         self.debug.debug_print(
                             f"Received {event_type} event after {elapsed:.1f}s",
@@ -4399,9 +4410,7 @@ class WebSocketClient:
                             style="green"
                         )
                         return event
-
-            # Update initial_event_count to avoid re-checking same events
-            initial_event_count = len(self.events)
+                last_checked_index = current_events_len # Update last checked index
 
             # Short sleep to avoid busy waiting
             await asyncio.sleep(0.1)
@@ -4461,17 +4470,17 @@ class WebSocketClient:
             ci_mode=self.config.ci_mode
         )
 
-        async def send_chunk_in_new_thread(chunk, chunk_num):
+        async def send_chunk_in_new_thread(chunk, chunk_num, main_run_id: Optional[str]):
             """Helper to send a single chunk in a new WebSocket connection."""
             self.debug.debug_print(f"[CHUNK {chunk_num}] Starting to send chunk.", DebugLevel.VERBOSE, style="cyan")
             try:
                 # Create a new WebSocket client for each chunk
                 self.debug.debug_print(f"[CHUNK {chunk_num}] Creating WebSocketClient.", DebugLevel.VERBOSE, style="cyan")
                 ws_client = WebSocketClient(
-                    self.config, self.token, self.debug,
+                    self.config, self.token, self.debug, run_id=main_run_id,
                     handshake_timeout=self.handshake_timeout
                 )
-                ws_client.events = self.events
+
 
                 self.debug.debug_print(f"[CHUNK {chunk_num}] Connecting to WebSocket.", DebugLevel.VERBOSE, style="cyan")
                 if await ws_client.connect():
@@ -4497,44 +4506,55 @@ class WebSocketClient:
                     completion_event = await ws_client._wait_for_event('agent_completed', timeout=300.0)
                     if completion_event:
                         self.debug.debug_print(f"[CHUNK {chunk_num}] agent_completed event received.", DebugLevel.VERBOSE, style="green")
+                        # Display the completion event
+                        formatted_event = completion_event.format_for_display(self.debug)
+                        timestamp = datetime.now().strftime('%H:%M:%S')
+                        safe_console_print(f"[{timestamp}] {formatted_event}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+                        # Clean up
+                        self.debug.debug_print(f"[CHUNK {chunk_num}] Closing WebSocket.", DebugLevel.VERBOSE, style="cyan")
+                        event_task.cancel()
+                        await ws_client.close()
+                        self.debug.debug_print(f"[CHUNK {chunk_num}] WebSocket closed.", DebugLevel.VERBOSE, style="green")
+                        self.debug.debug_print(f"Chunk {chunk_num}/{total_chunks} sent and processed successfully in a new thread.", DebugLevel.VERBOSE, style="green")
+                        return completion_event
                     else:
                         self.debug.debug_print(f"[CHUNK {chunk_num}] Timed out waiting for agent_completed event.", DebugLevel.VERBOSE, style="yellow")
-
-
-                    # Clean up
-                    self.debug.debug_print(f"[CHUNK {chunk_num}] Closing WebSocket.", DebugLevel.VERBOSE, style="cyan")
-                    event_task.cancel()
-                    await ws_client.close()
-                    self.debug.debug_print(f"[CHUNK {chunk_num}] WebSocket closed.", DebugLevel.VERBOSE, style="green")
-                    self.debug.debug_print(f"Chunk {chunk_num}/{total_chunks} sent and processed successfully in a new thread.", DebugLevel.VERBOSE, style="green")
-                    return True
+                        # Clean up even if timed out
+                        self.debug.debug_print(f"[CHUNK {chunk_num}] Closing WebSocket.", DebugLevel.VERBOSE, style="cyan")
+                        event_task.cancel()
+                        await ws_client.close()
+                        self.debug.debug_print(f"[CHUNK {chunk_num}] WebSocket closed.", DebugLevel.VERBOSE, style="green")
+                        return None # Indicate failure
                 else:
                     self.debug.debug_print(f"[CHUNK {chunk_num}] Failed to connect WebSocket.", DebugLevel.BASIC, style="red")
-                    return False
+                    return None
             except Exception as e:
                 self.debug.log_error(e, f"sending chunk {chunk_num}")
                 return False
 
         # Create and run tasks for each chunk
-        tasks = [send_chunk_in_new_thread(chunk, i + 1) for i, chunk in enumerate(all_chunks)]
+        tasks = [send_chunk_in_new_thread(chunk, i + 1, self.run_id) for i, chunk in enumerate(all_chunks)]
         results = await asyncio.gather(*tasks)
 
-        if all(results):
+        successful_completions = [res for res in results if res is not None]
+
+        if successful_completions:
             safe_console_print(
-                f"\n✓ All {total_chunks} chunk(s) sent successfully in parallel threads.",
+                f"\n✓ All {len(successful_completions)}/{total_chunks} chunk(s) sent and processed successfully in parallel threads.",
                 style="green",
                 json_mode=self.config.json_mode,
                 ci_mode=self.config.ci_mode
             )
-            return True
+            return successful_completions
         else:
             safe_console_print(
-                f"\n⚠️ Some chunks failed to send.",
+                f"\n⚠️ All chunks failed to send or process.",
                 style="yellow",
                 json_mode=self.config.json_mode,
                 ci_mode=self.config.ci_mode
             )
-            return False
+            return []
 
     async def _send_single_chunk(
         self,
@@ -5608,27 +5628,36 @@ class AgentCLI:
             formatted_event = event.format_for_display(self.debug)
             safe_console_print(f"[{event.timestamp.strftime('%H:%M:%S')}] {formatted_event}")
 
-            # Update spinner for thinking and tool_executing events (if spinner is enabled)
-            if spinner_enabled and event.type in ["agent_thinking", "tool_executing"]:
-                # Remove old task if exists
-                if thinking_task is not None:
-                    thinking_spinner.remove_task(thinking_task)
-                    thinking_task = None
-
-                # Add new task with latest event
-                if event.type == "agent_thinking":
+            # Update spinner for relevant event types (if spinner is enabled)
+            if spinner_enabled:
+                new_spinner_text = None
+                if event.type == "agent_started":
+                    agent_name = event.data.get('agent_name', 'Agent')
+                    new_spinner_text = f"🤖 {agent_name} started..."
+                elif event.type == "agent_thinking":
                     thought = event.data.get('thought', event.data.get('reasoning', ''))
-                    spinner_text = truncate_with_ellipsis(thought, 60) if thought else "Processing..."
-                    thinking_task = thinking_spinner.add_task(f"💭 {spinner_text}", total=None)
+                    new_spinner_text = f"💭 {truncate_with_ellipsis(thought, 60) if thought else 'Agent thinking...'}"
                 elif event.type == "tool_executing":
                     tool_name = event.data.get('tool', event.data.get('tool_name', 'Unknown'))
-                    spinner_text = f"Executing {tool_name}..."
-                    thinking_task = thinking_spinner.add_task(f"🔧 {spinner_text}", total=None)
+                    new_spinner_text = f"🔧 Executing {tool_name}..."
+                elif event.type == "tool_completed":
+                    tool_name = event.data.get('tool', event.data.get('tool_name', 'Unknown'))
+                    new_spinner_text = f"✅ Tool {tool_name} completed."
+                elif event.type == "agent_completed":
+                    agent_name = event.data.get('agent_name', 'Agent')
+                    new_spinner_text = f"🏁 {agent_name} completed."
+                elif event.type == "ping":
+                    # Ignore ping events for spinner updates to avoid flicker
+                    pass
+                else:
+                    # Generic waiting message for other events or during idle periods
+                    new_spinner_text = "⏳ Waiting for agent activity..."
 
-            # Clear spinner for any other event type (if spinner is enabled)
-            elif spinner_enabled and thinking_task is not None:
-                thinking_spinner.remove_task(thinking_task)
-                thinking_task = None
+                if new_spinner_text:
+                    if thinking_task is not None:
+                        thinking_spinner.remove_task(thinking_task)
+                        thinking_task = None
+                    thinking_task = thinking_spinner.add_task(new_spinner_text, total=None)
 
             # Display raw data in verbose mode
             if self.debug.debug_level >= DebugLevel.DIAGNOSTIC:
@@ -5685,27 +5714,36 @@ class AgentCLI:
             timestamp = event.timestamp.strftime('%H:%M:%S')
             safe_console_print(f"[{timestamp}] {formatted_event}", json_mode=self.json_mode, ci_mode=self.ci_mode)
 
-            # Update spinner for thinking and tool_executing events (if spinner is enabled)
-            if spinner_enabled and event.type in ["agent_thinking", "tool_executing"]:
-                # Remove old task if exists
-                if thinking_task is not None:
-                    thinking_spinner.remove_task(thinking_task)
-                    thinking_task = None
-
-                # Add new task with latest event
-                if event.type == "agent_thinking":
+            # Update spinner for relevant event types (if spinner is enabled)
+            if spinner_enabled:
+                new_spinner_text = None
+                if event.type == "agent_started":
+                    agent_name = event.data.get('agent_name', 'Agent')
+                    new_spinner_text = f"🤖 {agent_name} started..."
+                elif event.type == "agent_thinking":
                     thought = event.data.get('thought', event.data.get('reasoning', ''))
-                    spinner_text = truncate_with_ellipsis(thought, 60) if thought else "Processing..."
-                    thinking_task = thinking_spinner.add_task(f"💭 {spinner_text}", total=None)
+                    new_spinner_text = f"💭 {truncate_with_ellipsis(thought, 60) if thought else 'Agent thinking...'}"
                 elif event.type == "tool_executing":
                     tool_name = event.data.get('tool', event.data.get('tool_name', 'Unknown'))
-                    spinner_text = f"Executing {tool_name}..."
-                    thinking_task = thinking_spinner.add_task(f"🔧 {spinner_text}", total=None)
+                    new_spinner_text = f"🔧 Executing {tool_name}..."
+                elif event.type == "tool_completed":
+                    tool_name = event.data.get('tool', event.data.get('tool_name', 'Unknown'))
+                    new_spinner_text = f"✅ Tool {tool_name} completed."
+                elif event.type == "agent_completed":
+                    agent_name = event.data.get('agent_name', 'Agent')
+                    new_spinner_text = f"🏁 {agent_name} completed."
+                elif event.type == "ping":
+                    # Ignore ping events for spinner updates to avoid flicker
+                    pass
+                else:
+                    # Generic waiting message for other events or during idle periods
+                    new_spinner_text = "⏳ Waiting for agent activity..."
 
-            # Clear spinner for any other event type (if spinner is enabled)
-            elif spinner_enabled and thinking_task is not None:
-                thinking_spinner.remove_task(thinking_task)
-                thinking_task = None
+                if new_spinner_text:
+                    if thinking_task is not None:
+                        thinking_spinner.remove_task(thinking_task)
+                        thinking_task = None
+                    thinking_task = thinking_spinner.add_task(new_spinner_text, total=None)
 
             # Issue #2177: WebSocket event validation
             if self.validate_events and self.event_validator:
@@ -6220,7 +6258,7 @@ class AgentCLI:
                 safe_console_print(traceback.format_exc(), style="dim red")
             return False
 
-    async def run_single_message(self, message: str, wait_time: int = 300):
+    async def run_single_message(self, message: str, wait_time: int = 300, jsonl_logs: Optional[List[Dict[str, Any]]] = None):
         """Run a single message and wait for response.
 
         Issue #2665: Default wait time increased from 10s to 300s to accommodate
@@ -6332,7 +6370,7 @@ class AgentCLI:
                     return False
 
                 # Send message
-                run_id = await self.ws_client.send_message(message)
+                run_id = await self.ws_client.send_message(message, jsonl_logs=jsonl_logs)
 
 
 
