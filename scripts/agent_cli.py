@@ -6381,7 +6381,8 @@ class AgentCLI:
                 # Send message
                 run_id = await self.ws_client.send_message(message, jsonl_logs=jsonl_logs)
 
-
+                if jsonl_logs is not None:
+                    return run_id
 
                 # Normal flow: wait for events
                 safe_console_print(f"SUCCESS: Message sent with run_id: {run_id}", style="green",
