@@ -889,6 +889,33 @@ class DebugManager:
             retry_suffix = get_retry_suffix(data)
             return f"[PASS] Tool Complete: {tool} ({status}){retry_suffix}"
         elif event_type == "agent_completed":
+            agent_name = data.get('agent_name', 'Unknown')
+            run_id = data.get('run_id', 'N/A')
+            retry_suffix = get_retry_suffix(data)
+            result = data.get('result')
+            if result is None:
+                result = data.get('final_response')
+            if result is None:
+                result = data.get('response', '')
+
+            formatted_result = ""
+            if isinstance(result, dict):
+                # Pretty print the entire result dictionary without truncation
+                formatted_result = json.dumps(result, indent=2, ensure_ascii=False)
+            else:
+                formatted_result = str(result)
+
+            # Apply hierarchy-aware formatting for agent_completed
+            orchestrator_patterns = ['Supervisor', 'WorkflowOrchestrator']
+            step_patterns = ['triage']
+
+            if any(pattern in agent_name for pattern in orchestrator_patterns):
+                return f"🎯 Orchestrator: {agent_name} (run: {truncate_with_ellipsis(run_id, 8)}) - Completed{retry_suffix}\n{formatted_result}"
+            elif any(pattern in agent_name for pattern in step_patterns):
+                return f"  🤖 Step: {agent_name} (run: {truncate_with_ellipsis(run_id, 8)}) - Completed{retry_suffix}\n{formatted_result}"
+            else:
+                return f"    🧠 Agent Completed: {agent_name} (run: {truncate_with_ellipsis(run_id, 8)}){retry_suffix}\n{formatted_result}"
+        elif event_type == "agent_completed":
             result = data.get('result')
             if result is None:
                 result = data.get('final_response')
@@ -4536,25 +4563,7 @@ class WebSocketClient:
         # Create and run tasks for each chunk
         tasks = [send_chunk_in_new_thread(chunk, i + 1, self.run_id) for i, chunk in enumerate(all_chunks)]
         results = await asyncio.gather(*tasks)
-
-        successful_completions = [res for res in results if res is not None]
-
-        if successful_completions:
-            safe_console_print(
-                f"\n✓ All {len(successful_completions)}/{total_chunks} chunk(s) sent and processed successfully in parallel threads.",
-                style="green",
-                json_mode=self.config.json_mode,
-                ci_mode=self.config.ci_mode
-            )
-            return successful_completions
-        else:
-            safe_console_print(
-                f"\n⚠️ All chunks failed to send or process.",
-                style="yellow",
-                json_mode=self.config.json_mode,
-                ci_mode=self.config.ci_mode
-            )
-            return []
+        return results
 
     async def _send_single_chunk(
         self,
