@@ -4490,12 +4490,44 @@ class WebSocketClient:
             entry_offset += file_analysis.entry_count
 
         total_chunks = len(all_chunks)
-        safe_console_print(
-            f"\nSending {total_chunks} chunk(s) concurrently...",
-            style="cyan",
-            json_mode=self.config.json_mode,
-            ci_mode=self.config.ci_mode
-        )
+
+        # Display detailed chunking info (similar to non-chunked UI)
+        separator = "=" * 60
+        total_entries = sum(fa.entry_count for fa in chunking_strategy.file_analyses)
+        total_size_mb = sum(fa.size_mb for fa in chunking_strategy.file_analyses)
+        total_size_kb = total_size_mb * 1024
+
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("SENDING LOGS TO OPTIMIZER (CHUNKED)", style="bold cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Provider: {self.logs_provider.upper()}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Total Entries: {total_entries}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Files Read: {len(chunking_strategy.file_analyses)}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Payload Size: {total_size_kb:.2f} KB", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        if self.logs_project:
+            safe_console_print(f"  Project: {self.logs_project}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("  Files:", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        for file_analysis in chunking_strategy.file_analyses:
+            safe_console_print(
+                f"    * {file_analysis.file_name} (hash: {file_analysis.file_hash[:8]}, {file_analysis.entry_count} entries)",
+                json_mode=self.config.json_mode,
+                ci_mode=self.config.ci_mode
+            )
+
+        # Add payload confirmation
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("  Payload Confirmation:", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"    [OK] Total chunks to send: {total_chunks}", style="green", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"    [OK] First log entry timestamp: {logs[0].get('timestamp', 'N/A') if logs else 'N/A'}", style="green", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"    [OK] Last log entry timestamp: {logs[-1].get('timestamp', 'N/A') if logs else 'N/A'}", style="green", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"\nSending {total_chunks} chunk(s) concurrently...", style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
 
         async def send_chunk_in_new_thread(chunk, chunk_num, main_run_id: Optional[str]):
             """Helper to send a single chunk in a new WebSocket connection."""
