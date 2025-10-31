@@ -5784,9 +5784,11 @@ class AgentCLI:
             event_count += 1
 
             # Display event with enhanced formatting and emojis
-            formatted_event = event.format_for_display(self.debug)
-            timestamp = event.timestamp.strftime('%H:%M:%S')
-            safe_console_print(f"[{timestamp}] {formatted_event}", json_mode=self.json_mode, ci_mode=self.ci_mode)
+            # Skip initial display for agent_completed as it will be shown in the boxed panel below
+            if event.type != "agent_completed":
+                formatted_event = event.format_for_display(self.debug)
+                timestamp = event.timestamp.strftime('%H:%M:%S')
+                safe_console_print(f"[{timestamp}] {formatted_event}", json_mode=self.json_mode, ci_mode=self.ci_mode)
 
             # Update spinner for relevant event types (if spinner is enabled)
             if spinner_enabled:
