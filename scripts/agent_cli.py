@@ -4569,6 +4569,19 @@ class WebSocketClient:
                     )
                     self.debug.debug_print(f"[CHUNK {chunk_num}] Chunk sent.", DebugLevel.VERBOSE, style="green")
 
+                    # Wait for agent_started event to notify user that backend started processing
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] Waiting for agent_started event.", DebugLevel.VERBOSE, style="cyan")
+                    started_event = await ws_client._wait_for_event('agent_started', timeout=30.0)
+                    if started_event:
+                        self.debug.debug_print(f"[CHUNK {chunk_num}] agent_started event received.", DebugLevel.VERBOSE, style="green")
+                        safe_console_print(
+                            f"🚀 Agent started processing chunk {chunk_num}/{total_chunks}",
+                            style="cyan",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+                        sys.stdout.flush()
+
                     # Wait for agent to complete
                     self.debug.debug_print(f"[CHUNK {chunk_num}] Waiting for agent_completed event.", DebugLevel.VERBOSE, style="cyan")
                     completion_event = await ws_client._wait_for_event('agent_completed', timeout=300.0)
@@ -4657,10 +4670,9 @@ class WebSocketClient:
         results = await asyncio.gather(*tasks)
 
         # Display final summary
-        successful_chunks = sum(1 for r in results if r is not None and r is not False)
         safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(
-            f"🎉 All chunks processed! {successful_chunks}/{total_chunks} completed successfully.",
+            "All the chunks processed successfully. Look Above",
             style="bold green",
             json_mode=self.config.json_mode,
             ci_mode=self.config.ci_mode
