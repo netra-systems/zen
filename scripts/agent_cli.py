@@ -4585,10 +4585,48 @@ class WebSocketClient:
                             ci_mode=self.config.ci_mode
                         )
 
-                        # Display the completion event
-                        formatted_event = completion_event.format_for_display(self.debug)
-                        timestamp = datetime.now().strftime('%H:%M:%S')
-                        safe_console_print(f"[{timestamp}] {formatted_event}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+                        # Display the completion event in boxed format
+                        result = (
+                            completion_event.data.get('result')
+                            or completion_event.data.get('response')
+                            or completion_event.data.get('final_response')
+                        )
+
+                        if result is not None:
+                            if isinstance(result, (dict, list)):
+                                try:
+                                    pretty_result = json.dumps(result, indent=2, ensure_ascii=False)
+                                except (TypeError, ValueError):
+                                    pretty_result = str(result)
+
+                                safe_console_print(
+                                    Panel(
+                                        Syntax(pretty_result, "json", word_wrap=True),
+                                        title=f"Chunk {chunk_num}/{total_chunks} Result",
+                                        border_style="green"
+                                    ),
+                                    json_mode=self.config.json_mode,
+                                    ci_mode=self.config.ci_mode
+                                )
+                            else:
+                                safe_console_print(
+                                    f"✅ Chunk {chunk_num} result:",
+                                    style="bold green",
+                                    json_mode=self.config.json_mode,
+                                    ci_mode=self.config.ci_mode
+                                )
+                                safe_console_print(
+                                    str(result),
+                                    style="green",
+                                    json_mode=self.config.json_mode,
+                                    ci_mode=self.config.ci_mode
+                                )
+                        else:
+                            # Fallback to formatted event display if no result found
+                            formatted_event = completion_event.format_for_display(self.debug)
+                            timestamp = datetime.now().strftime('%H:%M:%S')
+                            safe_console_print(f"[{timestamp}] {formatted_event}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
                         safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
 
                         # Clean up
