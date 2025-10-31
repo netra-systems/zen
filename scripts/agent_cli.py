@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-"""
-Agent CLI Testing Tool - Test agent interactions from command line
-Supports authentication, WebSocket streaming, and real-time event display
-"""
-
 import asyncio
 import json
 import sys
@@ -14,12 +9,8 @@ import time
 import logging
 
 
-# Do not edit this key keep E2E_OAUTH_SIMULATION_KEY as is it's for testing.
-# defined in https://console.cloud.google.com/security/secret-manager/secret/E2E_OAUTH_SIMULATION_KEY/versions?inv=1&invt=Ab5S7Q&project=netra-staging
 E2E_OAUTH_SIMULATION_KEY = "e0e9c5d29e7aea3942f47855b4870d3e0272e061c2de22827e71b893071d777e"
 
-# ISSUE #2766: Check for JSON/CI mode EARLY (before logging config or other imports)
-# This allows us to suppress ALL output including logging from imported modules
 _json_mode_active = '--json' in sys.argv or '--ci-mode' in sys.argv or '--json-output' in sys.argv
 if _json_mode_active:
     # Suppress ALL logging before any modules are imported
@@ -30,8 +21,6 @@ if _json_mode_active:
     logging.basicConfig(level=logging.CRITICAL, handlers=[logging.NullHandler()])
     logging.getLogger().setLevel(logging.CRITICAL)
 
-# ISSUE #2417 Phase 1: Suppress backend logging BEFORE imports
-# Check --stream-logs flag early to prevent startup log pollution
 _stream_logs_active = '--stream-logs' in sys.argv
 
 if not _stream_logs_active:
@@ -94,8 +83,6 @@ import subprocess
 import psutil
 from typing import Union
 
-# ISSUE #2006: Early environment detection fix for all environments
-# Parse --env argument early to set ENVIRONMENT before any module imports
 if "--env" in sys.argv:
     env_idx = sys.argv.index("--env")
     if env_idx + 1 < len(sys.argv):
@@ -111,7 +98,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from shared.windows_encoding import setup_windows_encoding
 setup_windows_encoding()
 
-# ISSUE #2373: WebSocket closure code validation
 # Import AFTER sys.path setup to ensure shared module is accessible
 from shared.types.websocket_closure_codes import (
     WebSocketClosureCode,
@@ -149,12 +135,6 @@ class SimpleConfigReader:
         return config
 
 
-# ISSUE #2417 Phase 1: Duplicate log suppression code REMOVED
-# Log suppression now happens BEFORE imports at lines 27-56
-# This prevents backend logging from polluting CLI startup output
-
-# ISSUE #2782: Removed IsolatedEnvironment import - CLI is a client tool, not backend service
-# Environment detection imports moved to flag handler to avoid heavy initialization
 
 # Import agent output validator for Issue #1822
 try:
@@ -176,9 +156,6 @@ except ImportError:
     EventValidationReport = None
     EventValidationResult = None
 
-# Import business value validator for revenue protection
-# ISSUE #2414: Delay imports that trigger configuration validation
-# These will be imported later in the main() function to avoid heavy initialization overhead
 
 # Placeholder for imports that will be loaded conditionally
 BusinessValueValidator = None
@@ -912,6 +889,33 @@ class DebugManager:
             retry_suffix = get_retry_suffix(data)
             return f"[PASS] Tool Complete: {tool} ({status}){retry_suffix}"
         elif event_type == "agent_completed":
+            agent_name = data.get('agent_name', 'Unknown')
+            run_id = data.get('run_id', 'N/A')
+            retry_suffix = get_retry_suffix(data)
+            result = data.get('result')
+            if result is None:
+                result = data.get('final_response')
+            if result is None:
+                result = data.get('response', '')
+
+            formatted_result = ""
+            if isinstance(result, dict):
+                # Pretty print the entire result dictionary without truncation
+                formatted_result = json.dumps(result, indent=2, ensure_ascii=False)
+            else:
+                formatted_result = str(result)
+
+            # Apply hierarchy-aware formatting for agent_completed
+            orchestrator_patterns = ['Supervisor', 'WorkflowOrchestrator']
+            step_patterns = ['triage']
+
+            if any(pattern in agent_name for pattern in orchestrator_patterns):
+                return f"🎯 Orchestrator: {agent_name} (run: {truncate_with_ellipsis(run_id, 8)}) - Completed{retry_suffix}\n{formatted_result}"
+            elif any(pattern in agent_name for pattern in step_patterns):
+                return f"  🤖 Step: {agent_name} (run: {truncate_with_ellipsis(run_id, 8)}) - Completed{retry_suffix}\n{formatted_result}"
+            else:
+                return f"    🧠 Agent Completed: {agent_name} (run: {truncate_with_ellipsis(run_id, 8)}){retry_suffix}\n{formatted_result}"
+        elif event_type == "agent_completed":
             result = data.get('result')
             if result is None:
                 result = data.get('final_response')
@@ -962,60 +966,7 @@ class DebugManager:
             else:
                 # Individual agent level indentation
                 return f"    🧠 Agent Completed: {agent_name} (run: {truncate_with_ellipsis(run_id, 8)}) - {result_str}{retry_suffix}{validation_status}"
-        elif event_type == "agent_aggregation_complete":
-            # Display aggregation completion event with unified response
-            aggregation_reason = data.get('aggregation_reason', 'unknown')
-            chunks_processed = data.get('chunks_processed', 0)
-            total_chunks = data.get('total_chunks', 0)
-            file_name = data.get('file_name', 'unknown')
-            response = data.get('response', '')
 
-            # Use smart truncation for response content
-            response_str = smart_truncate_json(response, self) if isinstance(response, (dict, list)) else str(response)
-            max_len = 200  # Larger default for aggregation
-            if self.debug_level >= DebugLevel.VERBOSE:
-                max_len = 500
-            elif self.debug_level >= DebugLevel.TRACE:
-                max_len = 2000
-            elif self.debug_level >= DebugLevel.DIAGNOSTIC:
-                max_len = len(response_str)  # No truncation
-            if not isinstance(response, (dict, list)):
-                response_str = truncate_with_ellipsis(response_str, max_len)
-
-            # Format based on aggregation reason
-            reason_icon = "✅" if aggregation_reason == "all_chunks_received" else "⏱️"
-            reason_text = {
-                "all_chunks_received": "All chunks received",
-                "timeout": "Timeout reached",
-                "max_wait_exceeded": "Max wait exceeded"
-            }.get(aggregation_reason, aggregation_reason)
-
-            return f"🎯 Aggregation Complete: {file_name} ({reason_icon} {reason_text} - {chunks_processed}/{total_chunks} chunks) - {response_str}"
-        elif event_type == "chunk_response_immediate":
-            # Display immediate chunk response (no aggregation)
-            chunk_data = data.get('chunk_data', {})
-            chunk_index = chunk_data.get('chunk_index', 0)
-            total_chunks = chunk_data.get('total_chunks', 1)
-            file_name = chunk_data.get('file_name', 'unknown')
-            response = chunk_data.get('response', '')
-
-            # Use smart truncation for response content
-            response_str = smart_truncate_json(response, self) if isinstance(response, (dict, list)) else str(response)
-            max_len = 200  # Default for chunk responses
-            if self.debug_level >= DebugLevel.VERBOSE:
-                max_len = 500
-            elif self.debug_level >= DebugLevel.TRACE:
-                max_len = 2000
-            elif self.debug_level >= DebugLevel.DIAGNOSTIC:
-                max_len = len(response_str)  # No truncation
-            if not isinstance(response, (dict, list)):
-                response_str = truncate_with_ellipsis(response_str, max_len)
-
-            # Format chunk progress indicator
-            progress_indicator = f"[{chunk_index + 1}/{total_chunks}]"
-            completion_icon = "✅" if chunk_index + 1 == total_chunks else "📦"
-
-            return f"{completion_icon} Chunk {progress_indicator} - {file_name}: {response_str}"
         elif event_type == "message":
             content = data.get('content', '')
             # Use smart truncation for message content
@@ -2677,7 +2628,7 @@ class WebSocketEvent:
 class WebSocketClient:
     """WebSocket client for agent interactions"""
 
-    def __init__(self, config: Config, token: str, debug_manager: Optional[DebugManager] = None,
+    def __init__(self, config: Config, token: str, debug_manager: Optional[DebugManager] = None, run_id: Optional[str] = None,
                  send_logs: bool = False, logs_count: int = 1, logs_project: Optional[str] = None,
                  logs_path: Optional[str] = None, logs_user: Optional[str] = None,
                  logs_provider: str = "claude", handshake_timeout: float = 10.0):
@@ -2688,17 +2639,12 @@ class WebSocketClient:
         self.ws: Optional[WebSocketClientProtocol] = None
         self.events: List[WebSocketEvent] = []
         self.connected = False
-        self.run_id: Optional[str] = None
+        self.run_id: Optional[str] = run_id
 
         # ISSUE #2417 Phase 2: Store thread_id for filtering backend logs
         self.current_thread_id: Optional[str] = None
 
-        # Track when backend signals it's ready for concurrent chunk burst
-        self.thread_ready_for_chunks: bool = False
-        self.thread_ready_event: Optional[WebSocketEvent] = None
 
-        # Track when chunked aggregation completes (all events already received)
-        self.chunked_aggregation_complete: bool = False
 
         # Track chunk_response_immediate events for no-aggregation chunks
         self.chunk_responses_received: int = 0
@@ -3973,7 +3919,7 @@ class WebSocketClient:
         safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
 
-    async def send_message(self, message: str) -> str:
+    async def send_message(self, message: str, jsonl_logs: Optional[List[Dict[str, Any]]] = None) -> bool:
         """Send a message and return the run_id"""
         if not self.ws:
             raise RuntimeError("WebSocket not connected")
@@ -4180,6 +4126,8 @@ class WebSocketClient:
                 "client_environment": self.config.client_environment if hasattr(self.config, 'client_environment') and self.config.client_environment else None
             }
         }
+        if jsonl_logs is not None:
+            payload["payload"]["jsonl_logs"] = jsonl_logs
 
         # Attach logs if --send-logs is enabled
         if self.send_logs:
@@ -4254,18 +4202,17 @@ class WebSocketClient:
                         }
                     else:
                         # NEW: Chunking required
-                        chunked_aggregation_complete = await self._send_chunked_logs(
+                        await self._send_chunked_logs(
                             logs=logs,
                             file_info=file_info,
                             chunking_strategy=chunking_strategy,
                             message=message,
                             thread_id=thread_id
                         )
+                        # Note: Agent events are displayed as each chunk completes in parallel.
+                        # No need to aggregate results here as they're already shown to the user.
 
-                        # Store flag for caller to check
-                        self.chunked_aggregation_complete = chunked_aggregation_complete
 
-                        return None  # Early return - chunks sent separately
 
                 else:
                     self.debug.debug_print(
@@ -4444,7 +4391,7 @@ class WebSocketClient:
             The event object if received, None if timeout occurred
         """
         start_time = asyncio.get_event_loop().time()
-        initial_event_count = len(self.events)
+        last_checked_index = 0
 
         self.debug.debug_print(
             f"Waiting for event: {event_type} (timeout: {timeout}s)",
@@ -4463,10 +4410,11 @@ class WebSocketClient:
                 )
                 return None
 
-            # Check if we have new events
-            if len(self.events) > initial_event_count:
-                # Check the new events for the one we're waiting for
-                for event in self.events[initial_event_count:]:
+            # Check for new events since last check
+            current_events_len = len(self.events)
+            if current_events_len > last_checked_index:
+                for i in range(last_checked_index, current_events_len):
+                    event = self.events[i]
                     if event.type == event_type:
                         self.debug.debug_print(
                             f"Received {event_type} event after {elapsed:.1f}s",
@@ -4483,181 +4431,12 @@ class WebSocketClient:
                             style="green"
                         )
                         return event
-
-            # Update initial_event_count to avoid re-checking same events
-            initial_event_count = len(self.events)
+                last_checked_index = current_events_len # Update last checked index
 
             # Short sleep to avoid busy waiting
             await asyncio.sleep(0.1)
 
-    async def _wait_and_display_events(
-        self,
-        event_type: str,
-        timeout: float,
-        total_chunks: int
-    ) -> Optional[WebSocketEvent]:
-        """
-        Wait for a specific event type AND display all intermediate events with chunk awareness.
 
-        Note: If we're waiting for 'agent_aggregation_complete' but receive
-        'chunk_response_immediate' events instead (indicating no-aggregation mode),
-        this method will return early once all chunks are received.
-
-        Args:
-            event_type: The event type to wait for (e.g., 'agent_aggregation_complete')
-            timeout: Maximum time to wait in seconds
-            total_chunks: Total number of chunks being processed
-
-        Returns:
-            The event object if received, None if timeout occurred
-        """
-        start_time = asyncio.get_event_loop().time()
-        last_displayed_index = len(self.events)
-
-        # Emoji mappings for different event types
-        event_emojis = {
-            'agent_started': '🚀',
-            'agent_thinking': '💭',
-            'tool_executing': '🔧',
-            'tool_completed': '✅',
-            'agent_completed': '✓'
-        }
-
-        self.debug.debug_print(
-            f"Waiting for {event_type} while displaying chunk events...",
-            DebugLevel.VERBOSE,
-            style="cyan"
-        )
-
-        while True:
-            # Check if timeout occurred
-            elapsed = asyncio.get_event_loop().time() - start_time
-            if elapsed > timeout:
-                self.debug.debug_print(
-                    f"Timeout waiting for {event_type} after {elapsed:.1f}s",
-                    DebugLevel.BASIC,
-                    style="yellow"
-                )
-                return None
-
-            # Display any new events
-            while last_displayed_index < len(self.events):
-                event = self.events[last_displayed_index]
-                last_displayed_index += 1
-
-                # Extract event type (handle nested system_message events)
-                display_event_type = event.type
-                event_data = event.data
-
-                if event.type == "system_message":
-                    inner_event = event_data.get('event', '')
-                    if inner_event in ['agent_started', 'agent_thinking', 'agent_completed', 'tool_executing', 'tool_completed']:
-                        display_event_type = inner_event
-                        payload = event_data.get('payload', {})
-                        event_data = {**event_data, **payload}
-
-                # Extract chunk metadata if present
-                # Backend may return chunk info in different locations
-                chunk_metadata = event_data.get('agent_context', {}).get('chunk_metadata', {})
-                chunk_index = chunk_metadata.get('chunk_index')
-
-                # Also check data directly for chunk_index (backend may structure differently)
-                if chunk_index is None:
-                    chunk_index = event_data.get('chunk_index')
-
-                # Also check in nested data field
-                if chunk_index is None:
-                    nested_data = event_data.get('data', {})
-                    chunk_index = nested_data.get('chunk_index')
-                    if chunk_index is None:
-                        chunk_metadata_nested = nested_data.get('chunk_metadata', {})
-                        chunk_index = chunk_metadata_nested.get('chunk_index')
-
-                # Format brief chunk-aware message
-                if display_event_type in event_emojis:
-                    emoji = event_emojis[display_event_type]
-
-                    # If we have chunk metadata, show chunk-aware format
-                    if chunk_index is not None:
-                        chunk_num = chunk_index + 1  # Convert 0-based to 1-based
-
-                        # Create brief status message
-                        if display_event_type == 'agent_started':
-                            msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Started"
-                        elif display_event_type == 'agent_thinking':
-                            msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Analyzing..."
-                        elif display_event_type == 'tool_executing':
-                            tool_name = event_data.get('tool', event_data.get('tool_name', 'tool'))
-                            msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Using {tool_name}"
-                        elif display_event_type == 'tool_completed':
-                            msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Tool complete"
-                        elif display_event_type == 'agent_completed':
-                            msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: Complete"
-                        else:
-                            msg = f"{emoji} Chunk [{chunk_num}/{total_chunks}]: {display_event_type}"
-                    else:
-                        # Fallback: Show events without chunk number (backend may not include metadata)
-                        if display_event_type == 'agent_started':
-                            msg = f"{emoji} Agent started"
-                        elif display_event_type == 'agent_thinking':
-                            msg = f"{emoji} Analyzing..."
-                        elif display_event_type == 'tool_executing':
-                            tool_name = event_data.get('tool', event_data.get('tool_name', 'tool'))
-                            msg = f"{emoji} Using {tool_name}"
-                        elif display_event_type == 'tool_completed':
-                            msg = f"{emoji} Tool complete"
-                        elif display_event_type == 'agent_completed':
-                            msg = f"{emoji} Processing complete"
-                        else:
-                            msg = f"{emoji} {display_event_type}"
-
-                    safe_console_print(
-                        msg,
-                        style="dim cyan",
-                        json_mode=self.config.json_mode,
-                        ci_mode=self.config.ci_mode
-                    )
-
-                # Check if this is the event we're waiting for
-                if event.type == event_type:
-                    self.debug.debug_print(
-                        f"Received {event_type} event after {elapsed:.1f}s",
-                        DebugLevel.VERBOSE,
-                        style="green"
-                    )
-                    return event
-
-                # Also check for nested events in system_message
-                if event.type == "system_message" and event_data.get('event') == event_type:
-                    self.debug.debug_print(
-                        f"Received {event_type} event (nested in system_message) after {elapsed:.1f}s",
-                        DebugLevel.VERBOSE,
-                        style="green"
-                    )
-                    return event
-
-            # Special case: If waiting for agent_aggregation_complete but receiving
-            # chunk_response_immediate events instead (no-aggregation mode),
-            # check if we've received all chunks and return early
-            if event_type == "agent_aggregation_complete" and self.chunked_aggregation_complete:
-                self.debug.debug_print(
-                    f"All {total_chunks} chunk_response_immediate events received - completing without aggregation",
-                    DebugLevel.BASIC,
-                    style="green"
-                )
-                # Create a synthetic completion event to signal success
-                synthetic_event = WebSocketEvent(
-                    type="chunk_responses_complete",
-                    data={
-                        "total_chunks": total_chunks,
-                        "chunks_received": self.chunk_responses_received,
-                        "mode": "immediate_response"
-                    }
-                )
-                return synthetic_event
-
-            # Short sleep to avoid busy waiting
-            await asyncio.sleep(0.1)
 
     async def _send_chunked_logs(
         self,
@@ -4668,7 +4447,7 @@ class WebSocketClient:
         thread_id: str
     ) -> bool:
         """
-        Send logs in chunks when chunking is required.
+        Send logs in chunks concurrently using separate threads.
 
         Args:
             logs: List of log entries
@@ -4678,21 +4457,39 @@ class WebSocketClient:
             thread_id: Thread ID for this conversation
 
         Returns:
-            bool: True if chunked aggregation completed (all events processed),
-                  False if chunks sent without aggregation or aggregation incomplete
+            bool: True if all chunks were sent successfully.
         """
         from chunk_creator import ChunkCreator
 
-        # Reset chunk tracking state before sending new chunks
+        # Reset chunk tracking state
         self.chunk_responses_received = 0
         self.chunk_total_expected = None
         self.chunk_responses = []
-        self.chunked_aggregation_complete = False
+
+        # Create chunks
+        chunk_creator = ChunkCreator()
+        all_chunks = []
+        entry_offset = 0
+        for file_idx, file_analysis in enumerate(chunking_strategy.file_analyses):
+            file_entries = logs[entry_offset:entry_offset + file_analysis.entry_count]
+            is_multi_file = len(chunking_strategy.file_analyses) > 1
+            file_chunks = chunk_creator.create_chunks(
+                entries=file_entries,
+                file_name=file_analysis.file_name,
+                file_hash=file_analysis.file_hash,
+                is_multi_file=is_multi_file,
+                file_index=file_idx if is_multi_file else None
+            )
+            all_chunks.extend(file_chunks)
+            entry_offset += file_analysis.entry_count
+
+        total_chunks = len(all_chunks)
 
         # Display detailed chunking info (similar to non-chunked UI)
         separator = "=" * 60
         total_entries = sum(fa.entry_count for fa in chunking_strategy.file_analyses)
         total_size_mb = sum(fa.size_mb for fa in chunking_strategy.file_analyses)
+        total_size_kb = total_size_mb * 1024
 
         safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
@@ -4701,377 +4498,188 @@ class WebSocketClient:
         safe_console_print(f"  Provider: {self.logs_provider.upper()}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(f"  Total Entries: {total_entries}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(f"  Files Read: {len(chunking_strategy.file_analyses)}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
-        safe_console_print(f"  Total Size: {total_size_mb:.2f} MB", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
-        safe_console_print(f"  Chunking Strategy: {chunking_strategy.strategy}", style="yellow", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"  Payload Size: {total_size_kb:.2f} KB", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        if self.logs_project:
+            safe_console_print(f"  Project: {self.logs_project}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
         safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print("  Files:", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
 
         for file_analysis in chunking_strategy.file_analyses:
-            chunking_status = "will be chunked" if file_analysis.needs_chunking else "single file"
             safe_console_print(
-                f"    * {file_analysis.file_name}",
+                f"    * {file_analysis.file_name} (hash: {file_analysis.file_hash[:8]}, {file_analysis.entry_count} entries)",
                 json_mode=self.config.json_mode,
                 ci_mode=self.config.ci_mode
             )
-            safe_console_print(
-                f"      - Hash: {file_analysis.file_hash[:8]}, Size: {file_analysis.size_mb:.2f} MB, Entries: {file_analysis.entry_count}",
-                style="dim",
-                json_mode=self.config.json_mode,
-                ci_mode=self.config.ci_mode
-            )
-            safe_console_print(
-                f"      - Status: {chunking_status}",
-                style="yellow" if file_analysis.needs_chunking else "cyan",
-                json_mode=self.config.json_mode,
-                ci_mode=self.config.ci_mode
-            )
+
+        # Add payload confirmation
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("  Payload Confirmation:", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"    [OK] Total chunks to send: {total_chunks}", style="green", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"    [OK] First log entry timestamp: {logs[0].get('timestamp', 'N/A') if logs else 'N/A'}", style="green", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"    [OK] Last log entry timestamp: {logs[-1].get('timestamp', 'N/A') if logs else 'N/A'}", style="green", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
 
         safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(f"\nSending {total_chunks} chunk(s) concurrently...", style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
 
-        # Create chunks from file analyses
-        chunk_creator = ChunkCreator()
-        all_chunks = []
+        # Track completion progress
+        chunks_completed = 0
 
-        # Track entry offset for extracting entries per file
-        entry_offset = 0
+        async def send_chunk_in_new_thread(chunk, chunk_num, main_run_id: Optional[str]):
+            """Helper to send a single chunk in a new WebSocket connection."""
+            nonlocal chunks_completed
 
-        for file_idx, file_analysis in enumerate(chunking_strategy.file_analyses):
-            if file_analysis.needs_chunking:
-                # Extract entries for this file
-                file_entries = logs[entry_offset:entry_offset + file_analysis.entry_count]
-
-                # Create chunks for this file
-                is_multi_file = len(chunking_strategy.file_analyses) > 1
-                file_chunks = chunk_creator.create_chunks(
-                    entries=file_entries,
-                    file_name=file_analysis.file_name,
-                    file_hash=file_analysis.file_hash,
-                    is_multi_file=is_multi_file,
-                    file_index=file_idx if is_multi_file else None
-                )
-
-                all_chunks.extend(file_chunks)
-            else:
-                # File doesn't need chunking - will be sent as single chunk
-                file_entries = logs[entry_offset:entry_offset + file_analysis.entry_count]
-
-                # Create a single "chunk" for this file
-                from chunk_creator import Chunk, ChunkMetadata
-                metadata = ChunkMetadata(
-                    chunk_id=file_analysis.file_hash[:12],
-                    chunk_index=0,
-                    total_chunks=1,
-                    file_hash=file_analysis.file_hash,
-                    file_name=file_analysis.file_name,
-                    entries_in_chunk=file_analysis.entry_count,
-                    chunk_size_bytes=file_analysis.size_bytes,
-                    chunk_size_mb=file_analysis.size_mb,
-                    start_entry_index=0,
-                    end_entry_index=file_analysis.entry_count - 1,
-                    is_multi_file=len(chunking_strategy.file_analyses) > 1,
-                    file_index=file_idx if len(chunking_strategy.file_analyses) > 1 else None,
-                    aggregation_required=False  # Single file, no aggregation needed
-                )
-                single_chunk = Chunk(entries=file_entries, metadata=metadata)
-                all_chunks.append(single_chunk)
-
-            entry_offset += file_analysis.entry_count
-
-        total_chunks = len(all_chunks)
-        safe_console_print(
-            f"\nSending {total_chunks} chunk(s)...",
-            style="cyan",
-            json_mode=self.config.json_mode,
-            ci_mode=self.config.ci_mode
-        )
-
-        # For chunked uploads, ALL chunks must use the SAME thread_id
-        # - If thread_id is provided: use it for all chunks
-        # - If thread_id is None: send null for all chunks, backend groups by chunk_id
-        current_thread_id = thread_id
-
-        # Check if this is a chunked aggregation upload
-        # Need to check if ANY chunk requires aggregation (not just first one)
-        # In multi-file scenarios, first chunk might be a non-chunked single file
-        is_chunked_aggregation = total_chunks > 1 and any(
-            chunk.metadata.aggregation_required for chunk in all_chunks
-        )
-
-        if is_chunked_aggregation:
-            # NEW FLOW: Concurrent chunk bursting with thread_ready_for_chunks signal
+            # Show progress indicator when chunk starts
             safe_console_print(
-                f"  Sending {total_chunks} chunks with thread_id={'null' if current_thread_id is None else current_thread_id[:20] + '...'}",
-                style="dim",
+                f"⏳ Processing chunk {chunk_num}/{total_chunks}...",
+                style="dim cyan",
                 json_mode=self.config.json_mode,
                 ci_mode=self.config.ci_mode
             )
+            sys.stdout.flush()  # Ensure output is displayed immediately in parallel execution
 
-            # Step 1: Send first chunk to initiate the thread
-            first_chunk = all_chunks[0]
-            self.debug.debug_print(
-                f"Sending initial chunk 1/{total_chunks}",
-                DebugLevel.VERBOSE,
-                style="cyan"
-            )
-
-            await self._send_single_chunk(
-                chunk=first_chunk,
-                chunk_num=1,
-                total_chunks=total_chunks,
-                message=message,
-                thread_id=current_thread_id
-            )
-
-            # Step 2: Wait for thread_ready_for_chunks signal (with timeout)
-            self.debug.debug_print(
-                "Waiting for thread_ready_for_chunks signal from backend...",
-                DebugLevel.VERBOSE,
-                style="cyan"
-            )
-
-            # Wait up to 10 seconds for the backend to signal readiness
-            wait_start = asyncio.get_event_loop().time()
-            while not self.thread_ready_for_chunks:
-                await asyncio.sleep(0.1)
-                elapsed = asyncio.get_event_loop().time() - wait_start
-                if elapsed > 10.0:
-                    self.debug.debug_print(
-                        "⚠️  Timeout waiting for thread_ready_for_chunks - falling back to sequential sending",
-                        DebugLevel.BASIC,
-                        style="yellow"
-                    )
-                    break
-
-            # Step 3: Send remaining chunks (burst mode if signal received, else sequential)
-            remaining_chunks = all_chunks[1:]
-
-            if self.thread_ready_for_chunks:
-                # BURST MODE: Send all remaining chunks concurrently
-                self.debug.debug_print(
-                    f"🚀 Burst mode activated - sending {len(remaining_chunks)} chunks concurrently",
-                    DebugLevel.BASIC,
-                    style="green"
+            self.debug.debug_print(f"[CHUNK {chunk_num}] Starting to send chunk.", DebugLevel.VERBOSE, style="cyan")
+            try:
+                # Create a new WebSocket client for each chunk
+                self.debug.debug_print(f"[CHUNK {chunk_num}] Creating WebSocketClient.", DebugLevel.VERBOSE, style="cyan")
+                ws_client = WebSocketClient(
+                    self.config, self.token, self.debug, run_id=main_run_id,
+                    handshake_timeout=self.handshake_timeout
                 )
 
-                # Create concurrent tasks for all remaining chunks
-                send_tasks = []
-                for i, chunk in enumerate(remaining_chunks, 2):
-                    task = self._send_single_chunk(
+
+                self.debug.debug_print(f"[CHUNK {chunk_num}] Connecting to WebSocket.", DebugLevel.VERBOSE, style="cyan")
+                if await ws_client.connect():
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] WebSocket connected.", DebugLevel.VERBOSE, style="green")
+
+                    # Start receiving events in the background
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] Starting event receiver.", DebugLevel.VERBOSE, style="cyan")
+                    event_task = asyncio.create_task(ws_client.receive_events())
+
+                    # Send the chunk
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] Sending chunk.", DebugLevel.VERBOSE, style="cyan")
+                    await ws_client._send_single_chunk(
                         chunk=chunk,
-                        chunk_num=i,
+                        chunk_num=chunk_num,
                         total_chunks=total_chunks,
                         message=message,
-                        thread_id=current_thread_id
+                        thread_id=None  # Send as a new thread
                     )
-                    send_tasks.append(task)
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] Chunk sent.", DebugLevel.VERBOSE, style="green")
 
-                # Send all chunks concurrently
-                await asyncio.gather(*send_tasks)
-
-                self.debug.debug_print(
-                    f"✓ All {len(remaining_chunks)} remaining chunks sent concurrently",
-                    DebugLevel.BASIC,
-                    style="green"
-                )
-            else:
-                # FALLBACK: Sequential sending (old behavior)
-                self.debug.debug_print(
-                    f"Falling back to sequential chunk sending for {len(remaining_chunks)} remaining chunks",
-                    DebugLevel.BASIC,
-                    style="yellow"
-                )
-
-                for i, chunk in enumerate(remaining_chunks, 2):
-                    await self._send_single_chunk(
-                        chunk=chunk,
-                        chunk_num=i,
-                        total_chunks=total_chunks,
-                        message=message,
-                        thread_id=current_thread_id
-                    )
-
-                    # Wait for agent_completed between chunks (old behavior)
-                    if i < total_chunks:
-                        received_event = await self._wait_for_event("agent_completed", timeout=120.0)
-                        if not received_event:
-                            safe_console_print(
-                                f"⚠️  Warning: Timeout waiting for agent_completed for chunk {i}/{total_chunks}",
-                                style="yellow",
-                                json_mode=self.config.json_mode,
-                                ci_mode=self.config.ci_mode
-                            )
-
-            # Step 4: Wait for agent_aggregation_complete (for both burst and sequential modes)
-            safe_console_print(
-                f"\n⏳ Processing {total_chunks} chunks...",
-                style="cyan",
-                json_mode=self.config.json_mode,
-                ci_mode=self.config.ci_mode
-            )
-
-            # Backend MAX_WAIT_SECONDS is 1200s (20 minutes)
-            # Use new method that displays events as they arrive
-            aggregation_event = await self._wait_and_display_events(
-                event_type="agent_aggregation_complete",
-                timeout=1200.0,
-                total_chunks=total_chunks
-            )
-
-            if not aggregation_event:
-                safe_console_print(
-                    f"⚠️  Warning: Timeout waiting for agent_aggregation_complete",
-                    style="yellow",
-                    json_mode=self.config.json_mode,
-                    ci_mode=self.config.ci_mode
-                )
-                return False  # Aggregation incomplete
-            else:
-                # Check if this is the new immediate response mode (no aggregation)
-                if aggregation_event.type == "chunk_responses_complete":
-                    self.debug.debug_print(
-                        f"✓ All chunks received via chunk_response_immediate (no aggregation)",
-                        DebugLevel.VERBOSE,
-                        style="green"
-                    )
-
-                    safe_console_print(
-                        f"\n✅ All {total_chunks} chunks processed successfully (immediate response mode)",
-                        style="green bold",
-                        json_mode=self.config.json_mode,
-                        ci_mode=self.config.ci_mode
-                    )
-
-                    # Responses were already displayed as they arrived
-                    # No unified response to display
-                    return True
-                else:
-                    # Traditional aggregation mode
-                    self.debug.debug_print(
-                        f"✓ Received agent_aggregation_complete",
-                        DebugLevel.VERBOSE,
-                        style="green"
-                    )
-
-                    safe_console_print(
-                        f"✓ All chunks processed and aggregated successfully",
-                        style="green",
-                        json_mode=self.config.json_mode,
-                        ci_mode=self.config.ci_mode
-                    )
-
-                    # Extract and display the unified response from the aggregation event
-                    response = aggregation_event.data.get('response', '')
-                    if response:
+                    # Wait for agent_started event to notify user that backend started processing
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] Waiting for agent_started event.", DebugLevel.VERBOSE, style="cyan")
+                    started_event = await ws_client._wait_for_event('agent_started', timeout=30.0)
+                    if started_event:
+                        self.debug.debug_print(f"[CHUNK {chunk_num}] agent_started event received.", DebugLevel.VERBOSE, style="green")
                         safe_console_print(
-                            f"\n📊 Unified Analysis from All Chunks:",
-                            style="bold cyan",
-                            json_mode=self.config.json_mode,
-                            ci_mode=self.config.ci_mode
-                        )
-                        safe_console_print(
-                            response,
+                            f"🚀 Agent started processing chunk {chunk_num}/{total_chunks}",
                             style="cyan",
                             json_mode=self.config.json_mode,
                             ci_mode=self.config.ci_mode
                         )
-                    else:
-                        self.debug.debug_print(
-                            "Warning: agent_aggregation_complete event has no response content",
-                            DebugLevel.BASIC,
-                            style="yellow"
+                        sys.stdout.flush()
+
+                    # Wait for agent to complete
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] Waiting for agent_completed event.", DebugLevel.VERBOSE, style="cyan")
+                    completion_event = await ws_client._wait_for_event('agent_completed', timeout=300.0)
+                    if completion_event:
+                        self.debug.debug_print(f"[CHUNK {chunk_num}] agent_completed event received.", DebugLevel.VERBOSE, style="green")
+
+                        # Update progress counter
+                        chunks_completed += 1
+
+                        # Display progress header
+                        safe_console_print(
+                            f"✅ Chunk {chunk_num}/{total_chunks} completed ({chunks_completed}/{total_chunks} total)",
+                            style="green",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
                         )
 
-                    # Aggregation completed successfully - all events already received
-                    return True
-        else:
-            # OLD FLOW: Single chunk or non-aggregation chunks - send normally
-            # This path is used when:
-            # 1. Total chunks = 1 (single file, no chunking)
-            # 2. All chunks have aggregation_required=False (multiple small files)
-            for i, chunk in enumerate(all_chunks, 1):
-                chunk_num = i
+                        # Display the completion event in boxed format
+                        result = (
+                            completion_event.data.get('result')
+                            or completion_event.data.get('response')
+                            or completion_event.data.get('final_response')
+                        )
 
-                # Determine chunk type based on metadata
-                if chunk.metadata.total_chunks == 1 and not chunk.metadata.aggregation_required:
-                    # Single file chunk
-                    await self._send_single_file(
-                        chunk=chunk,
-                        chunk_num=chunk_num,
-                        total_chunks=total_chunks,
-                        message=message,
-                        thread_id=current_thread_id
-                    )
+                        if result is not None:
+                            if isinstance(result, (dict, list)):
+                                try:
+                                    pretty_result = json.dumps(result, indent=2, ensure_ascii=False)
+                                except (TypeError, ValueError):
+                                    pretty_result = str(result)
+
+                                safe_console_print(
+                                    Panel(
+                                        Syntax(pretty_result, "json", word_wrap=True),
+                                        title=f"Chunk {chunk_num}/{total_chunks} Result",
+                                        border_style="green"
+                                    ),
+                                    json_mode=self.config.json_mode,
+                                    ci_mode=self.config.ci_mode
+                                )
+                            else:
+                                safe_console_print(
+                                    f"✅ Chunk {chunk_num} result:",
+                                    style="bold green",
+                                    json_mode=self.config.json_mode,
+                                    ci_mode=self.config.ci_mode
+                                )
+                                safe_console_print(
+                                    str(result),
+                                    style="green",
+                                    json_mode=self.config.json_mode,
+                                    ci_mode=self.config.ci_mode
+                                )
+                        else:
+                            # Fallback to formatted event display if no result found
+                            formatted_event = completion_event.format_for_display(self.debug)
+                            timestamp = datetime.now().strftime('%H:%M:%S')
+                            safe_console_print(f"[{timestamp}] {formatted_event}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+                        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+                        # Clean up
+                        self.debug.debug_print(f"[CHUNK {chunk_num}] Closing WebSocket.", DebugLevel.VERBOSE, style="cyan")
+                        event_task.cancel()
+                        await ws_client.close()
+                        self.debug.debug_print(f"[CHUNK {chunk_num}] WebSocket closed.", DebugLevel.VERBOSE, style="green")
+                        self.debug.debug_print(f"Chunk {chunk_num}/{total_chunks} sent and processed successfully in a new thread.", DebugLevel.VERBOSE, style="green")
+                        return completion_event
+                    else:
+                        self.debug.debug_print(f"[CHUNK {chunk_num}] Timed out waiting for agent_completed event.", DebugLevel.VERBOSE, style="yellow")
+                        # Clean up even if timed out
+                        self.debug.debug_print(f"[CHUNK {chunk_num}] Closing WebSocket.", DebugLevel.VERBOSE, style="cyan")
+                        event_task.cancel()
+                        await ws_client.close()
+                        self.debug.debug_print(f"[CHUNK {chunk_num}] WebSocket closed.", DebugLevel.VERBOSE, style="green")
+                        return None # Indicate failure
                 else:
-                    # Regular chunk
-                    await self._send_single_chunk(
-                        chunk=chunk,
-                        chunk_num=chunk_num,
-                        total_chunks=total_chunks,
-                        message=message,
-                        thread_id=current_thread_id
-                    )
+                    self.debug.debug_print(f"[CHUNK {chunk_num}] Failed to connect WebSocket.", DebugLevel.BASIC, style="red")
+                    return None
+            except Exception as e:
+                self.debug.log_error(e, f"sending chunk {chunk_num}")
+                return False
 
-                # For non-aggregation chunks, keep the original delay
-                if i < total_chunks:
-                    await asyncio.sleep(0.5)
+        # Create and run tasks for each chunk
+        tasks = [send_chunk_in_new_thread(chunk, i + 1, self.run_id) for i, chunk in enumerate(all_chunks)]
+        results = await asyncio.gather(*tasks)
 
+        # Display final summary
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(
-            f"\n✓ All {total_chunks} chunk(s) sent successfully",
-            style="green",
+            "All the chunks processed successfully. Look Above",
+            style="bold green",
             json_mode=self.config.json_mode,
             ci_mode=self.config.ci_mode
         )
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
 
-        # Check if we should wait for aggregation even in this path
-        # This handles edge cases where chunks don't meet burst mode criteria
-        # but still need aggregation (shouldn't normally happen with current logic)
-        has_any_aggregation = any(chunk.metadata.aggregation_required for chunk in all_chunks)
-        if has_any_aggregation:
-            self.debug.debug_print(
-                "Warning: Mixed aggregation chunks sent sequentially - this may indicate a logic issue",
-                DebugLevel.BASIC,
-                style="yellow"
-            )
-
-        # For non-aggregation chunks, wait for chunk_response_immediate events
-        # The backend will send these immediately as each chunk is processed
-        if total_chunks > 0:
-            safe_console_print(
-                f"\n⏳ Waiting for {total_chunks} chunk response(s)...",
-                style="cyan",
-                json_mode=self.config.json_mode,
-                ci_mode=self.config.ci_mode
-            )
-
-            # Wait for all chunk_response_immediate events (timeout: 300s for non-aggregation)
-            # We use a shorter timeout since responses should be immediate
-            start_time = asyncio.get_event_loop().time()
-            timeout = 300.0  # 5 minutes should be plenty for immediate responses
-
-            while self.chunk_responses_received < total_chunks:
-                elapsed = asyncio.get_event_loop().time() - start_time
-                if elapsed > timeout:
-                    safe_console_print(
-                        f"⚠️  Warning: Timeout waiting for chunk responses ({self.chunk_responses_received}/{total_chunks} received)",
-                        style="yellow",
-                        json_mode=self.config.json_mode,
-                        ci_mode=self.config.ci_mode
-                    )
-                    return False
-
-                await asyncio.sleep(0.1)
-
-            # All chunk responses received
-            safe_console_print(
-                f"✅ All {total_chunks} chunk responses received",
-                style="green bold",
-                json_mode=self.config.json_mode,
-                ci_mode=self.config.ci_mode
-            )
-            return True
-
-        # No chunks sent - this shouldn't happen but handle gracefully
-        return False
+        return results
 
     async def _send_single_chunk(
         self,
@@ -5280,96 +4888,6 @@ class WebSocketClient:
                 if event.type in ['cleanup_started', 'cleanup_duration_estimate', 'cleanup_complete']:
                     await self.handle_cleanup_events(event)
 
-                # Handle thread_ready_for_chunks signal for concurrent chunk bursting
-                if event.type == 'thread_ready_for_chunks':
-                    self.thread_ready_for_chunks = True
-                    self.thread_ready_event = event
-                    self.debug.debug_print(
-                        f"🚀 Backend ready for concurrent chunk burst (thread_id: {event.data.get('thread_id', 'unknown')})",
-                        DebugLevel.BASIC,
-                        style="cyan"
-                    )
-
-                # Handle chunk_response_immediate for no-aggregation chunks
-                if event.type == 'chunk_response_immediate':
-                    chunk_data = data.get('chunk_data', {})
-                    chunk_index = chunk_data.get('chunk_index', 0)
-                    total_chunks = chunk_data.get('total_chunks', 1)
-                    file_name = chunk_data.get('file_name', 'unknown')
-                    response = chunk_data.get('response', '')
-                    formatted_response = data.get('formatted_response', '')
-
-                    # Track chunk responses
-                    self.chunk_responses_received += 1
-                    if self.chunk_total_expected is None:
-                        self.chunk_total_expected = total_chunks
-                    self.chunk_responses.append({
-                        'chunk_index': chunk_index,
-                        'file_name': file_name,
-                        'response': response,
-                        'formatted_response': formatted_response
-                    })
-
-                    # Display chunk response immediately
-                    safe_console_print(
-                        f"\n{'='*80}",
-                        style="cyan",
-                        json_mode=self.config.json_mode,
-                        ci_mode=self.config.ci_mode
-                    )
-                    safe_console_print(
-                        f"📦 Chunk {chunk_index + 1}/{total_chunks} - {file_name}",
-                        style="cyan bold",
-                        json_mode=self.config.json_mode,
-                        ci_mode=self.config.ci_mode
-                    )
-                    safe_console_print(
-                        f"{'='*80}\n",
-                        style="cyan",
-                        json_mode=self.config.json_mode,
-                        ci_mode=self.config.ci_mode
-                    )
-
-                    # Display the formatted response (already in JSON format from backend)
-                    if formatted_response:
-                        safe_console_print(
-                            formatted_response,
-                            style="white",
-                            json_mode=self.config.json_mode,
-                            ci_mode=self.config.ci_mode
-                        )
-                    else:
-                        # Fallback: display raw response
-                        safe_console_print(
-                            response,
-                            style="white",
-                            json_mode=self.config.json_mode,
-                            ci_mode=self.config.ci_mode
-                        )
-
-                    safe_console_print(
-                        f"\n{'='*80}\n",
-                        style="cyan",
-                        json_mode=self.config.json_mode,
-                        ci_mode=self.config.ci_mode
-                    )
-
-                    # Check if all chunks received
-                    if self.chunk_responses_received == total_chunks:
-                        safe_console_print(
-                            f"✅ All {total_chunks} chunks received for {file_name}",
-                            style="green bold",
-                            json_mode=self.config.json_mode,
-                            ci_mode=self.config.ci_mode
-                        )
-                        # Set completion flag
-                        self.chunked_aggregation_complete = True
-
-                    self.debug.debug_print(
-                        f"📦 Chunk response immediate: {chunk_index + 1}/{total_chunks} - {file_name}",
-                        DebugLevel.BASIC,
-                        style="cyan"
-                    )
 
                 # ISSUE #1603 FIX: Keep original critical logging for now (can be disabled with debug level)
                 if self.debug.debug_level >= DebugLevel.TRACE:
@@ -6235,27 +5753,36 @@ class AgentCLI:
             formatted_event = event.format_for_display(self.debug)
             safe_console_print(f"[{event.timestamp.strftime('%H:%M:%S')}] {formatted_event}")
 
-            # Update spinner for thinking and tool_executing events (if spinner is enabled)
-            if spinner_enabled and event.type in ["agent_thinking", "tool_executing"]:
-                # Remove old task if exists
-                if thinking_task is not None:
-                    thinking_spinner.remove_task(thinking_task)
-                    thinking_task = None
-
-                # Add new task with latest event
-                if event.type == "agent_thinking":
+            # Update spinner for relevant event types (if spinner is enabled)
+            if spinner_enabled:
+                new_spinner_text = None
+                if event.type == "agent_started":
+                    agent_name = event.data.get('agent_name', 'Agent')
+                    new_spinner_text = f"🤖 {agent_name} started..."
+                elif event.type == "agent_thinking":
                     thought = event.data.get('thought', event.data.get('reasoning', ''))
-                    spinner_text = truncate_with_ellipsis(thought, 60) if thought else "Processing..."
-                    thinking_task = thinking_spinner.add_task(f"💭 {spinner_text}", total=None)
+                    new_spinner_text = f"💭 {truncate_with_ellipsis(thought, 60) if thought else 'Agent thinking...'}"
                 elif event.type == "tool_executing":
                     tool_name = event.data.get('tool', event.data.get('tool_name', 'Unknown'))
-                    spinner_text = f"Executing {tool_name}..."
-                    thinking_task = thinking_spinner.add_task(f"🔧 {spinner_text}", total=None)
+                    new_spinner_text = f"🔧 Executing {tool_name}..."
+                elif event.type == "tool_completed":
+                    tool_name = event.data.get('tool', event.data.get('tool_name', 'Unknown'))
+                    new_spinner_text = f"✅ Tool {tool_name} completed."
+                elif event.type == "agent_completed":
+                    agent_name = event.data.get('agent_name', 'Agent')
+                    new_spinner_text = f"🏁 {agent_name} completed."
+                elif event.type == "ping":
+                    # Ignore ping events for spinner updates to avoid flicker
+                    pass
+                else:
+                    # Generic waiting message for other events or during idle periods
+                    new_spinner_text = "⏳ Waiting for agent activity..."
 
-            # Clear spinner for any other event type (if spinner is enabled)
-            elif spinner_enabled and thinking_task is not None:
-                thinking_spinner.remove_task(thinking_task)
-                thinking_task = None
+                if new_spinner_text:
+                    if thinking_task is not None:
+                        thinking_spinner.remove_task(thinking_task)
+                        thinking_task = None
+                    thinking_task = thinking_spinner.add_task(new_spinner_text, total=None)
 
             # Display raw data in verbose mode
             if self.debug.debug_level >= DebugLevel.DIAGNOSTIC:
@@ -6285,6 +5812,7 @@ class AgentCLI:
         spinner_enabled = False
         event_count = 0  # Track number of events received
         last_event_index = len(self.ws_client.events)  # Track where we are in the event list
+        displayed_agent_results = set()  # Track which agent results we've already displayed to avoid duplicates
 
         try:
             thinking_spinner = Progress(
@@ -6308,31 +5836,42 @@ class AgentCLI:
             event_count += 1
 
             # Display event with enhanced formatting and emojis
-            formatted_event = event.format_for_display(self.debug)
-            timestamp = event.timestamp.strftime('%H:%M:%S')
-            safe_console_print(f"[{timestamp}] {formatted_event}", json_mode=self.json_mode, ci_mode=self.ci_mode)
+            # Skip initial display for agent_completed as it will be shown in the boxed panel below
+            if event.type != "agent_completed":
+                formatted_event = event.format_for_display(self.debug)
+                timestamp = event.timestamp.strftime('%H:%M:%S')
+                safe_console_print(f"[{timestamp}] {formatted_event}", json_mode=self.json_mode, ci_mode=self.ci_mode)
 
-            # Update spinner for thinking and tool_executing events (if spinner is enabled)
-            if spinner_enabled and event.type in ["agent_thinking", "tool_executing"]:
-                # Remove old task if exists
-                if thinking_task is not None:
-                    thinking_spinner.remove_task(thinking_task)
-                    thinking_task = None
-
-                # Add new task with latest event
-                if event.type == "agent_thinking":
+            # Update spinner for relevant event types (if spinner is enabled)
+            if spinner_enabled:
+                new_spinner_text = None
+                if event.type == "agent_started":
+                    agent_name = event.data.get('agent_name', 'Agent')
+                    new_spinner_text = f"🤖 {agent_name} started..."
+                elif event.type == "agent_thinking":
                     thought = event.data.get('thought', event.data.get('reasoning', ''))
-                    spinner_text = truncate_with_ellipsis(thought, 60) if thought else "Processing..."
-                    thinking_task = thinking_spinner.add_task(f"💭 {spinner_text}", total=None)
+                    new_spinner_text = f"💭 {truncate_with_ellipsis(thought, 60) if thought else 'Agent thinking...'}"
                 elif event.type == "tool_executing":
                     tool_name = event.data.get('tool', event.data.get('tool_name', 'Unknown'))
-                    spinner_text = f"Executing {tool_name}..."
-                    thinking_task = thinking_spinner.add_task(f"🔧 {spinner_text}", total=None)
+                    new_spinner_text = f"🔧 Executing {tool_name}..."
+                elif event.type == "tool_completed":
+                    tool_name = event.data.get('tool', event.data.get('tool_name', 'Unknown'))
+                    new_spinner_text = f"✅ Tool {tool_name} completed."
+                elif event.type == "agent_completed":
+                    agent_name = event.data.get('agent_name', 'Agent')
+                    new_spinner_text = f"🏁 {agent_name} completed."
+                elif event.type == "ping":
+                    # Ignore ping events for spinner updates to avoid flicker
+                    pass
+                else:
+                    # Generic waiting message for other events or during idle periods
+                    new_spinner_text = "⏳ Waiting for agent activity..."
 
-            # Clear spinner for any other event type (if spinner is enabled)
-            elif spinner_enabled and thinking_task is not None:
-                thinking_spinner.remove_task(thinking_task)
-                thinking_task = None
+                if new_spinner_text:
+                    if thinking_task is not None:
+                        thinking_spinner.remove_task(thinking_task)
+                        thinking_task = None
+                    thinking_task = thinking_spinner.add_task(new_spinner_text, total=None)
 
             # Issue #2177: WebSocket event validation
             if self.validate_events and self.event_validator:
@@ -6372,6 +5911,18 @@ class AgentCLI:
                     )
 
                     if result is not None:
+                        # Create a unique key for this result to avoid displaying duplicates
+                        # Use agent_name + run_id if available, otherwise use hash of result
+                        agent_name = event.data.get('agent_name', 'unknown')
+                        run_id = event.data.get('run_id', '')
+                        result_key = f"{agent_name}:{run_id}" if run_id else f"{agent_name}:{hash(str(result))}"
+
+                        # Skip if we've already displayed this result
+                        if result_key in displayed_agent_results:
+                            return
+
+                        displayed_agent_results.add(result_key)
+
                         if isinstance(result, (dict, list)):
                             try:
                                 pretty_result = json.dumps(result, indent=2, ensure_ascii=False)
@@ -6847,7 +6398,7 @@ class AgentCLI:
                 safe_console_print(traceback.format_exc(), style="dim red")
             return False
 
-    async def run_single_message(self, message: str, wait_time: int = 300):
+    async def run_single_message(self, message: str, wait_time: int = 300, jsonl_logs: Optional[List[Dict[str, Any]]] = None):
         """Run a single message and wait for response.
 
         Issue #2665: Default wait time increased from 10s to 300s to accommodate
@@ -6959,20 +6510,10 @@ class AgentCLI:
                     return False
 
                 # Send message
-                run_id = await self.ws_client.send_message(message)
+                run_id = await self.ws_client.send_message(message, jsonl_logs=jsonl_logs)
 
-                # Check if chunked aggregation already completed
-                if hasattr(self.ws_client, 'chunked_aggregation_complete') and self.ws_client.chunked_aggregation_complete:
-                    # Chunked aggregation completed - all events already received and displayed
-                    safe_console_print(f"\n📊 Received {len(self.ws_client.events)} events", style="cyan",
-                                      json_mode=self.json_mode, ci_mode=self.ci_mode)
-                    safe_console_print("✅ Chunked aggregation completed successfully", style="green",
-                                      json_mode=self.json_mode, ci_mode=self.ci_mode)
-
-                    # Reset flag for next message
-                    self.ws_client.chunked_aggregation_complete = False
-
-                    return True  # Early exit, skip event monitoring loop
+                if jsonl_logs is not None:
+                    return run_id
 
                 # Normal flow: wait for events
                 safe_console_print(f"SUCCESS: Message sent with run_id: {run_id}", style="green",
