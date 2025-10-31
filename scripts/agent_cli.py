@@ -4538,6 +4538,7 @@ class WebSocketClient:
                 json_mode=self.config.json_mode,
                 ci_mode=self.config.ci_mode
             )
+            sys.stdout.flush()  # Ensure output is displayed immediately in parallel execution
 
             self.debug.debug_print(f"[CHUNK {chunk_num}] Starting to send chunk.", DebugLevel.VERBOSE, style="cyan")
             try:
