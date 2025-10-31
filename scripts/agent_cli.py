@@ -5812,6 +5812,7 @@ class AgentCLI:
         spinner_enabled = False
         event_count = 0  # Track number of events received
         last_event_index = len(self.ws_client.events)  # Track where we are in the event list
+        displayed_agent_results = set()  # Track which agent results we've already displayed to avoid duplicates
 
         try:
             thinking_spinner = Progress(
@@ -5910,6 +5911,18 @@ class AgentCLI:
                     )
 
                     if result is not None:
+                        # Create a unique key for this result to avoid displaying duplicates
+                        # Use agent_name + run_id if available, otherwise use hash of result
+                        agent_name = event.data.get('agent_name', 'unknown')
+                        run_id = event.data.get('run_id', '')
+                        result_key = f"{agent_name}:{run_id}" if run_id else f"{agent_name}:{hash(str(result))}"
+
+                        # Skip if we've already displayed this result
+                        if result_key in displayed_agent_results:
+                            return
+
+                        displayed_agent_results.add(result_key)
+
                         if isinstance(result, (dict, list)):
                             try:
                                 pretty_result = json.dumps(result, indent=2, ensure_ascii=False)
