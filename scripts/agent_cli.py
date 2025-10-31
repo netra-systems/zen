@@ -4202,21 +4202,15 @@ class WebSocketClient:
                         }
                     else:
                         # NEW: Chunking required
-                        successful_completions = await self._send_chunked_logs(
+                        await self._send_chunked_logs(
                             logs=logs,
                             file_info=file_info,
                             chunking_strategy=chunking_strategy,
                             message=message,
                             thread_id=thread_id
                         )
-                        if not jsonl_logs and successful_completions:
-                            # Extract results from completion events and add to payload
-                            aggregated_results = []
-                            for comp_event in successful_completions:
-                                if comp_event.data and 'result' in comp_event.data:
-                                    aggregated_results.append(comp_event.data['result'])
-                            if aggregated_results:
-                                payload["payload"]["jsonl_logs"] = aggregated_results
+                        # Note: Agent events are displayed as each chunk completes in parallel.
+                        # No need to aggregate results here as they're already shown to the user.
 
 
 
@@ -4528,9 +4522,23 @@ class WebSocketClient:
 
         safe_console_print(separator, style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
         safe_console_print(f"\nSending {total_chunks} chunk(s) concurrently...", style="cyan", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
+        # Track completion progress
+        chunks_completed = 0
 
         async def send_chunk_in_new_thread(chunk, chunk_num, main_run_id: Optional[str]):
             """Helper to send a single chunk in a new WebSocket connection."""
+            nonlocal chunks_completed
+
+            # Show progress indicator when chunk starts
+            safe_console_print(
+                f"⏳ Processing chunk {chunk_num}/{total_chunks}...",
+                style="dim cyan",
+                json_mode=self.config.json_mode,
+                ci_mode=self.config.ci_mode
+            )
+
             self.debug.debug_print(f"[CHUNK {chunk_num}] Starting to send chunk.", DebugLevel.VERBOSE, style="cyan")
             try:
                 # Create a new WebSocket client for each chunk
@@ -4544,7 +4552,7 @@ class WebSocketClient:
                 self.debug.debug_print(f"[CHUNK {chunk_num}] Connecting to WebSocket.", DebugLevel.VERBOSE, style="cyan")
                 if await ws_client.connect():
                     self.debug.debug_print(f"[CHUNK {chunk_num}] WebSocket connected.", DebugLevel.VERBOSE, style="green")
-                    
+
                     # Start receiving events in the background
                     self.debug.debug_print(f"[CHUNK {chunk_num}] Starting event receiver.", DebugLevel.VERBOSE, style="cyan")
                     event_task = asyncio.create_task(ws_client.receive_events())
@@ -4565,10 +4573,23 @@ class WebSocketClient:
                     completion_event = await ws_client._wait_for_event('agent_completed', timeout=300.0)
                     if completion_event:
                         self.debug.debug_print(f"[CHUNK {chunk_num}] agent_completed event received.", DebugLevel.VERBOSE, style="green")
+
+                        # Update progress counter
+                        chunks_completed += 1
+
+                        # Display progress header
+                        safe_console_print(
+                            f"✅ Chunk {chunk_num}/{total_chunks} completed ({chunks_completed}/{total_chunks} total)",
+                            style="green",
+                            json_mode=self.config.json_mode,
+                            ci_mode=self.config.ci_mode
+                        )
+
                         # Display the completion event
                         formatted_event = completion_event.format_for_display(self.debug)
                         timestamp = datetime.now().strftime('%H:%M:%S')
                         safe_console_print(f"[{timestamp}] {formatted_event}", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+                        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
 
                         # Clean up
                         self.debug.debug_print(f"[CHUNK {chunk_num}] Closing WebSocket.", DebugLevel.VERBOSE, style="cyan")
@@ -4595,6 +4616,18 @@ class WebSocketClient:
         # Create and run tasks for each chunk
         tasks = [send_chunk_in_new_thread(chunk, i + 1, self.run_id) for i, chunk in enumerate(all_chunks)]
         results = await asyncio.gather(*tasks)
+
+        # Display final summary
+        successful_chunks = sum(1 for r in results if r is not None and r is not False)
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+        safe_console_print(
+            f"🎉 All chunks processed! {successful_chunks}/{total_chunks} completed successfully.",
+            style="bold green",
+            json_mode=self.config.json_mode,
+            ci_mode=self.config.ci_mode
+        )
+        safe_console_print("", json_mode=self.config.json_mode, ci_mode=self.config.ci_mode)
+
         return results
 
     async def _send_single_chunk(
